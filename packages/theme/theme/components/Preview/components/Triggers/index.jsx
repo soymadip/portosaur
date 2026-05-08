@@ -1,2 +1,2 @@
-export { default as Pv } from "./Pv";
-export { default as SrcPv } from "./SrcPv";
+export { default as Pv } from "./Pv.jsx";
+export { default as SrcPv } from "./SrcPv.jsx";

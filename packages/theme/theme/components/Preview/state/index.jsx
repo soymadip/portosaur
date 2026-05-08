@@ -3,11 +3,18 @@ import React, {
   useContext,
   useReducer,
   useCallback,
-  ReactNode,
 } from "react";
+
 const PreviewContext = createContext(null);
 const DEFAULT_SIZE = { width: 720, height: 400 };
 const DEFAULT_DOCK_PERCENTAGE = 0.42;
+
+export const PreviewMode = {
+  POPUP: "popup",
+  DOCK: "dock",
+  PIP: "pip",
+};
+
 function getInitialState() {
   if (typeof window === "undefined") {
     return {
@@ -22,6 +29,7 @@ function getInitialState() {
       floatingState: { ...DEFAULT_SIZE, x: null, y: null },
     };
   }
+
   let defaultDockWidth = Math.floor(
     window.innerWidth * DEFAULT_DOCK_PERCENTAGE,
   );
@@ -29,6 +37,7 @@ function getInitialState() {
     380,
     Math.min(defaultDockWidth, window.innerWidth * 0.8),
   );
+
   return {
     isOpen: false,
     mode: "popup",
@@ -41,6 +50,7 @@ function getInitialState() {
     floatingState: { ...DEFAULT_SIZE, x: null, y: null },
   };
 }
+
 function reducer(state, action) {
   switch (action.type) {
     case "OPEN":
@@ -85,8 +95,10 @@ function reducer(state, action) {
       return state;
   }
 }
+
 export function PreviewProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, getInitialState);
+
   const openPreview = useCallback(
     (
       sources,
@@ -103,6 +115,7 @@ export function PreviewProvider({ children }) {
     },
     [],
   );
+
   const closePreview = useCallback(() => {
     if (typeof window !== "undefined") {
       window.history.replaceState(
@@ -113,28 +126,32 @@ export function PreviewProvider({ children }) {
     }
     dispatch({ type: "CLOSE" });
   }, []);
-  const setMode = useCallback((mode) => {
-    dispatch({ type: "SET_MODE", mode });
-  }, []);
-  const setActiveIndex = useCallback((index) => {
-    dispatch({ type: "SET_ACTIVE_INDEX", index });
-  }, []);
-  const setDockWidth = useCallback((width) => {
-    dispatch({ type: "SET_DOCK_WIDTH", width });
-  }, []);
-  const setPeekHeight = useCallback((height) => {
-    dispatch({ type: "SET_PEEK_HEIGHT", height });
-  }, []);
-  const setFloatingState = useCallback((newState) => {
-    dispatch({ type: "SET_FLOATING_STATE", state: newState });
-  }, []);
-  const toggleMode = useCallback(() => {
-    dispatch({ type: "TOGGLE_MODE" });
-  }, []);
-  return jsxDEV_7x81h0kn(
-    PreviewContext.Provider,
-    {
-      value: {
+
+  const setMode = useCallback(
+    (mode) => dispatch({ type: "SET_MODE", mode }),
+    [],
+  );
+  const setActiveIndex = useCallback(
+    (index) => dispatch({ type: "SET_ACTIVE_INDEX", index }),
+    [],
+  );
+  const setDockWidth = useCallback(
+    (width) => dispatch({ type: "SET_DOCK_WIDTH", width }),
+    [],
+  );
+  const setPeekHeight = useCallback(
+    (height) => dispatch({ type: "SET_PEEK_HEIGHT", height }),
+    [],
+  );
+  const setFloatingState = useCallback(
+    (newState) => dispatch({ type: "SET_FLOATING_STATE", state: newState }),
+    [],
+  );
+  const toggleMode = useCallback(() => dispatch({ type: "TOGGLE_MODE" }), []);
+
+  return (
+    <PreviewContext.Provider
+      value={{
         ...state,
         openPreview,
         closePreview,
@@ -144,15 +161,13 @@ export function PreviewProvider({ children }) {
         setPeekHeight,
         setFloatingState,
         toggleMode,
-      },
-      children,
-    },
-    undefined,
-    false,
-    undefined,
-    this,
+      }}
+    >
+      {children}
+    </PreviewContext.Provider>
   );
 }
+
 const DEFAULT_CTX = {
   isOpen: false,
   mode: "popup",
@@ -172,6 +187,7 @@ const DEFAULT_CTX = {
   setFloatingState: () => {},
   toggleMode: () => {},
 };
+
 export function usePreview() {
   return useContext(PreviewContext) ?? DEFAULT_CTX;
 }

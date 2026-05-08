@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useLocation } from "@docusaurus/router";
-import { usePreview } from "../../state";
-import Tooltip from "../../../Tooltip";
+import { usePreview } from "../../state/index.jsx";
+import Tooltip from "../../../Tooltip/index.jsx";
 import {
   generatePvSlug,
   generatePvHash,
@@ -9,6 +9,7 @@ import {
   classify,
 } from "../../utils";
 import styles from "../../styles.module.css";
+
 export function normalizeSources({
   href,
   path,
@@ -24,6 +25,7 @@ export function normalizeSources({
       : href || path
         ? [{ path: (href || path).trim(), label: null, desc }]
         : [];
+
   return rawSources.map((src) => {
     const sPath = (src.path || src.href || "").trim();
     const sDesc = src.desc || "";
@@ -35,6 +37,7 @@ export function normalizeSources({
     let urlLabel = "";
     let domain = "";
     let type = "text";
+
     if (sPath) {
       type = classify(sPath);
       const cleanPath = sPath.split(/[?#]/)[0].toLowerCase();
@@ -48,9 +51,11 @@ export function normalizeSources({
         }
       } catch (e) {}
     }
+
     const source = domain || urlLabel || "Local";
     const displayLabel = label || source;
     const tooltip = sDesc || null;
+
     return {
       path: sPath,
       label: displayLabel,
@@ -63,6 +68,7 @@ export function normalizeSources({
     };
   });
 }
+
 export default function Pv(props) {
   const {
     children,
@@ -74,34 +80,24 @@ export default function Pv(props) {
     modeSwitch = true,
     underline = true,
   } = props;
+
   const hasSingleSource = !!(props.href || props.path);
   const hasMultiSource = !!(overrideSources && overrideSources.length > 0);
+
   if (!hasSingleSource && !hasMultiSource) {
     console.error(
       "<Pv> component requires either 'href', 'path', or 'sources' prop.",
     );
-    return jsxDEV_7x81h0kn(
-      "span",
-      { style: { color: "red" }, children: "[Preview Error: Missing href]" },
-      undefined,
-      false,
-      undefined,
-      this,
-    );
+    return <span style={{ color: "red" }}>[Preview Error: Missing href]</span>;
   }
+
   if (hasSingleSource && hasMultiSource) {
     console.error(
       "<Pv> component cannot accept both 'href' and 'sources'. Choose one.",
     );
-    return jsxDEV_7x81h0kn(
-      "span",
-      { style: { color: "red" }, children: "[Preview Error: Conflict]" },
-      undefined,
-      false,
-      undefined,
-      this,
-    );
+    return <span style={{ color: "red" }}>[Preview Error: Conflict]</span>;
   }
+
   const {
     isOpen,
     mode: currentMode,
@@ -111,11 +107,13 @@ export default function Pv(props) {
     closePreview,
     setMode,
   } = usePreview();
+
   const location = useLocation();
   const srcList = useMemo(
     () => overrideSources || normalizeSources(props),
     [props, overrideSources, title],
   );
+
   const baseSlug = useMemo(() => {
     if (manualId) return generatePvSlug(manualId);
     if (title) return generatePvSlug(title);
@@ -132,6 +130,7 @@ export default function Pv(props) {
     if (childrenText) return generatePvSlug(childrenText);
     return "preview";
   }, [manualId, title, props.href, props.path, srcList, activeIdx, children]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const parsed = parsePvHash(window.location.hash);
@@ -159,20 +158,17 @@ export default function Pv(props) {
     activeIdx,
     modeSwitch,
   ]);
-  if (srcList.length === 0)
-    return jsxDEV_7x81h0kn(
-      "span",
-      { children },
-      undefined,
-      false,
-      undefined,
-      this,
-    );
+
+  if (srcList.length === 0) {
+    return <span>{children}</span>;
+  }
+
   const isCurrentlyActive =
     isOpen &&
     activeSources.length === srcList.length &&
     activeSources[activeIdx]?.path === srcList[activeIdx]?.path &&
     activeIndex === activeIdx;
+
   const handleClick = () => {
     if (isCurrentlyActive) {
       closePreview();
@@ -188,66 +184,42 @@ export default function Pv(props) {
       );
     }
   };
+
   const targetHash = generatePvHash(baseSlug, mode);
-  const trigger = jsxDEV_7x81h0kn(
-    "a",
-    {
-      href: `#${targetHash}`,
-      className: `${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${!underline ? styles.noUnderline : ""}`,
-      onClick: (e) => {
+
+  const trigger = (
+    <a
+      href={`#${targetHash}`}
+      className={`${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${!underline ? styles.noUnderline : ""}`}
+      onClick={(e) => {
         e.preventDefault();
         handleClick();
-      },
-      role: "button",
-      tabIndex: 0,
-      onKeyDown: (e) => {
+      }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           handleClick();
         }
-      },
-      children: children || srcList[activeIdx]?.label,
-    },
-    undefined,
-    false,
-    undefined,
-    this,
+      }}
+    >
+      {children || srcList[activeIdx]?.label}
+    </a>
   );
+
   const hasTooltip = !!srcList[activeIdx]?.tooltip;
-  if (!hasTooltip) {
-    return jsxDEV_7x81h0kn(
-      "span",
-      { className: styles.previewContainer, children: trigger },
-      undefined,
-      false,
-      undefined,
-      this,
-    );
-  }
   const tooltipMsg = srcList[activeIdx]?.tooltip;
-  return jsxDEV_7x81h0kn(
-    "span",
-    {
-      className: styles.previewContainer,
-      children: tooltipMsg
-        ? jsxDEV_7x81h0kn(
-            Tooltip,
-            {
-              msg: tooltipMsg,
-              position: "top",
-              underline: false,
-              children: trigger,
-            },
-            undefined,
-            false,
-            undefined,
-            this,
-          )
-        : trigger,
-    },
-    undefined,
-    false,
-    undefined,
-    this,
+
+  return (
+    <span className={styles.previewContainer}>
+      {hasTooltip && tooltipMsg ? (
+        <Tooltip msg={tooltipMsg} position="top" underline={false}>
+          {trigger}
+        </Tooltip>
+      ) : (
+        trigger
+      )}
+    </span>
   );
 }

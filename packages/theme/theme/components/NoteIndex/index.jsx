@@ -2,10 +2,11 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Link from "@docusaurus/Link";
 import { FaBook, FaChevronRight } from "react-icons/fa";
-import Tooltip from "../Tooltip/index.js";
-import { iconMap } from "../../config/iconMappings.js";
+import Tooltip from "../Tooltip/index.jsx";
+import { iconMap } from "../../config/iconMappings.jsx";
 import DocCardList from "@theme/DocCardList";
 import styles from "./styles.module.css";
+
 function useNotes() {
   const context = require.context(`@site/notes`, true, /index\.mdx?$|\.mdx?$/);
   return context
@@ -45,138 +46,69 @@ function useNotes() {
     })
     .sort((a, b) => a.position - b.position);
 }
+
 function NoteCard({ title, language, slug, desc, index, docsBasePath }) {
   const noteUrl = useBaseUrl(`${docsBasePath}/${slug}`);
   const { icon: Icon = FaBook, color = "var(--ifm-color-primary)" } =
     iconMap[language] || iconMap[title.toLowerCase()] || {};
   const tooltipContent = desc ? desc : null;
-  const cardInner = jsxDEV_7x81h0kn(
-    Link,
-    {
-      to: noteUrl,
-      className: styles.noteCard,
-      style: { "--card-index": index, "--note-color": color },
-      "aria-label": `Read note: ${title}`,
-      children: [
-        jsxDEV_7x81h0kn(
-          "div",
-          {
-            className: styles.iconWrapper,
-            children: jsxDEV_7x81h0kn(
-              Icon,
-              { className: styles.noteIcon },
-              undefined,
-              false,
-              undefined,
-              this,
-            ),
-          },
-          undefined,
-          false,
-          undefined,
-          this,
-        ),
-        jsxDEV_7x81h0kn(
-          "div",
-          {
-            className: styles.cardContent,
-            children: jsxDEV_7x81h0kn(
-              "h3",
-              { className: styles.noteTitle, children: title },
-              undefined,
-              false,
-              undefined,
-              this,
-            ),
-          },
-          undefined,
-          false,
-          undefined,
-          this,
-        ),
-        jsxDEV_7x81h0kn(
-          FaChevronRight,
-          { className: styles.mobileChevron },
-          undefined,
-          false,
-          undefined,
-          this,
-        ),
-      ],
-    },
-    undefined,
-    true,
-    undefined,
-    this,
+
+  const cardInner = (
+    <Link
+      to={noteUrl}
+      className={styles.noteCard}
+      style={{ "--card-index": index, "--note-color": color }}
+      aria-label={`Read note: ${title}`}
+    >
+      <div className={styles.iconWrapper}>
+        <Icon className={styles.noteIcon} />
+      </div>
+      <div className={styles.cardContent}>
+        <h3 className={styles.noteTitle}>{title}</h3>
+      </div>
+      <FaChevronRight className={styles.mobileChevron} />
+    </Link>
   );
-  return tooltipContent
-    ? jsxDEV_7x81h0kn(
-        Tooltip,
-        {
-          msg: tooltipContent,
-          position: "top",
-          underline: false,
-          gap: -8,
-          children: cardInner,
-        },
-        undefined,
-        false,
-        undefined,
-        this,
-      )
-    : cardInner;
+
+  return tooltipContent ? (
+    <Tooltip msg={tooltipContent} position="top" underline={false} gap={-8}>
+      {cardInner}
+    </Tooltip>
+  ) : (
+    cardInner
+  );
 }
+
 export default function NoteCards() {
   const notes = useNotes();
   const { path: docsBasePath } = usePluginData(
     "docusaurus-plugin-content-docs",
   );
+
   if (!notes.length) return null;
-  return jsxDEV_7x81h0kn(
-    "div",
-    {
-      className: styles.notesGrid,
-      role: "list",
-      children: notes.map((note, index) =>
-        jsxDEV_7x81h0kn(
-          NoteCard,
-          { ...note, index, docsBasePath },
-          note.slug,
-          false,
-          undefined,
-          this,
-        ),
-      ),
-    },
-    undefined,
-    false,
-    undefined,
-    this,
+
+  return (
+    <div className={styles.notesGrid} role="list">
+      {notes.map((note, index) => (
+        <NoteCard
+          key={note.slug}
+          {...note}
+          index={index}
+          docsBasePath={docsBasePath}
+        />
+      ))}
+    </div>
   );
 }
+
 export function TopicList({
   desc = "Click on the links below to explore the topics.",
   style = { marginTop: "-2.5rem", marginBottom: "2.5rem", textAlign: "center" },
 }) {
-  return jsxDEV_7x81h0kn(
-    "div",
-    {
-      style,
-      children: [
-        jsxDEV_7x81h0kn(
-          "p",
-          { dangerouslySetInnerHTML: { __html: desc } },
-          undefined,
-          false,
-          undefined,
-          this,
-        ),
-        jsxDEV_7x81h0kn(DocCardList, {}, undefined, false, undefined, this),
-      ],
-    },
-    undefined,
-    true,
-    undefined,
-    this,
+  return (
+    <div style={style}>
+      <p dangerouslySetInnerHTML={{ __html: desc }} />
+      <DocCardList />
+    </div>
   );
 }

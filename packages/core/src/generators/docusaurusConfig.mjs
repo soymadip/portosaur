@@ -194,14 +194,14 @@ export function generateDocusaurusConfig(
             path: "notes",
             sidebarPath: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
-              "theme/config/sidebar.js",
+              "config/sidebar.jsx",
             ),
           },
           blog: { path: "blog", showReadingTime: false },
           theme: {
             customCss: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
-              "theme/css/custom.css",
+              "css/custom.css",
             ),
           },
         },
@@ -217,9 +217,9 @@ export function generateDocusaurusConfig(
           debug: !env.NODE_ENV || env.NODE_ENV === "development",
           offlineModeActivationStrategies: [
             "always",
-            "deviceRetroactive",
-            "query",
-            "checkRedirect",
+            "appInstalled",
+            "queryString",
+            "standalone",
           ],
         },
       ],

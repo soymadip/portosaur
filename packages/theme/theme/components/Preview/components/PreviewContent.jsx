@@ -5,6 +5,7 @@ import ImageRenderer from "../renderers/ImageRenderer";
 import PdfRenderer from "../renderers/PdfRenderer";
 import WebRenderer from "../renderers/WebRenderer";
 import CodeRenderer from "../renderers/CodeRenderer";
+
 export default function PreviewContent({
   currentFile,
   fileType,
@@ -20,84 +21,58 @@ export default function PreviewContent({
 }) {
   const path = currentFile?.path;
   const isExternal = path?.startsWith("http") || path?.startsWith("//");
+
   if (!isOnline && isExternal) {
-    return jsxDEV_7x81h0kn(
-      OfflineState,
-      { onRetry: retryFetch },
-      undefined,
-      false,
-      undefined,
-      this,
-    );
+    return <OfflineState onRetry={retryFetch} />;
   }
+
   const errorMsg = fetchErrors?.[path];
   if (errorMsg) {
-    return jsxDEV_7x81h0kn(
-      ErrorState,
-      { path, message: errorMsg, fileType, fileUrl, onRetry: retryFetch },
-      undefined,
-      false,
-      undefined,
-      this,
+    return (
+      <ErrorState
+        path={path}
+        message={errorMsg}
+        fileType={fileType}
+        fileUrl={fileUrl}
+        onRetry={retryFetch}
+      />
     );
   }
+
   if (textLoading && fileType === "text") {
-    return jsxDEV_7x81h0kn(LoadingState, {}, undefined, false, undefined, this);
+    return <LoadingState />;
   }
+
   switch (fileType) {
     case "image":
-      return jsxDEV_7x81h0kn(
-        ImageRenderer,
-        {
-          fileUrl,
-          label: currentFile.label,
-          zoomLevel,
-          onError: (msg) => setError(path, msg),
-        },
-        fileUrl,
-        false,
-        undefined,
-        this,
+      return (
+        <ImageRenderer
+          fileUrl={fileUrl}
+          label={currentFile.label}
+          zoomLevel={zoomLevel}
+          onError={(msg) => setError(path, msg)}
+        />
       );
     case "pdf":
-      return jsxDEV_7x81h0kn(
-        PdfRenderer,
-        { fileUrl, zoomLevel, onError: (msg) => setError(path, msg) },
-        fileUrl,
-        false,
-        undefined,
-        this,
+      return (
+        <PdfRenderer
+          fileUrl={fileUrl}
+          zoomLevel={zoomLevel}
+          onError={(msg) => setError(path, msg)}
+        />
       );
     case "web":
-      return jsxDEV_7x81h0kn(
-        WebRenderer,
-        {
-          fileUrl,
-          label: currentFile.label,
-          onError: (msg) => setError(path, msg),
-        },
-        fileUrl,
-        false,
-        undefined,
-        this,
+      return (
+        <WebRenderer
+          fileUrl={fileUrl}
+          label={currentFile.label}
+          onError={(msg) => setError(path, msg)}
+        />
       );
     default: {
-      if (!textContent)
-        return jsxDEV_7x81h0kn(
-          LoadingState,
-          {},
-          undefined,
-          false,
-          undefined,
-          this,
-        );
-      return jsxDEV_7x81h0kn(
-        CodeRenderer,
-        { code: textContent, language: ext, zoomLevel },
-        undefined,
-        false,
-        undefined,
-        this,
+      if (!textContent) return <LoadingState />;
+      return (
+        <CodeRenderer code={textContent} language={ext} zoomLevel={zoomLevel} />
       );
     }
   }

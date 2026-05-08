@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Tooltip from "../Tooltip";
 import styles from "./styles.module.css";
+
 export default function NavArrow() {
   const [direction, setDirection] = useState("down");
   const [isVisible, setIsVisible] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
+
   const getSections = () => {
     const main = document.querySelector("main");
     if (!main) return [];
@@ -14,29 +16,36 @@ export default function NavArrow() {
       .map((el) => el.id)
       .filter((id) => id !== "nav-arrow");
   };
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
+
       setIsVisible(scrollTop > 100);
+
       if (scrollTop + windowHeight >= fullHeight - 50) {
         setDirection("up");
       } else {
         setDirection("down");
       }
+
       setIsScrolling(true);
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
       scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 800);
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
   }, []);
+
   const handleClick = () => {
     if (direction === "up") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -45,6 +54,7 @@ export default function NavArrow() {
       const windowTop =
         window.pageYOffset || document.documentElement.scrollTop;
       let nextSectionId = null;
+
       for (const id of sections) {
         const element = document.getElementById(id);
         if (element) {
@@ -56,9 +66,11 @@ export default function NavArrow() {
           }
         }
       }
+
       if (nextSectionId) {
-        const element = document.getElementById(nextSectionId);
-        element.scrollIntoView({ behavior: "smooth" });
+        document
+          .getElementById(nextSectionId)
+          .scrollIntoView({ behavior: "smooth" });
       } else {
         window.scrollTo({
           top: document.documentElement.scrollHeight,
@@ -67,58 +79,29 @@ export default function NavArrow() {
       }
     }
   };
-  return jsxDEV_7x81h0kn(
-    "button",
-    {
-      className: `${styles.navArrow} ${isVisible ? styles.visible : ""} ${isScrolling ? styles.scrolling : ""}`,
-      onClick: handleClick,
-      "aria-label":
-        direction === "down" ? "Scroll to next section" : "Scroll to top",
-      children: jsxDEV_7x81h0kn(
-        Tooltip,
-        {
-          msg: direction === "down" ? "Next Section" : "Back to Top",
-          position: "top",
-          gap: 25,
-          underline: false,
-          children: jsxDEV_7x81h0kn(
-            "div",
-            {
-              className: `${styles.iconWrapper} ${styles[direction]}`,
-              children:
-                direction === "down"
-                  ? jsxDEV_7x81h0kn(
-                      FaChevronDown,
-                      { className: styles.chevron },
-                      undefined,
-                      false,
-                      undefined,
-                      this,
-                    )
-                  : jsxDEV_7x81h0kn(
-                      FaChevronUp,
-                      { className: styles.chevron },
-                      undefined,
-                      false,
-                      undefined,
-                      this,
-                    ),
-            },
-            undefined,
-            false,
-            undefined,
-            this,
-          ),
-        },
-        undefined,
-        false,
-        undefined,
-        this,
-      ),
-    },
-    undefined,
-    false,
-    undefined,
-    this,
+
+  return (
+    <button
+      className={`${styles.navArrow} ${isVisible ? styles.visible : ""} ${isScrolling ? styles.scrolling : ""}`}
+      onClick={handleClick}
+      aria-label={
+        direction === "down" ? "Scroll to next section" : "Scroll to top"
+      }
+    >
+      <Tooltip
+        msg={direction === "down" ? "Next Section" : "Back to Top"}
+        position="top"
+        gap={25}
+        underline={false}
+      >
+        <div className={`${styles.iconWrapper} ${styles[direction]}`}>
+          {direction === "down" ? (
+            <FaChevronDown className={styles.chevron} />
+          ) : (
+            <FaChevronUp className={styles.chevron} />
+          )}
+        </div>
+      </Tooltip>
+    </button>
   );
 }
