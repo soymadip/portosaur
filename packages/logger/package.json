@@ -1,6 +1,6 @@
 {
   "name": "@portosaur/logger",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A lightweight, Docusaurus-compatible logging library similar to Docusaurus, with some extras.",
   "author": "soymadip",
   "license": "GPL-3.0-only",

@@ -1,6 +1,6 @@
 {
   "name": "@portosaur/core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "The engine of portosaur that translates YAML configuration into Docusaurus structures.",
   "license": "GPL-3.0-only",
   "author": "soymadip",
