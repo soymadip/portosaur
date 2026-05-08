@@ -25,8 +25,6 @@ bunx @portosaur/cli init
 # Or with project name (not recommended)
 bunx @portosaur/cli@latest init -P my-portfolio
 
-# Or: npx @portosaur/cli init
-
 
 # Start development
 cd <your-project-dir>

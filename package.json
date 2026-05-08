@@ -15,12 +15,13 @@
     "docs"
   ],
   "scripts": {
-    "lint": "prettier --check .",
+    "format:check": "prettier --check .",
     "format": "prettier --write .",
     "test:cli": "bun test --cwd packages/cli",
     "test:core": "bun test --cwd packages/core",
     "test:logger": "bun test --cwd packages/logger",
-    "test:all": "bun test && bun run test:cli && bun run test:core && bun run test:logger",
+    "test:all": "bun test",
+    "test:smoke": "bash src/scripts/smoke-test.sh",
     "build:docs": "bun run --cwd docs build",
     "build:all": "bun run build:docs",
     "dev": "bun run --cwd docs dev",

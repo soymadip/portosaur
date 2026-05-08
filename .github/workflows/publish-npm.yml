@@ -7,8 +7,43 @@ on:
   workflow_dispatch:
 
 jobs:
+  verify:
+    name: Verify Codebase
+    runs-on: ubuntu-latest
+    env:
+      GIT_AUTHOR_NAME: "soymadip"
+      GIT_COMMITTER_NAME: "Soumadip Das"
+      GIT_AUTHOR_EMAIL: "ci@portosaur.org"
+      GIT_COMMITTER_EMAIL: "ci@portosaur.org"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: |-
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "ci@portosaur.org"
+          git config --global user.name "Portosaur CI"
+
+      - name: Run Smoke Test
+        run: bun run test:smoke
+
   publish:
     name: Build and Publish
+    needs: verify
     runs-on: ubuntu-latest
     environment: npm
     env:
@@ -34,7 +69,7 @@ jobs:
         with:
           path: |-
             ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 

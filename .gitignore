@@ -34,10 +34,14 @@ yarn-error.log*
 bun-debug.log*
 
 # Test / Temporary
+!tests/*
+!tests/**
 my-portfolio/
 *test-site/
+test+.js
 *test/
 TEST*/
+smoke-test-site/
 
 ss.*
 *tmp*
