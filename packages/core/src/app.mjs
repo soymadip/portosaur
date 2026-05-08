@@ -6,7 +6,7 @@ import { resolve } from "path";
  */
 export const porto = (() => {
   try {
-    const pkgPath = resolve(import.meta.dirname, "../../../package.json");
+    const pkgPath = resolve(import.meta.dirname, "../package.json");
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
     return {
