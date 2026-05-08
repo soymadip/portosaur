@@ -46,7 +46,7 @@ bun run build
 If you want to use Portosaur programmatically, install `@portosaur/core`:
 
 ```bash
-npm install @portosaur/core
+bun install -g @portosaur/core
 ```
 
 See `@portosaur/core` for API documentation.

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 
 const srcDir = path.resolve(import.meta.dirname, "../");
@@ -29,5 +30,14 @@ export const Paths = {
   core: path.resolve(pkgDir, "../core"),
 
   /** Absolute path to the theme package. */
-  theme: path.resolve(pkgDir, "../theme"),
+  get theme() {
+    const localNodeModulesTheme = path.resolve(
+      process.cwd(),
+      "node_modules/@portosaur/theme",
+    );
+    if (fs.existsSync(localNodeModulesTheme)) {
+      return localNodeModulesTheme;
+    }
+    return path.resolve(pkgDir, "../theme");
+  },
 };

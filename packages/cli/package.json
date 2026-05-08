@@ -27,7 +27,6 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@portosaur/core": "workspace:*",
-    "@portosaur/theme": "workspace:*",
     "@portosaur/logger": "workspace:*",
     "@portosaur/wizard": "workspace:*",
     "commander": "^13.1.0",

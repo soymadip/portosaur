@@ -18,6 +18,7 @@ packages/
 ## Architecture Rules
 
 - **Dependency Flow**: Flow MUST be unidirectional: `cli` -> `core` -> `logger`. (Theme depends on Core). No circular dependencies.
+- **Lightweight CLI**: The `@portosaur/cli` package MUST NOT depend on `@portosaur/theme` or heavy frontend frameworks (Docusaurus/React). The theme should be injected into the user's local project `package.json` to keep global CLI installs fast.
 - **Workspace Imports**: Always use `@portosaur/<package>` for cross-package imports. No relative paths like `../../logger`.
 - **ESM only**: Use `.mjs` and `import`/`export` syntax everywhere if possible.
 - **Types**: Library packages MUST have an `index.d.ts` in `src/`, linked via `types` in `package.json`. Update it if there are any changes in the code.

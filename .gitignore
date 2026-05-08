@@ -37,7 +37,7 @@ bun-debug.log*
 my-portfolio/
 *test-site/
 *test/
-TEST/
+TEST*/
 
 ss.*
 *tmp*

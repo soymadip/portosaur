@@ -10,16 +10,16 @@ export const porto = (() => {
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
     return {
-      name: pkg.name || "Portosaur",
-      version: pkg.version || "0.0.0",
-      description: pkg.description || "",
-      license: pkg.license || "",
-      homepage: pkg.homepage || "",
-      repository: pkg.repository?.url || "",
-      engines: pkg.engines || {},
+      name: pkg.name,
+      version: pkg.version,
+      description: pkg.description,
+      license: pkg.license,
+      homepage: pkg.homepage,
+      repository: pkg.repository?.url,
+      engines: pkg.engines,
 
       // Derived/computed fields
-      engineName: `${pkg.name || "Portosaur"}`,
+      engineName: pkg.name,
     };
   } catch (error) {
     console.warn(
