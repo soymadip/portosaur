@@ -15,14 +15,17 @@ export default function SocialIcons({ showAll = false, links = null }) {
   const isBrowser = useIsBrowser();
   const [animationDelays, setAnimationDelays] = useState({});
 
-  const allSocialLinks = customFields.socialLinks.links || [];
+  const allSocialLinks = customFields.socialSection?.links || [];
   const socialLinks = useMemo(() => {
     if (links) return links;
     return showAll ? allSocialLinks : allSocialLinks.filter((link) => link.pin);
   }, [allSocialLinks, showAll, links]);
 
   const calculateDelays = useCallback(() => {
-    if (!isBrowser) return {};
+    if (!isBrowser) {
+      return {};
+    }
+
     const isTablet = window.innerWidth <= 768;
     const isMobile = window.innerWidth <= 480;
     const delays = {};

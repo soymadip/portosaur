@@ -9,6 +9,7 @@ import styles from "./styles.module.css";
 
 function useNotes() {
   const context = require.context(`@site/notes`, true, /index\.mdx?$|\.mdx?$/);
+
   return context
     .keys()
     .filter((path) => {
@@ -36,6 +37,7 @@ function useNotes() {
             .replace(/ /g, "")
             .replace(/[\s-]/g, "")
         : slug.toLowerCase() || title.toLowerCase();
+
       return {
         title,
         language,

@@ -31,7 +31,7 @@ export default function ContactSection({ id, className }) {
   }
 
   const { customFields } = siteConfig;
-  const socialLinksConfig = customFields.socialLinks || {};
+  const socialLinksConfig = customFields.socialSection || {};
 
   if (socialLinksConfig.enable === false) {
     return null;

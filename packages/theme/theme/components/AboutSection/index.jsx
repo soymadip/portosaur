@@ -14,7 +14,7 @@ export default function AboutSection({ id, className }) {
   }
 
   const { customFields } = siteConfig;
-  const aboutMe = customFields.aboutMe || {};
+  const aboutMe = customFields.aboutSection || {};
 
   if (aboutMe.enable === false) {
     return null;

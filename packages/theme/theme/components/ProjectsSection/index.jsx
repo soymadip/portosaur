@@ -24,7 +24,7 @@ export default function ProjectsSection({ id, className }) {
     brokenLinks.collectAnchor(id);
   }
 
-  const projectShelf = siteConfig.customFields?.projects || {};
+  const projectShelf = siteConfig.customFields?.projectShelf || {};
 
   if (projectShelf.enable === false) {
     return null;
@@ -84,8 +84,8 @@ export default function ProjectsSection({ id, className }) {
   }, []);
 
   useEffect(() => {
-    const configuredProjects = siteConfig.customFields?.projects?.enable
-      ? siteConfig.customFields?.projects?.projects || []
+    const configuredProjects = siteConfig.customFields?.projectShelf?.enable
+      ? siteConfig.customFields?.projectShelf?.projects || []
       : [];
     const handleLayout = () => {
       const newSlidesToShow = getVisibleSlidesPerView();
