@@ -45,6 +45,36 @@ function processManifest(manifestFile, outputDir, appVersion) {
   }
 }
 
+/**
+ * Converts a raw HTML tag string from the favicons library into a Docusaurus
+ * headTag object: { tagName, attributes }.
+ *
+ * Example input:  '<link rel="icon" href="/favicon/favicon.ico">'
+ * Example output: { tagName: 'link', attributes: { rel: 'icon', href: '/favicon/favicon.ico' } }
+ */
+function parseHtmlTagString(htmlString) {
+  const tagMatch = htmlString.match(/^<(\w+)/);
+  if (!tagMatch) {
+    return null;
+  }
+
+  const tagName = tagMatch[1];
+  const attributes = {};
+  const attrRegex = /([\w-]+)(?:=["']([^"']*)["'])?/g;
+
+  // Skip past the opening tag name to only match attributes
+  attrRegex.lastIndex = tagName.length + 1;
+  let match;
+  while ((match = attrRegex.exec(htmlString)) !== null) {
+    if (match[0] === tagName) {
+      continue;
+    }
+    attributes[match[1]] = match[2] ?? "";
+  }
+
+  return { tagName, attributes };
+}
+
 //  Main Generation Function
 
 export async function generateFavicons(siteDir, options = {}) {
@@ -77,9 +107,16 @@ export async function generateFavicons(siteDir, options = {}) {
   if (fs.existsSync(hashFilePath)) {
     const existingHash = fs.readFileSync(hashFilePath, "utf-8");
     if (existingHash === configHash) {
+      const htmlFilePath = path.join(outputDir, ".favicon.html");
       if (fs.existsSync(path.join(outputDir, "favicon.ico"))) {
         logger.info("Favicons are up to date, skipping generation.");
-        return { success: true, html: [] };
+        try {
+          const cachedHtml = JSON.parse(fs.readFileSync(htmlFilePath, "utf-8"));
+          const headTags = cachedHtml.map(parseHtmlTagString).filter(Boolean);
+          return { success: true, html: headTags };
+        } catch (e) {
+          return { success: true, html: [] };
+        }
       }
     }
   }
@@ -97,7 +134,10 @@ export async function generateFavicons(siteDir, options = {}) {
     const iconsToGenerate = ["note", "blog"];
     for (const icon of iconsToGenerate) {
       try {
-        await extractSvg(icon, imgDir, iconColor);
+        await extractSvg(icon, imgDir, {
+          ...iconColor,
+          assetsDir: options.portoAssetsDir,
+        });
       } catch (e) {}
     }
 
@@ -212,7 +252,10 @@ export async function generateFavicons(siteDir, options = {}) {
     const htmlFilePath = path.join(outputDir, ".favicon.html");
     fs.writeFileSync(htmlFilePath, JSON.stringify(response.html), "utf-8");
     tempFiles.forEach(cleanupFile);
-    return { success: true, html: response.html || [] };
+    const headTags = (response.html || [])
+      .map(parseHtmlTagString)
+      .filter(Boolean);
+    return { success: true, html: headTags };
   } catch (error) {
     logger.warn(`Favicon generation skipped: ${error.message}`);
     tempFiles.forEach(cleanupFile);
@@ -220,7 +263,8 @@ export async function generateFavicons(siteDir, options = {}) {
     if (fs.existsSync(htmlFilePath)) {
       try {
         const cachedHtml = JSON.parse(fs.readFileSync(htmlFilePath, "utf-8"));
-        return { success: false, html: cachedHtml };
+        const headTags = cachedHtml.map(parseHtmlTagString).filter(Boolean);
+        return { success: false, html: headTags };
       } catch (e) {}
     }
     return { success: false, html: [] };

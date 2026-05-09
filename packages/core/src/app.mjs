@@ -1,12 +1,12 @@
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { fileURLToPath } from "url";
 
 /**
  * Portosaur application metadata and configuration
  */
 export const porto = (() => {
   try {
-    const pkgPath = resolve(import.meta.dirname, "../package.json");
+    const pkgPath = fileURLToPath(new URL("../package.json", import.meta.url));
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
     return {

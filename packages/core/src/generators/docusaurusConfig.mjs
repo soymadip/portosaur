@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { createRequire } from "module";
 import { getGitDate } from "../utils/system.mjs";
 import { porto } from "../app.mjs";
 import { resolveVars, getNestedValue } from "../utils/config.mjs";
@@ -15,19 +16,14 @@ import {
 /**
  * Generates a Docusaurus configuration object from raw user config
  */
-export function generateDocusaurusConfig(
-  rawUserConfig,
-  projectDir,
-  context = {},
-) {
+export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const {
-    portoPkg = {},
     portoPaths = {},
     gitDate = null,
     env = process.env,
   } = context;
 
-  const portoVersion = portoPkg.version ?? "0.0.0";
+  const portoVersion = porto.version ?? "0.0.0";
   const lastUpdated = gitDate ?? getGitDate(projectDir);
 
   const staticDir = path.resolve(projectDir, "static");
@@ -65,6 +61,16 @@ export function generateDocusaurusConfig(
 
   // ------- Configuration Setup -------
 
+  // Collect static directories: local site static/, theme assets/, and portosaur dot-dir.
+  const staticDirectories = [
+    "static",
+    assetsDir,
+    path.join(projectDir, ".docusaurus", "portosaur"),
+  ].filter((dir) => dir && fs.existsSync(dir));
+
+  const isDarkMode = get("theme.appearance.dark_mode", true);
+  const disableSwitch = get("theme.appearance.disable_switch", false);
+
   return {
     projectName: siteName,
     title: siteName,
@@ -82,6 +88,104 @@ export function generateDocusaurusConfig(
     onBrokenAnchors: get("site.on_broken_anchors", "throw"),
     onBrokenLinks: get("site.on_broken_links", "throw"),
     i18n: { defaultLocale: "en", locales: ["en"] },
+
+    staticDirectories,
+
+    themeConfig: {
+      colorMode: {
+        defaultMode: isDarkMode ? "dark" : "light",
+        disableSwitch,
+        respectPrefersColorScheme: false,
+      },
+
+      navbar: {
+        title: siteName,
+        logo: {
+          alt: `${siteName} logo`,
+          src: resolveAsset(get("site.favicon", ""), "img/icon.png"),
+        },
+        hideOnScroll: get("theme.navigation.hide_navbar_on_scroll", true),
+        items: [
+          {
+            type: "search",
+            position: "right",
+            className: "navbar-search-bar",
+          },
+          ...(get("home_page.about.enable", true)
+            ? [
+                {
+                  label: "About Me",
+                  to: "/#about",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
+            : []),
+          ...(get("home_page.project_shelf.enable", true)
+            ? [
+                {
+                  label: "Projects",
+                  to: "/#projects",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
+            : []),
+          ...(get("home_page.experience.enable", false)
+            ? [
+                {
+                  label: "Experience",
+                  to: "/#experience",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
+            : []),
+          ...(get("home_page.social.enable", true)
+            ? [
+                {
+                  label: "Contact",
+                  to: "/#contact",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
+            : []),
+          {
+            type: "dropdown",
+            label: "More",
+            position: "right",
+            className: "_navbar-more-items",
+            items: [
+              { label: "Notes", to: "/notes" },
+              { label: "Blog", to: "/blog" },
+              ...(get("tasks.enable", false)
+                ? [{ label: "Tasks", to: "/tasks" }]
+                : []),
+              ...(!get("theme.appearance.disable_branding", false)
+                ? [
+                    {
+                      label: `Portosaur v${portoVersion}`,
+                      className: "_nav-portosaur-version",
+                      href:
+                        porto?.homepage ||
+                        "https://github.com/soymadip/portosaur",
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ],
+      },
+
+      footer: {
+        style: "dark",
+        copyright: get(
+          "site.footer_text",
+          `© ${new Date().getFullYear()} ${siteName}. Built with Portosaur.`,
+        ),
+      },
+    },
 
     headTags: buildHeadTags([
       { meta: { name: "generator", content: `Portosaur v${porto.version}` } },
@@ -132,11 +236,17 @@ export function generateDocusaurusConfig(
         subtitle: get("home_page.hero.subtitle", "I am a"),
         profession: get("home_page.hero.profession", "Your Profession"),
         desc: get("home_page.hero.desc", "Welcome to my portfolio."),
+        social: get("home_page.hero.social", []),
+        learnMoreButtonTxt: get(
+          "home_page.hero.learn_more_button_txt",
+          "Learn More",
+        ),
       },
 
       aboutSection: {
         enable: get("home_page.about.enable", true),
         heading: get("home_page.about.heading", "About Me"),
+        name: get("site.title", "Your Name"),
         image: resolveAsset(get("home_page.about.image", "")),
         bio: get("home_page.about.bio", []),
         skills: get("home_page.about.skills", []),
@@ -208,6 +318,33 @@ export function generateDocusaurusConfig(
       ],
     ],
 
+    // ------- Themes -------
+
+    themes: [
+      [
+        (() => {
+          const require = createRequire(import.meta.url);
+          return require.resolve("@easyops-cn/docusaurus-search-local", {
+            paths: [portoPaths.theme ?? context.portoRoot ?? ""],
+          });
+        })(),
+        {
+          hashed: true,
+          indexDocs: true,
+          indexBlog: true,
+          indexPages: true,
+          docsDir: "notes",
+          docsRouteBasePath: "notes",
+          searchContextByPaths: ["notes", "blog"],
+          highlightSearchTermsOnTargetPage: true,
+          explicitSearchResultPath: true,
+          hideSearchBarWithNoSearchContext: true,
+          searchBarShortcutHint: false,
+          language: ["en"],
+        },
+      ],
+    ],
+
     // ------- Plugins -------
 
     plugins: [
@@ -221,6 +358,19 @@ export function generateDocusaurusConfig(
             "queryString",
             "standalone",
           ],
+        },
+      ],
+
+      // Serve the theme's pages/ directory as page routes.
+      // This registers pages/index.jsx → / and pages/tasks.jsx → /tasks etc.
+      [
+        "@docusaurus/plugin-content-pages",
+        {
+          id: "portosaur-pages",
+          path: path.resolve(
+            portoPaths.theme ?? context.portoRoot ?? "",
+            "pages",
+          ),
         },
       ],
     ],

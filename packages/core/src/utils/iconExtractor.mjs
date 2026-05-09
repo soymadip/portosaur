@@ -1,19 +1,28 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { logger } from "@portosaur/logger";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 /**
- * Extracts specific SVGs from the internal assets and saves them to the project.
+ * Extracts specific SVGs from a given assets directory and saves them to the project.
+ *
+ * @param {string} iconName   - Icon name without the "icon-" prefix or extension.
+ * @param {string} destDir    - Destination directory to copy the SVG into.
+ * @param {Object} options    - Optional settings.
+ * @param {string} options.assetsDir - Base assets directory containing img/svg/. Required.
+ * @param {string} options.color     - Optional fill color to inject into the SVG.
  */
 export async function extractSvg(iconName, destDir, options = {}) {
-  const srcPath = path.resolve(
-    __dirname,
-    `../../assets/img/svg/icon-${iconName}.svg`,
-  );
+  if (!options.assetsDir) {
+    logger.warn(
+      `extractSvg: assetsDir not provided, skipping icon-${iconName}.svg`,
+    );
+    return false;
+  }
 
+  const srcPath = path.resolve(
+    options.assetsDir,
+    `img/svg/icon-${iconName}.svg`,
+  );
   const destPath = path.join(destDir, `icon-${iconName}.svg`);
 
   if (!fs.existsSync(srcPath)) {
@@ -28,6 +37,7 @@ export async function extractSvg(iconName, destDir, options = {}) {
   if (options.color) {
     content = content.replace(/fill="[^"]*"/g, `fill="${options.color}"`);
   }
+
   fs.writeFileSync(destPath, content);
 
   logger.info(`Generated SVG icon: ${destPath}`);

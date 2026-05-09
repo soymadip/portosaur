@@ -41,7 +41,7 @@ export function buildCommand(siteDir?: string, extraArgs?: string[]): void;
 /**
  * Serves the built static site locally.
  */
-export function serveCommand(siteDir?: string): void;
+export function serveCommand(siteDir?: string, extraArgs?: string[]): void;
 
 /**
  * Generates the config schema.

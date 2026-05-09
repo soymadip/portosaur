@@ -18,22 +18,26 @@ export function getNestedValue(obj, pathStr, ...fallbacks) {
   }
 
   // Return if value found at requested path
-  if (current !== undefined) return current;
+  if (current !== undefined && current !== null) {
+    return current;
+  }
 
   // ------- Try fallback paths ----------
-  for (const fallback of fallbacks) {
-    if (fallback.includes(".")) {
-      const val = getNestedValue(obj, fallback);
+  if (fallbacks.length === 0) return undefined;
 
+  const defaultVal = fallbacks[fallbacks.length - 1];
+  const altPaths = fallbacks.slice(0, fallbacks.length - 1);
+
+  for (const fallback of altPaths) {
+    if (typeof fallback === "string") {
+      const val = getNestedValue(obj, fallback);
       if (val !== undefined) {
         return val;
       }
-    } else if (obj[fallback] !== undefined) {
-      return obj[fallback];
     }
   }
 
-  return;
+  return defaultVal;
 }
 
 /**

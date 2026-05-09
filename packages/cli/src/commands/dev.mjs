@@ -41,9 +41,14 @@ export async function devCommand(siteDir, extraArgs = []) {
       const watcher = fs.watch(configYamlPath, (eventType) => {
         if (eventType === "change") {
           logger.info(`Detected change in ${configYaml}, reloading...`);
-          // Touch the shim config to trigger Docusaurus reload
-          const now = new Date();
-          fs.utimesSync(configPath, now, now);
+
+          // Regenerate the static config shim with the updated values,
+          // which triggers Docusaurus' own file watcher to hot-reload.
+          try {
+            writeConfigShim(UserRoot, portoPaths);
+          } catch (err) {
+            logger.warn(`Failed to regenerate config: ${err.message}`);
+          }
         }
       });
 

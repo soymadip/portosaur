@@ -55,6 +55,7 @@ export async function buildCommand(siteDir, extraArgs = []) {
       siteTitle: userConfig.site?.title,
       siteTagline: userConfig.site?.tagline,
       staticDirs: ["static"],
+      portoAssetsDir: portoPaths.assets,
     });
 
     const configPath = writeConfigShim(UserRoot, portoPaths, {

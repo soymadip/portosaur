@@ -57,8 +57,9 @@ program
   .action(buildCommand);
 
 program
-  .command("serve [siteDir]")
+  .command("serve [siteDir] [extraArgs...]")
   .description("Serve the built static site locally")
+  .allowUnknownOption()
   .action(serveCommand);
 
 program

@@ -8,8 +8,8 @@ site:
   title: "{{fullName}}"
   tagline: "Short description about you, your passion, your goals etc."
 
-  favicon: "{{portoRoot}}/src/assets/img/svg/icon.svg"
-  social_card: "{{portoRoot}}/src/assets/img/social-card.jpeg"
+  favicon: "{{portoRoot}}/assets/img/svg/icon.svg"
+  social_card: "{{portoRoot}}/assets/img/social-card.jpeg"
 
   # Auto set if deploying in Github/GitLab Pages
   url: "auto"
@@ -55,7 +55,7 @@ home_page:
       - "skill 1"
       - "skill 2"
       - "skill 3"
-    resume: "{{portoRoot}}/src/assets/sample-resume.pdf"
+    resume: "{{portoRoot}}/assets/sample-resume.pdf"
 
   project_shelf:
     enable: true
@@ -69,7 +69,7 @@ home_page:
         repo: "https://github.com/yourname/project1"
 
       - title: "Your Awesome Project 2"
-        icon: "{{portoRoot}}/src/assets/img/svg/icon.svg"
+        icon: "{{portoRoot}}/assets/img/svg/icon.svg"
         bg: "#5c8f2d"
         tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"]
         featured: true

@@ -31,16 +31,42 @@ export function resolveBasePath(configValue, env = process.env) {
 }
 
 /**
- * Creates a function to resolve static asset paths
+ * Creates a function to resolve static asset paths.
+ * Handles portoRoot-prefixed absolute paths by extracting the bare relative
+ * subpath after any "assets/" segment, so they resolve correctly from
+ * the registered staticDirectories.
  */
 export function createStaticAssetResolver(_projectDir, staticDir, assetsDir) {
   return function (primaryPath, fallbackPath = "") {
-    if (!primaryPath) return fallbackPath;
-    if (/^https?:\/\//.test(primaryPath)) return primaryPath;
-    if (fs.existsSync(path.resolve(staticDir, primaryPath))) return primaryPath;
-    if (assetsDir && fs.existsSync(path.resolve(assetsDir, primaryPath)))
+    if (!primaryPath) {
+      return fallbackPath;
+    }
+    if (/^https?:\/\//.test(primaryPath)) {
       return primaryPath;
-    return fallbackPath || primaryPath;
+    }
+
+    // Strip known prefix segments that arise from {{portoRoot}}/src/assets/...
+    // or {{portoRoot}}/assets/... template paths so we get a bare relative path
+    // that Docusaurus can serve from its staticDirectories.
+    const match = primaryPath.match(/(?:src\/)?assets\/(.+)$/);
+    const normalizedPath = match ? match[1] : primaryPath;
+
+    if (fs.existsSync(path.resolve(staticDir, normalizedPath))) {
+      return normalizedPath;
+    }
+    if (assetsDir && fs.existsSync(path.resolve(assetsDir, normalizedPath))) {
+      return normalizedPath;
+    }
+
+    // Fallback: try the original path unchanged
+    if (fs.existsSync(path.resolve(staticDir, primaryPath))) {
+      return primaryPath;
+    }
+    if (assetsDir && fs.existsSync(path.resolve(assetsDir, primaryPath))) {
+      return primaryPath;
+    }
+
+    return fallbackPath || normalizedPath || primaryPath;
   };
 }
 

@@ -16,7 +16,7 @@ export * from "./app.mjs";
 
 export { generateFavicons } from "./generators/generateFavicons.mjs";
 export { generateRobotsTxt } from "./generators/generateRobots.mjs";
-export { generateDocusaurusConfig } from "./generators/docusaurusConfig.mjs";
+export { buildDocuConfig } from "./generators/docusaurusConfig.mjs";
 
 export {
   resolveSiteUrl,

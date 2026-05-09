@@ -34,7 +34,6 @@ export { porto, git, text, limits } from "./app.mjs";
 export { generateFavicons } from "./generators/generateFavicons.mjs";
 export { generateRobotsTxt } from "./generators/generateRobots.mjs";
 export {
-  generateDocusaurusConfig,
   buildDocuConfig,
   resolveSiteUrl,
   resolveBasePath,
