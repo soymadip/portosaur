@@ -17,11 +17,7 @@ import {
  * Generates a Docusaurus configuration object from raw user config
  */
 export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
-  const {
-    portoPaths = {},
-    gitDate = null,
-    env = process.env,
-  } = context;
+  const { portoPaths = {}, gitDate = null, env = process.env } = context;
 
   const portoVersion = porto.version ?? "0.0.0";
   const lastUpdated = gitDate ?? getGitDate(projectDir);
