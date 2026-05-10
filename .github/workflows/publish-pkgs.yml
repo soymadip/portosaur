@@ -1,4 +1,4 @@
-name: Publish Packages to NPM
+name: Publish Packages to Regestries
 
 on:
   push:
