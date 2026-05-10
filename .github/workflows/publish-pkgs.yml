@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: Verify Codebase
+    name: Verify Changes
     runs-on: ubuntu-latest
     env:
       GIT_AUTHOR_NAME: "soymadip"
@@ -41,8 +41,8 @@ jobs:
       - name: Run Smoke Test
         run: bun run test:smoke
 
-  publish:
-    name: Build and Publish
+  publish-npm:
+    name: Publish to NPM
     needs: verify
     runs-on: ubuntu-latest
     environment: npm

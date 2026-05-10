@@ -16,7 +16,7 @@
   ],
   "type": "module",
   "bin": {
-    "porto": "./bin/porto.mjs"
+    "porto": "bin/porto.mjs"
   },
   "exports": {
     ".": {
