@@ -1,0 +1,116 @@
+stages:
+  - verify
+  - deploy
+  - publish
+
+# Global cache for Bun dependencies
+cache:
+  key:
+    files:
+      - bun.lock
+  paths:
+    - .bun-cache/
+    - node_modules/
+
+variables:
+  BUN_INSTALL_CACHE_DIR: .bun-cache
+
+# Common setup for most jobs
+.bun_setup:
+  image: oven/bun:latest
+  before_script:
+    - bun install --frozen-lockfile
+
+# --- Stage: verify ---
+
+lint-test:
+  extends: .bun_setup
+  stage: verify
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - git config --global user.email "ci@portosaur.org"
+    - git config --global user.name "Portosaur CI"
+    - bun run format:check
+    - bun run test:all
+
+smoke-test:
+  extends: .bun_setup
+  stage: verify
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/ && $CI_COMMIT_TAG !~ /-(beta|alpha)/
+    - if: $CI_PIPELINE_SOURCE == "web"
+  script:
+    - git config --global user.email "ci@portosaur.org"
+    - git config --global user.name "Portosaur CI"
+    - bun run test:smoke
+
+# --- Stage: deploy ---
+
+pages:
+  image: oven/bun:latest
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - "docs/**/*"
+        - "packages/cli/src/commands/schema.*"
+        - "packages/core/src/index.mjs"
+        - "package.json"
+        - "bun.lock"
+  script:
+    - bun install --cwd docs
+    - bun install --cwd packages/cli
+    - bun run --cwd docs build
+    - bun run packages/cli/bin/porto.mjs schema -o docs/.vitepress/dist/conf-schema.json
+    - mv docs/.vitepress/dist public
+  artifacts:
+    paths:
+      - public
+
+deploy-proxy:
+  image: oven/bun:latest
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - "proxy/**/*"
+  script:
+    - cd proxy
+    - bun install
+    - bunx wrangler deploy
+
+# --- Stage: publish ---
+
+publish-npm:
+  extends: .bun_setup
+  stage: publish
+  needs: ["smoke-test"]
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/ && $CI_COMMIT_TAG !~ /-(beta|alpha)/
+  script:
+    - |
+      git config --global user.email "ci@portosaur.org"
+      git config --global user.name "Portosaur CI"
+      echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+
+      for dir in packages/*; do
+        if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+          pkg_name=$(bun -e "import pkg from './$dir/package.json' with { type: 'json' }; console.log(pkg.name)")
+          pkg_version=$(bun -e "import pkg from './$dir/package.json' with { type: 'json' }; console.log(pkg.version)")
+          
+          echo "Checking $pkg_name@$pkg_version..."
+          
+          if bunx npm view "$pkg_name@$pkg_version" > /dev/null 2>&1; then
+            echo "✓ $pkg_name@$pkg_version already published"
+          else
+            echo "Publishing $pkg_name@$pkg_version..."
+            sed -i "s/workspace:\*/^${pkg_version}/g" "$dir/package.json"
+            cd $dir
+            bunx npm publish --access public
+            cd ../..
+            git checkout "$dir/package.json"
+          fi
+        fi
+      done
