@@ -16,15 +16,16 @@ variables:
   BUN_INSTALL_CACHE_DIR: .bun-cache
 
 # Common setup for most jobs
-.bun_setup:
+.setup_tools:
   image: oven/bun:latest
   before_script:
+    - apt-get update && apt-get install -y git
     - bun install --frozen-lockfile
 
 # --- Stage: verify ---
 
 lint-test:
-  extends: .bun_setup
+  extends: .setup_tools
   stage: verify
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -36,7 +37,7 @@ lint-test:
     - bun run test:all
 
 smoke-test:
-  extends: .bun_setup
+  extends: .setup_tools
   stage: verify
   rules:
     - if: $CI_COMMIT_TAG =~ /^v/ && $CI_COMMIT_TAG !~ /-(beta|alpha)/
@@ -84,7 +85,7 @@ deploy-proxy:
 # --- Stage: publish ---
 
 publish-npm:
-  extends: .bun_setup
+  extends: .setup_tools
   stage: publish
   needs: ["smoke-test"]
   rules:
