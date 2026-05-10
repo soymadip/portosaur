@@ -1,0 +1,105 @@
+.tooltipContainer {
+  position: relative;
+  display: inline-flex;
+  vertical-align: baseline;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.hasUnderline {
+  cursor: help;
+  border-bottom: 1.5px dotted var(--ifm-color-primary);
+  transition: border-bottom-color 0.2s ease;
+}
+
+.hasUnderline:hover {
+  border-bottom-style: dashed;
+  border-bottom-color: var(--ifm-color-primary-darker);
+}
+
+.tooltip {
+  position: fixed;
+  background-color: var(--tooltip-color, var(--ifm-background-surface-color));
+  color: var(--tooltip-text-color, var(--ifm-font-color-base));
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: normal;
+  word-break: break-word;
+  max-width: min(320px, 90vw);
+  width: max-content;
+  z-index: 9999;
+  opacity: 0;
+  animation: tooltipFadeIn 0.15s ease-out forwards;
+  box-shadow: var(--ifm-global-shadow-md);
+  pointer-events: none;
+}
+
+.arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: inherit;
+}
+
+/* Positioning: coordinates are set via JS (top/left on the element).
+   These classes only handle the transform offset from that anchor point. */
+
+.top {
+  transform: translateX(-50%) translateY(-100%);
+}
+
+.top .arrow {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  margin-top: -4px;
+}
+
+.bottom {
+  transform: translateX(-50%);
+}
+
+.bottom .arrow {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  margin-bottom: -4px;
+}
+
+.left {
+  transform: translateX(-100%) translateY(-50%);
+}
+
+.left .arrow {
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.right {
+  transform: translateY(-50%);
+}
+
+.right .arrow {
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+}

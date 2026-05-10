@@ -1,51 +1,30 @@
 # Dependencies
-node_modules/
-.pnp
-.pnp.js
+/node_modules
 
-# Build and Output
-*.bkp
+# Example files
+notes/
+!notes/index.mdx
+static/example*
+
+# Production
+/build
+*tmp*
+*temp*
 *favicon/
-dist/
-build/
-dist/
-cache/
-.docusaurus/
-.portosaur/
-.turbo/
-configSchema.json
-scratch
-scratch.*
 TestimonialsSection/
 
-# Env
-.env
-.env.*
-!.env.example
-# OS
-.DS_Store
-Thumbs.db
+# Generated files
+.docusaurus
+.cache-loader
+.wrangler/
 
-# Logs
-*.log
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-bun-debug.log*
-
-# Test / Temporary
-!tests/*
-!tests/**
-my-portfolio/
-*test-site/
-test+.js
-*test/
-TEST*/
-smoke-test-site/
-
-ss.*
-*tmp*
-*.tmp
-*.temp
-temp/
-!templates/**

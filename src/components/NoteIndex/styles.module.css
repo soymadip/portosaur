@@ -1,0 +1,171 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.noteCard {
+  width: 200px;
+  border-radius: var(--ifm-card-border-radius);
+  text-align: center;
+  padding: 1.2rem;
+  background-color: var(--ifm-card-background-color);
+  opacity: 0;
+  transition:
+    transform 0.3s ease,
+    scale 0.3s ease,
+    z-index 0s;
+  animation: fadeIn 0.5s ease-out forwards;
+  animation-delay: calc(0.2s + (var(--card-index, 0) * 0.1s));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.noteCard:hover {
+  transform: translateY(-5px);
+  scale: 1.05;
+  z-index: 10;
+}
+
+.noteIcon {
+  font-size: 69px;
+  margin-bottom: -1rem;
+  transition: transform 0.2s ease;
+}
+
+.noteCard:hover .noteIcon {
+  transform: scale(1.1);
+}
+
+.noteTitle {
+  margin-bottom: 1.8rem;
+  color: var(--ifm-font-color-base);
+  font-size: 1.8rem;
+  font-weight: 600;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.noteCard > a {
+  margin-top: auto;
+  align-self: center;
+}
+
+@media (max-width: 768px) {
+  .noteCard {
+    width: 150px;
+    padding: 0.8rem;
+  }
+
+  .noteIcon {
+    font-size: 45px;
+    margin-bottom: -0.8rem;
+  }
+
+  .noteTitle {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .notesGrid {
+    gap: 0.7rem;
+    margin: 0.8rem auto;
+    justify-content: center;
+    padding: 0 0.05rem;
+  }
+
+  .noteCard {
+    width: 100%;
+    max-width: 400px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+    border-radius: var(--ifm-card-border-radius);
+    box-shadow: var(--ifm-global-shadow-md);
+    transition: transform 0.2s ease;
+  }
+
+  .noteCard:hover {
+    transform: none;
+    scale: 1;
+  }
+
+  .noteCard:active {
+    transform: scale(0.98);
+    background-color: var(--ifm-hover-overlay);
+  }
+
+  .noteIcon {
+    font-size: 42px;
+    margin: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Remove any absolute positioning or shifts that break centering */
+  .noteIcon > svg {
+    margin: 0;
+  }
+
+  .noteTitle {
+    font-size: 1.1rem;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .noteCard > a {
+    margin: 0 0 0 auto;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: var(--ifm-global-radius);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noteCard {
+    animation: none !important;
+    opacity: 1;
+    transition: none !important;
+  }
+
+  .noteIcon {
+    transition: none !important;
+  }
+}

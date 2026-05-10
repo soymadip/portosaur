@@ -1,0 +1,491 @@
+
+/* Animations*/
+
+@keyframes skillAppear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0); 
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+
+/*  Styles */
+
+.aboutSection {
+  scroll-margin-top: var(--ifm-scroll-margin-top);
+  padding: 0.5rem 0 9.5rem;
+  background-color: var(--ifm-background-color);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.aboutContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.aboutHeader {
+  text-align: center;
+  margin-bottom: 4.7rem;
+}
+
+.aboutHeading {
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  margin-bottom: 0.6rem;
+  animation: slideUp 0.5s ease-out forwards;
+  position: relative;
+  display: inline-block;
+}
+
+.aboutHeading::after {
+  content: '';
+  position: absolute;
+  width: 30%;
+  height: 3px;
+  bottom: -0.5rem;
+  left: 35%;
+  background-color: var(--ifm-color-primary);
+  border-radius: var(--ifm-global-radius);
+}
+
+.aboutContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 0;
+  animation: fadeIn 0.8s ease-out 0.3s both;
+  align-items: center;
+}
+
+.aboutBio {
+  display: flex;
+  flex-direction: row;
+  gap: 4rem;
+  width: 100%;
+  align-items: center;
+}
+
+.bioImageContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0;
+  align-self: stretch;
+  margin-bottom: 1.3rem;
+}
+
+.imageWrapper {
+  position: relative;
+  border-radius: var(--ifm-card-border-radius);
+  overflow: hidden;
+  box-shadow: 0 10px 20px var(--ifm-shadow-color);
+  transform: none; 
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  max-width: 350px;
+  margin: auto 0;
+}
+
+.imageWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: var(--ifm-card-border-radius);
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.imageWrapper:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px var(--ifm-shadow-color);
+}
+
+.aboutImage {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ifm-global-radius);
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+.bioTextContainer {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-self: flex-start;
+}
+
+.bioText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: -0.5rem;
+}
+
+.aboutParagraph {
+  margin-bottom: 0.2rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--ifm-font-color-base);
+  position: relative;
+  padding-left: 0.8rem;
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: calc(0.3s + var(--paragraph-index, 0) * 0.15s);
+}
+
+.aboutParagraph:last-child {
+  margin-bottom: 0;
+}
+
+.aboutParagraph::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--ifm-color-primary), transparent);
+  border-radius: var(--ifm-global-radius);
+  opacity: 0.7;
+}
+
+.resumeButtonWrapper {
+  margin-top: 1rem;
+}
+
+.resumeButton {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ifm-background-color);
+  background-color: var(--ifm-color-primary);
+  border-radius: var(--ifm-global-radius);
+  transition: all 0.3s ease, transform 0.2s ease;
+  border: 2px solid var(--ifm-color-primary);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.resumeButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.7s ease;
+  z-index: -1;
+}
+
+.resumeButton:hover {
+  background-color: transparent;
+  color: var(--ifm-color-primary);
+  transform: translateY(-3px);
+  box-shadow: var(--ifm-global-shadow-md);
+  text-decoration: none;
+}
+
+.resumeButton:hover::before {
+  left: 100%;
+}
+
+.buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.skillsContainer {
+  width: 100%;
+  padding: 0.8rem 0 0.5rem;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.skillsTitle {
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  padding-left: 0;
+  position: relative;
+  display: inline-block;
+}
+
+.skillsTitle::after {
+  content: '';
+  position: absolute;
+  width: 40%;
+  height: 2px;
+  bottom: -0.4rem;
+  left: 0;
+  background-color: var(--ifm-color-primary);
+  opacity: 0.5;
+  border-radius: var(--ifm-global-radius);
+}
+
+.skillsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  padding-left: 0;
+  padding-top: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.skillBadge {
+  background-color: rgba(var(--ctp-lavender-rgb), 0.08);
+  color: var(--ctp-lavender);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--ctp-lavender-rgb), 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation-delay: calc(0.1s + (var(--card-index, 0) * 0.1s));
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.skillBadge:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ifm-global-shadow-md);
+  background-color: rgba(var(--ctp-lavender-rgb), 0.15);
+  border-color: rgba(var(--ctp-lavender-rgb), 0.3);
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .aboutBio {
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .aboutSection {
+    scroll-margin-top: var(--ifm-scroll-margin-top-mobile);
+    padding: 1.5rem 0 4rem;
+  }
+  
+  .aboutContainer {
+    padding: 0 1.5rem;
+  }
+  
+  .aboutHeader {
+    margin-bottom: 2rem;
+  }
+  
+  .aboutHeading {
+    font-size: 2.4rem;
+  }
+  
+  .aboutBio {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .bioImageContainer {
+    width: 100%;
+    padding-top: 0;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .imageWrapper {
+    transform: none;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  
+  .bioTextContainer {
+    width: 100%;
+    gap: 1rem;
+  }
+  
+  .skillsContainer {
+    padding: 0.6rem 0 0.5rem;
+    margin-top: 0;
+  }
+  
+  .skillsTitle {
+    margin-bottom: 1rem;
+    display: block;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .skillsTitle::after {
+    width: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .skillsGrid {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutSection {
+    scroll-margin-top: 25px;
+    padding: 0.5rem 0 2.5rem;
+    min-height: auto;
+  }
+  
+  .aboutContainer {
+    padding: 0 1rem;
+  }
+  
+  .aboutHeader {
+    margin-bottom: 1.4rem;
+  }
+  
+  .aboutHeading {
+    font-size: 1.8rem;
+  }
+  
+  .aboutContent {
+    gap: 1.5rem;
+  }
+  
+  .aboutBio {
+    gap: 1.6rem;
+  }
+  
+  .bioImageContainer {
+    padding-top: 0;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0;
+  }
+  
+  .imageWrapper {
+    max-width: 200px;
+    margin: 0 auto 0.5rem;
+  }
+  
+  .aboutParagraph {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding-left: 0.6rem;
+  }
+  
+  .aboutParagraph::before {
+    width: 2px;
+  }
+  
+  .skillsTitle {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+  
+  .skillsGrid {
+    gap: 0.6rem;
+    justify-content: center;
+    padding-top: 0.3rem;
+  }
+  
+  .skillBadge {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 16px;
+  }
+  
+  .bioTextContainer {
+    gap: 0.6rem;
+  }
+  
+  .skillsContainer {
+    padding: 0.3rem 0 0.5rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .aboutHeading {
+    font-size: 1.6rem;
+  }
+  
+  .imageWrapper {
+    max-width: 180px;
+  }
+  
+  .skillBadge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+  
+  .aboutParagraph {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aboutHeading, .aboutContent, .aboutImage, 
+  .resumeButton, .skillBadge, .imageWrapper, .resumeButton::before,
+  .aboutParagraph {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1;
+    transform: none !important;
+  }
+}

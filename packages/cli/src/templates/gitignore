@@ -1,9 +1,0 @@
-# gitignore, init time renamed
-
-node_modules/
-.docusaurus/
-.portosaur/
-.cache-loader/
-build/
-notes/index.md*
-test*

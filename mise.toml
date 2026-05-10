@@ -4,11 +4,14 @@ uv = "latest"
 bun = "latest"
 
 [env]
-_.path = './packages/cli/bin'
+_.path = './bin'
 CZ_CONFIG = 'src/cz/cz.yaml'
 
+[shell_alias]
+cz = "cz --config $CZ_CONFIG "
+
 [tasks]
-bump = "cz --config $CZ_CONFIG  bump"
-commit = "cz --config $CZ_CONFIG commit"
-changelog = "cz --config $CZ_CONFIG changelog"
+bump = "cz bump"
+commit = "cz commit"
+changelog = "cz changelog"
 pr = "gh pr create"

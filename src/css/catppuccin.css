@@ -1,0 +1,632 @@
+/**
+ * Catppuccin color palette
+ * https://catppuccin.com
+**/
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Alata&family=DM+Serif+Display&display=swap');
+
+
+
+:root {
+
+    --ifm-heading-font-family: 'Alata', system-ui, -apple-system, sans-serif;
+    --ifm-font-family-base: 'Alata', system-ui, -apple-system, sans-serif;
+    
+    --ifm-scroll-margin-top: 38px;
+    --ifm-scroll-margin-top-mobile: 32px;
+
+
+    /* Catppuccin Latte palate */
+    --ctp-latte-rosewater: #dc8a78;
+    --ctp-latte-rosewater-rgb: 220, 138, 120;
+    --ctp-latte-flamingo:  #dd7878;
+    --ctp-latte-flamingo-rgb: 221, 120, 120;
+    --ctp-latte-pink: #ea76cb;
+    --ctp-latte-pink-rgb: 234, 118, 203;
+    --ctp-latte-mauve: #8839ef;
+    --ctp-latte-mauve-rgb: 136, 57, 239;
+    --ctp-latte-red: #d20f39;
+    --ctp-latte-red-rgb: 210, 15, 57;
+    --ctp-latte-maroon: #e64553;
+    --ctp-latte-maroon-rgb: 230, 69, 83;
+    --ctp-latte-peach: #fe640b;
+    --ctp-latte-peach-rgb: 254, 100, 11;
+    --ctp-latte-yellow: #df8e1d;
+    --ctp-latte-yellow-rgb: 223, 142, 29;
+    --ctp-latte-green: #40a02b;
+    --ctp-latte-green-rgb: 64, 160, 43;
+    --ctp-latte-teal: #179299;
+    --ctp-latte-teal-rgb: 23, 146, 153;
+    --ctp-latte-sky: #04a5e5;
+    --ctp-latte-sky-rgb: 4, 165, 229;
+    --ctp-latte-sapphire: #209fb5;
+    --ctp-latte-sapphire-rgb: 32, 159, 181;
+    --ctp-latte-blue: #1e66f5;
+    --ctp-latte-blue-rgb: 30, 102, 245;
+    --ctp-latte-lavender: #7287fd;
+    --ctp-latte-lavender-rgb: 114, 135, 253;
+    --ctp-latte-text: #4c4f69;
+    --ctp-latte-text-rgb: 76, 79, 105;
+    --ctp-latte-subtext1: #5c5f77;
+    --ctp-latte-subtext1-rgb: 92, 95, 119;
+    --ctp-latte-subtext0: #6c6f85;
+    --ctp-latte-subtext0-rgb: 108, 111, 133;
+    --ctp-latte-overlay2: #7c7f93;
+    --ctp-latte-overlay2-rgb: 124, 127, 147;
+    --ctp-latte-overlay1: #8c8fa1;
+    --ctp-latte-overlay1-rgb: 140, 143, 161;
+    --ctp-latte-overlay0: #9ca0b0;
+    --ctp-latte-overlay0-rgb: 156, 160, 176;
+    --ctp-latte-surface2: #acb0be;
+    --ctp-latte-surface2-rgb: 172, 176, 190;
+    --ctp-latte-surface1: #bcc0cc;
+    --ctp-latte-surface1-rgb: 188, 192, 204;
+    --ctp-latte-surface0: #ccd0da;
+    --ctp-latte-surface0-rgb: 204, 208, 218;
+    --ctp-latte-base: #eff1f5;
+    --ctp-latte-base-rgb: 239, 241, 245;
+    --ctp-latte-mantle: #e6e9ef;
+    --ctp-latte-mantle-rgb: 230, 233, 239;
+    --ctp-latte-crust: #dce0e8;
+    --ctp-latte-crust-rgb: 220, 224, 232;
+
+
+    /* Catppuccin Mocha */
+    --ctp-mocha-rosewater: #f5e0dc;
+    --ctp-mocha-rosewater-rgb: 245, 224, 220;
+    --ctp-mocha-flamingo: #f2cdcd;
+    --ctp-mocha-flamingo-rgb: 242, 205, 205;
+    --ctp-mocha-pink: #f5c2e7;
+    --ctp-mocha-pink-rgb: 245, 194, 231;
+    --ctp-mocha-mauve: #cba6f7;
+    --ctp-mocha-mauve-rgb: 203, 166, 247;
+    --ctp-mocha-red: #f38ba8;
+    --ctp-mocha-red-rgb: 243, 139, 168;
+    --ctp-mocha-maroon: #eba0ac;
+    --ctp-mocha-maroon-rgb: 235, 160, 172;
+    --ctp-mocha-peach: #fab387;
+    --ctp-mocha-peach-rgb: 250, 179, 135;
+    --ctp-mocha-yellow: #f9e2af;
+    --ctp-mocha-yellow-rgb: 249, 226, 175;
+    --ctp-mocha-green: #a6e3a1;
+    --ctp-mocha-green-rgb: 166, 227, 161;
+    --ctp-mocha-teal: #94e2d5;
+    --ctp-mocha-teal-rgb: 148, 226, 213;
+    --ctp-mocha-sky: #89dceb;
+    --ctp-mocha-sky-rgb: 137, 220, 235;
+    --ctp-mocha-sapphire: #74c7ec;
+    --ctp-mocha-sapphire-rgb: 116, 199, 236;
+    --ctp-mocha-blue: #89b4fa;
+    --ctp-mocha-blue-rgb: 137, 180, 250;
+    --ctp-mocha-lavender: #b4befe;
+    --ctp-mocha-lavender-rgb: 180, 190, 254;
+    --ctp-mocha-text: #cdd6f4;
+    --ctp-mocha-text-rgb: 205, 214, 244;
+    --ctp-mocha-subtext1: #bac2de;
+    --ctp-mocha-subtext1-rgb: 186, 194, 222;
+    --ctp-mocha-subtext0: #a6adc8;
+    --ctp-mocha-subtext0-rgb: 166, 173, 200;
+    --ctp-mocha-overlay2: #9399b2;
+    --ctp-mocha-overlay2-rgb: 147, 153, 178;
+    --ctp-mocha-overlay1: #7f849c;
+    --ctp-mocha-overlay1-rgb: 127, 132, 156;
+    --ctp-mocha-overlay0: #6c7086;
+    --ctp-mocha-overlay0-rgb: 108, 112, 134;
+    --ctp-mocha-surface2: #585b70;
+    --ctp-mocha-surface2-rgb: 88, 91, 112;
+    --ctp-mocha-surface1: #45475a;
+    --ctp-mocha-surface1-rgb: 69, 71, 90;
+    --ctp-mocha-surface0: #313244;
+    --ctp-mocha-surface0-rgb: 49, 50, 68;
+    --ctp-mocha-base: #1e1e2e;
+    --ctp-mocha-base-rgb: 30, 30, 46;
+    --ctp-mocha-mantle: #181825;
+    --ctp-mocha-mantle-rgb: 24, 24, 37;
+    --ctp-mocha-crust: #11111b;
+    --ctp-mocha-crust-rgb: 17, 17, 27;
+}
+
+
+
+/* Light Mode - Catppuccin Latte */
+[data-theme='light'] {
+
+    --ifm-color-scheme: light;
+
+    --ctp-rosewater: var(--ctp-latte-rosewater);
+    --ctp-rosewater-rgb: var(--ctp-latte-rosewater-rgb);
+    --ctp-flamingo: var(--ctp-latte-flamingo);
+    --ctp-flamingo-rgb: var(--ctp-latte-flamingo-rgb);
+    --ctp-pink: var(--ctp-latte-pink);
+    --ctp-pink-rgb: var(--ctp-latte-pink-rgb);
+    --ctp-mauve: var(--ctp-latte-mauve);
+    --ctp-mauve-rgb: var(--ctp-latte-mauve-rgb);
+    --ctp-red: var(--ctp-latte-red);
+    --ctp-red-rgb: var(--ctp-latte-red-rgb);
+    --ctp-maroon: var(--ctp-latte-maroon);
+    --ctp-maroon-rgb: var(--ctp-latte-maroon-rgb);
+    --ctp-peach: var(--ctp-latte-peach);
+    --ctp-peach-rgb: var(--ctp-latte-peach-rgb);
+    --ctp-yellow: var(--ctp-latte-yellow);
+    --ctp-yellow-rgb: var(--ctp-latte-yellow-rgb);
+    --ctp-green: var(--ctp-latte-green);
+    --ctp-green-rgb: var(--ctp-latte-green-rgb);
+    --ctp-teal: var(--ctp-latte-teal);
+    --ctp-teal-rgb: var(--ctp-latte-teal-rgb);
+    --ctp-sky: var(--ctp-latte-sky);
+    --ctp-sky-rgb: var(--ctp-latte-sky-rgb);
+    --ctp-sapphire: var(--ctp-latte-sapphire);
+    --ctp-sapphire-rgb: var(--ctp-latte-sapphire-rgb);
+    --ctp-blue: var(--ctp-latte-blue);
+    --ctp-blue-rgb: var(--ctp-latte-blue-rgb);
+    --ctp-lavender: var(--ctp-latte-lavender);
+    --ctp-lavender-rgb: var(--ctp-latte-lavender-rgb);
+    --ctp-text: var(--ctp-latte-text);
+    --ctp-text-rgb: var(--ctp-latte-text-rgb);
+    --ctp-subtext1: var(--ctp-latte-subtext1);
+    --ctp-subtext1-rgb: var(--ctp-latte-subtext1-rgb);
+    --ctp-subtext0: var(--ctp-latte-subtext0);
+    --ctp-subtext0-rgb: var(--ctp-latte-subtext0-rgb);
+    --ctp-overlay2: var(--ctp-latte-overlay2);
+    --ctp-overlay2-rgb: var(--ctp-latte-overlay2-rgb);
+    --ctp-overlay1: var(--ctp-latte-overlay1);
+    --ctp-overlay1-rgb: var(--ctp-latte-overlay1-rgb);
+    --ctp-overlay0: var(--ctp-latte-overlay0);
+    --ctp-overlay0-rgb: var(--ctp-latte-overlay0-rgb);
+    --ctp-surface2: var(--ctp-latte-surface2);
+    --ctp-surface2-rgb: var(--ctp-latte-surface2-rgb);
+    --ctp-surface1: var(--ctp-latte-surface1);
+    --ctp-surface1-rgb: var(--ctp-latte-surface1-rgb);
+    --ctp-surface0: var(--ctp-latte-surface0);
+    --ctp-surface0-rgb: var(--ctp-latte-surface0-rgb);
+    --ctp-base: var(--ctp-latte-base);
+    --ctp-base-rgb: var(--ctp-latte-base-rgb);
+    --ctp-mantle: var(--ctp-latte-mantle);
+    --ctp-mantle-rgb: var(--ctp-latte-mantle-rgb);
+    --ctp-crust: var(--ctp-latte-crust);
+    --ctp-crust-rgb: var(--ctp-latte-crust-rgb);
+
+
+
+    /* === PRIMARY COLOR SYSTEM === */
+
+    --ifm-color-primary: var(--ctp-latte-peach);
+    --ifm-color-primary-rgb: var(--ctp-latte-peach-rgb);
+
+    /* Light variations */
+    --ifm-color-primary-lightest: var(--ctp-latte-teal);
+    --ifm-color-primary-lightest-rgb: var(--ctp-latte-teal-rgb);
+    --ifm-color-primary-lighter: var(--ctp-latte-green);
+    --ifm-color-primary-lighter-rgb: var(--ctp-latte-green-rgb);
+    --ifm-color-primary-light: var(--ctp-latte-yellow);
+    --ifm-color-primary-light-rgb: var(--ctp-latte-yellow-rgb);
+
+    /* Dark variations */
+    --ifm-color-primary-dark: var(--ctp-latte-red);
+    --ifm-color-primary-dark-rgb: var(--ctp-latte-red-rgb);
+    --ifm-color-primary-darker: var(--ctp-latte-maroon);
+    --ifm-color-primary-darker-rgb: var(--ctp-latte-maroon-rgb);
+    --ifm-color-primary-darkest: var(--ctp-latte-flamingo);
+    --ifm-color-primary-darkest-rgb: var(--ctp-latte-flamingo-rgb);
+
+
+    /* === STANDARD COLOR VARIABLES === */
+
+    --ifm-color-black: var(--ctp-latte-text);
+    --ifm-color-black-rgb: var(--ctp-latte-text-rgb);
+
+    --ifm-color-white: var(--ctp-latte-base);
+    --ifm-color-white-rgb: var(--ctp-latte-base-rgb);
+
+    --ifm-color-gray: var(--ctp-latte-overlay0);
+    --ifm-color-gray-rgb: var(--ctp-latte-overlay0-rgb);
+    
+    --ifm-color-red: var(--ctp-latte-red);
+    --ifm-color-red-rgb: var(--ctp-latte-red-rgb);
+    
+    --ifm-color-orange: var(--ctp-latte-peach);
+    --ifm-color-orange-rgb: var(--ctp-latte-peach-rgb);
+    
+    --ifm-color-yellow: var(--ctp-latte-yellow);
+    --ifm-color-yellow-rgb: var(--ctp-latte-yellow-rgb);
+    
+    --ifm-color-green: var(--ctp-latte-green);
+    --ifm-color-green-rgb: var(--ctp-latte-green-rgb);
+    
+    --ifm-color-teal: var(--ctp-latte-teal);
+    --ifm-color-teal-rgb: var(--ctp-latte-teal-rgb);
+    
+    --ifm-color-cyan: var(--ctp-latte-sky);
+    --ifm-color-cyan-rgb: var(--ctp-latte-sky-rgb);
+    
+    --ifm-color-blue: var(--ctp-latte-blue);
+    --ifm-color-blue-rgb: var(--ctp-latte-blue-rgb);
+    
+    --ifm-color-indigo: var(--ctp-latte-sapphire);
+    --ifm-color-indigo-rgb: var(--ctp-latte-sapphire-rgb);
+    
+    --ifm-color-purple: var(--ctp-latte-mauve);
+    --ifm-color-purple-rgb: var(--ctp-latte-mauve-rgb);
+    
+    --ifm-color-pink: var(--ctp-latte-pink);
+    --ifm-color-pink-rgb: var(--ctp-latte-pink-rgb);
+
+
+    /* === SEMANTIC COLOR SYSTEM === */
+
+    /* Success color - Green */
+    --ifm-color-success-lightest: var(--ctp-latte-sky);
+    --ifm-color-success-lighter: var(--ctp-latte-teal);
+    --ifm-color-success-light: var(--ctp-latte-sky);
+    --ifm-color-success: var(--ctp-latte-green);
+    --ifm-color-success-rgb: var(--ctp-latte-green-rgb);
+    --ifm-color-success-dark: var(--ctp-latte-teal);
+    --ifm-color-success-darker: var(--ctp-latte-sapphire);
+    --ifm-color-success-darkest: var(--ctp-latte-blue);
+
+    /* Info color - Blue */
+    --ifm-color-info-lightest: var(--ctp-latte-lavender);
+    --ifm-color-info-lighter: var(--ctp-latte-sapphire);
+    --ifm-color-info-light: var(--ctp-latte-sky);
+    --ifm-color-info: var(--ctp-latte-blue);
+    --ifm-color-info-rgb: var(--ctp-latte-blue-rgb);
+    --ifm-color-info-dark: var(--ctp-latte-sapphire);
+    --ifm-color-info-darker: var(--ctp-latte-lavender);
+    --ifm-color-info-darkest: var(--ctp-latte-mauve);
+
+    /* Warning color - Yellow */
+    --ifm-color-warning-lightest: var(--ctp-latte-peach);
+    --ifm-color-warning-lighter: var(--ctp-latte-yellow);
+    --ifm-color-warning-light: var(--ctp-latte-yellow);
+    --ifm-color-warning: var(--ctp-latte-yellow);
+    --ifm-color-warning-rgb: var(--ctp-latte-yellow-rgb);
+    --ifm-color-warning-dark: var(--ctp-latte-peach);
+    --ifm-color-warning-darker: var(--ctp-latte-red);
+    --ifm-color-warning-darkest: var(--ctp-latte-maroon);
+
+    /* Danger color - Red */
+    --ifm-color-danger-lightest: var(--ctp-latte-flamingo);
+    --ifm-color-danger-lighter: var(--ctp-latte-maroon);
+    --ifm-color-danger-light: var(--ctp-latte-peach);
+    --ifm-color-danger: var(--ctp-latte-red);
+    --ifm-color-danger-rgb: var(--ctp-latte-red-rgb);
+    --ifm-color-danger-dark: var(--ctp-latte-maroon);
+    --ifm-color-danger-darker: var(--ctp-latte-flamingo);
+    --ifm-color-danger-darkest: var(--ctp-latte-pink);
+
+
+    /* === GRAYSCALE AND UI COLORS === */
+
+    /* Background colors */
+    --ifm-background-color: var(--ctp-latte-base)             !important;
+    --ifm-background-color-rgb: var(--ctp-latte-base-rgb)     !important;
+    --ifm-background-surface-color: var(--ctp-latte-surface0) !important;
+    --ifm-hero-background-color: var(--ctp-latte-mantle)      !important;
+    --ifm-footer-background-color: var(--ctp-latte-mantle)    !important;
+
+    /* Component-specific background colors */
+    --ifm-navbar-background-color: var(--ctp-latte-base)   !important;
+    --ifm-navbar-search-input-color: var(--ifm-font-color-base);
+    --ifm-navbar-search-input-background-color: var(--ctp-latte-surface0);
+    --ifm-table-stripe-background: var(--ctp-latte-mantle) !important;
+    --ifm-pre-background: var(--ctp-latte-surface0);
+    --ifm-alert-background-color: var(--ctp-latte-surface0);
+    --ifm-card-background-color: var(--ctp-latte-surface0);
+
+    /* Gray color scale */
+    --ifm-color-gray-0: var(--ctp-latte-base);
+    --ifm-color-gray-100: var(--ctp-latte-mantle);
+    --ifm-color-gray-200: var(--ctp-latte-crust);
+    --ifm-color-gray-300: var(--ctp-latte-surface0);
+    --ifm-color-gray-400: var(--ctp-latte-surface1);
+    --ifm-color-gray-500: var(--ctp-latte-surface2);
+    --ifm-color-gray-600: var(--ctp-latte-overlay0);
+    --ifm-color-gray-700: var(--ctp-latte-overlay1);
+    --ifm-color-gray-800: var(--ctp-latte-overlay2);
+    --ifm-color-gray-900: var(--ctp-latte-subtext0);
+    --ifm-color-gray-1000: var(--ctp-latte-text);
+
+    /* emphasis colors */
+    --ifm-color-emphasis-0:   var(--ctp-latte-text)     !important;
+    --ifm-color-emphasis-100: var(--ctp-latte-subtext0) !important;
+    --ifm-color-emphasis-200: var(--ctp-latte-overlay2) !important;
+    --ifm-color-emphasis-300: var(--ctp-latte-overlay1) !important;
+    --ifm-color-emphasis-400: var(--ctp-latte-overlay0) !important;
+    --ifm-color-emphasis-500: var(--ctp-latte-surface2) !important;
+    --ifm-color-emphasis-600: var(--ctp-latte-surface1) !important;
+    --ifm-color-emphasis-700: var(--ctp-latte-surface0) !important;
+    --ifm-color-emphasis-800: var(--ctp-latte-base)     !important;
+    --ifm-color-emphasis-900: var(--ctp-latte-mantle)   !important;
+    --ifm-color-emphasis-1000: var(--ctp-latte-crust)   !important;
+
+    /* Text colors */
+    --ifm-font-color-base: var(--ctp-latte-text);
+    --ifm-font-color-base-rgb: var(--ctp-latte-text-rgb);
+    --ifm-font-color-secondary: var(--ctp-latte-subtext0);
+    --ifm-font-color-tertiary: var(--ctp-latte-subtext1);
+    --ifm-font-color-quaternary: var(--ctp-latte-overlay2);
+
+    /* Content colors */
+    --ifm-color-content: var(--ctp-latte-text) !important;
+    --ifm-color-content-secondary: var(--ctp-latte-subtext0) !important;
+
+    /* Link colors */
+    --ifm-link-color: var(--ifm-color-primary);
+    --ifm-link-hover-color: var(--ifm-color-primary-darker);
+    --ifm-link-decoration: none;
+    --ifm-link-hover-decoration: underline;
+
+    /* Navigation/UI colors */
+    --ifm-navbar-link-color: var(--ctp-latte-text);
+    --ifm-navbar-link-hover-color: var(--ifm-color-primary);
+    --ifm-menu-color: var(--ctp-latte-subtext0);
+    --ifm-menu-color-active: var(--ctp-latte-peach);
+    --ifm-menu-color-background-active: rgba(var(--ctp-latte-peach-rgb), 0.1);
+    --ifm-menu-color-background-hover: rgba(var(--ctp-latte-surface0-rgb), 0.5);
+    --ifm-toc-link-color: var(--ctp-latte-subtext0);
+    --ifm-toc-link-color-active: var(--ctp-latte-peach);
+    --ifm-toc-border-color: var(--ctp-latte-crust) !important;
+
+    /* Code block */
+    --ifm-code-color: var(--ctp-latte-red) !important;
+    --ifm-code-background: var(--ctp-latte-surface0) !important;
+
+    /* Other UI elements */
+    --ifm-blockquote-color: var(--ctp-latte-subtext0);
+    --ifm-blockquote-border-color: var(--ctp-latte-peach);
+    --ifm-shadow-color: var(--ctp-latte-surface1);
+    --ifm-shadow-color-rgb: var(--ctp-latte-surface1-rgb);
+    --ifm-button-color: var(--ctp-latte-crust);
+    --ifm-hover-overlay: rgba(var(--ctp-latte-surface2-rgb), 0.5) !important;
+
+    /* Code highlighting */
+    --docusaurus-highlighted-code-line-bg: rgba(var(--ctp-latte-surface2-rgb), 0.5) !important;
+}
+
+
+/* Dark mode - Catppuccin Mocha */
+[data-theme='dark'] {
+
+    --ifm-color-scheme: dark;
+
+    --ctp-rosewater: var(--ctp-mocha-rosewater);
+    --ctp-rosewater-rgb: var(--ctp-mocha-rosewater-rgb);
+    --ctp-flamingo: var(--ctp-mocha-flamingo);
+    --ctp-flamingo-rgb: var(--ctp-mocha-flamingo-rgb);
+    --ctp-pink: var(--ctp-mocha-pink);
+    --ctp-pink-rgb: var(--ctp-mocha-pink-rgb);
+    --ctp-mauve: var(--ctp-mocha-mauve);
+    --ctp-mauve-rgb: var(--ctp-mocha-mauve-rgb);
+    --ctp-red: var(--ctp-mocha-red);
+    --ctp-red-rgb: var(--ctp-mocha-red-rgb);
+    --ctp-maroon: var(--ctp-mocha-maroon);
+    --ctp-maroon-rgb: var(--ctp-mocha-maroon-rgb);
+    --ctp-peach: var(--ctp-mocha-peach);
+    --ctp-peach-rgb: var(--ctp-mocha-peach-rgb);
+    --ctp-yellow: var(--ctp-mocha-yellow);
+    --ctp-yellow-rgb: var(--ctp-mocha-yellow-rgb);
+    --ctp-green: var(--ctp-mocha-green);
+    --ctp-green-rgb: var(--ctp-mocha-green-rgb);
+    --ctp-teal: var(--ctp-mocha-teal);
+    --ctp-teal-rgb: var(--ctp-mocha-teal-rgb);
+    --ctp-sky: var(--ctp-mocha-sky);
+    --ctp-sky-rgb: var(--ctp-mocha-sky-rgb);
+    --ctp-sapphire: var(--ctp-mocha-sapphire);
+    --ctp-sapphire-rgb: var(--ctp-mocha-sapphire-rgb);
+    --ctp-blue: var(--ctp-mocha-blue);
+    --ctp-blue-rgb: var(--ctp-mocha-blue-rgb);
+    --ctp-lavender: var(--ctp-mocha-lavender);
+    --ctp-lavender-rgb: var(--ctp-mocha-lavender-rgb);
+    --ctp-text: var(--ctp-mocha-text);
+    --ctp-text-rgb: var(--ctp-mocha-text-rgb);
+    --ctp-subtext1: var(--ctp-mocha-subtext1);
+    --ctp-subtext1-rgb: var(--ctp-mocha-subtext1-rgb);
+    --ctp-subtext0: var(--ctp-mocha-subtext0);
+    --ctp-subtext0-rgb: var(--ctp-mocha-subtext0-rgb);
+    --ctp-overlay2: var(--ctp-mocha-overlay2);
+    --ctp-overlay2-rgb: var(--ctp-mocha-overlay2-rgb);
+    --ctp-overlay1: var(--ctp-mocha-overlay1);
+    --ctp-overlay1-rgb: var(--ctp-mocha-overlay1-rgb);
+    --ctp-overlay0: var(--ctp-mocha-overlay0);
+    --ctp-overlay0-rgb: var(--ctp-mocha-overlay0-rgb);
+    --ctp-surface2: var(--ctp-mocha-surface2);
+    --ctp-surface2-rgb: var(--ctp-mocha-surface2-rgb);
+    --ctp-surface1: var(--ctp-mocha-surface1);
+    --ctp-surface1-rgb: var(--ctp-mocha-surface1-rgb);
+    --ctp-surface0: var(--ctp-mocha-surface0);
+    --ctp-surface0-rgb: var(--ctp-mocha-surface0-rgb);
+    --ctp-base: var(--ctp-mocha-base);
+    --ctp-base-rgb: var(--ctp-mocha-base-rgb);
+    --ctp-mantle: var(--ctp-mocha-mantle);
+    --ctp-mantle-rgb: var(--ctp-mocha-mantle-rgb);
+    --ctp-crust: var(--ctp-mocha-crust);
+    --ctp-crust-rgb: var(--ctp-mocha-crust-rgb);
+
+
+
+    /* === PRIMARY COLOR SYSTEM === */
+
+    --ifm-color-primary: var(--ctp-mocha-peach);
+    --ifm-color-primary-rgb: var(--ctp-mocha-peach-rgb);
+
+    /* Light variations of primary color */
+    --ifm-color-primary-lightest: var(--ctp-mocha-teal);
+    --ifm-color-primary-lightest-rgb: var(--ctp-mocha-teal-rgb);
+    --ifm-color-primary-lighter: var(--ctp-mocha-green);
+    --ifm-color-primary-lighter-rgb: var(--ctp-mocha-green-rgb);
+    --ifm-color-primary-light: var(--ctp-mocha-yellow);
+    --ifm-color-primary-light-rgb: var(--ctp-mocha-yellow-rgb);
+
+    /* Dark variations of primary color */
+    --ifm-color-primary-dark: var(--ctp-mocha-red);
+    --ifm-color-primary-dark-rgb: var(--ctp-mocha-red-rgb);
+    --ifm-color-primary-darker: var(--ctp-mocha-maroon);
+    --ifm-color-primary-darker-rgb: var(--ctp-mocha-maroon-rgb);
+    --ifm-color-primary-darkest: var(--ctp-mocha-flamingo);
+    --ifm-color-primary-darkest-rgb: var(--ctp-mocha-flamingo-rgb);
+
+
+    /* === STANDARD COLOR VARIABLES === */
+
+    --ifm-color-black: var(--ctp-mocha-crust);
+    --ifm-color-black-rgb: var(--ctp-mocha-crust-rgb);
+
+    --ifm-color-white: var(--ctp-mocha-text);
+    --ifm-color-white-rgb: var(--ctp-mocha-text-rgb);
+
+    /* Basic color palette */
+    --ifm-color-gray: var(--ctp-mocha-overlay0);
+    --ifm-color-gray-rgb: var(--ctp-mocha-overlay0-rgb);
+    --ifm-color-red: var(--ctp-mocha-red);
+    --ifm-color-red-rgb: var(--ctp-mocha-red-rgb);
+    --ifm-color-orange: var(--ctp-mocha-peach);
+    --ifm-color-orange-rgb: var(--ctp-mocha-peach-rgb);
+    --ifm-color-yellow: var(--ctp-mocha-yellow);
+    --ifm-color-yellow-rgb: var(--ctp-mocha-yellow-rgb);
+    --ifm-color-green: var(--ctp-mocha-green);
+    --ifm-color-green-rgb: var(--ctp-mocha-green-rgb);
+    --ifm-color-teal: var(--ctp-mocha-teal);
+    --ifm-color-teal-rgb: var(--ctp-mocha-teal-rgb);
+    --ifm-color-cyan: var(--ctp-mocha-sky);
+    --ifm-color-cyan-rgb: var(--ctp-mocha-sky-rgb);
+    --ifm-color-blue: var(--ctp-mocha-blue);
+    --ifm-color-blue-rgb: var(--ctp-mocha-blue-rgb);
+    --ifm-color-indigo: var(--ctp-mocha-sapphire);
+    --ifm-color-indigo-rgb: var(--ctp-mocha-sapphire-rgb);
+    --ifm-color-purple: var(--ctp-mocha-mauve);
+    --ifm-color-purple-rgb: var(--ctp-mocha-mauve-rgb);
+    --ifm-color-pink: var(--ctp-mocha-pink);
+    --ifm-color-pink-rgb: var(--ctp-mocha-pink-rgb);
+
+
+    /* === SEMANTIC COLOR SYSTEM === */
+
+    /* Success color - Green */
+    --ifm-color-success-lightest: var(--ctp-mocha-sky);
+    --ifm-color-success-lighter: var(--ctp-mocha-teal);
+    --ifm-color-success-light: var(--ctp-mocha-sky);
+    --ifm-color-success: var(--ctp-mocha-green);
+    --ifm-color-success-rgb: var(--ctp-mocha-green-rgb);
+    --ifm-color-success-dark: var(--ctp-mocha-teal);
+    --ifm-color-success-darker: var(--ctp-mocha-sapphire);
+    --ifm-color-success-darkest: var(--ctp-mocha-blue);
+
+    /* Info color - Blue */
+    --ifm-color-info-lightest: var(--ctp-mocha-lavender);
+    --ifm-color-info-lighter: var(--ctp-mocha-sapphire);
+    --ifm-color-info-light: var(--ctp-mocha-sky);
+    --ifm-color-info: var(--ctp-mocha-blue);
+    --ifm-color-info-rgb: var(--ctp-mocha-blue-rgb);
+    --ifm-color-info-dark: var(--ctp-mocha-sapphire);
+    --ifm-color-info-darker: var(--ctp-mocha-lavender);
+    --ifm-color-info-darkest: var(--ctp-mocha-mauve);
+
+    /* Warning color - Yellow */
+    --ifm-color-warning-lightest: var(--ctp-mocha-peach);
+    --ifm-color-warning-lighter: var(--ctp-mocha-yellow);
+    --ifm-color-warning-light: var(--ctp-mocha-yellow);
+    --ifm-color-warning: var(--ctp-mocha-yellow);
+    --ifm-color-warning-rgb: var(--ctp-mocha-yellow-rgb);
+    --ifm-color-warning-dark: var(--ctp-mocha-peach);
+    --ifm-color-warning-darker: var(--ctp-mocha-red);
+    --ifm-color-warning-darkest: var(--ctp-mocha-maroon);
+
+    /* Danger color - Red */
+    --ifm-color-danger-lightest: var(--ctp-mocha-flamingo);
+    --ifm-color-danger-lighter: var(--ctp-mocha-maroon);
+    --ifm-color-danger-light: var(--ctp-mocha-peach);
+    --ifm-color-danger: var(--ctp-mocha-red);
+    --ifm-color-danger-rgb: var(--ctp-mocha-red-rgb);
+    --ifm-color-danger-dark: var(--ctp-mocha-maroon);
+    --ifm-color-danger-darker: var(--ctp-mocha-flamingo);
+    --ifm-color-danger-darkest: var(--ctp-mocha-pink);
+
+
+    /* === GRAYSCALE AND UI COLORS === */
+
+    /* Background colors */
+    --ifm-background-color: var(--ctp-mocha-base)             !important;
+    --ifm-background-color-rgb: var(--ctp-mocha-base-rgb)     !important;
+    --ifm-background-surface-color: var(--ctp-mocha-surface0) !important;
+    --ifm-hero-background-color: var(--ctp-mocha-mantle)      !important;
+    --ifm-footer-background-color: var(--ctp-mocha-mantle)    !important;
+
+    /* Component-specific background colors */
+    --ifm-navbar-background-color: var(--ctp-mocha-base)     !important;
+    --ifm-navbar-search-input-color: var(--ifm-font-color-base);
+    --ifm-navbar-search-input-background-color: var(--ctp-mocha-surface0);
+    --ifm-table-stripe-background: var(--ctp-mocha-surface0) !important;
+    --ifm-pre-background: var(--ctp-mocha-surface0);
+    --ifm-alert-background-color: var(--ctp-mocha-surface1);
+    --ifm-card-background-color: var(--ctp-mocha-surface0);
+
+    /* Gray color scale */
+    --ifm-color-gray-0: var(--ctp-mocha-text);
+    --ifm-color-gray-100: var(--ctp-mocha-subtext0);
+    --ifm-color-gray-200: var(--ctp-mocha-overlay2);
+    --ifm-color-gray-300: var(--ctp-mocha-overlay1);
+    --ifm-color-gray-400: var(--ctp-mocha-overlay0);
+    --ifm-color-gray-500: var(--ctp-mocha-surface2);
+    --ifm-color-gray-600: var(--ctp-mocha-surface1);
+    --ifm-color-gray-700: var(--ctp-mocha-surface0);
+    --ifm-color-gray-800: var(--ctp-mocha-base);
+    --ifm-color-gray-900: var(--ctp-mocha-mantle);
+    --ifm-color-gray-1000: var(--ctp-mocha-crust);
+
+    /* emphasis colors */
+    --ifm-color-emphasis-0: var(--ctp-mocha-text)       !important;
+    --ifm-color-emphasis-100: var(--ctp-mocha-subtext0) !important;
+    --ifm-color-emphasis-200: var(--ctp-mocha-overlay2) !important;
+    --ifm-color-emphasis-300: var(--ctp-mocha-overlay1) !important;
+    --ifm-color-emphasis-400: var(--ctp-mocha-overlay0) !important;
+    --ifm-color-emphasis-500: var(--ctp-mocha-surface2) !important;
+    --ifm-color-emphasis-600: var(--ctp-mocha-surface1) !important;
+    --ifm-color-emphasis-700: var(--ctp-mocha-surface0) !important;
+    --ifm-color-emphasis-800: var(--ctp-mocha-base)     !important;
+    --ifm-color-emphasis-900: var(--ctp-mocha-mantle)   !important;
+    --ifm-color-emphasis-1000: var(--ctp-mocha-crust)   !important;
+
+    /* Text colors */
+    --ifm-font-color-base: var(--ctp-mocha-text);
+    --ifm-font-color-base-rgb: var(--ctp-mocha-text-rgb);
+    --ifm-font-color-secondary: var(--ctp-mocha-subtext1);
+    --ifm-font-color-tertiary: var(--ctp-mocha-subtext0);
+    --ifm-font-color-quaternary: var(--ctp-mocha-overlay2);
+
+    /* Content colors */
+    --ifm-color-content: var(--ctp-mocha-text) !important;
+    --ifm-color-content-secondary: var(--ctp-mocha-subtext0) !important;
+
+    /* Link colors */
+    --ifm-link-color: var(--ifm-color-primary);
+    --ifm-link-hover-color: var(--ifm-color-primary-darker);
+    --ifm-link-decoration: none;
+    --ifm-link-hover-decoration: underline;
+
+    /* Navigation/UI */
+    --ifm-navbar-link-color: var(--ctp-mocha-text);
+    --ifm-navbar-link-hover-color: var(--ifm-color-primary);
+    --ifm-menu-color: var(--ctp-mocha-subtext0);
+    --ifm-menu-color-active: var(--ctp-mocha-peach);
+    --ifm-menu-color-background-active: rgba(var(--ctp-mocha-peach-rgb), 0.1);
+    --ifm-menu-color-background-hover: rgba(var(--ctp-mocha-surface0-rgb), 0.5);
+    --ifm-toc-link-color: var(--ctp-mocha-subtext0);
+    --ifm-toc-link-color-active: var(--ctp-mocha-peach);
+    --ifm-toc-border-color: var(--ctp-mocha-crust) !important;
+
+    /* Code block */
+    --ifm-code-color: var(--ctp-mocha-red) !important;
+    --ifm-code-background: var(--ctp-mocha-surface0) !important;
+
+    /* Other UI elements */
+    --ifm-blockquote-color: var(--ctp-mocha-subtext0);
+    --ifm-blockquote-border-color: var(--ctp-mocha-peach);
+    --ifm-shadow-color: var(--ctp-mocha-surface1);
+    --ifm-shadow-color-rgb: var(--ctp-mocha-surface1-rgb);
+    --ifm-button-color: var(--ctp-mocha-crust);
+    --ifm-hover-overlay: rgba(var(--ctp-mocha-surface2-rgb), 0.5) !important;
+
+    /* Code highlighting */
+    --docusaurus-highlighted-code-line-bg: rgba(var(--ctp-mocha-surface2-rgb), 0.5);
+}

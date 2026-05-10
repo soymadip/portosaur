@@ -1,0 +1,830 @@
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.projectsSection {
+  scroll-margin-top: var(--ifm-scroll-margin-top);
+  min-height: calc(100vh - 60px);
+  margin-bottom: 0;
+  width: 100%;
+  padding: 1.5rem 0 5rem;
+  background-color: var(--ifm-background-color);
+}
+
+.projectsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 2rem;
+}
+
+.projectsHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.projectsTitle {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  margin-bottom: 0.6rem;
+  animation: slideUp 0.5s ease-out forwards;
+  position: relative;
+  display: inline-block;
+}
+
+.projectsSubtitle {
+  font-size: 0.95rem;
+  color: var(--ifm-font-color-tertiary);
+  max-width: 600px;
+  margin: 0.4rem auto 0;
+  animation: slideUp 0.5s ease-out 0.2s forwards;
+}
+
+/* Carousel Styles */
+.carouselContainer {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.75rem 2rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.carouselWrapper {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 35px;
+}
+
+.projectsCarousel {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.carouselSlide {
+  padding: 4px 8px;
+  height: 100%;
+}
+
+.carouselCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ifm-card-background-color);
+  border-radius: var(--ifm-card-border-radius);
+  overflow: hidden;
+  box-shadow: var(--ifm-global-shadow-md);
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
+  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid var(--ifm-shadow-color);
+  width: 100%;
+}
+
+.featuredCard {
+  border: 1.5px solid rgba(var(--ifm-color-primary-rgb), 0.7);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.featuredBadge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  z-index: 5;
+  box-shadow: var(--ifm-global-shadow-lw);
+  top: auto;
+}
+
+.featuredBadge svg {
+  font-size: 10px;
+}
+
+.carouselCard:hover {
+  transform: scale(1.02);
+  border-color: var(--ifm-color-primary);
+}
+
+.featuredCard:hover {
+  border-width: 1.5px;
+}
+
+.projectImageContainer {
+  position: relative;
+  width: 100%;
+  padding-top: 62%;
+  overflow: hidden;
+  background-color: var(--ifm-shadow-color);
+  border-bottom-left-radius: var(--ifm-card-border-radius);
+  border-bottom-right-radius: var(--ifm-card-border-radius);
+}
+
+.projectImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
+  transition: transform 0.5s ease;
+}
+
+.carouselCard:hover .projectImage {
+  transform: scale(1.12);
+}
+
+/* Card content styling */
+.projectContent {
+  padding: 0.8rem 1.5rem 0rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.projectStateBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+}
+
+.projectStateLabel {
+  font-size: 0.65rem; 
+  font-weight: 500;
+  padding: 1px 4px;
+  border-radius: var(--ifm-global-radius);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ifm-color-white);
+}
+
+/* Status colors */
+.stateActive {
+  background-color: var(--ifm-color-green);
+  color: var(--ifm-color-black);
+}
+
+.stateCompleted {
+  background-color: var(--ifm-color-blue);
+}
+
+.stateMaintenance {
+  background-color: var(--ifm-color-yellow);
+  color: var(--ifm-color-text);
+}
+
+.statePaused {
+  background-color: var(--ifm-color-orange);
+  color: var(--ifm-color-black);
+}
+
+.stateArchived {
+  background-color: var(--ifm-color-gray);
+}
+
+.stateNA {
+  background-color: var(--ifm-color-info-dark);
+  color: var(--ifm-color-black);
+}
+
+.statePlanned {
+  background-color: var(--ifm-color-purple);
+  color: var(--ifm-color-black);
+}
+
+.projectTitle {
+  font-size: 1.7rem;
+  margin-bottom: 0.4rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.projectDescription {
+  color: var(--ifm-font-color-tertiary);
+  margin: 0.4rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Tags styling */
+.projectTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0.8rem;
+  opacity: 0.85;
+  justify-content: center;
+}
+
+.projectTag {
+  background-color: var(--ifm-shadow-color);
+  color: var(--ifm-font-color-secondary);
+  padding: 0.02rem 0.3rem;
+  padding-top: 0px;
+  border-radius: 40px;
+  font-size: 0.55rem;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  border: 1px solid var(--ifm-color-gray-500);
+  margin: 0.05rem;
+}
+
+/* Links styling */
+.projectLinks {
+  display: flex;
+  justify-content: center;
+  padding: 1.05rem 1.5rem 1.3rem;
+  gap: 0.8rem;
+  margin-top: auto;
+}
+
+.projectLink {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ifm-font-color-tertiary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--ifm-global-radius);
+  border: 1px solid var(--ifm-color-gray-500);
+  background-color: var(--ifm-shadow-color);
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.projectLink:hover {
+  color: var(--ifm-color-primary);
+  background-color: var(--ifm-card-background-color);
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-global-shadow-md);
+  border-color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.projectLink:active {
+  transform: translateY(-1px);
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.projectLink svg {
+  font-size: 0.95rem;
+  transition: transform 0.2s ease;
+  color: var(--ifm-font-color-secondary);
+}
+
+.projectLink:hover svg {
+  transform: scale(1.08);
+  color: var(--ifm-color-primary);
+}
+
+/* Carousel control buttons */
+.carouselControl {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  padding: 0;
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.carouselControl svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--ifm-color-white);
+}
+
+.carouselControl:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Disabled button style */
+.disabledButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabledButton:hover {
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+.prevButton {
+  left: -25px;
+}
+
+.nextButton {
+  right: -25px;
+}
+
+.noProjects {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ifm-font-color-tertiary);
+  background-color: var(--ifm-shadow-color);
+  border-radius: var(--ifm-card-border-radius);
+  margin: 1rem 0;
+}
+
+:global(.slick-track) {
+  display: flex !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+:global(.slick-slide) {
+  height: inherit !important;
+  float: none !important;
+}
+
+:global(.slick-slide > div) {
+  height: 100%;
+  margin: 0 0.2rem;
+}
+
+/* Hide default slick dots */
+:global(.slick-dots) {
+  display: none !important;
+}
+
+/* Custom navigation dots styling */
+.navDotsContainer {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  min-width: fit-content;
+}
+
+.dotsScrollContainer {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  display: flex;
+  justify-content: center;
+  padding: 0.8rem 0;
+  max-width: 60vw; 
+  scroll-padding: 0 20px;
+  margin: 0 5px;
+  position: relative;
+}
+
+.dotsScrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.navDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--ifm-color-gray-500);
+  border: none;
+  margin: 0 6px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+  flex-shrink: 0;
+  min-width: 9px;
+  min-height: 9px;
+}
+
+.navDot:hover {
+  opacity: 1;
+  background-color: var(--ifm-color-primary-dark);
+}
+
+.activeDot {
+  background-color: var(--ifm-color-primary);
+  transform: scale(1.5);
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(var(--ifm-color-primary-rgb), 0.4);
+  z-index: 5; /* Ensure active dot appears above others */
+}
+
+.dotsScrollContainer .navDot {
+  opacity: 0.8;
+}
+
+/* Center alignment for dots */
+.centerDots {
+  display: flex !important;
+  justify-content: center !important; 
+  text-align: center !important;
+  margin: 0 auto;
+}
+
+.scrollDots {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  margin: 0;
+}
+
+.navigationControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto 10px;
+  width: 100%;
+  gap: 15px;
+}
+
+.desktopDotsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0 10px;
+  padding: 5px 0;
+  width: 100%;
+}
+
+/* Mobile bottom navigation - hidden on desktop */
+.mobileNavigationControls {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px auto 10px;
+  width: 100%;
+  gap: 5px;
+}
+
+/* Add a spacer to center the navigation buttons */
+.mobileControlsSpacer {
+  flex: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .projectsSection {
+    scroll-margin-top: 70px;
+    min-height: calc(100vh);
+    padding: 1.5rem 0 4rem;
+  }
+
+  .projectsTitle {
+    font-size: 2.2rem;
+  }
+
+  .projectsSubtitle {
+    font-size: 0.9rem;
+  }
+
+  .projectsHeader {
+    margin-bottom: 2rem;
+  }
+
+  .carouselContainer {
+    padding: 0 0.5rem;
+    display: block;
+  }
+
+  .carouselControl {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carouselControl svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .projectContent {
+    padding: 1.3rem 1.1rem 0rem;
+  }
+
+  .projectLinks {
+    padding: 0.8rem 1.1rem 1.3rem;
+    gap: 0.7rem;
+  }
+
+  .projectLinks {
+    padding: 0.8rem 1.1rem 1.3rem;
+    gap: 0.7rem;
+  }
+
+  .prevButton {
+    left: -20px;
+  }
+
+  .nextButton {
+    right: -20px;
+  }
+
+  :global(.slick-slide > div) {
+    margin: 0 0.3rem;
+  }
+
+  /* Hide desktop side buttons */
+  .desktopOnly {
+    display: none;
+  }
+
+  /* Hide desktop dots */
+  .desktopDotsContainer {
+    display: none;
+  }
+
+  /* Show mobile navigation */
+  .mobileNavigationControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .mobileNavigationControls .dotsScrollContainer {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .mobileNavigationControls .centerDots {
+    margin: 0 auto;
+  }
+
+  .mobileNavigationControls .carouselControl {
+    position: relative;
+    top: auto;
+    transform: none;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    z-index: 10; 
+  }
+
+  .mobileNavigationControls .carouselControl:hover {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobileNavigationControls .disabledButton:hover {
+    opacity: 0.6;
+    transform: none;
+  }
+
+  .mobileNavigationControls .prevButton,
+  .mobileNavigationControls .nextButton {
+    left: auto;
+    right: auto;
+  }
+
+  .projectStateBadge {
+    top: 8px;
+    right: 8px;
+  }
+
+  .projectStateLabel {
+    font-size: 0.6rem;
+    padding: 1px 3px;
+  }
+
+  .mobileNavigationControls .dotsScrollContainer {
+    justify-content: flex-start; 
+    padding-left: 10px;
+    min-height: 40px; 
+    align-items: center;
+  }
+  
+  .mobileNavigationControls .centerDots {
+    justify-content: center !important;
+    padding-left: 0;
+  }
+  
+  .mobileNavigationControls .navDot:first-child {
+    margin-left: 2px;
+  }
+  
+  .mobileNavigationControls .activeDot {
+    transform: scale(1.6);
+    opacity: 1;
+    box-shadow: 0 0 0 2px rgba(var(--ifm-color-primary-rgb), 0.5); 
+  }
+}
+
+@media (max-width: 480px) {
+  .projectsSection {
+    scroll-margin-top: var(--ifm-scroll-margin-top-mobile);
+    padding: 1rem 0 3rem;
+  }
+
+  .projectsContainer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .projectsTitle {
+    font-size: 1.9rem;
+  }
+
+  .projectsSubtitle {
+    font-size: 0.9rem;
+    max-width: 90%;
+  }
+
+  .projectsHeader {
+    margin-bottom: 1.5rem;
+  }
+
+  .carouselContainer {
+    padding: 0 0.1rem;
+    max-width: 100%;
+  }
+
+  .projectImageContainer {
+    padding-top: 62%;
+  }
+
+  .carouselControl {
+    width: 36px;
+    height: 36px;
+  }
+
+  .carouselControl svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .projectTitle {
+    font-size: 1.5rem;
+  }
+
+  .projectDescription {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .projectContent {
+    padding: 1.2rem 1rem 0rem;
+  }
+
+  .projectLinks {
+    padding: 0.8rem 1rem 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  .projectTags {
+    margin: 0.2rem 0 0.5rem;
+    gap: 0.15rem;
+  }
+
+  .projectTag {
+    padding: 0.01rem 0.25rem;
+    font-size: 0.55rem;
+  }
+
+  .projectLinks {
+    padding: 0.8rem 1rem 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  .projectLink {
+    padding: 0.32rem 0.65rem;
+    font-size: 0.75rem;
+    flex: 0 1 auto;
+    justify-content: center;
+    min-width: 85px;
+  }
+
+  :global(.slick-slide) {
+    width: 100vw !important;
+    max-width: 550px;
+    margin: 0 auto;
+  }
+
+  :global(.slick-slide > div) {
+    margin: 0;
+    width: 100%;
+  }
+
+  :global(.slick-track) {
+    display: flex !important;
+    justify-content: center;
+  }
+
+  .carouselWrapper {
+    margin-bottom: 25px;
+    overflow: visible;
+  }
+
+  .prevButton {
+    left: -8px;
+  }
+
+  .nextButton {
+    right: -8px;
+  }
+
+  .dotsScrollContainer {
+    max-width: 45vw;
+    padding: 0.6rem 0;
+  }
+
+  .navDot {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    min-height: 10px;
+    margin: 0 5px;
+  }
+
+  .mobileNavigationControls .carouselControl {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .projectStateBadge {
+    top: 6px;
+    right: 6px;
+  }
+
+  .projectStateLabel {
+    font-size: 0.55rem;
+    padding: 0px 3px;
+    letter-spacing: 0.3px;
+  }
+
+  .mobileNavigationControls .activeDot {
+    box-shadow: 0 0 0 1.5px rgba(var(--ifm-color-primary-rgb), 0.4);
+    transform: scale(1.5); 
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .projectsTitle,
+  .projectsSubtitle {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .navDot,
+  .activeDot,
+  .carouselCard,
+  .projectImage,
+  .projectLink,
+  .carouselControl {
+    transition: none;
+  }
+
+  .carouselCard {
+    animation: none;
+  }
+
+  .projectStateLabel {
+    transition: none !important;
+  }
+}
