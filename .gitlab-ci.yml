@@ -87,6 +87,8 @@ deploy-proxy:
 publish-npm:
   extends: .setup_tools
   stage: publish
+  environment:
+    name: npm
   needs: ["smoke-test"]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v/ && $CI_COMMIT_TAG !~ /-(beta|alpha)/
