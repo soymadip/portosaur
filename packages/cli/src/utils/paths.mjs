@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
 const srcDir = path.resolve(import.meta.dirname, "../");
 const pkgDir = path.resolve(srcDir, "../");
 
@@ -27,17 +31,20 @@ export const Paths = {
   packageJson: path.join(pkgDir, "package.json"),
 
   /** Absolute path to the core package. */
-  core: path.resolve(pkgDir, "../core"),
+  get core() {
+    try {
+      return path.dirname(require.resolve("@portosaur/core/package.json"));
+    } catch {
+      return path.resolve(pkgDir, "../core");
+    }
+  },
 
   /** Absolute path to the theme package. */
   get theme() {
-    const localNodeModulesTheme = path.resolve(
-      process.cwd(),
-      "node_modules/@portosaur/theme",
-    );
-    if (fs.existsSync(localNodeModulesTheme)) {
-      return localNodeModulesTheme;
+    try {
+      return path.dirname(require.resolve("@portosaur/theme/package.json"));
+    } catch {
+      return path.resolve(pkgDir, "../theme");
     }
-    return path.resolve(pkgDir, "../theme");
   },
 };

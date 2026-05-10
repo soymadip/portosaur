@@ -23,12 +23,13 @@ bun run "$REPO_ROOT/packages/cli/bin/porto.mjs" init \
 # --- Link local packages into the new project ---
 echo "📦 Installing local packages..."
 cd "$SITE_DIR"
-bun link @portosaur/cli @portosaur/theme @portosaur/core @portosaur/logger @portosaur/wizard
 bun install
+bun link @portosaur/cli @portosaur/theme @portosaur/core @portosaur/logger @portosaur/wizard
 
 # --- Build ---
 echo "🔨 Building..."
-bun run build
+# Use the local linked porto directly to avoid 'bun install' in the script overwriting links
+./node_modules/.bin/porto build
 
 echo ""
 echo "✅ Smoke test passed!"
