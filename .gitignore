@@ -12,6 +12,7 @@ dist/
 cache/
 .docusaurus/
 .portosaur/
+.bun-cache/
 .turbo/
 configSchema.json
 scratch

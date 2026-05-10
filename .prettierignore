@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 cache/
+.bun-cache/
 .docusaurus/
 .portosaur/
 
