@@ -12,6 +12,7 @@ static/example*
 *temp*
 *favicon/
 TestimonialsSection/
+*.hash
 
 # Generated files
 .docusaurus

@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "clear &&  $npm_execpath i && docusaurus start && docusaurus clear",
-    "build": "$npm_execpath i && docusaurus build",
-    "serve": "$npm_execpath i && docusaurus serve",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "swizzle": "docusaurus swizzle",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids"
+    "start": "clear && bun install && bun x docusaurus start && bun x docusaurus clear",
+    "build": "bun install && bun x docusaurus build",
+    "serve": "bun install && bun x docusaurus serve",
+    "deploy": "bun x docusaurus deploy",
+    "clear": "bun x docusaurus clear",
+    "swizzle": "bun x docusaurus swizzle",
+    "write-translations": "bun x docusaurus write-translations",
+    "write-heading-ids": "bun x docusaurus write-heading-ids"
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.0",

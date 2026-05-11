@@ -11,6 +11,14 @@ function getInitialState() {
       isOpen: false,
       isDocked: false,
       dockWidth: 420,
+      sources: [],
+      activeIndex: 0,
+      floatingState: {
+        width: DEFAULT_SIZE.width,
+        height: DEFAULT_SIZE.height,
+        x: null,
+        y: null,
+      },
     };
   }
 

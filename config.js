@@ -1,7 +1,7 @@
 exports.usrConf = {
   "auto_update": true,
   "dark_mode": true,
-  "edit_url": "https://github.com/soymadip/soymadip.github.io/edit/content/notes/",
+  "edit_url": "https://gitlab.com/soymadip/soymadip.gitlab.io/-/edit/content/notes/",
   "site_url": "http://localhost:5677",
   "site_path": "/",
   "srt_url": "${site_url}${site_path}/l",
