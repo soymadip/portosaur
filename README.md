@@ -22,10 +22,6 @@ Get your portfolio up and running in seconds:
 # Initialize a new project (interactive)
 bunx @portosaur/cli init
 
-# Or with project name (not recommended)
-bunx @portosaur/cli@latest init -P my-portfolio
-
-
 # Start development
 cd <your-project-dir>
 bun run dev   # or: npm run dev
