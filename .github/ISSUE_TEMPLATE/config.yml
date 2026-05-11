@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🚀 Open an Issue on GitLab
+    url: https://gitlab.com/soymadip/portosaur/-/issues
+    about: We have moved! Please report all bugs and features on GitLab.

@@ -14,47 +14,10 @@
 - **📱 Mobile Optimized** — Adapts seamlessly on all devices, from desktop to mobiles.
 - **🛠️ Highly Configurable** — Extensive customization options through a central, logic-less config.
 
-## Quick Start
-
-Get your portfolio up and running in seconds:
-
-```bash
-# Initialize a new project (interactive)
-bunx @portosaur/cli init
-
-# Or with project name (not recommended)
-bunx @portosaur/cli@latest init -P my-portfolio
-
-
-# Start development
-cd <your-project-dir>
-bun run dev   # or: npm run dev
-```
-
-## 📍 Documentation
-
-For user guides and CLI reference, visit the **[Documentation Site](https://soymadip.github.io/portosaur)**.
-
 <br>
 
-## 🏗️ Architecture
+## 🚨 Moved to GitLab
 
-This repository is a monorepo structured for performance and extensibility:
+This project has moved to **GitLab**.   
 
-- **[`@portosaur/cli`](./packages/cli)** — The CLI for project lifecycle & builds.
-- **[`@portosaur/core`](./packages/core)** — The logic engine for configuration & variable resolution.
-- **[`@portosaur/theme`](./packages/theme)** — The UI core containing components, assets, & plugins.
-- **[`@portosaur/wizard`](./packages/wizard)** — The interaction engine for CLI prompt workflows.
-
-## Credits
-
-- [Docusaurus](https://docusaurus.io/) - The core engine.
-- [Catppuccin](https://github.com/catppuccin/catppuccin) - Color inspiration.
-- [Hugo Profile](https://hugo-profile.netlify.app/) - Design inspiration.
-- [VitePress](https://vitepress.dev) - Documentation site
-
----
-
-<div align="center">
-    Built with 🦖 by <a href="https://github.com/soymadip">soymadip</a>
-</div>
+Please go to gitlab for further information: **[gitlab.com/soymadip/portosaur](https://gitlab.com/soymadip/portosaur)**
