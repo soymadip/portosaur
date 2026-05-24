@@ -4,6 +4,8 @@
 /* Bootstrap (some prebuilt) */
 @import url(./bootstrap.css);
 
+@import url('https://fonts.googleapis.com/css2?family=Alata&family=DM+Serif+Display&display=swap');
+
 
 /* === Component overrides === */
 
@@ -128,6 +130,10 @@ html {
   background-color: transparent !important;
 }
 
+.markdown :is(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Alata', sans-serif;
+}
+
 .markdown h1 {
   text-align: center;
   color: var(--ifm-color-primary);
@@ -138,6 +144,7 @@ html {
 .markdown h2 {
   color: var(--ifm-color-primary);
 }
+
 
 .markdown img {
   display: block;

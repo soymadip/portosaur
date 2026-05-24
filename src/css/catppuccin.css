@@ -4,14 +4,13 @@
 **/
 
 /* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Alata&family=DM+Serif+Display&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
 
 
 :root {
 
-    --ifm-heading-font-family: 'Alata', system-ui, -apple-system, sans-serif;
-    --ifm-font-family-base: 'Alata', system-ui, -apple-system, sans-serif;
+    --ifm-heading-font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+    --ifm-font-family-base: 'Lexend', system-ui, -apple-system, sans-serif;
     
     --ifm-scroll-margin-top: 38px;
     --ifm-scroll-margin-top-mobile: 32px;
