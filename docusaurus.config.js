@@ -1,3 +1,6 @@
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+
 import { catppuccinMocha, catppuccinLatte } from "./src/config/prism.js";
 import { appVersion } from "./src/utils/appVersion.js";
 import { metaTags } from "./src/config/metaTags.js";
@@ -113,6 +116,16 @@ const config = {
     ].filter(Boolean),
   },
 
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css",
+      type: "text/css",
+      integrity:
+        "sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB",
+      crossorigin: "anonymous",
+    },
+  ],
+
   presets: [
     [
       "classic",
@@ -122,6 +135,9 @@ const config = {
           path: "notes",
           sidebarPath: "./src/config/sidebar.js",
           editUrl: usrConf.editUrl || "#",
+
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
 
           admonitions: {
             keywords: ["note", "tip", "info", "warning", "danger", "question"],
