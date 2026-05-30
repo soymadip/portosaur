@@ -1,5 +1,5 @@
 import Layout from "@theme/Layout";
-import NoteCards from "../components/NoteIndex/index.jsx";
+import NoteCards from "../components/NoteCards/index.jsx";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import NavArrow from "../components/NavArrow/index.jsx";
 import HashNavigation from "../utils/HashNavigation.jsx";

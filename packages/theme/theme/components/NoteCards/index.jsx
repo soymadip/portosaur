@@ -4,9 +4,7 @@ import Link from "@docusaurus/Link";
 import { FaBook, FaChevronRight } from "react-icons/fa";
 import Tooltip from "../Tooltip/index.jsx";
 import { iconMap } from "../../config/iconMappings.jsx";
-import DocCardList from "@theme/DocCardList";
 import styles from "./styles.module.css";
-import { useCurrentSidebarCategory } from "@docusaurus/plugin-content-docs/client"
 
 function useNotes() {
   const context = require.context(`@site/notes`, true, /index\.mdx?$|\.mdx?$/);
@@ -14,7 +12,9 @@ function useNotes() {
   return context
     .keys()
     .filter((path) => {
-      if (path === "./index.md" || path === "./index.mdx") return false;
+      if (path === "./index.md" || path === "./index.mdx") {
+        return false;
+      }
       const pathParts = path.split("/");
       const isTopLevelFile =
         pathParts.length === 2 && !path.match(/index\.mdx?$/);
@@ -88,14 +88,19 @@ export default function NoteCards() {
     "docusaurus-plugin-content-docs",
   );
 
-  if (!notes.length) return null;
+  if (!notes.length) {
+    return null;
+  }
 
   return (
     <div className={styles.notesGrid} role="list">
       {notes.map((note, index) => (
         <NoteCard
           key={note.slug}
-          {...note}
+          title={note.title}
+          language={note.language}
+          slug={note.slug}
+          desc={note.desc}
           index={index}
           docsBasePath={docsBasePath}
         />
@@ -104,31 +109,3 @@ export default function NoteCards() {
   );
 }
 
-// List Topics inside Individual Notes
-export function TopicList({
-  children,
-  description = "Click on the links below to explore the topics.",
-  style = {
-    marginTop: "-2.5rem",
-    marginBottom: "2.5rem",
-    textAlign: "center",
-  },
-}) {
-  let items;
-  try {
-    const category = useCurrentSidebarCategory();
-    items = category.items;
-  } catch (e) {
-    // Fallback if not on a category page
-  }
-
-  return (
-    <>
-      <br />
-      {(children || description) && (
-        <p style={style}>{children || description}</p>
-      )}
-      <DocCardList items={items} />
-    </>
-  );
-}

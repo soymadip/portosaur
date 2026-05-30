@@ -4,7 +4,8 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { Pv, SrcPv } from "./components/Preview/index.js";
 import Tooltip from "./components/Tooltip/index.js";
-import NoteCards, { TopicList } from "./components/NoteIndex/index.js";
+import NoteCards from "./components/NoteCards/index.jsx";
+import TopicList from "./components/TopicList/index.jsx";
 const components = {
   ...MDXComponents,
   Pv,
