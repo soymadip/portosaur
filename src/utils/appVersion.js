@@ -10,7 +10,7 @@ function appVersion() {
   }
 
   try {
-    const pkgPath = path.resolve(__dirname, '../../package.json');
+    const pkgPath = path.normalize(path.resolve(__dirname, '../../package.json'));
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
     cachedVersion = pkg.version || '0.0.0';

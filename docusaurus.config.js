@@ -134,7 +134,7 @@ const config = {
           routeBasePath: "notes",
           path: "notes",
           sidebarPath: "./src/config/sidebar.js",
-          editUrl: usrConf.editUrl || "#",
+          editUrl: usrConf.edit_url || usrConf.editUrl || undefined,
 
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
