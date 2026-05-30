@@ -6,6 +6,7 @@ import Tooltip from "../Tooltip/index.jsx";
 import { iconMap } from "../../config/iconMappings.jsx";
 import DocCardList from "@theme/DocCardList";
 import styles from "./styles.module.css";
+import { useCurrentSidebarCategory } from "@docusaurus/plugin-content-docs/client"
 
 function useNotes() {
   const context = require.context(`@site/notes`, true, /index\.mdx?$|\.mdx?$/);
@@ -103,14 +104,31 @@ export default function NoteCards() {
   );
 }
 
+// List Topics inside Individual Notes
 export function TopicList({
-  desc = "Click on the links below to explore the topics.",
-  style = { marginTop: "-2.5rem", marginBottom: "2.5rem", textAlign: "center" },
+  children,
+  description = "Click on the links below to explore the topics.",
+  style = {
+    marginTop: "-2.5rem",
+    marginBottom: "2.5rem",
+    textAlign: "center",
+  },
 }) {
+  let items;
+  try {
+    const category = useCurrentSidebarCategory();
+    items = category.items;
+  } catch (e) {
+    // Fallback if not on a category page
+  }
+
   return (
-    <div style={style}>
-      <p dangerouslySetInnerHTML={{ __html: desc }} />
-      <DocCardList />
-    </div>
+    <>
+      <br />
+      {(children || description) && (
+        <p style={style}>{children || description}</p>
+      )}
+      <DocCardList items={items} />
+    </>
   );
 }

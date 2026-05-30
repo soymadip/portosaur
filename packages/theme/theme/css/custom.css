@@ -93,7 +93,7 @@ html {
   font-size: 0.8rem;
 }
 
-.cardDescription_PWke {
+[class*='cardDescription_'] {
   color: var(--ifm-font-color-base) !important;
   opacity: 0.6;
 }
