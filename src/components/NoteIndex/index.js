@@ -1,10 +1,10 @@
-import { useRef, useState, useEffect } from "react";
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import { iconMap } from "@site/src/config/iconMappings";
 import DocCardList from "@theme/DocCardList";
 import Tooltip from "@site/src/components/Tooltip";
+import { useCurrentSidebarCategory } from "@docusaurus/plugin-content-docs/client";
 
 import { FaBook } from "react-icons/fa";
 import styles from "./styles.module.css";
@@ -85,7 +85,14 @@ function NoteCard({
       }}
     >
       <strong style={{ fontSize: "0.95em" }}>{title}</strong>
-      <span style={{ fontSize: "0.85em", opacity: 0.85, fontWeight: 400, textAlign: "left" }}>
+      <span
+        style={{
+          fontSize: "0.85em",
+          opacity: 0.85,
+          fontWeight: 400,
+          textAlign: "left",
+        }}
+      >
         {description}
       </span>
     </span>
@@ -136,7 +143,10 @@ export default function NoteCards({ buttonText = "Open Note" }) {
       {notes.map((note, index) => (
         <NoteCard
           key={note.title}
-          {...note}
+          title={note.title}
+          language={note.language}
+          link={note.link}
+          description={note.description}
           index={index}
           docsBasePath={docsBasePath}
           buttonText={buttonText}
@@ -148,6 +158,7 @@ export default function NoteCards({ buttonText = "Open Note" }) {
 
 // List Topics inside Individual Notes
 export function TopicList({
+  children,
   description = "Click on the links below to explore the topics.",
   style = {
     marginTop: "-2.5rem",
@@ -155,13 +166,21 @@ export function TopicList({
     textAlign: "center",
   },
 }) {
+  let items;
+  try {
+    const category = useCurrentSidebarCategory();
+    items = category.items;
+  } catch (e) {
+    // Fallback if not on a category page
+  }
+
   return (
     <>
-      <p
-        style={style}
-        dangerouslySetInnerHTML={{ __html: description }} // Well we are giving it only HTML :)
-      />
-      <DocCardList />
+      <br />
+      {(children || description) && (
+        <p style={style}>{children || description}</p>
+      )}
+      <DocCardList items={items} />
     </>
   );
 }
