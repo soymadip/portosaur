@@ -55,8 +55,9 @@ export async function buildCommand(siteDir, extraArgs = []) {
       path.join(portoPaths.theme, "css/custom.css"),
       path.join(portoPaths.theme, "css/overrides/variables.css"),
     ];
-    
-    const themeColor = getCssVar("--ifm-color-primary", cssFilesToParse) || "#3578e5";
+
+    const themeColor =
+      getCssVar("--ifm-color-primary", cssFilesToParse) || "#3578e5";
 
     const faviconRes = await generateFavicons(UserRoot, {
       imagePath: userConfig.home_page?.hero?.profile_pic,

@@ -17,7 +17,10 @@
   opacity: 0;
   transform: translateY(20px) scale(0.9);
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .scrollToTop.visible {

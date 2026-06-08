@@ -27,7 +27,7 @@ th {
   text-align: center !important;
 }
 
-[class*='cardDescription_'] {
+[class*="cardDescription_"] {
   color: var(--ifm-font-color-base) !important;
   opacity: 0.6;
 }

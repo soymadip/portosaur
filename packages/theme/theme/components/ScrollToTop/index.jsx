@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { IoIosArrowUp } from 'react-icons/io';
-import styles from './styles.module.css';
+import { useState, useEffect, useRef } from "react";
+import { IoIosArrowUp } from "react-icons/io";
+import styles from "./styles.module.css";
 
 export default function ScrollToTop({ hideDelay = 1500 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -24,7 +24,8 @@ export default function ScrollToTop({ hideDelay = 1500 }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
       const isScrollingUp = scrollTop < lastScrollTopRef.current;
 
       // Save the current scroll position
@@ -43,11 +44,11 @@ export default function ScrollToTop({ hideDelay = 1500 }) {
     };
 
     // Set up event listener
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     // Clean up
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -67,17 +68,19 @@ export default function ScrollToTop({ hideDelay = 1500 }) {
   };
 
   const scrollToTop = () => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     window.scrollTo({
       top: 0,
-      behavior: prefersReducedMotion ? 'auto' : 'smooth'
+      behavior: prefersReducedMotion ? "auto" : "smooth",
     });
   };
 
   return (
     <button
-      className={`${styles.scrollToTop} ${isVisible ? styles.visible : ''}`}
+      className={`${styles.scrollToTop} ${isVisible ? styles.visible : ""}`}
       onClick={scrollToTop}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
