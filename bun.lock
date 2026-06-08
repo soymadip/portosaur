@@ -10,7 +10,7 @@
     },
     "docs": {
       "name": "@portosaur/docs",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "devDependencies": {
         "debug": "^4.4.3",
         "js-yaml": "^4.1.1",
@@ -24,7 +24,7 @@
     },
     "packages/cli": {
       "name": "@portosaur/cli",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "bin": {
         "porto": "./bin/porto.mjs",
       },
@@ -38,7 +38,7 @@
     },
     "packages/core": {
       "name": "@portosaur/core",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "dependencies": {
         "@portosaur/logger": "workspace:*",
         "favicons": "^7.2.0",
@@ -48,7 +48,7 @@
     },
     "packages/logger": {
       "name": "@portosaur/logger",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "dependencies": {
         "@docusaurus/logger": "^3.10.0",
         "chalk": "^5.6.2",
@@ -57,12 +57,14 @@
     },
     "packages/theme": {
       "name": "@portosaur/theme",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "dependencies": {
         "@docusaurus/core": "^3.10.1",
         "@docusaurus/plugin-pwa": "^3.10.1",
         "@docusaurus/preset-classic": "^3.10.1",
         "@easyops-cn/docusaurus-search-local": "^0.55.1",
+        "@fontsource-variable/lexend": "^5.2.11",
+        "@fontsource/alata": "^5.2.8",
         "@portosaur/core": "workspace:*",
         "chalk": "^5.6.2",
         "clsx": "^2.1.1",
@@ -80,7 +82,7 @@
     },
     "packages/wizard": {
       "name": "@portosaur/wizard",
-      "version": "0.1.5",
+      "version": "0.2.0",
       "dependencies": {
         "@clack/prompts": "^1.2.0",
         "chalk": "^5.6.2",
@@ -571,6 +573,10 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.21.5", "", { "os": "win32", "cpu": "ia32" }, "sha512-SWXFF1CL2RVNMaVs+BBClwtfZSvDgtL//G/smwAc5oVK/UPu2Gu9tIaRgFmYFFKrmg3SyAjSrElf0TiJ1v8fYA=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.21.5", "", { "os": "win32", "cpu": "x64" }, "sha512-tQd/1efJuzPC6rCFwEvLtci/xNFcTZknmXs98FYDfGE4wP9ClFV98nyKrzJKVPMhdDnjzLhdUyMX4PsQAPjwIw=="],
+
+    "@fontsource-variable/lexend": ["@fontsource-variable/lexend@5.2.11", "", {}, "sha512-0hgEQ4O7Nh8fxL/WWmspJf0BErbocRkZwtLRGey/V4mUUqxfF7QUwqhcdzwpjom3NYCniY4uzQ5wYD7r9/92tQ=="],
+
+    "@fontsource/alata": ["@fontsource/alata@5.2.8", "", {}, "sha512-E+QjT/nw8t2J7qJ+20mN0b/mVc6jXDTPyZHM3/VnOLj86GA91l2whD2EgBcLU5zi5/GVp5Gyzh/RcwiwkbQ89g=="],
 
     "@hapi/hoek": ["@hapi/hoek@9.3.0", "", {}, "sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ=="],
 

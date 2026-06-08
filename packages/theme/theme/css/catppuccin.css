@@ -4,7 +4,7 @@
 **/
 
 /* Import fonts */
-@import url("https://fonts.googleapis.com/css2?family=Alata&family=DM+Serif+Display&display=swap");
+@import '@fontsource-variable/lexend';
 
 :root {
   --ifm-heading-font-family: "Alata", system-ui, -apple-system, sans-serif;
