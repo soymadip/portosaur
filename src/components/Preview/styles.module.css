@@ -618,15 +618,20 @@
 }
 
 /* --- Global Layout Hooks (when docked) --- */
+
 :global(body.pv-dock-active) :global(.main-wrapper) {
   padding-right: var(--pv-dock-width, 400px);
   transition: padding-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :global(body.pv-dock-active) :global(.col.col--3),
-:global(body.pv-dock-active) :global(.theme-doc-toc-desktop),
-:global(body.pv-dock-active) :global(.table-of-contents) {
+:global(body.pv-dock-active) :global(.theme-doc-toc-desktop) {
   display: none !important;
+}
+
+/* Show the mobile/tablet collapsible TOC when preview dock hides the sidebar TOC */
+:global(body.pv-dock-active) :global(.theme-doc-toc-mobile) {
+  display: block !important;
 }
 
 /* Ensure the main content column expands and doesn't hit a max-width cap when docked */
