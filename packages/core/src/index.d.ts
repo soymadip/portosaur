@@ -31,6 +31,7 @@ export {
   openInBrowser,
 } from "./utils/system.mjs";
 export { porto, git, text, limits } from "./app.mjs";
+export { getCssVar } from "./utils/cssExtractor.mjs";
 export { generateFavicons } from "./generators/generateFavicons.mjs";
 export { generateRobotsTxt } from "./generators/generateRobots.mjs";
 export {

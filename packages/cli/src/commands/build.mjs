@@ -12,6 +12,7 @@ import {
   loadUserConfig,
   generateFavicons,
   generateRobotsTxt,
+  getCssVar,
 } from "@portosaur/core";
 
 /**
@@ -50,12 +51,20 @@ export async function buildCommand(siteDir, extraArgs = []) {
 
     logger.info("Generating site assets...");
 
+    const cssFilesToParse = [
+      path.join(portoPaths.theme, "css/custom.css"),
+      path.join(portoPaths.theme, "css/catppuccin.css"),
+    ];
+    
+    const themeColor = getCssVar("--ifm-color-primary", cssFilesToParse) || "#3578e5";
+
     const faviconRes = await generateFavicons(UserRoot, {
       imagePath: userConfig.home_page?.hero?.profile_pic,
       siteTitle: userConfig.site?.title,
       siteTagline: userConfig.site?.tagline,
       staticDirs: ["static"],
       portoAssetsDir: portoPaths.assets,
+      themeColor: themeColor,
     });
 
     const configPath = writeConfigShim(UserRoot, portoPaths, {

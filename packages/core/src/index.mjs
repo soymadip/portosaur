@@ -14,6 +14,8 @@ export {
 
 export * from "./app.mjs";
 
+export { getCssVar } from "./utils/cssExtractor.mjs";
+
 export { generateFavicons } from "./generators/generateFavicons.mjs";
 export { generateRobotsTxt } from "./generators/generateRobots.mjs";
 export { buildDocuConfig } from "./generators/docusaurusConfig.mjs";
