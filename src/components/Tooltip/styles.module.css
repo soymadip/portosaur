@@ -12,7 +12,14 @@
   transition: border-bottom-color 0.2s ease;
 }
 
-.hasUnderline:hover {
+@media (hover: hover) {
+  .hasUnderline:hover {
+    border-bottom-style: dashed;
+    border-bottom-color: var(--ifm-color-primary-darker);
+  }
+}
+
+.hasUnderline.isActive {
   border-bottom-style: dashed;
   border-bottom-color: var(--ifm-color-primary-darker);
 }
@@ -52,7 +59,7 @@
 
 .top .arrow {
   top: 100%;
-  left: 50%;
+  left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-top: -4px;
 }
@@ -63,7 +70,7 @@
 
 .bottom .arrow {
   bottom: 100%;
-  left: 50%;
+  left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-bottom: -4px;
 }
