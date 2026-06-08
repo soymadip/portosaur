@@ -1,4 +1,5 @@
 name: Verify Codebase
+run-name: verify changes
 
 on:
   push:

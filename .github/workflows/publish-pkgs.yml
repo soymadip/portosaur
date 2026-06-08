@@ -1,4 +1,5 @@
 name: Publish Packages to Regestries
+run-name: publish Version ${{ github.ref_name }} to npm
 
 on:
   push:
