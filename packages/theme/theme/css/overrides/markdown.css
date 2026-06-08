@@ -27,6 +27,19 @@
   color: var(--ifm-color-primary);
 }
 
+.markdown big {
+  display: inline-block;
+  font-size: 1.5rem;
+  margin-bottom: 0.65rem;
+  margin-top: 0.6rem;
+}
+
+.markdown li big,
+.markdown p big {
+  margin-top: inherit;
+  margin-bottom: inherit;
+}
+
 .markdown img {
   display: block;
   margin: 0 auto;
@@ -43,15 +56,7 @@ mark {
   border-bottom: 1px solid var(--ifm-color-primary);
 }
 
-.pagination-nav__link {
-  border: 1px solid var(--ifm-background-color);
-  background-color: var(--ifm-background-surface-color);
-}
 
-.pagination-nav__link:hover {
-  border: 1px solid var(--ifm-color-primary);
-  border-color: var(--ifm-color-primary);
-}
 
 .table-of-contents__link--active {
   font-weight: bold;
