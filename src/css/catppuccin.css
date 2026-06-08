@@ -9,8 +9,8 @@
 
 :root {
 
-    --ifm-heading-font-family: 'Lexend', system-ui, -apple-system, sans-serif;
-    --ifm-font-family-base: 'Lexend', system-ui, -apple-system, sans-serif;
+    --ifm-heading-font-family: 'Alata', system-ui, -apple-system, sans-serif;
+    --ifm-font-family-base: 'Alata', system-ui, -apple-system, sans-serif;
     
     --ifm-scroll-margin-top: 38px;
     --ifm-scroll-margin-top-mobile: 32px;
