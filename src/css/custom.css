@@ -130,7 +130,7 @@ html {
 }
 
 .markdown {
-  --ifm-font-family-base: "Lexend", system-ui, -apple-system, sans-serif;
+  --ifm-font-family-base: 'Lexend Variable', system-ui, -apple-system, sans-serif;
   font-family: var(--ifm-font-family-base);
 }
 
