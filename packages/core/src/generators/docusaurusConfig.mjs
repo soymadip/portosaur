@@ -112,43 +112,43 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           },
           ...(get("home_page.about.enable", true)
             ? [
-              {
-                label: "About Me",
-                to: "/#about",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "About Me",
+                  to: "/#about",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(get("home_page.project_shelf.enable", true)
             ? [
-              {
-                label: "Projects",
-                to: "/#projects",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Projects",
+                  to: "/#projects",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(get("home_page.experience.enable", false)
             ? [
-              {
-                label: "Experience",
-                to: "/#experience",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Experience",
+                  to: "/#experience",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(get("home_page.social.enable", true)
             ? [
-              {
-                label: "Contact",
-                to: "/#contact",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Contact",
+                  to: "/#contact",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           {
             type: "dropdown",
@@ -163,14 +163,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 : []),
               ...(!get("theme.appearance.disable_branding", false)
                 ? [
-                  {
-                    label: `Portosaur v${portoVersion}`,
-                    className: "_nav-portosaur-version",
-                    href:
-                      porto?.homepage ||
-                      "https://github.com/soymadip/portosaur",
-                  },
-                ]
+                    {
+                      label: `Portosaur v${portoVersion}`,
+                      className: "_nav-portosaur-version",
+                      href:
+                        porto?.homepage ||
+                        "https://github.com/soymadip/portosaur",
+                    },
+                  ]
                 : []),
             ],
           },
@@ -366,7 +366,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     plugins: [
       function portosaurWebpackLoader(context, options) {
         return {
-          name: 'portosaur-webpack-loader',
+          name: "portosaur-webpack-loader",
           configureWebpack(config, isServer, utils) {
             return {
               module: {
