@@ -4,8 +4,7 @@
 /* Bootstrap (some prebuilt) */
 @import url(./bootstrap.css);
 
-@import '@fontsource/alata';
-
+@import "@fontsource/alata";
 
 /* === Component overrides === */
 
@@ -130,7 +129,8 @@ html {
 }
 
 .markdown {
-  --ifm-font-family-base: 'Lexend Variable', system-ui, -apple-system, sans-serif;
+  --ifm-font-family-base:
+    "Lexend Variable", system-ui, -apple-system, sans-serif;
   font-family: var(--ifm-font-family-base);
 }
 
@@ -145,6 +145,21 @@ html {
   color: var(--ifm-color-primary);
 }
 
+/* ------- Adding a new line after big tag if not in inline ------- */
+.markdown big {
+  display: inline-block;
+  font-size: 1.5rem;
+  margin-bottom: 0.65rem;
+  margin-top: 0.6rem;
+}
+
+.markdown li big,
+.markdown p big {
+  margin-top: inherit;
+  margin-bottom: inherit;
+}
+
+/* -------- img style edit -------*/
 .markdown img {
   display: block;
   margin: 0 auto;
