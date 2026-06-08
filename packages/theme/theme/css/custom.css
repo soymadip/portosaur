@@ -187,6 +187,58 @@ mark {
   align-items: center;
 }
 
+th {
+  text-align: center !important;
+}
+
+.pagination-nav__label {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.pagination-nav__link--prev .pagination-nav__label {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.pagination-nav__link--next .pagination-nav__label {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.pagination-nav__link--prev .pagination-nav__label::before {
+  content: "«" !important;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.pagination-nav__link--next .pagination-nav__label::after {
+  content: "»" !important;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* Stack prev/next nav buttons vertically on mobile */
+@media (max-width: 768px) {
+  .pagination-nav {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pagination-nav__link--prev {
+    text-align: left !important;
+  }
+
+  .pagination-nav__link--next {
+    grid-column: 1 !important;
+    text-align: right !important;
+  }
+}
+
 /* === Global Entrance Animations === */
 
 @keyframes fadeIn {
