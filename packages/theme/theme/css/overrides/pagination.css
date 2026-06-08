@@ -1,5 +1,9 @@
 /* === Pagination Overrides === */
 
+.pagination-nav {
+  margin-top: 1.5rem !important;
+}
+
 .pagination-nav__label {
   font-size: 1.1rem;
   display: flex;
@@ -32,10 +36,21 @@
   line-height: 1;
 }
 
+.pagination-nav__link {
+  border: 1px solid var(--ifm-background-color);
+  background-color: var(--ifm-background-surface-color);
+}
+
+.pagination-nav__link:hover {
+  border: 1px solid var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+
 /* Stack prev/next nav buttons vertically on mobile */
 @media (max-width: 768px) {
   .pagination-nav {
     grid-template-columns: 1fr !important;
+    gap: 0.15rem !important;
   }
 
   .pagination-nav__link--prev {
