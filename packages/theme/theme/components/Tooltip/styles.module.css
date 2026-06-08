@@ -21,7 +21,17 @@
   transition: background-image 0.2s ease;
 }
 
-.hasUnderline:hover {
+@media (hover: hover) {
+  .hasUnderline:hover {
+    background-image: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ifm-color-primary-darker), transparent 10%) 1.2px,
+      transparent 1.5px
+    );
+  }
+}
+
+.hasUnderline.isActive {
   background-image: radial-gradient(
     circle,
     color-mix(in srgb, var(--ifm-color-primary-darker), transparent 10%) 1.2px,
@@ -83,7 +93,7 @@
 
 .top .arrow {
   top: 100%;
-  left: 50%;
+  left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-top: -5.5px;
   border-right: 1px solid var(--ifm-color-emphasis-300);
@@ -92,7 +102,7 @@
 
 .bottom .arrow {
   bottom: 100%;
-  left: 50%;
+  left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-bottom: -5.5px;
   border-left: 1px solid var(--ifm-color-emphasis-300);
