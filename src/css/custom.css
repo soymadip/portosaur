@@ -4,7 +4,8 @@
 /* Bootstrap (some prebuilt) */
 @import url(./bootstrap.css);
 
-@import url("https://fonts.googleapis.com/css2?family=Alata&family=DM+Serif+Display&display=swap");
+@import '@fontsource/alata';
+
 
 /* === Component overrides === */
 

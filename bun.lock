@@ -8,6 +8,8 @@
         "@docusaurus/core": "^3.10.0",
         "@docusaurus/preset-classic": "^3.10.0",
         "@easyops-cn/docusaurus-search-local": "^0.52.1",
+        "@fontsource-variable/lexend": "^5.2.11",
+        "@fontsource/alata": "^5.2.8",
         "@mdx-js/react": "^3.1.1",
         "clsx": "^2.1.1",
         "favicons": "7.2.0",
@@ -446,6 +448,10 @@
     "@emnapi/runtime": ["@emnapi/runtime@1.9.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-3U4+MIWHImeyu1wnmVygh5WlgfYDtyf0k8AbLhMFxOipihf6nrWC4syIm/SwEeec0mNSafiiNnMJwbza/Is6Lw=="],
 
     "@emnapi/wasi-threads": ["@emnapi/wasi-threads@1.2.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w=="],
+
+    "@fontsource-variable/lexend": ["@fontsource-variable/lexend@5.2.11", "", {}, "sha512-0hgEQ4O7Nh8fxL/WWmspJf0BErbocRkZwtLRGey/V4mUUqxfF7QUwqhcdzwpjom3NYCniY4uzQ5wYD7r9/92tQ=="],
+
+    "@fontsource/alata": ["@fontsource/alata@5.2.8", "", {}, "sha512-E+QjT/nw8t2J7qJ+20mN0b/mVc6jXDTPyZHM3/VnOLj86GA91l2whD2EgBcLU5zi5/GVp5Gyzh/RcwiwkbQ89g=="],
 
     "@hapi/hoek": ["@hapi/hoek@9.3.0", "", {}, "sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ=="],
 

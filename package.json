@@ -17,6 +17,8 @@
     "@docusaurus/core": "^3.10.0",
     "@docusaurus/preset-classic": "^3.10.0",
     "@easyops-cn/docusaurus-search-local": "^0.52.1",
+    "@fontsource-variable/lexend": "^5.2.11",
+    "@fontsource/alata": "^5.2.8",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
     "favicons": "7.2.0",
