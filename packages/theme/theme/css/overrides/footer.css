@@ -1,0 +1,14 @@
+/* === Footer Overrides === */
+
+.footer {
+  background-color: var(--ifm-footer-background-color) !important;
+  padding-top: 0rem !important;
+  padding-bottom: 0.15rem !important;
+  margin: 0 !important;
+}
+
+.footer__copyright {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  font-size: 0.8rem;
+}

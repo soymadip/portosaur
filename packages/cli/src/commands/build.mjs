@@ -53,7 +53,7 @@ export async function buildCommand(siteDir, extraArgs = []) {
 
     const cssFilesToParse = [
       path.join(portoPaths.theme, "css/custom.css"),
-      path.join(portoPaths.theme, "css/catppuccin.css"),
+      path.join(portoPaths.theme, "css/overrides/variables.css"),
     ];
     
     const themeColor = getCssVar("--ifm-color-primary", cssFilesToParse) || "#3578e5";

@@ -1,0 +1,37 @@
+/* === Base HTML and Utility Overrides === */
+
+html {
+  scroll-behavior: smooth;
+  color: var(--ifm-font-color-base);
+  background-color: var(--ifm-footer-background-color) !important;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.main-wrapper {
+  background-color: var(--ifm-background-color) !important;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+th {
+  text-align: center !important;
+}
+
+[class*='cardDescription_'] {
+  color: var(--ifm-font-color-base) !important;
+  opacity: 0.6;
+}
+
+.hide-this {
+  display: none !important;
+}
