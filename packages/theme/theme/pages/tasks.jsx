@@ -2,7 +2,8 @@ import { useState } from "react";
 import Layout from "@theme/Layout";
 import Head from "@docusaurus/Head";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import "../css/tasks.css";
+import styles from "../css/tasks.module.css";
+import clsx from "clsx";
 import {
   FaClipboardList,
   FaSyncAlt,
@@ -20,8 +21,8 @@ import {
 function TaskList({ filterStatus, taskList }) {
   if (!taskList || !Array.isArray(taskList)) {
     return (
-      <div className="task-empty-state">
-        <FaTasks className="task-empty-icon" />
+      <div className={styles["task-empty-state"]}>
+        <FaTasks className={styles["task-empty-icon"]} />
         <p>No tasks available</p>
       </div>
     );
@@ -33,8 +34,8 @@ function TaskList({ filterStatus, taskList }) {
 
   if (filteredTasks.length === 0) {
     return (
-      <div className="task-empty-state">
-        <FaTasks className="task-empty-icon" />
+      <div className={styles["task-empty-state"]}>
+        <FaTasks className={styles["task-empty-icon"]} />
         <p>No tasks in this category</p>
       </div>
     );
@@ -49,67 +50,67 @@ function TaskList({ filterStatus, taskList }) {
   });
 
   return (
-    <div className="task-list-container">
-      <div className="task-list-table">
+    <div className={styles["task-list-container"]}>
+      <div className={styles["task-list-table"]}>
         {/* Table header */}
-        <div className="task-list-header">
-          <div className="task-cell task-cell-status">Status</div>
-          <div className="task-cell task-cell-title">Task Details</div>
-          <div className="task-cell task-cell-priority">Priority</div>
+        <div className={styles["task-list-header"]}>
+          <div className={clsx(styles["task-cell"], styles["task-cell-status"])}>Status</div>
+          <div className={clsx(styles["task-cell"], styles["task-cell-title"])}>Task Details</div>
+          <div className={clsx(styles["task-cell"], styles["task-cell-priority"])}>Priority</div>
         </div>
 
         {/* Task rows */}
-        <div className="task-rows">
+        <div className={styles["task-rows"]}>
           {sortedTasks.map((task, index) => (
             <div
               key={index}
-              className={`task-row ${task.status === "completed" ? "task-row-completed" : ""} ${index % 2 === 1 ? "task-row-striped" : ""}`}
+              className={clsx(styles["task-row"], task.status === "completed" ? "task-row-completed" : "" && styles["task-row-completed"], index % 2 === 1 ? "task-row-striped" : "" && styles["task-row-striped"])}
             >
               {/* Status cell */}
-              <div className="task-cell task-cell-status">
-                <span className={`badge badge-status-${task.status}`}>
+              <div className={clsx(styles["task-cell"], styles["task-cell-status"])}>
+                <span className={clsx(styles["badge"], styles[`badge-status-${task.status}`])}>
                   {task.status === "completed" && (
                     <>
-                      <FaCheckCircle className="badge-icon" /> Done
+                      <FaCheckCircle className={styles["badge-icon"]} /> Done
                     </>
                   )}
                   {task.status === "active" && (
                     <>
-                      <FaSyncAlt className="badge-icon spin" /> In Progress
+                      <FaSyncAlt className={clsx(styles["badge-icon"], styles["spin"])} /> In Progress
                     </>
                   )}
                   {task.status === "pending" && (
                     <>
-                      <FaClock className="badge-icon" /> Planned
+                      <FaClock className={styles["badge-icon"]} /> Planned
                     </>
                   )}
                 </span>
               </div>
 
               {/* Title cell */}
-              <div className="task-cell task-cell-title">
-                <div className="task-title">{task.title}</div>
+              <div className={clsx(styles["task-cell"], styles["task-cell-title"])}>
+                <div className={styles["task-title"]}>{task.title}</div>
                 {task.desc && (
-                  <div className="task-description">{task.desc}</div>
+                  <div className={styles["task-description"]}>{task.desc}</div>
                 )}
               </div>
 
               {/* Priority cell */}
-              <div className="task-cell task-cell-priority">
-                <span className={`badge badge-priority-${task.priority}`}>
+              <div className={clsx(styles["task-cell"], styles["task-cell-priority"])}>
+                <span className={clsx(styles["badge"], styles[`badge-priority-${task.priority}`])}>
                   {task.priority === "high" && (
                     <>
-                      <FaFire className="badge-icon" /> High
+                      <FaFire className={styles["badge-icon"]} /> High
                     </>
                   )}
                   {task.priority === "medium" && (
                     <>
-                      <FaThermometerHalf className="badge-icon" /> Medium
+                      <FaThermometerHalf className={styles["badge-icon"]} /> Medium
                     </>
                   )}
                   {task.priority === "low" && (
                     <>
-                      <FaSnowflake className="badge-icon" /> Low
+                      <FaSnowflake className={styles["badge-icon"]} /> Low
                     </>
                   )}
                 </span>
@@ -138,29 +139,29 @@ function TaskStats({ taskList }) {
   const percentComplete = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <div className="stats-container">
-      <div className="stat-box">
-        <div className="stat-label">Total Tasks</div>
-        <div className="stat-value">{total}</div>
+    <div className={styles["stats-container"]}>
+      <div className={styles["stat-box"]}>
+        <div className={styles["stat-label"]}>Total Tasks</div>
+        <div className={styles["stat-value"]}>{total}</div>
       </div>
-      <div className="stat-box">
-        <div className="stat-label">Completed</div>
-        <div className="stat-value stat-value-completed">{completed}</div>
+      <div className={styles["stat-box"]}>
+        <div className={styles["stat-label"]}>Completed</div>
+        <div className={clsx(styles["stat-value"], styles["stat-value-completed"])}>{completed}</div>
       </div>
-      <div className="stat-box">
-        <div className="stat-label">In Progress</div>
-        <div className="stat-value stat-value-active">{active}</div>
+      <div className={styles["stat-box"]}>
+        <div className={styles["stat-label"]}>In Progress</div>
+        <div className={clsx(styles["stat-value"], styles["stat-value-active"])}>{active}</div>
       </div>
-      <div className="stat-box">
-        <div className="stat-label">Planned</div>
-        <div className="stat-value stat-value-pending">{pending}</div>
+      <div className={styles["stat-box"]}>
+        <div className={styles["stat-label"]}>Planned</div>
+        <div className={clsx(styles["stat-value"], styles["stat-value-pending"])}>{pending}</div>
       </div>
-      <div className="stat-box">
-        <div className="stat-label">Progress</div>
-        <div className="stat-value">{percentComplete}%</div>
-        <div className="progress-bar-container">
+      <div className={styles["stat-box"]}>
+        <div className={styles["stat-label"]}>Progress</div>
+        <div className={styles["stat-value"]}>{percentComplete}%</div>
+        <div className={styles["progress-bar-container"]}>
           <div
-            className="progress-bar"
+            className={styles["progress-bar"]}
             style={{ width: `${percentComplete}%` }}
           />
         </div>
@@ -188,7 +189,7 @@ function TaskTabs({ taskList }) {
     {
       id: "active",
       label: "In Progress",
-      icon: <FaSyncAlt className="spin" />,
+      icon: <FaSyncAlt className={styles["spin"]} />,
       count: taskList.filter((t) => t.status === "active").length,
     },
     {
@@ -206,29 +207,29 @@ function TaskTabs({ taskList }) {
   ];
 
   return (
-    <div className="task-tabs-container">
-      <div className="task-tabs" role="tablist" aria-label="Task categories">
+    <div className={styles["task-tabs-container"]}>
+      <div className={styles["task-tabs"]} role="tablist" aria-label="Task categories">
         {tabData.map((tab) => (
           <button
             key={tab.id}
-            className={`task-tab ${activeTab === tab.id ? "task-tab-active" : ""}`}
+            className={clsx(styles["task-tab"], activeTab === tab.id ? "task-tab-active" : "" ? styles["task-tab-active"] : "")}
             onClick={() => setActiveTab(tab.id)}
             role="tab"
             aria-selected={activeTab === tab.id}
             aria-controls={`tab-content-${tab.id}`}
             id={`tab-${tab.id}`}
           >
-            <span className="task-tab-icon" aria-hidden="true">
+            <span className={styles["task-tab-icon"]} aria-hidden="true">
               {tab.icon}
             </span>
-            <span className="task-tab-label">{tab.label}</span>
-            <span className="task-tab-count">{tab.count}</span>
+            <span className={styles["task-tab-label"]}>{tab.label}</span>
+            <span className={styles["task-tab-count"]}>{tab.count}</span>
           </button>
         ))}
       </div>
 
       <div
-        className="task-tab-content"
+        className={styles["task-tab-content"]}
         role="tabpanel"
         id={`tab-content-${activeTab}`}
         aria-labelledby={`tab-${activeTab}`}
@@ -261,14 +262,14 @@ export default function TasksPage() {
         title="Tasks are Disabled"
         description="Tasks are currently disabled"
       >
-        <div className="tasks-container">
-          <div className="tasks-content">
-            <div className="tasks-disabled-notice">
-              <div className="disabled-icon">
+        <div className={styles["tasks-container"]}>
+          <div className={styles["tasks-content"]}>
+            <div className={styles["tasks-disabled-notice"]}>
+              <div className={styles["disabled-icon"]}>
                 <FaExclamationTriangle aria-hidden="true" />
               </div>
-              <h2 className="disabled-title">Tasks are currently disabled</h2>
-              <p className="disabled-help">
+              <h2 className={styles["disabled-title"]}>Tasks are currently disabled</h2>
+              <p className={styles["disabled-help"]}>
                 To enable tasks, set <code>tasks.enable</code> to{" "}
                 <code>true</code>
               </p>
@@ -291,12 +292,12 @@ export default function TasksPage() {
         <meta name="twitter:title" content={heading} />
         <meta name="twitter:description" content={subheading} />
       </Head>
-      <div className="tasks-container">
-        <div className="tasks-header">
-          <h1 className="tasks-heading">{heading}</h1>
-          {subheading && <p className="tasks-subheading">{subheading}</p>}
+      <div className={styles["tasks-container"]}>
+        <div className={styles["tasks-header"]}>
+          <h1 className={styles["tasks-heading"]}>{heading}</h1>
+          {subheading && <p className={styles["tasks-subheading"]}>{subheading}</p>}
         </div>
-        <div className="tasks-content">
+        <div className={styles["tasks-content"]}>
           <TaskStats taskList={taskList} />
           <TaskTabs taskList={taskList} />
         </div>
