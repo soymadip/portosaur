@@ -192,6 +192,10 @@ th {
   text-align: center !important;
 }
 
+.pagination-nav {
+  margin-top: 1.5rem !important;
+}
+
 .pagination-nav__label {
   font-size: 1.1rem;
   display: flex;
@@ -228,6 +232,7 @@ th {
 @media (max-width: 768px) {
   .pagination-nav {
     grid-template-columns: 1fr !important;
+    gap: 0.15rem !important;
   }
 
   .pagination-nav__link--prev {
