@@ -1,4 +1,4 @@
-# gitignore, init time renamed
+# gitignore, init time generated
 
 node_modules/
 .docusaurus/
