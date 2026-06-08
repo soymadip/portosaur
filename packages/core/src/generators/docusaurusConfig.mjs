@@ -11,6 +11,9 @@ import {
   buildHeadTags,
 } from "../utils/docusaurus.mjs";
 
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+
 // ------- Main Configuration Generator -------
 
 /**
@@ -109,43 +112,43 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           },
           ...(get("home_page.about.enable", true)
             ? [
-                {
-                  label: "About Me",
-                  to: "/#about",
-                  position: "right",
-                  activeBasePath: "/never-match",
-                },
-              ]
+              {
+                label: "About Me",
+                to: "/#about",
+                position: "right",
+                activeBasePath: "/never-match",
+              },
+            ]
             : []),
           ...(get("home_page.project_shelf.enable", true)
             ? [
-                {
-                  label: "Projects",
-                  to: "/#projects",
-                  position: "right",
-                  activeBasePath: "/never-match",
-                },
-              ]
+              {
+                label: "Projects",
+                to: "/#projects",
+                position: "right",
+                activeBasePath: "/never-match",
+              },
+            ]
             : []),
           ...(get("home_page.experience.enable", false)
             ? [
-                {
-                  label: "Experience",
-                  to: "/#experience",
-                  position: "right",
-                  activeBasePath: "/never-match",
-                },
-              ]
+              {
+                label: "Experience",
+                to: "/#experience",
+                position: "right",
+                activeBasePath: "/never-match",
+              },
+            ]
             : []),
           ...(get("home_page.social.enable", true)
             ? [
-                {
-                  label: "Contact",
-                  to: "/#contact",
-                  position: "right",
-                  activeBasePath: "/never-match",
-                },
-              ]
+              {
+                label: "Contact",
+                to: "/#contact",
+                position: "right",
+                activeBasePath: "/never-match",
+              },
+            ]
             : []),
           {
             type: "dropdown",
@@ -160,14 +163,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 : []),
               ...(!get("theme.appearance.disable_branding", false)
                 ? [
-                    {
-                      label: `Portosaur v${portoVersion}`,
-                      className: "_nav-portosaur-version",
-                      href:
-                        porto?.homepage ||
-                        "https://github.com/soymadip/portosaur",
-                    },
-                  ]
+                  {
+                    label: `Portosaur v${portoVersion}`,
+                    className: "_nav-portosaur-version",
+                    href:
+                      porto?.homepage ||
+                      "https://github.com/soymadip/portosaur",
+                  },
+                ]
                 : []),
             ],
           },
@@ -302,8 +305,15 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               portoPaths.theme ?? context.portoRoot ?? "",
               "config/sidebar.jsx",
             ),
+            remarkPlugins: [remarkMath],
+            rehypePlugins: [rehypeKatex],
           },
-          blog: { path: "blog", showReadingTime: false },
+          blog: {
+            path: "blog",
+            showReadingTime: false,
+            remarkPlugins: [remarkMath],
+            rehypePlugins: [rehypeKatex],
+          },
           theme: {
             customCss: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
@@ -343,7 +353,37 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     // ------- Plugins -------
 
+    stylesheets: [
+      {
+        href: "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css",
+        type: "text/css",
+        integrity:
+          "sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB",
+        crossorigin: "anonymous",
+      },
+    ],
+
     plugins: [
+      function portosaurWebpackLoader(context, options) {
+        return {
+          name: 'portosaur-webpack-loader',
+          configureWebpack(config, isServer, utils) {
+            return {
+              module: {
+                rules: [
+                  {
+                    test: /\.jsx?$/,
+                    include: [
+                      path.resolve(portoPaths.theme ?? context.portoRoot ?? ""),
+                    ],
+                    use: [utils.getJSLoader({ isServer })],
+                  },
+                ],
+              },
+            };
+          },
+        };
+      },
       [
         "@docusaurus/plugin-pwa",
         {
