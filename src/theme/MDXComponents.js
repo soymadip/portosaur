@@ -6,6 +6,7 @@ import TabItem from "@theme/TabItem";
 import { Pv, SrcPv } from "@site/src/components/Preview";
 import Tooltip from "@site/src/components/Tooltip";
 import NoteCards, { TopicList } from "@site/src/components/NoteIndex";
+import Indent from "@site/src/components/Indent";
 
 export default {
   ...MDXComponents,
@@ -17,4 +18,5 @@ export default {
   Tabs,
   TabItem,
   Tooltip,
+  Indent,
 };
