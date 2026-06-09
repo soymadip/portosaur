@@ -24,7 +24,8 @@
     },
     "./assets/*": "./assets/*",
     "./plugins/*": "./plugins/*",
-    "./theme/*": "./theme/*"
+    "./theme/*": "./theme/*",
+    "./components/*": "./components/*"
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.1",

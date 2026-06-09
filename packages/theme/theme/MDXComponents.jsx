@@ -4,17 +4,20 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { Pv, SrcPv } from "./components/Preview/index.js";
 import Tooltip from "./components/Tooltip/index.js";
-import NoteCards from "./components/NoteCards/index.jsx";
 import TopicList from "./components/TopicList/index.jsx";
+import Indent from "./components/Indent/index.jsx";
+
+// Make useful Custom Components available by default
 const components = {
   ...MDXComponents,
   Pv,
   SrcPv,
   TopicList,
-  NoteCards,
   Details,
   Tabs,
   TabItem,
   Tooltip,
+  Indent,
 };
+
 export default components;
