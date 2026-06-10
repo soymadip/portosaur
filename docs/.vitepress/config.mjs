@@ -5,11 +5,6 @@ import { resolve } from "path";
 import { resolveVars } from "./plugins/resolveVars.js";
 import { autoRedirects } from "./plugins/autoRedirects.js";
 import { searchLinks } from "./plugins/searchLinks.js";
-import {
-  getVersions,
-  generateVersionedNav,
-  generateSidebar,
-} from "./plugins/versioning.mjs";
 import { nav, baseSidebar } from "./navigation.mjs";
 import yaml from "js-yaml";
 
@@ -64,13 +59,7 @@ const metadata = {
   },
 };
 
-const versions = getVersions(process.cwd());
-const versionNav = generateVersionedNav(versions);
 const dynamicNav = [...nav];
-
-if (versionNav) {
-  dynamicNav.push(versionNav);
-}
 
 const base = process.env.GITHUB_REPOSITORY
   ? `/${process.env.GITHUB_REPOSITORY.split("/")[1]}/`
@@ -78,10 +67,6 @@ const base = process.env.GITHUB_REPOSITORY
 
 export default withMermaid({
   base: base,
-
-  rewrites: {
-    "archive/:version/:rest*": ":version/:rest*",
-  },
 
   vite: {
     publicDir: resolve(process.cwd(), "../packages/theme/assets"),
@@ -142,7 +127,7 @@ export default withMermaid({
     },
 
     nav: dynamicNav,
-    sidebar: generateSidebar(versions, baseSidebar),
+    sidebar: baseSidebar,
 
     socialLinks: [{ icon: "github", link: metadata.project.repo }],
   },

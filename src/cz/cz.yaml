@@ -93,11 +93,9 @@ commitizen:
     - git push origin $(git branch --show-current) --follow-tags
   pre_bump_hooks:
     - bun test
-    - bun run --cwd docs docs:version
     - src/cz/bumper.sh
     - bun install
     - bun format
-    - git add docs/versions.json docs/md/archive
   tag_format: v$version
   template: src/cz/changelog.j2
   update_changelog_on_bump: false

@@ -13,8 +13,7 @@
   "scripts": {
     "dev": "vitepress dev --host",
     "preview": "vitepress preview --host",
-    "build": "vitepress build",
-    "docs:version": "node scripts/version.mjs"
+    "build": "vitepress build"
   },
   "devDependencies": {
     "debug": "^4.4.3",
