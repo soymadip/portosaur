@@ -12,3 +12,18 @@ bump = "cz --config $CZ_CONFIG  bump"
 commit = "cz --config $CZ_CONFIG commit"
 changelog = "cz --config $CZ_CONFIG changelog"
 pr = "gh pr create"
+
+[tasks.changelog-latest]
+run = """
+#!/usr/bin/env bash
+tag=${1:-$(git describe --tags --abbrev=0 HEAD)}
+
+changelog=$(cz --config $CZ_CONFIG changelog $tag --dry-run | sed -n '/^###/,$p')
+
+if [[ -n "$changelog" ]]; then
+  echo "## What's New?"
+  echo "$changelog"
+else
+  echo "No changes to note."
+fi
+"""
