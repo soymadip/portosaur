@@ -52,6 +52,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Mise
         uses: jdx/mise-action@v4
@@ -65,8 +67,8 @@ jobs:
             exit 0
           fi
 
-          echo "Generating changelog for ${{ github.ref_name }}..."
-          mise run changelog-latest ${{ github.ref_name }} > release_notes.md
+          echo "Generating changelog for ${{ github.ref_name }} using mise..."
+          mise run -q changelog-latest ${{ github.ref_name }} > release_notes.md
 
           # Check if version starts with 0 to mark as prerelease
           latest_ver="${{ github.ref_name }}"
