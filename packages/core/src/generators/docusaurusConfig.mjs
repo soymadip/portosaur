@@ -370,26 +370,6 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     ],
 
     plugins: [
-      function portosaurWebpackLoader(context, options) {
-        return {
-          name: "portosaur-webpack-loader",
-          configureWebpack(config, isServer, utils) {
-            return {
-              module: {
-                rules: [
-                  {
-                    test: /\.jsx?$/,
-                    include: [
-                      path.resolve(portoPaths.theme ?? context.portoRoot ?? ""),
-                    ],
-                    use: [utils.getJSLoader({ isServer })],
-                  },
-                ],
-              },
-            };
-          },
-        };
-      },
       [
         "@docusaurus/plugin-pwa",
         {

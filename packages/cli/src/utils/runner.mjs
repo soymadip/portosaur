@@ -134,6 +134,7 @@ export function warnIfRepoNameMismatch(
 
 /**
  * Executes a Docusaurus command.
+ *
  * @param {string} command - Docusaurus command to run (e.g., 'start', 'build').
  * @param {string} UserRoot - The project directory.
  * @param {string} configPath - Path to the docusaurus.config.js shim.
@@ -146,36 +147,25 @@ export async function runDocusaurus(
   configPath,
   extraArgs = [],
 ) {
-  const isBun =
-    typeof process !== "undefined" &&
-    process.versions &&
-    process.versions.bun !== undefined;
+  const require = createRequire(import.meta.url);
+  let docusaurusBin;
 
-  let bin;
-  let args;
-
-  if (isBun) {
-    bin = "bun";
-    args = ["run", "--bun", "docusaurus", command, UserRoot];
-  } else {
-    bin = "node";
-    let docusaurusBin;
-    try {
-      const require = createRequire(import.meta.url);
-      docusaurusBin = require.resolve("docusaurus/bin/docusaurus.mjs", {
-        paths: [UserRoot],
-      });
-    } catch (e) {
-      docusaurusBin = path.join(
-        UserRoot,
-        "node_modules",
-        "docusaurus",
-        "bin",
-        "docusaurus.mjs",
-      );
-    }
-    args = [docusaurusBin, command, UserRoot];
+  try {
+    docusaurusBin = require.resolve("@docusaurus/core/bin/docusaurus.mjs", {
+      paths: [UserRoot],
+    });
+  } catch {
+    docusaurusBin = path.join(
+      UserRoot,
+      "node_modules",
+      "@docusaurus",
+      "core",
+      "bin",
+      "docusaurus.mjs",
+    );
   }
+
+  const args = [docusaurusBin, command, UserRoot];
 
   if (configPath) {
     args.push("--config", configPath);
@@ -183,20 +173,24 @@ export async function runDocusaurus(
 
   args.push(...extraArgs);
 
+  // Use bun when available for faster builds, fall back to node.
+  const runtime = typeof Bun !== "undefined" ? "bun" : "node";
+
   // Skip actual execution in test mode
   if (process.env.PORTO_TEST_MODE === "true") {
     console.log(
-      `[TEST_MODE] Would run docusaurus ${command} in ${UserRoot} using ${bin}`,
+      `[TEST_MODE] Would run docusaurus ${command} in ${UserRoot} using ${runtime}`,
     );
     return Promise.resolve();
   }
 
   const childEnv = { ...process.env, FORCE_COLOR: "true" };
+
   if (command === "build") {
     childEnv.CI = "true";
   }
 
-  const child = spawn(bin, args, {
+  const child = spawn(runtime, args, {
     stdio: "inherit",
     cwd: UserRoot,
     env: childEnv,
