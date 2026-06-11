@@ -349,6 +349,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           language: ["en"],
         },
       ],
+      [
+        path.join(portoPaths.plugins, "theme.mjs"),
+        {
+          themeDir: portoPaths.theme,
+        },
+      ],
     ],
 
     // ------- Plugins -------
