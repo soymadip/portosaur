@@ -19,6 +19,10 @@ export default function TopicList({
     // Fallback if not on a category page
   }
 
+  if (!items || items.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <br />
