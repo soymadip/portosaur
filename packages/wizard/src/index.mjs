@@ -78,8 +78,12 @@ export async function runWizard({ intro, outro, steps, initialState = {} }) {
 
       if (step.runIf && !step.runIf(state)) {
         if (state[step.id] == null && step.initialValue !== undefined) {
-          const { initialValue } = buildPromptOpts(step, state);
-          state[step.id] = initialValue;
+          try {
+            const { initialValue } = buildPromptOpts(step, state);
+            state[step.id] = initialValue;
+          } catch (e) {
+            // Ignore initialValue evaluation errors for skipped steps
+          }
         }
         currentStep++;
         continue;
