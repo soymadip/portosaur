@@ -23,6 +23,11 @@ bun run "$REPO_ROOT/packages/cli/bin/porto.mjs" init \
 # --- Link local packages into the new project ---
 echo "📦 Installing local packages..."
 cd "$SITE_DIR"
+
+# Prevent manual developer runs (e.g. bun run dev) from overwriting local links
+# by stripping the auto-install step from package scripts
+sed -i 's/$npm_execpath install && //' package.json
+
 bun install
 bun link @portosaur/cli @portosaur/theme @portosaur/core @portosaur/logger @portosaur/wizard
 

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { createRequire } from "module";
+import { hasCommand } from "@portosaur/core";
 
 /**
  * Generates a static Docusaurus config file by evaluating the Portosaur config
@@ -174,7 +175,11 @@ export async function runDocusaurus(
   args.push(...extraArgs);
 
   // Use bun when available for faster builds, fall back to node.
-  const runtime = typeof Bun !== "undefined" ? "bun" : "node";
+  // If node isn't installed, fallback to bun gracefully.
+  let runtime = "node";
+  if (typeof Bun !== "undefined" || !hasCommand("node")) {
+    runtime = "bun";
+  }
 
   // Skip actual execution in test mode
   if (process.env.PORTO_TEST_MODE === "true") {
@@ -185,10 +190,6 @@ export async function runDocusaurus(
   }
 
   const childEnv = { ...process.env, FORCE_COLOR: "true" };
-
-  if (command === "build") {
-    childEnv.CI = "true";
-  }
 
   const child = spawn(runtime, args, {
     stdio: "inherit",
