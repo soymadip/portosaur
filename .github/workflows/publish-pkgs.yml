@@ -1,5 +1,5 @@
 name: Publish New Version to Regestries
-run-name: publish V${{ github.ref_name }} to GH, npm
+run-name: publish ${{ github.ref_name }} to GH, npm
 
 on:
   push:
