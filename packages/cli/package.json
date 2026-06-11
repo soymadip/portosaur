@@ -1,6 +1,6 @@
 {
   "name": "@portosaur/cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "CLI for Portosaur - The static Personal portfolio site generator.",
   "license": "GPL-3.0-only",
   "author": "soymadip",
