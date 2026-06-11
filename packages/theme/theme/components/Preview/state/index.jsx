@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useReducer,
-  useCallback,
-} from "react";
+import { createContext, useContext, useReducer, useCallback } from "react";
 
 const PreviewContext = createContext(null);
 const DEFAULT_SIZE = { width: 720, height: 400 };
