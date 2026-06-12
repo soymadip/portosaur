@@ -83,6 +83,18 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     getPortoDotDir(projectDir),
   ].filter((dir) => dir && fs.existsSync(dir));
 
+  // Process all head tags (from plugins and user config)
+  const allHeadTags = buildHeadTags([
+    ...(context.extraHeadTags || []),
+    ...get("site.head_tags", []),
+  ]);
+
+  // Separate regular head tags from meta tags
+  const regularHeadTags = allHeadTags.filter((t) => t.tagName !== "meta");
+  const customMetaTags = allHeadTags
+    .filter((t) => t.tagName === "meta")
+    .map((t) => t.attributes);
+
   // ------- Configuration Setup -------
 
   return {
@@ -99,16 +111,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     staticDirectories,
 
-    headTags: buildHeadTags([
-      ...(context.extraHeadTags || []),
-      ...get("site.head_tags", []),
-    ]),
+    headTags: regularHeadTags,
 
     themeConfig: {
       image: resolveAsset(get("site.social_card", "")) || undefined,
       metadata: [
         { name: "generator", content: `Portosaur v${porto.version}` },
         { name: "theme-color", content: "var(--ifm-background-color)" },
+        ...customMetaTags,
       ],
       colorMode: {
         defaultMode: defaultTheme,
