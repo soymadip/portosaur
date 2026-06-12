@@ -1,15 +1,11 @@
 # yaml-language-server: $schema=https://soymadip.github.io/portosaur/conf-schema.json
 #
 # Portosaur Project Configuration
-# Check Config Docs: https://soymadip.is-a.dev/portosaur/guide/config
+# Check full Config Docs: https://soymadip.is-a.dev/portosaur/guide/config
 
 # Site Metadata & SEO
 site:
-  title: null # Defaults to {{homepage.hero.title}}
-  tagline: null # Defaults to {{homepage.hero.desc}}
-
   favicon: null # By default, generates from {{home_page.hero.profile_pic}}
-  # social_card: "{{portoRoot}}/assets/img/social-card.jpeg"
 
   # Auto set if deploying in Github/GitLab Pages
   url: "auto"
@@ -17,20 +13,8 @@ site:
 
 # UI/UX & Theme Behavior
 theme:
-  appearance:
-    default_theme: dark # dark | light
-    show_theme_switch: true
-    disable_project_link: false
-
-  footer:
-    enable: true
-    message: null
-    disable_project_link: false
-
   navigation:
-    breadcrumbs: true
     collapsable_sidebar: true
-    hide_navbar_on_scroll: true
 
 # Page Content & Sections
 home_page:
@@ -142,7 +126,7 @@ tasks:
       status: "done"
       desc: "Implementing the core framework."
 
-# Functional Tools
+# Functional Tools [TODO]
 tools:
   link_shortener:
     enable: false
