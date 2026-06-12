@@ -231,12 +231,12 @@ A built-in utility to create short, memorable URLs that redirect to external sit
 | `deploy_path` | `str`  | `"/l"`  | URL base path for redirects.           |
 | `short_links` | `dict` | `{}`    | Key-value map of slugs to target URLs. |
 
-## `custom`
+## `vars`
 
-Define any key-value pairs in the `custom` block to reference them throughout your content using the `{{custom.key}}` syntax. This is useful for centralizing information like usernames or common links.
+Define any key-value pairs in the `vars` block to reference them throughout your content using the `{{vars.key}}` syntax. This is useful for centralizing information like usernames or common links.
 
 ```yaml
-custom:
+vars:
   github: "yourusername"
   twitter: "@yourhandle"
 ```
