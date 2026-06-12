@@ -415,18 +415,23 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     ],
 
     plugins: [
-      [
-        "@docusaurus/plugin-pwa",
-        {
-          debug: false,
-          offlineModeActivationStrategies: [
-            "always",
-            "appInstalled",
-            "queryString",
-            "standalone",
-          ],
-        },
-      ],
+      ...(env.NODE_ENV === "production"
+        ? [
+            [
+              "@docusaurus/plugin-pwa",
+              {
+                debug: false,
+                offlineModeActivationStrategies: [
+                  "appInstalled",
+                  "standalone",
+                  "queryString",
+                  "mobile",
+                  "saveData",
+                ],
+              },
+            ],
+          ]
+        : []),
 
       // Serve the theme's pages/ directory as page routes.
       // This registers pages/index.jsx → / and pages/tasks.jsx → /tasks etc.
