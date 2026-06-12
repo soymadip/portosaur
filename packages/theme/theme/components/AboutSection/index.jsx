@@ -1,4 +1,5 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import { FaDownload } from "react-icons/fa";
 import { Pv } from "../Preview/index.jsx";
@@ -46,7 +47,7 @@ export default function AboutSection({ id, className }) {
               {aboutMe.image && (
                 <div className={styles.imageWrapper}>
                   <img
-                    src={aboutMe.image}
+                    src={useBaseUrl(aboutMe.image)}
                     alt={aboutMe.name || "About Me"}
                     className={styles.aboutImage}
                   />

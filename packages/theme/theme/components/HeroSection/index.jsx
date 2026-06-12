@@ -1,5 +1,6 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import SocialLinks from "../SocialLinks/index.jsx";
 import styles from "./styles.module.css";
 
@@ -64,7 +65,7 @@ export default function HeroSection({ id, className }) {
         {/* Right: profile picture */}
         <div className={styles.rightSection}>
           <img
-            src={`${profilePic}`}
+            src={useBaseUrl(profilePic)}
             alt="profile"
             className={styles.profilePic}
             loading="lazy"
