@@ -174,6 +174,30 @@ export async function runDocusaurus(
 
   args.push(...extraArgs);
 
+  // Strip the hardcoded Docusaurus generator tag from its internal HTML templates
+  // so that only the Portosaur metadata tag is rendered in the final output.
+  try {
+    const coreLibDir = path.resolve(path.dirname(docusaurusBin), "../lib");
+    const templates = [
+      path.join(coreLibDir, "webpack/templates/dev.html.template.ejs"),
+      path.join(coreLibDir, "ssg/ssgTemplate.html.js"),
+    ];
+    for (const tpl of templates) {
+      if (fs.existsSync(tpl)) {
+        let content = fs.readFileSync(tpl, "utf8");
+        const newContent = content.replace(
+          /<meta name="generator" content="Docusaurus[^"]*">\n?/g,
+          ""
+        );
+        if (content !== newContent) {
+          fs.writeFileSync(tpl, newContent, "utf8");
+        }
+      }
+    }
+  } catch (err) {
+    // Ignore permissions or missing file errors
+  }
+
   // Use bun when available for faster builds, fall back to node.
   // If node isn't installed, fallback to bun gracefully.
   let runtime = "node";
