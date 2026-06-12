@@ -38,14 +38,14 @@ site:
 
 ### Custom Variables
 
-You can define your own variables in the `custom:` block of your `config.yml` and reference them elsewhere:
+You can define your own variables in the `vars:` block of your `config.yml` and reference them elsewhere:
 
 ```yaml
-custom:
+vars:
   twitter_handle: "@myname"
 
 hero_section:
-  desc: "Follow me on Twitter: \{{custom.twitter_handle}}"
+  desc: "Follow me on Twitter: \{{vars.twitter_handle}}"
 ```
 
 ## Recursive Resolution
@@ -54,12 +54,12 @@ The resolution engine supports deep nesting. A variable can reference another va
 
 ```yaml
 # config.yml
-custom:
-  name: "soymadip"
-  intro: "Hello, I am \{{custom.name}}"
+vars:
+  name: "John Doe"
+  intro: "Hello, I am \{{vars.name}}"
 
 site:
-  tagline: "\{{custom.intro}} and this is my site."
+  tagline: "\{{vars.intro}} and this is my site."
 ```
 
 ## Literals & Escaping

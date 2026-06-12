@@ -4,6 +4,12 @@
 # Check full Config Docs: https://soymadip.is-a.dev/portosaur/guide/config
 #
 
+# User variables for use in your values as {{vars.key}}
+vars:
+  twitter: "@{{userName}}"
+  github: "{{userName}}"
+  linkedin: "{{userName}}"
+
 # Site Metadata & SEO
 site:
   url: "auto"
@@ -27,7 +33,7 @@ home_page:
         url: "https://www.linked.com/in/{{userName}}"
 
       - name: "GitHub"
-        icon: "githubalt"
+        icon: "githubalt" # TODO: needs documentation
         url: "https://github.com/{{userName}}"
 
       - name: "Telegram"
@@ -123,9 +129,3 @@ tasks:
     - title: "Build the future"
       status: "done"
       desc: "Implementing the core framework."
-
-# Custom variables for use in your content as {{custom.key}}
-custom:
-  twitter: "@{{userName}}"
-  github: "{{userName}}"
-  linkedin: "{{userName}}"

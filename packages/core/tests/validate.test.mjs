@@ -56,9 +56,9 @@ describe("validateUserConfig", () => {
     ]);
   });
 
-  test("should allow any keys under freeform block 'custom'", () => {
+  test("should allow any keys under freeform block 'vars'", () => {
     const rawConfig = {
-      custom: {
+      vars: {
         my_custom_var: 123,
         nested: {
           foo: "bar",

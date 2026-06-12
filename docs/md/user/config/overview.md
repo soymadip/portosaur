@@ -11,4 +11,4 @@ The configuration is divided into several main blocks that map directly to the r
 - **`home_page`**: Content for the primary sections of your site.
 - **`tasks`**: Public roadmap and goal tracking.
 - **`tools`**: Functional utilities like link shorteners.
-- **`custom`**: User-defined variables for re-use.
+- **`vars`**: User-defined variables for re-use.

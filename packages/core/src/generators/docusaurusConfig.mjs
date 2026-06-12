@@ -54,7 +54,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     isProd: env.NODE_ENV === "production",
     isDev: env.NODE_ENV === "development",
     nodeEnv: env.NODE_ENV ?? "development",
-    custom: rawGet("custom", {}),
+    vars: rawGet("vars", {}),
   });
 
   const get = (key, ...fallbacks) =>
