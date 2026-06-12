@@ -10,8 +10,12 @@
     "url": "https://github.com/soymadip/portosaur"
   },
   "files": [
-    "src"
+    "src",
+    "configSchema.json"
   ],
+  "scripts": {
+    "prepack": "bun ../cli/bin/porto.mjs schema"
+  },
   "type": "module",
   "exports": {
     ".": {

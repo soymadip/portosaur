@@ -58,6 +58,7 @@ pages:
         - "docs/**/*"
         - "packages/cli/src/commands/schema.*"
         - "packages/core/src/index.mjs"
+        - "packages/core/src/generators/docusaurusConfig.mjs"
         - "package.json"
         - "bun.lock"
   script:

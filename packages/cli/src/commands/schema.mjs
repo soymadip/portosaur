@@ -5,151 +5,198 @@ import { logger } from "@portosaur/logger";
 /**
  * Portosaur Discovery-Based Schema Generator
  *
- * This command "discovers" the configuration schema by parsing the actual
- * Docusaurus config building logic. Every key accessed via the `get()` helper
- * is recorded and mapped to a JSON schema.
+ * Discovers the configuration schema by parsing every key accessed via the
+ * `get()` and `rawGet()` helpers in docusaurusConfig.mjs.
+ *
+ * It parses all arguments in the call:
+ * `get("key1", "key2", "default")`
+ * - "key1" and "key2" are discovered as schema properties
+ * - "default" is recorded as the default value
  */
+
+// ------- Helpers -------
+
+function applyEntry(propertiesRoot, dotPath, leafSchema) {
+  const parts = dotPath.split(".");
+  let current = propertiesRoot;
+
+  parts.forEach((part, index) => {
+    const isLast = index === parts.length - 1;
+
+    if (!current[part]) {
+      current[part] = isLast
+        ? { ...leafSchema }
+        : { type: "object", additionalProperties: false, properties: {} };
+    } else if (!isLast && current[part].type !== "object") {
+      current[part] = {
+        type: "object",
+        additionalProperties: false,
+        properties: {},
+      };
+    }
+
+    if (!isLast) {
+      if (!current[part].properties) {
+        current[part].properties = {};
+      }
+      current = current[part].properties;
+    }
+  });
+}
+
+function isJsExpression(val) {
+  if (!val) return false;
+  return (
+    val.startsWith("`") ||
+    val.includes("${") ||
+    val.includes("()") ||
+    /^[a-zA-Z_$][a-zA-Z0-9_.]*$/.test(val) // bare identifier
+  );
+}
+
+// ------- Main -------
+
 export async function schemaCommand(options = {}) {
-  // Resolve paths for the monorepo structure
   const pkgDir = path.resolve(import.meta.dirname, "../");
   const coreDir = path.resolve(pkgDir, "../../core");
 
   const SOURCE_FILE =
     typeof options.config === "string"
       ? path.resolve(process.cwd(), options.config)
-      : path.resolve(coreDir, "src/index.mjs");
+      : path.resolve(coreDir, "src/generators/docusaurusConfig.mjs");
 
   const OUTPUT_FILE =
     typeof options.output === "string"
       ? path.resolve(process.cwd(), options.output)
-      : path.resolve(pkgDir, "../../../configSchema.json");
+      : path.resolve(coreDir, "configSchema.json");
 
   const discoveredSchema = {
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "Portosaur Project Configuration",
+    description: "Schema for config.yml — validated at build time by porto.",
     type: "object",
     properties: {},
     required: [],
-    additionalProperties: true,
+    additionalProperties: false,
   };
-
-  // State for Balanced Parenthesis Walker
-  const getStartRegex = /get\(\s*["']([^"']+)["']\s*,\s*/g;
-  let match;
 
   try {
     if (!fs.existsSync(SOURCE_FILE)) {
       throw new Error(`Source file not found: ${SOURCE_FILE}`);
     }
 
-    logger.info(`Discovering keys from ${SOURCE_FILE}...`);
+    logger.info(`Discovering keys from: ${SOURCE_FILE}`);
     const sourceCode = fs.readFileSync(SOURCE_FILE, "utf8");
 
-    // Discovery Loop
+    // match the start of `get(` or `rawGet(`
+    const getStartRegex = /\b(?:get|rawGet)\s*\(/g;
+    let match;
+
     while ((match = getStartRegex.exec(sourceCode)) !== null) {
-      const keyPath = match[1];
       const startIdx = match.index + match[0].length;
 
-      let braceCount = 1;
+      let depth = 1;
       let currentIdx = startIdx;
-      let defaultValueRaw = "";
+      let argsRaw = [];
+      let currentArg = "";
       let inString = null;
       let inComment = null;
       let escaped = false;
 
-      // Extract raw default value using balanced parenthesis walker
-      while (braceCount > 0 && currentIdx < sourceCode.length) {
+      // Extract all arguments separated by commas
+      while (depth > 0 && currentIdx < sourceCode.length) {
         const char = sourceCode[currentIdx];
         const nextChar = sourceCode[currentIdx + 1];
 
         if (escaped) {
           escaped = false;
+          currentArg += char;
         } else if (char === "\\") {
           escaped = true;
+          currentArg += char;
         } else if (!inString && !inComment) {
-          if (char === "'" || char === '"' || char === "`") inString = char;
-          else if (char === "/" && nextChar === "/") inComment = "//";
-          else if (char === "/" && nextChar === "*") inComment = "/*";
-          else if (char === "(") braceCount++;
-          else if (char === ")") braceCount--;
+          if (char === "'" || char === '"' || char === "`") {
+            inString = char;
+            currentArg += char;
+          } else if (char === "/" && nextChar === "/") {
+            inComment = "//";
+          } else if (char === "/" && nextChar === "*") {
+            inComment = "/*";
+          } else if (char === "(" || char === "[" || char === "{") {
+            depth++;
+            currentArg += char;
+          } else if (char === ")" || char === "]" || char === "}") {
+            depth--;
+            if (depth > 0) currentArg += char;
+          } else if (char === "," && depth === 1) {
+            argsRaw.push(currentArg.trim());
+            currentArg = "";
+          } else {
+            currentArg += char;
+          }
         } else if (inString) {
           if (char === inString) inString = null;
+          currentArg += char;
         } else if (inComment === "//") {
           if (char === "\n") inComment = null;
         } else if (inComment === "/*") {
           if (char === "*" && nextChar === "/") {
             inComment = null;
-            defaultValueRaw += "*/";
-            currentIdx += 2;
-            continue;
+            currentIdx++;
           }
         }
-
-        if (braceCount > 0) defaultValueRaw += char;
         currentIdx++;
       }
 
-      // Extract Documentation Comments
+      if (currentArg.trim()) {
+        argsRaw.push(currentArg.trim());
+      }
+
+      if (argsRaw.length === 0) continue;
+
+      const defaultValueRaw = argsRaw.pop(); // Last argument is default
+
+      // All remaining arguments that are simple strings are key paths
+      const keys = [];
+      for (const arg of argsRaw) {
+        if (/^["'][^"']+["']$/.test(arg)) {
+          keys.push(arg.slice(1, -1));
+        }
+      }
+
+      if (keys.length === 0) continue;
+
+      // Extract comment
       const beforeMatch = sourceCode.slice(0, match.index);
-      const currentLineStart = beforeMatch.lastIndexOf("\n");
-      const linesBefore = sourceCode
-        .slice(0, currentLineStart === -1 ? 0 : currentLineStart)
-        .split("\n");
+      const lines = beforeMatch.split("\n");
 
-      let i = linesBefore.length - 1;
-      let foundComment = [];
-      let inDocBlock = false;
+      let description = "";
+      let i = lines.length - 1;
+      const commentLines = [];
 
-      while (i >= 0 && foundComment.length < 15) {
-        let line = linesBefore[i].trim();
-        if (!line && !inDocBlock) break;
-        if (line.endsWith("*/")) inDocBlock = true;
-
-        if (inDocBlock) {
-          const content = line.replace(/^\/\*\*?|\*\/|\*/g, "").trim();
-          if (content) foundComment.unshift(content);
-          if (line.startsWith("/*") || line.startsWith("/**"))
-            inDocBlock = false;
-        } else if (line.startsWith("//")) {
-          let content = line.replace(/^\/\/\s?/, "").trim();
+      while (i >= 0 && commentLines.length < 5) {
+        const line = lines[i].trim();
+        if (!line) break;
+        if (line.startsWith("//")) {
+          const content = line.replace(/^\/\/\s?/, "").trim();
           if (!content.match(/^(TODO|FIXME|NOTE|SECTION|---)/i)) {
-            foundComment.unshift(content);
+            commentLines.unshift(content);
           }
-        } else if (line && !line.startsWith("/") && !line.startsWith("*")) {
+          i--;
+        } else if (line.endsWith("*/") || line.startsWith("*")) {
+          break;
+        } else {
           break;
         }
-        i--;
       }
-      const description = foundComment.join("\n").trim();
+      description = commentLines.join(" ").trim();
 
-      // Basic Type Inference and Argument Parsing
+      // Type inference
+      const val = defaultValueRaw;
+
       let type = "string";
       let defaultValue = undefined;
-
-      let args = [];
-      let currentArg = "";
-      let depth = 0;
-      let argInString = null;
-
-      for (let i = 0; i < defaultValueRaw.length; i++) {
-        const c = defaultValueRaw[i];
-        if (!argInString) {
-          if (c === "'" || c === '"' || c === "`") argInString = c;
-          else if (c === "(" || c === "[" || c === "{") depth++;
-          else if (c === ")" || c === "]" || c === "}") depth--;
-          else if (c === "," && depth === 0) {
-            args.push(currentArg.trim());
-            currentArg = "";
-            continue;
-          }
-        } else if (c === argInString && defaultValueRaw[i - 1] !== "\\") {
-          argInString = null;
-        }
-        currentArg += c;
-      }
-      if (currentArg.trim()) args.push(currentArg.trim());
-
-      let val = (args[args.length - 1] || "").trim();
+      let isFreeform = false;
 
       if (val === "true" || val === "false") {
         type = "boolean";
@@ -164,45 +211,29 @@ export async function schemaCommand(options = {}) {
         val.includes(".slice(")
       ) {
         type = "array";
+      } else if (val === "{}") {
+        type = "object";
+        isFreeform = true;
       } else if (val.startsWith("{")) {
         type = "object";
-      } else if (val) {
-        defaultValue = val.replace(/^["'`](.*)["'`]$/s, "$1").trim();
+      } else if (val && !isJsExpression(val)) {
+        defaultValue = val.replace(/^["'`](.*?)["'`]$/s, "$1").trim();
       }
 
-      // Map to Discovered Schema Object
-      const parts = keyPath.split(".");
-      let current = discoveredSchema.properties;
+      const leafSchema = { type };
+      if (isFreeform) leafSchema.additionalProperties = true;
+      if (description) leafSchema.description = description;
+      if (defaultValue !== undefined) leafSchema.default = defaultValue;
 
-      parts.forEach((part, index) => {
-        const isLast = index === parts.length - 1;
-
-        if (!current[part]) {
-          if (isLast) {
-            current[part] = { type };
-            if (description) current[part].description = description;
-            if (defaultValue !== undefined)
-              current[part].default = defaultValue;
-          } else {
-            current[part] = { type: "object", properties: {} };
-          }
-        } else if (!isLast && current[part].type !== "object") {
-          current[part] = { type: "object", properties: {} };
-        }
-
-        if (!isLast) {
-          if (!current[part].properties) current[part].properties = {};
-          current = current[part].properties;
-        }
-      });
+      for (const keyPath of keys) {
+        applyEntry(discoveredSchema.properties, keyPath, leafSchema);
+      }
     }
 
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(discoveredSchema, null, 2));
-    logger.success(
-      `Successfully discovered and wrote schema to: ${OUTPUT_FILE}`,
-    );
+    logger.success(`Schema written to: ${OUTPUT_FILE}`);
   } catch (error) {
-    logger.error(`Discovery failed: ${error.message}`);
+    logger.error(`Schema generation failed: ${error.message}`);
     process.exit(1);
   }
 }

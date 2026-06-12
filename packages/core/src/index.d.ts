@@ -61,3 +61,10 @@ export function getNestedValue(
   pathStr: string,
   ...fallbacks: string[]
 ): any;
+
+/**
+ * Validates the raw user config against the generated JSON Schema.
+ * Returns dot-notation paths for any unknown keys found.
+ * Freeform blocks (custom, tools.link_shortener.short_links) are skipped.
+ */
+export function validateUserConfig(rawConfig: Record<string, any>): string[];

@@ -23,14 +23,17 @@ import rehypeKatex from "rehype-katex";
 export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const { portoPaths = {}, gitDate = null, env = process.env } = context;
 
+  const rawGet = (key, ...fallbacks) =>
+    getNestedValue(rawUserConfig, key, ...fallbacks);
+
   const portoVersion = porto.version ?? "0.0.0";
   const lastUpdated = gitDate ?? getGitDate(projectDir);
 
   const staticDir = path.resolve(projectDir, "static");
   const assetsDir = portoPaths.assets ?? "";
 
-  const siteUrl = resolveSiteUrl(rawUserConfig.site?.url ?? "auto", env);
-  const sitePath = resolveBasePath(rawUserConfig.site?.path ?? "auto", env);
+  const siteUrl = resolveSiteUrl(rawGet("site.url", "auto"), env);
+  const sitePath = resolveBasePath(rawGet("site.path", "auto"), env);
 
   const resolveAsset = createStaticAssetResolver(
     projectDir,
@@ -51,7 +54,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     isProd: env.NODE_ENV === "production",
     isDev: env.NODE_ENV === "development",
     nodeEnv: env.NODE_ENV ?? "development",
-    custom: rawUserConfig.custom ?? {},
+    custom: rawGet("custom", {}),
   });
 
   const get = (key, ...fallbacks) =>
