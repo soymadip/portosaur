@@ -4,6 +4,11 @@
   background-color: var(--ifm-navbar-background-color) !important;
 }
 
+.navbar__logo {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 /* Reduce gap between navbar items */
 .navbar__items .navbar__item {
   padding-left: 0.5rem;
