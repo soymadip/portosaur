@@ -394,10 +394,13 @@ export async function initCommand(options = {}) {
 
   const portoVer = isTestProject ? "*" : `^${porto.version || "0.0.0"}`;
 
+  const cloneUrl = state.gitRemoteUrl || "<your-repository-url>";
+
   const templateVars = {
     projectName: state.projectName,
     userName: state.userName || "",
     fullName: state.fullName || "",
+    cloneUrl,
     portoVer,
     portoHome: porto.homepage || "",
     portoRepo: porto.repository || "",
