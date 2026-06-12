@@ -346,9 +346,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         (() => {
           const require = createRequire(import.meta.url);
           return require.resolve("@easyops-cn/docusaurus-search-local", {
-            paths: [portoPaths.theme ?? context.portoRoot ?? ""],
+            paths: [projectDir, portoPaths.theme ?? context.portoRoot ?? ""],
           });
         })(),
+
         {
           hashed: true,
           indexDocs: true,
