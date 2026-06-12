@@ -99,5 +99,5 @@ commitizen:
   tag_format: v$version
   template: src/cz/changelog.j2
   update_changelog_on_bump: false
-  version: 0.9.3
+  version: 0.9.4
   version_scheme: semver
