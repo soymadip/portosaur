@@ -1,13 +1,11 @@
-# yaml-language-server: $schema=https://soymadip.github.io/portosaur/conf-schema.json
+# yaml-language-server: $schema=https://soymadip.github.io/portosaur/user/config/schema.json
 #
 # Portosaur Project Configuration
 # Check full Config Docs: https://soymadip.is-a.dev/portosaur/guide/config
+#
 
 # Site Metadata & SEO
 site:
-  favicon: null # By default, generates from {{home_page.hero.profile_pic}}
-
-  # Auto set if deploying in Github/GitLab Pages
   url: "auto"
   path: "auto"
 
@@ -37,7 +35,7 @@ home_page:
 
   about:
     enable: true
-    image: null # Fallback to {{home_page.hero.profile_pic}}
+    image: "{{home_page.hero.profile_pic}}"
     bio:
       - "I'm a {{home_page.hero.profession}} who loves turning ideas into reality."
       - "With a background in computer science and a passion for design, I bridge the gap between aesthetics and functionality."
@@ -125,14 +123,6 @@ tasks:
     - title: "Build the future"
       status: "done"
       desc: "Implementing the core framework."
-
-# Functional Tools [TODO]
-tools:
-  link_shortener:
-    enable: false
-    deploy_path: "/l"
-    short_links:
-      "example": "https://example.com"
 
 # Custom variables for use in your content as {{custom.key}}
 custom:

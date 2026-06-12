@@ -76,7 +76,7 @@ jobs:
         run: bun run --cwd ${{ env.DOCS_DIR }} build
 
       - name: Generate Config Schema
-        run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema -o ${{ env.DOCS_OUT_DIR }}/conf-schema.json
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema -o ${{ env.DOCS_OUT_DIR }}/user/config/schema.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

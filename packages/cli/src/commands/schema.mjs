@@ -230,6 +230,10 @@ export async function schemaCommand(options = {}) {
       }
     }
 
+    const outDir = path.dirname(OUTPUT_FILE);
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true });
+    }
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(discoveredSchema, null, 2));
     logger.success(`Schema written to: ${OUTPUT_FILE}`);
   } catch (error) {
