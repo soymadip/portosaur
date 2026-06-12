@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getPortoDotDir } from "../utils/fs.mjs";
 import { favicons } from "favicons";
 import { downloadImage } from "../utils/imageDownloader.mjs";
 import { reshapeImage } from "../utils/imageProcessor.mjs";
@@ -121,7 +122,7 @@ export async function generateFavicons(siteDir, options = {}) {
     }
   }
 
-  const cacheDir = path.join(siteDir, ".docusaurus", "portosaur", "cache");
+  const cacheDir = path.join(getPortoDotDir(siteDir), "cache");
   createDirectoryIfNotExists(cacheDir);
   const reshapedImagePath = path.join(cacheDir, "profile_pic_reshaped.png");
   const tempFiles = [];

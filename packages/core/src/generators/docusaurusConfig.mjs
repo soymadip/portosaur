@@ -4,6 +4,7 @@ import { createRequire } from "module";
 import { getGitDate } from "../utils/system.mjs";
 import { porto } from "../app.mjs";
 import { resolveVars, getNestedValue } from "../utils/config.mjs";
+import { getPortoDotDir } from "../utils/fs.mjs";
 import {
   resolveSiteUrl,
   resolveBasePath,
@@ -64,7 +65,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const staticDirectories = [
     "static",
     assetsDir,
-    path.join(projectDir, ".docusaurus", "portosaur"),
+    getPortoDotDir(projectDir),
   ].filter((dir) => dir && fs.existsSync(dir));
 
   const isDarkMode = get("theme.appearance.dark_mode", true);

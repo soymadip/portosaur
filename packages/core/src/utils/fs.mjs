@@ -3,6 +3,15 @@ import path from "path";
 import { text } from "../app.mjs";
 
 /**
+ * Gets the standardized path to the hidden Portosaur data directory.
+ * @param {string} siteDir - The project root directory.
+ * @returns {string} The resolved path.
+ */
+export function getPortoDotDir(siteDir) {
+  return path.join(siteDir, ".docusaurus", ".portosaur");
+}
+
+/**
  * Loads a package.json file from a directory.
  * @param {string} dir - The directory to look in.
  * @returns {Object} The parsed package.json or an empty object if not found or invalid.

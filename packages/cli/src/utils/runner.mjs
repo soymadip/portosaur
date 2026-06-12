@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { createRequire } from "module";
-import { hasCommand } from "@portosaur/core";
+import { hasCommand, getPortoDotDir } from "@portosaur/core";
 
 /**
  * Generates a static Docusaurus config file by evaluating the Portosaur config
@@ -15,7 +15,7 @@ import { hasCommand } from "@portosaur/core";
  * @returns {string} The path to the generated config file.
  */
 export function writeConfigShim(UserRoot, portoPaths, context = {}) {
-  const dotDir = path.join(UserRoot, ".docusaurus", "portosaur");
+  const dotDir = getPortoDotDir(UserRoot);
 
   if (!fs.existsSync(dotDir)) {
     fs.mkdirSync(dotDir, { recursive: true });
@@ -187,7 +187,7 @@ export async function runDocusaurus(
         let content = fs.readFileSync(tpl, "utf8");
         const newContent = content.replace(
           /<meta name="generator" content="Docusaurus[^"]*">\n?/g,
-          ""
+          "",
         );
         if (content !== newContent) {
           fs.writeFileSync(tpl, newContent, "utf8");

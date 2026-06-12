@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import yaml from "js-yaml";
 
-export { mirrorSync, loadPkg } from "./utils/fs.mjs";
+export { mirrorSync, loadPkg, getPortoDotDir } from "./utils/fs.mjs";
 
 export {
   deepMerge,
