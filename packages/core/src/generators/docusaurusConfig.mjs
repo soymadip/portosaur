@@ -296,6 +296,22 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         subtitle: get("tasks.subtitle", "My current focus"),
         list: get("tasks.list", []),
       },
+
+      toolsConfig: {
+        linkShortener: {
+          enable: get("tools.link_shortener.enable", false),
+          deployPath: get("tools.link_shortener.deploy_path", "/l"),
+          shortLinks: get("tools.link_shortener.short_links", {}),
+        },
+      },
+
+      // site.robots_txt is consumed in build.mjs, but we pass it through here
+      // so the schema generator discovers it without hardcoding.
+      robotsTxt: {
+        enable: rawGet("site.robots_txt.enable", true),
+        rules: rawGet("site.robots_txt.rules", []),
+        customLines: rawGet("site.robots_txt.custom_lines", []),
+      },
     },
 
     // ------- Presets -------
