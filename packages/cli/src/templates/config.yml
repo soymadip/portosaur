@@ -28,6 +28,7 @@ theme:
     disable_project_link: false
 
   navigation:
+    breadcrumbs: true
     collapsable_sidebar: true
     hide_navbar_on_scroll: true
 

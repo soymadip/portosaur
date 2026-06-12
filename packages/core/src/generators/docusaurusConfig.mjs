@@ -307,6 +307,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           docs: {
             routeBasePath: "notes",
             path: "notes",
+            breadcrumbs: get("theme.navigation.breadcrumbs", true),
             sidebarPath: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
               "config/sidebar.jsx",
