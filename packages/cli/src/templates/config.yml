@@ -1,15 +1,15 @@
 # yaml-language-server: $schema=https://soymadip.github.io/portosaur/conf-schema.json
+#
 # Portosaur Project Configuration
-# This file is filled with example values
 # Check Config Docs: https://soymadip.is-a.dev/portosaur/guide/config
 
 # Site Metadata & SEO
 site:
-  title: "{{fullName}}"
-  tagline: "Short description about you, your passion, your goals etc."
+  title: null # Defaults to {{homepage.hero.title}}
+  tagline: null # Defaults to {{homepage.hero.desc}}
 
-  favicon: "{{portoRoot}}/assets/img/svg/icon.svg"
-  social_card: "{{portoRoot}}/assets/img/social-card.jpeg"
+  favicon: null # By default, generates from {{home_page.hero.profile_pic}}
+  # social_card: "{{portoRoot}}/assets/img/social-card.jpeg"
 
   # Auto set if deploying in Github/GitLab Pages
   url: "auto"
@@ -18,8 +18,14 @@ site:
 # UI/UX & Theme Behavior
 theme:
   appearance:
-    dark_mode: true
-    disable_switch: false
+    default_theme: dark # dark | light
+    show_theme_switch: true
+    disable_project_link: false
+
+  footer:
+    enable: true
+    message: null
+    disable_project_link: false
 
   navigation:
     collapsable_sidebar: true
@@ -28,10 +34,10 @@ theme:
 # Page Content & Sections
 home_page:
   hero:
-    title: null # Fallback to {{site.title}}
+    title: "{{fullName}}"
     profession: "Your Profession"
-    desc: null # Fallback to {{site.tagline}}
-    profile_pic: null # Fallback to {{site.favicon}}
+    desc: "Short description about you, your passion, your goals etc."
+    profile_pic: "{{portoRoot}}/assets/img/svg/icon.svg"
 
     social:
       - name: "LinkedIn"

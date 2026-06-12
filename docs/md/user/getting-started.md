@@ -14,11 +14,14 @@
 You can install {{meta.project.title}} globally with:
 
 ```bash
-bun i -g portosaur@latest
-
+bun i -g @portosaur/cli
 ```
 
-After this, add the bin directory to PATH and restart shell.
+Then check where it's installed and make sure it's in `PATH`:
+
+```bash
+which {{meta.pkg.bin}}
+```
 
 ## Initialization
 
@@ -33,7 +36,7 @@ This is the standard way to set up your site. It will guide you through configur
 {{meta.pkg.bin}} init
 
 # Or without installation
-bunx portosaur init
+bunx @portosaur/cli@latest init
 ```
 
 ### Non-Interactive
@@ -49,14 +52,14 @@ Useful for automation and scripting.
 bunx portosaur@latest init -p github -h github-pages -u soymadip -n "Shyam Roy"
 ```
 
-| Flag                   | Description                                                    | Default                 |
-| :--------------------- | :------------------------------------------------------------- | :---------------------- |
-| `-p`, `--vcs-provider` | Git Provider ID (`none`, `{{meta.defaults.vcsList}}`)          | `{{meta.defaults.vcs}}` |
-| `-h`, `--hosting`      | Hosting Platform ID (`none`, `{{meta.defaults.hostingList}}`)  | `Selected VCS Default`  |
-| `-u`, `--username`     | Username for the Git provider                                  | `Git/OS User`           |
-| `-n`, `--name`         | Full Name for the site title                                   | `Full Name`             |
-| `-k`, `--no-install`   | Skip automatic dependency installation                         | `false`                 |
-| `-P`, `--project-name` | Desired Project Name. Note that custom name is not recommended | vcs provider ideal name |
+| Flag                   | Description                                                    | Default                                                                                                |
+| :--------------------- | :------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| `-p`, `--vcs-provider` | Git Provider ID (`none`, `{{meta.defaults.vcsList}}`)          | `{{meta.defaults.vcs}}`                                                                                |
+| `-h`, `--hosting`      | Hosting Platform ID (`none`, `{{meta.defaults.hostingList}}`)  | `Selected VCS Default`                                                                                 |
+| `-u`, `--username`     | Username for the Git provider                                  | `Git/OS User`                                                                                          |
+| `-n`, `--name`         | Full Name for the site title                                   | `Full Name`                                                                                            |
+| `-k`, `--no-install`   | Skip automatic dependency installation                         | `false`                                                                                                |
+| `-P`, `--project-name` | Desired Project Name. Note that custom name is not recommended | [vcs provider ideal name]({{meta.project.repo}}/blob/main/packages/cli/src/templates/registry.yml#L38) |
 
 > [!WARNING] It's not recommended to use custom name
 >
@@ -94,6 +97,10 @@ cd <your-project-dir>
 ```
 
 The site will be available at `http://localhost:3000`.
+
+> [!WARNING]
+>
+> Press `ctrl`+`shift`+`R` once to hard reload the dev site once.
 
 ## Production Build
 

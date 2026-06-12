@@ -66,4 +66,6 @@ site:
 
 If you want to display the literal `\{{variable_name}}` without it being resolved, prefix the first brace with a backslash: `\\{{variable_name}}`.
 
-> **Note**: In `config.yml`, you should use `\\{{` to escape the tag. The engine will remove the backslash and preserve the braces in the final output.
+> [!NOTE]
+>
+> In `config.yml`, you should use `\\{{` to escape the tag. The backslash will be removed and the braces will be preserved in the final output.

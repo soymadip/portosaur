@@ -57,9 +57,21 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const get = (key, ...fallbacks) =>
     getNestedValue(userConfig, key, ...fallbacks);
 
-  const siteName = get("site.title", "Your Name");
+  const defaultTheme =
+    get("theme.appearance.default_mode", "dark") === "light" ? "light" : "dark";
 
-  // ------- Configuration Setup -------
+  const titleName = get("home_page.hero.title", "Your Name");
+  const siteName = get("site.title", titleName);
+  const siteFavicon = resolveAsset(
+    get("site.favicon", ""),
+    resolveAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"),
+  );
+
+  const siteTagline = get(
+    "home_page.hero.desc",
+    "site.tagline",
+    "Short description about you, your passion, your goals etc.",
+  );
 
   // Collect static directories: local site static/, theme assets/, and portosaur dot-dir.
   const staticDirectories = [
@@ -68,22 +80,15 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     getPortoDotDir(projectDir),
   ].filter((dir) => dir && fs.existsSync(dir));
 
-  const isDarkMode = get("theme.appearance.dark_mode", true);
-  const disableSwitch = get("theme.appearance.disable_switch", false);
+  // ------- Configuration Setup -------
 
   return {
     projectName: siteName,
     title: siteName,
-    tagline: get(
-      "site.tagline",
-      "Short description about you, your passion, your goals etc.",
-    ),
+    tagline: siteTagline,
     url: siteUrl,
     baseUrl: sitePath,
-    favicon: resolveAsset(
-      get("site.favicon", ""),
-      resolveAsset("favicon/favicon.ico", "img/icon.png"),
-    ),
+    favicon: siteFavicon,
     organizationName: siteName,
     onBrokenAnchors: get("site.on_broken_anchors", "throw"),
     onBrokenLinks: get("site.on_broken_links", "throw"),
@@ -91,10 +96,20 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     staticDirectories,
 
+    headTags: buildHeadTags([
+      ...(context.extraHeadTags || []),
+      ...get("site.head_tags", []),
+    ]),
+
     themeConfig: {
+      image: resolveAsset(get("site.social_card", "")) || undefined,
+      metadata: [
+        { name: "generator", content: `Portosaur v${porto.version}` },
+        { name: "theme-color", content: "var(--ifm-background-color)" },
+      ],
       colorMode: {
-        defaultMode: isDarkMode ? "dark" : "light",
-        disableSwitch,
+        defaultMode: defaultTheme,
+        disableSwitch: !get("theme.appearance.show_theme_switch", true),
         respectPrefersColorScheme: false,
       },
 
@@ -102,7 +117,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         title: siteName,
         logo: {
           alt: `${siteName} logo`,
-          src: resolveAsset(get("site.favicon", ""), "img/icon.png"),
+          src: siteFavicon,
         },
         hideOnScroll: get("theme.navigation.hide_navbar_on_scroll", true),
         items: [
@@ -162,14 +177,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               ...(get("tasks.enable", false)
                 ? [{ label: "Tasks", to: "/tasks" }]
                 : []),
-              ...(!get("theme.appearance.disable_branding", false)
+              ...(!get("theme.appearance.disable_project_link", false)
                 ? [
                     {
                       label: `Portosaur v${portoVersion}`,
                       className: "_nav-portosaur-version",
-                      href:
-                        porto?.homepage ||
-                        "https://github.com/soymadip/portosaur",
+                      href: porto?.homepage ?? "#",
                     },
                   ]
                 : []),
@@ -178,52 +191,44 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         ],
       },
 
-      footer: {
-        style: "dark",
-        copyright: get(
-          "site.footer_text",
-          `© ${new Date().getFullYear()} ${siteName}. Built with Portosaur.`,
-        ),
+      docs: {
+        sidebar: {
+          hideable: get("theme.navigation.collapsable_sidebar", true),
+        },
       },
-    },
 
-    headTags: buildHeadTags([
-      { meta: { name: "generator", content: `Portosaur v${porto.version}` } },
-      { meta: { name: "theme-color", content: "var(--ifm-background-color)" } },
-      ...(context.extraHeadTags || []),
-      ...get("site.head_tags", []),
-    ]),
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 3,
+      },
+
+      markdown: {
+        mermaid: get("theme.markdown.mermaid", true),
+        emoji: get("theme.markdown.render_emoji_shortcodes", true),
+        on_broken_links: get("theme.markdown.on_broken_links", "throw"),
+        on_broken_images: get("theme.markdown.on_broken_images", "throw"),
+      },
+
+      ...(get("theme.footer.enable", true)
+        ? {
+            footer: {
+              copyright: get(
+                "theme.footer.message",
+                `© ${new Date().getFullYear()} ${titleName}.${
+                  !get("theme.footer.disable_project_link", false)
+                    ? ` | Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
+                    : ""
+                }`,
+              ),
+            },
+          }
+        : {}),
+    },
 
     // ------- Custom Fields -------
 
     customFields: {
       portoVersion,
-
-      theme: {
-        markdown: {
-          mermaid: get("theme.markdown.mermaid", true),
-          on_broken_links: get("theme.markdown.on_broken_links", "throw"),
-          on_broken_images: get("theme.markdown.on_broken_images", "throw"),
-        },
-
-        navigation: {
-          collapsable_sidebar: get(
-            "theme.navigation.collapsable_sidebar",
-            true,
-          ),
-
-          hide_navbar_on_scroll: get(
-            "theme.navigation.hide_navbar_on_scroll",
-            true,
-          ),
-        },
-
-        appearance: {
-          dark_mode: get("theme.appearance.dark_mode", true),
-          disable_switch: get("theme.appearance.disable_switch", false),
-          disable_branding: get("theme.appearance.disable_branding", false),
-        },
-      },
 
       heroSection: {
         profilePic: resolveAsset(
@@ -232,7 +237,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         ),
 
         intro: get("home_page.hero.intro", "Hello there, I'm"),
-        title: get("home_page.hero.title", "site.title", "Your Name"),
+        title: titleName,
         subtitle: get("home_page.hero.subtitle", "I am a"),
         profession: get("home_page.hero.profession", "Your Profession"),
         desc: get("home_page.hero.desc", "Welcome to my portfolio."),
@@ -314,6 +319,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             showReadingTime: false,
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
+            feedOptions: {
+              type: get("site.rss.enable", true) ? "all" : null,
+              copyright: get(
+                "site.rss.copyright",
+                `Copyright © ${new Date().getFullYear()} ${siteName}.`,
+              ),
+              description: get("site.rss.desc", siteTagline),
+            },
           },
           theme: {
             customCss: path.resolve(

@@ -6,100 +6,142 @@
 
 The `site` block contains global settings for your site identity and SEO. This information is used to generate meta tags, site titles, and social sharing previews.
 
-| Key                 | Type   | Default          | Description                                                      |
-| :------------------ | :----- | :--------------- | :--------------------------------------------------------------- |
-| `title`             | `str`  | `"Your Name"`    | The name displayed in the browser tab and site headers.          |
-| `tagline`           | `str`  | `"Short bio..."` | A brief desc used for SEO meta tags.                             |
-| `favicon`           | `str`  | `(default icon)` | Path to your site's favicon.                                     |
-| `social_card`       | `str`  | `(default img)`  | Preview image used when sharing your site on social media.       |
-| `url`               | `str`  | `"auto"`         | Canonical URL. Use `auto` for automatic CI/CD detection.         |
-| `path`              | `str`  | `"auto"`         | Base path for sub-directory deployments.                         |
-| `on_broken_links`   | `str`  | `"throw"`        | Behavior when a link is broken (`throw`, `warn`, `ignore`).      |
-| `on_broken_anchors` | `str`  | `"throw"`        | Behavior when a link anchor (#) is missing.                      |
-| `robots_txt`        | `dict` | `{enable: true}` | Configuration for `robots.txt` generation.                       |
-| `rss`               | `bool` | `true`           | Enable RSS and Atom feeds for the blog.                          |
-| `head_tags`         | `list` | `[]`             | Custom HTML tags to inject into `<head>` (see Advanced section). |
-| `cors_proxy`        | `list` | `[]`             | Custom CORS proxies for image loading (see Advanced section).    |
+| Key                 | Type    | Default                       | Description                                                                        |
+| :------------------ | :------ | :---------------------------- | :--------------------------------------------------------------------------------- |
+| `title`             | `str`   | `{{home_page.hero.title}}`    | The site name (tab title/headers).                                                 |
+| `tagline`           | `str`   | `{{home_page.hero.desc}}`     | A brief desc used for SEO meta tags.                                               |
+| `favicon`           | `str`   | `(default icon)`              | Path to your site's favicon.                                                       |
+| `social_card`       | `str`   | `(default img)`               | Preview image used when sharing your site on social media.                         |
+| `url`               | `str`   | `"auto"`                      | Canonical URL. Use `auto` for automatic CI/CD detection.                           |
+| `path`              | `str`   | `"auto"`                      | Base path for sub-directory deployments.                                           |
+| `on_broken_links`   | `str`   | `"throw"`                     | Behavior when a link is broken <br/>Options: `throw`, `warn`, `ignore`.            |
+| `on_broken_anchors` | `str`   | `"throw"`                     | Behavior when a link anchor (#) is missing.<br/>Options: `throw`, `warn`, `ignore` |
+| `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
+| `rss`               | `block` | [see below](#site-rss)        | RSS feed generation                                                                |
+| `head_tags`         | `list`  | `[]`                          | Custom HTML tags to inject into `<head>` (see Advanced section).                   |
+
+### `site.rss`
+
+| Key         | Type   | Default            | Description                              |
+| :---------- | :----- | :----------------- | :--------------------------------------- |
+| `enable`    | `bool` | `true`             | Toggle RSS feed generation for the blog. |
+| `copyright` | `str`  | `(dynamic)`        | Custom copyright string for the feed.    |
+| `desc`      | `str`  | `{{site.tagline}}` | Description for the feed.                |
+
+### `site.robots_txt`
+
+| Key            | Type   | Default | Description                                              |
+| :------------- | :----- | :------ | :------------------------------------------------------- |
+| `enable`       | `bool` | `true`  | Toggle `robots.txt` file generation.                     |
+| `rules`        | `list` | `[...]` | List of rules (e.g., `user_agent`, `allow`, `disallow`). |
+| `custom_lines` | `list` | `[]`    | Extra raw lines to append to `robots.txt`.               |
 
 ## `theme`
 
-The `theme` block controls the visual appearance and navigation behavior of your portfolio. It allows you to toggle dark mode, customize the sidebar, and enable advanced Markdown features.
+The `theme` block controls the visual appearance and navigation behavior of portosaur site.
 
-### `appearance`
+| Key          | Type  | Default                        | Description                           |
+| :----------- | :---- | :----------------------------- | :------------------------------------ |
+| `appearance` | block | [see below](#theme-appearance) | Settings related to visual appearance |
+| `footer`     | block | [see below](#theme-footer)     | Site's footer settings                |
+| `markdown`   | block | [see below](#theme-markdown)   | Markdown rendering settings           |
+| `navigation` | block | [see below](#theme-navigation) | Navigation component settings         |
+
+### `theme.appearance`
 
 Settings related to the visual theme and mode switching.
 
-| Key                | Type   | Default | Description                                                  |
-| :----------------- | :----- | :------ | :----------------------------------------------------------- |
-| `dark_mode`        | `bool` | `true`  | Enable the dark theme by default.                            |
-| `disable_switch`   | `bool` | `false` | Hide the dark/light mode toggle.                             |
-| `disable_branding` | `bool` | `false` | Hide the "{{meta.project.title}} vX.X.X" link in the navbar. |
+| Key                    | Type   | Default  | Description                                                |
+| :--------------------- | :----- | :------- | :--------------------------------------------------------- |
+| `default_mode`         | `str`  | `"dark"` | Set the default theme.<br/>Options: `"dark"` or `"light"`. |
+| `show_theme_switch`    | `bool` | `true`   | Show the dark/light mode toggle.                           |
+| `disable_project_link` | `bool` | `false`  | Hide the Project link in the navbar.                       |
 
-### `navigation`
+### `theme.navigation`
 
 Settings for the site's navigation components.
 
-| Key                     | Type   | Default | Description                                        |
-| :---------------------- | :----- | :------ | :------------------------------------------------- |
-| `collapsable_sidebar`   | `bool` | `true`  | Allow users to collapse the side navigation.       |
-| `hide_navbar_on_scroll` | `bool` | `true`  | Automatically hide the navbar when scrolling down. |
+| Key                     | Type   | Default | Description                                            |
+| :---------------------- | :----- | :------ | :----------------------------------------------------- |
+| `breadcrumbs`           | `bool` | `true`  | Show breadcrumb navigation in the documentation pages. |
+| `collapsable_sidebar`   | `bool` | `true`  | Allow users to collapse the side navigation.           |
+| `hide_navbar_on_scroll` | `bool` | `true`  | Automatically hide the navbar when scrolling down.     |
 
-### `markdown`
+### `theme.markdown`
 
 Fine-tune the behavior of the Markdown renderer and documentation features.
 
-| Key                | Type   | Default   | Description                             |
-| :----------------- | :----- | :-------- | :-------------------------------------- |
-| `on_broken_links`  | `str`  | `"throw"` | MD-specific broken link behavior.       |
-| `on_broken_images` | `str`  | `"throw"` | MD-specific broken image behavior.      |
-| `mermaid`          | `bool` | `true`    | Enable support for Mermaid.js diagrams. |
+| Key                       | Type   | Default   | Description                             |
+| :------------------------ | :----- | :-------- | :-------------------------------------- |
+| `on_broken_links`         | `str`  | `"throw"` | MD-specific broken link behavior.       |
+| `on_broken_images`        | `str`  | `"throw"` | MD-specific broken image behavior.      |
+| `mermaid`                 | `bool` | `true`    | Enable support for Mermaid.js diagrams. |
+| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`. |
+
+### `theme.footer`
+
+Settings for the site footer.
+
+| Key                    | Type   | Default | Description                          |
+| :--------------------- | :----- | :------ | :----------------------------------- |
+| `enable`               | `bool` | `true`  | Toggle the footer section.           |
+| `message`              | `str`  | `null`  | Custom copyright message.            |
+| `disable_project_link` | `bool` | `false` | Hide the Project link in the footer. |
 
 ## `home_page`
 
-The `home_page` block contains the content for the primary sections of your site. This is where you define your hero banner, about text, project showcase, and more.
+The `home_page` block contains the content for the primary sections of your site.
 
-### `hero`
+| Key             | Type  | Default                               | Description                                |
+| :-------------- | :---- | :------------------------------------ | :----------------------------------------- |
+| `hero`          | block | [see below](#home-page-hero)          | Configuration for the hero banner section. |
+| `about`         | block | [see below](#home-page-about)         | Configuration for the about me section.    |
+| `project_shelf` | block | [see below](#home-page-project-shelf) | Showcase of your best projects.            |
+| `experience`    | block | [see below](#home-page-experience)    | Timeline of your professional career.      |
+| `social`        | block | [see below](#home-page-social)        | Social media presence and contact links.   |
+
+### `home_page.hero`
 
 The hero section is the first thing visitors see. It should provide a clear and concise introduction to who you are.
 
-| Key                  | Type  | Default               | Description                                 |
-| :------------------- | :---- | :-------------------- | :------------------------------------------ |
-| `title`              | `str` | `{{site.title}}`      | The main heading (defaults to site title).  |
-| `profession`         | `str` | `"Software Engineer"` | Your professional title.                    |
-| `desc`               | `str` | `{{site.tagline}}`    | A short bio or mission statement.           |
-| `profile_pic`        | `str` | `(default icon)`      | Path to your main profile image.            |
-| `intro`              | `str` | `"Hello there, I'm"`  | Small greeting text above the title.        |
-| `subtitle`           | `str` | `"I am a"`            | Text displayed above your profession.       |
-| `learn_more_btn_txt` | `str` | `"Learn More"`        | Text for the primary call-to-action button. |
+| Key                     | Type   | Default                      | Description                                 |
+| :---------------------- | :----- | :--------------------------- | :------------------------------------------ |
+| `title`                 | `str`  | `"Your Name"`                | The main heading.                           |
+| `profession`            | `str`  | `"Your Profession"`          | Your professional title.                    |
+| `desc`                  | `str`  | `"Welcome to my portfolio."` | A short bio or mission statement.           |
+| `profile_pic`           | `str`  | `(default icon)`             | Path to your main profile image.            |
+| `intro`                 | `str`  | `"Hello there, I'm"`         | Small greeting text above the title.        |
+| `subtitle`              | `str`  | `"I am a"`                   | Text displayed above your profession.       |
+| `social`                | `list` | `[]`                         | List of social links below the hero.        |
+| `learn_more_button_txt` | `str`  | `"Learn More"`               | Text for the primary call-to-action button. |
 
-### `about`
+### `home_page.about`
 
 The about section allows you to provide a more detailed biography and list your technical skills.
 
-| Key              | Type   | Default       | Description                                     |
-| :--------------- | :----- | :------------ | :---------------------------------------------- |
-| `enable`         | `bool` | `true`        | Toggle the About section.                       |
-| `heading`        | `str`  | `"About Me"`  | Heading for the about section.                  |
-| `subheading`     | `str`  | `null`        | Subheading for the about section.               |
-| `image`          | `str`  | `null`        | Optional bio image (falls back to profile pic). |
-| `bio`            | `list` | `[...]`       | List of strings, each rendered as a paragraph.  |
-| `skills_heading` | `str`  | `"My Skills"` | Heading for the technical skills section.       |
-| `skills`         | `list` | `[]`          | List of skills to display as badges.            |
-| `resume`         | `str`  | `null`        | Link to your resume/CV file.                    |
+| Key              | Type   | Default                          | Description                                     |
+| :--------------- | :----- | :------------------------------- | :---------------------------------------------- |
+| `enable`         | `bool` | `true`                           | Toggle the About section.                       |
+| `heading`        | `str`  | `"About Me"`                     | Heading for the about section.                  |
+| `image`          | `str`  | `{{home_page.hero.profile_pic}}` | Optional bio image (falls back to profile pic). |
+| `bio`            | `list` | `[...]`                          | List of strings, each rendered as a paragraph.  |
+| `skills_heading` | `str`  | `"My Skills"`                    | Heading for the technical skills section.       |
+| `skills`         | `list` | `[]`                             | List of skills to display as badges.            |
+| `resume`         | `str`  | `null`                           | Link to your resume/CV file.                    |
 
-### `project_shelf`
+### `home_page.project_shelf`
 
 The project shelf is a curated showcase of your best work. You can feature specific projects to give them more prominence.
 
-| Key          | Type   | Default         | Description                                       |
-| :----------- | :----- | :-------------- | :------------------------------------------------ |
-| `enable`     | `bool` | `true`          | Toggle the Project Shelf.                         |
-| `heading`    | `str`  | `"My Projects"` | Heading for the project section.                  |
-| `subheading` | `str`  | `null`          | Subheading for the project section.               |
-| `autoplay`   | `bool` | `true`          | Enable/disable automatic scrolling for the shelf. |
-| `projects`   | `list` | `[]`            | List of project objects (see schema below).       |
+| Key          | Type   | Default                          | Description                                                                      |
+| :----------- | :----- | :------------------------------- | :------------------------------------------------------------------------------- |
+| `enable`     | `bool` | `true`                           | Toggle the Project Shelf.                                                        |
+| `heading`    | `str`  | `"My Projects"`                  | Heading for the project section.                                                 |
+| `subheading` | `str`  | `"A collection of all my works"` | Subheading for the project section.                                              |
+| `autoplay`   | `bool` | `true`                           | Enable/disable automatic scrolling for the shelf.                                |
+| `projects`   | `list` | `[]`                             | List of project objects ([see schema below](#home-page-project-shelf-projects)). |
 
-**Project Object Schema:**
+#### `home_page.project_shelf.projects`
 
 | Key        | Type   | Default            | Description                                                                                                                                |
 | :--------- | :----- | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -113,18 +155,18 @@ The project shelf is a curated showcase of your best work. You can feature speci
 | `repo`     | `str`  | `null`             | URL to the source code repository (e.g., GitHub).                                                                                          |
 | `demo`     | `str`  | `null`             | URL to a live demo or interactive preview.                                                                                                 |
 
-### `experience`
+### `home_page.experience`
 
 The experience section provides a timeline of your professional career, education, or other milestones.
 
-| Key          | Type   | Default        | Description                            |
-| :----------- | :----- | :------------- | :------------------------------------- |
-| `enable`     | `bool` | `false`        | Toggle the Experience section.         |
-| `heading`    | `str`  | `"Experience"` | Heading for the experience section.    |
-| `subheading` | `str`  | `null`         | Subheading for the experience section. |
-| `list`       | `list` | `[]`           | List of work experience objects.       |
+| Key          | Type   | Default                     | Description                                                                       |
+| :----------- | :----- | :-------------------------- | :-------------------------------------------------------------------------------- |
+| `enable`     | `bool` | `false`                     | Toggle the Experience section.                                                    |
+| `heading`    | `str`  | `"Experience"`              | Heading for the experience section.                                               |
+| `subheading` | `str`  | `"My professional journey"` | Subheading for the experience section.                                            |
+| `list`       | `list` | `[]`                        | List of work experience objects ([see schema below](#home-page-experience-list)). |
 
-**Experience Object Schema:**
+#### `home_page.experience.list`
 
 | Key        | Type  | Default | Description                                        |
 | :--------- | :---- | :------ | :------------------------------------------------- |
@@ -133,37 +175,37 @@ The experience section provides a timeline of your professional career, educatio
 | `duration` | `str` | `null`  | Time period (e.g., "2022 - Present").              |
 | `desc`     | `str` | `null`  | Summary of your responsibilities and achievements. |
 
-### `social`
+### `home_page.social`
 
 Manage your social media presence and contact links. These are usually displayed in the footer or social section.
 
-| Key          | Type   | Default          | Description                                         |
-| :----------- | :----- | :--------------- | :-------------------------------------------------- |
-| `enable`     | `bool` | `true`           | Toggle social media links.                          |
-| `heading`    | `str`  | `"Get In Touch"` | Heading for the contact section.                    |
-| `subheading` | `str`  | `(dynamic)`      | Subheading with invitation to connect.              |
-| `links`      | `list` | `[]`             | List of social platform objects (see schema below). |
+| Key          | Type   | Default                    | Description                                                                    |
+| :----------- | :----- | :------------------------- | :----------------------------------------------------------------------------- |
+| `enable`     | `bool` | `true`                     | Toggle social media links.                                                     |
+| `heading`    | `str`  | `"Get In Touch"`           | Heading for the contact section.                                               |
+| `subheading` | `str`  | `"Feel free to reach out"` | Subheading with invitation to connect.                                         |
+| `links`      | `list` | `[]`                       | List of social platform objects ([see schema below](#home-page-social-links)). |
 
-**Social Link Schema:**
+#### `home_page.social.links`
 
-| Key    | Type  | Default | Description                                          |
-| :----- | :---- | :------ | :--------------------------------------------------- |
-| `name` | `str` | `null`  | Name of the platform (e.g., "GitHub").               |
-| `icon` | `str` | `null`  | Icon identifier (supports FontAwesome/Lucide names). |
-| `url`  | `str` | `null`  | URL to your profile.                                 |
+| Key    | Type  | Default | Description                            |
+| :----- | :---- | :------ | :------------------------------------- |
+| `name` | `str` | `null`  | Name of the platform (e.g., "GitHub"). |
+| `icon` | `str` | `null`  | Icon identifier.                       |
+| `url`  | `str` | `null`  | URL to your profile.                   |
 
 ## `tasks`
 
 The `tasks` block powers a public roadmap and goal tracking system. It allows you to share what you're working on and your progress with your audience.
 
-| Key        | Type   | Default         | Description                              |
-| :--------- | :----- | :-------------- | :--------------------------------------- |
-| `enable`   | `bool` | `false`         | Toggle the public tasks page.            |
-| `title`    | `str`  | `"Tasks"`       | Heading for the tasks page.              |
-| `subtitle` | `str`  | `(placeholder)` | Sub-heading for the page.                |
-| `list`     | `list` | `[]`            | List of task objects (see schema below). |
+| Key        | Type   | Default              | Description                                                   |
+| :--------- | :----- | :------------------- | :------------------------------------------------------------ |
+| `enable`   | `bool` | `false`              | Toggle the public tasks page.                                 |
+| `title`    | `str`  | `"Tasks"`            | Heading for the tasks page.                                   |
+| `subtitle` | `str`  | `"My current focus"` | Sub-heading for the page.                                     |
+| `list`     | `list` | `[]`                 | List of task objects ([see schema below](#taskslist-schema)). |
 
-**Task `list` Object Schema:**
+#### `tasks.list`
 
 | Key      | Type  | Default  | Description                                       |
 | :------- | :---- | :------- | :------------------------------------------------ |
@@ -175,7 +217,11 @@ The `tasks` block powers a public roadmap and goal tracking system. It allows yo
 
 The `tools` block includes functional utilities that enhance your portfolio's capabilities, such as a built-in link shortener.
 
-### `link_shortener`
+| Key              | Type  | Default                            | Description                     |
+| :--------------- | :---- | :--------------------------------- | :------------------------------ |
+| `link_shortener` | block | [see below](#tools-link-shortener) | Internal link redirect utility. |
+
+### `tools.link_shortener`
 
 A built-in utility to create short, memorable URLs that redirect to external sites.
 
