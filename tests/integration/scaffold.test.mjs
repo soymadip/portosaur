@@ -47,7 +47,7 @@ describe("Integration: Scaffold & Build", () => {
     const shimPath = path.join(
       projectPath,
       ".docusaurus",
-      "portosaur",
+      ".portosaur",
       "docusaurus.config.js",
     );
     expect(fs.existsSync(shimPath)).toBe(true);
