@@ -418,7 +418,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       [
         "@docusaurus/plugin-pwa",
         {
-          debug: !env.NODE_ENV || env.NODE_ENV === "development",
+          debug: false,
           offlineModeActivationStrategies: [
             "always",
             "appInstalled",
