@@ -296,6 +296,14 @@ export async function initCommand(options = {}) {
 
     state.projectName = options.projectName || "my-portfolio";
 
+    if (state.vcs !== "none") {
+      const vcsConfig = registry.vcs_providers[state.vcs];
+      state.gitRemoteUrl = vcsConfig.url
+        .replace("{{user}}", state.userName)
+        .replace("{{projectName}}", state.projectName)
+        .replace("{{domain}}", vcsConfig.domain);
+    }
+
     // Validate resolved hosting platform
     if (
       state.hosting !== "none" &&
