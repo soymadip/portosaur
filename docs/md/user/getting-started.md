@@ -49,7 +49,7 @@ Useful for automation and scripting.
 {{meta.pkg.bin}} init -p github -h github-pages -u soymadip -n "Shyam Roy"
 
 # Or withought installation
-bunx portosaur@latest init -p github -h github-pages -u soymadip -n "Shyam Roy"
+bunx @portosaur/cli@latest init -p github -h github-pages -u soymadip -n "Shyam Roy"
 ```
 
 | Flag                   | Description                                                    | Default                                                                                                |
