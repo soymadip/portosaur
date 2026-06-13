@@ -227,7 +227,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             footer: {
               copyright: get(
                 "theme.footer.message",
-                `© ${new Date().getFullYear()} ${titleName}.${
+                `© Copyright ${new Date().getFullYear()} ${titleName}.${
                   !get("theme.footer.disable_project_link", false)
                     ? ` | Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
                     : ""
@@ -353,7 +353,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               type: get("site.rss.enable", true) ? "all" : null,
               copyright: get(
                 "site.rss.copyright",
-                `Copyright © ${new Date().getFullYear()} ${siteName}.`,
+                `© Copyright ${new Date().getFullYear()} ${siteName}.`,
               ),
               description: get("site.rss.desc", siteTagline),
             },
@@ -378,7 +378,6 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             paths: [projectDir, portoPaths.theme ?? context.portoRoot ?? ""],
           });
         })(),
-
         {
           hashed: true,
           indexDocs: true,
