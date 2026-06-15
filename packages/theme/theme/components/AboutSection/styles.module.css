@@ -276,6 +276,19 @@
   .bioTextContainer {
     padding: 2rem;
   }
+
+  .skillsContainer {
+    text-align: center;
+  }
+
+  .skillsTitle::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .skillsGrid {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 768px) {
