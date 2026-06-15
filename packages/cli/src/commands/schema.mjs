@@ -208,7 +208,10 @@ function extractPrecedingComment(beforeText) {
     }
 
     // Skip bare identifier / assignment lines (e.g. `heroSection: {`, `const x =`)
-    if (/^[a-zA-Z0-9_$]+:?\s*\{?\s*$/.test(line) || /^(const|let|var|return)\s/.test(line)) {
+    if (
+      /^[a-zA-Z0-9_$]+:?\s*\{?\s*$/.test(line) ||
+      /^(const|let|var|return)\s/.test(line)
+    ) {
       // These aren't comments — stop walking
       break;
     }
@@ -430,9 +433,13 @@ export async function schemaCommand(options = {}) {
         // Priority: per-key inside body > preceding block > closing-line inline
         const resolved = perKey[keyPath];
         const description =
-          resolved?.description || preceding.description || fallback.description;
+          resolved?.description ||
+          preceding.description ||
+          fallback.description;
         const itemsSchema =
-          resolved?.itemsSchema ?? preceding.itemsSchema ?? fallback.itemsSchema;
+          resolved?.itemsSchema ??
+          preceding.itemsSchema ??
+          fallback.itemsSchema;
 
         const keySchema = { type: [type, "null"] };
         if (isFreeform) keySchema.additionalProperties = true;

@@ -14,6 +14,7 @@ import {
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { catppuccinLatte, catppuccinMocha } from "../config/prism.mjs";
 
 // ------- Main Configuration Generator -------
 
@@ -235,6 +236,36 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       tableOfContents: {
         minHeadingLevel: 2,
         maxHeadingLevel: 3,
+      },
+
+      prism: {
+        theme: catppuccinLatte,
+        darkTheme: catppuccinMocha,
+        additionalLanguages: [
+          "java",
+          "php",
+          "rust",
+          "go",
+          "yaml",
+          "toml",
+          "c",
+          "cpp",
+        ],
+        magicComments: [
+          {
+            line: "highlight-next-line",
+            className: "theme-code-block-highlighted-line",
+            block: { start: "highlight-start", end: "highlight-end" },
+          },
+          {
+            line: "error-next-line",
+            className: "code-block-error-line",
+          },
+          {
+            line: "success-next-line",
+            className: "code-block-success-line",
+          },
+        ],
       },
 
       ...(get("theme.footer.enable", true) // Toggle the footer section.

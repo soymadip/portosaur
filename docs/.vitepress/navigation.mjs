@@ -24,6 +24,7 @@ export const baseSidebar = [
         collapsed: true,
         items: [
           { text: "Interactive Previews", link: "/user/markdown/previews" },
+          { text: "Code Blocks", link: "/user/markdown/code-blocks" },
           { text: "Tabs", link: "/user/markdown/tabs" },
           { text: "Details", link: "/user/markdown/details" },
           { text: "Tooltips", link: "/user/markdown/tooltips" },
