@@ -49,8 +49,7 @@ function isJsExpression(val) {
   return (
     val.startsWith("`") ||
     val.includes("${") ||
-    val.includes("()") ||
-    val.includes("()") ||
+    val.match(/^[a-zA-Z_$][a-zA-Z0-9_.]*\(/) ||
     /^[a-zA-Z_$][a-zA-Z0-9_.]*$/.test(val) // bare identifier
   );
 }
