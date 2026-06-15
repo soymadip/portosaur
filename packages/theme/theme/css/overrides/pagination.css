@@ -1,7 +1,16 @@
 /* === Pagination Overrides === */
 
 .pagination-nav {
-  margin-top: 1.5rem !important;
+  margin-top: auto !important;
+  padding-top: 2.5rem;
+}
+
+/* Make content containers flex columns so pagination can stick to the bottom on short pages */
+[class*="docItemContainer_"],
+.theme-blog-post-page main .container .row > .col {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--ifm-navbar-height) - 4.5rem);
 }
 
 .pagination-nav__label {
