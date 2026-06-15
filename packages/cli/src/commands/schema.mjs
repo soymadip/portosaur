@@ -26,10 +26,14 @@ function applyEntry(propertiesRoot, dotPath, leafSchema) {
     if (!current[part]) {
       current[part] = isLast
         ? { ...leafSchema }
-        : { type: "object", additionalProperties: false, properties: {} };
-    } else if (!isLast && current[part].type !== "object") {
+        : {
+            type: ["object", "null"],
+            additionalProperties: false,
+            properties: {},
+          };
+    } else if (!isLast && !Array.isArray(current[part].type)) {
       current[part] = {
-        type: "object",
+        type: ["object", "null"],
         additionalProperties: false,
         properties: {},
       };
@@ -72,18 +76,19 @@ function parseItemsShorthand(shorthand) {
 
     let propSchema = {};
     if (typeStr.startsWith("enum[")) {
-      propSchema.type = "string";
+      propSchema.type = ["string", "null"];
       propSchema.enum = typeStr
         .slice(5, -1)
         .split("|")
         .map((s) => s.trim());
+      propSchema.enum.push(null);
     } else if (typeStr === "string|null") {
       propSchema.type = ["string", "null"];
     } else if (typeStr === "array") {
-      propSchema.type = "array";
-      propSchema.items = { type: "string" };
+      propSchema.type = ["array", "null"];
+      propSchema.items = { type: ["string", "null"] };
     } else {
-      propSchema.type = typeStr;
+      propSchema.type = [typeStr, "null"];
     }
 
     properties[cleanKey] = propSchema;
@@ -283,7 +288,9 @@ export async function schemaCommand(options = {}) {
       let defaultValue = undefined;
       let isFreeform = false;
 
-      if (val === "true" || val === "false") {
+      if (val === "null") {
+        defaultValue = null;
+      } else if (val === "true" || val === "false") {
         type = "boolean";
         defaultValue = val === "true";
       } else if (!isNaN(val) && val !== "") {
@@ -305,7 +312,7 @@ export async function schemaCommand(options = {}) {
         defaultValue = val.replace(/^["'`](.*?)["'`]$/s, "$1").trim();
       }
 
-      const leafSchema = { type };
+      const leafSchema = { type: [type, "null"] };
       if (isFreeform) leafSchema.additionalProperties = true;
       if (description) leafSchema.description = description;
       if (defaultValue !== undefined) leafSchema.default = defaultValue;

@@ -70,8 +70,12 @@ function walk(configNode, schemaNode, prefix, violations) {
 
     const childSchema = schemaProperties[key];
 
+    const isObject = Array.isArray(childSchema?.type)
+      ? childSchema.type.includes("object")
+      : childSchema?.type === "object";
+
     // Recurse into object nodes (skip arrays — no item schema)
-    if (childSchema?.type === "object") {
+    if (isObject) {
       walk(configNode[key], childSchema, dotPath, violations);
     }
   }
