@@ -430,16 +430,6 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     // ------- Plugins -------
 
-    stylesheets: [
-      {
-        href: "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css",
-        type: "text/css",
-        integrity:
-          "sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB",
-        crossorigin: "anonymous",
-      },
-    ],
-
     plugins: [
       ...(env.NODE_ENV === "production"
         ? [

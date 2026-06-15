@@ -3,6 +3,7 @@
 
 /* ----- Global Fonts ----- */
 @import "@fontsource/alata";
+@import "katex/dist/katex.min.css";
 
 /* ----- Global Styles ----- */
 @import url("./animations.css");
