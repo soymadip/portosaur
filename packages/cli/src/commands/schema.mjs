@@ -50,8 +50,49 @@ function isJsExpression(val) {
     val.startsWith("`") ||
     val.includes("${") ||
     val.includes("()") ||
+    val.includes("()") ||
     /^[a-zA-Z_$][a-zA-Z0-9_.]*$/.test(val) // bare identifier
   );
+}
+
+function parseItemsShorthand(shorthand) {
+  const content = shorthand.replace(/^\{|\}$/g, "").trim();
+  const properties = {};
+  const required = [];
+
+  const regex = /([a-zA-Z0-9_]+\??):\s*([^,}]+)/g;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    const key = match[1].trim();
+    const typeStr = match[2].trim();
+
+    const isOptional = key.endsWith("?");
+    const cleanKey = isOptional ? key.slice(0, -1) : key;
+
+    if (!isOptional) required.push(cleanKey);
+
+    let propSchema = {};
+    if (typeStr.startsWith("enum[")) {
+      propSchema.type = "string";
+      propSchema.enum = typeStr
+        .slice(5, -1)
+        .split("|")
+        .map((s) => s.trim());
+    } else if (typeStr === "string|null") {
+      propSchema.type = ["string", "null"];
+    } else if (typeStr === "array") {
+      propSchema.type = "array";
+      propSchema.items = { type: "string" };
+    } else {
+      propSchema.type = typeStr;
+    }
+
+    properties[cleanKey] = propSchema;
+  }
+
+  const result = { type: "object", properties, additionalProperties: false };
+  if (required.length > 0) result.required = required;
+  return result;
 }
 
 // ------- Main -------
@@ -171,25 +212,70 @@ export async function schemaCommand(options = {}) {
       const lines = beforeMatch.split("\n");
 
       let description = "";
-      let i = lines.length - 1;
+      let i = lines.length - 2;
       const commentLines = [];
+      let itemsSchema = null;
 
       while (i >= 0 && commentLines.length < 5) {
         const line = lines[i].trim();
-        if (!line) break;
+        if (!line || /^[a-zA-Z0-9_]+:?$/.test(line)) {
+          i--;
+          continue;
+        }
         if (line.startsWith("//")) {
           const content = line.replace(/^\/\/\s?/, "").trim();
-          if (!content.match(/^(TODO|FIXME|NOTE|SECTION|---)/i)) {
+          if (content.startsWith("@items ")) {
+            try {
+              itemsSchema = parseItemsShorthand(content.substring(7));
+            } catch (e) {
+              logger.warn(`Failed to parse @items schema for ${keys[0]}`);
+            }
+          } else if (!content.match(/^(TODO|FIXME|NOTE|SECTION|---)/i)) {
             commentLines.unshift(content);
           }
           i--;
-        } else if (line.endsWith("*/") || line.startsWith("*")) {
-          break;
+        } else if (
+          line.endsWith("*/") ||
+          line.startsWith("*") ||
+          line.startsWith("/*")
+        ) {
+          let clean = line
+            .replace(/\*\/$/, "")
+            .replace(/^\/\*/, "")
+            .replace(/^\*/, "")
+            .trim();
+          if (clean) commentLines.unshift(clean);
+          i--;
         } else {
           break;
         }
       }
       description = commentLines.join(" ").trim();
+
+      // Extract inline comment after the get() call
+      let inlineComment = "";
+      let j = currentIdx;
+      while (j < sourceCode.length && sourceCode[j] !== "\n") {
+        inlineComment += sourceCode[j];
+        j++;
+      }
+
+      const commentMatch = inlineComment.match(/\/\/(.*)/);
+      if (commentMatch) {
+        const content = commentMatch[1].trim();
+        if (content.startsWith("@items ")) {
+          try {
+            itemsSchema = parseItemsShorthand(content.substring(7));
+          } catch (e) {
+            logger.warn(`Failed to parse inline @items schema for ${keys[0]}`);
+          }
+        } else if (
+          !description &&
+          !content.match(/^(TODO|FIXME|NOTE|SECTION|---)/i)
+        ) {
+          description = content;
+        }
+      }
 
       // Type inference
       const val = defaultValueRaw;
@@ -224,6 +310,7 @@ export async function schemaCommand(options = {}) {
       if (isFreeform) leafSchema.additionalProperties = true;
       if (description) leafSchema.description = description;
       if (defaultValue !== undefined) leafSchema.default = defaultValue;
+      if (type === "array" && itemsSchema) leafSchema.items = itemsSchema;
 
       for (const keyPath of keys) {
         applyEntry(discoveredSchema.properties, keyPath, leafSchema);

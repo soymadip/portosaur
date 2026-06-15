@@ -254,11 +254,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         subtitle: get("home_page.hero.subtitle", "I am a"),
         profession: get("home_page.hero.profession", "Your Profession"),
         desc: get("home_page.hero.desc", "Welcome to my portfolio."),
-        social: get("home_page.hero.social", []),
         learnMoreButtonTxt: get(
           "home_page.hero.learn_more_button_txt",
           "Learn More",
         ),
+        social: get("home_page.hero.social", []), // @items { name: string, url: string, icon?: string }
       },
 
       aboutSection: {
@@ -280,6 +280,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           "A collection of all my works",
         ),
         autoplay: get("home_page.project_shelf.autoplay", true),
+        // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
         projects: get("home_page.project_shelf.projects", []),
       },
 
@@ -290,7 +291,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           "home_page.experience.subheading",
           "My professional journey",
         ),
-        list: get("home_page.experience.list", []),
+        list: get("home_page.experience.list", []), // @items { company: string, role: string, duration?: string, desc?: string }
       },
 
       socialSection: {
@@ -300,14 +301,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           "home_page.social.subheading",
           "Feel free to reach out",
         ),
-        links: get("home_page.social.links", []),
+        links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
       },
 
       tasks: {
         enable: get("tasks.enable", false),
         title: get("tasks.title", "Tasks"),
         subtitle: get("tasks.subtitle", "My current focus"),
-        list: get("tasks.list", []),
+        list: get("tasks.list", []), // @items { title: string, status: string, desc?: string, link?: string }
       },
 
       toolsConfig: {
