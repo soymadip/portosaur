@@ -113,6 +113,16 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     headTags: regularHeadTags,
 
+    markdown: {
+      format: get("site.markdown.format", "mdx"),
+      mermaid: get("site.markdown.mermaid", true),
+      emoji: get("site.markdown.render_emoji_shortcodes", true),
+      hooks: {
+        onBrokenMarkdownLinks: get("site.markdown.on_broken_links", "throw"),
+        onBrokenMarkdownImages: get("site.markdown.on_broken_images", "throw"),
+      },
+    },
+
     themeConfig: {
       image: resolveAsset(get("site.social_card", "")) || undefined,
       metadata: [
@@ -227,21 +237,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         maxHeadingLevel: 3,
       },
 
-      markdown: {
-        mermaid: get("theme.markdown.mermaid", true),
-        emoji: get("theme.markdown.render_emoji_shortcodes", true),
-        on_broken_links: get("theme.markdown.on_broken_links", "throw"),
-        on_broken_images: get("theme.markdown.on_broken_images", "throw"),
-      },
-
       ...(get("theme.footer.enable", true)
         ? {
             footer: {
               copyright: get(
                 "theme.footer.message",
-                `© Copyright ${new Date().getFullYear()} ${titleName}.${
+                `Copyright © ${new Date().getFullYear()} ${titleName}.${
                   !get("theme.footer.disable_project_link", false)
-                    ? ` | Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
+                    ? `Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
                     : ""
                 }`,
               ),
@@ -360,7 +363,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               portoPaths.theme ?? context.portoRoot ?? "",
               "config/sidebar.jsx",
             ),
-            ...(get("site.edit_url") ? { editUrl: get("site.edit_url") } : {}),
+            ...(get("site.edit_url", "")
+              ? { editUrl: get("site.edit_url", "") }
+              : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
           },
@@ -374,7 +379,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               type: get("site.rss.enable", true) ? "all" : null,
               copyright: get(
                 "site.rss.copyright",
-                `© Copyright ${new Date().getFullYear()} ${siteName}.`,
+                `Copyright © ${new Date().getFullYear()} ${siteName}.`,
               ),
               description: get("site.rss.desc", siteTagline),
             },

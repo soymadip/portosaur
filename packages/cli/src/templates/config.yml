@@ -10,12 +10,12 @@ vars:
   github: "{{userName}}"
   linkedin: "{{userName}}"
 
-# Site Metadata & SEO
+# Site Metadata, SEO, Parser behavior
 site:
   url: "auto"
   path: "auto"
 
-# UI/UX & Theme Behavior
+# UI, Navigation Behavior
 theme:
   navigation:
     collapsable_sidebar: true

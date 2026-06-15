@@ -17,9 +17,10 @@ The `site` block contains global settings for your site identity and SEO. This i
 | `edit_url`          | `str`   | `null`                        | Base URL for "Edit this page" links (e.g., GitHub repo tree/main link).            |
 | `on_broken_links`   | `str`   | `"throw"`                     | Behavior when a link is broken <br/>Options: `throw`, `warn`, `ignore`.            |
 | `on_broken_anchors` | `str`   | `"throw"`                     | Behavior when a link anchor (#) is missing.<br/>Options: `throw`, `warn`, `ignore` |
-| `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
 | `rss`               | `block` | [see below](#site-rss)        | RSS feed generation                                                                |
+| `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
 | `head_tags`         | `list`  | `[]`                          | Custom HTML tags to inject into `<head>` (see Advanced section).                   |
+| `markdown`          | `block` | [see below](#site-markdown)   | Markdown renderer settings.                                                        |
 
 ### `site.rss`
 
@@ -37,6 +38,18 @@ The `site` block contains global settings for your site identity and SEO. This i
 | `rules`        | `list` | `[...]` | List of rules (e.g., `user_agent`, `allow`, `disallow`). |
 | `custom_lines` | `list` | `[]`    | Extra raw lines to append to `robots.txt`.               |
 
+### `site.markdown`
+
+Configure the Markdown renderer behavior.
+
+| Key                       | Type   | Default   | Description                                                            |
+| :------------------------ | :----- | :-------- | :--------------------------------------------------------------------- |
+| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.       |
+| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. |
+| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above.                  |
+| `mermaid`                 | `bool` | `true`    | Render Mermaid.js diagrams.                                            |
+| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                |
+
 ## `theme`
 
 The `theme` block controls the visual appearance and navigation behavior of portosaur site.
@@ -45,7 +58,6 @@ The `theme` block controls the visual appearance and navigation behavior of port
 | :----------- | :---- | :----------------------------- | :------------------------------------ |
 | `appearance` | block | [see below](#theme-appearance) | Settings related to visual appearance |
 | `footer`     | block | [see below](#theme-footer)     | Site's footer settings                |
-| `markdown`   | block | [see below](#theme-markdown)   | Markdown rendering settings           |
 | `navigation` | block | [see below](#theme-navigation) | Navigation component settings         |
 
 ### `theme.appearance`
@@ -67,17 +79,6 @@ Settings for the site's navigation components.
 | `breadcrumbs`           | `bool` | `true`  | Show breadcrumb navigation in the documentation pages. |
 | `collapsable_sidebar`   | `bool` | `true`  | Allow users to collapse the side navigation.           |
 | `hide_navbar_on_scroll` | `bool` | `true`  | Automatically hide the navbar when scrolling down.     |
-
-### `theme.markdown`
-
-Fine-tune the behavior of the Markdown renderer and documentation features.
-
-| Key                       | Type   | Default   | Description                             |
-| :------------------------ | :----- | :-------- | :-------------------------------------- |
-| `on_broken_links`         | `str`  | `"throw"` | MD-specific broken link behavior.       |
-| `on_broken_images`        | `str`  | `"throw"` | MD-specific broken image behavior.      |
-| `mermaid`                 | `bool` | `true`    | Enable support for Mermaid.js diagrams. |
-| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`. |
 
 ### `theme.footer`
 
