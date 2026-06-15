@@ -61,18 +61,18 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     getNestedValue(userConfig, key, ...fallbacks);
 
   const defaultTheme =
-    get("theme.appearance.default_mode", "dark") === "light" ? "light" : "dark";
+    get("theme.appearance.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
 
-  const titleName = get("home_page.hero.title", "Your Name");
-  const siteName = get("site.title", titleName);
+  const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
+  const siteName = get("site.title", titleName); // Global site title.
   const siteFavicon = resolveAsset(
-    get("site.favicon", ""),
-    resolveAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"),
+    get("site.favicon", ""), // Path to site's favicon (Default: home_page.hero.profile_pic).
+    resolveAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"), // Path/URL to profile picture in the hero section.
   );
 
   const siteTagline = get(
-    "home_page.hero.desc",
-    "site.tagline",
+    "home_page.hero.desc", // Short description about You.
+    "site.tagline", // Global site tagline.
     "Short description about you, your passion, your goals etc.",
   );
 
@@ -86,7 +86,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   // Process all head tags (from plugins and user config)
   const allHeadTags = buildHeadTags([
     ...(context.extraHeadTags || []),
-    ...get("site.head_tags", []),
+    ...get("site.head_tags", []), // Custom head tags to inject into the document.
   ]);
 
   // Separate regular head tags from meta tags
@@ -105,8 +105,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     baseUrl: sitePath,
     favicon: siteFavicon,
     organizationName: siteName,
-    onBrokenAnchors: get("site.on_broken_anchors", "throw"),
-    onBrokenLinks: get("site.on_broken_links", "throw"),
+    onBrokenAnchors: get("site.on_broken_anchors", "throw"), // Behavior when a link anchor (#) is missing.
+    onBrokenLinks: get("site.on_broken_links", "throw"), // Behavior when a link is broken.
     i18n: { defaultLocale: "en", locales: ["en"] },
 
     staticDirectories,
@@ -114,17 +114,17 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     headTags: regularHeadTags,
 
     markdown: {
-      format: get("site.markdown.format", "mdx"),
-      mermaid: get("site.markdown.mermaid", true),
-      emoji: get("site.markdown.render_emoji_shortcodes", true),
+      format: get("site.markdown.format", "mdx"), // Markdown parser format (mdx, md, detect).
+      mermaid: get("site.markdown.mermaid", true), // Enable support for Mermaid.js diagrams.
+      emoji: get("site.markdown.render_emoji_shortcodes", true), // Render emoji shortcodes like :smile:.
       hooks: {
-        onBrokenMarkdownLinks: get("site.markdown.on_broken_links", "throw"),
-        onBrokenMarkdownImages: get("site.markdown.on_broken_images", "throw"),
+        onBrokenMarkdownLinks: get("site.markdown.on_broken_links", "throw"), // Broken link behavior.
+        onBrokenMarkdownImages: get("site.markdown.on_broken_images", "throw"), // Broken image behavior.
       },
     },
 
     themeConfig: {
-      image: resolveAsset(get("site.social_card", "")) || undefined,
+      image: resolveAsset(get("site.social_card", "")) || undefined, // Preview image used when sharing your site on social media.
       metadata: [
         { name: "generator", content: `Portosaur v${porto.version}` },
         { name: "theme-color", content: "var(--ifm-background-color)" },
@@ -132,7 +132,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       ],
       colorMode: {
         defaultMode: defaultTheme,
-        disableSwitch: !get("theme.appearance.show_theme_switch", true),
+        disableSwitch: !get("theme.appearance.show_theme_switch", true), // Show the dark/light mode toggle.
         respectPrefersColorScheme: false,
       },
 
@@ -142,14 +142,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           alt: `${siteName} logo`,
           src: siteFavicon,
         },
-        hideOnScroll: get("theme.navigation.hide_navbar_on_scroll", true),
+        hideOnScroll: get("theme.navigation.hide_navbar_on_scroll", true), // Automatically hide the navbar when scrolling down.
         items: [
           {
             type: "search",
             position: "right",
             className: "navbar-search-bar",
           },
-          ...(get("home_page.about.enable", true)
+          ...(get("home_page.about.enable", true) // Toggle the About Me section.
             ? [
                 {
                   label: "About Me",
@@ -159,7 +159,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.project_shelf.enable", true)
+          ...(get("home_page.project_shelf.enable", true) // Toggle the Project Shelf section.
             ? [
                 {
                   label: "Projects",
@@ -169,7 +169,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.experience.enable", false)
+          ...(get("home_page.experience.enable", false) // Toggle the Experience section.
             ? [
                 {
                   label: "Experience",
@@ -179,7 +179,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.social.enable", true)
+          ...(get("home_page.social.enable", true) // Toggle the Social Links section.
             ? [
                 {
                   label: "Contact",
@@ -197,10 +197,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             items: [
               { label: "Notes", to: "/notes" },
               { label: "Blog", to: "/blog" },
-              ...(get("tasks.enable", false)
+              ...(get("tasks.enable", false) // Toggle the Tasks page.
                 ? [{ label: "Tasks", to: "/tasks" }]
                 : []),
-              ...(!get("theme.appearance.disable_project_link", false)
+              ...(!get("theme.appearance.disable_project_link", false) // Hide the Project link in the navbar.
                 ? [
                     {
                       label: `Portosaur v${portoVersion}`,
@@ -212,7 +212,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 : []),
             ],
           },
-          ...(!get("theme.appearance.disable_project_link", false)
+          ...(!get("theme.appearance.disable_project_link", false) // Hide the Project link in the navbar.
             ? [
                 {
                   label: `Portosaur v${portoVersion}`,
@@ -228,7 +228,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       docs: {
         sidebar: {
-          hideable: get("theme.navigation.collapsable_sidebar", true),
+          hideable: get("theme.navigation.collapsable_sidebar", true), // Enable collapsable sidebar navigation.
         },
       },
 
@@ -237,13 +237,13 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         maxHeadingLevel: 3,
       },
 
-      ...(get("theme.footer.enable", true)
+      ...(get("theme.footer.enable", true) // Toggle the footer section.
         ? {
             footer: {
               copyright: get(
-                "theme.footer.message",
+                "theme.footer.message", // Custom copyright message.
                 `Copyright © ${new Date().getFullYear()} ${titleName}.${
-                  !get("theme.footer.disable_project_link", false)
+                  !get("theme.footer.disable_project_link", false) // Hide the Project link in the footer.
                     ? `Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
                     : ""
                 }`,
@@ -264,52 +264,51 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           "img/icon.png",
         ),
 
-        intro: get("home_page.hero.intro", "Hello there, I'm"),
+        intro: get("home_page.hero.intro", "Hello there, I'm"), // Intro text before name.
         title: titleName,
-        subtitle: get("home_page.hero.subtitle", "I am a"),
+        subtitle: get("home_page.hero.subtitle", "I am a"), // Subtitle text after name.
         profession: get("home_page.hero.profession", "Your Profession"),
         desc: get("home_page.hero.desc", "Welcome to my portfolio."),
         learnMoreButtonTxt: get(
-          "home_page.hero.learn_more_button_txt",
+          "home_page.hero.learn_more_button_txt", // Text for the call-to-action button.
           "Learn More",
         ),
-        social: get("home_page.hero.social", []), // @items { name: string, url: string, icon?: string }
+        social: get("home_page.hero.social", []), // List of social links. @items { name: string, url: string, icon?: string }
       },
 
       aboutSection: {
         enable: get("home_page.about.enable", true),
-        heading: get("home_page.about.heading", "About Me"),
-        name: get("site.title", "Your Name"),
+        heading: get("home_page.about.heading", "About Me"), // Heading for the About Me section.
+        name: get("site.title", "Your Name"), // Global site title.
         image: resolveAsset(
           get(
-            "home_page.about.image",
+            "home_page.about.image", // Image used in the About Me section.
             "home_page.hero.profile_pic",
             "img/icon.png",
           ),
         ),
-        bio: get("home_page.about.bio", []),
+        bio: get("home_page.about.bio", []), // Paragraphs for your biography.
         skills: get("home_page.about.skills", []),
-        skillsHeading: get("home_page.about.skills_heading", "My Skills"),
+        skillsHeading: get("home_page.about.skills_heading", "My Skills"), // Heading for the skills list.
         resume: get("home_page.about.resume", ""),
       },
 
       projectShelf: {
         enable: get("home_page.project_shelf.enable", true),
-        heading: get("home_page.project_shelf.heading", "My Projects"),
+        heading: get("home_page.project_shelf.heading", "My Projects"), // Heading for the projects section.
         subheading: get(
-          "home_page.project_shelf.subheading",
+          "home_page.project_shelf.subheading", // Subheading for the projects section.
           "A collection of all my works",
         ),
-        autoplay: get("home_page.project_shelf.autoplay", true),
-        // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
-        projects: get("home_page.project_shelf.projects", []),
+        autoplay: get("home_page.project_shelf.autoplay", true), // Autoplay the project carousel.
+        projects: get("home_page.project_shelf.projects", []), // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
       },
 
       experienceSection: {
         enable: get("home_page.experience.enable", false),
-        heading: get("home_page.experience.heading", "Experience"),
+        heading: get("home_page.experience.heading", "Experience"), // Heading for the experience section.
         subheading: get(
-          "home_page.experience.subheading",
+          "home_page.experience.subheading", // Subheading for the experience section.
           "My professional journey",
         ),
         list: get("home_page.experience.list", []), // @items { company: string, role: string, duration?: string, desc?: string }
@@ -317,9 +316,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       socialSection: {
         enable: get("home_page.social.enable", true),
-        heading: get("home_page.social.heading", "Get In Touch"),
+        heading: get("home_page.social.heading", "Get In Touch"), // Heading for the social links section.
         subheading: get(
-          "home_page.social.subheading",
+          "home_page.social.subheading", // Subheading for the social links section.
           "Feel free to reach out",
         ),
         links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
@@ -327,25 +326,25 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       tasks: {
         enable: get("tasks.enable", false),
-        title: get("tasks.title", "Tasks"),
+        title: get("tasks.title", "Tasks"), // Title for the tasks page.
         subtitle: get("tasks.subtitle", "My current focus"),
         list: get("tasks.list", []), // @items { title: string, status: string, desc?: string }
       },
 
       toolsConfig: {
         linkShortener: {
-          enable: get("tools.link_shortener.enable", false),
-          deployPath: get("tools.link_shortener.deploy_path", "/l"),
-          shortLinks: get("tools.link_shortener.short_links", {}),
+          enable: get("tools.link_shortener.enable", false), // Toggle the internal link shortener.
+          deployPath: get("tools.link_shortener.deploy_path", "/l"), // URL base path for redirects.
+          shortLinks: get("tools.link_shortener.short_links", {}), // Key-value map of slugs to target URLs.
         },
       },
 
       // site.robots_txt is consumed in build.mjs, but we pass it through here
       // so the schema generator discovers it without hardcoding.
       robotsTxt: {
-        enable: rawGet("site.robots_txt.enable", true),
-        rules: rawGet("site.robots_txt.rules", []),
-        customLines: rawGet("site.robots_txt.custom_lines", []),
+        enable: rawGet("site.robots_txt.enable", true), // Toggle robots.txt file generation.
+        rules: rawGet("site.robots_txt.rules", []), // List of rules (e.g., user_agent, allow, disallow).
+        customLines: rawGet("site.robots_txt.custom_lines", []), // Extra raw lines to append to robots.txt.
       },
     },
 
@@ -358,12 +357,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           docs: {
             routeBasePath: "notes",
             path: "notes",
-            breadcrumbs: get("theme.navigation.breadcrumbs", true),
+            breadcrumbs: get("theme.navigation.breadcrumbs", true), // Show breadcrumbs in the notes pages.
             sidebarPath: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
               "config/sidebar.jsx",
             ),
-            ...(get("site.edit_url", "")
+            ...(get("site.edit_url", "") // Base URL for Edit this page links.
               ? { editUrl: get("site.edit_url", "") }
               : {}),
             remarkPlugins: [remarkMath],
@@ -372,16 +371,18 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           blog: {
             path: "blog",
             showReadingTime: false,
-            ...(get("site.edit_url", "") ? { editUrl: get("site.edit_url", "") } : {}),
+            ...(get("site.edit_url", "") // Base URL for Edit this page links.
+              ? { editUrl: get("site.edit_url", "") }
+              : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
             feedOptions: {
-              type: get("site.rss.enable", true) ? "all" : null,
+              type: get("site.rss.enable", true) ? "all" : null, // Toggle RSS feed generation for the blog.
               copyright: get(
-                "site.rss.copyright",
+                "site.rss.copyright", // Custom copyright string for the feed.
                 `Copyright © ${new Date().getFullYear()} ${siteName}.`,
               ),
-              description: get("site.rss.desc", siteTagline),
+              description: get("site.rss.desc", siteTagline), // Description for the feed.
             },
           },
           theme: {
