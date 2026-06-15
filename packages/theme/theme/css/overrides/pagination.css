@@ -24,12 +24,12 @@ article:has(.theme-doc-footer) + .pagination-nav {
   display: flex;
   flex-direction: column;
   flex: 1;
-  row-gap: 2.5rem;
 }
 
 /* Push the doc footer ("Edit this page") to the bottom of the article */
 .theme-doc-footer {
   margin-top: auto !important;
+  padding-top: 2rem;
 }
 
 .pagination-nav__label {
