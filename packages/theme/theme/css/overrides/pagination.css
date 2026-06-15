@@ -2,7 +2,12 @@
 
 .pagination-nav {
   margin-top: auto !important;
-  padding-top: 2.5rem;
+  padding-top: 2.9rem;
+}
+
+/* Reduce top padding if the article above it has a footer (Edit this page) */
+article:has(.theme-doc-footer) + .pagination-nav {
+  padding-top: 1.5rem;
 }
 
 /* Make content containers flex columns so pagination can stick to the bottom on short pages */
@@ -11,6 +16,20 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - var(--ifm-navbar-height) - 4.5rem);
+}
+
+/* Make the article a flex column that stretches */
+[class*="docItemContainer_"] > article,
+.theme-blog-post-page main .container .row > .col > article {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  row-gap: 2.5rem;
+}
+
+/* Push the doc footer ("Edit this page") to the bottom of the article */
+.theme-doc-footer {
+  margin-top: auto !important;
 }
 
 .pagination-nav__label {

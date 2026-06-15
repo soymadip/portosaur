@@ -360,12 +360,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               portoPaths.theme ?? context.portoRoot ?? "",
               "config/sidebar.jsx",
             ),
+            ...(get("site.edit_url") ? { editUrl: get("site.edit_url") } : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
           },
           blog: {
             path: "blog",
             showReadingTime: false,
+            ...(get("site.edit_url") ? { editUrl: get("site.edit_url") } : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
             feedOptions: {

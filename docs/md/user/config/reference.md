@@ -14,6 +14,7 @@ The `site` block contains global settings for your site identity and SEO. This i
 | `social_card`       | `str`   | `(default img)`               | Preview image used when sharing your site on social media.                         |
 | `url`               | `str`   | `"auto"`                      | Canonical URL. Use `auto` for automatic CI/CD detection.                           |
 | `path`              | `str`   | `"auto"`                      | Base path for sub-directory deployments.                                           |
+| `edit_url`          | `str`   | `null`                        | Base URL for "Edit this page" links (e.g., GitHub repo tree/main link).            |
 | `on_broken_links`   | `str`   | `"throw"`                     | Behavior when a link is broken <br/>Options: `throw`, `warn`, `ignore`.            |
 | `on_broken_anchors` | `str`   | `"throw"`                     | Behavior when a link anchor (#) is missing.<br/>Options: `throw`, `warn`, `ignore` |
 | `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
