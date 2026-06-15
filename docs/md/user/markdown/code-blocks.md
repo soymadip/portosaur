@@ -34,7 +34,7 @@ function init() {
 }
 ```
 
-### Error Line
+### Error Line & Block
 
 Show an incorrect or failing line of code by using `// error-next-line`.
 This highlights the line in red to indicate an error or bad practice.
@@ -46,7 +46,19 @@ function calculate() {
 }
 ```
 
-### Success Line
+You can also highlight an entire block of error lines using `// error-start` and `// error-end`:
+
+```javascript
+function calculate() {
+  // error-start
+  let x = 1;
+  let y = 0;
+  let result = x / y;
+  // error-end
+}
+```
+
+### Success Line & Block
 
 Highlight a successful or correct line of code using `// success-next-line`.
 This highlights the line in green.

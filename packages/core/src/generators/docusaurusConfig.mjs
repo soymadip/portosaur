@@ -260,10 +260,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           {
             line: "error-next-line",
             className: "code-block-error-line",
+            block: { start: "error-start", end: "error-end" },
           },
           {
             line: "success-next-line",
             className: "code-block-success-line",
+            block: { start: "success-start", end: "success-end" },
           },
         ],
       },
