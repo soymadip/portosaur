@@ -4,23 +4,7 @@ import { usePluginData } from "@docusaurus/useGlobalData";
 import NavArrow from "../components/NavArrow/index.jsx";
 import HashNavigation from "../utils/HashNavigation.jsx";
 
-const style = {
-  notesContainer: { padding: "2rem 0", maxWidth: "1200px", margin: "0 auto" },
-  pageTitle: {
-    fontSize: "2.5rem",
-    textAlign: "center",
-    marginBottom: "0.5rem",
-    color: "var(--ifm-color-primary)",
-    animation: "slideUp 0.5s ease-out forwards",
-  },
-  pageDescription: {
-    fontSize: "0.9rem",
-    textAlign: "center",
-    color: "var(--ifm-font-color-tertiary)",
-    marginBottom: "2rem",
-    animation: "slideUp 0.5s ease-out 0.2s forwards",
-  },
-};
+import styles from "../css/notes.module.css";
 
 export default function Notes() {
   const { path: docsBasePath } = usePluginData(
@@ -31,11 +15,11 @@ export default function Notes() {
 
   return (
     <Layout title={pageTitle} description={`My ${pageTitle}`}>
-      <main style={style.notesContainer}>
+      <main className={styles.notesContainer}>
         <div className="container">
           <header className="text-center mb-4">
-            <h1 style={style.pageTitle}>My Notes</h1>
-            <p style={style.pageDescription}>
+            <h1 className={styles.pageTitle}>My Notes</h1>
+            <p className={styles.pageDescription}>
               A collection of my self written notes &amp; reference guides
             </p>
           </header>

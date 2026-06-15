@@ -244,7 +244,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 "theme.footer.message", // Custom copyright message.
                 `Copyright © ${new Date().getFullYear()} ${titleName}.${
                   !get("theme.footer.disable_project_link", false) // Hide the Project link in the footer.
-                    ? `Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
+                    ? ` | Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
                     : ""
                 }`,
               ),
@@ -380,7 +380,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               type: get("site.rss.enable", true) ? "all" : null, // Toggle RSS feed generation for the blog.
               copyright: get(
                 "site.rss.copyright", // Custom copyright string for the feed.
-                `Copyright © ${new Date().getFullYear()} ${siteName}.`,
+                ` | Copyright © ${new Date().getFullYear()} ${siteName}.`,
               ),
               description: get("site.rss.desc", siteTagline), // Description for the feed.
             },

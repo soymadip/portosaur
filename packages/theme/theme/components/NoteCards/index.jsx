@@ -67,7 +67,7 @@ function NoteCard({ title, language, slug, desc, index, docsBasePath }) {
         <Icon className={styles.noteIcon} />
       </div>
       <div className={styles.cardContent}>
-        <h3 className={styles.noteTitle}>{title}</h3>
+        <h3 className={styles.noteTitle} title={title}>{title}</h3>
       </div>
       <FaChevronRight className={styles.mobileChevron} />
     </Link>
