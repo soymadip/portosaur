@@ -265,7 +265,13 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         enable: get("home_page.about.enable", true),
         heading: get("home_page.about.heading", "About Me"),
         name: get("site.title", "Your Name"),
-        image: resolveAsset(get("home_page.about.image", "")),
+        image: resolveAsset(
+          get(
+            "home_page.about.image",
+            "home_page.hero.profile_pic",
+            "img/icon.png",
+          ),
+        ),
         bio: get("home_page.about.bio", []),
         skills: get("home_page.about.skills", []),
         skillsHeading: get("home_page.about.skills_heading", "My Skills"),
@@ -308,7 +314,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         enable: get("tasks.enable", false),
         title: get("tasks.title", "Tasks"),
         subtitle: get("tasks.subtitle", "My current focus"),
-        list: get("tasks.list", []), // @items { title: string, status: string, desc?: string, link?: string }
+        list: get("tasks.list", []), // @items { title: string, status: string, desc?: string }
       },
 
       toolsConfig: {

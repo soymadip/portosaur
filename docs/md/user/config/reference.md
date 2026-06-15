@@ -119,15 +119,15 @@ The hero section is the first thing visitors see. It should provide a clear and 
 
 The about section allows you to provide a more detailed biography and list your technical skills.
 
-| Key              | Type   | Default                          | Description                                     |
-| :--------------- | :----- | :------------------------------- | :---------------------------------------------- |
-| `enable`         | `bool` | `true`                           | Toggle the About section.                       |
-| `heading`        | `str`  | `"About Me"`                     | Heading for the about section.                  |
-| `image`          | `str`  | `{{home_page.hero.profile_pic}}` | Optional bio image (falls back to profile pic). |
-| `bio`            | `list` | `[...]`                          | List of strings, each rendered as a paragraph.  |
-| `skills_heading` | `str`  | `"My Skills"`                    | Heading for the technical skills section.       |
-| `skills`         | `list` | `[]`                             | List of skills to display as badges.            |
-| `resume`         | `str`  | `null`                           | Link to your resume/CV file.                    |
+| Key              | Type   | Default                                          | Description                                    |
+| :--------------- | :----- | :----------------------------------------------- | :--------------------------------------------- |
+| `enable`         | `bool` | `true`                                           | Toggle the About section.                      |
+| `heading`        | `str`  | `"About Me"`                                     | Heading for the about section.                 |
+| `image`          | `str`  | `{{home_page.hero.profile_pic}}` -> default icon | Optional bio image.                            |
+| `bio`            | `list` | `[...]`                                          | List of strings, each rendered as a paragraph. |
+| `skills_heading` | `str`  | `"My Skills"`                                    | Heading for the technical skills section.      |
+| `skills`         | `list` | `[]`                                             | List of skills to display as badges.           |
+| `resume`         | `str`  | `null`                                           | Link to your resume/CV file.                   |
 
 ### `home_page.project_shelf`
 
@@ -188,11 +188,12 @@ Manage your social media presence and contact links. These are usually displayed
 
 #### `home_page.social.links`
 
-| Key    | Type  | Default | Description                            |
-| :----- | :---- | :------ | :------------------------------------- |
-| `name` | `str` | `null`  | Name of the platform (e.g., "GitHub"). |
-| `icon` | `str` | `null`  | Icon identifier.                       |
-| `url`  | `str` | `null`  | URL to your profile.                   |
+| Key    | Type  | Default | Description                               |
+| :----- | :---- | :------ | :---------------------------------------- |
+| `name` | `str` | `null`  | Name of the platform (e.g., "GitHub").    |
+| `icon` | `str` | `null`  | Icon identifier.                          |
+| `desc` | `str` | `null`  | Brief description or call-to-action text. |
+| `url`  | `str` | `null`  | URL to your profile.                      |
 
 ## `tasks`
 
@@ -207,11 +208,11 @@ The `tasks` block powers a public roadmap and goal tracking system. It allows yo
 
 #### `tasks.list`
 
-| Key      | Type  | Default  | Description                                       |
-| :------- | :---- | :------- | :------------------------------------------------ |
-| `title`  | `str` | `null`   | Short name of the task.                           |
-| `status` | `str` | `"todo"` | Current progress (`done`, `todo`, `in-progress`). |
-| `desc`   | `str` | `null`   | Optional details about the task.                  |
+| Key      | Type  | Default     | Description                                          |
+| :------- | :---- | :---------- | :--------------------------------------------------- |
+| `title`  | `str` | `null`      | Short name of the task.                              |
+| `status` | `str` | `"pending"` | Current progress (`active`, `pending`, `completed`). |
+| `desc`   | `str` | `null`      | Optional details about the task.                     |
 
 ## `tools`
 
