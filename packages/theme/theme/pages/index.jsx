@@ -8,7 +8,6 @@ import ContactSection from "../components/ContactSection/index.jsx";
 import ExperienceSection from "../components/ExperienceSection/index.jsx";
 import NavArrow from "../components/NavArrow/index.jsx";
 
-
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
 
@@ -35,7 +34,6 @@ export default function Home() {
         <ExperienceSection id="experience" />
         <ContactSection id="contact" />
         <NavArrow />
-
       </main>
     </Layout>
   );

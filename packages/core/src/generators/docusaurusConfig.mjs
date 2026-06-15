@@ -194,13 +194,25 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 ? [
                     {
                       label: `Portosaur v${portoVersion}`,
-                      className: "_nav-portosaur-version",
+                      className:
+                        "_nav-portosaur-version desktop-only-portosaur-version",
                       href: porto?.homepage ?? "#",
                     },
                   ]
                 : []),
             ],
           },
+          ...(!get("theme.appearance.disable_project_link", false)
+            ? [
+                {
+                  label: `Portosaur v${portoVersion}`,
+                  className:
+                    "_nav-portosaur-version mobile-only-portosaur-version",
+                  href: porto?.homepage ?? "#",
+                  position: "right",
+                },
+              ]
+            : []),
         ],
       },
 

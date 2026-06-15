@@ -40,3 +40,33 @@
     margin-left: 0 !important;
   }
 }
+
+/* Desktop/Mobile specific Portosaur version strings */
+@media (min-width: 997px) {
+  .mobile-only-portosaur-version {
+    display: none !important;
+  }
+}
+
+@media (max-width: 996px) {
+  .desktop-only-portosaur-version {
+    display: none !important;
+  }
+
+  .mobile-only-portosaur-version {
+    position: fixed !important;
+    bottom: 0;
+    left: 0;
+    width: var(--ifm-navbar-sidebar-width);
+    padding: 1rem;
+    z-index: 100;
+    border-top: 1px solid var(--ifm-toc-border-color);
+    margin: 0 !important;
+    text-align: center;
+  }
+
+  /* Ensure the sidebar scrollable area doesn't get covered by the fixed version footer */
+  .navbar-sidebar__items {
+    padding-bottom: 70px !important;
+  }
+}
