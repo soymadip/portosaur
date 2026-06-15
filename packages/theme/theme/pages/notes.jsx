@@ -3,7 +3,7 @@ import NoteCards from "../components/NoteCards/index.jsx";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import NavArrow from "../components/NavArrow/index.jsx";
 import HashNavigation from "../utils/HashNavigation.jsx";
-import ScrollToTop from "../components/ScrollToTop/index.jsx";
+
 
 const style = {
   notesContainer: { padding: "2rem 0", maxWidth: "1200px", margin: "0 auto" },
@@ -42,7 +42,7 @@ export default function Notes() {
           </header>
           <NoteCards />
           <NavArrow />
-          <ScrollToTop />
+
           <HashNavigation
             elementPrefix="note-"
             elementSelector=".note-card"
