@@ -372,7 +372,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           blog: {
             path: "blog",
             showReadingTime: false,
-            ...(get("site.edit_url") ? { editUrl: get("site.edit_url") } : {}),
+            ...(get("site.edit_url", "") ? { editUrl: get("site.edit_url", "") } : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
             feedOptions: {
