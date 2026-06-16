@@ -17,7 +17,6 @@ import {
   printWorkflowTips,
   warnIfRepoNameMismatch,
   isInteractive as getInteractivity,
-  looksLikeTestProject,
 } from "../utils/index.mjs";
 
 /**
@@ -160,8 +159,7 @@ export async function initCiCommand(options = {}) {
   });
 
   // Gather variables for template replacement
-  const isTestProject = looksLikeTestProject(path.basename(projectDir));
-  const portoVer = isTestProject ? "link:portosaur" : porto.version || "0.0.0";
+  const portoVer = porto.version || "0.0.0";
 
   const userName = getPlatformUserGuess(vcsProviderId, gitConfig) || "user";
   const fullName = gitConfig["user.name"] || "User";

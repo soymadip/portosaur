@@ -43,6 +43,7 @@ test+.js
 *test/
 TEST*/
 smoke-test-site/
+playground/
 
 ss.*
 *tmp*

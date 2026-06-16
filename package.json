@@ -17,16 +17,11 @@
   "scripts": {
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "test:cli": "bun test --cwd packages/cli",
-    "test:core": "bun run schema && bun test --cwd packages/core",
-    "test:logger": "bun test --cwd packages/logger",
-    "test:all": "bun run schema && bun test",
-    "test:smoke": "bun run schema && bash src/scripts/smoke-test.sh",
     "schema": "bun packages/cli/bin/porto.mjs schema",
-    "build:docs": "bun run --cwd docs build",
-    "build:all": "bun run build:docs",
-    "dev": "bun run --cwd docs dev",
-    "dev:docs": "bun run --cwd docs dev"
+    "dev": "bun src/playground.mjs dev",
+    "dev:docs": "bun run --cwd docs dev",
+    "test:all": "bun run schema && bun test",
+    "test:smoke": "bun src/playground.mjs build -p -d smoke-test-site && rm -rf smoke-test-site"
   },
   "devDependencies": {
     "prettier": "latest"

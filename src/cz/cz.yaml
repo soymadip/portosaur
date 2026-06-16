@@ -92,7 +92,8 @@ commitizen:
   post_bump_hooks:
     - git push origin $(git branch --show-current) --follow-tags
   pre_bump_hooks:
-    - bun test
+    - bun run test:all
+    - bun run test:smoke
     - src/cz/bumper.sh
     - bun install
     - bun format

@@ -17,7 +17,6 @@ import {
   ensureContentDirs,
   printWorkflowTips,
   isInteractive as getInteractivity,
-  looksLikeTestProject,
 } from "../utils/index.mjs";
 
 /**
@@ -387,13 +386,7 @@ export async function initCommand(options = {}) {
   logger.info("Creating project files...");
 
   // Prepare Template Variables
-
-  // If the project name looks like a testing/demo project, prefer linking
-  // to the CLI package to avoid loose dev-mode predictions.
-  const isTestProject = looksLikeTestProject(state.projectName);
-
-  const portoVer = isTestProject ? "*" : `^${porto.version || "0.0.0"}`;
-
+  const portoVersion = `^${porto.version || "0.0.0"}`;
   const cloneUrl = state.gitRemoteUrl || "<your-repository-url>";
 
   const templateVars = {
@@ -401,7 +394,7 @@ export async function initCommand(options = {}) {
     userName: state.userName || "",
     fullName: state.fullName || "",
     cloneUrl,
-    portoVer,
+    portoVersion,
     portoHome: porto.homepage || "",
     portoRepo: porto.repository || "",
   };
