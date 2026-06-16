@@ -58,6 +58,37 @@ export async function devCommand(siteDir, extraArgs = []) {
       });
     }
 
+    // [Playground] Watch portosaur packages for backend changes if running inside the monorepo
+    const packagesDir = path.resolve(Paths.root, "../../packages");
+
+    if (fs.existsSync(packagesDir)) {
+      logger.info(
+        "Playground dev mode: watching @portosaur/* for backend logic changes...",
+      );
+
+      const coreWatcher = fs.watch(
+        packagesDir,
+        { recursive: true },
+        (_eventType, filename) => {
+          // Only trigger on .mjs changes.
+          // This naturally ignores .jsx and .css changes in the theme,
+          // preserving Docusaurus's instant Webpack HMR for components/styles!
+          if (filename && filename.endsWith(".mjs")) {
+            logger.info(`Detected backend change (${filename}), reloading...`);
+            try {
+              writeConfigShim(UserRoot, portoPaths, {}, true); // forceRefresh = true
+            } catch (err) {
+              logger.warn(`Failed to regenerate config: ${err.message}`);
+            }
+          }
+        },
+      );
+
+      process.on("SIGINT", () => {
+        coreWatcher.close();
+      });
+    }
+
     await runDocusaurus("start", UserRoot, configPath, extraArgs);
   } catch (error) {
     logger.error(`Failed to start dev server: ${error.message}`);

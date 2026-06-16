@@ -14,7 +14,12 @@ import { hasCommand, getPortoDotDir } from "@portosaur/core";
  * @param {Object} [context={}] - Additional context for config generation.
  * @returns {string} The path to the generated config file.
  */
-export function writeConfigShim(UserRoot, portoPaths, context = {}) {
+export function writeConfigShim(
+  UserRoot,
+  portoPaths,
+  context = {},
+  forceRefresh = false,
+) {
   const dotDir = getPortoDotDir(UserRoot);
 
   if (!fs.existsSync(dotDir)) {
@@ -26,7 +31,7 @@ export function writeConfigShim(UserRoot, portoPaths, context = {}) {
     fs.existsSync(path.join(UserRoot, file)),
   );
 
-  if (configYaml) {
+  if (configYaml && !forceRefresh) {
     configMtime = fs.statSync(path.join(UserRoot, configYaml)).mtimeMs;
   }
 
