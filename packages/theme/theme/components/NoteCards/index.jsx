@@ -29,7 +29,7 @@ function useNotes() {
       const fileSlug = isTopLevelFile
         ? path.replace("./", "").replace(/\.mdx?$/, "")
         : pathParts[1];
-      const slug = frontMatter.slug || frontMatter.id || fileSlug;
+      const slug = frontMatter.slug || fileSlug;
       const rawTitle = frontMatter.title || frontMatter.language || fileSlug;
       const title = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
       const language = frontMatter.language
