@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import path from "path";
 import os from "os";
 import { execSync, execFileSync } from "child_process";

@@ -80,6 +80,12 @@ export async function buildCommand(siteDir, extraArgs = []) {
 
     // ------- Post Build -------
 
+    try {
+      fs.writeFileSync(path.join(UserRoot, "build", ".nojekyll"), "");
+    } catch (e) {
+      logger.warn(`Failed to create .nojekyll in build dir: ${e.message}`);
+    }
+
     await generateRobotsTxt(UserRoot, {
       enable: userConfig.site?.robots_txt?.enable,
       rules: userConfig.site?.robots_txt?.rules,
