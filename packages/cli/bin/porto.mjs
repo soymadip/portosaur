@@ -44,10 +44,13 @@ program
 program
   .command("providers")
   .description("List available VCS providers and hosting platforms")
-  .addArgument(
-    new Argument("[type]", "Filter list by type").choices(["vcs", "hosting"]),
+  .addOption(
+    new Option("-t, --type <type>", "Filter list by type").choices([
+      "vcs",
+      "hosting",
+    ]),
   )
-  .action((type) => providersCommand(type));
+  .action((options) => providersCommand(options.type));
 
 program
   .command("dev [siteDir]")

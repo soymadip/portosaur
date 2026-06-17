@@ -4,8 +4,10 @@ uv = "latest"
 bun = "latest"
 
 [env]
-_.path = './packages/cli/bin'
 CZ_CONFIG = 'src/cz/cz.yaml'
+
+[shell_alias]
+porto = './packages/cli/bin/porto.mjs'
 
 [tasks]
 bump = "cz --config $CZ_CONFIG  bump"
