@@ -21,7 +21,7 @@ packages/
 - **Lightweight CLI**: The `@portosaur/cli` package MUST NOT depend on `@portosaur/theme` or heavy frontend frameworks (Docusaurus/React). The theme should be injected into the user's local project `package.json` to keep global CLI installs fast.
 - **Workspace Imports**: Always use `@portosaur/<package>` for cross-package imports. No relative paths like `../../logger`.
 - **ESM only**: Use `.mjs` and `import`/`export` syntax everywhere if possible.
-- **Types**: Library packages MUST have an `index.d.ts` in `src/`, linked via `types` in `package.json`. Update it if there are any changes in the code.
+- **Types & Docs**: Library packages MUST have an `index.d.ts` in `src/`, linked via `types` in `package.json`. You MUST write JSDoc comments in the source `.mjs` files AND update the explicit TypeScript signatures in `index.d.ts` whenever you create or modify public APIs.
 - **Docs**: Update/write docs if required. Implementation should match docs.
 - **Decision**: Ask before making any change/ in case of doubt.
 
