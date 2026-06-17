@@ -53,6 +53,7 @@ export function useTouchZoom({
     let initialScrollTop = 0;
     const handleMouseDown = (e) => {
       if (e.button !== 0) return;
+      if (el.classList.contains(styles.isText)) return;
       isPanning = true;
       startX = e.pageX;
       startY = e.pageY;
