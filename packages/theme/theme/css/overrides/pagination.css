@@ -48,20 +48,13 @@ article:has(.theme-doc-footer) + .pagination-nav {
   text-align: right;
 }
 
-.pagination-nav__link--prev .pagination-nav__label::before {
-  content: "«" !important;
-  margin-right: 0.5rem;
-  flex-shrink: 0;
-  font-size: 1.6rem;
-  line-height: 1;
-}
-
+/* Remove default Infima arrows and custom arrows */
+.pagination-nav__link--prev .pagination-nav__sublabel::before,
+.pagination-nav__link--next .pagination-nav__sublabel::after,
+.pagination-nav__link--prev .pagination-nav__label::before,
 .pagination-nav__link--next .pagination-nav__label::after {
-  content: "»" !important;
-  margin-left: 0.5rem;
-  flex-shrink: 0;
-  font-size: 1.6rem;
-  line-height: 1;
+  content: none !important;
+  display: none !important;
 }
 
 .pagination-nav__link {
