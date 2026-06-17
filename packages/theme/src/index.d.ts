@@ -30,3 +30,15 @@ export interface ThemePluginOptions {
  * Configures webpack loaders for out-of-bounds JSX resolution and symlink handling.
  */
 export function ThemePlugin(context: any, options?: ThemePluginOptions): any;
+
+/**
+ * Accurately mimics Docusaurus' internal routing and URL slug generation logic
+ *
+ * @param filePath - The relative file path to the markdown document (e.g. "python/4 - loops/4.1 - while-loops/index.mdx")
+ * @param frontMatter - The parsed frontmatter of the markdown file (e.g. { slug: "custom" })
+ * @returns The computed docSlug exactly as Docusaurus generates it (e.g. { slug: "python/loops/4.1 - while-loops/custom", fileSlug: "python" })
+ */
+export function guessDocPermalink(
+  filePath: string,
+  frontMatter?: Record<string, any>,
+): { slug: string; fileSlug: string };

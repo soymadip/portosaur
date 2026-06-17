@@ -4,9 +4,26 @@ import Link from "@docusaurus/Link";
 import { FaBook, FaChevronRight } from "react-icons/fa";
 import Tooltip from "../Tooltip/index.jsx";
 import { iconMap } from "../../config/iconMappings.jsx";
+import { guessDocPermalink } from "../../utils/docsUtils.js";
 import styles from "./styles.module.css";
 
-function useNotes() {
+/**
+ * Represents a parsed markdown note, extracted from Docusaurus frontmatter.
+ * @typedef {Object} ParsedNote
+ * @property {string} title - Display title (from `title` or directory name)
+ * @property {string} slug - Routing slug (from `slug` or computed)
+ * @property {string} description - Description for tooltips (from `description`)
+ * @property {number} position - Ordering weight (from `sidebar_position`)
+ * @property {string|null} iconStr - Custom icon override (from `icon`)
+ * @property {string|null} colorStr - Custom CSS color override (from `color`)
+ */
+
+/**
+ * Custom hook that uses Webpack's require.context to dynamically
+ * parse and load markdown files from the notes/ directory at build time.
+ * @returns {Array<ParsedNote>} A sorted array of parsed note objects containing frontmatter and routing data.
+ */
+function getAllNotesData() {
   const context = require.context(`@site/notes`, true, /index\.mdx?$|\.mdx?$/);
 
   return context
@@ -24,31 +41,13 @@ function useNotes() {
     })
     .map((path) => {
       const { frontMatter } = context(path);
-      const pathParts = path.split("/");
-      const isTopLevelFile = pathParts.length === 2;
-      const fileSlug = isTopLevelFile
-        ? path.replace("./", "").replace(/\.mdx?$/, "")
-        : pathParts[1];
+      const { slug, fileSlug } = guessDocPermalink(path, frontMatter);
 
-      // Mimic Docusaurus routing:
-      // Explicit `slug` -> For index.mdx, `id` is ignored and uses the directory name (fileSlug)
-      // For other files, falls back to `id` if present, then filename
-      const isIndexFile = path.match(/index\.mdx?$/);
-      const slug =
-        frontMatter.slug ||
-        (isIndexFile ? fileSlug : frontMatter.id || fileSlug);
-      const rawTitle = frontMatter.title || frontMatter.language || fileSlug;
+      const rawTitle = frontMatter.title || fileSlug;
       const title = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
-      const language = frontMatter.language
-        ? frontMatter.language
-            .toLowerCase()
-            .replace(/ /g, "")
-            .replace(/[\s-]/g, "")
-        : slug.toLowerCase() || title.toLowerCase();
 
       return {
         title,
-        language,
         slug,
         description: frontMatter.description || "",
         position: frontMatter.sidebar_position || 999,
@@ -59,19 +58,45 @@ function useNotes() {
     .sort((a, b) => a.position - b.position);
 }
 
-function NoteCard({
-  title,
-  language,
-  slug,
-  desc,
-  iconStr,
-  colorStr,
-  index,
-  docsBasePath,
-}) {
+/**
+ * Renders an individual note card with an icon, title, and optional tooltip.
+ * @param {object} props - The component props
+ * @param {ParsedNote} props.note - The parsed note object containing all metadata (title, language, slug, etc)
+ * @param {number} props.index - The iteration index, used for staggered CSS animations
+ * @param {string} props.docsBasePath - The base path for Docusaurus routes
+ * @returns {JSX.Element} A single linked note card
+ */
+function NoteCard({ note, index, docsBasePath }) {
+  const { title, slug, description, iconStr, colorStr } = note;
   const noteUrl = useBaseUrl(`${docsBasePath}/${slug}`);
-  const defaultIconData =
-    iconMap[language] || iconMap[title.toLowerCase()] || {};
+  
+  // Guess the icon key using the first segment of the slug
+  const firstSlugSegment = slug.split('/')[0].toLowerCase();
+  
+  // Try exact match on the first segment
+  let defaultIconData = iconMap[firstSlugSegment];
+  
+  // If no match and it contains hyphens/underscores, check individual sub words
+  if (!defaultIconData && firstSlugSegment.match(/[-_]/)) {
+    const subParts = firstSlugSegment.split(/[-_]/);
+    for (const part of subParts) {
+      if (iconMap[part]) {
+        defaultIconData = iconMap[part];
+        break;
+      }
+    }
+  }
+
+  // Fallback to the title (Exact Match)
+  if (!defaultIconData) {
+    const lowerTitle = title.toLowerCase();
+    defaultIconData = iconMap[lowerTitle];
+    
+    // Ultimate fallback - default icon
+    if (!defaultIconData) {
+      defaultIconData = {};
+    }
+  }
 
   let Icon = defaultIconData.icon || FaBook;
   let color = colorStr || defaultIconData.color || "var(--ifm-color-primary)";
@@ -89,7 +114,7 @@ function NoteCard({
       customIconElement = (
         <img src={imgSrc} className={styles.imgIcon} alt={`${title} icon`} />
       );
-} else if (iconStr.trim().startsWith("<svg")) {
+    } else if (iconStr.trim().startsWith("<svg")) {
       customIconElement = (
         <div
           className={styles.svgIcon}
@@ -136,8 +161,13 @@ function NoteCard({
   );
 }
 
+/**
+ * A responsive grid container that renders a collection of NoteCard components
+ * based on the markdown files present in the notes/ directory.
+ * @returns {JSX.Element|null} The NoteCards grid or null if no notes exist
+ */
 export default function NoteCards() {
-  const notes = useNotes();
+  const notes = getAllNotesData();
   const { path: docsBasePath } = usePluginData(
     "docusaurus-plugin-content-docs",
   );
@@ -151,12 +181,7 @@ export default function NoteCards() {
       {notes.map((note, index) => (
         <NoteCard
           key={note.slug}
-          title={note.title}
-          language={note.language}
-          slug={note.slug}
-          desc={note.desc}
-          iconStr={note.iconStr}
-          colorStr={note.colorStr}
+          note={note}
           index={index}
           docsBasePath={docsBasePath}
         />

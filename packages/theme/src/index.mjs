@@ -10,5 +10,6 @@ export const ThemePaths = {
 };
 
 export { default as ThemePlugin } from "./plugins/theme.mjs";
+export { guessDocPermalink } from "../theme/utils/docsUtils.js";
 
 export default ThemePaths;
