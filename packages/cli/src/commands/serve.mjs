@@ -11,18 +11,22 @@ import { loadUserConfig } from "@portosaur/core";
 /**
  * Serves the built Portosaur site locally.
  */
-export async function serveCommand(siteDir, options = {}, extraArgs = []) {
-  if (siteDir && siteDir.startsWith("-")) {
-    extraArgs.unshift(siteDir);
-    siteDir = undefined;
+export async function serveCommand(siteDir, options = {}) {
+  const extraArgs = [];
+
+  if (options.port) {
+    extraArgs.push("--port", options.port);
+  }
+  if (options.host) {
+    extraArgs.push("--host", options.host);
+  }
+  if (options.browser === false) {
+    extraArgs.push("--no-open");
   }
 
   const UserRoot = siteDir
     ? path.resolve(process.cwd(), siteDir)
     : process.cwd();
-
-  // Ensure extraArgs is always an array (in case options object is passed)
-  const argsArray = Array.isArray(extraArgs) ? extraArgs : [];
 
   // ------- Setup -------
 
@@ -46,15 +50,11 @@ export async function serveCommand(siteDir, options = {}, extraArgs = []) {
     const customBuildDir = options.outDir || userConfig.site?.build?.output_dir;
 
     if (customBuildDir && customBuildDir !== "build") {
-      // Docusaurus serve uses --dir instead of --out-dir
-      const dirIndex = argsArray.findIndex((arg) => arg === "--dir");
-      if (dirIndex === -1) {
-        argsArray.push("--dir", customBuildDir);
-      }
+      extraArgs.push("--dir", customBuildDir);
     }
 
     // Docusaurus serve looks for the 'build' directory by default.
-    await runDocusaurus("serve", UserRoot, configPath, argsArray);
+    await runDocusaurus("serve", UserRoot, configPath, extraArgs);
   } catch (error) {
     logger.error(`Failed to serve site: ${error.message}`);
     process.exit(1);

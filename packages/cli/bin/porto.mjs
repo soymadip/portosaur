@@ -44,29 +44,31 @@ program
   .action((type) => providersCommand(type));
 
 program
-  .command("dev [siteDir] [extraArgs...]")
+  .command("dev [siteDir]")
   .alias("start")
   .description("Start the development server")
-  .allowUnknownOption()
-  .action(devCommand);
+  .option("-p, --port <port>", "Port to use")
+  .option("-h, --host <host>", "Host to use")
+  .option("--no-browser", "Do not open browser")
+  .option("--poll [interval]", "Use polling for file watching")
+  .action((siteDir, options) => devCommand(siteDir, options));
 
 program
-  .command("build [siteDir] [extraArgs...]")
+  .command("build [siteDir]")
   .description("Build the static site")
   .option("-o, --out-dir <dir>", "Custom output directory")
-  .allowUnknownOption()
-  .action((siteDir, extraArgs, options) =>
-    buildCommand(siteDir, options, extraArgs),
-  );
+  .option("--bundle-analyzer", "Analyze webpack bundle")
+  .option("--no-minify", "Do not minify the output")
+  .action((siteDir, options) => buildCommand(siteDir, options));
 
 program
-  .command("serve [siteDir] [extraArgs...]")
+  .command("serve [siteDir]")
   .description("Serve the built static site locally")
   .option("-o, --out-dir <dir>", "Custom output directory")
-  .allowUnknownOption()
-  .action((siteDir, extraArgs, options) =>
-    serveCommand(siteDir, options, extraArgs),
-  );
+  .option("-p, --port <port>", "Port to use")
+  .option("-h, --host <host>", "Host to use")
+  .option("--no-browser", "Do not open browser")
+  .action((siteDir, options) => serveCommand(siteDir, options));
 
 program
   .command("schema", { hidden: true })

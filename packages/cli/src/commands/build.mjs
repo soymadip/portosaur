@@ -23,10 +23,14 @@ import {
  * 2. Generating dynamic assets (favicons, robots.txt).
  * 3. Compiling the site via Docusaurus.
  */
-export async function buildCommand(siteDir, options = {}, extraArgs = []) {
-  if (siteDir && siteDir.startsWith("-")) {
-    extraArgs.unshift(siteDir);
-    siteDir = undefined;
+export async function buildCommand(siteDir, options = {}) {
+  const extraArgs = [];
+
+  if (options.bundleAnalyzer) {
+    extraArgs.push("--bundle-analyzer");
+  }
+  if (options.minify === false) {
+    extraArgs.push("--no-minify");
   }
 
   const UserRoot = siteDir
@@ -81,14 +85,8 @@ export async function buildCommand(siteDir, options = {}, extraArgs = []) {
 
     logger.info("Building static site...");
 
-    let outDirName =
-      options.outDir || userConfig.site?.build?.output_dir || "build";
-
-    const outDirIndex = extraArgs.findIndex((arg) => arg === "--out-dir");
-
-    if (outDirIndex !== -1 && extraArgs.length > outDirIndex + 1) {
-      outDirName = extraArgs[outDirIndex + 1];
-    } else if (outDirName !== "build") {
+    let outDirName = options.outDir || userConfig.site?.build_dir || "build";
+    if (outDirName !== "build") {
       extraArgs.push("--out-dir", outDirName);
     }
 

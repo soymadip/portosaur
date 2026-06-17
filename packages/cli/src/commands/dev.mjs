@@ -9,10 +9,24 @@ import {
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
 
-export async function devCommand(siteDir, extraArgs = []) {
-  if (siteDir && siteDir.startsWith("-")) {
-    extraArgs.unshift(siteDir);
-    siteDir = undefined;
+export async function devCommand(siteDir, options = {}) {
+  const extraArgs = [];
+
+  if (options.port) {
+    extraArgs.push("--port", options.port);
+  }
+  if (options.host) {
+    extraArgs.push("--host", options.host);
+  }
+  if (options.browser === false) {
+    extraArgs.push("--no-open");
+  }
+  if (options.poll) {
+    if (options.poll === true) {
+      extraArgs.push("--poll");
+    } else {
+      extraArgs.push("--poll", options.poll);
+    }
   }
 
   const UserRoot = siteDir
