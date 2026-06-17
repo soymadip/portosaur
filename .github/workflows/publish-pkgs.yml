@@ -42,46 +42,6 @@ jobs:
       - name: Run Smoke Test
         run: bun run test:smoke
 
-  github-release:
-    name: Create GitHub Release
-    needs: verify
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Mise
-        uses: jdx/mise-action@v4
-
-      - name: Create Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view ${{ github.ref_name }} > /dev/null 2>&1; then
-            echo "Release ${{ github.ref_name }} already exists, skipping."
-            exit 0
-          fi
-
-          echo "Generating changelog for ${{ github.ref_name }} using mise..."
-          mise run -q changelog-latest ${{ github.ref_name }} > release_notes.md
-
-          # Check if version starts with 0 to mark as prerelease
-          latest_ver="${{ github.ref_name }}"
-          latest_ver="${latest_ver#v}"
-
-          PRERELEASE_FLAG=""
-          if [[ "$latest_ver" == 0* ]]; then
-            PRERELEASE_FLAG="--prerelease"
-          fi
-
-          echo "Creating GitHub release for tag ${{ github.ref_name }}..."
-          gh release create ${{ github.ref_name }} -F release_notes.md $PRERELEASE_FLAG
-
   publish-npm:
     name: Publish to NPM
     needs: verify
@@ -166,3 +126,43 @@ jobs:
               fi
             fi
           done
+
+  github-release:
+    name: Create GitHub Release
+    needs: publish-npm
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view ${{ github.ref_name }} > /dev/null 2>&1; then
+            echo "Release ${{ github.ref_name }} already exists, skipping."
+            exit 0
+          fi
+
+          echo "Generating changelog for ${{ github.ref_name }} using mise..."
+          mise run -q changelog-latest ${{ github.ref_name }} > release_notes.md
+
+          # Check if version starts with 0 to mark as prerelease
+          latest_ver="${{ github.ref_name }}"
+          latest_ver="${latest_ver#v}"
+
+          PRERELEASE_FLAG=""
+          if [[ "$latest_ver" == 0* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          echo "Creating GitHub release for tag ${{ github.ref_name }}..."
+          gh release create ${{ github.ref_name }} -F release_notes.md $PRERELEASE_FLAG
