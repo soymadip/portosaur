@@ -25,12 +25,21 @@ export function runPlayground({
   const REPO_ROOT = path.resolve(__dirname, "..");
   const SITE_DIR = path.join(REPO_ROOT, siteName);
 
-  function run(cmd, cwd = REPO_ROOT) {
-    console.log(`\n${colors.command("$ " + cmd)}`);
-    execSync(cmd, { stdio: "inherit", cwd });
+  function run(cmd, cwd = REPO_ROOT, quiet = false) {
+    if (!quiet) console.log(`\n${colors.command("$ " + cmd)}`);
+
+    try {
+      execSync(cmd, { stdio: quiet ? "pipe" : "inherit", cwd });
+    } catch (error) {
+      if (quiet) {
+        if (error.stdout) process.stdout.write(error.stdout);
+        if (error.stderr) process.stderr.write(error.stderr);
+      }
+      throw error;
+    }
   }
 
-  console.log(colors.info(">>> Generating config schema..."));
+  console.log(colors.info("\n>>> Generating config schema..."));
 
   run("bun run schema");
 
@@ -39,7 +48,9 @@ export function runPlayground({
     rmSync(SITE_DIR, { recursive: true, force: true });
   }
 
-  if (!existsSync(SITE_DIR)) {
+  const isExisting = existsSync(SITE_DIR);
+
+  if (!isExisting) {
     console.log(colors.info(">>> Linking local packages..."));
 
     const packagesDir = path.join(REPO_ROOT, "packages");
@@ -93,7 +104,7 @@ export function runPlayground({
   console.log(colors.info(">>> Installing local packages..."));
 
   // Run a real install to fetch transitive dependencies from npm
-  run("bun install", SITE_DIR);
+  run("bun install", SITE_DIR, isExisting);
 
   // Overwrite the top-level generic packages with our local symlinks
   const packagesDir = path.join(REPO_ROOT, "packages");
@@ -104,7 +115,7 @@ export function runPlayground({
   );
 
   const linkCmd = `bun link ${packages.map((p) => `@portosaur/${p}`).join(" ")}`;
-  run(linkCmd, SITE_DIR);
+  run(linkCmd, SITE_DIR, isExisting);
 
   if (runCommand === "dev") {
     console.log(colors.info(`\n>>> Starting dev server in ${siteName}...`));
