@@ -25,7 +25,7 @@ export function runPlayground({
   const REPO_ROOT = path.resolve(__dirname, "..");
   const SITE_DIR = path.join(REPO_ROOT, siteName);
 
-  function run(cmd, cwd = REPO_ROOT, quiet = false) {
+  function run(cmd, { cwd = REPO_ROOT, quiet = false } = {}) {
     if (!quiet) console.log(`\n${colors.command("$ " + cmd)}`);
 
     try {
@@ -41,7 +41,7 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Generating config schema..."));
 
-  run("bun run schema");
+  run("bun run schema", { quiet: true });
 
   if (prune && existsSync(SITE_DIR)) {
     console.log(colors.warn(`>>> Pruning old ${siteName}...`));
@@ -61,8 +61,9 @@ export function runPlayground({
     );
 
     for (const pkg of packages) {
-      run("bun link", path.join(REPO_ROOT, "packages", pkg));
+      run("bun link", { cwd: path.join(REPO_ROOT, "packages", pkg) });
     }
+    console.log("Done..");
 
     console.log(colors.info("\n>>> Initializing new project..."));
     run(
@@ -76,7 +77,7 @@ export function runPlayground({
     );
   }
 
-  console.log(colors.info(">>> Preparing package.json for testing..."));
+  console.log(colors.info("\n>>> Preparing package.json for testing..."));
 
   // Strip the auto-install steps so future commands like 'bun run build' don't wipe out the symlinks
   // Also force local portosaur packages to "*" so bun install pulls from npm registry
@@ -101,10 +102,10 @@ export function runPlayground({
   }
   writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2));
 
-  console.log(colors.info(">>> Installing local packages..."));
+  console.log(colors.info("\n>>> Installing local packages..."));
 
   // Run a real install to fetch transitive dependencies from npm
-  run("bun install", SITE_DIR, isExisting);
+  run("bun install", { cwd: SITE_DIR, quiet: isExisting });
 
   // Overwrite the top-level generic packages with our local symlinks
   const packagesDir = path.join(REPO_ROOT, "packages");
@@ -115,14 +116,18 @@ export function runPlayground({
   );
 
   const linkCmd = `bun link ${packages.map((p) => `@portosaur/${p}`).join(" ")}`;
-  run(linkCmd, SITE_DIR, isExisting);
+
+  if (isExisting) {
+    console.log(colors.info(">>> Overwriting with local symlinks..."));
+  }
+  run(linkCmd, { cwd: SITE_DIR, quiet: isExisting });
 
   if (runCommand === "dev") {
     console.log(colors.info(`\n>>> Starting dev server in ${siteName}...`));
-    run("bun run dev", SITE_DIR);
+    run("bun run dev", { cwd: SITE_DIR });
   } else if (runCommand === "build") {
     console.log(colors.info(`\n>>> Building ${siteName}...`));
-    run("bun run build", SITE_DIR);
+    run("bun run build", { cwd: SITE_DIR });
   } else {
     console.log(
       colors.success(
