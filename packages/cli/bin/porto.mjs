@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 
-import { Command, Argument } from "commander";
+import { Command, Option } from "commander";
 import { porto } from "@portosaur/core";
 import { initCommand } from "../src/commands/init.mjs";
 import { initCiCommand } from "../src/commands/initCi.mjs";
+import { initIgnoreCommand } from "../src/commands/initIgnore.mjs";
 import { devCommand } from "../src/commands/dev.mjs";
 import { buildCommand } from "../src/commands/build.mjs";
 import { serveCommand } from "../src/commands/serve.mjs";
@@ -20,20 +21,25 @@ program
 
 program
   .command("init")
-  .description("Initialize a new Portosaur project")
+  .description(
+    "Initialize a new Portosaur project (or only generate CI/ignore)",
+  )
   .option("-p, --vcs-provider <id>", "VCS Provider ID")
   .option("-h, --hosting <id>", "Hosting Platform ID")
   .option("-u, --username <user>", "VCS username")
   .option("-n, --name <name>", "Full name for portfolio")
   .option("-P, --project-name <name>", "Project name")
   .option("-k, --no-install", "Skip dependency installation")
-  .action((options) => initCommand(options));
-
-program
-  .command("init-ci")
-  .description("Setup CI/CD workflows for an existing project")
-  .option("-h, --hosting <id>", "Hosting Platform ID")
-  .action((options) => initCiCommand(options));
+  .option("--ci-only", "Setup Only CI/CD workflows for an existing project")
+  .option(
+    "--gitignore-only",
+    "Generate Only .gitignore file for an existing project",
+  )
+  .action((options) => {
+    if (options.ciOnly) return initCiCommand(options);
+    if (options.gitignoreOnly) return initIgnoreCommand(options);
+    return initCommand(options);
+  });
 
 program
   .command("providers")

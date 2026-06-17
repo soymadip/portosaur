@@ -18,6 +18,7 @@ export const baseSidebar = [
           { text: "Reference", link: "/user/config/reference" },
         ],
       },
+      { text: "CLI Reference", link: "/user/cli" },
       {
         text: "Markdown Features",
         link: "/user/markdown/overview",

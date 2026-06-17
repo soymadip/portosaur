@@ -97,14 +97,6 @@
         "chalk": "^5.6.2",
       },
     },
-    "test-site": {
-      "name": "test-site",
-      "version": "1.0.0",
-      "dependencies": {
-        "@portosaur/cli": "workspace:*",
-        "@portosaur/theme": "workspace:*",
-      },
-    },
   },
   "packages": {
     "@algolia/abtesting": ["@algolia/abtesting@1.16.1", "", { "dependencies": { "@algolia/client-common": "5.50.1", "@algolia/requester-browser-xhr": "5.50.1", "@algolia/requester-fetch": "5.50.1", "@algolia/requester-node-http": "5.50.1" } }, "sha512-Xxk4l00pYI+jE0PNw8y0MvsQWh5278WRtZQav8/BMMi3HKi2xmeuqe11WJ3y8/6nuBHdv39w76OpJb09TMfAVQ=="],
@@ -3088,8 +3080,6 @@
     "terser": ["terser@5.46.1", "", { "dependencies": { "@jridgewell/source-map": "^0.3.3", "acorn": "^8.15.0", "commander": "^2.20.0", "source-map-support": "~0.5.20" }, "bin": { "terser": "bin/terser" } }, "sha512-vzCjQO/rgUuK9sf8VJZvjqiqiHFaZLnOiimmUuOKODxWL8mm/xua7viT7aqX7dgPY60otQjUotzFMmCB4VdmqQ=="],
 
     "terser-webpack-plugin": ["terser-webpack-plugin@5.4.0", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.25", "jest-worker": "^27.4.5", "schema-utils": "^4.3.0", "terser": "^5.31.1" }, "peerDependencies": { "webpack": "^5.1.0" } }, "sha512-Bn5vxm48flOIfkdl5CaD2+1CiUVbonWQ3KQPyP7/EuIl9Gbzq/gQFOzaMFUEgVjB1396tcK0SG8XcNJ/2kDH8g=="],
-
-    "test-site": ["test-site@workspace:test-site"],
 
     "thingies": ["thingies@2.6.0", "", { "peerDependencies": { "tslib": "^2" } }, "sha512-rMHRjmlFLM1R96UYPvpmnc3LYtdFrT33JIB7L9hetGue1qAPfn1N2LJeEjxUSidu1Iku+haLZXDuEXUHNGO/lg=="],
 

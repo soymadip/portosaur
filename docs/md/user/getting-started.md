@@ -52,14 +52,14 @@ Useful for automation and scripting.
 bunx @portosaur/cli@latest init -p github -h github-pages -u soymadip -n "Shyam Roy"
 ```
 
-| Flag                   | Description                                                    | Default                                                                                                |
-| :--------------------- | :------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
-| `-p`, `--vcs-provider` | Git Provider ID (`none`, `{{meta.defaults.vcsList}}`)          | `{{meta.defaults.vcs}}`                                                                                |
-| `-h`, `--hosting`      | Hosting Platform ID (`none`, `{{meta.defaults.hostingList}}`)  | `Selected VCS Default`                                                                                 |
-| `-u`, `--username`     | Username for the Git provider                                  | `Git/OS User`                                                                                          |
-| `-n`, `--name`         | Full Name for the site title                                   | `Full Name`                                                                                            |
-| `-k`, `--no-install`   | Skip automatic dependency installation                         | `false`                                                                                                |
-| `-P`, `--project-name` | Desired Project Name. Note that custom name is not recommended | [vcs provider ideal name]({{meta.project.repo}}/blob/main/packages/cli/src/templates/registry.yml#L38) |
+| Flag                   | Description                                                        | Default                                                                                                |
+| :--------------------- | :----------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| `-p`, `--vcs-provider` | Git hosting Provider ID (`none`, `{{meta.defaults.vcsList}}`)      | `{{meta.defaults.vcs}}`                                                                                |
+| `-h`, `--hosting`      | Site Hosting Platform ID (`none`, `{{meta.defaults.hostingList}}`) | `Selected VCS Default`                                                                                 |
+| `-u`, `--username`     | Your VCS provider username                                         | `Git/OS User`                                                                                          |
+| `-n`, `--name`         | Full Name, used for the site title                                 | `Full Name`                                                                                            |
+| `-k`, `--no-install`   | Skips automatic dependency installation                            | `false`                                                                                                |
+| `-P`, `--project-name` | Desired Project Name. Note that custom name is not recommended     | [vcs provider ideal name]({{meta.project.repo}}/blob/main/packages/cli/src/templates/registry.yml#L38) |
 
 > [!WARNING] It's not recommended to use custom name
 >
