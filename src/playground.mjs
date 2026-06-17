@@ -9,7 +9,7 @@ import path from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 
-let SITE_NAME = "playground";
+let SITE_NAME = ".playground";
 let runCommand = null;
 let prune = false;
 
@@ -59,7 +59,7 @@ if (!existsSync(SITE_DIR)) {
 
   console.log("Initializing new project...");
   run(
-    `bun run "${path.join(REPO_ROOT, "packages/cli/bin/porto.mjs")}" init --project-name "${SITE_NAME}" --no-install`,
+    `bun run "${path.join(REPO_ROOT, "packages/cli/bin/porto.mjs")}" init --project-name "${SITE_NAME}" --vcs-provider none --no-install`,
   );
 } else {
   console.log(`\n${SITE_NAME} already exists, skipping initialization...`);

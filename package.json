@@ -18,10 +18,11 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "schema": "bun packages/cli/bin/porto.mjs schema",
-    "dev": "bun src/playground.mjs dev",
+    "playground": "bun src/playground.mjs",
+    "dev": "bun run playground dev",
     "dev:docs": "bun run --cwd docs dev",
     "test:all": "bun run schema && bun test",
-    "test:smoke": "bun src/playground.mjs build -p -d smoke-test-site && rm -rf smoke-test-site"
+    "test:smoke": "bun run playground build -p -d smoke-test-site && rm -rf smoke-test-site"
   },
   "devDependencies": {
     "prettier": "latest"
