@@ -735,8 +735,16 @@
 }
 
 /* --- Global Layout Hooks (when docked) --- */
-:global(body.pv-dock-active) :global(.main-wrapper) {
-  padding-right: var(--pv-dock-width, 400px);
+:global(.main-wrapper) {
+  padding-right: var(--pv-dock-width, 0px);
+  padding-bottom: var(--mobile-peek-height, 0px);
+  transition:
+    padding-right 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    padding-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:global(.footer) {
+  padding-right: var(--pv-dock-width, 0px);
   transition: padding-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -754,10 +762,4 @@
 
 :global(body.pv-dock-active) :global(.container.docItemWrapperEnhanced_JWYK) {
   max-width: none !important;
-}
-
-/* --- Global Layout Hooks (when peeking on mobile/tablet) --- */
-:global(body.pv-peek-active) :global(.main-wrapper) {
-  padding-bottom: var(--mobile-peek-height, 50vh);
-  transition: padding-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

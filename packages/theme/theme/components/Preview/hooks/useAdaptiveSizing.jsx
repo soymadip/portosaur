@@ -35,8 +35,8 @@ export function useAdaptiveSizing({
     ? windowWidth
     : isTablet
       ? Math.min(600, windowWidth - 60)
-  : floatingState.width;
-  
+      : floatingState.width;
+
   const pipHeight = isPhone
     ? Math.min(floatingState.height, vh * 0.7)
     : isTablet

@@ -10,6 +10,11 @@ article:has(.theme-doc-footer) + .pagination-nav {
   padding-top: 1.5rem;
 }
 
+[class*="docItemCol_"] {
+  container-type: inline-size;
+  container-name: docCol;
+}
+
 /* Make content containers flex columns so pagination can stick to the bottom on short pages */
 [class*="docItemContainer_"],
 .theme-blog-post-page main .container .row > .col {
@@ -67,7 +72,7 @@ article:has(.theme-doc-footer) + .pagination-nav {
   border-color: var(--ifm-color-primary);
 }
 
-/* Stack prev/next nav buttons vertically on mobile */
+/* Stack prev/next nav buttons vertically on mobile or when container is small */
 @media (max-width: 768px) {
   .pagination-nav {
     grid-template-columns: 1fr !important;
@@ -78,6 +83,20 @@ article:has(.theme-doc-footer) + .pagination-nav {
     text-align: left !important;
   }
 
+  .pagination-nav__link--next {
+    grid-column: 1 !important;
+    text-align: right !important;
+  }
+}
+
+@container docCol (max-width: 996px) {
+  .pagination-nav {
+    grid-template-columns: 1fr !important;
+    gap: 0.15rem !important;
+  }
+  .pagination-nav__link--prev {
+    text-align: left !important;
+  }
   .pagination-nav__link--next {
     grid-column: 1 !important;
     text-align: right !important;
