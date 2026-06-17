@@ -343,7 +343,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         bio: get("home_page.about.bio", []), // Paragraphs for your biography.
         skills: get("home_page.about.skills", []),
         skillsHeading: get("home_page.about.skills_heading", "My Skills"), // Heading for the skills list.
-        resume: get("home_page.about.resume", ""),
+        resume: get("home_page.about.resume", "none"),
       },
 
       projectShelf: {

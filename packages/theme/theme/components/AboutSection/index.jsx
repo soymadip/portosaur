@@ -53,15 +53,17 @@ export default function AboutSection({ id, className }) {
                   />
                 </div>
               )}
-              {aboutMe.resume && (
-                <div className={styles.resumeContainer}>
-                  <Pv href={aboutMe.resume} title="My Resume">
-                    <span className={styles.resumeButton}>
-                      <FaDownload /> View Resume
-                    </span>
-                  </Pv>
-                </div>
-              )}
+              {typeof aboutMe.resume === "string" &&
+                aboutMe.resume.trim() !== "" &&
+                aboutMe.resume.trim().toLowerCase() !== "none" && (
+                  <div className={styles.resumeContainer}>
+                    <Pv href={aboutMe.resume} title="My Resume">
+                      <span className={styles.resumeButton}>
+                        <FaDownload /> View Resume
+                      </span>
+                    </Pv>
+                  </div>
+                )}
             </div>
 
             {/* Bio + Skills */}

@@ -69,13 +69,13 @@ function getAllNotesData() {
 function NoteCard({ note, index, docsBasePath }) {
   const { title, slug, description, iconStr, colorStr } = note;
   const noteUrl = useBaseUrl(`${docsBasePath}/${slug}`);
-  
+
   // Guess the icon key using the first segment of the slug
-  const firstSlugSegment = slug.split('/')[0].toLowerCase();
-  
+  const firstSlugSegment = slug.split("/")[0].toLowerCase();
+
   // Try exact match on the first segment
   let defaultIconData = iconMap[firstSlugSegment];
-  
+
   // If no match and it contains hyphens/underscores, check individual sub words
   if (!defaultIconData && firstSlugSegment.match(/[-_]/)) {
     const subParts = firstSlugSegment.split(/[-_]/);
@@ -91,7 +91,7 @@ function NoteCard({ note, index, docsBasePath }) {
   if (!defaultIconData) {
     const lowerTitle = title.toLowerCase();
     defaultIconData = iconMap[lowerTitle];
-    
+
     // Ultimate fallback - default icon
     if (!defaultIconData) {
       defaultIconData = {};
