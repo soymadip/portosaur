@@ -13,7 +13,7 @@ export default function SrcPv(props) {
       <span className={styles.sourceFooterLabel}>{prefixText}</span>
       {srcList.map((src, idx) => (
         <React.Fragment key={idx}>
-          <Pv {...props} sources={srcList} activeIdx={idx}>
+          <Pv {...props} href={srcList} activeIdx={idx}>
             {src.label}
           </Pv>
           {idx < srcList.length - 1 ? ", " : ""}
