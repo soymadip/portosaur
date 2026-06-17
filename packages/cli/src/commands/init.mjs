@@ -400,10 +400,13 @@ export async function initCommand(options = {}) {
   };
 
   try {
-    mirrorSync(Paths.templates, newProjDir, templateVars, [
-      "registry.yml",
-      "workflows",
-    ]);
+    const mirrorIgnores = ["registry.yml", "workflows"];
+
+    if (state.vcs === "none") {
+      mirrorIgnores.push("gitignore");
+    }
+
+    mirrorSync(Paths.templates, newProjDir, templateVars, mirrorIgnores);
   } catch (e) {
     logger.error(`Failed to create project files: ${e.message}`);
     process.exitCode = 1;
