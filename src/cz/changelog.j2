@@ -8,7 +8,7 @@
 
 {% for commit in commits %}
 {% set message = commit.message | trim %}
-- {% if commit.scope %}**{{ commit.scope }}**: {% endif %}{{ message[:1] | upper }}{{ message[1:] }}
+- {% if commit.scope %}**{{ commit.scope }}**: {% endif %}{{ message[:1] | upper }}{{ message[1:] }}{{ '.' if not message.endswith('.') else '' }}
 {% endfor %}
 
 {% endfor %}
