@@ -22,7 +22,7 @@
     "dev": "bun run playground dev",
     "dev:docs": "bun run --cwd docs dev",
     "test:all": "bun run schema && bun test",
-    "test:smoke": "bun run playground build -p -d smoke-test-site && rm -rf smoke-test-site"
+    "test:smoke": "bun run src/smoke-test.mjs"
   },
   "devDependencies": {
     "prettier": "latest"

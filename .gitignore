@@ -42,7 +42,7 @@ my-portfolio/
 test+.js
 *test/
 TEST*/
-smoke-test-site/
+.smoke-test-site/
 .playground/
 
 ss.*

@@ -32,7 +32,7 @@ packages/
 - **Terminology**: Use **VCS Provider** (git host) and **Hosting Platform** (deployment target). Use `none` to skip.
 - **Human Formatting**: Maintain sane newlines, group logical blocks with comments, and write "human-readable" code. Avoid machine-dense logic. Use newlines between documented properties and separate logical sections clearly. Never use numbered comments (e.g., // 1., // 2.); use descriptive section headers instead.
 - **Braces**: Always use braces `{}` for `if` statements, even for single-line returns or guard clauses.
-- **Bun**: Always use `bun` for package management. Keep Node compatibility.
+- **Bun**: Always use `bun` for package management. **Keep Node compatibility**.
 
 ## Testing
 
