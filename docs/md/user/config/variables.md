@@ -19,6 +19,8 @@ These variables are automatically provided by the engine during the build proces
 - `\{{baseUrl}}` — The base path of your site (e.g., `/my-portfolio/`).
 - `\{{lastUpdated}}` — The timestamp of the last git commit.
 - `\{{isProd}}` / `{{isDev}}` — Booleans indicating the current build environment.
+- `\{{siteRoot}}` — The absolute path to your local project directory.
+- `\{{portoRoot}}` — The absolute path to the `@{{meta.project.title}}/theme` installation.
 
 ### Configuration References
 
