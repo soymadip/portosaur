@@ -328,9 +328,28 @@ export default function PreviewViewer() {
               if (!isDockMode && !showAsPeek && !isPopupMode)
                 setFloatingState({ x: d.x, y: d.y });
             }}
-            onResizeStart={() => setIsInteracting(true)}
+            onResizeStart={() => {
+              setIsInteracting(true);
+              document.body.classList.add("pv-resizing");
+            }}
+            onResize={(e, direction, ref) => {
+              if (isDockMode) {
+                const newWidth = parseInt(ref.style.width, 10);
+                document.body.style.setProperty(
+                  "--pv-dock-width",
+                  `${newWidth}px`,
+                );
+              } else if (showAsPeek) {
+                const newHeight = parseInt(ref.style.height, 10);
+                document.body.style.setProperty(
+                  "--mobile-peek-height",
+                  `${newHeight}px`,
+                );
+              }
+            }}
             onResizeStop={(_e, _direction, ref, _delta, position) => {
               setIsInteracting(false);
+              document.body.classList.remove("pv-resizing");
               const newWidth = parseInt(ref.style.width, 10);
               const newHeight = parseInt(ref.style.height, 10);
               if (isDockMode) setDockWidth(newWidth);
