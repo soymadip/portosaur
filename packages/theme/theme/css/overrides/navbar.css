@@ -4,7 +4,10 @@
   background-color: var(--ifm-navbar-background-color) !important;
 }
 
-.navbar__logo img {
+.navbar__logo img,
+.navbar-sidebar__brand img,
+.menu__logo img,
+[class^="sidebarLogo_"] img {
   border-radius: 50%;
   object-fit: cover;
 }
