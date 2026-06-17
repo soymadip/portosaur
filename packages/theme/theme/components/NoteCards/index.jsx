@@ -50,7 +50,7 @@ function useNotes() {
         title,
         language,
         slug,
-        desc: frontMatter.desc || "",
+        description: frontMatter.description || "",
         position: frontMatter.sidebar_position || 999,
         iconStr: frontMatter.icon || null,
         colorStr: frontMatter.color || null,
@@ -102,7 +102,7 @@ function NoteCard({
     }
   }
 
-  const tooltipContent = desc ? desc : null;
+  const tooltipContent = description ? description : null;
 
   const cardInner = (
     <Link
