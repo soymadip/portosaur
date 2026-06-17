@@ -53,14 +53,20 @@ program
 program
   .command("build [siteDir] [extraArgs...]")
   .description("Build the static site")
+  .option("-o, --out-dir <dir>", "Custom output directory")
   .allowUnknownOption()
-  .action(buildCommand);
+  .action((siteDir, extraArgs, options) =>
+    buildCommand(siteDir, options, extraArgs),
+  );
 
 program
   .command("serve [siteDir] [extraArgs...]")
   .description("Serve the built static site locally")
+  .option("-o, --out-dir <dir>", "Custom output directory")
   .allowUnknownOption()
-  .action(serveCommand);
+  .action((siteDir, extraArgs, options) =>
+    serveCommand(siteDir, options, extraArgs),
+  );
 
 program
   .command("schema", { hidden: true })

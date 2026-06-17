@@ -17,10 +17,17 @@ The `site` block contains global settings for your site identity and SEO. This i
 | `edit_url`          | `str`   | `null`                        | Base URL for "Edit this page" links (e.g., GitHub repo tree/main link).            |
 | `on_broken_links`   | `str`   | `"throw"`                     | Behavior when a link is broken <br/>Options: `throw`, `warn`, `ignore`.            |
 | `on_broken_anchors` | `str`   | `"throw"`                     | Behavior when a link anchor (#) is missing.<br/>Options: `throw`, `warn`, `ignore` |
+| `build`             | `block` | [see below](#site-build)      | Build settings.                                                                    |
 | `rss`               | `block` | [see below](#site-rss)        | RSS feed generation                                                                |
 | `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
 | `head_tags`         | `list`  | `[]`                          | Custom HTML tags to inject into `<head>` (see Advanced section).                   |
 | `markdown`          | `block` | [see below](#site-markdown)   | Markdown renderer settings.                                                        |
+
+### `site.build`
+
+| Key          | Type  | Default   | Description                                            |
+| ------------ | ----- | --------- | ------------------------------------------------------ |
+| `output_dir` | `str` | `"build"` | Custom directory name to output the built static site. |
 
 ### `site.rss`
 

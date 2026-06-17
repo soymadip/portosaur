@@ -10,6 +10,11 @@ import {
 import { logger } from "@portosaur/logger";
 
 export async function devCommand(siteDir, extraArgs = []) {
+  if (siteDir && siteDir.startsWith("-")) {
+    extraArgs.unshift(siteDir);
+    siteDir = undefined;
+  }
+
   const UserRoot = siteDir
     ? path.resolve(process.cwd(), siteDir)
     : process.cwd();

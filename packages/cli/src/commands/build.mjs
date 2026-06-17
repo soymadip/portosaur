@@ -23,7 +23,12 @@ import {
  * 2. Generating dynamic assets (favicons, robots.txt).
  * 3. Compiling the site via Docusaurus.
  */
-export async function buildCommand(siteDir, extraArgs = []) {
+export async function buildCommand(siteDir, options = {}, extraArgs = []) {
+  if (siteDir && siteDir.startsWith("-")) {
+    extraArgs.unshift(siteDir);
+    siteDir = undefined;
+  }
+
   const UserRoot = siteDir
     ? path.resolve(process.cwd(), siteDir)
     : process.cwd();
@@ -76,12 +81,25 @@ export async function buildCommand(siteDir, extraArgs = []) {
 
     logger.info("Building static site...");
 
+    let outDirName =
+      options.outDir || userConfig.site?.build?.output_dir || "build";
+
+    const outDirIndex = extraArgs.findIndex((arg) => arg === "--out-dir");
+
+    if (outDirIndex !== -1 && extraArgs.length > outDirIndex + 1) {
+      outDirName = extraArgs[outDirIndex + 1];
+    } else if (outDirName !== "build") {
+      extraArgs.push("--out-dir", outDirName);
+    }
+
+    const finalOutDir = path.resolve(UserRoot, outDirName);
+
     await runDocusaurus("build", UserRoot, configPath, extraArgs);
 
     // ------- Post Build -------
 
     try {
-      fs.writeFileSync(path.join(UserRoot, "build", ".nojekyll"), "");
+      fs.writeFileSync(path.join(finalOutDir, ".nojekyll"), "");
     } catch (e) {
       logger.warn(`Failed to create .nojekyll in build dir: ${e.message}`);
     }
@@ -92,6 +110,7 @@ export async function buildCommand(siteDir, extraArgs = []) {
       customLines: userConfig.site?.robots_txt?.custom_lines,
       siteUrl: userConfig.site?.url,
       baseUrl: userConfig.site?.path,
+      outDir: finalOutDir,
     });
 
     logger.success("Build completed successfully!");

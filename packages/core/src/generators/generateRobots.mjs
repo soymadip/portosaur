@@ -6,8 +6,12 @@ export function generateRobotsTxt(siteDir, options = {}) {
     return;
   }
   logger.info("Generating robots.txt...");
-  const staticDir = path.resolve(siteDir, "static");
-  const robotsPath = path.join(staticDir, "robots.txt");
+
+  const targetDir = options.outDir
+    ? path.resolve(options.outDir)
+    : path.resolve(siteDir, "static");
+
+  const robotsPath = path.join(targetDir, "robots.txt");
   let content = `User-agent: *
 `;
   if (options.rules) {
@@ -36,7 +40,7 @@ export function generateRobotsTxt(siteDir, options = {}) {
     content += `Sitemap: ${options.siteUrl}${options.baseUrl || "/"}sitemap.xml
 `;
   }
-  fs.mkdirSync(staticDir, { recursive: true });
+  fs.mkdirSync(targetDir, { recursive: true });
   fs.writeFileSync(robotsPath, content);
   logger.success(`Generated robots.txt at ${robotsPath}`);
 }

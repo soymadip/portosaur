@@ -6,11 +6,17 @@ import {
   writeConfigShim,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
+import { loadUserConfig } from "@portosaur/core";
 
 /**
  * Serves the built Portosaur site locally.
  */
-export async function serveCommand(siteDir, extraArgs = []) {
+export async function serveCommand(siteDir, options = {}, extraArgs = []) {
+  if (siteDir && siteDir.startsWith("-")) {
+    extraArgs.unshift(siteDir);
+    siteDir = undefined;
+  }
+
   const UserRoot = siteDir
     ? path.resolve(process.cwd(), siteDir)
     : process.cwd();
@@ -34,6 +40,18 @@ export async function serveCommand(siteDir, extraArgs = []) {
 
     // Generate config shim so Docusaurus can locate site configuration
     const configPath = writeConfigShim(UserRoot, portoPaths);
+
+    // Load user config to check for custom build dir
+    const userConfig = loadUserConfig(UserRoot, portoPaths);
+    const customBuildDir = options.outDir || userConfig.site?.build?.output_dir;
+
+    if (customBuildDir && customBuildDir !== "build") {
+      // Docusaurus serve uses --dir instead of --out-dir
+      const dirIndex = argsArray.findIndex((arg) => arg === "--dir");
+      if (dirIndex === -1) {
+        argsArray.push("--dir", customBuildDir);
+      }
+    }
 
     // Docusaurus serve looks for the 'build' directory by default.
     await runDocusaurus("serve", UserRoot, configPath, argsArray);
