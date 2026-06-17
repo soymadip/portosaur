@@ -748,6 +748,12 @@
   transition: padding-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Disable transition while dragging so it keeps up with the mouse perfectly */
+:global(body.pv-resizing) :global(.main-wrapper),
+:global(body.pv-resizing) :global(.footer) {
+  transition: none !important;
+}
+
 :global(body.pv-dock-active) :global(.col.col--3),
 :global(body.pv-dock-active) :global(.theme-doc-toc-desktop) {
   display: none !important;

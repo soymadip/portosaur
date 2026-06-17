@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+
 export function useDockLayout({
   isOpen,
   isPopupMode,
@@ -8,36 +9,36 @@ export function useDockLayout({
   peekHeight,
 }) {
   const weCollapsedSidebar = useRef(false);
+
+  // Hook 1: Handle structural layout changes (sidebar, classes, overflow)
   useEffect(() => {
     if (typeof document === "undefined") return;
+
     if (isOpen && isPopupMode) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
+
     if (isSidebarDock) {
       document.body.classList.add("pv-dock-active");
-      document.body.style.setProperty("--pv-dock-width", `${dockWidth}px`);
     } else {
       document.body.classList.remove("pv-dock-active");
-      document.body.style.setProperty("--pv-dock-width", "0px");
     }
+
     if (isPeekDock) {
       document.body.classList.add("pv-peek-active");
-      document.body.style.setProperty(
-        "--mobile-peek-height",
-        `${peekHeight}px`,
-      );
     } else {
       document.body.classList.remove("pv-peek-active");
-      document.body.style.setProperty("--mobile-peek-height", "0px");
     }
+
     const sidebarToggleBtn = document.querySelector(
       '[class*="collapseSidebarButton"]',
     );
     const isCollapsed = !!document.querySelector(
       '[aria-label="Expand sidebar"]',
     );
+
     if (isSidebarDock) {
       if (sidebarToggleBtn && !isCollapsed) {
         weCollapsedSidebar.current = true;
@@ -49,6 +50,7 @@ export function useDockLayout({
         sidebarToggleBtn.click();
       }
     }
+
     const updateNavOffset = () => {
       const nav = document.querySelector(".navbar");
       if (nav) {
@@ -58,16 +60,17 @@ export function useDockLayout({
         );
       }
     };
+
     if (isSidebarDock) {
       updateNavOffset();
       window.addEventListener("resize", updateNavOffset, { passive: true });
     }
+
     return () => {
       document.body.classList.remove("pv-dock-active");
       document.body.classList.remove("pv-peek-active");
       document.body.style.overflow = "";
-      document.body.style.removeProperty("--pv-dock-width");
-      document.body.style.removeProperty("--mobile-peek-height");
+
       if (weCollapsedSidebar.current) {
         const sidebarToggleBtn = document.querySelector(
           '[class*="collapseSidebarButton"]',
@@ -82,5 +85,30 @@ export function useDockLayout({
       }
       window.removeEventListener("resize", updateNavOffset);
     };
-  }, [isOpen, isPopupMode, isSidebarDock, isPeekDock, dockWidth, peekHeight]);
+  }, [isOpen, isPopupMode, isSidebarDock, isPeekDock]);
+
+  // Hook 2: Handle dimension updates without tearing down the structural layout
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    if (isSidebarDock) {
+      document.body.style.setProperty("--pv-dock-width", `${dockWidth}px`);
+    } else {
+      document.body.style.setProperty("--pv-dock-width", "0px");
+    }
+
+    if (isPeekDock) {
+      document.body.style.setProperty(
+        "--mobile-peek-height",
+        `${peekHeight}px`,
+      );
+    } else {
+      document.body.style.setProperty("--mobile-peek-height", "0px");
+    }
+
+    return () => {
+      document.body.style.removeProperty("--pv-dock-width");
+      document.body.style.removeProperty("--mobile-peek-height");
+    };
+  }, [isSidebarDock, isPeekDock, dockWidth, peekHeight]);
 }
