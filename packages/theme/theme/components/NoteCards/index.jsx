@@ -52,15 +52,56 @@ function useNotes() {
         slug,
         desc: frontMatter.desc || "",
         position: frontMatter.sidebar_position || 999,
+        iconStr: frontMatter.icon || null,
+        colorStr: frontMatter.color || null,
       };
     })
     .sort((a, b) => a.position - b.position);
 }
 
-function NoteCard({ title, language, slug, desc, index, docsBasePath }) {
+function NoteCard({
+  title,
+  language,
+  slug,
+  desc,
+  iconStr,
+  colorStr,
+  index,
+  docsBasePath,
+}) {
   const noteUrl = useBaseUrl(`${docsBasePath}/${slug}`);
-  const { icon: Icon = FaBook, color = "var(--ifm-color-primary)" } =
+  const defaultIconData =
     iconMap[language] || iconMap[title.toLowerCase()] || {};
+
+  let Icon = defaultIconData.icon || FaBook;
+  let color = colorStr || defaultIconData.color || "var(--ifm-color-primary)";
+
+  let customIconElement = null;
+
+  if (iconStr) {
+    if (iconMap[iconStr.toLowerCase()]) {
+      Icon = iconMap[iconStr.toLowerCase()].icon;
+      if (!colorStr) {
+        color = iconMap[iconStr.toLowerCase()].color;
+      }
+    } else if (iconStr.startsWith("/") || iconStr.startsWith("http")) {
+      const imgSrc = iconStr.startsWith("/") ? useBaseUrl(iconStr) : iconStr;
+      customIconElement = (
+        <img src={imgSrc} className={styles.imgIcon} alt={`${title} icon`} />
+      );
+} else if (iconStr.trim().startsWith("<svg")) {
+      customIconElement = (
+        <div
+          className={styles.svgIcon}
+          dangerouslySetInnerHTML={{ __html: iconStr }}
+          aria-hidden="true"
+        />
+      );
+    } else {
+      customIconElement = <span className={styles.textIcon}>{iconStr}</span>;
+    }
+  }
+
   const tooltipContent = desc ? desc : null;
 
   const cardInner = (
@@ -71,7 +112,11 @@ function NoteCard({ title, language, slug, desc, index, docsBasePath }) {
       aria-label={`Read note: ${title}`}
     >
       <div className={styles.iconWrapper}>
-        <Icon className={styles.noteIcon} />
+        {customIconElement ? (
+          customIconElement
+        ) : (
+          <Icon className={styles.noteIcon} />
+        )}
       </div>
       <div className={styles.cardContent}>
         <h3 className={styles.noteTitle} title={title}>
@@ -110,6 +155,8 @@ export default function NoteCards() {
           language={note.language}
           slug={note.slug}
           desc={note.desc}
+          iconStr={note.iconStr}
+          colorStr={note.colorStr}
           index={index}
           docsBasePath={docsBasePath}
         />
