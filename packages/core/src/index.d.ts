@@ -18,9 +18,18 @@ export interface DocusaurusContext {
 }
 
 /**
- * Loads and parses the user's config.yml file.
+ * Loads, parses, and validates the user's `config.yml` file.
+ * Optionally resolves template variables (like `{{siteRoot}}` or `{{portoRoot}}`)
+ * immediately if `systemVars` are provided.
+ *
+ * @param projectDir - The absolute path to the user's project directory.
+ * @param systemVars - Optional system variables to inject for template resolution.
+ * @returns The parsed (and optionally resolved) configuration object.
  */
-export function loadUserConfig(projectDir: string): any;
+export function loadUserConfig(
+  projectDir: string,
+  systemVars?: Record<string, any>,
+): any;
 
 export { mirrorSync, loadPkg } from "./utils/fs.mjs";
 export {
