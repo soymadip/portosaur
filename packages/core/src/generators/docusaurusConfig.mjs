@@ -112,7 +112,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     staticDirectories,
 
-    headTags: regularHeadTags,
+    headTags: [
+      ...regularHeadTags,
+      {
+        tagName: "script",
+        attributes: {},
+        innerHTML: `window.process = window.process || { env: { NODE_ENV: '${process.env.NODE_ENV || "production"}' } };`,
+      },
+    ],
 
     markdown: {
       format: get("site.markdown.format", "mdx"), // Markdown parser format (mdx, md, detect).

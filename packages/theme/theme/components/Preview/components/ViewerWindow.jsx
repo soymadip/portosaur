@@ -209,7 +209,7 @@ export default function PreviewViewer() {
         onSelect={setActiveIndex}
       />
       <div
-        className={`${styles.popupBody} ${fileType === "code" ? styles.isText : styles.isGrabbable}`}
+        className={`${styles.popupBody} ${fileType === "text" ? styles.isText : styles.isGrabbable}`}
         ref={(el) => {
           popupBodyRef.current = el;
           if (el && isOpen) el.focus({ preventScroll: true });
@@ -233,11 +233,13 @@ export default function PreviewViewer() {
     </div>
   );
 
-  const rndEnableResizing = isDockMode
-    ? { left: true }
-    : showAsPeek
-      ? { top: true }
-      : true;
+  const rndEnableResizing = isPopupMode
+    ? false
+    : isDockMode
+      ? { left: true }
+      : showAsPeek
+        ? { top: true }
+        : true;
   const rndResizeHandleStyles = showAsPeek
     ? {
         top: {
@@ -308,71 +310,55 @@ export default function PreviewViewer() {
             <div className={styles.previewBackdrop} onClick={closePreview} />
           )}
 
-          {isPopupMode ? (
-            <motion.div
-              key="desktop-popup"
-              className={styles.windowFrame}
-              initial={{ opacity: 0, scale: 0.9, y: "-45%", x: "-50%" }}
-              animate={{ opacity: 1, scale: 1, y: "-50%", x: "-50%" }}
-              exit={{ opacity: 0, scale: 0.9, y: "-45%", x: "-50%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          <Rnd
+            position={layout.rndPosition}
+            size={layout.rndSize}
+            disableDragging={isDockMode || showAsPeek || isPopupMode}
+            enableResizing={rndEnableResizing}
+            dragHandleClassName={styles.dragHandleWrapper}
+            minWidth={rndMinWidth}
+            minHeight={rndMinHeight}
+            maxWidth={rndMaxWidth}
+            maxHeight={rndMaxHeight}
+            bounds={layout.rndBounds}
+            resizeHandleStyles={rndResizeHandleStyles}
+            onDragStart={() => setIsInteracting(true)}
+            onDragStop={(_e, d) => {
+              setIsInteracting(false);
+              if (!isDockMode && !showAsPeek && !isPopupMode)
+                setFloatingState({ x: d.x, y: d.y });
+            }}
+            onResizeStart={() => setIsInteracting(true)}
+            onResizeStop={(_e, _direction, ref, _delta, position) => {
+              setIsInteracting(false);
+              const newWidth = parseInt(ref.style.width, 10);
+              const newHeight = parseInt(ref.style.height, 10);
+              if (isDockMode) setDockWidth(newWidth);
+              else if (showAsPeek) setPeekHeight(newHeight);
+              else if (!isPopupMode)
+                setFloatingState({
+                  width: newWidth,
+                  height: newHeight,
+                  ...position,
+                });
+            }}
+            className={`${styles.rndWrapper} ${isPopupMode ? styles.modePopup : ""}`}
+            style={{
+              zIndex: 10,
+              transition: isInteracting
+                ? "none"
+                : "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+            <div
+              className={`${styles.windowFrame} ${isInteracting ? styles.windowInteracting : ""}`}
+              style={{ width: "100%", height: "100%", position: "relative" }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.dragHandleWrapper}>{header}</div>
               {innerContent}
-            </motion.div>
-          ) : (
-            <Rnd
-              key={`${mode}-${showAsPeek}`}
-              position={layout.rndPosition}
-              size={layout.rndSize}
-              disableDragging={isDockMode || showAsPeek}
-              enableResizing={rndEnableResizing}
-              dragHandleClassName={styles.dragHandleWrapper}
-              minWidth={rndMinWidth}
-              minHeight={rndMinHeight}
-              maxWidth={rndMaxWidth}
-              maxHeight={rndMaxHeight}
-              bounds={layout.rndBounds}
-              resizeHandleStyles={rndResizeHandleStyles}
-              onDragStart={() => setIsInteracting(true)}
-              onDragStop={(_e, d) => {
-                setIsInteracting(false);
-                if (!isDockMode && !showAsPeek)
-                  setFloatingState({ x: d.x, y: d.y });
-              }}
-              onResizeStart={() => setIsInteracting(true)}
-              onResizeStop={(_e, _direction, ref, _delta, position) => {
-                setIsInteracting(false);
-                const newWidth = parseInt(ref.style.width, 10);
-                const newHeight = parseInt(ref.style.height, 10);
-                if (isDockMode) setDockWidth(newWidth);
-                else if (showAsPeek) setPeekHeight(newHeight);
-                else
-                  setFloatingState({
-                    width: newWidth,
-                    height: newHeight,
-                    ...position,
-                  });
-              }}
-              className={styles.rndWrapper}
-              style={{
-                zIndex: 10,
-                transition: isInteracting
-                  ? "none"
-                  : "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-              }}
-            >
-              <div
-                className={`${styles.windowFrame} ${isInteracting ? styles.windowInteracting : ""}`}
-                style={{ width: "100%", height: "100%", position: "relative" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className={styles.dragHandleWrapper}>{header}</div>
-                {innerContent}
-              </div>
-            </Rnd>
-          )}
+            </div>
+          </Rnd>
         </motion.div>
       )}
     </AnimatePresence>,

@@ -58,6 +58,7 @@ export function normalizeSources({
 
     return {
       path: sPath,
+      url: sPath,
       label: displayLabel,
       domain,
       type,

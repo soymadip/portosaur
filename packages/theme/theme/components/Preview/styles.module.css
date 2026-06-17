@@ -195,23 +195,10 @@
 }
 
 .modePopup .windowFrame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  /* transform removed to allow framer-motion full control over centering animation */
-  width: var(--pv-popup-width);
-  height: var(--pv-popup-height);
   border-radius: var(--pv-popup-radius);
   box-shadow: var(--pv-popup-shadow);
   overflow: hidden;
   z-index: 10;
-}
-
-@media (max-width: 1024px) {
-  .modePopup .windowFrame {
-    width: 95vw;
-    height: 90vh;
-  }
 }
 
 /* --- Window Components: Header & Drag --- */
