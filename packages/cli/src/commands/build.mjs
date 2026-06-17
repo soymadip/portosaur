@@ -45,7 +45,7 @@ export async function buildCommand(siteDir, extraArgs = []) {
   };
 
   try {
-    const userConfig = loadUserConfig(UserRoot);
+    const userConfig = loadUserConfig(UserRoot, { portoRoot: Paths.theme });
 
     // ------- Asset Generation -------
 
