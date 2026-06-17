@@ -57,6 +57,25 @@ export function parsePvHash(hash) {
   if (!hash) return null;
   const cleanHash = hash.replace("#", "");
   if (!cleanHash.includes(":pv-")) return null;
-  const [slug, mode] = cleanHash.split(":pv-");
-  return { slug, mode };
+  const parts = cleanHash.split(":pv-");
+  const mode = parts.pop();
+  return { slug: parts.join("-"), mode };
+}
+
+export function extractTextFromChildren(children) {
+  if (typeof children === "string" || typeof children === "number") {
+    return String(children);
+  }
+  if (Array.isArray(children)) {
+    return children.map(extractTextFromChildren).join("");
+  }
+  if (
+    children &&
+    typeof children === "object" &&
+    children.props &&
+    children.props.children
+  ) {
+    return extractTextFromChildren(children.props.children);
+  }
+  return "";
 }

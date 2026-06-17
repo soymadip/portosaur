@@ -6,21 +6,17 @@ import {
   generatePvSlug,
   generatePvHash,
   parsePvHash,
+  extractTextFromChildren,
   classify,
 } from "../../utils";
 import styles from "../../styles.module.css";
 
-export function normalizeSources({
-  href,
-  children,
-  desc,
-  title,
-  id,
-}) {
+export function normalizeSources({ href, children, desc, title, id }) {
   let rawSources = [];
   if (Array.isArray(href)) {
-    rawSources = href.map(item => {
-      if (typeof item === 'string') return { href: item.trim() };
+    rawSources = href.map((item) => {
+      if (typeof item === "string") return { href: item.trim() };
+      if (!item.href && item.path) return { ...item, href: item.path };
       return item;
     });
   } else if (href) {
@@ -30,10 +26,7 @@ export function normalizeSources({
   return rawSources.map((src) => {
     const sPath = (src.href || "").trim();
     const sDesc = src.desc || "";
-    const childrenText = React.Children.toArray(children)
-      .map((c) => (typeof c === "string" || typeof c === "number" ? c : ""))
-      .join("")
-      .trim();
+    const childrenText = extractTextFromChildren(children).trim();
     const label = src.label || childrenText;
     let urlLabel = "";
     let domain = "";
@@ -82,7 +75,7 @@ export function normalizeSources({
 
 /**
  * A trigger component that opens the global file preview window.
- * 
+ *
  * @param {Object} props
  * @param {string|PvSource|Array<string|PvSource>} props.href - The URL/path(s) to preview. Can be a single string, or an array for multi-tab preview.
  * @param {React.ReactNode} [props.children] - The clickable trigger content. Defaults to the filename if not provided.
@@ -97,7 +90,7 @@ export default function Pv(props) {
   const {
     children,
     id: manualId,
-    activeIdx = 0,
+    activeIdx: _activeIdx,
     title,
     mode = "popup",
     modeSwitch = true,
@@ -109,26 +102,36 @@ export default function Pv(props) {
     return <span style={{ color: "red" }}>[Preview Error: Missing href]</span>;
   }
 
+  const activeIdx = _activeIdx ?? 0;
+  const isMultiTabTrigger =
+    _activeIdx === undefined && Array.isArray(props.href);
+
   const {
     isOpen,
     mode: currentMode,
     sources: activeSources,
     activeIndex,
+    baseSlug: activeBaseSlug,
     openPreview,
     closePreview,
     setMode,
   } = usePreview();
 
   const location = useLocation();
-  const srcList = useMemo(
-    () => normalizeSources(props),
-    [props, title],
-  );
+  const srcList = useMemo(() => normalizeSources(props), [props, title]);
 
   const baseSlug = useMemo(() => {
     if (manualId) return generatePvSlug(manualId);
     if (title) return generatePvSlug(title);
-    const pathOrHref = typeof props.href === "string" ? props.href : srcList[activeIdx]?.path;
+
+    const childrenText = extractTextFromChildren(children).trim();
+    if (childrenText) {
+      return generatePvSlug(childrenText);
+    }
+
+    const pathOrHref =
+      typeof props.href === "string" ? props.href : srcList[activeIdx]?.path;
+
     if (pathOrHref) {
       const filename = pathOrHref
         .split(/[?#]/)[0]
@@ -137,25 +140,50 @@ export default function Pv(props) {
         .pop();
       if (filename) return generatePvSlug(filename);
     }
-    const childrenText = typeof children === "string" ? children.trim() : null;
-    if (childrenText) return generatePvSlug(childrenText);
+
     return "preview";
   }, [manualId, title, props.href, srcList, activeIdx, children]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const parsed = parsePvHash(window.location.hash);
-      if (parsed && parsed.slug === baseSlug) {
-        const hashMode = parsed.mode || mode;
-        setMode(hashMode);
-        openPreview(
-          srcList,
-          activeIdx,
-          generatePvHash(baseSlug, hashMode),
-          hashMode,
-          baseSlug,
-          modeSwitch,
-        );
+      if (parsed) {
+        let isMatch = false;
+        let targetIdx = activeIdx;
+
+        if (parsed.slug === baseSlug) {
+          isMatch = true;
+          // Note: if the hash precisely matches the baseSlug, it implies tab 0 or the default
+        } else {
+          const match = parsed.slug.match(
+            new RegExp(`^${baseSlug}-tab(\\d+)$`),
+          );
+          if (match) {
+            isMatch = true;
+            const tabNum = parseInt(match[1], 10);
+            const parsedIdx = tabNum - 1;
+            if (
+              !isNaN(parsedIdx) &&
+              parsedIdx >= 0 &&
+              parsedIdx < srcList.length
+            ) {
+              targetIdx = parsedIdx;
+            }
+          }
+        }
+
+        if (isMatch) {
+          const hashMode = parsed.mode || mode;
+          setMode(hashMode);
+          openPreview(
+            srcList,
+            targetIdx,
+            window.location.hash.substring(1),
+            hashMode,
+            baseSlug,
+            modeSwitch,
+          );
+        }
       }
     }, 150);
     return () => clearTimeout(timer);
@@ -176,9 +204,10 @@ export default function Pv(props) {
 
   const isCurrentlyActive =
     isOpen &&
+    activeBaseSlug === baseSlug &&
     activeSources.length === srcList.length &&
     activeSources[activeIdx]?.path === srcList[activeIdx]?.path &&
-    activeIndex === activeIdx;
+    (isMultiTabTrigger || activeIndex === activeIdx);
 
   const handleClick = () => {
     if (isCurrentlyActive) {
@@ -206,8 +235,7 @@ export default function Pv(props) {
         e.preventDefault();
         handleClick();
       }}
-      role="button"
-      tabIndex={0}
+      title={srcList[activeIdx]?.tooltip || ""}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
           e.preventDefault();

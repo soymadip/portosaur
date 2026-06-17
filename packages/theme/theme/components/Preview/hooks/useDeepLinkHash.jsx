@@ -1,19 +1,16 @@
 import { useEffect } from "react";
 import { generatePvSlug, generatePvHash } from "../utils";
+
 export function useDeepLinkHash(isOpen, sources, activeIndex, mode, baseSlug) {
   useEffect(() => {
     if (!isOpen) return;
+
     let slug = baseSlug;
-    if (sources && sources.length > 1) {
-      const src = sources[activeIndex];
-      if (src) {
-        const rawLabel =
-          src.label ||
-          (src.path ? src.path.split(/[?#]/)[0].split("/").pop() : "tab");
-        const tabSlug = generatePvSlug(rawLabel);
-        slug = baseSlug ? `${baseSlug}-${tabSlug}` : tabSlug;
-      }
+    if (sources && sources.length > 1 && activeIndex > 0) {
+      const tabNum = activeIndex + 1;
+      slug = baseSlug ? `${baseSlug}-tab${tabNum}` : `tab${tabNum}`;
     }
+
     if (slug) {
       const newHash = generatePvHash(slug, mode);
       if (window.location.hash !== `#${newHash}`) {
