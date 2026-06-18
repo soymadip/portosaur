@@ -1,4 +1,4 @@
-import DocCategoryGeneratedIndexPage from "@theme-original/DocCategoryGeneratedIndexPage";
+import DocCategoryGeneratedIndexPage from "@theme-init/DocCategoryGeneratedIndexPage";
 import NoteCards from "@portosaur/theme/theme/components/NoteCards/index.jsx";
 
 export default function DocCategoryGeneratedIndexPageWrapper(props) {

@@ -59,10 +59,14 @@ export function useAdaptiveSizing({
   let rndY = floatingState.y ?? defaultPipY;
 
   if (!isDockMode && !isPhone && floatingState.x !== null) {
-    rndX = Math.min(rndX, windowWidth - pipWidth - 10);
-    rndX = Math.max(10, rndX);
-    rndY = Math.min(rndY, vh - pipHeight - 10);
-    rndY = Math.max(10, rndY);
+    const minVisible = 60;
+    const minVisibleY = 50;
+
+    rndX = Math.max(
+      -pipWidth + minVisible,
+      Math.min(windowWidth - minVisible, rndX),
+    );
+    rndY = Math.max(-pipHeight + minVisibleY, Math.min(vh - minVisibleY, rndY));
   }
 
   const popupWidth = isMobile
@@ -91,7 +95,7 @@ export function useAdaptiveSizing({
     ? { left: 0, top: 0, right: windowWidth, bottom: vh }
     : isDockMode
       ? { left: 0, top: 0, right: windowWidth, bottom: vh }
-      : "parent";
+      : undefined;
 
   return {
     isPhone,

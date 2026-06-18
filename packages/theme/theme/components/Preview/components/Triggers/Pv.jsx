@@ -27,7 +27,7 @@ export function normalizeSources({ href, children, desc, title, id }) {
     const sPath = (src.href || "").trim();
     const sDesc = src.desc || "";
     const childrenText = extractTextFromChildren(children).trim();
-    const label = src.label || childrenText;
+    const label = src.label;
     let urlLabel = "";
     let domain = "";
     let type = "text";
@@ -59,7 +59,7 @@ export function normalizeSources({ href, children, desc, title, id }) {
       source,
       tooltip,
       id: src.id || id,
-      title: src.title || title,
+      title: src.title || title || childrenText,
     };
   });
 }
@@ -84,27 +84,25 @@ export function normalizeSources({ href, children, desc, title, id }) {
  * @param {"popup"|"dock"|"pip"} [props.mode="popup"] - The default display mode to open in.
  * @param {boolean} [props.modeSwitch=true] - Whether the user can switch between popup/dock/pip modes inside the preview.
  * @param {boolean} [props.underline=true] - Whether the trigger link should have an underline style.
+ * @param {string} [props.className] - CSS class to apply to the anchor tag.
  * @param {number} [props.activeIdx=0] - The index of the initially active tab when multiple hrefs are provided.
  */
 export default function Pv(props) {
   const {
     children,
     id: manualId,
-    activeIdx: _activeIdx,
+    activeIdx = 0,
     title,
     mode = "popup",
     modeSwitch = true,
     underline = true,
+    className,
   } = props;
 
   if (!props.href) {
     console.error("<Pv> component requires the 'href' prop.");
     return <span style={{ color: "red" }}>[Preview Error: Missing href]</span>;
   }
-
-  const activeIdx = _activeIdx ?? 0;
-  const isMultiTabTrigger =
-    _activeIdx === undefined && Array.isArray(props.href);
 
   const {
     isOpen,
@@ -153,15 +151,8 @@ export default function Pv(props) {
 
         if (parsed.slug === baseSlug) {
           isMatch = true;
-          // Note: if the hash precisely matches the baseSlug, it implies tab 0 or the default
-        } else {
-          const match = parsed.slug.match(
-            new RegExp(`^${baseSlug}-tab(\\d+)$`),
-          );
-          if (match) {
-            isMatch = true;
-            const tabNum = parseInt(match[1], 10);
-            const parsedIdx = tabNum - 1;
+          if (parsed.tabNum !== undefined) {
+            const parsedIdx = parsed.tabNum - 1;
             if (
               !isNaN(parsedIdx) &&
               parsedIdx >= 0 &&
@@ -207,7 +198,7 @@ export default function Pv(props) {
     activeBaseSlug === baseSlug &&
     activeSources.length === srcList.length &&
     activeSources[activeIdx]?.path === srcList[activeIdx]?.path &&
-    (isMultiTabTrigger || activeIndex === activeIdx);
+    activeIndex === activeIdx;
 
   const handleClick = () => {
     if (isCurrentlyActive) {
@@ -217,7 +208,7 @@ export default function Pv(props) {
       openPreview(
         srcList,
         activeIdx,
-        generatePvHash(baseSlug, mode),
+        generatePvHash(baseSlug, mode, activeIdx),
         mode,
         baseSlug,
         modeSwitch,
@@ -225,12 +216,16 @@ export default function Pv(props) {
     }
   };
 
-  const targetHash = generatePvHash(baseSlug, mode);
+  const targetHash = generatePvHash(baseSlug, mode, activeIdx);
+
+  const baseClassName = className
+    ? className
+    : `${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${!underline ? styles.noUnderline : ""}`;
 
   const trigger = (
     <a
       href={`#${targetHash}`}
-      className={`${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${!underline ? styles.noUnderline : ""}`}
+      className={baseClassName}
       onClick={(e) => {
         e.preventDefault();
         handleClick();

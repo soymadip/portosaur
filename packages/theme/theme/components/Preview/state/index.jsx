@@ -48,6 +48,7 @@ function getInitialState() {
 
 function reducer(state, action) {
   switch (action.type) {
+  
     case "OPEN":
       return {
         ...state,
@@ -143,6 +144,7 @@ export function PreviewProvider({ children }) {
     [],
   );
   const toggleMode = useCallback(() => dispatch({ type: "TOGGLE_MODE" }), []);
+
 
   return (
     <PreviewContext.Provider

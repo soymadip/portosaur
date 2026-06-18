@@ -471,12 +471,15 @@
   border-bottom-color: var(--ifm-color-primary);
 }
 
-/* Content Area */
 .windowContent {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+.windowInteracting .windowContent {
+  pointer-events: none;
 }
 
 .popupBody {
@@ -622,20 +625,6 @@
   text-decoration: none !important;
 }
 
-.sourceFooter {
-  margin: 2rem 0 1rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--ifm-color-emphasis-200);
-  font-size: 0.85rem;
-  color: var(--ifm-font-color-secondary);
-}
-
-.sourceFooterLabel {
-  font-weight: 700;
-  color: var(--ifm-font-color-base);
-  margin-right: 8px;
-}
-
 /* --- react-rnd wrapper --- */
 .rndWrapper {
   pointer-events: auto;
@@ -773,3 +762,5 @@
 :global(body.pv-dock-active) :global(.container.docItemWrapperEnhanced_JWYK) {
   max-width: none !important;
 }
+
+

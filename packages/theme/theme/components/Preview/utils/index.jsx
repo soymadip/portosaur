@@ -49,17 +49,49 @@ export function generatePvSlug(text) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
-export function generatePvHash(slug, mode) {
+export function generatePvHash(slug, mode, activeIndex = 0) {
   if (!slug) return "";
-  return `${slug}:pv-${mode || "popup"}`;
+  let hash = `${slug}-pv`;
+  const params = [];
+  if (activeIndex > 0) {
+    params.push(`t=${activeIndex + 1}`);
+  }
+  if (mode && mode !== "popup") {
+    params.push(`m=${mode}`);
+  }
+  if (params.length > 0) {
+    hash += `?${params.join("&")}`;
+  }
+  return hash;
 }
+
 export function parsePvHash(hash) {
   if (!hash) return null;
   const cleanHash = hash.replace("#", "");
-  if (!cleanHash.includes(":pv-")) return null;
-  const parts = cleanHash.split(":pv-");
-  const mode = parts.pop();
-  return { slug: parts.join("-"), mode };
+
+  const match = cleanHash.match(/^(.+)-pv(?:$|\?(.*))$/);
+  if (!match) return null;
+
+  const baseSlug = match[1];
+  const queryString = match[2];
+
+  let tabNum = 1;
+  let mode = "popup";
+
+  if (queryString) {
+    const searchParams = new URLSearchParams(queryString);
+    const tVal = searchParams.get("t");
+    if (tVal) {
+      const parsedTab = parseInt(tVal, 10);
+      if (!isNaN(parsedTab)) tabNum = parsedTab;
+    }
+    const mVal = searchParams.get("m");
+    if (mVal === "popup" || mVal === "dock" || mVal === "pip") {
+      mode = mVal;
+    }
+  }
+
+  return { slug: baseSlug, tabNum, mode };
 }
 
 export function extractTextFromChildren(children) {
