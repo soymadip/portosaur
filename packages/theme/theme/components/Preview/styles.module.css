@@ -1,5 +1,5 @@
 :root {
-  --pv-backdrop-bg: rgba(var(--ifm-color-emphasis-900-rgb), 0.1);
+  --pv-backdrop-bg: rgba(var(--ifm-color-black-rgb), 0.75);
   --pv-popup-shadow: 0 20px 50px rgba(var(--ifm-color-emphasis-900-rgb), 0.3);
   --pv-popup-width: min(900px, 90vw);
   --pv-popup-height: min(700px, 85vh);
