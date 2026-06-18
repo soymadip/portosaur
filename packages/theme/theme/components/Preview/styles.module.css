@@ -224,6 +224,14 @@
   cursor: default;
 }
 
+.modePopup .dragHandleWrapper {
+  cursor: default;
+}
+
+.modePopup .dragHandleWrapper:active {
+  cursor: default;
+}
+
 .revealHeader {
   position: absolute;
   top: 0;
