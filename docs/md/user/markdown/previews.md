@@ -1,76 +1,71 @@
 # Interactive Previews
 
-{{meta.project.title}} transforms static links into an **interactive multitasking system**. Instead of forcing users away to a new tab, Interactive Previews keep them engaged with your content by opening references in a premium, responsive window.
+You can use the `<Pv />` component to preview various file types, including PDFs, images, code files, and more.
+
+Main difference with `<a>` tag is that this opens a preview window instead of navigating to the file.
 
 ---
 
-## Component Reference
+## Basic Usage
 
-### `<Pv />` Props
+<big>**Single File**</big>:
 
-| Prop          | Type      | Default   | Description                                          |
-| :------------ | :-------- | :-------- | :--------------------------------------------------- |
-| **`href`**    | `string`  | -         | The path to the file or URL.                         |
-| **`sources`** | `array`   | -         | Array of `{path, label}` objects for tabbed views.   |
-| **`mode`**    | `string`  | `"popup"` | Starting layout: `"popup"`, `"pip"`, or `"dock"`.    |
-| `title`       | `string`  | -         | Custom title for the window header.                  |
-| `id`          | `string`  | -         | Custom ID for the URL hash (e.g. `#my-id:pv-popup`). |
-| `modeSwitch`  | `boolean` | `true`    | Show/hide the multitasking (Dock/PiP) toggle.        |
-| `underline`   | `boolean` | `true`    | Show the distinctive dashed link style.              |
-| `desc`        | `string`  | -         | Tooltip text shown on hover.                         |
+```mdx
+Here is my <Pv href="/resume.pdf">Resume</Pv>.
+```
 
----
+<big>**Multiple Files**</big>:
 
-### `<SrcPv />`
-
-A specialized trigger for lists. Perfect for "Resources" or "Downloads" sections.
-
-```jsx
-<SrcPv
-  prefixText="Resources: "
-  sources={[
-    { path: "https://github.com", label: "GitHub" },
-    { path: "/manual.pdf", label: "User Manual" },
-  ]}
-/>
+```mdx
+These are <Pv href={["/resume.pdf", "/work-samples.zip"]}>Resume & Samples</Pv>.
 ```
 
 ---
 
-## Why use Previews?
+## `<Pv />` Props
 
-- **Keep the Flow**: Users can view PDFs, images, or code without losing their scroll position on the main article.
-- **Contextual Learning**: Display a code sample in a side-dock while the user reads the explanation.
-- **Immersive references**: Show full external websites or complex documents in a beautiful, controlled UI.
+| Prop         | Type              | Default | Description                                                                                                                                                                                                              |
+| :----------- | :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`href`**   | `string \| array` | -       | Can be:<br/>1. The root-relative (e.g. `/code/script.py`) or absolute URL of an asset<br/>2. External direct asset URL<br/>3. Embed URL<br/>4. An Array of above                                                         |
+| `type`       | `string`          | `auto`  | Force a specific renderer. Can be:<br/>1. `video`: play as video<br/>2. `image`: view image<br/>3. `pdf`: render PDF document<br/>4. `text`: syntax highlighted code/text<br/>5. `web`: embed external site in an iframe |
+| `title`      | `string`          | -       | Custom title for the window header.                                                                                                                                                                                      |
+| `desc`       | `string`          | -       | Tooltip text shown on hover.                                                                                                                                                                                             |
+| `id`         | `string`          | -       | Custom ID for the URL hash (e.g. `#my-id-pv?m=popup`).                                                                                                                                                                   |
+| `mode`       | `string`          | `popup` | Starting layout.<br/>Can be: `popup`, `pip`, or `dock`. More info below                                                                                                                                                  |
+| `modeSwitch` | `boolean`         | `true`  | Show/hide the mode switch (Dock/PiP) toggle.                                                                                                                                                                             |
+| `underline`  | `boolean`         | `true`  | Show/hide the underline on hover.                                                                                                                                                                                        |
 
 ---
 
-## The Core Component: `<Pv />`
+## Automatic File Detection
 
-The `<Pv />` (Preview) component is your primary tool. Wrap any link or text with it to make it "Preview-able".
+You don't need to tell what kind of file is it for the basic usage. The system automatically detects and renders:
 
-```jsx
-<Pv href="/resume.pdf">View my Resume</Pv>
-```
-
-### Automatic File Detection
-
-You don't need to tell {{meta.project.title}} what kind of file it is. The system automatically detects and renders:
-
-- **Documents**: PDFs (with zoom/search).
+- **Documents**: PDFs.
 - **Code**: 100+ languages with syntax highlighting.
 - **Images**: High-res previews with click-to-zoom.
+- **Video**: Native video player (mp4, webm, ogg, mkv).
 - **Websites**: Full external sites with a "Visit" fallback.
+
+### Forcing a Specific Renderer
+
+If your URL doesn't have a standard extension (like an API endpoint or a dynamic stream), the auto-detection might not work. You can force a specific renderer by passing the `type` prop:
+
+```jsx
+<Pv href="https://example.com/stream" type="video">
+  Watch Live Stream
+</Pv>
+```
 
 ---
 
 ## Choosing your Layout
 
-{{meta.project.title}} features a **3-tier adaptive engine** that ensures your previews look great on any device. You can set the starting `mode`, and the user can switch between them using the header controls.
+There are 3 layout modes. You can set the starting `mode`, and the user can switch between them using the header buttons.
 
-### 1. Popup (The Immersive Choice)
+### 1. Popup (default)
 
-The default mode. It opens a centered, high-contrast modal that focuses the user's entire attention on the document. Best for Resumes, full-screen images, or critical references.
+It opens a centered modal that focuses user's attention on the document.
 
 ```jsx
 <Pv href="/design-spec.pdf" mode="popup">
@@ -78,9 +73,9 @@ The default mode. It opens a centered, high-contrast modal that focuses the user
 </Pv>
 ```
 
-### 2. PiP (The Multitasker)
+### 2. PiP
 
-**Picture-in-Picture** mode creates a floating window that stays visible while the user scrolls the main page.
+Creates a floating window that stays visible while the user scrolls the main page.
 
 - **Mobile**: Becomes a YouTube-style mini-player at the bottom.
 - **Desktop**: A sleek floating window you can drag anywhere.
@@ -91,11 +86,11 @@ The default mode. It opens a centered, high-contrast modal that focuses the user
 </Pv>
 ```
 
-### 3. Dock (The Pro Workflow)
+### 3. Dock
 
 Splits the screen to show content side-by-side.
 
-- **Desktop**: Pushes the documentation to the left and docks the preview to the right (like a professional IDE).
+- **Desktop**: Pushes the documentation to the left and docks the preview to the right.
 - **Mobile**: Becomes a bottom-half "Peek" sheet.
 
 ```jsx
@@ -106,16 +101,14 @@ Splits the screen to show content side-by-side.
 
 ---
 
-## Advanced Features
+## Tabbed Preview (Multi-Source)
 
-### Tabbed Collections (Multi-Source)
-
-You can group related files into a single preview window using the `sources` prop. Users can switch between files using an integrated tab bar.
+You can group related files into a single preview window by passing an array to the `href` prop. Users can switch between files using an tab bar.
 
 ```jsx
 <Pv
   title="Project Source"
-  sources={[
+  href={[
     { path: "/src/index.js", label: "Logic" },
     { path: "/src/styles.css", label: "Theme" },
   ]}
@@ -124,8 +117,10 @@ You can group related files into a single preview window using the `sources` pro
 </Pv>
 ```
 
-### Stable Deep Linking
-
-Every preview generates a unique URL hash. If a user finds a specific file in your dock, they can copy the URL and share it. When the next person opens that link, {{meta.project.title}} will **automatically open the previewer** to that exact file and mode.
-
-**Format**: `#my-slug:pv-dock`
+> [!INFO]
+>
+> You don't have to pass separate `path` and `label` objects. You can just pass an array of strings, and the filename will automatically be used as the tab label:
+>
+> ```jsx
+> <Pv href={["/src/index.js", "/src/styles.css"]}>Browse Project Files</Pv>
+> ```

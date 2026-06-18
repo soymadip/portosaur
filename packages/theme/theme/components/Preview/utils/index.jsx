@@ -23,8 +23,35 @@ const TEXT_EXTS = [
   "sql",
   "diff",
   "patch",
+  "csv",
+  "php",
+  "rb",
+  "swift",
+  "kt",
+  "scala",
+  "cs",
+  "ini",
+  "conf",
+  "env",
+  "graphql",
+  "gql",
+  "log",
+  "vue",
+  "svelte",
 ];
-const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
+const IMAGE_EXTS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "bmp",
+  "ico",
+  "tiff",
+  "tif",
+  "avif",
+];
 export function getExt(path) {
   return (path || "").split(".").pop().toLowerCase().split("?")[0];
 }
