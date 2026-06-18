@@ -1,0 +1,15 @@
+.footerSourceBtn {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ifm-link-color);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--ifm-transition-fast) ease;
+}
+
+.footerSourceBtn:hover {
+  color: var(--ifm-link-hover-color);
+  text-decoration: underline;
+  text-decoration: var(--ifm-link-hover-decoration);
+}
