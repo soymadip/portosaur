@@ -11,7 +11,14 @@ import {
 } from "../../utils";
 import styles from "../../styles.module.css";
 
-export function normalizeSources({ href, children, desc, title, id }) {
+export function normalizeSources({
+  href,
+  children,
+  desc,
+  title,
+  id,
+  type: manualType,
+}) {
   let rawSources = [];
   if (Array.isArray(href)) {
     rawSources = href.map((item) => {
@@ -45,6 +52,9 @@ export function normalizeSources({ href, children, desc, title, id }) {
         }
       } catch (e) {}
     }
+
+    if (src.type) type = src.type;
+    else if (manualType) type = manualType;
 
     const source = domain || urlLabel || "Local";
     const displayLabel = label || source;
@@ -81,6 +91,7 @@ export function normalizeSources({ href, children, desc, title, id }) {
  * @param {React.ReactNode} [props.children] - The clickable trigger content. Defaults to the filename if not provided.
  * @param {string} [props.title] - Custom title for the preview window header.
  * @param {string} [props.id] - Manual ID to generate the URL hash.
+ * @param {string} [props.type] - Manual type to force the renderer (e.g. "video", "image").
  * @param {"popup"|"dock"|"pip"} [props.mode="popup"] - The default display mode to open in.
  * @param {boolean} [props.modeSwitch=true] - Whether the user can switch between popup/dock/pip modes inside the preview.
  * @param {boolean} [props.underline=true] - Whether the trigger link should have an underline style.

@@ -209,7 +209,7 @@ export default function PreviewViewer() {
         onSelect={setActiveIndex}
       />
       <div
-        className={`${styles.popupBody} ${fileType === "text" ? styles.isText : styles.isGrabbable}`}
+        className={`${styles.popupBody} ${fileType === "text" ? styles.isText : fileType === "image" || fileType === "pdf" ? styles.isGrabbable : ""}`}
         ref={(el) => {
           popupBodyRef.current = el;
           if (el && isOpen) el.focus({ preventScroll: true });

@@ -58,8 +58,8 @@ export default function PreviewHeader({
 
         {/* Controls */}
         <div className={styles.headerControls}>
-          {/* Zoom picker (desktop, non-web) */}
-          {!isMobileSize && fileType !== "web" && (
+          {/* Zoom picker (desktop, non-web, non-video) */}
+          {!isMobileSize && fileType !== "web" && fileType !== "video" && (
             <div
               className={styles.zoomDropdown}
               ref={zoomMenuRef}

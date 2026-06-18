@@ -575,6 +575,23 @@
   display: block;
 }
 
+.videoView {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+  height: 100%;
+  background: var(--ifm-background-color);
+}
+.videoPlayer {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
 .errorState {
   flex: 1;
   display: flex;
@@ -762,4 +779,3 @@
 :global(body.pv-dock-active) :global(.container.docItemWrapperEnhanced_JWYK) {
   max-width: none !important;
 }
-

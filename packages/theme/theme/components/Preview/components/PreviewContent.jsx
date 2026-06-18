@@ -5,6 +5,7 @@ import ImageRenderer from "../renderers/ImageRenderer";
 import PdfRenderer from "../renderers/PdfRenderer";
 import WebRenderer from "../renderers/WebRenderer";
 import CodeRenderer from "../renderers/CodeRenderer";
+import VideoRenderer from "../renderers/VideoRenderer";
 
 export default function PreviewContent({
   currentFile,
@@ -58,6 +59,13 @@ export default function PreviewContent({
         <PdfRenderer
           fileUrl={fileUrl}
           zoomLevel={zoomLevel}
+          onError={(msg) => setError(path, msg)}
+        />
+      );
+    case "video":
+      return (
+        <VideoRenderer
+          fileUrl={fileUrl}
           onError={(msg) => setError(path, msg)}
         />
       );

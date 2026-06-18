@@ -52,30 +52,48 @@ const IMAGE_EXTS = [
   "tif",
   "avif",
 ];
+const VIDEO_EXTS = [
+  "mp4",
+  "webm",
+  "ogg",
+  "mkv",
+  "mov",
+  "m4v",
+  "avi",
+  "wmv",
+  "flv",
+  "3gp",
+];
+
 export function getExt(path) {
   return (path || "").split(".").pop().toLowerCase().split("?")[0];
 }
+
 export function classify(path) {
   if (!path) return "text";
   const ext = getExt(path);
   if (ext === "pdf") return "pdf";
   if (IMAGE_EXTS.includes(ext)) return "image";
+  if (VIDEO_EXTS.includes(ext)) return "video";
   if (TEXT_EXTS.includes(ext)) return "text";
   if (path.startsWith("http")) return "web";
   return "text";
 }
+
 export function resolveUrl(path) {
   if (!path) return "";
   if (path.startsWith("http") || path.startsWith("//")) return path;
   if (typeof window === "undefined") return path;
   return path.startsWith("/") ? path : `/${path}`;
 }
+
 export function generatePvSlug(text) {
   return (text || "preview")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
+
 export function generatePvHash(slug, mode, activeIndex = 0) {
   if (!slug) return "";
   let hash = `${slug}-pv`;
