@@ -242,6 +242,15 @@ export function createStaticAssetResolver(
  */
 export function buildHeadTags(tags?: any[]): any[];
 
+/**
+ * Automatically cleans slugs and strips numeric sorting prefixes from document metadata.
+ */
+export function cleanFrontMatterSlug(params: {
+  filePath: string;
+  frontMatter: Record<string, any>;
+  projectDir: string;
+}): Record<string, any>;
+
 // ----------------------------------------------------------------------------
 // Configuration Utilities (utils/config.mjs & utils/validate.mjs)
 // ----------------------------------------------------------------------------

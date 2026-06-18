@@ -21,6 +21,7 @@ export {
   resolveBasePath,
   createStaticAssetResolver,
   buildHeadTags,
+  cleanFrontMatterSlug,
 } from "./utils/docusaurus.mjs";
 
 export { resolveVars, getNestedValue } from "./utils/config.mjs";

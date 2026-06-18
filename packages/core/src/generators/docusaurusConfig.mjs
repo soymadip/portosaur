@@ -10,6 +10,7 @@ import {
   resolveBasePath,
   createStaticAssetResolver,
   buildHeadTags,
+  cleanFrontMatterSlug,
 } from "../utils/docusaurus.mjs";
 
 import remarkMath from "remark-math";
@@ -125,6 +126,15 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       format: get("site.markdown.format", "mdx"), // Markdown parser format (mdx, md, detect).
       mermaid: get("site.markdown.mermaid", true), // Enable support for Mermaid.js diagrams.
       emoji: get("site.markdown.render_emoji_shortcodes", true), // Render emoji shortcodes like :smile:.
+      parseFrontMatter: async ({ filePath, fileContent, defaultParseFrontMatter }) => {
+        const result = await defaultParseFrontMatter({ filePath, fileContent });
+        result.frontMatter = cleanFrontMatterSlug({
+          filePath,
+          frontMatter: result.frontMatter,
+          projectDir,
+        });
+        return result;
+      },
       hooks: {
         onBrokenMarkdownLinks: get("site.markdown.on_broken_links", "throw"), // Broken link behavior.
         onBrokenMarkdownImages: get("site.markdown.on_broken_images", "throw"), // Broken image behavior.
