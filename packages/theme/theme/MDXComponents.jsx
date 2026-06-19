@@ -3,7 +3,7 @@ import Details from "@theme/Details";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import { Pv } from "./components/Preview";
-import Tooltip from "./components/Tooltip";
+import Hint from "./components/Hint";
 import TopicList from "./components/TopicList";
 import Indent from "./components/Indent";
 
@@ -11,11 +11,10 @@ import Indent from "./components/Indent";
 export default {
   ...MDXComponents,
   Pv,
-
   TopicList,
   Details,
   Tabs,
   TabItem,
-  Tooltip,
+  Hint,
   Indent,
 };

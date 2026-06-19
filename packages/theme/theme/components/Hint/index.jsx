@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "./styles.module.css";
 
-export default function Tooltip({
+export default function Hint({
   children,
   msg,
   position = "top",
@@ -14,18 +14,16 @@ export default function Tooltip({
   className = "",
 }) {
   if (!msg) {
-    throw new Error(
-      "Tooltip: 'msg' prop is required to display tooltip content.",
-    );
+    throw new Error("Hint: 'msg' prop is required to display hint content.");
   }
 
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0, originalLeft: 0 });
   const [arrowOffset, setArrowOffset] = useState(0);
   const containerRef = useRef(null);
-  const tooltipRef = useRef(null);
+  const hintRef = useRef(null);
 
-  const tooltipStyle = {
+  const hintStyle = {
     ...(bg && { "--tooltip-color": bg }),
     ...(color && { "--tooltip-text-color": color }),
     ...(!color &&
@@ -83,10 +81,10 @@ export default function Tooltip({
   useEffect(() => {
     if (
       isVisible &&
-      tooltipRef.current &&
+      hintRef.current &&
       (position === "top" || position === "bottom")
     ) {
-      const rect = tooltipRef.current.getBoundingClientRect();
+      const rect = hintRef.current.getBoundingClientRect();
       const padding = 12;
       let newLeft = coords.originalLeft;
       const halfWidth = rect.width / 2;
@@ -107,14 +105,14 @@ export default function Tooltip({
     }
   }, [isVisible, coords.originalLeft, coords.left, position]);
 
-  const tooltip =
+  const hint =
     isVisible && typeof document !== "undefined"
       ? createPortal(
           <span
-            ref={tooltipRef}
-            className={`${styles.tooltip} ${styles[position]}`}
+            ref={hintRef}
+            className={`${styles.hint} ${styles[position]}`}
             style={{
-              ...tooltipStyle,
+              ...hintStyle,
               top: coords.top,
               left: coords.left,
               "--arrow-offset": `${arrowOffset}px`,
@@ -131,7 +129,7 @@ export default function Tooltip({
   return (
     <div
       ref={containerRef}
-      className={`${styles.tooltipContainer} ${underline ? styles.hasUnderline : ""} ${className} ${isVisible ? styles.isActive : ""}`}
+      className={`${styles.hintContainer} ${underline ? styles.hasUnderline : ""} ${className} ${isVisible ? styles.isActive : ""}`}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
@@ -140,7 +138,7 @@ export default function Tooltip({
       style={{ display: "contents" }}
     >
       {children}
-      {tooltip}
+      {hint}
     </div>
   );
 }
