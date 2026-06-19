@@ -243,6 +243,16 @@
 
   /* === SEMANTIC COLOR SYSTEM === */
 
+  /* Secondary color - Lavender/Surface */
+  --ifm-color-secondary-lightest: var(--ctp-latte-surface1);
+  --ifm-color-secondary-lighter: var(--ctp-latte-surface2);
+  --ifm-color-secondary-light: var(--ctp-latte-surface1);
+  --ifm-color-secondary: var(--ctp-latte-lavender);
+  --ifm-color-secondary-rgb: var(--ctp-latte-lavender-rgb);
+  --ifm-color-secondary-dark: var(--ctp-latte-sapphire);
+  --ifm-color-secondary-darker: var(--ctp-latte-sapphire);
+  --ifm-color-secondary-darkest: var(--ctp-latte-blue);
+
   /* Success color - Green */
   --ifm-color-success-lightest: var(--ctp-latte-sky);
   --ifm-color-success-lighter: var(--ctp-latte-teal);
@@ -485,6 +495,16 @@
   --ifm-color-pink-rgb: var(--ctp-mocha-pink-rgb);
 
   /* === SEMANTIC COLOR SYSTEM === */
+
+  /* Secondary color - Lavender/Surface */
+  --ifm-color-secondary-lightest: var(--ctp-mocha-surface1);
+  --ifm-color-secondary-lighter: var(--ctp-mocha-surface2);
+  --ifm-color-secondary-light: var(--ctp-mocha-surface1);
+  --ifm-color-secondary: var(--ctp-mocha-lavender);
+  --ifm-color-secondary-rgb: var(--ctp-mocha-lavender-rgb);
+  --ifm-color-secondary-dark: var(--ctp-mocha-sapphire);
+  --ifm-color-secondary-darker: var(--ctp-mocha-sapphire);
+  --ifm-color-secondary-darkest: var(--ctp-mocha-blue);
 
   /* Success color - Green */
   --ifm-color-success-lightest: var(--ctp-mocha-sky);
