@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import Tooltip from "../Tooltip";
+import Hint from "../Hint";
 import styles from "./styles.module.css";
 
 export default function NavArrow() {
@@ -88,7 +88,7 @@ export default function NavArrow() {
         direction === "down" ? "Scroll to next section" : "Scroll to top"
       }
     >
-      <Tooltip
+      <Hint
         msg={direction === "down" ? "Next Section" : "Back to Top"}
         position="top"
         gap={25}
@@ -101,7 +101,7 @@ export default function NavArrow() {
             <FaChevronUp className={styles.chevron} />
           )}
         </div>
-      </Tooltip>
+      </Hint>
     </button>
   );
 }

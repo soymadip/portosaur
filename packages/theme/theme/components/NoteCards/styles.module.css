@@ -133,7 +133,7 @@
     justify-content: flex-start;
   }
 
-  /* Force the Tooltip container to be full-width */
+  /* Force the Hint container to be full-width */
   .notesGrid > span {
     width: 100%;
     display: flex !important;

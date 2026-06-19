@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import Tooltip from "../../Tooltip/index.jsx";
+import Hint from "../../Hint/index.jsx";
 import styles from "../styles.module.css";
 import { PreviewMode } from "../state/index.jsx";
 import IconDock from "../../../../assets/img/svg/icon-dock.svg";
@@ -106,7 +106,7 @@ export default function PreviewHeader({
 
           {/* Open/Download action */}
           {fileType === "web" ? (
-            <Tooltip msg="Open externally" position="bottom" underline={false}>
+            <Hint msg="Open externally" position="bottom" underline={false}>
               <a
                 href={fileUrl}
                 target="_blank"
@@ -116,9 +116,9 @@ export default function PreviewHeader({
                 <IconLink className={styles.headerIcon} />
                 <span className={styles.btnText}>Visit</span>
               </a>
-            </Tooltip>
+            </Hint>
           ) : (
-            <Tooltip
+            <Hint
               msg={isDownloading ? "Downloading..." : "Download file"}
               position="bottom"
               underline={false}
@@ -137,12 +137,12 @@ export default function PreviewHeader({
                   {isDownloading ? "Saving" : "Save"}
                 </span>
               </button>
-            </Tooltip>
+            </Hint>
           )}
 
           {/* Mode toggle */}
           {modeSwitch && (
-            <Tooltip msg={toggleTooltip} position="bottom" underline={false}>
+            <Hint msg={toggleTooltip} position="bottom" underline={false}>
               <button
                 onClick={onToggleMode}
                 className={`${styles.headerAction} ${styles.dockToggle}`}
@@ -158,18 +158,18 @@ export default function PreviewHeader({
                   <span className={styles.btnText}>{toggleLabel}</span>
                 )}
               </button>
-            </Tooltip>
+            </Hint>
           )}
 
           {/* Close */}
-          <Tooltip msg="Close" position="bottom" underline={false}>
+          <Hint msg="Close" position="bottom" underline={false}>
             <button
               onClick={onClose}
               className={`${styles.headerAction} ${styles.headerActionClose}`}
             >
               <IconClose className={styles.headerIconSmall} />
             </button>
-          </Tooltip>
+          </Hint>
         </div>
       </div>
     </>

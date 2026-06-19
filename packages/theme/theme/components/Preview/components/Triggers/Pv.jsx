@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useLocation } from "@docusaurus/router";
 import { usePreview } from "../../state/index.jsx";
-import Tooltip from "../../../Tooltip/index.jsx";
+import Hint from "../../../Hint/index.jsx";
 import {
   generatePvSlug,
   generatePvHash,
@@ -78,7 +78,7 @@ export function normalizeSources({
  * @typedef {Object} PvSource
  * @property {string} href - The URL or path to preview
  * @property {string} [label] - The text label for the tab/source
- * @property {string} [desc] - Tooltip description
+ * @property {string} [desc] - Hint description
  * @property {string} [title] - Custom title for the preview window
  * @property {string} [id] - Manual ID for generating the URL hash
  */
@@ -259,9 +259,9 @@ export default function Pv(props) {
   return (
     <span className={styles.previewContainer}>
       {hasTooltip && tooltipMsg ? (
-        <Tooltip msg={tooltipMsg} position="top" underline={false}>
+        <Hint msg={tooltipMsg} position="top" underline={false}>
           {trigger}
-        </Tooltip>
+        </Hint>
       ) : (
         trigger
       )}

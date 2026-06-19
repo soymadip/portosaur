@@ -2,7 +2,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Link from "@docusaurus/Link";
 import { FaBook, FaChevronRight } from "react-icons/fa";
-import Tooltip from "../Tooltip/index.jsx";
+import Hint from "../Hint/index.jsx";
 import { guessDocPermalink } from "../../utils/docsUtils.js";
 import {
   resolveIconFromMap,
@@ -15,7 +15,7 @@ import styles from "./styles.module.css";
  * @typedef {Object} ParsedNote
  * @property {string} title - Display title (from `title` or directory name)
  * @property {string} slug - Routing slug (from `slug` or computed)
- * @property {string} description - Description for tooltips (from `description`)
+ * @property {string} description - Description for hints (from `description`)
  * @property {number} position - Ordering weight (from `sidebar_position`)
  * @property {string|null} iconStr - Custom icon override (from `icon`)
  * @property {string|null} colorStr - Custom CSS color override (from `color`)
@@ -70,7 +70,7 @@ function getAllNotesData() {
 }
 
 /**
- * Renders an individual note card with an icon, title, and optional tooltip.
+ * Renders an individual note card with an icon, title, and optional hint.
  * @param {object} props - The component props
  * @param {ParsedNote} props.note - The parsed note object containing all metadata (title, language, slug, etc)
  * @param {number} props.index - The iteration index, used for staggered CSS animations
@@ -152,9 +152,9 @@ function NoteCard({ note, index, docsBasePath }) {
   );
 
   return tooltipContent ? (
-    <Tooltip msg={tooltipContent} position="top" underline={false} gap={-8}>
+    <Hint msg={tooltipContent} position="top" underline={false} gap={-8}>
       {cardInner}
-    </Tooltip>
+    </Hint>
   ) : (
     cardInner
   );

@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useScrollReveal from "../../hooks/useScrollReveal";
-import Tooltip from "../Tooltip/index.jsx";
+import Hint from "../Hint/index.jsx";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import styles from "./styles.module.css";
 import "slick-carousel/slick/slick.css";
@@ -371,7 +371,7 @@ export default function ProjectsSection({ id, className }) {
                                     </span>
                                   ))}
                                   {extraCount > 0 && (
-                                    <Tooltip
+                                    <Hint
                                       msg={project.tags.slice(3).join(", ")}
                                       underline={false}
                                       gap={13}
@@ -381,7 +381,7 @@ export default function ProjectsSection({ id, className }) {
                                       >
                                         +{extraCount}
                                       </span>
-                                    </Tooltip>
+                                    </Hint>
                                   )}
                                 </div>
                               );

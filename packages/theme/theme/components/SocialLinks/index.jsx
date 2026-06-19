@@ -3,7 +3,7 @@ import styles from "./styles.module.css";
 import { FaQuestionCircle } from "react-icons/fa";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useIsBrowser from "@docusaurus/useIsBrowser";
-import Tooltip from "../Tooltip";
+import Hint from "../Hint";
 import { iconMap } from "../../config/iconMappings";
 
 const DEFAULT_ICON = FaQuestionCircle;
@@ -74,7 +74,7 @@ export default function SocialIcons({ showAll = false, links = null }) {
         const displayColor = social.color || iconColor;
 
         return (
-          <Tooltip
+          <Hint
             key={index}
             msg={social.desc || social.name || social.icon || "Link"}
             position="top"
@@ -95,7 +95,7 @@ export default function SocialIcons({ showAll = false, links = null }) {
             >
               <IconComponent size={24} />
             </a>
-          </Tooltip>
+          </Hint>
         );
       })}
     </div>
