@@ -29,14 +29,18 @@ function getAllNotesData() {
   return context
     .keys()
     .filter((path) => {
-      if (path === "./index.md" || path === "./index.mdx") {
+      const isRootIndex = path.match(/^\.\/(?:index|readme)\.mdx?$/i);
+
+      if (isRootIndex) {
         return false;
       }
+
       const pathParts = path.split("/");
-      const isTopLevelFile =
-        pathParts.length === 2 && !path.match(/index\.mdx?$/);
-      const isTopLevelDir =
-        pathParts.length === 3 && path.match(/index\.mdx?$/);
+
+      const isIndex = path.match(/(?:index|readme)\.mdx?$/i);
+      const isTopLevelFile = pathParts.length === 2 && !isIndex;
+      const isTopLevelDir = pathParts.length === 3 && isIndex;
+
       return isTopLevelFile || isTopLevelDir;
     })
     .map((path) => {
