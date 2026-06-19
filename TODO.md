@@ -1,12 +1,3 @@
-## Completed
-
-- [x] The note cards are taking ID as the link but Docusaurus doesn't do. Like for python note has ID 'python-index' so giving `/notes/python-index` but Docusaurus gives `/python`.
-- [x] Give user ability to customize build directory.
-- [x] **Important**: "View Resume" button is visible even if not given in config.
-- [x] TOC not scrolling as content is scrolled in notes.
-- [x] `srcPv` should be a button like the "Edit this page" button on the same line.
-- [x] In `Pv` component, if array contains one string, then don't render tab.
-
 ## Bugs
 
 - [ ] When scrolling in homepage, the url #section-id is not changed automatically.
@@ -33,6 +24,14 @@
 
 - [ ] Shift base to fumadocs?
 
+## Completed
+
+- [x] The note cards are taking ID as the link but Docusaurus doesn't do. Like for python note has ID 'python-index' so giving `/notes/python-index` but Docusaurus gives `/python`.
+- [x] Give user ability to customize build directory.
+- [x] **Important**: "View Resume" button is visible even if not given in config.
+- [x] TOC not scrolling as content is scrolled in notes.
+- [x] `srcPv` should be a button like the "Edit this page" button on the same line.
+- [x] In `Pv` component, if array contains one string, then don't render tab.
 
 <!-- Will be used later somewhere -->
 
