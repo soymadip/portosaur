@@ -29,7 +29,7 @@
     "@portosaur/core": "workspace:*",
     "@portosaur/logger": "workspace:*",
     "@portosaur/wizard": "workspace:*",
-    "commander": "^13.1.0",
-    "js-yaml": "^4.1.1"
+    "commander": "^15.0.0",
+    "js-yaml": "^4.2.0"
   }
 }

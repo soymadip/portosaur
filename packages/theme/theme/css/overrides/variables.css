@@ -3,12 +3,12 @@
  * https://catppuccin.com
 **/
 
-/* Import fonts */
-@import "@fontsource-variable/lexend";
-
 :root {
-  --ifm-heading-font-family: "Alata", system-ui, -apple-system, sans-serif;
-  --ifm-font-family-base: "Alata", system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family:
+    "Geologica Variable", system-ui, -apple-system, sans-serif;
+
+  --ifm-font-family-base:
+    "Geologica Variable", system-ui, -apple-system, sans-serif;
 
   --ifm-scroll-margin-top: 38px;
   --ifm-scroll-margin-top-mobile: 32px;

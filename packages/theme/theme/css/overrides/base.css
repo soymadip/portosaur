@@ -35,3 +35,10 @@ th {
 .hide-this {
   display: none !important;
 }
+
+/* TopicList Note Title */
+.theme-doc-card-title {
+  color: var(--ifm-font-color-base) !important;
+  font-size: 1.35rem !important;
+  font-weight: 750 !important;
+}

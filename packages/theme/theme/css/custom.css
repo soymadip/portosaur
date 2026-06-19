@@ -1,11 +1,10 @@
-/* ----- Core Theme Variables ----- */
-@import url("./overrides/variables.css");
-
 /* ----- Global Fonts ----- */
-@import "@fontsource/alata";
+@import "@fontsource-variable/lexend";
+@import "@fontsource-variable/geologica";
 @import "katex/dist/katex.min.css";
 
 /* ----- Global Styles ----- */
+@import url("./overrides/variables.css");
 @import url("./animations.css");
 
 /* ------ Component Overrides ------ */

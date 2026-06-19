@@ -33,7 +33,7 @@
     "@docusaurus/preset-classic": "^3.10.1",
     "@easyops-cn/docusaurus-search-local": "^0.55.2",
     "@fontsource-variable/lexend": "^5.2.11",
-    "@fontsource/alata": "^5.2.8",
+    "@fontsource-variable/geologica": "^5.2.8",
     "@portosaur/core": "workspace:*",
     "chalk": "^5.6.2",
     "clsx": "^2.1.1",
