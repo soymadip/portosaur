@@ -20,7 +20,6 @@ import {
 
 import styles from "../styles.module.css";
 
-
 /**
  * Determines if a document source path represents a category index page.
  * Aligns perfectly with Docusaurus' native category index conventions:
