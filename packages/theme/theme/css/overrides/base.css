@@ -39,6 +39,6 @@ th {
 /* TopicList Note Title */
 .theme-doc-card-title {
   color: var(--ifm-font-color-base) !important;
-  font-size: 1.35rem !important;
+  font-size: 1.5rem !important;
   font-weight: 750 !important;
 }

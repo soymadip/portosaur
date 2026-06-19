@@ -163,6 +163,7 @@ import {
   FaHome,
   FaInfoCircle,
   FaLink,
+  FaFont,
   FaDownload,
   FaUpload,
   FaSave,
@@ -424,4 +425,6 @@ export const iconMap = {
   githubcopilot: { icon: TbBrandGithubCopilot, color: "#000000" },
   googledrive: { icon: FaGoogleDrive, color: "#0F9D58" },
   gdrive: { icon: SiGoogledrive, color: "#0F9D58" },
+  font: { icon: FaFont, color: "#6b6a6aff" },
+  fafont: { icon: FaFont, color: "#616060ff" },
 };

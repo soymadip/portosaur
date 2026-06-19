@@ -10,6 +10,7 @@ import {
   resolveBasePath,
   createStaticAssetResolver,
   buildHeadTags,
+  createSidebarItemsGenerator,
   cleanFrontMatterSlug,
 } from "../utils/docusaurus.mjs";
 
@@ -448,6 +449,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               : {}),
             remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
+            sidebarItemsGenerator: createSidebarItemsGenerator(),
           },
           blog: {
             routeBasePath: blogRoute,

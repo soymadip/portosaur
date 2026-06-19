@@ -249,6 +249,7 @@ export function cleanFrontMatterSlug(params: {
   filePath: string;
   frontMatter: Record<string, any>;
   projectDir: string;
+  contentDirName?: string;
 }): Record<string, any>;
 
 // ----------------------------------------------------------------------------

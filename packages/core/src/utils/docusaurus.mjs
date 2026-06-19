@@ -114,21 +114,87 @@ function parseFileFrontmatter(filePath) {
 }
 
 /**
+ * Creates a sidebar items generator that enriches items with custom props (icon, color)
+ * from document frontmatter.
+ */
+export function createSidebarItemsGenerator() {
+  return async ({
+    defaultSidebarItemsGenerator,
+    numberPrefixParser,
+    ...args
+  }) => {
+    const sidebarItems = await defaultSidebarItemsGenerator({
+      numberPrefixParser,
+      ...args,
+    });
+
+    const enrichItems = (items) => {
+      return items.map((item) => {
+        if (item.type === "doc") {
+          const doc = args.docs.find((d) => d.id === item.id);
+          if (doc && doc.frontMatter) {
+            item.customProps = {
+              ...item.customProps,
+              icon: doc.frontMatter.icon,
+              color: doc.frontMatter.color,
+            };
+          }
+        } else if (item.type === "category") {
+          if (item.items) {
+            item.items = enrichItems(item.items);
+          }
+          if (item.link && item.link.type === "doc") {
+            const doc = args.docs.find((d) => d.id === item.link.id);
+            if (doc && doc.frontMatter) {
+              item.customProps = {
+                ...item.customProps,
+                icon: doc.frontMatter.icon,
+                color: doc.frontMatter.color,
+
+                // Inject description: prefer frontmatter, fall back to auto-extracted first paragraph
+                description:
+                  doc.frontMatter.description ?? doc.description ?? undefined,
+              };
+            }
+          }
+        }
+        return item;
+      });
+    };
+
+    return enrichItems(sidebarItems);
+  };
+}
+
+/**
  * Automatically cleans slugs and strips numeric sorting prefixes from document metadata.
  * Also inherits custom slugs from parent index files to route siblings consistently.
  */
-export function cleanFrontMatterSlug({ filePath, frontMatter, projectDir }) {
-  const notesDir = path.resolve(projectDir, "notes");
+export function cleanFrontMatterSlug({
+  filePath,
+  frontMatter,
+  projectDir,
+  contentDirName = "notes",
+}) {
+  const contentDir = path.resolve(projectDir, contentDirName);
 
-  if (filePath.startsWith(notesDir)) {
-    const relativePath = path.relative(notesDir, filePath);
+  if (filePath.startsWith(contentDir)) {
+    const relativePath = path.relative(contentDir, filePath);
     const pathParts = relativePath.split(path.sep);
 
-    let currentRoutePath = "/";
-    let currentPhysicalPath = notesDir;
+    const filename = pathParts[pathParts.length - 1];
+    const ext = path.extname(filename);
+    const base = path.basename(filename, ext);
+    const isIndexFile =
+      base.toLowerCase() === "index" || base.toLowerCase() === "readme";
 
-    // Traverse directory segments and resolve parent routes
-    for (let i = 0; i < pathParts.length - 1; i++) {
+    let currentRoutePath = "/";
+    let currentPhysicalPath = contentDir;
+
+    // Resolve directories up to grandparent for index files, otherwise parent
+    const dirLimit = isIndexFile ? pathParts.length - 2 : pathParts.length - 1;
+
+    for (let i = 0; i < dirLimit; i++) {
       const segment = pathParts[i];
       currentPhysicalPath = path.join(currentPhysicalPath, segment);
 
@@ -159,25 +225,36 @@ export function cleanFrontMatterSlug({ filePath, frontMatter, projectDir }) {
       }
     }
 
-    // Process the final file name
-    const filename = pathParts[pathParts.length - 1];
-    const ext = path.extname(filename);
-    const base = path.basename(filename, ext);
-
-    const isIndexFile =
-      base.toLowerCase() === "index" || base.toLowerCase() === "readme";
     let finalSlug = "";
     const userSlug = frontMatter.slug;
 
-    if (userSlug) {
-      if (userSlug.startsWith("/")) {
-        finalSlug = userSlug;
+    if (isIndexFile) {
+      if (userSlug) {
+        if (userSlug.startsWith("/")) {
+          finalSlug = userSlug;
+        } else {
+          finalSlug = path.posix.resolve(currentRoutePath, userSlug);
+        }
       } else {
-        finalSlug = path.posix.resolve(currentRoutePath, userSlug);
+        const lastDirSegment = pathParts[pathParts.length - 2];
+        let cleaned = lastDirSegment.replace(
+          /^\d+(?:\.\d+)*\s*(?:-\s*|\.\s*)/,
+          "",
+        );
+
+        cleaned = cleaned
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+        finalSlug = path.posix.resolve(currentRoutePath, cleaned);
       }
     } else {
-      if (isIndexFile) {
-        finalSlug = currentRoutePath;
+      if (userSlug) {
+        if (userSlug.startsWith("/")) {
+          finalSlug = userSlug;
+        } else {
+          finalSlug = path.posix.resolve(currentRoutePath, userSlug);
+        }
       } else {
         let cleaned = base.replace(/^\d+(?:\.\d+)*\s*(?:-\s*|\.\s*)/, "");
         cleaned = cleaned
