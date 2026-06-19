@@ -1,0 +1,92 @@
+.dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  background-color: var(--ifm-dropdown-background-color);
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-md);
+  padding: 0.5rem;
+  z-index: var(--ifm-z-index-dropdown);
+  min-width: 10rem;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  visibility: hidden;
+  transition:
+    opacity var(--ifm-transition-fast) var(--ifm-transition-timing-default),
+    transform var(--ifm-transition-fast) var(--ifm-transition-timing-default),
+    visibility var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+
+.dropdownMenu::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: inherit;
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: -1px -1px 1px var(--ifm-shadow-color);
+}
+
+.dropdownShow .dropdownMenu {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(-1px);
+  visibility: visible;
+}
+
+.dropdownMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  margin-top: 0.2rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--ifm-dropdown-link-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  text-decoration: none !important;
+  transition: all var(--ifm-transition-fast)
+    var(--ifm-transition-timing-default);
+}
+
+.dropdownMenuItem:hover {
+  background-color: var(--ifm-dropdown-hover-background-color);
+  color: var(--ifm-dropdown-link-color);
+}
+
+.dropdownMenuItemActive {
+  background-color: var(--ifm-dropdown-hover-background-color);
+  color: var(--ifm-link-color);
+}
+
+.dropdownMenuItemActive:hover {
+  background-color: var(--ifm-dropdown-hover-background-color);
+  color: var(--ifm-link-color);
+}
+
+.dropdownArrow {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+  opacity: 0.95;
+  flex-shrink: 0;
+}

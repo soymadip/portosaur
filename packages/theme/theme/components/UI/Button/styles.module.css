@@ -1,0 +1,119 @@
+.button {
+  background-color: var(--ifm-color-emphasis-600);
+  color: var(--ifm-font-color-base) !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 6.3px;
+  min-height: 28px;
+  line-height: 1;
+  box-sizing: border-box;
+  border-radius: 6px;
+  text-decoration: none !important;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 4.3px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-emphasis-900-rgb), 0.05);
+}
+
+.buttonDisabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.buttonDisabled:hover {
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+.buttonPrimary {
+  background-color: var(--ifm-color-primary) !important;
+  color: var(--ifm-button-color) !important;
+}
+
+.buttonPrimary:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-primary-rgb), 0.15);
+}
+
+.buttonSecondary {
+  background-color: var(--ifm-color-secondary) !important;
+  color: var(--ifm-color-secondary-contrast-background) !important;
+}
+
+.buttonSecondary:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-secondary-rgb), 0.15);
+}
+
+.buttonSuccess {
+  background-color: var(--ifm-color-success) !important;
+  color: var(--ifm-color-success-contrast-background) !important;
+}
+
+.buttonSuccess:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-success-rgb), 0.15);
+}
+
+.buttonInfo {
+  background-color: var(--ifm-color-info) !important;
+  color: var(--ifm-color-info-contrast-background) !important;
+}
+
+.buttonInfo:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-info-rgb), 0.15);
+}
+
+.buttonWarning {
+  background-color: var(--ifm-color-warning) !important;
+  color: var(--ifm-color-warning-contrast-background) !important;
+}
+
+.buttonWarning:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-warning-rgb), 0.15);
+}
+
+.buttonDanger {
+  background-color: var(--ifm-color-danger) !important;
+  color: var(--ifm-color-danger-contrast-background) !important;
+}
+
+.buttonDanger:hover {
+  box-shadow: 0 2px 6px rgba(var(--ifm-color-danger-rgb), 0.15);
+}
+
+.icon {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  font-family: var(--ifm-font-family-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text p {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit;
+}
+
+@media (max-width: 768px) {
+  .text {
+    display: none;
+  }
+}

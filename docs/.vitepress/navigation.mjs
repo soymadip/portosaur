@@ -31,6 +31,7 @@ export const baseSidebar = [
           { text: "Details", link: "/user/markdown/details" },
           { text: "Tooltips", link: "/user/markdown/tooltips" },
           { text: "Note Cards", link: "/user/markdown/note-cards" },
+          { text: "UI Components", link: "/user/markdown/ui-components" },
         ],
       },
       {
