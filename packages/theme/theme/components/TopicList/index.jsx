@@ -70,15 +70,29 @@ export default function TopicList({
   const topicListConfig = frontMatter?.topic_list;
 
   // Decide whether to render at all:
-  // - explicit enable: false → never render
-  // - explicit enable: true → always render
-  // - no topic_list config → only render on index/README pages
-  const shouldRender =
-    topicListConfig?.enable === false
-      ? false
-      : topicListConfig?.enable === true
-        ? true
-        : isIndexPage(metadata?.source);
+  // - explicit boolean (true/false)
+  // - explicit enable object property (enable: true/false)
+  // - fallback to only render on index/README pages
+  const shouldRender = (() => {
+    if (topicListConfig === false) {
+      return false;
+    }
+
+    if (topicListConfig === true) {
+      return true;
+    }
+
+    if (typeof topicListConfig === "object" && topicListConfig !== null) {
+      if (topicListConfig.enable === false) {
+        return false;
+      }
+      if (topicListConfig.enable === true) {
+        return true;
+      }
+    }
+
+    return isIndexPage(metadata?.source);
+  })();
 
   // Get sidebar items — may throw if not on a sidebar category page
   let items;
