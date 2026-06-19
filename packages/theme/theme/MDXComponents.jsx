@@ -5,6 +5,7 @@ import { Pv } from "./components/Preview";
 import Hint from "./components/Hint";
 import TopicList from "./components/TopicList";
 import Indent from "./components/Indent";
+import { Btn, Dropdown } from "./components/UI";
 
 // Make useful Custom Components available by default
 export default {
@@ -15,4 +16,6 @@ export default {
   TabItem,
   Hint,
   Indent,
+  Btn,
+  Dropdown,
 };

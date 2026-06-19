@@ -1,7 +1,6 @@
 ## Bugs
 
 - [ ] When scrolling in homepage, the url #section-id is not changed automatically.
-- [ ] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
 
 ## Features
 
@@ -13,12 +12,15 @@
 
 ## Improvements
 
-- [ ] Customize the callouts, details CSS to make them less ugly.
+- [ ] Port more manual styling to --ifm variables. like border, shadow, radius etc.
+- [ ] Customize the callouts, details CSS to make them less ugly. (or maybe swizzle?)
+- [ ] Customize the Heading Tags size, style. make them distinguishable. take a look at docs style.
 - [ ] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
 - [ ] Instead of react-icons, use something similar to mkdocs (like FontAwesome). Actually, maybe just directly fetch from react-icons if not found in `iconMappings`?
 - [ ] Modify `renderIconElement` to first search in mappings, and if not found, fallback directly to react-icons.
 - [ ] Bring the theme button in navbar before nav items.
 - [ ] Export Components from package?
+- [ ] Scrollbars looks wierd in chromium, should customize?
 
 ## Refactor
 
@@ -32,6 +34,7 @@
 - [x] TOC not scrolling as content is scrolled in notes.
 - [x] `srcPv` should be a button like the "Edit this page" button on the same line.
 - [x] In `Pv` component, if array contains one string, then don't render tab.
+- [x] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
 
 <!-- Will be used later somewhere -->
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { Btn, Dropdown } from "../../UI/index.jsx";
 import styles from "../styles.module.css";
 import IconDock from "../../../../assets/img/svg/icon-dock.svg";
 import IconPopup from "../../../../assets/img/svg/icon-popup.svg";
@@ -20,12 +20,6 @@ export default function PreviewHeader({
   isDownloading,
   modeSwitch = true,
 }) {
-  const [showZoomMenu, setShowZoomMenu] = useState(false);
-  const zoomMenuTimer = useRef(null);
-
-  const [showModeMenu, setShowModeMenu] = useState(false);
-  const modeMenuTimer = useRef(null);
-
   const isMobileSize =
     typeof window !== "undefined" && window.innerWidth <= 768;
 
@@ -51,48 +45,51 @@ export default function PreviewHeader({
 
         {/* Controls */}
         <div className={styles.headerControls}>
+          {/* Open/Download action */}
+          {fileType === "web" ? (
+            <Btn
+              as="a"
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open externally"
+              icon={<IconLink />}
+            >
+              Visit
+            </Btn>
+          ) : (
+            <Btn
+              onClick={onDownload}
+              disabled={isDownloading}
+              title={isDownloading ? "Downloading..." : "Download file"}
+              icon={
+                isDownloading ? (
+                  <div className={styles.spinnerSmall} />
+                ) : (
+                  <IconSave />
+                )
+              }
+              variant="primary"
+            >
+              {isDownloading ? "Saving" : "Save"}
+            </Btn>
+          )}
+
           {/* Zoom picker (desktop, non-web, non-video) */}
           {!isMobileSize && fileType !== "web" && fileType !== "video" && (
-            <div
-              className={`${styles.dropdown} ${showZoomMenu ? styles.dropdownShow : ""}`}
-              onMouseEnter={() => {
-                if (zoomMenuTimer.current) clearTimeout(zoomMenuTimer.current);
-                setShowZoomMenu(true);
-              }}
-              onMouseLeave={() => {
-                zoomMenuTimer.current = setTimeout(
-                  () => setShowZoomMenu(false),
-                  150,
-                );
-              }}
-            >
-              <button
-                onClick={() => setShowZoomMenu(!showZoomMenu)}
-                className={styles.headerAction}
-                title="Change Zoom"
-              >
-                <IconZoom className={styles.headerIconSmall} />
-                <span className={styles.btnText}>
-                  {Math.round(zoomLevel * 100)}%
-                </span>
-                <span className={styles.dropdownArrow}>▼</span>
-              </button>
-
-              <div className={styles.dropdownMenu}>
-                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => (
-                  <button
-                    key={level}
-                    className={`${styles.dropdownMenuItem} ${zoomLevel === level ? styles.dropdownMenuItemActive : ""}`}
-                    onClick={() => {
-                      onZoomChange(level);
-                      setShowZoomMenu(false);
-                    }}
-                  >
-                    {level === 1 ? "100% (Fit)" : `${Math.round(level * 100)}%`}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <Dropdown
+              label={`${Math.round(zoomLevel * 100)}%`}
+              variant="primary"
+              icon={<IconZoom />}
+              title="Change Zoom"
+              items={[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => ({
+                id: level,
+                label:
+                  level === 1 ? "100% (Fit)" : `${Math.round(level * 100)}%`,
+                active: zoomLevel === level,
+                onClick: () => onZoomChange(level),
+              }))}
+            />
           )}
 
           {/* Mode picker dropdown */}
@@ -108,89 +105,29 @@ export default function PreviewHeader({
               const ActiveModeIcon = activeModeOption.icon;
 
               return (
-                <div
-                  className={`${styles.dropdown} ${showModeMenu ? styles.dropdownShow : ""}`}
-                  onMouseEnter={() => {
-                    if (modeMenuTimer.current)
-                      clearTimeout(modeMenuTimer.current);
-                    setShowModeMenu(true);
-                  }}
-                  onMouseLeave={() => {
-                    modeMenuTimer.current = setTimeout(
-                      () => setShowModeMenu(false),
-                      150,
-                    );
-                  }}
-                >
-                  <button
-                    onClick={() => setShowModeMenu(!showModeMenu)}
-                    className={styles.headerAction}
-                    title="Change Preview Mode"
-                  >
-                    <ActiveModeIcon className={styles.headerIconSmall} />
-                    <span className={styles.btnText}>
-                      {activeModeOption.label}
-                    </span>
-                    <span className={styles.dropdownArrow}>▼</span>
-                  </button>
-
-                  <div className={styles.dropdownMenu}>
-                    {MODE_OPTIONS.map(({ id, label, icon: Icon }) => (
-                      <button
-                        key={id}
-                        className={`${styles.dropdownMenuItem} ${mode === id ? styles.dropdownMenuItemActive : ""}`}
-                        onClick={() => {
-                          onChangeMode(id);
-                          setShowModeMenu(false);
-                        }}
-                      >
-                        <Icon className={styles.headerIconSmall} />
-                        <span>{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <Dropdown
+                  label={activeModeOption.label}
+                  variant="primary"
+                  icon={<ActiveModeIcon />}
+                  title="Change Preview Mode"
+                  items={MODE_OPTIONS.map((m) => ({
+                    id: m.id,
+                    label: m.label,
+                    icon: m.icon,
+                    active: mode === m.id,
+                    onClick: () => onChangeMode(m.id),
+                  }))}
+                />
               );
             })()}
 
-          {/* Open/Download action */}
-          {fileType === "web" ? (
-            <a
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.headerAction}
-              title="Open externally"
-            >
-              <IconLink className={styles.headerIcon} />
-              <span className={styles.btnText}>Visit</span>
-            </a>
-          ) : (
-            <button
-              onClick={onDownload}
-              disabled={isDownloading}
-              className={`${styles.headerAction} ${styles.downloadButton} ${isDownloading ? styles.headerActionDisabled : ""}`}
-              title={isDownloading ? "Downloading..." : "Download file"}
-            >
-              {isDownloading ? (
-                <div className={styles.spinnerSmall} />
-              ) : (
-                <IconSave className={styles.headerIconSmall} />
-              )}
-              <span className={styles.btnText}>
-                {isDownloading ? "Saving" : "Save"}
-              </span>
-            </button>
-          )}
-
           {/* Close */}
-          <button
+          <Btn
             onClick={onClose}
-            className={`${styles.headerAction} ${styles.headerActionClose}`}
             title="Close"
-          >
-            <IconClose className={styles.headerIconSmall} />
-          </button>
+            variant="danger"
+            icon={<IconClose />}
+          />
         </div>
       </div>
     </>
