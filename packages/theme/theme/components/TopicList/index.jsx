@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import {
   useCurrentSidebarCategory,
@@ -49,13 +50,47 @@ export default function TopicList({
   className,
   descClass,
   style = {
-    marginTop: "0rem",
+    marginTop: "1.8rem",
     marginBottom: "1.9rem",
     textAlign: "center",
   },
 }) {
   let frontMatter = {};
   let metadata = {};
+
+  const containerRef = useRef(null);
+  const [hasContentBefore, setHasContentBefore] = useState(false);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const markdownEl = container.previousElementSibling?.classList.contains(
+      "theme-doc-markdown",
+    )
+      ? container.previousElementSibling
+      : container.closest(".theme-doc-markdown");
+
+    if (markdownEl) {
+      const children = Array.from(markdownEl.children);
+      const wrapperIndex = children.indexOf(container);
+
+      const hasContent = children.some((child, idx) => {
+        if (wrapperIndex !== -1 && idx >= wrapperIndex) {
+          return false;
+        }
+        const tag = child.tagName.toLowerCase();
+        return (
+          tag !== "h1" &&
+          tag !== "header" &&
+          !child.classList.contains("topic-list-wrapper")
+        );
+      });
+      setHasContentBefore(hasContent);
+    }
+  }, []);
 
   // Read doc context — may throw outside a doc page (e.g. custom MDX pages)
   try {
@@ -124,10 +159,18 @@ export default function TopicList({
     return frontMatter?.description ?? DEFAULT_DESC;
   })();
 
+  const resolvedStyle = {
+    ...style,
+    marginTop:
+      style.marginTop === "1.8rem" && !hasContentBefore
+        ? "0.1rem"
+        : style.marginTop,
+  };
+
   return (
-    <>
+    <div ref={containerRef} className="topic-list-wrapper">
       {resolvedDesc !== null && (
-        <div style={style} className={resolvedDescClass}>
+        <div style={resolvedStyle} className={resolvedDescClass}>
           {resolvedDesc}
         </div>
       )}
@@ -145,6 +188,6 @@ export default function TopicList({
           </article>
         ))}
       </section>
-    </>
+    </div>
   );
 }
