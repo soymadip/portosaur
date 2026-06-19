@@ -97,6 +97,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     .filter((t) => t.tagName === "meta")
     .map((t) => t.attributes);
 
+  const notesDir = get("site.notes.dir", "notes"); // Notes directory name. Relative to project root.
+  const notesRoute = get("site.notes.route", "notes"); // Notes Route (eg, my-notes -> my-website.in/my-notes)
+
+  const blogDir = get("site.blog.dir", "blog"); // Blog directory name. Relative to project root.
+  const blogRoute = get("site.blog.route", "blog"); // Blog Route (eg, my-blog -> my-website.in/my-blog)
+
   // ------- Configuration Setup -------
 
   return {
@@ -126,12 +132,17 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       format: get("site.markdown.format", "mdx"), // Markdown parser format (mdx, md, detect).
       mermaid: get("site.markdown.mermaid", true), // Enable support for Mermaid.js diagrams.
       emoji: get("site.markdown.render_emoji_shortcodes", true), // Render emoji shortcodes like :smile:.
-      parseFrontMatter: async ({ filePath, fileContent, defaultParseFrontMatter }) => {
+      parseFrontMatter: async ({
+        filePath,
+        fileContent,
+        defaultParseFrontMatter,
+      }) => {
         const result = await defaultParseFrontMatter({ filePath, fileContent });
         result.frontMatter = cleanFrontMatterSlug({
           filePath,
           frontMatter: result.frontMatter,
           projectDir,
+          contentDirName: notesDir,
         });
         return result;
       },
@@ -213,8 +224,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             position: "right",
             className: "_navbar-more-items",
             items: [
-              { label: "Notes", to: "/notes" },
-              { label: "Blog", to: "/blog" },
+              { label: "Notes", to: `/${notesRoute}` },
+              { label: "Blog", to: `/${blogRoute}` },
               ...(get("tasks.enable", false) // Toggle the Tasks page.
                 ? [{ label: "Tasks", to: "/tasks" }]
                 : []),
@@ -425,8 +436,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         "@docusaurus/preset-classic",
         {
           docs: {
-            routeBasePath: "notes",
-            path: "notes",
+            routeBasePath: notesRoute,
+            path: notesDir,
             breadcrumbs: get("theme.navigation.breadcrumbs", true), // Show breadcrumbs in the notes pages.
             sidebarPath: path.resolve(
               portoPaths.theme ?? context.portoRoot ?? "",
@@ -439,7 +450,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             rehypePlugins: [rehypeKatex],
           },
           blog: {
-            path: "blog",
+            routeBasePath: blogRoute,
+            path: blogDir,
             showReadingTime: false,
             ...(get("site.edit_url", "")
               ? { editUrl: get("site.edit_url", "") }
@@ -480,9 +492,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           indexDocs: true,
           indexBlog: true,
           indexPages: true,
-          docsDir: "notes",
-          docsRouteBasePath: "notes",
-          searchContextByPaths: ["notes", "blog"],
+          docsDir: notesDir,
+          docsRouteBasePath: notesRoute,
+          blogDir: blogDir,
+          blogRouteBasePath: blogRoute,
+          searchContextByPaths: [notesRoute, blogRoute],
           highlightSearchTermsOnTargetPage: true,
           explicitSearchResultPath: true,
           hideSearchBarWithNoSearchContext: true,
@@ -495,9 +509,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         {
           themeDir: portoPaths.theme,
 
-          // Signal the theme plugin to disable webpack symlink resolution when
-          // any webpack-processed content directory (notes/ or blog/) is a symlink.
-          hasSymlinkedContent: ["notes", "blog"].some((dir) => {
+          hasSymlinkedContent: [notesDir, blogDir].some((dir) => {
             try {
               return fs
                 .lstatSync(path.resolve(projectDir, dir))
@@ -513,6 +525,19 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     // ------- Plugins -------
 
     plugins: [
+      () => ({
+        name: "portosaur-aliases",
+        configureWebpack() {
+          return {
+            resolve: {
+              alias: {
+                "@portosaur-notes": path.resolve(projectDir, notesDir),
+                "@portosaur-blog": path.resolve(projectDir, blogDir),
+              },
+            },
+          };
+        },
+      }),
       ...(env.NODE_ENV === "production"
         ? [
             [

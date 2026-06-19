@@ -8,18 +8,20 @@ The `site` block contains global settings for your site identity and SEO. This i
 
 | Key                 | Type    | Default                       | Description                                                                        |
 | :------------------ | :------ | :---------------------------- | :--------------------------------------------------------------------------------- |
-| `title`             | `str`   | `{{home_page.hero.title}}`    | The site name (tab title/headers).                                                 |
-| `tagline`           | `str`   | `{{home_page.hero.desc}}`     | A brief desc used for SEO meta tags.                                               |
-| `favicon`           | `str`   | `(default icon)`              | Path to your site's favicon.                                                       |
 | `social_card`       | `str`   | `(default img)`               | Preview image used when sharing your site on social media.                         |
 | `url`               | `str`   | `"auto"`                      | Canonical URL. Use `auto` for automatic CI/CD detection.                           |
 | `path`              | `str`   | `"auto"`                      | Base path for sub-directory deployments.                                           |
 | `edit_url`          | `str`   | `null`                        | Base URL for "Edit this page" links (e.g., GitHub repo tree/main link).            |
 | `on_broken_links`   | `str`   | `"throw"`                     | Behavior when a link is broken <br/>Options: `throw`, `warn`, `ignore`.            |
 | `on_broken_anchors` | `str`   | `"throw"`                     | Behavior when a link anchor (#) is missing.<br/>Options: `throw`, `warn`, `ignore` |
+| `title`             | `str`   | `{{home_page.hero.title}}`    | The site name (tab title/headers).                                                 |
+| `tagline`           | `str`   | `{{home_page.hero.desc}}`     | A brief desc used for SEO meta tags.                                               |
+| `favicon`           | `str`   | `(default icon)`              | Path to your site's favicon.                                                       |
 | `build`             | `block` | [see below](#site-build)      | Build settings.                                                                    |
 | `rss`               | `block` | [see below](#site-rss)        | RSS feed generation                                                                |
 | `robots_txt`        | `block` | [see below](#site-robots-txt) | `robots.txt` generation.                                                           |
+| `blog.dir`          | `str`   | `"blog"`                      | Directory for blog documents. Relative to project root.                            |
+| `notes.dir`         | `str`   | `"notes"`                     | Directory for notes documents. Relative to project root.                           |
 | `head_tags`         | `list`  | `[]`                          | Custom HTML tags to inject into `<head>` (see Advanced section).                   |
 | `markdown`          | `block` | [see below](#site-markdown)   | Markdown renderer settings.                                                        |
 
