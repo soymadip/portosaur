@@ -1,42 +1,43 @@
-- [x] The note cards are taking id as the link but docusaurs doesn't do. like for python note has id 'python-index' so giving /notes/python-index. but docusaurus gives /python
-- [x] Give user ability to customize build dir
-- [x] Important: View Resume button is visible even if not given in config
+### Completed
 
-- [ ] Thoroughly check vars docs and separate config vars with runtime vars. Add a component and syntax to replace {meta.var_name} with actual var_value (a remark plugin maybe?). Also, make the config.yml's `vars` to be referable in notes and blog?
+- [x] The note cards are taking ID as the link but Docusaurus doesn't do. Like for python note has ID 'python-index' so giving `/notes/python-index` but Docusaurus gives `/python`.
+- [x] Give user ability to customize build directory.
+- [x] **Important**: "View Resume" button is visible even if not given in config.
+- [x] TOC not scrolling as content is scrolled in notes.
+- [x] `srcPv` should be a button like the "Edit this page" button on the same line.
+- [x] In `Pv` component, if array contains one string, then don't render tab.
 
-- [ ] Customize the callouts, details css. make them less ugly
+### Bugs
 
-- [ ] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also when we hover over the popup keep it open even we moved past the text
+- [ ] When scrolling in homepage, the url #section-id is not changed automatically.
+- [ ] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
 
-- [ ] when scrolling in homepage, the url #section-id is not changed automatically.
+### Features
 
-- [ ] Allow add tooltip when hovering
+- [ ] Thoroughly check vars docs and separate config vars with runtime vars. Add a component and syntax to replace `{meta.var_name}` with actual `var_value` (a remark plugin maybe?). Also, make the `config.yml`'s `vars` referable in notes and blog?
+- [ ] Allow adding tooltip when hovering.
+- [ ] Write custom component docs and add mdx syntax through plugins.
+- [ ] **Way to extend MDXComponents by user.** Maybe also allow to pass custom components? Maybe through `config.yml`? Or `MDXComponents.js` manually?
+- [ ] Allow to password protect certain notes? (Maybe a hash to match against)
 
-- [ ] <details> tag not showing summary text, instead just showing details. and the summary is rendered inside details text, revealed when opened detailes section
+### Improvements
 
-- [ ] Write custom component docs and add mdx syntax through plugins
+- [ ] Customize the callouts, details CSS to make them less ugly.
+- [ ] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
+- [ ] Instead of react-icons, use something similar to mkdocs (like FontAwesome). Actually, maybe just directly fetch from react-icons if not found in `iconMappings`?
+- [ ] Modify `renderIconElement` to first search in mappings, and if not found, fallback directly to react-icons.
+- [ ] Bring the theme button in navbar before nav items.
+- [ ] Export Components from package?
 
-- [ ] srcPv should be an button like the edit this page button on the same line
-
-- [ ] Instead of react icons, use something similar to mkdocs. like font-awsome... actually, maybe just directly fetch from react-icons if not found in iconmappings?
-
-- [ ] There is renderIconElement, maybe modify it to first see in mappings if not found directly in react-icons?
-
-- [ ] Bring the theme buttton in navbar before nav items
-
-- [ ] **Way to extend MDXComponents by user.** Maybe also allow to pass custom components? maybe through config.yml? or MDXCompoenonts.js manually?
-
-- [ ] Allow to password protect certain notes? :) Maybe a hash to match against?
-
-- [ ] Export Components from pacakge?
-
----
+### Refactor
 
 - [ ] Shift base to fumadocs?
 
 ---
 
 <!-- Will be used later somewhere -->
+
+<!--
 
 ### ⏩︎ Features
 
@@ -56,3 +57,5 @@
 - **Preview**: Change id pattern, add parameter support for mode & tab.
 - **Preview**: Introduce new id generation for multi file preview.
 - **Preview**: Remove the sources option and merge it directly to href option.
+
+-->

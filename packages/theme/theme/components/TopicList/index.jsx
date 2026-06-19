@@ -50,7 +50,7 @@ export default function TopicList({
   descClass,
   style = {
     marginTop: "0rem",
-    marginBottom: "1.6rem",
+    marginBottom: "1.9rem",
     textAlign: "center",
   },
 }) {
