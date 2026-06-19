@@ -26,9 +26,8 @@ function getIconTitleProps(item, customProps, href) {
     const iconData = resolveIconFromMap(customProps.icon) || {
       icon: customProps.icon,
     };
-    const { icon: iconVal, color: iconColor } = iconData;
-    const resolvedColor =
-      customProps?.color || iconColor || "var(--ifm-color-primary)";
+    const { icon: iconVal } = iconData;
+    const resolvedColor = "var(--ifm-color-primary)";
 
     const iconElement = renderIconElement({
       iconVal,
@@ -39,7 +38,6 @@ function getIconTitleProps(item, customProps, href) {
     return {
       icon: iconElement,
       title,
-      color: customProps?.color || iconColor,
     };
   }
 
@@ -69,13 +67,6 @@ function getIconTitleProps(item, customProps, href) {
   return { icon: iconElement, title };
 }
 
-function getCardStyle(color) {
-  if (!color) {
-    return undefined;
-  }
-  return { "--ifm-color-primary": color };
-}
-
 function CardCategory({ item }) {
   const href = findFirstSidebarItemLink(item);
   const categoryItemsPlural = useDocCardDescriptionCategoryItemsPlural();
@@ -84,13 +75,8 @@ function CardCategory({ item }) {
     return null;
   }
 
-  const { icon, title, color } = getIconTitleProps(
-    item,
-    item.customProps,
-    href,
-  );
+  const { icon, title } = getIconTitleProps(item, item.customProps, href);
 
-  const cardStyle = getCardStyle(color);
   const descriptionRaw = item.description || item.customProps?.description;
   const itemsCount = categoryItemsPlural(item.items.length);
   const descriptionString = descriptionRaw
@@ -98,7 +84,7 @@ function CardCategory({ item }) {
     : itemsCount;
 
   return (
-    <div style={{ ...cardStyle, position: "relative" }}>
+    <div style={{ position: "relative" }}>
       <Link
         href={href}
         className={clsx("card padding--lg", styles.cardContainer)}
@@ -131,12 +117,11 @@ function CardLink({ item }) {
     ...doc?.frontMatter,
     ...item.customProps,
   };
-  const { icon, title, color } = getIconTitleProps(item, customProps, href);
-  const cardStyle = getCardStyle(color);
+  const { icon, title } = getIconTitleProps(item, customProps, href);
   const description = item.description ?? doc?.description;
 
   return (
-    <div style={{ ...cardStyle, position: "relative" }}>
+    <div style={{ position: "relative" }}>
       <Link
         href={href}
         className={clsx("card padding--lg", styles.cardContainer)}
