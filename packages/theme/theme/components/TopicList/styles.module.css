@@ -1,0 +1,63 @@
+.cardContainer {
+  --ifm-link-color: var(--ifm-color-emphasis-800);
+  --ifm-link-hover-color: var(--ifm-color-emphasis-700);
+  --ifm-link-hover-decoration: none;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  box-shadow: var(--ifm-global-shadow-lw);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  transition: all var(--ifm-transition-fast) ease;
+  transition-property: border, box-shadow;
+}
+
+.cardContainer:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.cardContainer *:last-child {
+  margin-bottom: 0;
+}
+
+.cardTitle {
+  color: var(--ifm-color-primary) !important;
+  font-size: 1.4rem !important;
+  font-weight: 750 !important;
+  margin-bottom: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardDescription {
+  color: var(--ifm-font-color-base) !important;
+  opacity: 0.6;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+}
+
+.docCardListItem {
+  margin-bottom: 2rem;
+}
+
+.docCardListItem > * {
+  height: 100%;
+}
+
+@media (max-width: 996px) {
+  .docCardListItem {
+    margin-bottom: 0.95rem;
+  }
+}

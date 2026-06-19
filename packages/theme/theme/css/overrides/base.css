@@ -27,18 +27,6 @@ th {
   text-align: center !important;
 }
 
-[class*="cardDescription_"] {
-  color: var(--ifm-font-color-base) !important;
-  opacity: 0.6;
-}
-
 .hide-this {
   display: none !important;
-}
-
-/* TopicList Note Title */
-.theme-doc-card-title {
-  color: var(--ifm-font-color-base) !important;
-  font-size: 1.5rem !important;
-  font-weight: 750 !important;
 }
