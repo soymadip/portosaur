@@ -52,4 +52,4 @@ ss.*
 *.temp
 temp/
 !templates/**
-TODO.md
+wiki/
