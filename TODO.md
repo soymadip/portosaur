@@ -28,6 +28,8 @@
 
 - [ ] Allow to password protect certain notes? :) Maybe a hash to match against?
 
+- [ ] Export Components from pacakge?
+
 ---
 
 - [ ] Shift base to fumadocs?

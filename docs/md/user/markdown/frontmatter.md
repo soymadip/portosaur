@@ -7,38 +7,50 @@ sidebar_position: 1
 
 Frontmatter is the YAML block at the very top of your Markdown (`.md` or `.mdx`) files. It allows you pass metadata about the page to portosaur.
 
-Portosaur supports standard Docusaurus frontmatter as well as some specialized custom fields. Below ones are tested by us.
+> [!WARNING]  
+> Portosaur should support standard Docusaurus frontmatters but not guranteed  
+> Using other than below ones **can break site**.
 
 ## Notes Frontmatter
 
-Frontmatter fields for Notes pages
-
-```md
+```yaml
 ---
 title: JavaScript Tips
 slug: custom-url-path
-language: javascript
 desc: Advanced tricks and tips for JS.
 icon: 🚀
 color: "#F7DF1E"
 sidebar_label: JS Tips
 sidebar_position: 1
 pagination_label: JavaScript
+topic_list:
+  enable: true
+  desc: "pass custom description text instead of using page description"
+  class: "my-custom-grid-row"
+  desc_class: "text--left margin-bottom--md"
 ---
-
-# Note Content
 ```
 
-| Field                  | Default                    | Description                                                                                                                                                                                                                                                                                            |
-| ---------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`title`**            | _Markdown Title_           | The title of your document. If omitted, the filename (or folder name) is used.                                                                                                                                                                                                                         |
-| **`slug`**             | _File Path_                | Overrides the document URL.<br/> Support multiple patterns: `my-doc` -> `/notes/dir/my-doc`, `/my/path/myDoc` -> `/notes/my/path/myDoc`, `/` -> `/notes/`                                                                                                                                              |
-| **`description`**      | _None_                     | A brief description. Used for places like Note cards, Topic lists.                                                                                                                                                                                                                                     |
-| **`sidebar_label`**    | `title`                    | The text shown in the document sidebar for this document.                                                                                                                                                                                                                                              |
-| **`pagination_label`** | `title` or `sidebar_label` | The text used in the document next/previous buttons for this document.                                                                                                                                                                                                                                 |
-| **`sidebar_position`** | _Default Ordering_         | Controls the position of a doc inside the sidebar and in card grids.<br/> Lower numbers appear first.                                                                                                                                                                                                  |
-| **`icon`**             | _Default Icon_             | The icon shown on the note card. You can provide:<br/>1. An name from the built-in icon map (e.g., `linux`).<br/>2. An absolute path to image in `static/` directory (e.g., `/img/my-icon.png`).<br/>3. A raw SVG string (e.g., `<svg viewBox="0 0 100 100">...</svg>`).<br/>4. An emoji (e.g., `🚀`). |
-| **`color`**            | _Auto/Primary_             | A custom CSS color string (e.g., `#FF0000`, `rgb(0, 0, 0)`) that overrides the card's theme color.                                                                                                                                                                                                     |
+| Field                  | Default                    | Description                                                                                                                                                                                                                                                                         |
+| ---------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`title`**            | _Markdown Title_           | The title of your document. If omitted, the filename (or folder name) is used.                                                                                                                                                                                                      |
+| **`slug`**             | _File Path_                | Overrides the document URL. Support multiple patterns.<br/>- `my-doc` -> `/notes/dir/my-doc`<br/>- `/my/path/myDoc` -> `/notes/my/path/myDoc`                                                                                                                                  |
+| **`description`**      | _None_                     | A brief description. Used for places like Note cards, Topic lists.                                                                                                                                                                                                                  |
+| **`sidebar_label`**    | `title`                    | The text shown in the document sidebar for this document.                                                                                                                                                                                                                           |
+| **`pagination_label`** | `title` or `sidebar_label` | The text used in the document next/previous buttons for this document.                                                                                                                                                                                                              |
+| **`sidebar_position`** | _Default Ordering_         | Controls the position of a doc inside the sidebar and in card grids.<br/> Lower numbers appear first.                                                                                                                                                                               |
+| **`icon`**             | _Default Icon_             | The icon shown on the note card.<br/>You can provide:<br/>1. A name from the built-in icon map (e.g., `linux`).<br/>2. An absolute path to image in `static/` directory (e.g., `/img/my-icon.png`).<br/>3. A raw SVG string (e.g., `<svg>...</svg>`).<br/>4. An emoji (e.g., `🚀`). |
+| **`color`**            | _Auto/Primary_             | A custom CSS color string (e.g., `#FF0000`, `rgb(0, 0, 0)`) that overrides the card's theme color.                                                                                                                                                                                  |
+| **`topic_list`**       | `check below`              | Add Topic list cards at the page.                                                                                                                                                                                                                                                   |
+
+### `topic_list` Options
+
+| Option           | Type             | Default                                              | Description                                                                                                                                                        |
+| :--------------- | :--------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`enable`**     | `boolean`        | `true` _(on index/README)_<br/>`false` _(on others)_ | Enables/Disables adding TopicLists in any page.                                                                                                                    |
+| **`desc`**       | `string \| null` | Page `description` / fallback string                 | Overrides the text layout block sitting above the cards. Explicitly passing `null` completely disables and removes the description layout block.                   |
+| **`class`**      | `string`         | _None_                                               | Appends additional CSS class name(s) to the outer grid container layout element (`<section className="row">`). Use this to adjust grid spacing or wrap components. |
+| **`desc_class`** | `string`         | _None_                                               | Appends custom CSS class name(s) directly to the description container `<div>` layout wrapper (e.g., text alignment utilities like `text--left`).                  |
 
 ## Blog Frontmatter
 
@@ -69,7 +81,6 @@ image: /img/blog-cover.jpg
 ## Dynamic Variables in Markdown
 
 Because Portosaur uses MDX, your Markdown files are compiled into React components. This means you can define your own custom fields in the frontmatter and then inject them dynamically anywhere in your document using the global `frontMatter` object!
-h
 
 ```mdx
 ---

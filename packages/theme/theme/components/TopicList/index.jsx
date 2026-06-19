@@ -1,188 +1,123 @@
 import clsx from "clsx";
-import Link from "@docusaurus/Link";
 import {
-  useDocById,
-  findFirstSidebarItemLink,
   useCurrentSidebarCategory,
   filterDocCardListItems,
 } from "@docusaurus/plugin-content-docs/client";
-import {
-  extractLeadingEmoji,
-  useDocCardDescriptionCategoryItemsPlural,
-} from "@docusaurus/theme-common/internal";
-import isInternalUrl from "@docusaurus/isInternalUrl";
-
-import { FaFolder, FaFileAlt, FaLink } from "react-icons/fa";
-import { resolveIconFromMap, renderIconElement } from "../../utils/iconUtils";
 
 import styles from "./styles.module.css";
+import { isIndexPage, TopicCard } from "./src/helpers.jsx";
 
-// Resolve and render icon from customProps - only if explicitly set in frontmatter
-function getIconTitleProps(item, customProps, href) {
-  const extracted = extractLeadingEmoji(item.label);
-  const title = extracted.rest.trim();
+const DEFAULT_DESC = "Click on the links below to explore the topics.";
 
-  if (customProps?.icon) {
-    const iconData = resolveIconFromMap(customProps.icon) || {
-      icon: customProps.icon,
-    };
-    const { icon: iconVal } = iconData;
-    const resolvedColor = "var(--ifm-color-primary)";
-
-    const iconElement = renderIconElement({
-      iconVal,
-      color: resolvedColor,
-      style: { width: "24px", height: "24px" },
-    });
-
-    return {
-      icon: iconElement,
-      title,
-    };
-  }
-
-  // If there's an emoji explicitly prefixed in the label, use that
-  if (extracted.emoji) {
-    return { icon: extracted.emoji, title };
-  }
-
-  // No explicit icon and no label emoji - use clean React Icons
-  const IconComp =
-    item.type === "category"
-      ? FaFolder
-      : isInternalUrl(href)
-        ? FaFileAlt
-        : FaLink;
-
-  const iconElement = (
-    <IconComp
-      style={{
-        width: "20px",
-        height: "20px",
-        color: "var(--ifm-color-primary)",
-      }}
-    />
-  );
-
-  return { icon: iconElement, title };
-}
-
-function CardCategory({ item }) {
-  const href = findFirstSidebarItemLink(item);
-  const categoryItemsPlural = useDocCardDescriptionCategoryItemsPlural();
-
-  if (!href) {
-    return null;
-  }
-
-  const { icon, title } = getIconTitleProps(item, item.customProps, href);
-
-  const descriptionRaw = item.description || item.customProps?.description;
-  const itemsCount = categoryItemsPlural(item.items.length);
-  const descriptionString = descriptionRaw
-    ? `${itemsCount} • ${descriptionRaw}`
-    : itemsCount;
-
-  return (
-    <div style={{ position: "relative" }}>
-      <Link
-        href={href}
-        className={clsx("card padding--lg", styles.cardContainer)}
-        title={descriptionString}
-      >
-        <h2 className={styles.cardTitle} title={title}>
-          <span className={styles.cardIcon}>{icon}</span>
-          <span className="text--truncate">{title}</span>
-        </h2>
-        <p className={clsx("text--truncate", styles.cardDescription)}>
-          <strong style={{ color: "var(--ifm-font-color-base)" }}>
-            {itemsCount}
-          </strong>
-          {descriptionRaw ? (
-            <>
-              {" "}
-              <span style={{ opacity: 0.5 }}>•</span> {descriptionRaw}
-            </>
-          ) : null}
-        </p>
-      </Link>
-    </div>
-  );
-}
-
-function CardLink({ item }) {
-  const doc = useDocById(item.docId ?? undefined);
-  const href = item.href;
-  const customProps = {
-    ...doc?.frontMatter,
-    ...item.customProps,
-  };
-  const { icon, title } = getIconTitleProps(item, customProps, href);
-  const description = item.description ?? doc?.description;
-
-  return (
-    <div style={{ position: "relative" }}>
-      <Link
-        href={href}
-        className={clsx("card padding--lg", styles.cardContainer)}
-        title={description || undefined}
-      >
-        <h2 className={styles.cardTitle} title={title}>
-          <span className={styles.cardIcon}>{icon}</span>
-          <span className="text--truncate">{title}</span>
-        </h2>
-        {description && (
-          <p className={clsx("text--truncate", styles.cardDescription)}>
-            {description}
-          </p>
-        )}
-      </Link>
-    </div>
-  );
-}
-
-function TopicCard({ item }) {
-  switch (item.type) {
-    case "link":
-      return <CardLink item={item} />;
-    case "category":
-      return <CardCategory item={item} />;
-    default:
-      return null;
-  }
-}
-
-// List Topics inside Individual Notes
+/**
+ * Lists sub-topics (child sidebar items) inside individual Docusaurus notes.
+ * Supports two distinct modes:
+ * - **Auto Mode**: (rendered globally via DocItem/Content) No props needed. Reads frontmatter
+ *                   internally via `useDoc()`. Controlled via frontmatter configuration (`topic_list.enable` / `topic_list.desc`).
+ * - **Manual MDX Mode**: Explicitly declared inside a `.mdx` file with optional prop overrides.
+ *
+ * @component
+ * @param {object} props
+ * @param {React.ReactNode} [props.children] - Custom description content. Takes highest priority over all other description sources.
+ * @param {string|null} [props.desc] - Custom description string. Explicitly passing `null` disables the description entirely.
+ * @param {string} [props.className] - Additional CSS class name(s) applied to the outer `<section>` wrapper container.
+ * @param {string} [props.descClass] - CSS class name(s) applied to the description wrapper `<div>`.
+ * @param {React.CSSProperties} [props.style={ marginTop: "0rem", marginBottom: "1.6rem", textAlign: "center" }] - Inline styles applied to the description wrapper `<div>`.
+ * @returns {React.JSX.Element|null} The rendered topic list grid, or `null` if the component should not render (e.g., disabled, outside a sidebar category, or empty items).
+ *
+ * @example
+ * // 1. Manual MDX: Default behavior (uses frontmatter desc or fallback)
+ * <TopicList />
+ *
+ * @example
+ * // 2. Manual MDX: Explicit string description override
+ * <TopicList desc="Explore the following advanced sub-topics:" />
+ *
+ * @example
+ * // 3. Manual MDX: Disable description block entirely
+ * <TopicList desc={null} />
+ *
+ * @example
+ * // 4. Manual MDX: Rich JSX description using children
+ * <TopicList>
+ * Please select a topic from the <strong>curated list</strong> below.
+ * </TopicList>
+ */
 export default function TopicList({
   children,
-  description = "Click on the links below to explore the topics.",
+  desc,
+  className,
+  descClass,
   style = {
-    marginTop: "-2.5rem",
-    marginBottom: "2.5rem",
+    marginTop: "0rem",
+    marginBottom: "1.6rem",
     textAlign: "center",
   },
 }) {
-  let items;
+  let frontMatter = {};
+  let metadata = {};
+
+  // Read doc context — may throw outside a doc page (e.g. custom MDX pages)
   try {
-    const category = useCurrentSidebarCategory();
-    items = category.items;
+    const { useDoc } = require("@docusaurus/plugin-content-docs/client");
+    const doc = useDoc();
+    frontMatter = doc.frontMatter;
+    metadata = doc.metadata;
   } catch (e) {
     // Fallback if not on a category page
   }
 
-  if (!items || items.length === 0) {
-    return null;
-  }
+  const topicListConfig = frontMatter?.topic_list;
+
+  // Decide whether to render at all:
+  // - explicit enable: false → never render
+  // - explicit enable: true → always render
+  // - no topic_list config → only render on index/README pages
+  const shouldRender =
+    topicListConfig?.enable === false
+      ? false
+      : topicListConfig?.enable === true
+        ? true
+        : isIndexPage(metadata?.source);
+
+  // Get sidebar items — may throw if not on a sidebar category page
+  let items;
+  try {
+    const category = useCurrentSidebarCategory();
+    items = category.items;
+  } catch (e) {}
+
+  if (!shouldRender || !items || items.length === 0) return null;
 
   const filteredItems = filterDocCardListItems(items);
 
+  // Class / Layout resolution priority:
+  // - Explicit manual prop definition
+  // - YAML frontmatter option configuration
+  const resolvedClassName = className ?? topicListConfig?.class;
+  const resolvedDescClass = descClass ?? topicListConfig?.desc_class;
+
+  // Desc resolution priority:
+  // children (manual MDX)
+  // desc prop (manual MDX)
+  // topic_list.desc from frontmatter (null disables, string overrides)
+  // frontMatter.description (page-level description)
+  // DEFAULT_DESC
+  const resolvedDesc = (() => {
+    if (children) return children;
+    if (desc !== undefined) return desc; // null disables, string overrides
+    if (topicListConfig?.desc !== undefined) return topicListConfig.desc; // null disables
+    return frontMatter?.description ?? DEFAULT_DESC;
+  })();
+
   return (
     <>
-      <br />
-      {(children || description) && (
-        <p style={style}>{children || description}</p>
+      {resolvedDesc !== null && (
+        <div style={style} className={resolvedDescClass}>
+          {resolvedDesc}
+        </div>
       )}
-      <section className="row">
+      <section className={clsx("row", resolvedClassName)}>
         {filteredItems.map((item, index) => (
           <article
             key={index}
