@@ -117,7 +117,11 @@ export default function TopicList({
           {resolvedDesc}
         </div>
       )}
-      <section className={clsx("row", resolvedClassName)}>
+      <section
+        className={clsx("row", resolvedClassName, {
+          [styles.topicListSection]: resolvedDesc === null,
+        })}
+      >
         {filteredItems.map((item, index) => (
           <article
             key={index}
