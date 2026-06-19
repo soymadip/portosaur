@@ -1,4 +1,4 @@
-### Completed
+## Completed
 
 - [x] The note cards are taking ID as the link but Docusaurus doesn't do. Like for python note has ID 'python-index' so giving `/notes/python-index` but Docusaurus gives `/python`.
 - [x] Give user ability to customize build directory.
@@ -7,12 +7,12 @@
 - [x] `srcPv` should be a button like the "Edit this page" button on the same line.
 - [x] In `Pv` component, if array contains one string, then don't render tab.
 
-### Bugs
+## Bugs
 
 - [ ] When scrolling in homepage, the url #section-id is not changed automatically.
 - [ ] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
 
-### Features
+## Features
 
 - [ ] Thoroughly check vars docs and separate config vars with runtime vars. Add a component and syntax to replace `{meta.var_name}` with actual `var_value` (a remark plugin maybe?). Also, make the `config.yml`'s `vars` referable in notes and blog?
 - [ ] Allow adding tooltip when hovering.
@@ -20,7 +20,7 @@
 - [ ] **Way to extend MDXComponents by user.** Maybe also allow to pass custom components? Maybe through `config.yml`? Or `MDXComponents.js` manually?
 - [ ] Allow to password protect certain notes? (Maybe a hash to match against)
 
-### Improvements
+## Improvements
 
 - [ ] Customize the callouts, details CSS to make them less ugly.
 - [ ] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
@@ -29,11 +29,10 @@
 - [ ] Bring the theme button in navbar before nav items.
 - [ ] Export Components from package?
 
-### Refactor
+## Refactor
 
 - [ ] Shift base to fumadocs?
 
----
 
 <!-- Will be used later somewhere -->
 
