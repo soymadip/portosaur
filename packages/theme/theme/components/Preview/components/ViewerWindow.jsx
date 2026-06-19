@@ -27,7 +27,7 @@ export default function PreviewViewer() {
     peekHeight,
     modeSwitch,
     closePreview,
-    toggleMode,
+    setMode,
     setActiveIndex,
     setDockWidth,
     setPeekHeight,
@@ -192,7 +192,7 @@ export default function PreviewViewer() {
         mode={mode}
         zoomLevel={zoomLevel}
         onZoomChange={setZoomLevel}
-        onToggleMode={toggleMode}
+        onChangeMode={setMode}
         onClose={closePreview}
         onDownload={handleDownload}
         isDownloading={isDownloading}

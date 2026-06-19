@@ -1,12 +1,11 @@
 import React, { useState, useRef } from "react";
-import Hint from "../../Hint/index.jsx";
 import styles from "../styles.module.css";
-import { PreviewMode } from "../state/index.jsx";
 import IconDock from "../../../../assets/img/svg/icon-dock.svg";
 import IconPopup from "../../../../assets/img/svg/icon-popup.svg";
 import IconSave from "../../../../assets/img/svg/icon-save.svg";
 import IconLink from "../../../../assets/img/svg/icon-link.svg";
 import IconClose from "../../../../assets/img/svg/icon-close.svg";
+import IconZoom from "../../../../assets/img/svg/icon-zoom.svg";
 
 export default function PreviewHeader({
   displayTitle,
@@ -15,26 +14,20 @@ export default function PreviewHeader({
   mode,
   zoomLevel,
   onZoomChange,
-  onToggleMode,
+  onChangeMode,
   onClose,
   onDownload,
   isDownloading,
   modeSwitch = true,
-  showDockLabel = true,
 }) {
   const [showZoomMenu, setShowZoomMenu] = useState(false);
-  const zoomMenuRef = useRef(null);
   const zoomMenuTimer = useRef(null);
+
+  const [showModeMenu, setShowModeMenu] = useState(false);
+  const modeMenuTimer = useRef(null);
+
   const isMobileSize =
     typeof window !== "undefined" && window.innerWidth <= 768;
-  const toggleLabel =
-    mode === "popup" ? "Dock" : mode === "dock" ? "PiP" : "Dock";
-  const toggleTooltip =
-    mode === "popup"
-      ? "Dock to side"
-      : mode === "dock"
-        ? "Open as PiP"
-        : "Dock to side";
 
   return (
     <>
@@ -61,8 +54,7 @@ export default function PreviewHeader({
           {/* Zoom picker (desktop, non-web, non-video) */}
           {!isMobileSize && fileType !== "web" && fileType !== "video" && (
             <div
-              className={styles.zoomDropdown}
-              ref={zoomMenuRef}
+              className={`${styles.dropdown} ${showZoomMenu ? styles.dropdownShow : ""}`}
               onMouseEnter={() => {
                 if (zoomMenuTimer.current) clearTimeout(zoomMenuTimer.current);
                 setShowZoomMenu(true);
@@ -76,100 +68,129 @@ export default function PreviewHeader({
             >
               <button
                 onClick={() => setShowZoomMenu(!showZoomMenu)}
-                className={styles.zoomVal}
+                className={styles.headerAction}
                 title="Change Zoom"
               >
-                {Math.round(zoomLevel * 100)}%
+                <IconZoom className={styles.headerIconSmall} />
+                <span className={styles.btnText}>
+                  {Math.round(zoomLevel * 100)}%
+                </span>
                 <span className={styles.dropdownArrow}>▼</span>
               </button>
 
-              {showZoomMenu && (
-                <div className={styles.zoomMenu}>
-                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => (
-                    <button
-                      key={level}
-                      className={`${styles.zoomMenuItem} ${zoomLevel === level ? styles.zoomMenuItemActive : ""}`}
-                      onClick={() => {
-                        onZoomChange(level);
-                        setShowZoomMenu(false);
-                      }}
-                    >
-                      {level === 1
-                        ? "100% (Fit)"
-                        : `${Math.round(level * 100)}%`}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className={styles.dropdownMenu}>
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => (
+                  <button
+                    key={level}
+                    className={`${styles.dropdownMenuItem} ${zoomLevel === level ? styles.dropdownMenuItemActive : ""}`}
+                    onClick={() => {
+                      onZoomChange(level);
+                      setShowZoomMenu(false);
+                    }}
+                  >
+                    {level === 1 ? "100% (Fit)" : `${Math.round(level * 100)}%`}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
+          {/* Mode picker dropdown */}
+          {modeSwitch &&
+            (() => {
+              const MODE_OPTIONS = [
+                { id: "popup", label: "Popup", icon: IconPopup },
+                { id: "dock", label: "Dock", icon: IconDock },
+                { id: "pip", label: "PiP", icon: IconDock },
+              ];
+              const activeModeOption =
+                MODE_OPTIONS.find((m) => m.id === mode) || MODE_OPTIONS[0];
+              const ActiveModeIcon = activeModeOption.icon;
+
+              return (
+                <div
+                  className={`${styles.dropdown} ${showModeMenu ? styles.dropdownShow : ""}`}
+                  onMouseEnter={() => {
+                    if (modeMenuTimer.current)
+                      clearTimeout(modeMenuTimer.current);
+                    setShowModeMenu(true);
+                  }}
+                  onMouseLeave={() => {
+                    modeMenuTimer.current = setTimeout(
+                      () => setShowModeMenu(false),
+                      150,
+                    );
+                  }}
+                >
+                  <button
+                    onClick={() => setShowModeMenu(!showModeMenu)}
+                    className={styles.headerAction}
+                    title="Change Preview Mode"
+                  >
+                    <ActiveModeIcon className={styles.headerIconSmall} />
+                    <span className={styles.btnText}>
+                      {activeModeOption.label}
+                    </span>
+                    <span className={styles.dropdownArrow}>▼</span>
+                  </button>
+
+                  <div className={styles.dropdownMenu}>
+                    {MODE_OPTIONS.map(({ id, label, icon: Icon }) => (
+                      <button
+                        key={id}
+                        className={`${styles.dropdownMenuItem} ${mode === id ? styles.dropdownMenuItemActive : ""}`}
+                        onClick={() => {
+                          onChangeMode(id);
+                          setShowModeMenu(false);
+                        }}
+                      >
+                        <Icon className={styles.headerIconSmall} />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
           {/* Open/Download action */}
           {fileType === "web" ? (
-            <Hint msg="Open externally" position="bottom" underline={false}>
-              <a
-                href={fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.headerAction}
-              >
-                <IconLink className={styles.headerIcon} />
-                <span className={styles.btnText}>Visit</span>
-              </a>
-            </Hint>
-          ) : (
-            <Hint
-              msg={isDownloading ? "Downloading..." : "Download file"}
-              position="bottom"
-              underline={false}
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.headerAction}
+              title="Open externally"
             >
-              <button
-                onClick={onDownload}
-                disabled={isDownloading}
-                className={`${styles.headerAction} ${styles.downloadButton} ${isDownloading ? styles.headerActionDisabled : ""}`}
-              >
-                {isDownloading ? (
-                  <div className={styles.spinnerSmall} />
-                ) : (
-                  <IconSave className={styles.headerIconSmall} />
-                )}
-                <span className={styles.btnText}>
-                  {isDownloading ? "Saving" : "Save"}
-                </span>
-              </button>
-            </Hint>
-          )}
-
-          {/* Mode toggle */}
-          {modeSwitch && (
-            <Hint msg={toggleTooltip} position="bottom" underline={false}>
-              <button
-                onClick={onToggleMode}
-                className={`${styles.headerAction} ${styles.dockToggle}`}
-              >
-                {mode === "popup" || mode === "pip" ? (
-                  <IconDock className={styles.headerIcon} />
-                ) : (
-                  <IconPopup
-                    className={`${styles.headerIcon} ${styles.iconPopupTweak}`}
-                  />
-                )}
-                {showDockLabel && (
-                  <span className={styles.btnText}>{toggleLabel}</span>
-                )}
-              </button>
-            </Hint>
+              <IconLink className={styles.headerIcon} />
+              <span className={styles.btnText}>Visit</span>
+            </a>
+          ) : (
+            <button
+              onClick={onDownload}
+              disabled={isDownloading}
+              className={`${styles.headerAction} ${styles.downloadButton} ${isDownloading ? styles.headerActionDisabled : ""}`}
+              title={isDownloading ? "Downloading..." : "Download file"}
+            >
+              {isDownloading ? (
+                <div className={styles.spinnerSmall} />
+              ) : (
+                <IconSave className={styles.headerIconSmall} />
+              )}
+              <span className={styles.btnText}>
+                {isDownloading ? "Saving" : "Save"}
+              </span>
+            </button>
           )}
 
           {/* Close */}
-          <Hint msg="Close" position="bottom" underline={false}>
-            <button
-              onClick={onClose}
-              className={`${styles.headerAction} ${styles.headerActionClose}`}
-            >
-              <IconClose className={styles.headerIconSmall} />
-            </button>
-          </Hint>
+          <button
+            onClick={onClose}
+            className={`${styles.headerAction} ${styles.headerActionClose}`}
+            title="Close"
+          >
+            <IconClose className={styles.headerIconSmall} />
+          </button>
         </div>
       </div>
     </>
