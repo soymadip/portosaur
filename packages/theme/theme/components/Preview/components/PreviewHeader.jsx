@@ -122,12 +122,7 @@ export default function PreviewHeader({
             })()}
 
           {/* Close */}
-          <Btn
-            onClick={onClose}
-            title="Close"
-            danger
-            icon={<IconClose />}
-          />
+          <Btn onClick={onClose} title="Close" danger icon={<IconClose />} />
         </div>
       </div>
     </>

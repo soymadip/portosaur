@@ -104,7 +104,8 @@ export default function TopicList({
   }
 
   const { siteConfig } = useDocusaurusContext();
-  const enableByDefaults = siteConfig.customFields?.topicList?.enableByDefaults !== false;
+  const enableByDefaults =
+    siteConfig.customFields?.topicList?.enableByDefaults !== false;
 
   const topicListConfig = frontMatter?.topic_list;
 

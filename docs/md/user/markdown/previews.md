@@ -69,9 +69,7 @@ There are 3 layout modes. You can set the starting layout mode using boolean fla
 It opens a centered modal that focuses user's attention on the document.
 
 ```jsx
-<Pv href="/design-spec.pdf">
-  Open Specification
-</Pv>
+<Pv href="/design-spec.pdf">Open Specification</Pv>
 ```
 
 ### 2. PiP (`pip`)

@@ -23,8 +23,8 @@ The `site` block contains global settings for your site identity and SEO. This i
 | `blog.dir`          | `str`   | `"blog"`                      | Directory for blog documents. Relative to project root.                            |
 | `blog.route`        | `str`   | `"blog"`                      | Custom base route/URL path for blog pages.                                         |
 | `notes.dir`         | `str`   | `"notes"`                     | Directory for notes documents. Relative to project root.                           |
-| `notes.route`        | `str`   | `"notes"`                     | Custom base route/URL path for notes pages.                                        |
-| `notes.topic_list`  | `bool`  | `true`                        | Automatically append a list of child sub-topics to index/README pages.              |
+| `notes.route`       | `str`   | `"notes"`                     | Custom base route/URL path for notes pages.                                        |
+| `notes.topic_list`  | `bool`  | `true`                        | Automatically append a list of child sub-topics to index/README pages.             |
 | `head_tags`         | `list`  | `[]`                          | Custom HTML tags to inject into `<head>` (see Advanced section).                   |
 | `markdown`          | `block` | [see below](#site-markdown)   | Markdown renderer settings.                                                        |
 

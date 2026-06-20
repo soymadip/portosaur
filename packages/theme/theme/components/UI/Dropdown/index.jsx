@@ -57,8 +57,10 @@ export default function Dropdown({
     triggerElement = <Btn {...buttonProps}>{triggerElement}</Btn>;
   }
 
-  const isDefaultOrBtn = !trigger || typeof trigger === "string" || triggerElement.type === Btn;
-  const arrowClassName = `${styles.dropdownArrow} ${isDefaultOrBtn ? styles.dropdownArrowBtn : ""}`.trim();
+  const isDefaultOrBtn =
+    !trigger || typeof trigger === "string" || triggerElement.type === Btn;
+  const arrowClassName =
+    `${styles.dropdownArrow} ${isDefaultOrBtn ? styles.dropdownArrowBtn : ""}`.trim();
 
   // Enhance the trigger component with the dropdown arrow and click toggle
   const enhancedTrigger = React.isValidElement(triggerElement)
@@ -107,7 +109,10 @@ export default function Dropdown({
           const linkProps = {};
           if (href) {
             linkProps.to = href;
-            if (!sameTab && (href.startsWith("http") || href.startsWith("//"))) {
+            if (
+              !sameTab &&
+              (href.startsWith("http") || href.startsWith("//"))
+            ) {
               linkProps.target = "_blank";
               linkProps.rel = "noopener noreferrer";
             }

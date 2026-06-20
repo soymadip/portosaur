@@ -85,6 +85,7 @@ commitizen:
           ->"
         name: footer
         type: input
+  gpg_sign: true
   legacy_tag_formats:
     - $version
   major_version_zero: true
@@ -100,6 +101,5 @@ commitizen:
   tag_format: v$version
   template: src/cz/changelog.j2
   update_changelog_on_bump: false
-  version: 0.12.1
+  version: 0.12.2
   version_scheme: semver
-  gpg_sign: true
