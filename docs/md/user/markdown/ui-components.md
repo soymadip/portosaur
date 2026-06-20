@@ -21,31 +21,32 @@ The simplest button wraps text in `<Btn>` and defaults to a neutral style:
 You can change the color using the `variant` prop to establish visual hierarchy:
 
 ```mdx
-<Btn variant="primary">Primary</Btn>
-<Btn variant="secondary">Secondary</Btn>
-<Btn variant="success">Success</Btn>
-<Btn variant="info">Info</Btn>
-<Btn variant="warning">Warning</Btn>
-<Btn variant="danger">Danger</Btn>
+<Btn primary>Primary</Btn>
+<Btn secondary>Secondary</Btn>
+<Btn success>Success</Btn>
+<Btn info>Info</Btn>
+<Btn warning>Warning</Btn>
+<Btn danger>Danger</Btn>
 ```
 
 ### External & Internal Links
 
 Passing the `href` prop converts the component into a client-side Docusaurus `<Link>` to prevent full page reloads for internal pages.
 
-- For external links, `newTab` defaults to `true` (opens in a new tab securely).
-- For internal links, it defaults to standard page-to-page routing.
+- For external links, it defaults to opening securely in a new tab.
+- For internal links, it defaults to standard page-to-page routing in the same tab.
+- Pass the `sameTab` prop to force external links to open in the same tab.
 
 ```mdx
 {/* External Link */}
 
-<Btn variant="primary" href="https://github.com/your-username">
+<Btn primary href="https://github.com/your-username">
   Visit my GitHub
 </Btn>
 
 {/* Internal Link (opens in same tab) */}
 
-<Btn variant="secondary" href="/docs" newTab={false}>
+<Btn secondary href="/docs" sameTab>
   Go to Documentation
 </Btn>
 ```
@@ -66,21 +67,17 @@ You can pass Emojis, image URLs, or SVG React components directly to the `icon` 
 {/* Using an SVG React Component */}
 import IconClose from '@site/assets/img/svg/icon-close.svg';
 
-<Btn variant="danger" icon={<IconClose />}>
+<Btn danger icon={<IconClose />}>
   Close
 </Btn>
 ```
 
 ### Hover Tooltips (Hints)
 
-Add a hover message using the `desc` or `hint` prop. You can adjust the direction using `hintPosition` (`top`, `bottom`, `left`, or `right`).
+Add a hover message using the `desc` or `hint` prop.
 
 ```mdx
-<Btn
-  variant="danger"
-  desc="This action is destructive and cannot be undone."
-  hintPosition="bottom"
->
+<Btn danger hint="This action is destructive and cannot be undone.">
   Delete Project
 </Btn>
 ```
@@ -89,18 +86,17 @@ Add a hover message using the `desc` or `hint` prop. You can adjust the directio
 
 The `<Btn>` component accepts the following props:
 
-| Prop            | Type                  | Default     | Description                                                                              |
-| :-------------- | :-------------------- | :---------- | :--------------------------------------------------------------------------------------- |
-| `variant`       | `string`              | `"neutral"` | Color style (`primary`, `secondary`, `success`, `info`, `warning`, `danger`, `neutral`). |
-| `icon`          | `string` \| `element` | `null`      | Emoji, image URL path, or SVG component to render as a leading icon.                     |
-| `href`          | `string`              | `null`      | Link destination. Enables client-side Routing via Docusaurus `<Link>`.                   |
-| `newTab`        | `boolean`             | `true`      | Opens external links in a new tab securely.                                              |
-| `desc` / `hint` | `string`              | `null`      | Styled hover tooltip message.                                                            |
-| `hintPosition`  | `string`              | `"top"`     | Tooltip position (`top`, `bottom`, `left`, `right`).                                     |
-| `disabled`      | `boolean`             | `false`     | Disables button interactions and styles.                                                 |
-| `as`            | `string` \| `element` | `null`      | Custom tag or component to render as (e.g. `button`, `a`).                               |
-| `className`     | `string`              | `""`        | Custom CSS classes to apply to the button.                                               |
-| `style`         | `object`              | `null`      | Inline styles to apply to the button.                                                    |
+| Prop                      | Type                  | Default | Description                                                                                     |
+| :------------------------ | :-------------------- | :------ | :---------------------------------------------------------------------------------------------- |
+| `primary`, `danger`, etc. | `boolean`             | `false` | Boolean flags for color style (`primary`, `secondary`, `success`, `info`, `warning`, `danger`). |
+| `icon`                    | `string` \| `element` | `null`  | Emoji, image URL path, or SVG component to render as a leading icon.                            |
+| `href`                    | `string`              | `null`  | Link destination. Enables client-side Routing via Docusaurus `<Link>`.                          |
+| `sameTab`                 | `boolean`             | `false` | Forces external links to open in the same tab instead of a new tab.                             |
+| `desc` / `hint`           | `string`              | `null`  | Styled hover tooltip message. Defaults to top position.                                         |
+| `disabled`                | `boolean`             | `false` | Disables button interactions and styles.                                                        |
+| `as`                      | `string` \| `element` | `null`  | Custom tag or component to render as (e.g. `button`, `a`).                                      |
+| `className`               | `string`              | `""`    | Custom CSS classes to apply to the button.                                                      |
+| `style`                   | `object`              | `null`  | Inline styles to apply to the button.                                                           |
 
 ---
 
@@ -136,7 +132,7 @@ You can pass a custom element (like a custom styled `<Btn>`) or a plain HTML tag
 }
 <Dropdown
   trigger={
-    <Btn variant="primary" icon="⚙️">
+    <Btn primary icon="⚙️">
       Settings
     </Btn>
   }
@@ -164,7 +160,7 @@ You can pass a custom element (like a custom styled `<Btn>`) or a plain HTML tag
 
 ### Dropdown Items with Icons & Links
 
-Dropdown items support rendering leading icons (Emojis or SVGs) and standard links (`href` / `newTab`):
+Dropdown items support rendering leading icons (Emojis or SVGs) and standard links (`href` / `sameTab`):
 
 ```jsx
 import IconMoon from "@site/assets/img/svg/icon-moon.svg";
@@ -186,7 +182,7 @@ import IconSun from "@site/assets/img/svg/icon-sun.svg";
 
 | Prop            | Type                  | Default  | Description                                                                                                                                                             |
 | :-------------- | :-------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `*` (Btn Props) | `any`                 | `null`   | If omitting `trigger`, any button-specific props (e.g. `variant`, `icon`, `disabled`, `hint`) passed directly to `<Dropdown>` will be forwarded to the default trigger. |
+| `*` (Btn Props) | `any`                 | `null`   | If omitting `trigger`, any button-specific props (e.g. `primary`, `icon`, `disabled`, `hint`) passed directly to `<Dropdown>` will be forwarded to the default trigger. |
 | `label`         | `string`              | `"Menu"` | Text displayed on the default button trigger (if `trigger` is omitted).                                                                                                 |
 | `trigger`       | `element` \| `string` | `null`   | Custom React element or text string to use as the click/hover trigger.                                                                                                  |
 | `items`         | `array`               | `[]`     | Array of menu item objects (see structure below).                                                                                                                       |
@@ -206,4 +202,4 @@ Each object inside the `items` array supports the following properties:
 | `active`  | `boolean`             | `false`      | Toggles active styling (highlighting) on the item.                              |
 | `onClick` | `function`            | `null`       | Click callback handler.                                                         |
 | `href`    | `string`              | `null`       | URL target. If provided, renders the item as a client-side Docusaurus `<Link>`. |
-| `newTab`  | `boolean`             | `true`       | Opens external links in a new tab securely.                                     |
+| `sameTab` | `boolean`             | `false`      | Forces external links to open in the same tab instead of a new tab.             |

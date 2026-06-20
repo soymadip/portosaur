@@ -98,13 +98,13 @@ export default function Dropdown({
             active,
             onClick,
             href,
-            newTab = true,
+            sameTab,
           } = item;
           const Component = href ? Link : "button";
           const linkProps = {};
           if (href) {
             linkProps.to = href;
-            if (newTab && (href.startsWith("http") || href.startsWith("//"))) {
+            if (!sameTab && (href.startsWith("http") || href.startsWith("//"))) {
               linkProps.target = "_blank";
               linkProps.rel = "noopener noreferrer";
             }

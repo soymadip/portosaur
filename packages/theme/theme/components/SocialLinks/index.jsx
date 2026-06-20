@@ -77,9 +77,9 @@ export default function SocialIcons({ showAll = false, links = null }) {
           <Hint
             key={index}
             msg={social.desc || social.name || social.icon || "Link"}
-            position="top"
+            top
             bg={displayColor}
-            underline={false}
+            noUl
             gap={17}
           >
             <a

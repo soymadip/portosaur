@@ -69,7 +69,7 @@ export default function PreviewHeader({
                   <IconSave />
                 )
               }
-              variant="primary"
+              primary
             >
               {isDownloading ? "Saving" : "Save"}
             </Btn>
@@ -79,7 +79,7 @@ export default function PreviewHeader({
           {!isMobileSize && fileType !== "web" && fileType !== "video" && (
             <Dropdown
               label={`${Math.round(zoomLevel * 100)}%`}
-              variant="primary"
+              primary
               icon={<IconZoom />}
               title="Change Zoom"
               items={[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => ({
@@ -107,7 +107,7 @@ export default function PreviewHeader({
               return (
                 <Dropdown
                   label={activeModeOption.label}
-                  variant="primary"
+                  primary
                   icon={<ActiveModeIcon />}
                   title="Change Preview Mode"
                   items={MODE_OPTIONS.map((m) => ({
@@ -125,7 +125,7 @@ export default function PreviewHeader({
           <Btn
             onClick={onClose}
             title="Close"
-            variant="danger"
+            danger
             icon={<IconClose />}
           />
         </div>

@@ -167,7 +167,7 @@ function NoteCard({ note, index, docsBasePath }) {
   );
 
   return tooltipContent ? (
-    <Hint msg={tooltipContent} position="top" underline={false} gap={-8}>
+    <Hint msg={tooltipContent} top noUl gap={-8}>
       {cardInner}
     </Hint>
   ) : (

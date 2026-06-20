@@ -5,7 +5,6 @@ import styles from "./styles.module.css";
 
 export default function Btn({
   children,
-  variant = "neutral",
   icon,
   title,
   onClick,
@@ -13,10 +12,15 @@ export default function Btn({
   className = "",
   as,
   href,
-  newTab = true,
+  sameTab,
   desc,
   hint,
-  hintPosition = "top",
+  primary,
+  danger,
+  success,
+  warning,
+  info,
+  secondary,
   ...rest
 }) {
   const Component = as || (href ? Link : "button");
@@ -24,18 +28,20 @@ export default function Btn({
 
   if (href) {
     linkProps.to = href;
-    if (newTab && (href.startsWith("http") || href.startsWith("//"))) {
+    if (!sameTab && (href.startsWith("http") || href.startsWith("//"))) {
       linkProps.target = "_blank";
       linkProps.rel = "noopener noreferrer";
     }
   }
+
   let variantClass = "";
-  if (variant === "primary") variantClass = styles.buttonPrimary;
-  else if (variant === "danger") variantClass = styles.buttonDanger;
-  else if (variant === "success") variantClass = styles.buttonSuccess;
-  else if (variant === "warning") variantClass = styles.buttonWarning;
-  else if (variant === "info") variantClass = styles.buttonInfo;
-  else if (variant === "secondary") variantClass = styles.buttonSecondary;
+
+  if (primary) variantClass = styles.buttonPrimary;
+  else if (danger) variantClass = styles.buttonDanger;
+  else if (success) variantClass = styles.buttonSuccess;
+  else if (warning) variantClass = styles.buttonWarning;
+  else if (info) variantClass = styles.buttonInfo;
+  else if (secondary) variantClass = styles.buttonSecondary;
 
   const combinedClassName =
     `${styles.button} ${variantClass} ${disabled ? styles.buttonDisabled : ""} ${className}`.trim();
@@ -69,8 +75,15 @@ export default function Btn({
 
   const buttonElement = (
     <Component
-      onClick={onClick}
-      disabled={disabled}
+      onClick={(e) => {
+        if (disabled) {
+          e.preventDefault();
+          return;
+        }
+        if (onClick) onClick(e);
+      }}
+      disabled={Component === "button" ? disabled : undefined}
+      aria-disabled={disabled ? "true" : undefined}
       className={combinedClassName}
       title={title}
       {...linkProps}
@@ -84,7 +97,7 @@ export default function Btn({
   const tooltipMsg = desc || hint;
   if (tooltipMsg) {
     return (
-      <Hint msg={tooltipMsg} position={hintPosition} underline={false} gap={10}>
+      <Hint msg={tooltipMsg} noUl gap={10}>
         {buttonElement}
       </Hint>
     );

@@ -92,9 +92,11 @@ export function normalizeSources({
  * @param {string} [props.title] - Custom title for the preview window header.
  * @param {string} [props.id] - Manual ID to generate the URL hash.
  * @param {string} [props.type] - Manual type to force the renderer (e.g. "video", "image").
- * @param {"popup"|"dock"|"pip"} [props.mode="popup"] - The default display mode to open in.
+ * @param {boolean} [props.popup] - Open in popup mode (default).
+ * @param {boolean} [props.dock] - Open in dock mode.
+ * @param {boolean} [props.pip] - Open in pip mode.
  * @param {boolean} [props.modeSwitch=true] - Whether the user can switch between popup/dock/pip modes inside the preview.
- * @param {boolean} [props.underline=true] - Whether the trigger link should have an underline style.
+ * @param {boolean} [props.noUl] - Whether the trigger link should have NO underline style.
  * @param {string} [props.className] - CSS class to apply to the anchor tag.
  * @param {number} [props.activeIdx=0] - The index of the initially active tab when multiple hrefs are provided.
  */
@@ -104,11 +106,17 @@ export default function Pv(props) {
     id: manualId,
     activeIdx = 0,
     title,
-    mode = "popup",
+    dock,
+    pip,
     modeSwitch = true,
-    underline = true,
+    noUl,
     className,
   } = props;
+
+  let mode = "popup";
+
+  if (dock) mode = "dock";
+  else if (pip) mode = "pip";
 
   if (!props.href) {
     console.error("<Pv> component requires the 'href' prop.");
@@ -117,7 +125,6 @@ export default function Pv(props) {
 
   const {
     isOpen,
-    mode: currentMode,
     sources: activeSources,
     activeIndex,
     baseSlug: activeBaseSlug,
@@ -231,7 +238,7 @@ export default function Pv(props) {
 
   const baseClassName = className
     ? className
-    : `${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${!underline ? styles.noUnderline : ""}`;
+    : `${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${noUl ? styles.noUnderline : ""}`;
 
   const trigger = (
     <a
@@ -259,7 +266,7 @@ export default function Pv(props) {
   return (
     <span className={styles.previewContainer}>
       {hasTooltip && tooltipMsg ? (
-        <Hint msg={tooltipMsg} position="top" underline={false}>
+        <Hint msg={tooltipMsg} top noUl>
           {trigger}
         </Hint>
       ) : (

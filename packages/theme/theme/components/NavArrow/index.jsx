@@ -90,9 +90,9 @@ export default function NavArrow() {
     >
       <Hint
         msg={direction === "down" ? "Next Section" : "Back to Top"}
-        position="top"
+        top
         gap={25}
-        underline={false}
+        noUl
       >
         <div className={`${styles.iconWrapper} ${styles[direction]}`}>
           {direction === "down" ? (

@@ -31,9 +31,10 @@ These are <Pv href={["/resume.pdf", "/work-samples.zip"]}>Resume & Samples</Pv>.
 | `title`      | `string`          | -       | Custom title for the window header.                                                                                                                                                                                      |
 | `desc`       | `string`          | -       | Tooltip text shown on hover.                                                                                                                                                                                             |
 | `id`         | `string`          | -       | Custom ID for the URL hash (e.g. `#my-id-pv?m=popup`).                                                                                                                                                                   |
-| `mode`       | `string`          | `popup` | Starting layout.<br/>Can be: `popup`, `pip`, or `dock`. More info below                                                                                                                                                  |
+| `dock`       | `boolean`         | `false` | Open in Dock mode.                                                                                                                                                                                                       |
+| `pip`        | `boolean`         | `false` | Open in PiP mode.                                                                                                                                                                                                        |
 | `modeSwitch` | `boolean`         | `true`  | Show/hide the mode switch (Dock/PiP) toggle.                                                                                                                                                                             |
-| `underline`  | `boolean`         | `true`  | Show/hide the underline on hover.                                                                                                                                                                                        |
+| `noUl`       | `boolean`         | `false` | If `true`, disables the trigger link underline.                                                                                                                                                                          |
 
 ---
 
@@ -61,19 +62,19 @@ If your URL doesn't have a standard extension (like an API endpoint or a dynamic
 
 ## Choosing your Layout
 
-There are 3 layout modes. You can set the starting `mode`, and the user can switch between them using the header buttons.
+There are 3 layout modes. You can set the starting layout mode using boolean flags, and the user can switch between them using the header buttons.
 
 ### 1. Popup (default)
 
 It opens a centered modal that focuses user's attention on the document.
 
 ```jsx
-<Pv href="/design-spec.pdf" mode="popup">
+<Pv href="/design-spec.pdf">
   Open Specification
 </Pv>
 ```
 
-### 2. PiP
+### 2. PiP (`pip`)
 
 Creates a floating window that stays visible while the user scrolls the main page.
 
@@ -81,12 +82,12 @@ Creates a floating window that stays visible while the user scrolls the main pag
 - **Desktop**: A sleek floating window you can drag anywhere.
 
 ```jsx
-<Pv href="/demo.mp4" mode="pip">
+<Pv href="/demo.mp4" pip>
   Watch Demo while reading
 </Pv>
 ```
 
-### 3. Dock
+### 3. Dock (`dock`)
 
 Splits the screen to show content side-by-side.
 
@@ -94,7 +95,7 @@ Splits the screen to show content side-by-side.
 - **Mobile**: Becomes a bottom-half "Peek" sheet.
 
 ```jsx
-<Pv href="/api-example.js" mode="dock">
+<Pv href="/api-example.js" dock>
   View Code Side-by-Side
 </Pv>
 ```

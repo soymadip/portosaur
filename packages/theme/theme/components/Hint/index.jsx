@@ -5,10 +5,12 @@ import styles from "./styles.module.css";
 export default function Hint({
   children,
   msg,
-  position = "top",
+  bottom,
+  left,
+  right,
   color,
   bg,
-  underline = true,
+  noUl,
   gap = 5,
   shadow,
   className = "",
@@ -16,6 +18,11 @@ export default function Hint({
   if (!msg) {
     throw new Error("Hint: 'msg' prop is required to display hint content.");
   }
+
+  let position = "top";
+  if (bottom) position = "bottom";
+  else if (left) position = "left";
+  else if (right) position = "right";
 
   const [isVisible, setIsVisible] = useState(false);
   const [activePosition, setActivePosition] = useState(position);
@@ -210,7 +217,7 @@ export default function Hint({
   return (
     <div
       ref={containerRef}
-      className={`${styles.hintContainer} ${underline ? styles.hasUnderline : ""} ${className} ${isVisible ? styles.isActive : ""}`}
+      className={`${styles.hintContainer} ${!noUl ? styles.hasUnderline : ""} ${className} ${isVisible ? styles.isActive : ""}`}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
