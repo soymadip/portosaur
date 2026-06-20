@@ -6,7 +6,7 @@
 .dropdownMenu {
   position: absolute;
   top: calc(100% + 8px);
-  left: 50%;
+  left: calc(50% + var(--menu-offset, 0px));
   background-color: var(--ifm-dropdown-background-color);
   border: none;
   border-radius: var(--ifm-global-radius);
@@ -29,7 +29,7 @@
   content: "";
   position: absolute;
   top: -2px;
-  left: 50%;
+  left: calc(50% - var(--menu-offset, 0px));
   width: 10px;
   height: 10px;
   background-color: inherit;

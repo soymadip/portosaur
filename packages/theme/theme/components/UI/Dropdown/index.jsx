@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "@docusaurus/Link";
 import Btn from "../Button";
 import styles from "./styles.module.css";
@@ -13,7 +13,10 @@ export default function Dropdown({
   ...buttonProps
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [menuOffset, setMenuOffset] = useState(0);
   const menuTimer = useRef(null);
+  const containerRef = useRef(null);
+  const menuRef = useRef(null);
 
   const handleMouseEnter = () => {
     if (menuTimer.current) clearTimeout(menuTimer.current);
@@ -23,6 +26,28 @@ export default function Dropdown({
   const handleMouseLeave = () => {
     menuTimer.current = setTimeout(() => setShowMenu(false), hoverDelay);
   };
+
+  useEffect(() => {
+    if (showMenu && menuRef.current && containerRef.current) {
+      const menuWidth = menuRef.current.offsetWidth;
+      const triggerRect = containerRef.current.getBoundingClientRect();
+      const padding = 12;
+
+      const triggerCenter = triggerRect.left + triggerRect.width / 2;
+      const defaultMenuLeft = triggerCenter - menuWidth / 2;
+      const defaultMenuRight = triggerCenter + menuWidth / 2;
+
+      let offset = 0;
+
+      if (defaultMenuLeft < padding) {
+        offset = padding - defaultMenuLeft;
+      } else if (defaultMenuRight > window.innerWidth - padding) {
+        offset = window.innerWidth - padding - defaultMenuRight;
+      }
+
+      setMenuOffset(offset);
+    }
+  }, [showMenu]);
 
   // Resolve trigger element: default to a Btn if a string, or if omitted (using label)
   let triggerElement = trigger;
@@ -50,6 +75,7 @@ export default function Dropdown({
 
   return (
     <div
+      ref={containerRef}
       className={`${styles.dropdown} ${showMenu ? styles.dropdownShow : ""} ${className}`.trim()}
       style={style}
       onMouseEnter={handleMouseEnter}
@@ -57,7 +83,13 @@ export default function Dropdown({
     >
       {enhancedTrigger}
 
-      <div className={styles.dropdownMenu}>
+      <div
+        ref={menuRef}
+        className={styles.dropdownMenu}
+        style={{
+          "--menu-offset": `${menuOffset}px`,
+        }}
+      >
         {items.map((item, idx) => {
           const {
             id,
