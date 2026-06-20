@@ -66,21 +66,25 @@
 
 .top {
   transform: translateX(-50%) translateY(-100%);
+  transform-origin: bottom center;
   animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .bottom {
   transform: translateX(-50%);
+  transform-origin: top center;
   animation: popDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .left {
   transform: translateX(-100%) translateY(-50%);
+  transform-origin: right center;
   animation: popLeft 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .right {
   transform: translateY(-50%);
+  transform-origin: left center;
   animation: popRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -161,7 +165,7 @@
 @keyframes popRight {
   from {
     opacity: 0;
-    transform: translateX(5%) translateY(-50%) scale(0.9);
+    transform: translateX(-5%) translateY(-50%) scale(0.9);
   }
   to {
     opacity: 1;
