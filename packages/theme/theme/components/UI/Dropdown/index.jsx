@@ -57,6 +57,9 @@ export default function Dropdown({
     triggerElement = <Btn {...buttonProps}>{triggerElement}</Btn>;
   }
 
+  const isDefaultOrBtn = !trigger || typeof trigger === "string" || triggerElement.type === Btn;
+  const arrowClassName = `${styles.dropdownArrow} ${isDefaultOrBtn ? styles.dropdownArrowBtn : ""}`.trim();
+
   // Enhance the trigger component with the dropdown arrow and click toggle
   const enhancedTrigger = React.isValidElement(triggerElement)
     ? React.cloneElement(triggerElement, {
@@ -67,7 +70,7 @@ export default function Dropdown({
         children: (
           <>
             {triggerElement.props.children}
-            <span className={styles.dropdownArrow} />
+            <span className={arrowClassName} />
           </>
         ),
       })

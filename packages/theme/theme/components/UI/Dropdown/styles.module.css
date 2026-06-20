@@ -86,7 +86,15 @@
   height: 5px;
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg) translateY(-1px);
+  transform: rotate(45deg);
+  margin-left: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
   opacity: 0.95;
   flex-shrink: 0;
+}
+
+.dropdownArrowBtn {
+  margin-left: 1px;
 }
