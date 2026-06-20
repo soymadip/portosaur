@@ -102,3 +102,4 @@ commitizen:
   update_changelog_on_bump: false
   version: 0.12.1
   version_scheme: semver
+  gpg_sign: true
