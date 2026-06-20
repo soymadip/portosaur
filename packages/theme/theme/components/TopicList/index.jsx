@@ -4,6 +4,7 @@ import {
   useCurrentSidebarCategory,
   filterDocCardListItems,
 } from "@docusaurus/plugin-content-docs/client";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 
 import styles from "./styles.module.css";
 import { isIndexPage, TopicCard } from "./src/helpers.jsx";
@@ -102,12 +103,15 @@ export default function TopicList({
     // Fallback if not on a category page
   }
 
+  const { siteConfig } = useDocusaurusContext();
+  const enableByDefaults = siteConfig.customFields?.topicList?.enableByDefaults !== false;
+
   const topicListConfig = frontMatter?.topic_list;
 
   // Decide whether to render at all:
   // - explicit boolean (true/false)
   // - explicit enable object property (enable: true/false)
-  // - fallback to only render on index/README pages
+  // - fallback to only render on index/README pages (if enabled globally)
   const shouldRender = (() => {
     if (topicListConfig === false) {
       return false;
@@ -126,7 +130,7 @@ export default function TopicList({
       }
     }
 
-    return isIndexPage(metadata?.source);
+    return enableByDefaults && isIndexPage(metadata?.source);
   })();
 
   // Get sidebar items — may throw if not on a sidebar category page

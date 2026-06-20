@@ -49,12 +49,17 @@ topic_list:
 
 ### `topic_list` Options
 
-| Option           | Type             | Default                                              | Description                                                                                                                                                        |
-| :--------------- | :--------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`enable`**     | `boolean`        | `true` _(on index/README)_<br/>`false` _(on others)_ | Enables/Disables adding TopicLists in any page.                                                                                                                    |
-| **`desc`**       | `string \| null` | Page `description` / fallback string                 | Overrides the text layout block sitting above the cards. Explicitly passing `null` completely disables and removes the description layout block.                   |
-| **`class`**      | `string`         | _None_                                               | Appends additional CSS class name(s) to the outer grid container layout element (`<section className="row">`). Use this to adjust grid spacing or wrap components. |
-| **`desc_class`** | `string`         | _None_                                               | Appends custom CSS class name(s) directly to the description container `<div>` layout wrapper (e.g., text alignment utilities like `text--left`).                  |
+| Option           | Type             | Default                                         | Description                                                                                                                                                        |
+| ---------------- | ---------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`enable`**     | `boolean`        | `true` _(on index/README, if enabled globally)_ | Enables/Disables adding TopicLists in any page.                                                                                                                    |
+| **`desc`**       | `string \| null` | Page `description` / fallback string            | Overrides the text layout block sitting above the cards. Explicitly passing `null` completely disables and removes the description layout block.                   |
+| **`class`**      | `string`         | _None_                                          | Appends additional CSS class name(s) to the outer grid container layout element (`<section className="row">`). Use this to adjust grid spacing or wrap components. |
+| **`desc_class`** | `string`         | _None_                                          | Appends custom CSS class name(s) directly to the description container `<div>` layout wrapper (e.g., text alignment utilities like `text--left`).                  |
+
+> [!NOTE]
+> By default, topic lists are automatically appended to category index pages (e.g., `index.mdx` or `README.md`).
+> If you wish to disable this behavior globally across all index pages, set `site.notes.topic_list: false` in your `config.yml`.
+> Once disabled globally, you must set `topic_list: true` in the frontmatter of individual pages where you want topic list grids to appear.
 
 ## Blog Frontmatter
 

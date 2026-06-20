@@ -340,6 +340,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     customFields: {
       portoVersion,
 
+      topicList: {
+        enableByDefaults: get("site.notes.topic_list", true), // Toggle automatically adding topic lists to notes pages.
+      },
+
       heroSection: {
         profilePic: resolveAsset(
           get("home_page.hero.profile_pic", ""),
