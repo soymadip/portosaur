@@ -20,20 +20,19 @@
 }
 
 .button:hover {
-  opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(var(--ifm-color-emphasis-900-rgb), 0.05);
+}
+
+.button:not(.buttonDisabled):active {
+  filter: brightness(0.85) !important;
+  transform: translateY(1px) !important;
+  box-shadow: none !important;
 }
 
 .buttonDisabled {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-.buttonDisabled:hover {
-  opacity: 0.7;
-  transform: none;
-  box-shadow: none;
 }
 
 .buttonPrimary {
