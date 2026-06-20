@@ -18,6 +18,7 @@ export default function Hint({
   }
 
   const [isVisible, setIsVisible] = useState(false);
+  const [activePosition, setActivePosition] = useState(position);
   const [coords, setCoords] = useState({ top: 0, left: 0, originalLeft: 0 });
   const [arrowOffset, setArrowOffset] = useState(0);
   const containerRef = useRef(null);
@@ -55,6 +56,7 @@ export default function Hint({
         left = rect.left + rect.width / 2;
         break;
     }
+    setActivePosition(position);
     setCoords({ top, left, originalLeft: left });
     setArrowOffset(0);
     setIsVisible(true);
@@ -80,14 +82,90 @@ export default function Hint({
 
   useEffect(() => {
     if (
-      isVisible &&
-      hintRef.current &&
-      (position === "top" || position === "bottom")
+      !isVisible ||
+      !hintRef.current ||
+      !containerRef.current ||
+      !containerRef.current.children[0]
     ) {
-      const rect = hintRef.current.getBoundingClientRect();
-      const padding = 12;
+      return;
+    }
+
+    const tooltipWidth = hintRef.current.offsetWidth;
+    const tooltipHeight = hintRef.current.offsetHeight;
+    const triggerRect =
+      containerRef.current.children[0].getBoundingClientRect();
+
+    const padding = 10;
+    const tooltipGap = gap;
+
+    let newPosition = activePosition;
+
+    // Auto-flip horizontal placements if they overflow the viewport sides
+    //   For "left", the tooltip's right edge is at triggerRect.left - tooltipGap
+    //   So its left edge will be at triggerRect.left - tooltipGap - tooltipWidth
+    if (
+      activePosition === "left" &&
+      triggerRect.left - tooltipGap - tooltipWidth < padding
+    ) {
+      newPosition = "top";
+    } else if (
+      activePosition === "right" &&
+      triggerRect.right + tooltipGap + tooltipWidth >
+        window.innerWidth - padding
+    ) {
+      newPosition = "top";
+    }
+
+    // Auto-flip vertical placements if they overflow viewport top/bottom
+    //   For "top", the tooltip's bottom edge is at triggerRect.top - tooltipGap
+    //   So its top edge is at triggerRect.top - tooltipGap - tooltipHeight
+    if (
+      newPosition === "top" &&
+      triggerRect.top - tooltipGap - tooltipHeight < padding
+    ) {
+      newPosition = "bottom";
+    } else if (
+      newPosition === "bottom" &&
+      triggerRect.bottom + tooltipGap + tooltipHeight >
+        window.innerHeight - padding
+    ) {
+      newPosition = "top";
+    }
+
+    // If position flipped, update and recalculate coordinates
+    if (newPosition !== activePosition) {
+      let top, left;
+
+      switch (newPosition) {
+        case "bottom":
+          top = triggerRect.bottom + tooltipGap;
+          left = triggerRect.left + triggerRect.width / 2;
+          break;
+        case "left":
+          top = triggerRect.top + triggerRect.height / 2;
+          left = triggerRect.left - tooltipGap;
+          break;
+        case "right":
+          top = triggerRect.top + triggerRect.height / 2;
+          left = triggerRect.right + tooltipGap;
+          break;
+        case "top":
+        default:
+          top = triggerRect.top - tooltipGap;
+          left = triggerRect.left + triggerRect.width / 2;
+          break;
+      }
+
+      setActivePosition(newPosition);
+      setCoords({ top, left, originalLeft: left });
+      setArrowOffset(0);
+      return;
+    }
+
+    // 3. For top/bottom positions, shift horizontally to remain within the screen
+    if (activePosition === "top" || activePosition === "bottom") {
       let newLeft = coords.originalLeft;
-      const halfWidth = rect.width / 2;
+      const halfWidth = tooltipWidth / 2;
 
       if (coords.originalLeft - halfWidth < padding) {
         newLeft = halfWidth + padding;
@@ -103,25 +181,28 @@ export default function Hint({
         setArrowOffset(newLeft - coords.originalLeft);
       }
     }
-  }, [isVisible, coords.originalLeft, coords.left, position]);
+  }, [isVisible, coords.originalLeft, coords.left, activePosition, gap]);
 
   const hint =
     isVisible && typeof document !== "undefined"
       ? createPortal(
-          <span
-            ref={hintRef}
-            className={`${styles.hint} ${styles[position]}`}
-            style={{
-              ...hintStyle,
-              top: coords.top,
-              left: coords.left,
-              "--arrow-offset": `${arrowOffset}px`,
-            }}
-            role="tooltip"
-          >
-            {msg}
-            <span className={styles.arrow} />
-          </span>,
+          <>
+            <div className={styles.backdrop} />
+            <span
+              ref={hintRef}
+              className={`${styles.hint} ${styles[activePosition]}`}
+              style={{
+                ...hintStyle,
+                top: coords.top,
+                left: coords.left,
+                "--arrow-offset": `${arrowOffset}px`,
+              }}
+              role="tooltip"
+            >
+              {msg}
+              <span className={styles.arrow} />
+            </span>
+          </>,
           document.body,
         )
       : null;
