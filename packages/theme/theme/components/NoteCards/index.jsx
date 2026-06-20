@@ -64,7 +64,22 @@ function getAllNotesData() {
         position: frontMatter.sidebar_position || 999,
         iconStr: frontMatter.icon || null,
         colorStr: frontMatter.color || null,
+        draft: frontMatter.draft === true,
+        unlisted: frontMatter.unlisted === true,
       };
+    })
+    .filter((note) => {
+      // Hide drafts in production
+      if (note.draft && process.env.NODE_ENV === "production") {
+        return false;
+      }
+
+      // Hide unlisted pages from index grids/lists in all environments
+      if (note.unlisted) {
+        return false;
+      }
+
+      return true;
     })
     .sort((a, b) => a.position - b.position);
 }
