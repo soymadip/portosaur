@@ -111,9 +111,3 @@
   padding: 0 !important;
   line-height: inherit;
 }
-
-@media (max-width: 768px) {
-  .text {
-    display: none;
-  }
-}
