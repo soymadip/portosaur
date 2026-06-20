@@ -21,6 +21,7 @@
 - [ ] Bring the theme button in navbar before nav items.
 - [ ] Export Components from package?
 - [ ] Scrollbars looks wierd in chromium, should customize?
+- [ ] Allow hint/Preview to show certain lines of current/another note.
 
 ## Refactor
 
@@ -35,28 +36,3 @@
 - [x] `srcPv` should be a button like the "Edit this page" button on the same line.
 - [x] In `Pv` component, if array contains one string, then don't render tab.
 - [x] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
-
-<!-- Will be used later somewhere -->
-
-<!--
-
-### ⏩︎ Features
-
-- **Preview**: Show mobile toc bar when dock is open.
-
-### ⏩︎ Bug Fixes
-
-- **Preview**: Fix sidebar opening-closing on dock size change.
-- **Preview**: Fix docs area not updating while resizing the dock.
-- **Preview**: Fix pagination buttons always stacked when dock is opened.
-- **Preview**: Fix footer & pagination buttons not adapting to view area change when switched to dock mode.
-- **Preview**: Fix cursor becomin hand when left clicking on text preview.
-- **Preview**: Fix reloading preview on mode change.
-
-### ⏩︎ Refactor
-
-- **Preview**: Change id pattern, add parameter support for mode & tab.
-- **Preview**: Introduce new id generation for multi file preview.
-- **Preview**: Remove the sources option and merge it directly to href option.
-
--->
