@@ -2,8 +2,7 @@
 
 .footer {
   background-color: var(--ifm-footer-background-color) !important;
-  padding-top: 0rem !important;
-  padding-bottom: 0.15rem !important;
+  padding: 0.1rem !important;
   margin: 0 !important;
 }
 

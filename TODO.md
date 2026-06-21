@@ -9,6 +9,7 @@
 - [ ] Write custom component docs and add mdx syntax through plugins.
 - [ ] **Way to extend MDXComponents by user.** Maybe also allow to pass custom components? Maybe through `config.yml`? Or `MDXComponents.js` manually?
 - [ ] Allow to password protect certain notes? (Maybe a hash to match against)
+- [ ] Allow user to add custom css file through config.yml that will be loaded like custom.css
 
 ## Improvements
 
@@ -25,7 +26,7 @@
 
 ## Refactor
 
-- [ ] Shift base to fumadocs?
+- [ ] Shift base to fumadocs? (or astro?)
 
 ## Completed
 
