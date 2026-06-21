@@ -68,9 +68,18 @@ export default function NavArrow() {
       }
 
       if (nextSectionId) {
-        document
-          .getElementById(nextSectionId)
-          .scrollIntoView({ behavior: "smooth" });
+        const isLastSection = nextSectionId === sections[sections.length - 1];
+
+        if (isLastSection) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: "smooth",
+          });
+        } else {
+          document
+            .getElementById(nextSectionId)
+            .scrollIntoView({ behavior: "smooth" });
+        }
       } else {
         window.scrollTo({
           top: document.documentElement.scrollHeight,
