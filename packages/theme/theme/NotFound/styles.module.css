@@ -1,0 +1,31 @@
+/* === 404 Empty State === */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: calc(100vh - var(--ifm-navbar-height) - 100px);
+}
+
+.emptyIcon {
+  font-size: 4.5rem;
+  color: var(--porto-text-muted);
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.emptyTitle {
+  font-size: 2rem;
+  color: var(--ifm-heading-color);
+  margin-bottom: 1rem;
+}
+
+.emptyDesc {
+  font-size: 1.1rem;
+  color: var(--porto-text-muted);
+  max-width: 500px;
+}
+
+
