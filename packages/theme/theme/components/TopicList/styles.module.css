@@ -1,6 +1,6 @@
 .cardContainer {
-  --ifm-link-color: var(--ifm-color-emphasis-800);
-  --ifm-link-hover-color: var(--ifm-color-emphasis-700);
+  --ifm-link-color: var(--ifm-color-emphasis-200);
+  --ifm-link-hover-color: var(--ifm-color-emphasis-300);
   --ifm-link-hover-decoration: none;
 
   display: flex;
@@ -8,7 +8,7 @@
   height: 100%;
 
   box-shadow: var(--ifm-global-shadow-lw);
-  border: var(--ifm-button-border-width) solid var(--ifm-color-emphasis-200);
+  border: var(--ifm-button-border-width) solid var(--ifm-color-emphasis-400);
   transition: all var(--ifm-transition-fast) ease;
   transition-property: border, box-shadow;
 }

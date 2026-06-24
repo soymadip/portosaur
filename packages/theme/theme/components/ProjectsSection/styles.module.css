@@ -111,7 +111,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--ifm-color-emphasis-900);
+  color: var(--ifm-color-emphasis-100);
   box-shadow: var(--ifm-global-shadow-md);
   z-index: 10;
   flex-shrink: 0;
@@ -120,7 +120,7 @@
 
 .carouselControl:hover:not(:disabled) {
   background: var(--ifm-color-primary-darker);
-  color: var(--ifm-color-emphasis-900);
+  color: var(--ifm-color-emphasis-100);
   transform: scale(1.1);
   box-shadow: var(--ifm-global-shadow-lw);
 }
@@ -207,7 +207,7 @@
   bottom: 10px;
   right: 10px;
   background-color: var(--ifm-color-primary);
-  color: var(--ifm-color-emphasis-900);
+  color: var(--ifm-color-emphasis-100);
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -291,42 +291,43 @@
   border-radius: var(--ifm-global-radius);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--ifm-color-white);
+  color: var(--porto-bg);
 }
 
 /* Status colors */
 .stateActive {
-  background-color: var(--ifm-color-green);
-  color: var(--ifm-color-black);
+  background-color: var(--porto-green);
+  color: var(--porto-bg);
 }
 
 .stateCompleted {
-  background-color: var(--ifm-color-blue);
-  color: var(--ifm-color-black);
+  background-color: var(--porto-blue);
+  color: var(--porto-bg);
 }
 
 .stateMaintenance {
-  background-color: var(--ifm-color-yellow);
-  color: var(--ifm-color-text);
+  background-color: var(--porto-yellow);
+  color: var(--porto-bg);
 }
 
 .statePaused {
-  background-color: var(--ifm-color-orange);
-  color: var(--ifm-color-black);
+  background-color: var(--porto-red);
+  color: var(--porto-bg);
 }
 
 .stateArchived {
-  background-color: var(--ifm-color-gray);
+  background-color: var(--ifm-color-emphasis-500); /* Neutral Gray */
+  color: var(--porto-bg);
 }
 
 .stateNA {
-  background-color: var(--ifm-color-info-dark);
-  color: var(--ifm-color-black);
+  background-color: var(--porto-orange);
+  color: var(--porto-bg);
 }
 
 .statePlanned {
-  background-color: var(--ifm-color-purple);
-  color: var(--ifm-color-black);
+  background-color: var(--porto-purple);
+  color: var(--porto-bg);
 }
 
 .projectTitle {
@@ -366,13 +367,13 @@
   font-weight: 700;
   text-transform: capitalize;
   letter-spacing: 0.8px;
-  border: 1px solid var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-background-color);
   box-shadow: var(--ifm-global-shadow-lw);
 }
 
 .extraTagBtn {
   background-color: var(--ifm-color-primary) !important;
-  color: var(--ifm-color-emphasis-900) !important;
+  color: var(--ifm-color-emphasis-100) !important;
   border: 0.1px solid var(--ifm-color-primary) !important;
   cursor: help;
   opacity: 0.7;
@@ -397,7 +398,7 @@
   transition: all 0.2s ease;
   padding: 0.35rem 0.7rem;
   border-radius: var(--ifm-global-radius);
-  border: 1px solid var(--ifm-color-gray-500);
+  border: 1px solid var(--ifm-color-emphasis-500);
   background-color: var(--ifm-shadow-color);
   font-weight: 500;
   white-space: nowrap;
@@ -493,7 +494,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background-color: var(--ifm-color-gray-500);
+  background-color: var(--ifm-color-emphasis-500);
   border: none;
   margin: 0 6px;
   cursor: pointer;

@@ -85,7 +85,7 @@
 .aboutCard {
   display: flex;
   background-color: var(--ifm-card-background-color);
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-color-emphasis-800);
   border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--ifm-global-shadow-md);
@@ -109,7 +109,7 @@
   align-items: center;
   justify-content: center;
   gap: 3.5rem;
-  border-right: 1px solid var(--ifm-color-emphasis-200);
+  border-right: 1px solid var(--ifm-color-emphasis-800);
 }
 
 .imageWrapper {
@@ -204,10 +204,24 @@
 }
 
 .aboutParagraph {
+  position: relative;
   font-size: 1.1rem;
   line-height: 1.4;
   color: var(--ifm-font-color-base);
   margin: 0;
+  padding-left: 1rem;
+}
+
+.aboutParagraph::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  width: 1.5px;
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: 2px;
+  opacity: 0.6;
 }
 
 /* Skills Grid */
@@ -249,7 +263,7 @@
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-color-emphasis-800);
   transition: all 0.2s ease;
   cursor: default;
 }
@@ -269,7 +283,7 @@
 
   .bioImageContainer {
     border-right: none;
-    border-bottom: 1px solid var(--ifm-color-emphasis-200);
+    border-bottom: 1px solid var(--ifm-color-emphasis-800);
     padding: 2.5rem;
   }
 

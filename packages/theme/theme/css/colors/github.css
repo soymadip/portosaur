@@ -1,0 +1,179 @@
+/* GitHub Theme Colors */
+
+:root {
+  /* GitHub Light palette */
+  --gh-light-primary:     #0969da;
+  --gh-light-primary-rgb: 9, 105, 218;
+  --gh-light-success:     #1a7f37;
+  --gh-light-success-rgb: 26, 127, 55;
+  --gh-light-warning:     #bf8700;
+  --gh-light-warning-rgb: 191, 135, 0;
+  --gh-light-danger:      #cf222e;
+  --gh-light-danger-rgb:  207, 34, 46;
+  --gh-light-info:        #0969da;
+  --gh-light-info-rgb:    9, 105, 218;
+
+  /* GitHub Light backgrounds (like Catppuccin: bg > mantle > crust > surface0) */
+  --gh-light-bg:       #ffffff;
+  --gh-light-mantle:   #f6f8fa; /* slightly darker, like Catppuccin mantle */
+  --gh-light-crust:    #d0d7de; /* borders, like Catppuccin crust */
+  --gh-light-surface0: #eaeef2;
+  --gh-light-surface1: #d8dde3;
+  --gh-light-surface2: #c8ced6;
+
+  --gh-light-text:       #24292f;
+  --gh-light-text-rgb:   36, 41, 47;
+  --gh-light-text-muted: #57606a; /* muted text */
+  --gh-light-secondary:  #57606a; /* like Catppuccin lavender – muted accent */
+
+  /* GitHub Dark palette */
+  --gh-dark-primary:     #58a6ff;
+  --gh-dark-primary-rgb: 88, 166, 255;
+  --gh-dark-success:     #2ea043;
+  --gh-dark-success-rgb: 46, 160, 67;
+  --gh-dark-warning:     #e3b341;
+  --gh-dark-warning-rgb: 227, 179, 65;
+  --gh-dark-danger:      #f85149;
+  --gh-dark-danger-rgb:  248, 81, 73;
+  --gh-dark-info:        #58a6ff;
+  --gh-dark-info-rgb:    88, 166, 255;
+
+  /* GitHub Dark backgrounds (like Catppuccin: bg > mantle > crust > surface0) */
+  --gh-dark-bg:       #0d1117;
+  --gh-dark-mantle:   #090d13; /* slightly darker, like Catppuccin mantle */
+  --gh-dark-crust:    #30363d; /* border color, like Catppuccin crust */
+  --gh-dark-surface0: #161b22;
+  --gh-dark-surface1: #21262d;
+  --gh-dark-surface2: #30363d;
+
+  --gh-dark-text:       #c9d1d9;
+  --gh-dark-text-rgb:   201, 209, 217;
+  --gh-dark-text-muted: #8b949e; /* muted text */
+  --gh-dark-secondary:  #8b949e; /* like Catppuccin Mocha lavender – muted accent */
+}
+
+[data-theme="light"] {
+  /* Primary */
+  --porto-primary: var(--gh-light-primary);
+  --porto-primary-rgb: var(--gh-light-primary-rgb);
+  --porto-primary-dark: #085dc1;
+  --porto-primary-darker: #0758b7;
+  --porto-primary-darkest: #064896;
+  --porto-primary-light: #2279df;
+  --porto-primary-lighter: #2f81e1;
+  --porto-primary-lightest: #5599e7;
+
+  /* Semantic */
+  --porto-success: var(--gh-light-success);
+  --porto-success-rgb: var(--gh-light-success-rgb);
+  --porto-warning: var(--gh-light-warning);
+  --porto-warning-rgb: var(--gh-light-warning-rgb);
+  --porto-danger: var(--gh-light-danger);
+  --porto-danger-rgb: var(--gh-light-danger-rgb);
+  --porto-info: var(--gh-light-info);
+
+  /* Secondary — GitHub light text-muted, equivalent to Catppuccin lavender */
+  --porto-secondary: var(--gh-light-secondary);
+
+  /* Palette */
+  --porto-red: var(--gh-light-danger);
+  --porto-orange: #d15704;
+  --porto-yellow: var(--gh-light-warning);
+  --porto-green: var(--gh-light-success);
+  --porto-teal: #0969da;
+  --porto-blue: var(--gh-light-info);
+  --porto-purple: #8250df;
+  --porto-pink: #bf3989;
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--gh-light-bg);
+  --porto-bg-alt: var(--gh-light-mantle);
+  --porto-surface-0: var(--gh-light-surface0);
+  --porto-surface-0-rgb: 234, 238, 242;
+  --porto-surface-1: var(--gh-light-surface1);
+  --porto-surface-2: var(--gh-light-surface2);
+  --porto-surface-2-rgb: 200, 206, 214;
+
+  --porto-text: var(--gh-light-text);
+  --porto-text-muted: var(--gh-light-text-muted);
+
+  /* Border — crust equivalent (divider lines) */
+  --porto-border: var(--gh-light-crust);
+  --porto-code: #d44000;
+
+  /* Grayscale */
+  --porto-gray-0: var(--gh-light-bg);
+  --porto-gray-100: var(--gh-light-mantle);
+  --porto-gray-200: var(--gh-light-surface0);
+  --porto-gray-300: var(--gh-light-surface1);
+  --porto-gray-400: var(--gh-light-surface2);
+  --porto-gray-500: var(--gh-light-crust);
+  --porto-gray-600: var(--gh-light-text-muted);
+  --porto-gray-700: #474d54;
+  --porto-gray-800: #353a40;
+  --porto-gray-900: #24292f;
+  --porto-gray-1000: #0d1117;
+}
+
+[data-theme="dark"] {
+  /* Primary */
+  --porto-primary: var(--gh-dark-primary);
+  --porto-primary-rgb: var(--gh-dark-primary-rgb);
+  --porto-primary-dark: #3b99ff;
+  --porto-primary-darker: #2d92ff;
+  --porto-primary-darkest: #007aff;
+  --porto-primary-light: #75b3ff;
+  --porto-primary-lighter: #84baff;
+  --porto-primary-lightest: #b0d2ff;
+
+  /* Semantic */
+  --porto-success: var(--gh-dark-success);
+  --porto-success-rgb: var(--gh-dark-success-rgb);
+  --porto-warning: var(--gh-dark-warning);
+  --porto-warning-rgb: var(--gh-dark-warning-rgb);
+  --porto-danger: var(--gh-dark-danger);
+  --porto-danger-rgb: var(--gh-dark-danger-rgb);
+  --porto-info: var(--gh-dark-info);
+
+  /* Secondary — GitHub dark text-muted, equivalent to Catppuccin Mocha lavender */
+  --porto-secondary: var(--gh-dark-secondary);
+
+  /* Palette */
+  --porto-red: var(--gh-dark-danger);
+  --porto-orange: #bd561d;
+  --porto-yellow: var(--gh-dark-warning);
+  --porto-green: var(--gh-dark-success);
+  --porto-teal: #58a6ff;
+  --porto-blue: var(--gh-dark-info);
+  --porto-purple: #a371f7;
+  --porto-pink: #db61a2;
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--gh-dark-bg);
+  --porto-bg-alt: var(--gh-dark-mantle);
+  --porto-surface-0: var(--gh-dark-surface0);
+  --porto-surface-0-rgb: 22, 27, 34;
+  --porto-surface-1: var(--gh-dark-surface1);
+  --porto-surface-2: var(--gh-dark-surface2);
+  --porto-surface-2-rgb: 48, 54, 61;
+
+  --porto-text: var(--gh-dark-text);
+  --porto-text-muted: var(--gh-dark-text-muted);
+
+  /* Border — crust equivalent (separator lines, slightly lighter than bg-alt) */
+  --porto-border: var(--gh-dark-crust);
+  --porto-code: #ffa657;
+
+  /* Grayscale */
+  --porto-gray-0: #04070a;
+  --porto-gray-100: var(--gh-dark-mantle);
+  --porto-gray-200: var(--gh-dark-bg);
+  --porto-gray-300: #161b22;
+  --porto-gray-400: #1c2128;
+  --porto-gray-500: var(--gh-dark-crust);
+  --porto-gray-600: var(--gh-dark-surface0);
+  --porto-gray-700: var(--gh-dark-surface1);
+  --porto-gray-800: var(--gh-dark-surface2);
+  --porto-gray-900: var(--gh-dark-text-muted);
+  --porto-gray-1000: var(--gh-dark-text);
+}

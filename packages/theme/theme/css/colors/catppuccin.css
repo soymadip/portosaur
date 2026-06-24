@@ -115,112 +115,122 @@
 
 /* Light Mode - Catppuccin Latte */
 [data-theme="light"] {
-  --ctp-rosewater: var(--ctp-latte-rosewater);
-  --ctp-rosewater-rgb: var(--ctp-latte-rosewater-rgb);
-  --ctp-flamingo: var(--ctp-latte-flamingo);
-  --ctp-flamingo-rgb: var(--ctp-latte-flamingo-rgb);
-  --ctp-pink: var(--ctp-latte-pink);
-  --ctp-pink-rgb: var(--ctp-latte-pink-rgb);
-  --ctp-mauve: var(--ctp-latte-mauve);
-  --ctp-mauve-rgb: var(--ctp-latte-mauve-rgb);
-  --ctp-red: var(--ctp-latte-red);
-  --ctp-red-rgb: var(--ctp-latte-red-rgb);
-  --ctp-maroon: var(--ctp-latte-maroon);
-  --ctp-maroon-rgb: var(--ctp-latte-maroon-rgb);
-  --ctp-peach: var(--ctp-latte-peach);
-  --ctp-peach-rgb: var(--ctp-latte-peach-rgb);
-  --ctp-yellow: var(--ctp-latte-yellow);
-  --ctp-yellow-rgb: var(--ctp-latte-yellow-rgb);
-  --ctp-green: var(--ctp-latte-green);
-  --ctp-green-rgb: var(--ctp-latte-green-rgb);
-  --ctp-teal: var(--ctp-latte-teal);
-  --ctp-teal-rgb: var(--ctp-latte-teal-rgb);
-  --ctp-sky: var(--ctp-latte-sky);
-  --ctp-sky-rgb: var(--ctp-latte-sky-rgb);
-  --ctp-sapphire: var(--ctp-latte-sapphire);
-  --ctp-sapphire-rgb: var(--ctp-latte-sapphire-rgb);
-  --ctp-blue: var(--ctp-latte-blue);
-  --ctp-blue-rgb: var(--ctp-latte-blue-rgb);
-  --ctp-lavender: var(--ctp-latte-lavender);
-  --ctp-lavender-rgb: var(--ctp-latte-lavender-rgb);
-  --ctp-text: var(--ctp-latte-text);
-  --ctp-text-rgb: var(--ctp-latte-text-rgb);
-  --ctp-subtext1: var(--ctp-latte-subtext1);
-  --ctp-subtext1-rgb: var(--ctp-latte-subtext1-rgb);
-  --ctp-subtext0: var(--ctp-latte-subtext0);
-  --ctp-subtext0-rgb: var(--ctp-latte-subtext0-rgb);
-  --ctp-overlay2: var(--ctp-latte-overlay2);
-  --ctp-overlay2-rgb: var(--ctp-latte-overlay2-rgb);
-  --ctp-overlay1: var(--ctp-latte-overlay1);
-  --ctp-overlay1-rgb: var(--ctp-latte-overlay1-rgb);
-  --ctp-overlay0: var(--ctp-latte-overlay0);
-  --ctp-overlay0-rgb: var(--ctp-latte-overlay0-rgb);
-  --ctp-surface2: var(--ctp-latte-surface2);
-  --ctp-surface2-rgb: var(--ctp-latte-surface2-rgb);
-  --ctp-surface1: var(--ctp-latte-surface1);
-  --ctp-surface1-rgb: var(--ctp-latte-surface1-rgb);
-  --ctp-surface0: var(--ctp-latte-surface0);
-  --ctp-surface0-rgb: var(--ctp-latte-surface0-rgb);
-  --ctp-base: var(--ctp-latte-base);
-  --ctp-base-rgb: var(--ctp-latte-base-rgb);
-  --ctp-mantle: var(--ctp-latte-mantle);
-  --ctp-mantle-rgb: var(--ctp-latte-mantle-rgb);
-  --ctp-crust: var(--ctp-latte-crust);
-  --ctp-crust-rgb: var(--ctp-latte-crust-rgb);
+  /* Primary */
+  --porto-primary: var(--ctp-latte-peach);
+  --porto-primary-rgb: var(--ctp-latte-peach-rgb);
+  --porto-primary-dark: var(--ctp-latte-red);
+  --porto-primary-darker: var(--ctp-latte-maroon);
+  --porto-primary-darkest: var(--ctp-latte-flamingo);
+  --porto-primary-light: var(--ctp-latte-yellow);
+  --porto-primary-lighter: var(--ctp-latte-green);
+  --porto-primary-lightest: var(--ctp-latte-teal);
+
+  /* Secondary */
+  --porto-secondary: var(--ctp-latte-lavender);
+
+
+  /* Semantic */
+  --porto-success: var(--ctp-latte-green);
+  --porto-success-rgb: var(--ctp-latte-green-rgb);
+  --porto-warning: var(--ctp-latte-yellow);
+  --porto-warning-rgb: var(--ctp-latte-yellow-rgb);
+  --porto-danger: var(--ctp-latte-red);
+  --porto-danger-rgb: var(--ctp-latte-red-rgb);
+  --porto-info: var(--ctp-latte-blue);
+
+  /* Palette */
+  --porto-red: var(--ctp-latte-red);
+  --porto-orange: var(--ctp-latte-peach);
+  --porto-yellow: var(--ctp-latte-yellow);
+  --porto-green: var(--ctp-latte-green);
+  --porto-teal: var(--ctp-latte-teal);
+  --porto-blue: var(--ctp-latte-blue);
+  --porto-purple: var(--ctp-latte-mauve);
+  --porto-pink: var(--ctp-latte-pink);
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--ctp-latte-base);
+  --porto-bg-alt: var(--ctp-latte-mantle);
+  --porto-surface-0: var(--ctp-latte-surface0);
+  --porto-surface-0-rgb: var(--ctp-latte-surface0-rgb);
+  --porto-surface-1: var(--ctp-latte-surface1);
+  --porto-surface-2-rgb: var(--ctp-latte-surface2-rgb);
+
+  --porto-text: var(--ctp-latte-text);
+  --porto-text-muted: var(--ctp-latte-subtext0);
+  --porto-border: var(--ctp-latte-crust);
+  --porto-code: var(--ctp-latte-red);
+
+  /* Grayscale (Mapped to original Catppuccin Latte) */
+  --porto-gray-0: var(--ctp-latte-base);
+  --porto-gray-100: var(--ctp-latte-mantle);
+  --porto-gray-200: var(--ctp-latte-crust);
+  --porto-gray-300: var(--ctp-latte-surface0);
+  --porto-gray-400: var(--ctp-latte-surface1);
+  --porto-gray-500: var(--ctp-latte-surface2);
+  --porto-gray-600: var(--ctp-latte-overlay0);
+  --porto-gray-700: var(--ctp-latte-overlay1);
+  --porto-gray-800: var(--ctp-latte-overlay2);
+  --porto-gray-900: var(--ctp-latte-subtext0);
+  --porto-gray-1000: var(--ctp-latte-text);
 }
 
-/* Dark mode - Catppuccin Mocha */
+/* Dark Mode - Catppuccin Mocha */
 [data-theme="dark"] {
-  --ctp-rosewater: var(--ctp-mocha-rosewater);
-  --ctp-rosewater-rgb: var(--ctp-mocha-rosewater-rgb);
-  --ctp-flamingo: var(--ctp-mocha-flamingo);
-  --ctp-flamingo-rgb: var(--ctp-mocha-flamingo-rgb);
-  --ctp-pink: var(--ctp-mocha-pink);
-  --ctp-pink-rgb: var(--ctp-mocha-pink-rgb);
-  --ctp-mauve: var(--ctp-mocha-mauve);
-  --ctp-mauve-rgb: var(--ctp-mocha-mauve-rgb);
-  --ctp-red: var(--ctp-mocha-red);
-  --ctp-red-rgb: var(--ctp-mocha-red-rgb);
-  --ctp-maroon: var(--ctp-mocha-maroon);
-  --ctp-maroon-rgb: var(--ctp-mocha-maroon-rgb);
-  --ctp-peach: var(--ctp-mocha-peach);
-  --ctp-peach-rgb: var(--ctp-mocha-peach-rgb);
-  --ctp-yellow: var(--ctp-mocha-yellow);
-  --ctp-yellow-rgb: var(--ctp-mocha-yellow-rgb);
-  --ctp-green: var(--ctp-mocha-green);
-  --ctp-green-rgb: var(--ctp-mocha-green-rgb);
-  --ctp-teal: var(--ctp-mocha-teal);
-  --ctp-teal-rgb: var(--ctp-mocha-teal-rgb);
-  --ctp-sky: var(--ctp-mocha-sky);
-  --ctp-sky-rgb: var(--ctp-mocha-sky-rgb);
-  --ctp-sapphire: var(--ctp-mocha-sapphire);
-  --ctp-sapphire-rgb: var(--ctp-mocha-sapphire-rgb);
-  --ctp-blue: var(--ctp-mocha-blue);
-  --ctp-blue-rgb: var(--ctp-mocha-blue-rgb);
-  --ctp-lavender: var(--ctp-mocha-lavender);
-  --ctp-lavender-rgb: var(--ctp-mocha-lavender-rgb);
-  --ctp-text: var(--ctp-mocha-text);
-  --ctp-text-rgb: var(--ctp-mocha-text-rgb);
-  --ctp-subtext1: var(--ctp-mocha-subtext1);
-  --ctp-subtext1-rgb: var(--ctp-mocha-subtext1-rgb);
-  --ctp-subtext0: var(--ctp-mocha-subtext0);
-  --ctp-subtext0-rgb: var(--ctp-mocha-subtext0-rgb);
-  --ctp-overlay2: var(--ctp-mocha-overlay2);
-  --ctp-overlay2-rgb: var(--ctp-mocha-overlay2-rgb);
-  --ctp-overlay1: var(--ctp-mocha-overlay1);
-  --ctp-overlay1-rgb: var(--ctp-mocha-overlay1-rgb);
-  --ctp-overlay0: var(--ctp-mocha-overlay0);
-  --ctp-overlay0-rgb: var(--ctp-mocha-overlay0-rgb);
-  --ctp-surface2: var(--ctp-mocha-surface2);
-  --ctp-surface2-rgb: var(--ctp-mocha-surface2-rgb);
-  --ctp-surface1: var(--ctp-mocha-surface1);
-  --ctp-surface1-rgb: var(--ctp-mocha-surface1-rgb);
-  --ctp-surface0: var(--ctp-mocha-surface0);
-  --ctp-surface0-rgb: var(--ctp-mocha-surface0-rgb);
-  --ctp-base: var(--ctp-mocha-base);
-  --ctp-base-rgb: var(--ctp-mocha-base-rgb);
-  --ctp-mantle: var(--ctp-mocha-mantle);
-  --ctp-mantle-rgb: var(--ctp-mocha-mantle-rgb);
-  --ctp-crust: var(--ctp-mocha-crust);
-  --ctp-crust-rgb: var(--ctp-mocha-crust-rgb);
+  /* Primary */
+  --porto-primary: var(--ctp-mocha-peach);
+  --porto-primary-rgb: var(--ctp-mocha-peach-rgb);
+  --porto-primary-dark: var(--ctp-mocha-maroon);
+  --porto-primary-darker: var(--ctp-mocha-flamingo);
+  --porto-primary-darkest: var(--ctp-mocha-pink);
+  --porto-primary-light: var(--ctp-mocha-yellow);
+  --porto-primary-lighter: var(--ctp-mocha-green);
+  --porto-primary-lightest: var(--ctp-mocha-teal);
+
+  /* Semantic */
+  --porto-success: var(--ctp-mocha-green);
+  --porto-success-rgb: var(--ctp-mocha-green-rgb);
+  --porto-warning: var(--ctp-mocha-yellow);
+  --porto-warning-rgb: var(--ctp-mocha-yellow-rgb);
+  --porto-danger: var(--ctp-mocha-red);
+  --porto-danger-rgb: var(--ctp-mocha-red-rgb);
+  --porto-info: var(--ctp-mocha-blue);
+  /* Secondary */
+  --porto-secondary: var(--ctp-mocha-lavender);
+
+  /* Palette */
+  --porto-red: var(--ctp-mocha-red);
+  --porto-orange: var(--ctp-mocha-peach);
+  --porto-yellow: var(--ctp-mocha-yellow);
+  --porto-green: var(--ctp-mocha-green);
+  --porto-teal: var(--ctp-mocha-teal);
+  --porto-blue: var(--ctp-mocha-blue);
+  --porto-purple: var(--ctp-mocha-mauve);
+  --porto-pink: var(--ctp-mocha-pink);
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--ctp-mocha-base);
+  --porto-bg-alt: var(--ctp-mocha-mantle);
+  --porto-surface-0: var(--ctp-mocha-surface0);
+  --porto-surface-0-rgb: var(--ctp-mocha-surface0-rgb);
+  --porto-surface-1: var(--ctp-mocha-surface1);
+  --porto-surface-2-rgb: var(--ctp-mocha-surface2-rgb);
+
+  --porto-text: var(--ctp-mocha-text);
+  --porto-text-muted: var(--ctp-mocha-subtext0);
+  --porto-border: var(--ctp-mocha-crust);
+  --porto-code: var(--ctp-mocha-red);
+
+  /* Grayscale (Mapped to original Catppuccin Mocha) */
+  --porto-gray-0: var(--ctp-mocha-crust);
+  --porto-gray-100: var(--ctp-mocha-mantle);
+  --porto-gray-200: var(--ctp-mocha-base);
+  --porto-gray-300: var(--ctp-mocha-surface0);
+  --porto-gray-400: var(--ctp-mocha-surface1);
+  --porto-gray-500: var(--ctp-mocha-surface2);
+  --porto-gray-600: var(--ctp-mocha-overlay0);
+  --porto-gray-700: var(--ctp-mocha-overlay1);
+  --porto-gray-800: var(--ctp-mocha-overlay2);
+  --porto-gray-900: var(--ctp-mocha-subtext0);
+  --porto-gray-1000: var(--ctp-mocha-text);
 }

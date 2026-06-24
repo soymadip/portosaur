@@ -34,8 +34,7 @@ export default function Hint({
   const hintStyle = {
     ...(bg && { "--tooltip-color": bg }),
     ...(color && { "--tooltip-text-color": color }),
-    ...(!color &&
-      bg && { "--tooltip-text-color": "var(--ifm-font-color-base-inverse)" }),
+    ...(!color && bg && { "--tooltip-text-color": "#fff" }),
     ...(shadow && { "--tooltip-shadow": shadow }),
   };
 
@@ -193,23 +192,20 @@ export default function Hint({
   const hint =
     isVisible && typeof document !== "undefined"
       ? createPortal(
-          <>
-            <div className={styles.backdrop} />
-            <span
-              ref={hintRef}
-              className={`${styles.hint} ${styles[activePosition]}`}
-              style={{
-                ...hintStyle,
-                top: coords.top,
-                left: coords.left,
-                "--arrow-offset": `${arrowOffset}px`,
-              }}
-              role="tooltip"
-            >
-              {msg}
-              <span className={styles.arrow} />
-            </span>
-          </>,
+          <span
+            ref={hintRef}
+            className={`${styles.hint} ${styles[activePosition]}`}
+            style={{
+              ...hintStyle,
+              top: coords.top,
+              left: coords.left,
+              "--arrow-offset": `${arrowOffset}px`,
+            }}
+            role="tooltip"
+          >
+            {msg}
+            <span className={styles.arrow} />
+          </span>,
           document.body,
         )
       : null;

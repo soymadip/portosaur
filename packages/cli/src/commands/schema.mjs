@@ -441,9 +441,20 @@ export async function schemaCommand(options = {}) {
           preceding.itemsSchema ??
           fallback.itemsSchema;
 
-        const keySchema = { type: [type, "null"] };
+        const finalTypes = [type, "null"];
+        let cleanDescription = description;
+
+        if (description && description.includes("@type {string|array}")) {
+          finalTypes.push(type === "string" ? "array" : "string");
+          cleanDescription = description
+            .replace("@type {string|array}", "")
+            .trim();
+        }
+
+        const keySchema = { type: finalTypes };
+
         if (isFreeform) keySchema.additionalProperties = true;
-        if (description) keySchema.description = description;
+        if (cleanDescription) keySchema.description = cleanDescription;
         if (defaultValue !== undefined) keySchema.default = defaultValue;
         if (type === "array" && itemsSchema) keySchema.items = itemsSchema;
 

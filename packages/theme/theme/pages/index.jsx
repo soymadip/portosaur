@@ -20,7 +20,9 @@ export default function Home() {
   };
 
   const customStyles = `
-  /* For future */
+  :root {
+    --ifm-navbar-shadow: none !important;
+  }
   `;
 
   return (

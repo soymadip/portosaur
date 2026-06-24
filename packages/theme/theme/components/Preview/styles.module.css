@@ -1,6 +1,6 @@
 :root {
-  --pv-backdrop-bg: rgba(var(--ifm-color-black-rgb), 0.75);
-  --pv-popup-shadow: 0 20px 50px rgba(var(--ifm-color-emphasis-900-rgb), 0.3);
+  --pv-backdrop-bg: rgba(0, 0, 0, 0.25);
+  --pv-popup-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   --pv-popup-width: min(900px, 90vw);
   --pv-popup-height: min(700px, 85vh);
   --pv-popup-radius: var(--ifm-global-radius, 16px);
@@ -114,7 +114,7 @@
     border 0.3s ease,
     box-shadow 0.3s ease;
   z-index: 10;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-color-emphasis-800);
 }
 
 .modePip .windowFrame,
@@ -125,7 +125,7 @@
 [data-theme="dark"] .windowFrame {
   background: var(--ifm-background-surface-color);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--ifm-color-emphasis-800);
   box-shadow: var(--ifm-global-shadow-lw);
 }
 
@@ -183,6 +183,19 @@
   border-top: 1px solid var(--ifm-toc-border-color);
 }
 
+@keyframes smoothBlur {
+  from {
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    background-color: transparent;
+  }
+  to {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    background-color: var(--pv-backdrop-bg);
+  }
+}
+
 .previewBackdrop {
   position: absolute;
   inset: 0;
@@ -192,6 +205,7 @@
   z-index: 5;
   cursor: pointer;
   pointer-events: auto;
+  animation: smoothBlur 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .modePopup .windowFrame {
@@ -468,9 +482,9 @@
   background: none;
   color: var(--ifm-font-color-base);
   opacity: 0.6;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  transition: color 0.2s, background 0.2s, opacity 0.2s;
   white-space: nowrap;
+  position: relative;
 }
 
 .tab:hover {
@@ -482,7 +496,16 @@
 .activeTab {
   opacity: 1;
   color: var(--ifm-color-primary);
-  border-bottom-color: var(--ifm-color-primary);
+}
+
+.activeTabIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--ifm-color-primary);
+  border-radius: 2px 2px 0 0;
 }
 
 .windowContent {
@@ -680,7 +703,7 @@
 .modePeek .windowFrame {
   border-radius: 0;
   border: none;
-  border-top: 1px solid var(--ifm-color-emphasis-400);
+  border-top: 1px solid var(--ifm-color-emphasis-600);
   box-shadow: 0 -10px 40px rgba(var(--ifm-color-emphasis-900-rgb), 0.15);
   transition:
     border-top-color 0.2s ease,
@@ -739,7 +762,7 @@
 }
 
 .visitButton {
-  background: var(--ifm-color-emphasis-200);
+  background: var(--ifm-color-emphasis-800);
   color: var(--ifm-font-color-base);
   border: none;
   border-radius: var(--ifm-global-radius);

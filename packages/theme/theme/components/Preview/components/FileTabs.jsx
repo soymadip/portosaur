@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import styles from "../styles.module.css";
 
 export default function FileTabs({ sources, activeIndex, onSelect }) {
@@ -27,6 +28,13 @@ export default function FileTabs({ sources, activeIndex, onSelect }) {
           onClick={() => onSelect(i)}
         >
           {src.label || src.path.split("/").pop()}
+          {i === activeIndex && (
+            <motion.div
+              layoutId="activePreviewTabIndicator"
+              className={styles.activeTabIndicator}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
         </button>
       ))}
     </div>

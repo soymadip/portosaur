@@ -82,19 +82,15 @@
 
 .dropdownArrow {
   display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg);
-  margin-left: 6px;
+  border: 0.35em solid transparent;
+  border-top-color: currentColor;
+  border-bottom: none;
+  margin-left: 0.25em;
   vertical-align: middle;
-  position: relative;
-  top: -2px;
   opacity: 0.95;
   flex-shrink: 0;
 }
 
 .dropdownArrowBtn {
-  margin-left: 1px;
+  margin-left: 0.01em;
 }

@@ -31,7 +31,7 @@ export default function CodeRenderer({ code, language, zoomLevel = 1 }) {
             fontSize: `calc(0.85rem * ${zoomLevel})`,
             lineHeight: 1.6,
             minHeight: "100%",
-            background: "var(--ifm-background-color)",
+            backgroundColor: style?.backgroundColor || "var(--ifm-background-color)",
           }}
         >
           {tokens.map((line, i) => {

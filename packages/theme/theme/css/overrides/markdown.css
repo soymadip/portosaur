@@ -50,7 +50,7 @@
 }
 
 mark {
-  background-color: rgba(var(--ctp-peach-rgb), 0.2);
+  background-color: rgba(var(--porto-warning-rgb), 0.2);
   color: var(--ifm-font-color-base);
   padding: 0.17rem 0.27rem;
   border-radius: 0.2rem;
@@ -63,17 +63,72 @@ mark {
 
 /* Custom Magic Comments for Code Blocks */
 .code-block-error-line {
-  background-color: rgba(var(--ctp-red-rgb, 243, 139, 168), 0.2);
+  background-color: rgba(var(--porto-danger-rgb), 0.2);
   display: block;
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
-  border-left: 3px solid var(--ctp-red, #f38ba8);
+  border-left: 3px solid var(--porto-danger);
 }
 
 .code-block-success-line {
-  background-color: rgba(var(--ctp-green-rgb, 166, 227, 161), 0.2);
+  background-color: rgba(var(--porto-success-rgb), 0.2);
   display: block;
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
-  border-left: 3px solid var(--ctp-green, #a6e3a1);
+  border-left: 3px solid var(--porto-success);
+}
+
+/* === Callouts / Alerts Customization === */
+.alert--info {
+  --ifm-alert-border-color: var(--porto-info);
+  --ifm-alert-background-color: color-mix(
+    in srgb,
+    var(--porto-info) 25%,
+    var(--porto-surface-0)
+  );
+  --ifm-alert-foreground-color: var(--porto-info);
+}
+.alert--success {
+  --ifm-alert-border-color: var(--porto-success);
+  --ifm-alert-background-color: color-mix(
+    in srgb,
+    var(--porto-success) 25%,
+    var(--porto-surface-0)
+  );
+  --ifm-alert-foreground-color: var(--porto-success);
+}
+.alert--warning {
+  --ifm-alert-border-color: var(--porto-warning);
+  --ifm-alert-background-color: color-mix(
+    in srgb,
+    var(--porto-warning) 25%,
+    var(--porto-surface-0)
+  );
+  --ifm-alert-foreground-color: var(--porto-warning);
+}
+.alert--danger {
+  --ifm-alert-border-color: var(--porto-danger);
+  --ifm-alert-background-color: color-mix(
+    in srgb,
+    var(--porto-danger) 25%,
+    var(--porto-surface-0)
+  );
+  --ifm-alert-foreground-color: var(--porto-danger);
+}
+.alert--secondary {
+  --ifm-alert-border-color: var(--porto-text-muted);
+  --ifm-alert-background-color: color-mix(
+    in srgb,
+    var(--porto-text-muted) 25%,
+    var(--porto-surface-0)
+  );
+  --ifm-alert-foreground-color: var(--porto-text-muted);
+}
+
+.alert {
+  color: var(--ifm-font-color-base);
+}
+/* Ensure the icon keeps the tinted foreground color */
+.alert .admonitionIcon svg {
+  fill: var(--ifm-alert-foreground-color);
 }

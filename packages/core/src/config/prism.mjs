@@ -1,12 +1,14 @@
+import { themes as prismThemes } from "prism-react-renderer";
+
 /**
- * Catppuccin theme for Prism.js
+ * Custom themes for Prism.js
  **/
 
 // Catppuccin Mocha (dark theme)
 export const catppuccinMocha = {
   plain: {
     color: "#cdd6f4",
-    backgroundColor: "#181825",
+    backgroundColor: "var(--porto-bg-alt)",
   },
   styles: [
     {
@@ -94,7 +96,7 @@ export const catppuccinMocha = {
 export const catppuccinLatte = {
   plain: {
     color: "#4c4f69",
-    backgroundColor: "#FAF9F6",
+    backgroundColor: "var(--porto-bg-alt)",
   },
   styles: [
     {
@@ -176,4 +178,39 @@ export const catppuccinLatte = {
       },
     },
   ],
+};
+
+const withPortoBg = (theme) => ({
+  ...theme,
+  plain: {
+    ...theme.plain,
+    backgroundColor: "var(--porto-bg-alt)",
+  },
+});
+
+export const prismThemeMap = {
+  catppuccin: {
+    light: catppuccinLatte,
+    dark: catppuccinMocha,
+  },
+  github: {
+    light: withPortoBg(prismThemes.github),
+    dark: withPortoBg(prismThemes.dracula),
+  },
+  nord: {
+    light: withPortoBg(prismThemes.duotoneLight),
+    dark: withPortoBg(prismThemes.oceanicNext),
+  },
+  dracula: {
+    light: withPortoBg(prismThemes.github),
+    dark: withPortoBg(prismThemes.dracula),
+  },
+  gruvbox: {
+    light: withPortoBg(prismThemes.duotoneLight),
+    dark: withPortoBg(prismThemes.duotoneDark),
+  },
+  portosaur: {
+    light: withPortoBg(prismThemes.github),
+    dark: withPortoBg(prismThemes.oceanicNext),
+  },
 };

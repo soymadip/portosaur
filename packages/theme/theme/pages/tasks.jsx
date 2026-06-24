@@ -329,6 +329,11 @@ export default function TasksPage() {
         title="Tasks are Disabled"
         description="Tasks are currently disabled"
       >
+        <style>{`
+          :root {
+            --ifm-navbar-shadow: none !important;
+          }
+        `}</style>
         <div className={styles["tasks-container"]}>
           <div className={styles["tasks-content"]}>
             <div className={styles["tasks-disabled-notice"]}>
@@ -355,6 +360,11 @@ export default function TasksPage() {
 
   return (
     <Layout title={heading} description={subheading}>
+      <style>{`
+        :root {
+          --ifm-navbar-shadow: none !important;
+        }
+      `}</style>
       <Head>
         <meta property="og:title" content={heading} />
         <meta property="og:description" content={subheading} />

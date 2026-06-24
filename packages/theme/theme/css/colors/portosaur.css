@@ -1,0 +1,134 @@
+/* Portosaur Default Theme (Sleek Modern Portfolio) */
+:root {
+  /* Semantic (Global) */
+  --docusaurus-success: #10b981;
+  --docusaurus-success-rgb: 16, 185, 129;
+  --docusaurus-warning: #f59e0b;
+  --docusaurus-warning-rgb: 245, 158, 11;
+  --docusaurus-danger: #ef4444;
+  --docusaurus-danger-rgb: 239, 68, 68;
+  --docusaurus-info: #3b82f6;
+  --docusaurus-info-rgb: 59, 130, 246;
+}
+
+[data-theme="light"] {
+  /* Primary (Brand Dark Green) */
+  --porto-primary: #40a701;
+  --porto-primary-rgb: 64, 167, 1;
+  --porto-primary-dark: #378e01;
+  --porto-primary-darker: #2f7a01;
+  --porto-primary-darkest: #1e4d01;
+  --porto-primary-light: #48bb01;
+  --porto-primary-lighter: #60fc02;
+  --porto-primary-lightest: #80fd35;
+
+  /* Semantic */
+  --porto-success: var(--docusaurus-success);
+  --porto-success-rgb: var(--docusaurus-success-rgb);
+  --porto-warning: var(--docusaurus-warning);
+  --porto-warning-rgb: var(--docusaurus-warning-rgb);
+  --porto-danger: var(--docusaurus-danger);
+  --porto-danger-rgb: var(--docusaurus-danger-rgb);
+  --porto-info: var(--docusaurus-info);
+  --porto-secondary: #52525b;
+
+  /* Palette */
+  --porto-red: #ef4444;
+  --porto-orange: #f97316;
+  --porto-yellow: #eab308;
+  --porto-green: #22c55e;
+  --porto-teal: #14b8a6;
+  --porto-blue: #3b82f6;
+  --porto-purple: #8b5cf6;
+  --porto-pink: #ec4899;
+
+  /* Backgrounds & Text (Zinc) */
+  --porto-bg: #ffffff;
+  --porto-bg-alt: #f4f4f5;
+  --porto-surface-0: #e4e4e7;
+  --porto-surface-0-rgb: 228, 228, 231;
+  --porto-surface-1: #d4d4d8;
+  --porto-surface-2: #a1a1aa;
+  --porto-surface-2-rgb: 228, 228, 231;
+
+  --porto-text: #09090b;
+  --porto-text-muted: #52525b;
+
+  /* Borders & Code */
+  --porto-border: #e4e4e7;
+  --porto-code: #09090b;
+
+  /* Grayscale (Zinc Light) */
+  --porto-gray-0: #ffffff;
+  --porto-gray-100: #f4f4f5;
+  --porto-gray-200: #e4e4e7;
+  --porto-gray-300: #d4d4d8;
+  --porto-gray-400: #a1a1aa;
+  --porto-gray-500: #71717a;
+  --porto-gray-600: #52525b;
+  --porto-gray-700: #3f3f46;
+  --porto-gray-800: #27272a;
+  --porto-gray-900: #18181b;
+  --porto-gray-1000: #09090b;
+}
+
+[data-theme="dark"] {
+  /* Primary (Brand Neon Green) */
+  --porto-primary: #60fc02;
+  --porto-primary-rgb: 96, 252, 2;
+  --porto-primary-dark: #48bb01;
+  --porto-primary-darker: #40a701;
+  --porto-primary-darkest: #2f7a01;
+  --porto-primary-light: #80fd35;
+  --porto-primary-lighter: #a0fe68;
+  --porto-primary-lightest: #c0fe9b;
+
+  /* Semantic */
+  --porto-success: var(--docusaurus-success);
+  --porto-success-rgb: var(--docusaurus-success-rgb);
+  --porto-warning: var(--docusaurus-warning);
+  --porto-warning-rgb: var(--docusaurus-warning-rgb);
+  --porto-danger: var(--docusaurus-danger);
+  --porto-danger-rgb: var(--docusaurus-danger-rgb);
+  --porto-info: var(--docusaurus-info);
+  --porto-secondary: #a1a1aa;
+
+  /* Palette */
+  --porto-red: #f87171;
+  --porto-orange: #fb923c;
+  --porto-yellow: #facc15;
+  --porto-green: #4ade80;
+  --porto-teal: #2dd4bf;
+  --porto-blue: #60a5fa;
+  --porto-purple: #a78bfa;
+  --porto-pink: #f472b6;
+
+  /* Backgrounds & Text (Docusaurus Dark) */
+  --porto-bg: #18191a;
+  --porto-bg-alt: #121314;
+  --porto-surface-0: #242526;
+  --porto-surface-0-rgb: 36, 37, 38;
+  --porto-surface-1: #2f3032;
+  --porto-surface-2: #3e4042;
+  --porto-surface-2-rgb: 82, 82, 85;
+
+  --porto-text: #f5f6f7;
+  --porto-text-muted: #a1a1aa;
+
+  /* Borders & Code */
+  --porto-border: #3e4042;
+  --porto-code: #fb923c;
+
+  /* Grayscale (Docusaurus Dark) */
+  --porto-gray-0: #18191a;
+  --porto-gray-100: #242526;
+  --porto-gray-200: #2f3032;
+  --porto-gray-300: #3e4042;
+  --porto-gray-400: #525457;
+  --porto-gray-500: #727477;
+  --porto-gray-600: #a1a1aa;
+  --porto-gray-700: #d4d4d8;
+  --porto-gray-800: #e4e4e7;
+  --porto-gray-900: #f5f6f7;
+  --porto-gray-1000: #ffffff;
+}

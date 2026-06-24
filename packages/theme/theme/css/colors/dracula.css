@@ -1,0 +1,159 @@
+/* Dracula Theme Colors */
+
+:root {
+  /* Dracula Dark palette */
+  --drac-bg:      #282a36;
+  --drac-mantle:  #21222c; /* slightly darker, like Catppuccin mantle */
+  --drac-crust:   #191a21; /* darkest, like Catppuccin crust */
+  --drac-current: #44475a; /* surface/selection */
+  --drac-fg:      #f8f8f2;
+  --drac-comment: #6272a4;
+  --drac-cyan:    #8be9fd;
+  --drac-green:   #50fa7b;
+  --drac-orange:  #ffb86c;
+  --drac-pink:    #ff79c6;
+  --drac-purple:  #bd93f9;
+  --drac-red:     #ff5555;
+  --drac-yellow:  #f1fa8c;
+
+  /* Derived dark surfaces */
+  --drac-surface1: #52556b; /* between current and comment */
+  --drac-surface2: #626781; /* between comment and overlay */
+
+  /* Dracula Light (Alucard inspired) */
+  --drac-light-bg:      #f8f8f2;
+  --drac-light-mantle:  #efefea; /* slightly darker than bg, like Catppuccin mantle */
+  --drac-light-crust:   #e3e3df; /* darkest light surface, like Catppuccin crust */
+  --drac-light-current: #e9e9f4; /* surface0 */
+  --drac-light-surface1: #dcdcea;
+  --drac-light-surface2: #cdcdde;
+  --drac-light-fg:      #282a36;
+  --drac-light-comment: #6272a4; /* same in both modes */
+  --drac-light-purple:  #9a5cf4; /* slightly darker for light mode contrast */
+}
+
+[data-theme="light"] {
+  /* Primary — Dracula light purple */
+  --porto-primary: var(--drac-light-purple);
+  --porto-primary-rgb: 154, 92, 244;
+  --porto-primary-dark: #813de3;
+  --porto-primary-darker: #7131d2;
+  --porto-primary-darkest: #5523a5;
+  --porto-primary-light: #b07ef7;
+  --porto-primary-lighter: #bc92f9;
+  --porto-primary-lightest: #d1b4fc;
+
+  /* Semantic — darkened for light mode readability */
+  --porto-success: #159c3a;
+  --porto-success-rgb: 21, 156, 58;
+  --porto-warning: #e88c1c;
+  --porto-warning-rgb: 232, 140, 28;
+  --porto-danger: #e22d2d;
+  --porto-danger-rgb: 226, 45, 45;
+  --porto-info: #0d8ca8;
+
+  /* Secondary — Dracula comment (#6272a4), equivalent to Catppuccin lavender */
+  --porto-secondary: var(--drac-light-comment);
+
+  /* Palette */
+  --porto-red: #e22d2d;
+  --porto-orange: #e88c1c;
+  --porto-yellow: #d8a000;
+  --porto-green: #159c3a;
+  --porto-teal: #0d8ca8;
+  --porto-blue: #0d8ca8;
+  --porto-purple: var(--drac-light-purple);
+  --porto-pink: #d94186;
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--drac-light-bg);
+  --porto-bg-alt: var(--drac-light-mantle);
+  --porto-surface-0: var(--drac-light-current);
+  --porto-surface-0-rgb: 233, 233, 244;
+  --porto-surface-1: var(--drac-light-surface1);
+  --porto-surface-2: var(--drac-light-surface2);
+  --porto-surface-2-rgb: 205, 205, 222;
+
+  --porto-text: var(--drac-light-fg);
+  --porto-text-muted: var(--drac-light-comment);
+
+  /* Border — crust equivalent (darkest light surface) */
+  --porto-border: var(--drac-light-crust);
+  --porto-code: var(--drac-light-purple);
+
+  /* Grayscale (light: bg → fg, lightest to darkest) */
+  --porto-gray-0: var(--drac-light-bg);
+  --porto-gray-100: var(--drac-light-mantle);
+  --porto-gray-200: var(--drac-light-crust);
+  --porto-gray-300: var(--drac-light-current);
+  --porto-gray-400: var(--drac-light-surface1);
+  --porto-gray-500: var(--drac-light-surface2);
+  --porto-gray-600: var(--drac-comment);
+  --porto-gray-700: #4f5872;
+  --porto-gray-800: #3c4256;
+  --porto-gray-900: #2d3244;
+  --porto-gray-1000: var(--drac-light-fg);
+}
+
+[data-theme="dark"] {
+  /* Primary — Dracula purple */
+  --porto-primary: var(--drac-purple);
+  --porto-primary-rgb: 189, 147, 249;
+  --porto-primary-dark: #9e67f7;
+  --porto-primary-darker: #8b4cf6;
+  --porto-primary-darkest: #6a1bf3;
+  --porto-primary-light: #d1b3fb;
+  --porto-primary-lighter: #dbb3fb;
+  --porto-primary-lightest: #eedffc;
+
+  /* Semantic */
+  --porto-success: var(--drac-green);
+  --porto-success-rgb: 80, 250, 123;
+  --porto-warning: var(--drac-orange);
+  --porto-warning-rgb: 255, 184, 108;
+  --porto-danger: var(--drac-red);
+  --porto-danger-rgb: 255, 85, 85;
+  --porto-info: var(--drac-cyan);
+
+  /* Secondary — Dracula comment (#6272a4), equivalent to Catppuccin Mocha lavender */
+  --porto-secondary: var(--drac-comment);
+
+  /* Palette */
+  --porto-red: var(--drac-red);
+  --porto-orange: var(--drac-orange);
+  --porto-yellow: var(--drac-yellow);
+  --porto-green: var(--drac-green);
+  --porto-teal: var(--drac-cyan);
+  --porto-blue: var(--drac-cyan);
+  --porto-purple: var(--drac-purple);
+  --porto-pink: var(--drac-pink);
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--drac-bg);
+  --porto-bg-alt: var(--drac-mantle);
+  --porto-surface-0: var(--drac-current);
+  --porto-surface-0-rgb: 68, 71, 90;
+  --porto-surface-1: var(--drac-surface1);
+  --porto-surface-2-rgb: 98, 103, 129;
+
+  --porto-text: var(--drac-fg);
+  --porto-text-muted: var(--drac-comment);
+
+  /* Border — crust equivalent (darkest, below bg) */
+  --porto-border: var(--drac-crust);
+  --porto-code: var(--drac-red);
+
+  /* Grayscale (dark: fg → bg/crust, lightest to darkest) */
+  --porto-gray-0: var(--drac-crust);
+  --porto-gray-100: var(--drac-mantle);
+  --porto-gray-200: var(--drac-bg);
+  --porto-gray-300: var(--drac-current);
+  --porto-gray-400: var(--drac-surface1);
+  --porto-gray-500: var(--drac-comment);
+  --porto-gray-600: #909194;
+  --porto-gray-700: #a4a5a6;
+  --porto-gray-800: #b9b9b2;
+  --porto-gray-900: #d0d0ca;
+  --porto-gray-1000: var(--drac-fg);
+  --porto-surface-2: var(--drac-surface2);
+}

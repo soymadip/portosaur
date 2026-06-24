@@ -15,6 +15,11 @@ export default function Notes() {
 
   return (
     <Layout title={pageTitle} description={`My ${pageTitle}`}>
+      <style>{`
+        :root {
+          --ifm-navbar-shadow: none !important;
+        }
+      `}</style>
       <main className={styles.notesContainer}>
         <div className="container">
           <header className="text-center mb-4">

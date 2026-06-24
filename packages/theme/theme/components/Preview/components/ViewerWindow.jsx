@@ -296,21 +296,30 @@ export default function PreviewViewer() {
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          id="pv-viewer"
-          data-mode={mode}
-          className={`${styles.previewSystem} ${showAsPeek ? styles.modePeek : ""} ${isDockMode ? styles.modeDock : ""} ${isPipMode ? styles.modePip : ""} ${isPopupMode ? styles.modePopup : ""}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          onWheel={(e) => e.stopPropagation()}
-        >
+        <React.Fragment key="preview">
           {isPopupMode && (
-            <div className={styles.previewBackdrop} onClick={closePreview} />
+            <motion.div
+              className={styles.previewBackdrop}
+              onClick={closePreview}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ position: "fixed", zIndex: 1999, inset: 0 }}
+            />
           )}
-
-          <Rnd
+          <motion.div
+            id="pv-viewer"
+            data-mode={mode}
+            className={`${styles.previewSystem} ${showAsPeek ? styles.modePeek : ""} ${isDockMode ? styles.modeDock : ""} ${isPipMode ? styles.modePip : ""} ${isPopupMode ? styles.modePopup : ""}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onWheel={(e) => e.stopPropagation()}
+            style={{ zIndex: 2000 }}
+          >
+            <Rnd
             position={layout.rndPosition}
             size={layout.rndSize}
             disableDragging={isDockMode || showAsPeek || isPopupMode}
@@ -379,6 +388,7 @@ export default function PreviewViewer() {
             </div>
           </Rnd>
         </motion.div>
+        </React.Fragment>
       )}
     </AnimatePresence>,
     document.body,

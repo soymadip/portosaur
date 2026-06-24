@@ -4,6 +4,7 @@
 
 ## Features
 
+- [ ] Add Url Shortener, checkout https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-client-redirects
 - [ ] Thoroughly check vars docs and separate config vars with runtime vars. Add a component and syntax to replace `{meta.var_name}` with actual `var_value` (a remark plugin maybe?). Also, make the `config.yml`'s `vars` referable in notes and blog?
 - [ ] Allow adding tooltip when hovering.
 - [ ] Write custom component docs and add mdx syntax through plugins.

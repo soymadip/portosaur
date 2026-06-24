@@ -4,13 +4,16 @@
   "workspaces": {
     "": {
       "name": "portosaurus",
+      "dependencies": {
+        "@docusaurus/plugin-client-redirects": "^3.10.1",
+      },
       "devDependencies": {
         "prettier": "latest",
       },
     },
     "docs": {
       "name": "@portosaur/docs",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "devDependencies": {
         "debug": "^4.4.3",
         "js-yaml": "^4.2.0",
@@ -24,7 +27,7 @@
     },
     "packages/cli": {
       "name": "@portosaur/cli",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "bin": {
         "porto": "bin/porto.mjs",
       },
@@ -38,11 +41,12 @@
     },
     "packages/core": {
       "name": "@portosaur/core",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "dependencies": {
         "@portosaur/logger": "workspace:*",
         "favicons": "^7.2.0",
         "js-yaml": "^4.1.1",
+        "prism-react-renderer": "^2.4.1",
         "rehype-katex": "7",
         "remark-math": "6",
         "sharp": "^0.34.5",
@@ -50,7 +54,7 @@
     },
     "packages/logger": {
       "name": "@portosaur/logger",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "dependencies": {
         "@docusaurus/logger": "^3.10.0",
         "chalk": "^5.6.2",
@@ -59,7 +63,7 @@
     },
     "packages/theme": {
       "name": "@portosaur/theme",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "dependencies": {
         "@docusaurus/core": "^3.10.1",
         "@docusaurus/plugin-pwa": "^3.10.1",
@@ -67,6 +71,7 @@
         "@easyops-cn/docusaurus-search-local": "^0.55.2",
         "@fontsource-variable/geologica": "^5.2.8",
         "@fontsource-variable/lexend": "^5.2.11",
+        "@fontsource/alata": "^5.2.8",
         "@portosaur/core": "workspace:*",
         "chalk": "^5.6.2",
         "clsx": "^2.1.1",
@@ -91,7 +96,7 @@
     },
     "packages/wizard": {
       "name": "@portosaur/wizard",
-      "version": "0.10.0",
+      "version": "0.12.2",
       "dependencies": {
         "@clack/prompts": "^1.2.0",
         "chalk": "^5.6.2",
@@ -481,6 +486,8 @@
 
     "@docusaurus/module-type-aliases": ["@docusaurus/module-type-aliases@3.10.1", "", { "dependencies": { "@docusaurus/types": "3.10.1", "@types/history": "^4.7.11", "@types/react": "*", "@types/react-router-config": "*", "@types/react-router-dom": "*", "react-helmet-async": "npm:@slorber/react-helmet-async@1.3.0", "react-loadable": "npm:@docusaurus/react-loadable@6.0.0" }, "peerDependencies": { "react": "*", "react-dom": "*" } }, "sha512-YoOZKUdGlp8xSYhuAkGdSo5Ydkbq4V4eK3sD8v0a2hloxCWdQbNBhkc+Ko9QyjpESc0BYcIGM5iHVAy5hdFV6w=="],
 
+    "@docusaurus/plugin-client-redirects": ["@docusaurus/plugin-client-redirects@3.10.1", "", { "dependencies": { "@docusaurus/core": "3.10.1", "@docusaurus/logger": "3.10.1", "@docusaurus/utils": "3.10.1", "@docusaurus/utils-common": "3.10.1", "@docusaurus/utils-validation": "3.10.1", "eta": "^2.2.0", "fs-extra": "^11.1.1", "lodash": "^4.17.21", "tslib": "^2.6.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-LHgd+YDvkhfOHMAE6XtUng3DQNzVM765RqVRrMJgHtzAvfopQhY6ieprqjxDVBdv21cLma6I0jHr+YCZH8fL9A=="],
+
     "@docusaurus/plugin-content-blog": ["@docusaurus/plugin-content-blog@3.10.1", "", { "dependencies": { "@docusaurus/core": "3.10.1", "@docusaurus/logger": "3.10.1", "@docusaurus/mdx-loader": "3.10.1", "@docusaurus/theme-common": "3.10.1", "@docusaurus/types": "3.10.1", "@docusaurus/utils": "3.10.1", "@docusaurus/utils-common": "3.10.1", "@docusaurus/utils-validation": "3.10.1", "cheerio": "1.0.0-rc.12", "combine-promises": "^1.1.0", "feed": "^4.2.2", "fs-extra": "^11.1.1", "lodash": "^4.17.21", "schema-dts": "^1.1.2", "srcset": "^4.0.0", "tslib": "^2.6.0", "unist-util-visit": "^5.0.0", "utility-types": "^3.10.0", "webpack": "^5.88.1" }, "peerDependencies": { "@docusaurus/plugin-content-docs": "*", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-mmkgE6Q2+K74tnkou7tXlpDLvoCU/qkSa2GSQ3XUiHWvcebCoDQzS670RR3tO8PmaWlIyWWISYWzZLuMfxunRA=="],
 
     "@docusaurus/plugin-content-docs": ["@docusaurus/plugin-content-docs@3.10.1", "", { "dependencies": { "@docusaurus/core": "3.10.1", "@docusaurus/logger": "3.10.1", "@docusaurus/mdx-loader": "3.10.1", "@docusaurus/module-type-aliases": "3.10.1", "@docusaurus/theme-common": "3.10.1", "@docusaurus/types": "3.10.1", "@docusaurus/utils": "3.10.1", "@docusaurus/utils-common": "3.10.1", "@docusaurus/utils-validation": "3.10.1", "@types/react-router-config": "^5.0.7", "combine-promises": "^1.1.0", "fs-extra": "^11.1.1", "js-yaml": "^4.1.0", "lodash": "^4.17.21", "schema-dts": "^1.1.2", "tslib": "^2.6.0", "utility-types": "^3.10.0", "webpack": "^5.88.1" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-2jRVrtzjf8LClGTHQlwlwuD3wQXRx3WEoF7XUarJ8Ou+0onV+SLtejsyfY9JLpfUh9hPhXM4pbBGkyAY4Bi3HQ=="],
@@ -580,6 +587,8 @@
     "@fontsource-variable/geologica": ["@fontsource-variable/geologica@5.2.8", "", {}, "sha512-hmUBi4k8C0xfi/pk/ArAyK7kRPqbkV5o/YN4nmJ+mtc14HKaAzdWAKb31gFWpveI75POgtcw3/iAepcGRnotYw=="],
 
     "@fontsource-variable/lexend": ["@fontsource-variable/lexend@5.2.11", "", {}, "sha512-0hgEQ4O7Nh8fxL/WWmspJf0BErbocRkZwtLRGey/V4mUUqxfF7QUwqhcdzwpjom3NYCniY4uzQ5wYD7r9/92tQ=="],
+
+    "@fontsource/alata": ["@fontsource/alata@5.2.8", "", {}, "sha512-E+QjT/nw8t2J7qJ+20mN0b/mVc6jXDTPyZHM3/VnOLj86GA91l2whD2EgBcLU5zi5/GVp5Gyzh/RcwiwkbQ89g=="],
 
     "@hapi/hoek": ["@hapi/hoek@9.3.0", "", {}, "sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ=="],
 

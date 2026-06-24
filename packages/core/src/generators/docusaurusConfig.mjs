@@ -16,7 +16,7 @@ import {
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { catppuccinLatte, catppuccinMocha } from "../config/prism.mjs";
+import { prismThemeMap } from "../config/prism.mjs";
 
 // ------- Main Configuration Generator -------
 
@@ -64,7 +64,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     getNestedValue(userConfig, key, ...fallbacks);
 
   const defaultTheme =
-    get("theme.appearance.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
+    get("theme.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
+
+  const colorScheme = get("theme.color_scheme", "nord"); // The site's color scheme. Can be a built-in theme ("nord", "dracula", "github", "catppuccin", "gruvbox", "portosaur") or a path to a custom .css file.
+  const selectedPrism = prismThemeMap[colorScheme] || prismThemeMap.nord;
 
   const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
   const siteName = get("site.title", titleName); // Global site title.
@@ -268,8 +271,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       },
 
       prism: {
-        theme: catppuccinLatte,
-        darkTheme: catppuccinMocha,
+        theme: selectedPrism.light,
+        darkTheme: selectedPrism.dark,
         additionalLanguages: [
           "asciidoc",
           "awk",
@@ -384,7 +387,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         heading: get("home_page.project_shelf.heading", "My Projects"), // Heading for the projects section.
         subheading: get(
           "home_page.project_shelf.subheading", // Subheading for the projects section.
-          "A collection of all my works",
+          "A collection of all my works, with featured projects highlighted",
         ),
         autoplay: get("home_page.project_shelf.autoplay", true), // Autoplay the project carousel.
         projects: get("home_page.project_shelf.projects", []), // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
@@ -395,7 +398,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         heading: get("home_page.experience.heading", "Experience"), // Heading for the experience section.
         subheading: get(
           "home_page.experience.subheading", // Subheading for the experience section.
-          "My professional journey",
+          "My professional journey, in a glance",
         ),
         list: get("home_page.experience.list", []), // @items { company: string, role: string, duration?: string, desc?: string }
       },
@@ -405,7 +408,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         heading: get("home_page.social.heading", "Get In Touch"), // Heading for the social links section.
         subheading: get(
           "home_page.social.subheading", // Subheading for the social links section.
-          "Feel free to reach out",
+          "Feel free to reach out for collaborations, questions, or just to say hello!",
         ),
         links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
       },
@@ -474,10 +477,26 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             },
           },
           theme: {
-            customCss: path.resolve(
-              portoPaths.theme ?? context.portoRoot ?? "",
-              "css/custom.css",
-            ),
+            customCss: [
+              colorScheme.endsWith(".css") || colorScheme.includes("/") || colorScheme.includes("\\")
+                ? path.resolve(projectDir, colorScheme)
+                : path.resolve(
+                    portoPaths.theme ?? context.portoRoot ?? "",
+                    `css/colors/${colorScheme}.css`,
+                  ),
+              path.resolve(
+                portoPaths.theme ?? context.portoRoot ?? "",
+                "css/infima.css",
+              ),
+              path.resolve(
+                portoPaths.theme ?? context.portoRoot ?? "",
+                "css/custom.css",
+              ),
+              ...[get("theme.custom_css")] // Inject custom CSS files. Can be a single path string or an array of paths relative to the project directory. @type {string|array} @items { type: "string" }
+                .flat()
+                .filter(Boolean)
+                .map((cssPath) => path.resolve(projectDir, cssPath)),
+            ],
           },
         },
       ],

@@ -1,10 +1,10 @@
 /* ----- Global Fonts ----- */
+@import "@fontsource/alata";
 @import "@fontsource-variable/lexend";
 @import "@fontsource-variable/geologica";
 @import "katex/dist/katex.min.css";
 
 /* ----- Global Styles ----- */
-@import url("./infima.css");
 @import url("./animations.css");
 
 /* ------ Component Overrides ------ */

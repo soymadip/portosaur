@@ -63,9 +63,9 @@
   opacity: 0;
   filter: var(
     --tooltip-shadow,
-    drop-shadow(0 8px 24px rgba(var(--ifm-color-emphasis-900-rgb), 0.3))
+    drop-shadow(0 4px 8px rgba(var(--ifm-color-emphasis-900-rgb), 0.2))
   );
-  border: 1px solid var(--ifm-color-emphasis-300);
+  border: 1px solid var(--ifm-color-emphasis-700);
   pointer-events: none;
 }
 
@@ -105,8 +105,8 @@
   left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-top: -5.5px;
-  border-right: 1px solid var(--ifm-color-emphasis-300);
-  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  border-right: 1px solid var(--ifm-color-emphasis-700);
+  border-bottom: 1px solid var(--ifm-color-emphasis-700);
 }
 
 .bottom .arrow {
@@ -114,24 +114,24 @@
   left: calc(50% - var(--arrow-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   margin-bottom: -5.5px;
-  border-left: 1px solid var(--ifm-color-emphasis-300);
-  border-top: 1px solid var(--ifm-color-emphasis-300);
+  border-left: 1px solid var(--ifm-color-emphasis-700);
+  border-top: 1px solid var(--ifm-color-emphasis-700);
 }
 
 .left .arrow {
   right: -5.5px;
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
-  border-right: 1px solid var(--ifm-color-emphasis-300);
-  border-top: 1px solid var(--ifm-color-emphasis-300);
+  border-right: 1px solid var(--ifm-color-emphasis-700);
+  border-top: 1px solid var(--ifm-color-emphasis-700);
 }
 
 .right .arrow {
   left: -5.5px;
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
-  border-left: 1px solid var(--ifm-color-emphasis-300);
-  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  border-left: 1px solid var(--ifm-color-emphasis-700);
+  border-bottom: 1px solid var(--ifm-color-emphasis-700);
 }
 
 @keyframes popUp {
@@ -182,25 +182,6 @@
 @media (prefers-reduced-motion: reduce) {
   .hint {
     animation: none !important;
-    opacity: 1;
-  }
-}
-
-.backdrop {
-  position: fixed;
-  inset: 0;
-  backdrop-filter: blur(0.9px);
-  -webkit-backdrop-filter: blur(0.9px);
-  z-index: calc(var(--ifm-z-index-dropdown) - 1);
-  pointer-events: none;
-  animation: hintFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes hintFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
     opacity: 1;
   }
 }

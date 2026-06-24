@@ -76,11 +76,13 @@ The `theme` block controls the visual appearance and navigation behavior of port
 
 Settings related to the visual theme and mode switching.
 
-| Key                    | Type   | Default  | Description                                                |
-| :--------------------- | :----- | :------- | :--------------------------------------------------------- |
-| `default_mode`         | `str`  | `"dark"` | Set the default theme.<br/>Options: `"dark"` or `"light"`. |
-| `show_theme_switch`    | `bool` | `true`   | Show the dark/light mode toggle.                           |
-| `disable_project_link` | `bool` | `false`  | Hide the Project link in the navbar.                       |
+| Key                    | Type            | Default  | Description                                                                                                                                         |
+| :--------------------- | :-------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `color_scheme`         | `str`           | `"nord"` | The site's color scheme. Can be a built-in theme (`"nord"`, `"dracula"`, `"github"`, `"gruvbox"`, `"portosaur"`) or a path to a custom `.css` file. |
+| `custom_css`           | `str` \| `list` | `none`   | Inject custom CSS files. Can be a single path string or an array of paths relative to the project directory (e.g. `["./src/styles.css"]`).          |
+| `default_mode`         | `str`           | `"dark"` | Set the default theme.<br/>Options: `"dark"` or `"light"`.                                                                                          |
+| `show_theme_switch`    | `bool`          | `true`   | Show the dark/light mode toggle.                                                                                                                    |
+| `disable_project_link` | `bool`          | `false`  | Hide the Project link in the navbar.                                                                                                                |
 
 ### `theme.navigation`
 

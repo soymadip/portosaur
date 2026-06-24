@@ -1,0 +1,175 @@
+/* Gruvbox Theme Colors */
+
+:root {
+  /* Gruvbox Dark palette */
+  --gb-dark-bg0_h: #1d2021; /* hardest dark, like Catppuccin crust */
+  --gb-dark-bg0:   #282828; /* main dark bg */
+  --gb-dark-bg0_s: #32302f; /* soft dark, like Catppuccin mantle */
+  --gb-dark-bg1:   #3c3836;
+  --gb-dark-bg2:   #504945;
+  --gb-dark-bg3:   #665c54;
+  --gb-dark-bg4:   #7c6f64;
+  --gb-dark-fg:    #ebdbb2;
+  --gb-dark-fg1:   #ebdbb2;
+  --gb-dark-fg2:   #d5c4a1;
+  --gb-dark-fg3:   #bdae93;
+  --gb-dark-fg4:   #a89984;
+  --gb-dark-gray:  #928374;
+
+  --gb-dark-red:    #fb4934;
+  --gb-dark-green:  #b8bb26;
+  --gb-dark-yellow: #fabd2f;
+  --gb-dark-blue:   #83a598;
+  --gb-dark-purple: #d3869b;
+  --gb-dark-aqua:   #8ec07c;
+  --gb-dark-orange: #fe8019;
+
+  /* Gruvbox Light palette */
+  --gb-light-bg0_h: #f9f5d7; /* hardest light, like Catppuccin crust (lightest in light) */
+  --gb-light-bg0:   #fbf1c7; /* main light bg */
+  --gb-light-bg0_s: #f2e5bc; /* soft light, like Catppuccin mantle */
+  --gb-light-bg1:   #ebdbb2;
+  --gb-light-bg2:   #d5c4a1;
+  --gb-light-bg3:   #bdae93;
+  --gb-light-bg4:   #a89984;
+  --gb-light-fg:    #3c3836;
+  --gb-light-fg1:   #504945;
+  --gb-light-fg2:   #665c54;
+  --gb-light-fg3:   #7c6f64;
+  --gb-light-fg4:   #a89984;
+  --gb-light-gray:  #928374;
+
+  --gb-light-red:    #9d0006;
+  --gb-light-green:  #79740e;
+  --gb-light-yellow: #b57614;
+  --gb-light-blue:   #076678;
+  --gb-light-purple: #8f3f71;
+  --gb-light-aqua:   #427b58;
+  --gb-light-orange: #af3a03;
+}
+
+[data-theme="light"] {
+  /* Primary — Gruvbox light orange */
+  --porto-primary: var(--gb-light-orange);
+  --porto-primary-rgb: 175, 58, 3;
+  --porto-primary-dark: #8c2e02;
+  --porto-primary-darker: #7a2802;
+  --porto-primary-darkest: #551c01;
+  --porto-primary-light: #d14504;
+  --porto-primary-lighter: #e34b04;
+  --porto-primary-lightest: #f45d13;
+
+  /* Semantic */
+  --porto-success: var(--gb-light-green);
+  --porto-success-rgb: 121, 116, 14;
+  --porto-warning: var(--gb-light-yellow);
+  --porto-warning-rgb: 181, 118, 20;
+  --porto-danger: var(--gb-light-red);
+  --porto-danger-rgb: 157, 0, 6;
+  --porto-info: var(--gb-light-blue);
+
+  /* Secondary — Gruvbox light gray, equivalent to Catppuccin lavender (muted accent) */
+  --porto-secondary: var(--gb-light-gray);
+
+  /* Palette */
+  --porto-red: var(--gb-light-red);
+  --porto-orange: var(--gb-light-orange);
+  --porto-yellow: var(--gb-light-yellow);
+  --porto-green: var(--gb-light-green);
+  --porto-teal: var(--gb-light-aqua);
+  --porto-blue: var(--gb-light-blue);
+  --porto-purple: var(--gb-light-purple);
+  --porto-pink: var(--gb-light-purple);
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--gb-light-bg0);
+  --porto-bg-alt: var(--gb-light-bg0_s);
+  --porto-surface-0: var(--gb-light-bg1);
+  --porto-surface-0-rgb: 235, 219, 178;
+  --porto-surface-1: var(--gb-light-bg2);
+  --porto-surface-2: var(--gb-light-bg3);
+  --porto-surface-2-rgb: 213, 196, 161;
+
+  --porto-text: var(--gb-light-fg);
+  --porto-text-muted: var(--gb-light-fg4);
+
+  /* Border — bg0_h (hardest/most contrasting), like Catppuccin crust */
+  --porto-border: var(--gb-light-bg3);
+  --porto-code: var(--gb-light-red);
+
+  /* Grayscale (light: bg0 → fg, i.e. lightest to darkest) */
+  --porto-gray-0: var(--gb-light-bg0);
+  --porto-gray-100: var(--gb-light-bg0_s);
+  --porto-gray-200: var(--gb-light-bg1);
+  --porto-gray-300: var(--gb-light-bg2);
+  --porto-gray-400: var(--gb-light-bg3);
+  --porto-gray-500: var(--gb-light-gray);
+  --porto-gray-600: var(--gb-light-fg4);
+  --porto-gray-700: var(--gb-light-fg3);
+  --porto-gray-800: var(--gb-light-fg2);
+  --porto-gray-900: var(--gb-light-fg1);
+  --porto-gray-1000: var(--gb-light-fg);
+}
+
+[data-theme="dark"] {
+  /* Primary — Gruvbox dark orange */
+  --porto-primary: var(--gb-dark-orange);
+  --porto-primary-rgb: 254, 128, 25;
+  --porto-primary-dark: #e56a01;
+  --porto-primary-darker: #d16101;
+  --porto-primary-darkest: #aa4f01;
+  --porto-primary-light: #fe953e;
+  --porto-primary-lighter: #fea051;
+  --porto-primary-lightest: #feb577;
+
+  /* Semantic */
+  --porto-success: var(--gb-dark-green);
+  --porto-success-rgb: 184, 187, 38;
+  --porto-warning: var(--gb-dark-yellow);
+  --porto-warning-rgb: 250, 189, 47;
+  --porto-danger: var(--gb-dark-red);
+  --porto-danger-rgb: 251, 73, 52;
+  --porto-info: var(--gb-dark-blue);
+
+  /* Secondary — Gruvbox dark gray, equivalent to Catppuccin Mocha lavender (muted accent) */
+  --porto-secondary: var(--gb-dark-gray);
+
+  /* Palette */
+  --porto-red: var(--gb-dark-red);
+  --porto-orange: var(--gb-dark-orange);
+  --porto-yellow: var(--gb-dark-yellow);
+  --porto-green: var(--gb-dark-green);
+  --porto-teal: var(--gb-dark-aqua);
+  --porto-blue: var(--gb-dark-blue);
+  --porto-purple: var(--gb-dark-purple);
+  --porto-pink: var(--gb-dark-purple);
+
+  /* Backgrounds & Text */
+  --porto-bg: var(--gb-dark-bg0);
+  --porto-bg-alt: var(--gb-dark-bg0_s);
+  --porto-surface-0: var(--gb-dark-bg1);
+  --porto-surface-0-rgb: 60, 56, 54;
+  --porto-surface-1: var(--gb-dark-bg2);
+  --porto-surface-2-rgb: 80, 73, 69;
+
+  --porto-text: var(--gb-dark-fg);
+  --porto-text-muted: var(--gb-dark-fg3);
+
+  /* Border — bg0_h (hardest/most contrasting), like Catppuccin crust */
+  --porto-border: var(--gb-dark-bg0_h);
+  --porto-code: var(--gb-dark-red);
+
+  /* Grayscale (dark: fg → bg0_h, i.e. lightest to darkest) */
+  --porto-gray-0: var(--gb-dark-bg0_h);
+  --porto-gray-100: var(--gb-dark-bg0);
+  --porto-gray-200: var(--gb-dark-bg0_s);
+  --porto-gray-300: var(--gb-dark-bg1);
+  --porto-gray-400: var(--gb-dark-bg2);
+  --porto-gray-500: var(--gb-dark-bg3);
+  --porto-gray-600: var(--gb-dark-bg4);
+  --porto-gray-700: var(--gb-dark-gray);
+  --porto-gray-800: var(--gb-dark-fg4);
+  --porto-gray-900: var(--gb-dark-fg3);
+  --porto-gray-1000: var(--gb-dark-fg);
+  --porto-surface-2: var(--gb-dark-bg2);
+}
