@@ -20,6 +20,7 @@ export function runPlayground({
   siteName = ".playground",
   runCommand = null,
   prune = false,
+  extraArgs = [],
 } = {}) {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const REPO_ROOT = path.resolve(__dirname, "..");
@@ -122,12 +123,15 @@ export function runPlayground({
   }
   run(linkCmd, { cwd: SITE_DIR, quiet: isExisting });
 
+  const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
+
   if (runCommand === "dev") {
     console.log(colors.info(`\n>>> Starting dev server in ${siteName}...`));
-    run("bun run dev", { cwd: SITE_DIR });
+    const hostArg = extraArgs.includes("--host") ? "" : " --host 0.0.0.0";
+    run(`bun run dev${hostArg}${extraArgsStr}`, { cwd: SITE_DIR });
   } else if (runCommand === "build") {
     console.log(colors.info(`\n>>> Building ${siteName}...`));
-    run("bun run build", { cwd: SITE_DIR });
+    run(`bun run build${extraArgsStr}`, { cwd: SITE_DIR });
   } else {
     console.log(
       colors.success(
@@ -143,6 +147,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let siteName = ".playground";
   let runCommand = null;
   let prune = false;
+  let extraArgs = [];
 
   const args = process.argv.slice(2);
 
@@ -155,8 +160,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       prune = true;
     } else if (args[i] === "-d" || args[i] === "--dir") {
       siteName = args[++i];
+    } else {
+      extraArgs.push(args[i]);
     }
   }
 
-  runPlayground({ siteName, runCommand, prune });
+  runPlayground({ siteName, runCommand, prune, extraArgs });
 }
