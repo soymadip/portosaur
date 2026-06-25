@@ -14,6 +14,7 @@ export default function Hint({
   gap = 5,
   shadow,
   className = "",
+  zIndex,
 }) {
   if (!msg) {
     throw new Error("Hint: 'msg' prop is required to display hint content.");
@@ -36,6 +37,7 @@ export default function Hint({
     ...(color && { "--tooltip-text-color": color }),
     ...(!color && bg && { "--tooltip-text-color": "#fff" }),
     ...(shadow && { "--tooltip-shadow": shadow }),
+    ...(zIndex !== undefined && { zIndex }),
   };
 
   const show = useCallback(() => {
