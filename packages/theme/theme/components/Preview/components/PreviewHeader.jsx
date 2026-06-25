@@ -216,7 +216,20 @@ export default function PreviewHeader({
           {/* Minimize PiP */}
           {isPipMode && (
             <Btn
-              onClick={handleHidePip}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleHidePip();
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                handleHidePip();
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+              }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+              }}
               title="Minimize PiP"
               icon={<IconMinimize className={styles.headerIcon} />}
             />

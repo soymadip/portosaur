@@ -53,16 +53,16 @@ export function useMobileDockResize({
     // Negative deltaY means dragged down.
     // Velocity: pixels per ms
     const velocity = deltaY / deltaTime;
+    const finalHeight = startHeightRef.current + deltaY;
 
     // Swipe to dismiss conditions:
-    // Fast flick downwards (velocity <= -0.3)
-    // Dragged down more than 35% of the starting height
-    if (velocity <= -0.3 || deltaY <= -(startHeightRef.current * 0.35)) {
+    // Close only when quickly sent down (velocity <= -0.3)
+    if (velocity <= -0.3) {
       closePreview();
     } else {
       const newHeight = Math.max(
         100,
-        Math.min(startHeightRef.current + deltaY, vh * 0.95),
+        Math.min(finalHeight, vh * 0.95),
       );
       setPeekHeight(newHeight);
     }

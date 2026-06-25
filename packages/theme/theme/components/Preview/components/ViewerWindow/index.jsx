@@ -218,22 +218,16 @@ export default function PreviewViewer() {
     window.addEventListener("wheel", handleGlobalWheel, { passive: false });
 
     let originalOverflow = "";
-    let originalTouchAction = "";
 
-    // For all screens, block native touch zooming on the background website
-    originalTouchAction = document.body.style.touchAction;
-    document.body.style.touchAction = "none";
-
-    // Only lock scroll for overlays
-    if (isPopupMode || isMobileDock) {
+    // Only lock scroll for Popup modal
+    if (isPopupMode) {
       originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("wheel", handleGlobalWheel);
-      document.body.style.touchAction = originalTouchAction;
-      if (isPopupMode || isMobileDock) {
+      if (isPopupMode) {
         document.body.style.overflow = originalOverflow;
       }
     };

@@ -49,16 +49,18 @@ export function useAdaptiveSizing({
       : 800);
 
   // PiP Size
+  const isDefaultSize = floatingState.width === 720 && floatingState.height === 400;
+
   const pipWidth = isMobile
-    ? windowWidth - 32
+    ? (isDefaultSize ? windowWidth - 32 : floatingState.width)
     : isTabletPortrait || isTabletLandscape
-      ? Math.min(400, windowWidth - 60)
+      ? (isDefaultSize ? Math.min(400, windowWidth - 60) : floatingState.width)
       : floatingState.width;
 
   const pipHeight = isMobile
-    ? Math.min(160, vh * 0.3)
+    ? (isDefaultSize ? Math.min(160, vh * 0.3) : floatingState.height)
     : isTabletPortrait || isTabletLandscape
-      ? Math.min(250, vh * 0.4)
+      ? (isDefaultSize ? Math.min(250, vh * 0.4) : floatingState.height)
       : floatingState.height;
 
   // Base positions
@@ -67,20 +69,19 @@ export function useAdaptiveSizing({
 
   // Clamping constraints
   const getConstrainedPosition = (pipX, pipY) => {
-    // Determine minimum visible area
-    const minVisibleX = isMobile ? 0 : 20;
-    const minVisibleY = isMobile ? 0 : 20;
+    const minVisibleX = 20;
+    const minVisibleY = 20;
 
     const constrainedX = Math.max(
-      isMobile ? marginX : -pipWidth + minVisibleX,
+      -pipWidth + minVisibleX,
       Math.min(
-        windowWidth - (isMobile ? pipWidth + marginX : minVisibleX),
+        windowWidth - minVisibleX,
         pipX,
       ),
     );
     const constrainedY = Math.max(
-      isMobile ? marginY : -pipHeight + minVisibleY,
-      Math.min(vh - (isMobile ? pipHeight + marginY : minVisibleY), pipY),
+      -pipHeight + minVisibleY,
+      Math.min(vh - minVisibleY, pipY),
     );
 
     return { x: constrainedX, y: constrainedY };
