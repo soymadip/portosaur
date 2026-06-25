@@ -3,6 +3,7 @@ import fs from "fs";
 import {
   Paths,
   writeConfigShim,
+  logResolvedSiteLocation,
   runDocusaurus,
   validateProject,
   ensureContentDirs,
@@ -53,6 +54,7 @@ export async function devCommand(siteDir, options = {}) {
 
   try {
     const configPath = writeConfigShim(UserRoot, portoPaths);
+    logResolvedSiteLocation(UserRoot, portoPaths);
 
     // Watch for config.yml changes to trigger Docusaurus reload
     if (configYaml) {
@@ -65,6 +67,7 @@ export async function devCommand(siteDir, options = {}) {
           // which triggers Docusaurus' own file watcher to hot-reload.
           try {
             writeConfigShim(UserRoot, portoPaths);
+            logResolvedSiteLocation(UserRoot, portoPaths);
           } catch (err) {
             logger.warn(`Failed to regenerate config: ${err.message}`);
           }
@@ -96,6 +99,7 @@ export async function devCommand(siteDir, options = {}) {
             logger.info(`Detected backend change (${filename}), reloading...`);
             try {
               writeConfigShim(UserRoot, portoPaths, {}, true); // forceRefresh = true
+              logResolvedSiteLocation(UserRoot, portoPaths);
             } catch (err) {
               logger.warn(`Failed to regenerate config: ${err.message}`);
             }

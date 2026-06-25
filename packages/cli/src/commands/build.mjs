@@ -3,6 +3,7 @@ import path from "path";
 import {
   Paths,
   writeConfigShim,
+  logResolvedSiteLocation,
   runDocusaurus,
   validateProject,
   ensureContentDirs,
@@ -77,9 +78,11 @@ export async function buildCommand(siteDir, options = {}) {
       themeColor: themeColor,
     });
 
-    const configPath = writeConfigShim(UserRoot, portoPaths, {
+    const configContext = {
       extraHeadTags: faviconRes.html,
-    });
+    };
+    const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
+    logResolvedSiteLocation(UserRoot, portoPaths, configContext);
 
     // ------- Docusaurus Build -------
 

@@ -222,6 +222,8 @@ export function resolveSiteUrl(
 
 /**
  * Resolves base path based on config or environment.
+ * GitHub user/organization Pages repositories resolve to `/`, while
+ * project Pages repositories resolve to `/<repository>/`.
  */
 export function resolveBasePath(
   configValue: string,

@@ -2,7 +2,13 @@ import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { createRequire } from "module";
-import { hasCommand, getPortoDotDir } from "@portosaur/core";
+import {
+  buildDocuConfig,
+  hasCommand,
+  getPortoDotDir,
+  loadUserConfig,
+} from "@portosaur/core";
+import { logger } from "@portosaur/logger";
 
 /**
  * Generates a static Docusaurus config file by evaluating the Portosaur config
@@ -56,6 +62,25 @@ export default async function createConfig() {
   fs.writeFileSync(shimPath, shimContent);
 
   return shimPath;
+}
+
+/**
+ * Logs the resolved site URL and base path from the generated Docusaurus config.
+ *
+ * @param {string} UserRoot - The user's project directory.
+ * @param {Object} portoPaths - Paths to Portosaur assets and theme.
+ * @param {Object} [context={}] - Additional context for config generation.
+ */
+export function logResolvedSiteLocation(UserRoot, portoPaths, context = {}) {
+  const rawConf = loadUserConfig(UserRoot);
+  const docuConfig = buildDocuConfig(rawConf, UserRoot, {
+    portoPaths,
+    portoRoot: path.resolve(portoPaths.root),
+    ...context,
+  });
+
+  logger.info(`Resolved site URL: ${docuConfig.url}`);
+  logger.info(`Resolved base path: ${docuConfig.baseUrl}`);
 }
 
 /**
