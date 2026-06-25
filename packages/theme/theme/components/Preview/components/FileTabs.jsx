@@ -5,11 +5,16 @@ export default function FileTabs({ sources, activeIndex, onSelect }) {
   const tabRefs = useRef([]);
   const indicatorRef = useRef(null);
 
-  // Scroll active tab into view on change
+  // Scroll active tab into view safely without bubbling up to the window
   useEffect(() => {
     const el = tabRefs.current[activeIndex];
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+
+    if (el && el.parentElement) {
+      const parent = el.parentElement;
+      const scrollLeft =
+        el.offsetLeft - parent.offsetWidth / 2 + el.offsetWidth / 2;
+
+      parent.scrollTo({ left: scrollLeft, behavior: "smooth" });
     }
   }, [activeIndex]);
 

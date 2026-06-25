@@ -25,13 +25,15 @@ export default function CodeRenderer({ code, language, zoomLevel = 1 }) {
           className={className}
           style={{
             ...style,
+            "--zoom": zoomLevel,
             margin: 0,
             borderRadius: 0,
             padding: "14px 0",
-            fontSize: `calc(0.85rem * ${zoomLevel})`,
+            fontSize: `calc(0.85rem * var(--zoom, ${zoomLevel}))`,
             lineHeight: 1.6,
             minHeight: "100%",
-            backgroundColor: style?.backgroundColor || "var(--ifm-background-color)",
+            backgroundColor:
+              style?.backgroundColor || "var(--ifm-background-color)",
           }}
         >
           {tokens.map((line, i) => {

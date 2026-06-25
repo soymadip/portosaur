@@ -28,14 +28,18 @@ export default function WebRenderer({ fileUrl, label, onError }) {
   };
 
   return (
-    <div className={styles.webView}>
+    <div className={styles.webView} style={{ touchAction: "pan-x pan-y" }}>
       {!loaded && <LoadingState />}
       <iframe
         src={fileUrl}
         title={label}
         className={styles.webFrame}
         onLoad={handleLoad}
-        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+        style={{
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          touchAction: "pan-x pan-y",
+        }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen={true}
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"

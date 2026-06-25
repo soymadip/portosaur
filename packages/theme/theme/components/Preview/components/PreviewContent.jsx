@@ -28,7 +28,7 @@ export default function PreviewContent({
   }
 
   const errorMsg = fetchErrors?.[path];
-  if (errorMsg) {
+  if (path in (fetchErrors ?? {})) {
     return (
       <ErrorState
         path={path}

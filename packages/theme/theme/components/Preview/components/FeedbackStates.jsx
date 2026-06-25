@@ -1,4 +1,8 @@
 import styles from "../styles.module.css";
+import { Btn } from "../../UI/index.jsx";
+import IconWarning from "../../../../assets/img/svg/icon-warning.svg";
+import IconOffline from "../../../../assets/img/svg/icon-offline.svg";
+import IconRetry from "../../../../assets/img/svg/icon-retry.svg";
 
 export function LoadingState() {
   return (
@@ -14,42 +18,64 @@ export function LoadingState() {
   );
 }
 
-export function ErrorState({ path, message, fileType, fileUrl, onRetry }) {
+function BaseErrorState({ icon, title, description, actions }) {
   return (
     <div className={styles.errorState}>
-      <div className={styles.errorIcon}>⚠️</div>
-      <p>
-        Could not load: <code>{path?.split("/").pop()}</code>
-      </p>
-      <p className={styles.errorMsg}>{message}</p>
-      <div className={styles.errorActions}>
-        <button onClick={onRetry} className={styles.retryButton}>
-          Retry
-        </button>
-        {fileType === "web" && (
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener"
-            className={styles.visitButton}
-          >
-            Visit Website
-          </a>
-        )}
-      </div>
+      <div className={styles.errorIcon}>{icon}</div>
+      <h3>{title}</h3>
+      {description}
+      {actions && <div className={styles.errorActions}>{actions}</div>}
     </div>
+  );
+}
+
+export function ErrorState({ path, message, fileType, fileUrl, onRetry }) {
+  return (
+    <BaseErrorState
+      icon={<IconWarning className={styles.warningIcon} />}
+      title="Failed to Load"
+      description={
+        <>
+          <p>
+            Could not load: <code>{path?.split("/").pop()}</code>
+          </p>
+          {message && message !== "Failed to load image." && (
+            <p className={styles.errorMsg}>{message}</p>
+          )}
+        </>
+      }
+      actions={
+        <>
+          <Btn primary onClick={onRetry} icon={<IconRetry />}>
+            Try Again
+          </Btn>
+          {fileType === "web" && (
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener"
+              className={styles.visitButton}
+            >
+              Visit Website
+            </a>
+          )}
+        </>
+      }
+    />
   );
 }
 
 export function OfflineState({ onRetry }) {
   return (
-    <div className={styles.errorState}>
-      <div className={styles.errorIcon}>📡</div>
-      <h3>No Connection</h3>
-      <p>This resource requires an active internet connection.</p>
-      <button onClick={onRetry} className={styles.retryButton}>
-        Try Again
-      </button>
-    </div>
+    <BaseErrorState
+      icon={<IconOffline className={styles.offlineIcon} />}
+      title="No Connection"
+      description={<p>This resource requires an active internet connection.</p>}
+      actions={
+        <Btn primary onClick={onRetry} icon={<IconRetry />}>
+          Try Again
+        </Btn>
+      }
+    />
   );
 }

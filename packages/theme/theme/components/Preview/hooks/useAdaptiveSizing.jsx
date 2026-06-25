@@ -1,25 +1,31 @@
 import { useEffect, useRef } from "react";
+
 export function useAdaptiveSizing({
   mode,
   windowWidth,
   windowHeight,
   floatingState,
-  dockWidth,
-  peekHeight,
   setFloatingState,
 }) {
-  const isPhone = windowWidth <= 480;
-  const isMobile = windowWidth <= 768;
-  const isTablet = windowWidth > 480 && windowWidth <= 996;
+  const isMobile = windowWidth <= 480;
+  const isTabletPortrait = windowWidth > 480 && windowWidth <= 768;
+  const isTabletLandscape = windowWidth > 768 && windowWidth <= 996;
   const isDesktop = windowWidth > 996;
+
   const isPopupMode = mode === "popup";
   const isDockMode = mode === "dock" && isDesktop;
-  const showAsPeek = mode === "dock" && !isDesktop;
+  const isMobileDock = mode === "dock" && !isDesktop;
   const isPipMode = mode === "pip";
+
   const prevWidthRef = useRef(windowWidth);
 
+  // Auto-shift PiP when resizing window
   useEffect(() => {
-    if (floatingState.x !== null && !isDockMode && !isMobile) {
+    if (
+      floatingState.x !== null &&
+      !isDockMode &&
+      !(isMobile || isTabletPortrait)
+    ) {
       const wasOnRight = floatingState.x > prevWidthRef.current / 2;
       if (wasOnRight) {
         const delta = windowWidth - prevWidthRef.current;
@@ -27,92 +33,80 @@ export function useAdaptiveSizing({
       }
     }
     prevWidthRef.current = windowWidth;
-  }, [windowWidth, isDockMode, isMobile, floatingState.x, setFloatingState]);
+  }, [
+    windowWidth,
+    isDockMode,
+    isMobile,
+    isTabletPortrait,
+    floatingState.x,
+    setFloatingState,
+  ]);
 
-  // Use the live viewport height passed from ViewerWindow (tracked via resize listener).
-  // Falls back to clientHeight if not provided (backward compat).
-  const vh = windowHeight ??
-    (typeof window !== "undefined" ? document.documentElement.clientHeight : 800);
+  const vh =
+    windowHeight ??
+    (typeof window !== "undefined"
+      ? document.documentElement.clientHeight
+      : 800);
 
-
-  const pipWidth = isPhone
-    ? Math.min(floatingState.width, windowWidth)
-    : isTablet
-      ? Math.min(600, windowWidth - 60)
+  // PiP Size
+  const pipWidth = isMobile
+    ? windowWidth - 32
+    : isTabletPortrait || isTabletLandscape
+      ? Math.min(400, windowWidth - 60)
       : floatingState.width;
 
-  const pipHeight = isPhone
-    ? Math.min(floatingState.height, vh * 0.85)
-    : isTablet
-      ? Math.min(450, vh * 0.6)
+  const pipHeight = isMobile
+    ? Math.min(160, vh * 0.3)
+    : isTabletPortrait || isTabletLandscape
+      ? Math.min(250, vh * 0.4)
       : floatingState.height;
 
-  const marginX = isPhone ? 0 : 20;
-  const marginY = isPhone ? 0 : 20;
-  const defaultPipX = isTablet
-    ? (windowWidth - pipWidth) / 2
-    : isPhone
-      ? 0
-      : Math.max(16, windowWidth - pipWidth - marginX);
+  // Base positions
+  const marginX = isMobile ? 16 : 20;
+  const marginY = isMobile ? 16 : 20;
 
-  const defaultPipY = isPhone
-    ? vh - pipHeight
-    : Math.max(16, vh - pipHeight - marginY);
+  // Clamping constraints
+  const getConstrainedPosition = (pipX, pipY) => {
+    // Determine minimum visible area
+    const minVisibleX = isMobile ? 0 : 20;
+    const minVisibleY = isMobile ? 0 : 20;
 
-  let rndX = floatingState.x ?? defaultPipX;
-  let rndY = floatingState.y ?? defaultPipY;
-
-  if (!isDockMode && floatingState.x !== null) {
-    const minVisible = 20;
-    const minVisibleY = 20;
-
-    rndX = Math.max(
-      -pipWidth + minVisible,
-      Math.min(windowWidth - minVisible, rndX),
+    const constrainedX = Math.max(
+      isMobile ? marginX : -pipWidth + minVisibleX,
+      Math.min(
+        windowWidth - (isMobile ? pipWidth + marginX : minVisibleX),
+        pipX,
+      ),
     );
-    rndY = Math.max(-pipHeight + minVisibleY, Math.min(vh - minVisibleY, rndY));
-  }
+    const constrainedY = Math.max(
+      isMobile ? marginY : -pipHeight + minVisibleY,
+      Math.min(vh - (isMobile ? pipHeight + marginY : minVisibleY), pipY),
+    );
 
-  const popupWidth = isMobile
-    ? windowWidth * 0.95
-    : Math.min(windowWidth * 0.8, 1000);
+    return { x: constrainedX, y: constrainedY };
+  };
 
-  const popupHeight = isMobile ? vh * 0.9 : Math.min(vh * 0.8, 800);
+  const defaultPipX = windowWidth - pipWidth - marginX;
+  const defaultPipY = vh - pipHeight - marginY;
 
-  const rndPosition = isPopupMode
-    ? { x: (windowWidth - popupWidth) / 2, y: (vh - popupHeight) / 2 }
-    : isDockMode
-      ? { x: windowWidth - dockWidth, y: 0 }
-      : showAsPeek
-        ? { x: 0, y: Math.max(0, vh - peekHeight) }
-        : { x: rndX, y: rndY };
-
-  const rndSize = isPopupMode
-    ? { width: popupWidth, height: popupHeight }
-    : isDockMode
-      ? { width: dockWidth, height: vh }
-      : showAsPeek
-        ? { width: windowWidth, height: peekHeight }
-        : { width: pipWidth, height: pipHeight };
-
-  const rndBounds = isDockMode
-    ? { left: 0, top: 0, right: windowWidth, bottom: vh }
-    : undefined;
+  const { x: pipX, y: pipY } = getConstrainedPosition(
+    floatingState.x ?? defaultPipX,
+    floatingState.y ?? defaultPipY,
+  );
 
   return {
-    isPhone,
     isMobile,
-    isTablet,
+    isTabletPortrait,
+    isTabletLandscape,
     isDesktop,
     isPopupMode,
     isDockMode,
-    showAsPeek,
+    isMobileDock,
     isPipMode,
-    rndPosition,
-    rndSize,
-    rndBounds,
     pipWidth,
     pipHeight,
+    pipX,
+    pipY,
     vh,
   };
 }

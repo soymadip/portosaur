@@ -24,7 +24,8 @@ export default function ImageRenderer({ fileUrl, label, zoomLevel, onError }) {
         <img
           src={fileUrl}
           alt={label || ""}
-          className={styles.image}
+          className={`${styles.image} ${zoomLevel > 1 ? styles.isGrabbable : ""}`}
+          draggable={false}
           onLoad={() => setLoading(false)}
           onError={() => {
             setLoading(false);

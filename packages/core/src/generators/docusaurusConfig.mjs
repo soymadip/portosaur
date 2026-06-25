@@ -343,6 +343,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     customFields: {
       portoVersion,
 
+      preview: {
+        timeout: get("site.preview.timeout", 15) * 1000, // Timeout in seconds for fetching preview content (default: 15s).
+      },
+
       topicList: {
         enableByDefaults: get("site.notes.topic_list", true), // Toggle automatically adding topic lists to notes pages.
       },
@@ -478,7 +482,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           },
           theme: {
             customCss: [
-              colorScheme.endsWith(".css") || colorScheme.includes("/") || colorScheme.includes("\\")
+              colorScheme.endsWith(".css") ||
+              colorScheme.includes("/") ||
+              colorScheme.includes("\\")
                 ? path.resolve(projectDir, colorScheme)
                 : path.resolve(
                     portoPaths.theme ?? context.portoRoot ?? "",

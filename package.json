@@ -19,6 +19,7 @@
     "format": "prettier --write .",
     "schema": "bun packages/cli/bin/porto.mjs schema",
     "playground": "bun src/playground.mjs",
+    "build": "bun run playground build",
     "dev": "bun run playground dev",
     "dev:docs": "bun run --cwd docs dev",
     "test:all": "bun run schema && bun test",

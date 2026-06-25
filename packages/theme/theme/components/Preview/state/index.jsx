@@ -62,7 +62,6 @@ function reducer(state, action) {
       return {
         ...state,
         isOpen: false,
-        mode: "popup",
         baseSlug: null,
         modeSwitch: true,
       };

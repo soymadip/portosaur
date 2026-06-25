@@ -6,10 +6,105 @@ import "react-pdf/dist/Page/TextLayer.css";
 
 let PdfDocument, PdfPage, pdfjs;
 
+function VirtualPdfPage({
+  pageNumber,
+  containerWidth,
+  zoomLevel,
+  onRenderSuccess,
+  renderedCount,
+}) {
+  // Eagerly mount the first two pages to bypass IntersectionObserver layout delay
+  // This guarantees they are first in the PDF worker's render queue!
+  const shouldBackgroundLoad = pageNumber <= renderedCount + 2;
+  const [isVisible, setIsVisible] = useState(
+    pageNumber <= 2 || shouldBackgroundLoad,
+  );
+  const [isRendered, setIsRendered] = useState(false);
+  const ref = useRef(null);
+
+  // Background loading cascade
+  useEffect(() => {
+    if (shouldBackgroundLoad && !isVisible) {
+      setIsVisible(true);
+    }
+  }, [shouldBackgroundLoad, isVisible]);
+
+  useEffect(() => {
+    if (isRendered) return; // Never unmount once fully rendered!
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          // If it leaves the viewport AND hasn't finished rendering,
+          // AND it's not part of the active background load cascade,
+          // unmount it to cancel the render request and prioritize the active page!
+          if (!shouldBackgroundLoad && pageNumber > 2) {
+            setIsVisible(false);
+          }
+        }
+      },
+      { rootMargin: "1500px 0px" }, // Large pre-load buffer
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isRendered, shouldBackgroundLoad, pageNumber]);
+
+  // Approximate A4 ratio to prevent scroll jumping before render
+  const approxHeight = containerWidth * zoomLevel * 1.414;
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        minHeight: `${approxHeight}px`,
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      {isVisible ? (
+        <PdfPage
+          pageNumber={pageNumber}
+          width={containerWidth}
+          scale={zoomLevel}
+          className={`${styles.pdfPage} ${zoomLevel > 1 ? styles.isGrabbable : ""}`}
+          renderTextLayer={true}
+          renderAnnotationLayer={true}
+          loading={
+            <div
+              style={{
+                height: `${approxHeight}px`,
+                width: `${containerWidth * zoomLevel}px`,
+                background: "white",
+              }}
+            />
+          }
+          onRenderSuccess={() => {
+            setIsRendered(true);
+            onRenderSuccess?.();
+          }}
+        />
+      ) : (
+        <div
+          className={`${styles.pdfPage} ${zoomLevel > 1 ? styles.isGrabbable : ""}`}
+          style={{
+            height: `${approxHeight}px`,
+            width: `${containerWidth * zoomLevel}px`,
+            background: "white",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function PdfRenderer({ fileUrl, zoomLevel, onError }) {
   const [pdfReady, setPdfReady] = useState(!!PdfDocument);
   const [numPages, setNumPages] = useState(null);
   const [containerWidth, setContainerWidth] = useState(760);
+  const [renderedCount, setRenderedCount] = useState(0);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
@@ -56,14 +151,22 @@ export default function PdfRenderer({ fileUrl, zoomLevel, onError }) {
         loading={<LoadingState />}
       >
         {Array.from({ length: numPages || 0 }, (_, i) => (
-          <PdfPage
+          <VirtualPdfPage
             key={i}
             pageNumber={i + 1}
-            width={containerWidth}
-            scale={zoomLevel}
-            className={styles.pdfPage}
-            renderTextLayer={true}
-            renderAnnotationLayer={true}
+            containerWidth={containerWidth}
+            zoomLevel={zoomLevel}
+            renderedCount={renderedCount}
+            onRenderSuccess={() => {
+              // Update rendered count to trigger the next page to load in the background
+              setRenderedCount((prev) => Math.max(prev, i + 1));
+
+              if (wrapperRef.current) {
+                wrapperRef.current.style.transform = "";
+                wrapperRef.current.style.transformOrigin = "";
+                wrapperRef.current.style.transition = "";
+              }
+            }}
           />
         ))}
       </PdfDocument>

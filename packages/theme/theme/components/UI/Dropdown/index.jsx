@@ -52,7 +52,9 @@ export default function Dropdown({
   // Resolve trigger element: default to a Btn if a string, or if omitted (using label)
   let triggerElement = trigger;
   if (!triggerElement) {
-    triggerElement = <Btn {...buttonProps}>{label !== undefined ? label : "Menu"}</Btn>;
+    triggerElement = (
+      <Btn {...buttonProps}>{label !== undefined ? label : "Menu"}</Btn>
+    );
   } else if (typeof triggerElement === "string") {
     triggerElement = <Btn {...buttonProps}>{triggerElement}</Btn>;
   }
