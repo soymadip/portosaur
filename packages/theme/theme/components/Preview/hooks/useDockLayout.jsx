@@ -61,9 +61,36 @@ export function useDockLayout({
       }
     };
 
+    let navObserver = null;
+
     if (isSidebarDock) {
       updateNavOffset();
       window.addEventListener("resize", updateNavOffset, { passive: true });
+
+      // Track navbar hiding/showing to sync dock
+      const nav = document.querySelector(".navbar");
+      if (nav) {
+        const checkNavbarHidden = () => {
+          let isHidden = false;
+          for (let i = 0; i < nav.classList.length; i++) {
+            const cls = nav.classList[i];
+            if (cls.includes("navbarHidden") || cls.includes("navbar-hidden") || cls.includes("navbar--hidden")) {
+              isHidden = true;
+              break;
+            }
+          }
+          if (isHidden) {
+            document.body.classList.add("pv-navbar-hidden");
+          } else {
+            document.body.classList.remove("pv-navbar-hidden");
+          }
+        };
+
+        navObserver = new MutationObserver(checkNavbarHidden);
+        navObserver.observe(nav, { attributes: true, attributeFilter: ["class"] });
+        
+        checkNavbarHidden();
+      }
     }
 
     return () => {
@@ -83,6 +110,7 @@ export function useDockLayout({
         }
         weCollapsedSidebar.current = false;
       }
+      if (navObserver) navObserver.disconnect();
       window.removeEventListener("resize", updateNavOffset);
     };
   }, [isOpen, isPopupMode, isSidebarDock, isPeekDock]);

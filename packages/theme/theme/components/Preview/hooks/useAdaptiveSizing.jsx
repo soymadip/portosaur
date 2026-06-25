@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 export function useAdaptiveSizing({
   mode,
   windowWidth,
+  windowHeight,
   floatingState,
   dockWidth,
   peekHeight,
@@ -28,17 +29,20 @@ export function useAdaptiveSizing({
     prevWidthRef.current = windowWidth;
   }, [windowWidth, isDockMode, isMobile, floatingState.x, setFloatingState]);
 
-  const vh =
-    typeof window !== "undefined" ? document.documentElement.clientHeight : 800;
+  // Use the live viewport height passed from ViewerWindow (tracked via resize listener).
+  // Falls back to clientHeight if not provided (backward compat).
+  const vh = windowHeight ??
+    (typeof window !== "undefined" ? document.documentElement.clientHeight : 800);
+
 
   const pipWidth = isPhone
-    ? windowWidth
+    ? Math.min(floatingState.width, windowWidth)
     : isTablet
       ? Math.min(600, windowWidth - 60)
       : floatingState.width;
 
   const pipHeight = isPhone
-    ? Math.min(floatingState.height, vh * 0.7)
+    ? Math.min(floatingState.height, vh * 0.85)
     : isTablet
       ? Math.min(450, vh * 0.6)
       : floatingState.height;
@@ -58,9 +62,9 @@ export function useAdaptiveSizing({
   let rndX = floatingState.x ?? defaultPipX;
   let rndY = floatingState.y ?? defaultPipY;
 
-  if (!isDockMode && !isPhone && floatingState.x !== null) {
-    const minVisible = 60;
-    const minVisibleY = 50;
+  if (!isDockMode && floatingState.x !== null) {
+    const minVisible = 20;
+    const minVisibleY = 20;
 
     rndX = Math.max(
       -pipWidth + minVisible,
@@ -91,11 +95,9 @@ export function useAdaptiveSizing({
         ? { width: windowWidth, height: peekHeight }
         : { width: pipWidth, height: pipHeight };
 
-  const rndBounds = isPhone
+  const rndBounds = isDockMode
     ? { left: 0, top: 0, right: windowWidth, bottom: vh }
-    : isDockMode
-      ? { left: 0, top: 0, right: windowWidth, bottom: vh }
-      : undefined;
+    : undefined;
 
   return {
     isPhone,

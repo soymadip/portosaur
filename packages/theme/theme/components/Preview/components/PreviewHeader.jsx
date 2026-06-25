@@ -26,15 +26,6 @@ export default function PreviewHeader({
 
   return (
     <>
-      {/* Reveal header shown only in dock mode on desktop */}
-      {mode === "dock" && !isMobileSize && (
-        <div className={styles.revealHeader}>
-          <h1 className={styles.popupTitle}>
-            <span className={styles.primaryText}>Preview </span>
-          </h1>
-        </div>
-      )}
-
       {/* Main header bar */}
       <div className={styles.popupHeader}>
         {/* Title */}
@@ -56,7 +47,7 @@ export default function PreviewHeader({
               title="Open externally"
               icon={<IconLink />}
             >
-              Visit
+              {isMobileSize ? null : "Visit"}
             </Btn>
           ) : (
             <Btn
@@ -72,14 +63,14 @@ export default function PreviewHeader({
               }
               primary
             >
-              {isDownloading ? "Saving" : "Save"}
+              {isMobileSize ? null : (isDownloading ? "Saving" : "Save")}
             </Btn>
           )}
 
           {/* Zoom picker (desktop, non-web, non-video) */}
-          {!isMobileSize && fileType !== "web" && fileType !== "video" && (
+          {fileType !== "web" && fileType !== "video" && (
             <Dropdown
-              label={`${Math.round(zoomLevel * 100)}%`}
+              label={isMobileSize ? null : `${Math.round(zoomLevel * 100)}%`}
               primary
               icon={<IconZoom />}
               title="Change Zoom"
@@ -96,9 +87,19 @@ export default function PreviewHeader({
           {/* Mode picker dropdown */}
           {modeSwitch &&
             (() => {
+              const MobileAwareDockIcon = (props) => (
+                <IconDock
+                  {...props}
+                  style={{
+                    transform: isMobileSize ? "rotate(90deg)" : "none",
+                    ...props.style,
+                  }}
+                />
+              );
+
               const MODE_OPTIONS = [
                 { id: "popup", label: "Popup", icon: IconPopup },
-                { id: "dock", label: "Dock", icon: IconDock },
+                { id: "dock", label: "Dock", icon: MobileAwareDockIcon },
                 { id: "pip", label: "PiP", icon: IconPip },
               ];
               const activeModeOption =
@@ -107,7 +108,7 @@ export default function PreviewHeader({
 
               return (
                 <Dropdown
-                  label={activeModeOption.label}
+                  label={isMobileSize ? null : activeModeOption.label}
                   primary
                   icon={<ActiveModeIcon />}
                   title="Change Preview Mode"

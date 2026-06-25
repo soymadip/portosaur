@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { useLocation } from "@docusaurus/router";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { Rnd } from "react-rnd";
-import { AnimatePresence, motion } from "framer-motion";
 import { usePreview } from "../state/index.jsx";
 import { classify, getExt, resolveUrl } from "../utils/index.jsx";
 import { useFileFetch } from "../hooks/useFileFetch.jsx";
@@ -41,6 +40,10 @@ export default function PreviewViewer() {
   const location = useLocation();
 
   const [mounted, setMounted] = useState(typeof window !== "undefined");
+  // pvMounted: portal is in the DOM. pvVisible: CSS fade-in/out class is active.
+  const [pvMounted, setPvMounted] = useState(false);
+  const [pvVisible, setPvVisible] = useState(false);
+  const closeTimerRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isOnline, setIsOnline] = useState(
     typeof window !== "undefined" ? window.navigator.onLine : true,
@@ -48,16 +51,38 @@ export default function PreviewViewer() {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? document.documentElement.clientWidth : 1200,
   );
-  const [isInteracting, setIsInteracting] = useState(false);
+  const [windowHeight, setWindowHeight] = useState(
+    typeof window !== "undefined" ? document.documentElement.clientHeight : 800,
+  );
   const [isDownloading, setIsDownloading] = useState(false);
   const popupBodyRef = useRef(null);
+
+  const [portalRoot, setPortalRoot] = useState(null);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    let root = document.getElementById("pv-portal-root");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "pv-portal-root";
+      // display: contents ensures this wrapper is ignored for layout, 
+      // making the sticky previewSystem act as a direct child of the body.
+      root.style.display = "contents";
+      // Prepend to body so it sits at the very top of the document flow,
+      // allowing position: sticky to work correctly and bounce with rubber-banding!
+      document.body.prepend(root);
+    }
+    setPortalRoot(root);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    const handleResize = () =>
+    const handleResize = () => {
       setWindowWidth(document.documentElement.clientWidth);
+      setWindowHeight(document.documentElement.clientHeight);
+    };
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     window.addEventListener("resize", handleResize);
@@ -72,6 +97,7 @@ export default function PreviewViewer() {
   const layout = useAdaptiveSizing({
     mode,
     windowWidth,
+    windowHeight,
     floatingState,
     dockWidth,
     peekHeight,
@@ -101,6 +127,32 @@ export default function PreviewViewer() {
   useEffect(() => {
     if (isOpen) setZoomLevel(1);
   }, [mode, isOpen]);
+
+  useEffect(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+    if (isOpen) {
+      setPvMounted(true);
+    } else {
+      setPvVisible(false);
+      closeTimerRef.current = setTimeout(() => setPvMounted(false), 250);
+    }
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, [isOpen]);
+
+  // Trigger the CSS transition only after the DOM has been fully mounted and painted
+  useEffect(() => {
+    if (pvMounted && isOpen) {
+      // A small timeout ensures React has finished the commit phase and the browser has painted
+      const timer = setTimeout(() => {
+        setPvVisible(true);
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [pvMounted, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -174,6 +226,35 @@ export default function PreviewViewer() {
     }
   }, [fileUrl, currentFile, corsProxyList]);
 
+  // --- Peek resize via custom pointer tracking (not Rnd) ---
+  const peekDragStartY = useRef(null);
+  const peekStartHeight = useRef(null);
+
+  const handlePeekPointerDown = useCallback((e) => {
+    if (!showAsPeek) return;
+    e.preventDefault();
+    peekDragStartY.current = e.clientY;
+    peekStartHeight.current = peekHeight;
+    document.body.classList.add("pv-resizing");
+
+    const handlePointerMove = (moveEvent) => {
+      const deltaY = moveEvent.clientY - peekDragStartY.current;
+      const newHeight = peekStartHeight.current - deltaY;
+      const clampedHeight = Math.max(150, Math.min(newHeight, layout.vh * 0.85));
+      document.body.style.setProperty("--mobile-peek-height", `${clampedHeight}px`);
+      setPeekHeight(clampedHeight);
+    };
+
+    const handlePointerUp = () => {
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", handlePointerUp);
+      document.body.classList.remove("pv-resizing");
+    };
+
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
+  }, [showAsPeek, peekHeight, layout.vh, setPeekHeight]);
+
   if (!mounted || !currentFile) return null;
 
   const displayTitle =
@@ -182,215 +263,167 @@ export default function PreviewViewer() {
       ? currentFile.url.replace(/^https?:\/\//, "").split("/")[0]
       : currentFile.url.split("/").pop() || "File");
 
-  const header = (
-    <div className={styles.headerWrapper}>
-      {showAsPeek && <div className={styles.peekHandle} />}
-      <PreviewHeader
-        displayTitle={displayTitle}
-        fileType={fileType}
-        fileUrl={fileUrl}
-        mode={mode}
-        zoomLevel={zoomLevel}
-        onZoomChange={setZoomLevel}
-        onChangeMode={setMode}
-        onClose={closePreview}
-        onDownload={handleDownload}
-        isDownloading={isDownloading}
-        modeSwitch={modeSwitch}
-      />
-    </div>
-  );
-
-  const innerContent = (
-    <div className={styles.windowContent}>
-      <FileTabs
-        sources={sources}
-        activeIndex={activeIndex}
-        onSelect={setActiveIndex}
-      />
-      <div
-        className={`${styles.popupBody} ${fileType === "text" ? styles.isText : fileType === "image" || fileType === "pdf" ? styles.isGrabbable : ""}`}
-        ref={(el) => {
-          popupBodyRef.current = el;
-          if (el && isOpen) el.focus({ preventScroll: true });
-        }}
-        tabIndex={-1}
-      >
-        <PreviewContent
-          currentFile={currentFile}
-          fileType={fileType}
-          fileUrl={fileUrl}
-          isOnline={isOnline}
-          fetchErrors={fetchErrors}
-          textLoading={textLoading}
-          textContent={textContent}
-          zoomLevel={zoomLevel}
-          ext={ext}
-          retryFetch={retryFetch}
-          setError={setError}
-        />
-      </div>
-    </div>
-  );
+  // --- Rnd configuration per mode ---
 
   const rndEnableResizing = isPopupMode
     ? false
     : isDockMode
       ? { left: true }
       : showAsPeek
-        ? { top: true }
+        ? false // Peek uses custom pointer events, not Rnd resize
         : true;
-  const rndResizeHandleStyles = showAsPeek
-    ? {
-        top: {
-          height: "24px",
-          top: "-12px",
-          cursor: "row-resize",
-          zIndex: 100,
-        },
-      }
-    : isDockMode
-      ? { left: { width: "20px", left: "-10px" } }
-      : isPipMode
-        ? {
-            bottom: { height: "20px", bottom: "-10px" },
-            right: { width: "20px", right: "-10px" },
-            left: { width: "20px", left: "-10px" },
-            top: { height: "20px", top: "-10px" },
-            bottomRight: {
-              width: "30px",
-              height: "30px",
-              bottom: "-15px",
-              right: "-15px",
-            },
-            bottomLeft: {
-              width: "30px",
-              height: "30px",
-              bottom: "-15px",
-              left: "-15px",
-            },
-            topRight: {
-              width: "30px",
-              height: "30px",
-              top: "-15px",
-              right: "-15px",
-            },
-            topLeft: {
-              width: "30px",
-              height: "30px",
-              top: "-15px",
-              left: "-15px",
-            },
-          }
-        : {};
 
-  const rndMinWidth = isDockMode ? 380 : showAsPeek ? windowWidth : 380;
+  const rndResizeHandles = isDockMode
+    ? { left: { width: "20px", left: "-10px" } }
+    : isPipMode
+      ? {
+          bottom: { height: "20px", bottom: "-10px" },
+          right: { width: "20px", right: "-10px" },
+          left: { width: "20px", left: "-10px" },
+          top: { height: "20px", top: "-10px" },
+          bottomRight: { width: "30px", height: "30px", bottom: "-15px", right: "-15px" },
+          bottomLeft: { width: "30px", height: "30px", bottom: "-15px", left: "-15px" },
+          topRight: { width: "30px", height: "30px", top: "-15px", right: "-15px" },
+          topLeft: { width: "30px", height: "30px", top: "-15px", left: "-15px" },
+        }
+      : {};
+
+  const rndMinWidth = isDockMode ? 380 : showAsPeek ? windowWidth : 280;
   const rndMinHeight = showAsPeek ? 150 : isDockMode ? undefined : 60;
-  const rndMaxWidth = isDockMode
-    ? windowWidth * 0.8
-    : showAsPeek
-      ? windowWidth
-      : undefined;
-  const rndMaxHeight = showAsPeek ? layout.vh * 0.85 : undefined;
+  const rndMaxWidth = isDockMode ? windowWidth * 0.8 : windowWidth;
+  const rndMaxHeight = layout.vh;
+
+  if (!pvMounted || !portalRoot) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <React.Fragment key="preview">
-          {isPopupMode && (
-            <motion.div
-              className={styles.previewBackdrop}
-              onClick={closePreview}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ position: "fixed", zIndex: 1999, inset: 0 }}
-            />
-          )}
-          <motion.div
-            id="pv-viewer"
-            data-mode={mode}
-            className={`${styles.previewSystem} ${showAsPeek ? styles.modePeek : ""} ${isDockMode ? styles.modeDock : ""} ${isPipMode ? styles.modePip : ""} ${isPopupMode ? styles.modePopup : ""}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onWheel={(e) => e.stopPropagation()}
-            style={{ zIndex: 2000 }}
-          >
-            <Rnd
-            position={layout.rndPosition}
-            size={layout.rndSize}
-            disableDragging={isDockMode || showAsPeek || isPopupMode}
-            enableResizing={rndEnableResizing}
-            dragHandleClassName={styles.dragHandleWrapper}
-            minWidth={rndMinWidth}
-            minHeight={rndMinHeight}
-            maxWidth={rndMaxWidth}
-            maxHeight={rndMaxHeight}
-            bounds={layout.rndBounds}
-            resizeHandleStyles={rndResizeHandleStyles}
-            onDragStart={() => setIsInteracting(true)}
-            onDragStop={(_e, d) => {
-              setIsInteracting(false);
-              if (!isDockMode && !showAsPeek && !isPopupMode)
-                setFloatingState({ x: d.x, y: d.y });
-            }}
-            onResizeStart={() => {
-              setIsInteracting(true);
-              document.body.classList.add("pv-resizing");
-            }}
-            onResize={(e, direction, ref) => {
-              if (isDockMode) {
-                const newWidth = parseInt(ref.style.width, 10);
-                document.body.style.setProperty(
-                  "--pv-dock-width",
-                  `${newWidth}px`,
-                );
-              } else if (showAsPeek) {
-                const newHeight = parseInt(ref.style.height, 10);
-                document.body.style.setProperty(
-                  "--mobile-peek-height",
-                  `${newHeight}px`,
-                );
-              }
-            }}
-            onResizeStop={(_e, _direction, ref, _delta, position) => {
-              setIsInteracting(false);
-              document.body.classList.remove("pv-resizing");
-              const newWidth = parseInt(ref.style.width, 10);
-              const newHeight = parseInt(ref.style.height, 10);
-              if (isDockMode) setDockWidth(newWidth);
-              else if (showAsPeek) setPeekHeight(newHeight);
-              else if (!isPopupMode)
-                setFloatingState({
-                  width: newWidth,
-                  height: newHeight,
-                  ...position,
-                });
-            }}
-            className={`${styles.rndWrapper} ${isPopupMode ? styles.modePopup : ""}`}
-            style={{
-              zIndex: 10,
-              transition: isInteracting
-                ? "none"
-                : "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          >
-            <div
-              className={`${styles.windowFrame} ${isInteracting ? styles.windowInteracting : ""}`}
-              style={{ width: "100%", height: "100%", position: "relative" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.dragHandleWrapper}>{header}</div>
-              {innerContent}
-            </div>
-          </Rnd>
-        </motion.div>
-        </React.Fragment>
+    <React.Fragment>
+      {isPopupMode && (
+        <div
+          className={`${styles.previewBackdrop} ${pvVisible ? styles.pvVisible : ""}`}
+          onClick={closePreview}
+          style={{ position: "fixed", zIndex: 1999, inset: 0 }}
+        />
       )}
-    </AnimatePresence>,
-    document.body,
+      <div
+        id="pv-viewer"
+        data-mode={mode}
+        className={`${styles.previewSystem} ${showAsPeek ? styles.modePeek : ""} ${isDockMode ? styles.modeDock : ""} ${isPipMode ? styles.modePip : ""} ${isPopupMode ? styles.modePopup : ""} ${pvVisible ? styles.pvVisible : ""}`}
+        onWheel={(e) => e.stopPropagation()}
+      >
+        <Rnd
+          position={layout.rndPosition}
+          size={layout.rndSize}
+          disableDragging={isDockMode || showAsPeek || isPopupMode}
+          enableResizing={rndEnableResizing}
+          dragHandleClassName={styles.pipGripStrip}
+          minWidth={rndMinWidth}
+          minHeight={rndMinHeight}
+          maxWidth={rndMaxWidth}
+          maxHeight={rndMaxHeight}
+          bounds={layout.rndBounds}
+          resizeHandleStyles={rndResizeHandles}
+          onDragStop={(_e, d) => {
+            if (!isDockMode && !showAsPeek && !isPopupMode) {
+              setFloatingState({ x: d.x, y: d.y });
+            }
+          }}
+          onResizeStart={() => {
+            document.body.classList.add("pv-resizing");
+          }}
+          onResize={(_e, _dir, ref, _delta, position) => {
+            if (isDockMode) {
+              const newWidth = parseInt(ref.style.width, 10);
+              document.body.style.setProperty("--pv-dock-width", `${newWidth}px`);
+            } else if (isPipMode) {
+              setFloatingState({
+                width: parseInt(ref.style.width, 10),
+                height: parseInt(ref.style.height, 10),
+                ...position,
+              });
+            }
+          }}
+          onResizeStop={(_e, _dir, ref, _delta, position) => {
+            document.body.classList.remove("pv-resizing");
+            const newWidth = parseInt(ref.style.width, 10);
+            const newHeight = parseInt(ref.style.height, 10);
+            if (isDockMode) {
+              setDockWidth(newWidth);
+            } else if (!isPopupMode && !showAsPeek) {
+              setFloatingState({ width: newWidth, height: newHeight, ...position });
+            }
+          }}
+          className={styles.rndWrapper}
+          style={{ zIndex: 10 }}
+        >
+          <div
+            className={styles.windowFrame}
+            style={{ width: "100%", height: "100%", position: "relative" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* PiP drag grip: invisible strip at top, ABOVE the header.
+                Only this element triggers Rnd dragging, so header buttons stay clickable. */}
+            {isPipMode && <div className={styles.pipGripStrip} />}
+
+            {/* Peek drag pill: visible handle above header for mobile resize. */}
+            {showAsPeek && (
+              <div
+                className={styles.peekHandle}
+                onPointerDown={handlePeekPointerDown}
+              />
+            )}
+
+            {/* Header: NOT the Rnd drag handle, so all buttons respond to clicks. */}
+            <div className={styles.headerWrapper}>
+              <PreviewHeader
+                displayTitle={displayTitle}
+                fileType={fileType}
+                fileUrl={fileUrl}
+                mode={mode}
+                zoomLevel={zoomLevel}
+                onZoomChange={setZoomLevel}
+                onChangeMode={setMode}
+                onClose={closePreview}
+                onDownload={handleDownload}
+                isDownloading={isDownloading}
+                modeSwitch={modeSwitch}
+              />
+            </div>
+
+            {/* Main content: file tabs and preview body */}
+            <div className={styles.windowContent}>
+              <FileTabs
+                sources={sources}
+                activeIndex={activeIndex}
+                onSelect={setActiveIndex}
+              />
+              <div
+                className={`${styles.popupBody} ${fileType === "text" ? styles.isText : fileType === "image" || fileType === "pdf" ? styles.isGrabbable : ""}`}
+                ref={(el) => {
+                  popupBodyRef.current = el;
+                  if (el && isOpen) el.focus({ preventScroll: true });
+                }}
+                tabIndex={-1}
+              >
+                <PreviewContent
+                  currentFile={currentFile}
+                  fileType={fileType}
+                  fileUrl={fileUrl}
+                  isOnline={isOnline}
+                  fetchErrors={fetchErrors}
+                  textLoading={textLoading}
+                  textContent={textContent}
+                  zoomLevel={zoomLevel}
+                  ext={ext}
+                  retryFetch={retryFetch}
+                  setError={setError}
+                />
+              </div>
+            </div>
+          </div>
+        </Rnd>
+      </div>
+    </React.Fragment>,
+    portalRoot,
   );
 }
+

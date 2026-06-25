@@ -97,10 +97,26 @@
   z-index: 2000;
   pointer-events: none;
   font-family: var(--ifm-font-family-base);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.modeDock {
+.previewSystem.pvVisible {
+  opacity: 1;
+}
+
+.previewSystem.modeDock {
+  position: sticky;
+  top: 0;
+  height: 0;
+  width: 100%;
+  overflow: visible;
   z-index: 90;
+}
+
+/* Prevent rubber-banding on Mac/iOS from dragging the sticky navbar down over the fixed dock */
+:global(body.pv-dock-active) {
+  overscroll-behavior-y: none;
 }
 
 .windowFrame {
@@ -129,9 +145,10 @@
   box-shadow: var(--ifm-global-shadow-lw);
 }
 
-/* --- Modes (visual-only — react-rnd handles positioning for floating/dock) --- */
+/* --- Mode-specific window frame styles (visual only — Rnd controls size/position) --- */
 .modePip .windowFrame {
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .modeDock .windowFrame {
@@ -141,20 +158,58 @@
   border-left: 1px solid var(--ifm-toc-border-color);
   border-right: none;
   border-bottom: none;
+  border-top: none;
+
+  /* Start positioned directly below the visible navbar */
+  height: calc(100vh - var(--ifm-navbar-height, 60px)) !important;
+  transform: translateY(var(--ifm-navbar-height, 60px));
   transition:
-    border-left-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform var(--ifm-transition-fast) ease,
+    height var(--ifm-transition-fast) ease,
+    background 0.3s ease,
+    border 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.modeDock .windowFrame.windowInteracting {
+/* When the navbar hides (slides up), the dock slides up and expands to fill the space */
+:global(body.pv-navbar-hidden) .modeDock .windowFrame {
+  height: 100vh !important;
+  transform: translateY(0);
+}
+
+:global(.pv-resizing) .modeDock .windowFrame {
   border-left: 2px solid var(--ifm-color-primary);
   box-shadow: -4px 0 12px -4px rgba(var(--ifm-color-primary-rgb), 0.3);
 }
 
-.modePip .windowFrame {
+.modePeek .windowFrame {
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  overflow: hidden;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+}
+
+:global(.pv-resizing) .modePeek .windowFrame {
+  border-top: 2px solid var(--ifm-color-primary);
+}
+
+.modePopup .windowFrame {
   border-radius: 12px;
   overflow: hidden;
+  transform: scale(0.95);
+  opacity: 0;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+    opacity 0.2s ease,
+    background 0.3s ease,
+    border 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.modePopup.pvVisible .windowFrame {
+  transform: scale(1);
+  opacity: 1;
 }
 
 .modeFull .windowFrame {
@@ -172,30 +227,6 @@
   border: none !important;
 }
 
-.modePeek .windowFrame {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100vw;
-  height: var(--mobile-peek-height, 50vh);
-  border-radius: 0;
-  border-top: 1px solid var(--ifm-toc-border-color);
-}
-
-@keyframes smoothBlur {
-  from {
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-    background-color: transparent;
-  }
-  to {
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    background-color: var(--pv-backdrop-bg);
-  }
-}
-
 .previewBackdrop {
   position: absolute;
   inset: 0;
@@ -205,69 +236,24 @@
   z-index: 5;
   cursor: pointer;
   pointer-events: auto;
-  animation: smoothBlur 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.modePopup .windowFrame {
-  border-radius: var(--pv-popup-radius);
-  box-shadow: var(--pv-popup-shadow);
-  overflow: hidden;
-  z-index: 10;
+.previewBackdrop.pvVisible {
+  opacity: 1;
 }
 
-/* --- Window Components: Header & Drag --- */
-.dragHandleWrapper {
-  cursor: grab;
+/* --- Window Components: Header --- */
+.headerWrapper {
+  cursor: default;
   user-select: none;
   background: var(--ifm-footer-background-color);
-  border-bottom: none; /* Removed to avoid double border with tabs */
+  border-bottom: none;
   flex-shrink: 0;
   position: relative;
-}
-
-.dragHandleWrapper:active {
-  cursor: grabbing;
-}
-
-.modeDock .dragHandleWrapper {
-  padding-top: var(--ifm-navbar-height, 60px);
-  cursor: default;
-}
-
-.modeDock .dragHandleWrapper:active {
-  cursor: default;
-}
-
-.modePopup .dragHandleWrapper {
-  cursor: default;
-}
-
-.modePopup .dragHandleWrapper:active {
-  cursor: default;
-}
-
-.revealHeader {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--ifm-navbar-height, 60px);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.revealHeader .popupTitle {
-  flex: none; /* Don't expand so centering works */
-  justify-content: center;
-}
-
-.modePip .revealHeader,
-.modePeek .revealHeader {
-  display: none;
+  flex-direction: column;
 }
 
 .popupHeader {
@@ -462,8 +448,8 @@
 /* Tabs */
 .tabs {
   display: flex;
-  gap: 4px;
-  padding: 0 16px;
+  gap: 0; /* No gap between buttons — indicator tracks offsetLeft directly */
+  padding: 0 8px;
   background: var(--ifm-background-surface-color);
   border-top: 1px solid var(--ifm-toc-border-color);
   border-bottom: 1px solid var(--ifm-toc-border-color);
@@ -471,6 +457,7 @@
   scrollbar-width: none;
   flex-shrink: 0;
   z-index: 10;
+  position: relative; /* Required for the ink-bar indicator */
 }
 
 .tab {
@@ -482,7 +469,10 @@
   background: none;
   color: var(--ifm-font-color-base);
   opacity: 0.6;
-  transition: color 0.2s, background 0.2s, opacity 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    opacity 0.2s;
   white-space: nowrap;
   position: relative;
 }
@@ -499,13 +489,21 @@
 }
 
 .activeTabIndicator {
+  /* Ink-bar: single shared element that slides between tabs via CSS transition.
+     JS sets width and transform: translateX() to follow the active tab.
+     This approach works correctly inside Rnd/PiP because it only tracks
+     relative positions within the container, not absolute screen coords. */
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 0;
   height: 2px;
   background-color: var(--ifm-color-primary);
   border-radius: 2px 2px 0 0;
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, width;
+  pointer-events: none;
 }
 
 .windowContent {
@@ -515,17 +513,19 @@
   min-height: 0;
 }
 
-.windowInteracting .windowContent {
+.rndWrapper:global(.react-draggable-dragging) .windowContent,
+:global(.pv-resizing) .windowContent {
   pointer-events: none;
 }
 
 .popupBody {
   flex: 1;
   overflow: auto;
+  overscroll-behavior: contain;
   position: relative;
   display: flex;
   flex-direction: column;
-  outline: none; /* Focusable for Vimium */
+  outline: none;
 }
 
 .isGrabbable {
@@ -684,6 +684,17 @@
   pointer-events: auto;
   display: flex;
   flex-direction: column;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0, 0, 1),
+    width 0.4s cubic-bezier(0.2, 0, 0, 1),
+    height 0.4s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform, width, height;
+}
+
+/* Disable transition while dragging or resizing so it keeps up with the pointer perfectly */
+.rndWrapper:global(.react-draggable-dragging),
+:global(.pv-resizing) .rndWrapper {
+  transition: none !important;
 }
 
 .modePip .rndWrapper {
@@ -691,28 +702,39 @@
   box-shadow: var(--ifm-global-shadow-lw);
 }
 
-.modeDock .rndWrapper {
-  border-left: none;
+/* PiP drag grip strip: invisible, sits above header, triggers Rnd drag.
+   Header buttons are BELOW this strip so they receive click events normally. */
+.pipGripStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: grab;
+  z-index: 20;
+  touch-action: none;
+  background: transparent;
+  flex-shrink: 0;
 }
 
-/* --- Mobile Peek Handle --- */
+.pipGripStrip:active {
+  cursor: grabbing;
+}
+
+/* Peek drag pill: visible handle rendered above header in peek mode */
 .peekHandle {
-  display: none;
+  width: 40px;
+  height: 4px;
+  background: var(--ifm-color-emphasis-600);
+  border-radius: 2px;
+  margin: 8px auto 4px;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: ns-resize;
 }
 
-.modePeek .windowFrame {
-  border-radius: 0;
-  border: none;
-  border-top: 1px solid var(--ifm-color-emphasis-600);
-  box-shadow: 0 -10px 40px rgba(var(--ifm-color-emphasis-900-rgb), 0.15);
-  transition:
-    border-top-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.modePeek .windowFrame.windowInteracting {
-  border-top: 2px solid var(--ifm-color-primary);
-  box-shadow: 0 -4px 12px -4px rgba(var(--ifm-color-primary-rgb), 0.4);
+:global(.pv-resizing) .modePeek .peekHandle {
+  background: var(--ifm-color-primary);
 }
 
 /* --- Iframe Loading Overlay --- */
