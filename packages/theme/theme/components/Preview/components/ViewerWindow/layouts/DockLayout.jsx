@@ -1,6 +1,13 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import styles from "../../../styles.module.css";
 
+/**
+ * DockLayout — renders as a natural sticky flex sibling in the Layout.
+ * No fixed positioning or JS tracking needed: it sticks to the top of the
+ * viewport automatically (like the Docusaurus sidebar), moves with the navbar
+ * when hideOnScroll fires, and stops before the footer because the flex
+ * column ends there.
+ */
 export default function DockLayout({
   isVisible,
   children,

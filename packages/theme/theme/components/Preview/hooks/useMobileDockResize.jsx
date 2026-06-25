@@ -60,10 +60,7 @@ export function useMobileDockResize({
     if (velocity <= -0.3) {
       closePreview();
     } else {
-      const newHeight = Math.max(
-        100,
-        Math.min(finalHeight, vh * 0.95),
-      );
+      const newHeight = Math.max(100, Math.min(finalHeight, vh * 0.95));
       setPeekHeight(newHeight);
     }
   };

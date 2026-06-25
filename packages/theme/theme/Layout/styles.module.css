@@ -3,10 +3,17 @@ body {
   height: 100%;
 }
 
-.mainWrapper {
+.contentRow {
+  display: flex;
+  flex-direction: row;
   flex: 1 0 auto;
+}
+
+.mainWrapper {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 /* Docusaurus-specific utility class */

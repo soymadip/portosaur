@@ -18,7 +18,7 @@ export default function VideoRenderer({ fileUrl, onError }) {
           width: "100%",
           height: "100%",
           objectFit: "contain",
-          background: "var(--ifm-background-color)",
+          background: "var(--ifm-background-surface-color)",
         }}
       />
     </div>

@@ -1,4 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  createContext,
+  useContext,
+} from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "@docusaurus/router";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
@@ -17,7 +24,16 @@ import MobileDockLayout from "./layouts/MobileDockLayout.jsx";
 import PopupLayout from "./layouts/PopupLayout.jsx";
 import PipLayout from "./layouts/PipLayout.jsx";
 
-export default function PreviewViewer() {
+// Internal context to share computed viewer state between ViewerWindow and PreviewDock
+// without double-mounting effects
+const ViewerContext = createContext(null);
+
+/**
+ * ViewerRoot — a context-only provider that mounts all the preview state logic once.
+ * Both ViewerWindow and PreviewDock consume this context.
+ * Rendered at the Layout level so it's always alive regardless of open/mode state.
+ */
+export function ViewerRoot({ children }) {
   const {
     isOpen,
     mode,
@@ -97,8 +113,8 @@ export default function PreviewViewer() {
           switchTimerRef.current = setTimeout(() => {
             setIsVisible(true); // Fade in new mode
             switchTimerRef.current = null;
-          }, 30); // small delay to allow DOM render before triggering CSS transition
-        }, 150); // wait for fade out
+          }, 30);
+        }, 150);
       } else {
         setDisplayMode(mode);
       }
@@ -156,44 +172,47 @@ export default function PreviewViewer() {
       window.removeEventListener("keydown", handler, { capture: true });
   }, [isOpen, closePreview]);
 
-  // --- Sidebar & Layout Sync Logic ---
+  // --- Sidebar Collapse Sync ---
   const weCollapsedSidebar = useRef(false);
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    // Desktop Dock sync
+    const sidebarContainer = document.querySelector(
+      ".theme-doc-sidebar-container",
+    );
+    if (!sidebarContainer) return;
+
+    const collapseBtn = sidebarContainer.querySelector(
+      "button[class*='collapseSidebarButton'], button[title*='collapse' i]",
+    );
+    const expandBtn = sidebarContainer.querySelector(
+      "[class*='expandButton'], [title*='expand' i]",
+    );
+
     if (isDockMode && isOpen) {
-      document.body.classList.add("pv-dock-active");
-      document.body.style.setProperty("--pv-dock-width", `${dockWidth}px`);
+      const isCollapsed =
+        sidebarContainer.className.includes("Hidden") || !!expandBtn;
 
-      const sidebarCollapseBtn = document.querySelector(
-        ".theme-doc-sidebar-container button",
-      );
-
-      if (
-        sidebarCollapseBtn &&
-        sidebarCollapseBtn.getAttribute("title") === "Collapse sidebar"
-      ) {
-        sidebarCollapseBtn.click();
+      if (!isCollapsed && collapseBtn) {
+        collapseBtn.click();
         weCollapsedSidebar.current = true;
       }
     } else {
-      document.body.classList.remove("pv-dock-active");
       if (weCollapsedSidebar.current) {
-        const sidebarExpandBtn = document.querySelector(
-          ".theme-doc-sidebar-container button",
-        );
-        if (
-          sidebarExpandBtn &&
-          sidebarExpandBtn.getAttribute("title") === "Expand sidebar"
-        ) {
-          sidebarExpandBtn.click();
+        if (expandBtn) {
+          expandBtn.click();
+        } else if (collapseBtn) {
+          collapseBtn.click();
         }
         weCollapsedSidebar.current = false;
       }
     }
+  }, [isDockMode, isOpen]);
 
-    // Mobile Dock sync
+  // --- Mobile dock height CSS var ---
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
     if (isMobileDock && isOpen) {
       document.body.style.setProperty(
         "--mobile-dock-height",
@@ -202,13 +221,25 @@ export default function PreviewViewer() {
     } else {
       document.body.style.removeProperty("--mobile-dock-height");
     }
-  }, [isDockMode, isMobileDock, isOpen, dockWidth, peekHeight]);
+  }, [isMobileDock, isOpen, peekHeight]);
+
+  // --- Dock-active body class (hides desktop TOC, shows mobile TOC button) ---
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    if (isDockMode && isOpen) {
+      document.body.classList.add("pv-dock-active");
+    } else {
+      document.body.classList.remove("pv-dock-active");
+    }
+
+    return () => document.body.classList.remove("pv-dock-active");
+  }, [isDockMode, isOpen]);
 
   // --- Scroll & Global Zoom Lock ---
   useEffect(() => {
     if (typeof document === "undefined" || !isOpen) return;
 
-    // Block native trackpad Ctrl+Wheel zooming on the background webpage
     const handleGlobalWheel = (e) => {
       if (e.ctrlKey) {
         e.preventDefault();
@@ -218,8 +249,6 @@ export default function PreviewViewer() {
     window.addEventListener("wheel", handleGlobalWheel, { passive: false });
 
     let originalOverflow = "";
-
-    // Only lock scroll for Popup modal
     if (isPopupMode) {
       originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
@@ -310,14 +339,9 @@ export default function PreviewViewer() {
     }
   }, [fileUrl, currentFile, corsProxyList]);
 
-  // --- Rendering ---
-  if (!mounted) return null;
-  const portalRoot = document.getElementById("pv-portal-root") || document.body;
-
   const displayTitle =
     currentFile?.title || currentFile?.url?.split("/").pop() || "Preview";
 
-  // The common frame used across all layouts
   const frame = (
     <WindowFrame
       displayTitle={displayTitle}
@@ -349,19 +373,98 @@ export default function PreviewViewer() {
     />
   );
 
+  const ctx = {
+    mounted,
+    isMounted,
+    isVisible,
+    isOpen,
+    isDockMode,
+    isMobileDock,
+    isPopupMode,
+    isPipMode,
+    isMobile,
+    isTabletPortrait,
+    dockWidth,
+    setDockWidth,
+    peekHeight,
+    setPeekHeight,
+    closePreview,
+    setFloatingState,
+    layout,
+    frame,
+  };
+
+  return (
+    <ViewerContext.Provider value={ctx}>{children}</ViewerContext.Provider>
+  );
+}
+
+function useViewer() {
+  return useContext(ViewerContext);
+}
+
+/**
+ * PreviewDock — renders the desktop dock panel as a natural sticky flex sibling
+ * in the Layout. No portal, no fixed positioning, no JS tracking.
+ * Sticks to navbar, stops before footer, moves with navbar on hideOnScroll.
+ */
+export function PreviewDock() {
+  const ctx = useViewer();
+
+  // If ViewerRoot hasn't mounted yet (SSR or not yet rendered), render nothing
+  if (!ctx || !ctx.mounted) return null;
+
+  const { isMounted, isVisible, isDockMode, dockWidth, setDockWidth, frame } =
+    ctx;
+
+  // Non-dock modes are handled by ViewerWindow via portal
+  if (!isDockMode) return null;
+
+  return (
+    <DockLayout
+      isVisible={isVisible && isMounted}
+      dockWidth={dockWidth}
+      setDockWidth={setDockWidth}
+    >
+      {frame}
+    </DockLayout>
+  );
+}
+
+/**
+ * ViewerWindow — handles Popup, PiP, and MobileDock modes via portal.
+ * Desktop dock mode is handled by PreviewDock directly in the Layout.
+ */
+export default function PreviewViewer() {
+  const ctx = useViewer();
+
+  if (!ctx || !ctx.mounted) return null;
+
+  const {
+    isMounted,
+    isVisible,
+    isDockMode,
+    isMobileDock,
+    isPopupMode,
+    isPipMode,
+    isMobile,
+    isTabletPortrait,
+    peekHeight,
+    setPeekHeight,
+    closePreview,
+    setFloatingState,
+    layout,
+    frame,
+  } = ctx;
+
+  const portalRoot = document.getElementById("pv-portal-root") || document.body;
+
+  // Dock renders in Layout via PreviewDock — nothing to portal here
+  if (isDockMode) return null;
+
   return createPortal(
     isMounted && (
       <>
-        {isDockMode && (
-          <DockLayout
-            isVisible={isVisible}
-            dockWidth={dockWidth}
-            setDockWidth={setDockWidth}
-          >
-            {frame}
-          </DockLayout>
-        )}
-
         {isMobileDock && (
           <MobileDockLayout
             isVisible={isVisible}

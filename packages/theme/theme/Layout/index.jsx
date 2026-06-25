@@ -14,9 +14,35 @@ import ErrorPageContent from "@theme/ErrorPageContent";
 
 // Preview imports
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import { PreviewProvider, ViewerWindow } from "../components/Preview/index.jsx";
+import {
+  PreviewProvider,
+  ViewerWindow,
+  PreviewDock,
+  ViewerRoot,
+} from "../components/Preview/index.jsx";
 
 import styles from "./styles.module.css";
+
+/**
+ * Wrapper that mounts preview logic + dock on the client only.
+ * Keeps the outer layout SSR-compatible.
+ */
+function ClientPreview({ children }) {
+  return (
+    <ViewerRoot>
+      {/* Horizontal row: main content + dock as a sticky flex sibling */}
+      <div className={styles.contentRow}>
+        {children}
+
+        {/* Desktop dock — sticky right column, no fixed positioning */}
+        <PreviewDock />
+      </div>
+
+      {/* Popup, PiP, MobileDock — rendered via portal */}
+      <ViewerWindow />
+    </ViewerRoot>
+  );
+}
 
 export default function Layout(props) {
   const {
@@ -27,6 +53,21 @@ export default function Layout(props) {
     title,
     description,
   } = props;
+
+  const mainContent = (
+    <div
+      id={SkipToContentFallbackId}
+      className={clsx(
+        ThemeClassNames.wrapper.main,
+        styles.mainWrapper,
+        wrapperClassName,
+      )}
+    >
+      <ErrorBoundary fallback={(params) => <ErrorPageContent {...params} />}>
+        {children}
+      </ErrorBoundary>
+    </div>
+  );
 
   return (
     <LayoutProvider>
@@ -39,22 +80,13 @@ export default function Layout(props) {
 
         <Navbar />
 
-        <div
-          id={SkipToContentFallbackId}
-          className={clsx(
-            ThemeClassNames.wrapper.main,
-            styles.mainWrapper,
-            wrapperClassName,
-          )}
+        {/* On client: wrap in ViewerRoot so dock + modal can mount.
+            On server (SSR): just render main content directly in a contentRow-like div. */}
+        <BrowserOnly
+          fallback={<div className={styles.contentRow}>{mainContent}</div>}
         >
-          <ErrorBoundary
-            fallback={(params) => <ErrorPageContent {...params} />}
-          >
-            {children}
-          </ErrorBoundary>
-        </div>
-
-        <BrowserOnly>{() => <ViewerWindow />}</BrowserOnly>
+          {() => <ClientPreview>{mainContent}</ClientPreview>}
+        </BrowserOnly>
 
         {!noFooter && <Footer />}
       </PreviewProvider>

@@ -150,21 +150,23 @@
   border: 1px solid var(--ifm-color-emphasis-400);
 }
 
-/* 2. DOCK MODE (Desktop side column, fixed to right) */
+/* 2. DOCK MODE (Desktop side column, sticky right column)
+   Lives directly in the Layout flex column as a sibling of main-wrapper,
+   so it naturally sticks to viewport, moves with the navbar on hideOnScroll,
+   and stops before the footer — no JS tracking or fixed-position hacks needed. */
 .modeDock {
-  position: fixed;
-  top: var(--ifm-navbar-height, 60px);
-  right: 0;
-  height: calc(100vh - var(--ifm-navbar-height, 60px));
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
   flex-shrink: 0;
   z-index: 1000;
-  width: 0px;
-  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-}
-:global(body.pv-navbar-hidden) .modeDock {
-  top: 0;
+  width: 0;
   height: 100vh;
+  overflow: hidden;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Allow overflow on left so resize handle glow renders outside */
+  overflow-x: visible;
+  overflow-y: hidden;
 }
 .modeDock.pvVisible {
   width: var(--pv-dock-width, 380px);
@@ -177,13 +179,14 @@
   height: 100%;
 }
 .dockResizeHandle {
+  pointer-events: auto;
   position: absolute;
   top: 0;
-  left: 0;
+  left: -6px;
   width: 8px;
   height: 100%;
   cursor: ew-resize;
-  z-index: 10;
+  z-index: 20;
   touch-action: none;
 }
 .dockResizeHandle:hover {
@@ -781,6 +784,7 @@
   min-height: 0;
   height: 100%;
 }
+
 .webFrame {
   flex: 1;
   border: none;
@@ -797,8 +801,9 @@
   position: relative;
   min-height: 0;
   height: 100%;
-  background: var(--ifm-background-color);
+  background: var(--ifm-background-surface-color);
 }
+
 .videoPlayer {
   flex: 1;
   width: 100%;
@@ -836,6 +841,7 @@
   display: inline-flex;
   vertical-align: baseline;
 }
+
 .previewTrigger {
   color: var(--ifm-link-color);
   cursor: pointer;
@@ -849,6 +855,7 @@
   text-underline-offset: 4px;
   transition: all 0.2s ease;
 }
+
 .previewTrigger:hover {
   text-decoration: underline solid;
   text-decoration-color: var(--ifm-link-hover-color);
@@ -1031,8 +1038,9 @@
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  text-decoration: none;
-  transition: opacity 0.2s;
+  display: inline-block;
+  position: relative;
+  z-index: 10;
 }
 .visitButton:hover {
   opacity: 0.85;
@@ -1040,12 +1048,13 @@
 
 /* Global Layout Hooks (when docked/peek) --- */
 :global(.main-wrapper) {
+  /* Mobile dock bottom padding only; desktop dock takes its own flex column */
   padding-bottom: var(--mobile-dock-height, 0px);
   transition: padding-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Disable transition while dragging so it keeps up with the mouse perfectly */
-:global(body.pv-resizing) :global(.main-wrapper) {
+:global(body.pv-resizing) .modeDock {
   transition: none !important;
 }
 

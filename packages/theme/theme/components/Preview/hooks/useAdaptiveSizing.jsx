@@ -49,18 +49,27 @@ export function useAdaptiveSizing({
       : 800);
 
   // PiP Size
-  const isDefaultSize = floatingState.width === 720 && floatingState.height === 400;
+  const isDefaultSize =
+    floatingState.width === 720 && floatingState.height === 400;
 
   const pipWidth = isMobile
-    ? (isDefaultSize ? windowWidth - 32 : floatingState.width)
+    ? isDefaultSize
+      ? windowWidth - 32
+      : floatingState.width
     : isTabletPortrait || isTabletLandscape
-      ? (isDefaultSize ? Math.min(400, windowWidth - 60) : floatingState.width)
+      ? isDefaultSize
+        ? Math.min(400, windowWidth - 60)
+        : floatingState.width
       : floatingState.width;
 
   const pipHeight = isMobile
-    ? (isDefaultSize ? Math.min(160, vh * 0.3) : floatingState.height)
+    ? isDefaultSize
+      ? Math.min(160, vh * 0.3)
+      : floatingState.height
     : isTabletPortrait || isTabletLandscape
-      ? (isDefaultSize ? Math.min(250, vh * 0.4) : floatingState.height)
+      ? isDefaultSize
+        ? Math.min(250, vh * 0.4)
+        : floatingState.height
       : floatingState.height;
 
   // Base positions
@@ -74,10 +83,7 @@ export function useAdaptiveSizing({
 
     const constrainedX = Math.max(
       -pipWidth + minVisibleX,
-      Math.min(
-        windowWidth - minVisibleX,
-        pipX,
-      ),
+      Math.min(windowWidth - minVisibleX, pipX),
     );
     const constrainedY = Math.max(
       -pipHeight + minVisibleY,
