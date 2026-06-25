@@ -2,6 +2,7 @@ import { Btn, Dropdown } from "../../UI/index.jsx";
 import styles from "../styles.module.css";
 import IconDock from "../../../../assets/img/svg/icon-dock.svg";
 import IconPopup from "../../../../assets/img/svg/icon-popup.svg";
+import IconPip from "../../../../assets/img/svg/icon-pip.svg";
 import IconSave from "../../../../assets/img/svg/icon-save.svg";
 import IconLink from "../../../../assets/img/svg/icon-link.svg";
 import IconClose from "../../../../assets/img/svg/icon-close.svg";
@@ -98,7 +99,7 @@ export default function PreviewHeader({
               const MODE_OPTIONS = [
                 { id: "popup", label: "Popup", icon: IconPopup },
                 { id: "dock", label: "Dock", icon: IconDock },
-                { id: "pip", label: "PiP", icon: IconDock },
+                { id: "pip", label: "PiP", icon: IconPip },
               ];
               const activeModeOption =
                 MODE_OPTIONS.find((m) => m.id === mode) || MODE_OPTIONS[0];
