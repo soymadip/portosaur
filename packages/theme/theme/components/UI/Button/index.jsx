@@ -24,10 +24,16 @@ export default function Btn({
   ...rest
 }) {
   const Component = as || (href ? Link : "button");
+  const isDocusaurusLink = Component === Link;
   const linkProps = {};
 
   if (href) {
-    linkProps.to = href;
+    if (isDocusaurusLink) {
+      linkProps.to = href;
+    } else {
+      linkProps.href = href;
+    }
+
     if (!sameTab && (href.startsWith("http") || href.startsWith("//"))) {
       linkProps.target = "_blank";
       linkProps.rel = "noopener noreferrer";
@@ -36,18 +42,27 @@ export default function Btn({
 
   let variantClass = "";
 
-  if (primary) variantClass = styles.buttonPrimary;
-  else if (danger) variantClass = styles.buttonDanger;
-  else if (success) variantClass = styles.buttonSuccess;
-  else if (warning) variantClass = styles.buttonWarning;
-  else if (info) variantClass = styles.buttonInfo;
-  else if (secondary) variantClass = styles.buttonSecondary;
+  if (primary) {
+    variantClass = styles.buttonPrimary;
+  } else if (danger) {
+    variantClass = styles.buttonDanger;
+  } else if (success) {
+    variantClass = styles.buttonSuccess;
+  } else if (warning) {
+    variantClass = styles.buttonWarning;
+  } else if (info) {
+    variantClass = styles.buttonInfo;
+  } else if (secondary) {
+    variantClass = styles.buttonSecondary;
+  }
 
   const combinedClassName =
     `${styles.button} ${variantClass} ${disabled ? styles.buttonDisabled : ""} ${className}`.trim();
 
   const renderIcon = () => {
-    if (!icon) return null;
+    if (!icon) {
+      return null;
+    }
 
     if (typeof icon === "string") {
       const isUrl =
@@ -80,7 +95,10 @@ export default function Btn({
           e.preventDefault();
           return;
         }
-        if (onClick) onClick(e);
+
+        if (onClick) {
+          onClick(e);
+        }
       }}
       disabled={Component === "button" ? disabled : undefined}
       aria-disabled={disabled ? "true" : undefined}
