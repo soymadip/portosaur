@@ -2,54 +2,54 @@
 
 :root {
   /* GitHub Light palette */
-  --gh-light-primary:     #0969da;
+  --gh-light-primary: #0969da;
   --gh-light-primary-rgb: 9, 105, 218;
-  --gh-light-success:     #1a7f37;
+  --gh-light-success: #1a7f37;
   --gh-light-success-rgb: 26, 127, 55;
-  --gh-light-warning:     #bf8700;
+  --gh-light-warning: #bf8700;
   --gh-light-warning-rgb: 191, 135, 0;
-  --gh-light-danger:      #cf222e;
-  --gh-light-danger-rgb:  207, 34, 46;
-  --gh-light-info:        #0969da;
-  --gh-light-info-rgb:    9, 105, 218;
+  --gh-light-danger: #cf222e;
+  --gh-light-danger-rgb: 207, 34, 46;
+  --gh-light-info: #0969da;
+  --gh-light-info-rgb: 9, 105, 218;
 
   /* GitHub Light backgrounds (like Catppuccin: bg > mantle > crust > surface0) */
-  --gh-light-bg:       #ffffff;
-  --gh-light-mantle:   #f6f8fa; /* slightly darker, like Catppuccin mantle */
-  --gh-light-crust:    #d0d7de; /* borders, like Catppuccin crust */
+  --gh-light-bg: #ffffff;
+  --gh-light-mantle: #f6f8fa; /* slightly darker, like Catppuccin mantle */
+  --gh-light-crust: #d0d7de; /* borders, like Catppuccin crust */
   --gh-light-surface0: #eaeef2;
   --gh-light-surface1: #d8dde3;
   --gh-light-surface2: #c8ced6;
 
-  --gh-light-text:       #24292f;
-  --gh-light-text-rgb:   36, 41, 47;
+  --gh-light-text: #24292f;
+  --gh-light-text-rgb: 36, 41, 47;
   --gh-light-text-muted: #57606a; /* muted text */
-  --gh-light-secondary:  #57606a; /* like Catppuccin lavender – muted accent */
+  --gh-light-secondary: #57606a; /* like Catppuccin lavender – muted accent */
 
   /* GitHub Dark palette */
-  --gh-dark-primary:     #58a6ff;
+  --gh-dark-primary: #58a6ff;
   --gh-dark-primary-rgb: 88, 166, 255;
-  --gh-dark-success:     #2ea043;
+  --gh-dark-success: #2ea043;
   --gh-dark-success-rgb: 46, 160, 67;
-  --gh-dark-warning:     #e3b341;
+  --gh-dark-warning: #e3b341;
   --gh-dark-warning-rgb: 227, 179, 65;
-  --gh-dark-danger:      #f85149;
-  --gh-dark-danger-rgb:  248, 81, 73;
-  --gh-dark-info:        #58a6ff;
-  --gh-dark-info-rgb:    88, 166, 255;
+  --gh-dark-danger: #f85149;
+  --gh-dark-danger-rgb: 248, 81, 73;
+  --gh-dark-info: #58a6ff;
+  --gh-dark-info-rgb: 88, 166, 255;
 
   /* GitHub Dark backgrounds (like Catppuccin: bg > mantle > crust > surface0) */
-  --gh-dark-bg:       #0d1117;
-  --gh-dark-mantle:   #090d13; /* slightly darker, like Catppuccin mantle */
-  --gh-dark-crust:    #30363d; /* border color, like Catppuccin crust */
+  --gh-dark-bg: #0d1117;
+  --gh-dark-mantle: #090d13; /* slightly darker, like Catppuccin mantle */
+  --gh-dark-crust: #30363d; /* border color, like Catppuccin crust */
   --gh-dark-surface0: #161b22;
   --gh-dark-surface1: #21262d;
   --gh-dark-surface2: #30363d;
 
-  --gh-dark-text:       #c9d1d9;
-  --gh-dark-text-rgb:   201, 209, 217;
+  --gh-dark-text: #c9d1d9;
+  --gh-dark-text-rgb: 201, 209, 217;
   --gh-dark-text-muted: #8b949e; /* muted text */
-  --gh-dark-secondary:  #8b949e; /* like Catppuccin Mocha lavender – muted accent */
+  --gh-dark-secondary: #8b949e; /* like Catppuccin Mocha lavender – muted accent */
 }
 
 [data-theme="light"] {

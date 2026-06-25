@@ -2,34 +2,34 @@
 
 :root {
   /* Dracula Dark palette */
-  --drac-bg:      #282a36;
-  --drac-mantle:  #21222c; /* slightly darker, like Catppuccin mantle */
-  --drac-crust:   #191a21; /* darkest, like Catppuccin crust */
+  --drac-bg: #282a36;
+  --drac-mantle: #21222c; /* slightly darker, like Catppuccin mantle */
+  --drac-crust: #191a21; /* darkest, like Catppuccin crust */
   --drac-current: #44475a; /* surface/selection */
-  --drac-fg:      #f8f8f2;
+  --drac-fg: #f8f8f2;
   --drac-comment: #6272a4;
-  --drac-cyan:    #8be9fd;
-  --drac-green:   #50fa7b;
-  --drac-orange:  #ffb86c;
-  --drac-pink:    #ff79c6;
-  --drac-purple:  #bd93f9;
-  --drac-red:     #ff5555;
-  --drac-yellow:  #f1fa8c;
+  --drac-cyan: #8be9fd;
+  --drac-green: #50fa7b;
+  --drac-orange: #ffb86c;
+  --drac-pink: #ff79c6;
+  --drac-purple: #bd93f9;
+  --drac-red: #ff5555;
+  --drac-yellow: #f1fa8c;
 
   /* Derived dark surfaces */
   --drac-surface1: #52556b; /* between current and comment */
   --drac-surface2: #626781; /* between comment and overlay */
 
   /* Dracula Light (Alucard inspired) */
-  --drac-light-bg:      #f8f8f2;
-  --drac-light-mantle:  #efefea; /* slightly darker than bg, like Catppuccin mantle */
-  --drac-light-crust:   #e3e3df; /* darkest light surface, like Catppuccin crust */
+  --drac-light-bg: #f8f8f2;
+  --drac-light-mantle: #efefea; /* slightly darker than bg, like Catppuccin mantle */
+  --drac-light-crust: #e3e3df; /* darkest light surface, like Catppuccin crust */
   --drac-light-current: #e9e9f4; /* surface0 */
   --drac-light-surface1: #dcdcea;
   --drac-light-surface2: #cdcdde;
-  --drac-light-fg:      #282a36;
+  --drac-light-fg: #282a36;
   --drac-light-comment: #6272a4; /* same in both modes */
-  --drac-light-purple:  #9a5cf4; /* slightly darker for light mode contrast */
+  --drac-light-purple: #9a5cf4; /* slightly darker for light mode contrast */
 }
 
 [data-theme="light"] {

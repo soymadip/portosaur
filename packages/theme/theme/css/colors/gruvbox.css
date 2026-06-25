@@ -3,48 +3,48 @@
 :root {
   /* Gruvbox Dark palette */
   --gb-dark-bg0_h: #1d2021; /* hardest dark, like Catppuccin crust */
-  --gb-dark-bg0:   #282828; /* main dark bg */
+  --gb-dark-bg0: #282828; /* main dark bg */
   --gb-dark-bg0_s: #32302f; /* soft dark, like Catppuccin mantle */
-  --gb-dark-bg1:   #3c3836;
-  --gb-dark-bg2:   #504945;
-  --gb-dark-bg3:   #665c54;
-  --gb-dark-bg4:   #7c6f64;
-  --gb-dark-fg:    #ebdbb2;
-  --gb-dark-fg1:   #ebdbb2;
-  --gb-dark-fg2:   #d5c4a1;
-  --gb-dark-fg3:   #bdae93;
-  --gb-dark-fg4:   #a89984;
-  --gb-dark-gray:  #928374;
+  --gb-dark-bg1: #3c3836;
+  --gb-dark-bg2: #504945;
+  --gb-dark-bg3: #665c54;
+  --gb-dark-bg4: #7c6f64;
+  --gb-dark-fg: #ebdbb2;
+  --gb-dark-fg1: #ebdbb2;
+  --gb-dark-fg2: #d5c4a1;
+  --gb-dark-fg3: #bdae93;
+  --gb-dark-fg4: #a89984;
+  --gb-dark-gray: #928374;
 
-  --gb-dark-red:    #fb4934;
-  --gb-dark-green:  #b8bb26;
+  --gb-dark-red: #fb4934;
+  --gb-dark-green: #b8bb26;
   --gb-dark-yellow: #fabd2f;
-  --gb-dark-blue:   #83a598;
+  --gb-dark-blue: #83a598;
   --gb-dark-purple: #d3869b;
-  --gb-dark-aqua:   #8ec07c;
+  --gb-dark-aqua: #8ec07c;
   --gb-dark-orange: #fe8019;
 
   /* Gruvbox Light palette */
   --gb-light-bg0_h: #f9f5d7; /* hardest light, like Catppuccin crust (lightest in light) */
-  --gb-light-bg0:   #fbf1c7; /* main light bg */
+  --gb-light-bg0: #fbf1c7; /* main light bg */
   --gb-light-bg0_s: #f2e5bc; /* soft light, like Catppuccin mantle */
-  --gb-light-bg1:   #ebdbb2;
-  --gb-light-bg2:   #d5c4a1;
-  --gb-light-bg3:   #bdae93;
-  --gb-light-bg4:   #a89984;
-  --gb-light-fg:    #3c3836;
-  --gb-light-fg1:   #504945;
-  --gb-light-fg2:   #665c54;
-  --gb-light-fg3:   #7c6f64;
-  --gb-light-fg4:   #a89984;
-  --gb-light-gray:  #928374;
+  --gb-light-bg1: #ebdbb2;
+  --gb-light-bg2: #d5c4a1;
+  --gb-light-bg3: #bdae93;
+  --gb-light-bg4: #a89984;
+  --gb-light-fg: #3c3836;
+  --gb-light-fg1: #504945;
+  --gb-light-fg2: #665c54;
+  --gb-light-fg3: #7c6f64;
+  --gb-light-fg4: #a89984;
+  --gb-light-gray: #928374;
 
-  --gb-light-red:    #9d0006;
-  --gb-light-green:  #79740e;
+  --gb-light-red: #9d0006;
+  --gb-light-green: #79740e;
   --gb-light-yellow: #b57614;
-  --gb-light-blue:   #076678;
+  --gb-light-blue: #076678;
   --gb-light-purple: #8f3f71;
-  --gb-light-aqua:   #427b58;
+  --gb-light-aqua: #427b58;
   --gb-light-orange: #af3a03;
 }
 
