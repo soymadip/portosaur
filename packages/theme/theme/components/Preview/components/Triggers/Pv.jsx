@@ -236,9 +236,13 @@ export default function Pv(props) {
 
   const targetHash = generatePvHash(baseSlug, mode, activeIdx);
 
-  const baseClassName = className
-    ? className
-    : `${styles.previewTrigger} ${isCurrentlyActive ? styles.activeTrigger : ""} ${noUl ? styles.noUnderline : ""}`;
+  const baseClassName = [
+    className || styles.previewTrigger,
+    isCurrentlyActive ? styles.activeTrigger : "",
+    noUl ? styles.noUnderline : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const trigger = (
     <a
