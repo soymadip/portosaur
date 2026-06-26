@@ -53,9 +53,10 @@ export const baseSidebar = [
     link: "/dev/overview",
     collapsed: false,
     items: [
+      { text: "creating Themes", link: "/dev/creating-themes" },
+      { text: "Templates", link: "/dev/templates" },
       { text: "@portosaur/wizard", link: "/dev/wizard" },
       { text: "@portosaur/logger", link: "/dev/logger" },
-      { text: "Templates", link: "/dev/templates" },
     ],
   },
   {

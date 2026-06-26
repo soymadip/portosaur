@@ -92,7 +92,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
   // Process generated favicon/manifest head tags
   const extraHeadTags = buildHeadTags(context.extraHeadTags || []).filter(
-    (t) => !(t.tagName === "meta" && t.attributes && t.attributes.name === "theme-color")
+    (t) =>
+      !(
+        t.tagName === "meta" &&
+        t.attributes &&
+        t.attributes.name === "theme-color"
+      ),
   );
   const userHeadTags = buildHeadTags(get("site.head_tags", [])); // Custom head tags to inject into the document.
 

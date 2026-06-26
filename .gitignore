@@ -54,3 +54,6 @@ temp/
 !templates/**
 wiki/
 ifm-vars-list.css
+.playground---/
+
+docs/*
