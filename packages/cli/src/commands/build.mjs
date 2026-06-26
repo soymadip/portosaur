@@ -7,14 +7,10 @@ import {
   runDocusaurus,
   validateProject,
   ensureContentDirs,
+  generateSiteAssets,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
-import {
-  loadUserConfig,
-  generateFavicons,
-  generateRobotsTxt,
-  getCssVar,
-} from "@portosaur/core";
+import { loadUserConfig, generateRobotsTxt } from "@portosaur/core";
 
 /**
  * Builds the static Portosaur site.
@@ -61,27 +57,13 @@ export async function buildCommand(siteDir, options = {}) {
 
     logger.info("Generating site assets...");
 
-    const cssFilesToParse = [
-      path.join(portoPaths.theme, "css/custom.css"),
-      path.join(portoPaths.theme, "css/overrides/variables.css"),
-    ];
-
-    const themeColor =
-      getCssVar("--ifm-color-primary", cssFilesToParse) || "#3578e5";
-
-    const faviconRes = await generateFavicons(UserRoot, {
-      imagePath: userConfig.home_page?.hero?.profile_pic,
-      siteTitle: userConfig.site?.title,
-      siteTagline: userConfig.site?.tagline,
-      staticDirs: ["static"],
-      portoAssetsDir: portoPaths.assets,
-      themeColor: themeColor,
-    });
-
-    const configContext = {
-      extraHeadTags: faviconRes.html,
-    };
+    const configContext = await generateSiteAssets(
+      UserRoot,
+      userConfig,
+      portoPaths,
+    );
     const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
+
     logResolvedSiteLocation(UserRoot, portoPaths, configContext);
 
     // ------- Docusaurus Build -------

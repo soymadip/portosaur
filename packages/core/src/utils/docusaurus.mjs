@@ -283,3 +283,55 @@ export function cleanFrontMatterSlug({
 
   return frontMatter;
 }
+
+/**
+ * Returns the client-side script for syncing the theme color meta tag
+ * with the active theme variables.
+ */
+export function getThemeColorSyncScript() {
+  return `
+(function() {
+  function updateThemeColor() {
+    var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement('meta');
+      themeColorMeta.name = 'theme-color';
+      document.head.appendChild(themeColorMeta);
+    }
+    
+    // Read the variable globally from the HTML element
+    var style = window.getComputedStyle(document.documentElement);
+
+    // Docusaurus/Infima defines the navbar color globally
+    var bgColor = style.getPropertyValue('--ifm-navbar-background-color');
+    
+    if (bgColor) {
+      themeColorMeta.content = bgColor.trim();
+    }
+  }
+
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
+        setTimeout(updateThemeColor, 10);
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme', 'class']
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateThemeColor);
+  } else {
+    updateThemeColor();
+  }
+  
+  // Also run on window load to ensure all CSS stylesheets have been fully parsed
+  window.addEventListener('load', updateThemeColor);
+})();
+`;
+}

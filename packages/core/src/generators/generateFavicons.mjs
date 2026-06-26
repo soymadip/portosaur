@@ -31,6 +31,25 @@ function processManifest(manifestFile, outputDir, appVersion) {
   try {
     const manifest = JSON.parse(manifestFile.contents);
     manifest.version = appVersion;
+
+    if (manifest.icons && Array.isArray(manifest.icons)) {
+      const patchedIcons = [];
+
+      for (const icon of manifest.icons) {
+        if (
+          icon.purpose &&
+          (icon.purpose.includes("maskable") || icon.purpose.includes("any"))
+        ) {
+          // Add one entry for standard display and one for maskable support
+          patchedIcons.push({ ...icon, purpose: "any" });
+          patchedIcons.push({ ...icon, purpose: "maskable" });
+        } else {
+          patchedIcons.push({ ...icon, purpose: "any" });
+        }
+      }
+      manifest.icons = patchedIcons;
+    }
+
     fs.writeFileSync(
       path.join(outputDir, manifestFile.name),
       JSON.stringify(manifest, null, 2),
@@ -90,8 +109,7 @@ export async function generateFavicons(siteDir, options = {}) {
   const staticBaseDir = path.resolve(siteDir, "static");
   const imgDir = path.join(staticBaseDir, "img", "svg");
   const outputDir = path.join(
-    siteDir,
-    ".docusaurus/portosaur",
+    getPortoDotDir(siteDir),
     options.outputPath || "favicon",
   );
   const configHash = Buffer.from(

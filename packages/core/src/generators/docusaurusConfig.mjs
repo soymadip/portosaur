@@ -12,6 +12,7 @@ import {
   buildHeadTags,
   createSidebarItemsGenerator,
   cleanFrontMatterSlug,
+  getThemeColorSyncScript,
 } from "../utils/docusaurus.mjs";
 
 import remarkMath from "remark-math";
@@ -82,22 +83,22 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     "Short description about you, your passion, your goals etc.",
   );
 
-  // Collect static directories: local site static/, theme assets/, and portosaur dot-dir.
+  // Collect static directories: local site static/, theme assets/, and portosaur assets dir.
   const staticDirectories = [
     "static",
     assetsDir,
     getPortoDotDir(projectDir),
   ].filter((dir) => dir && fs.existsSync(dir));
 
-  // Process all head tags (from plugins and user config)
-  const allHeadTags = buildHeadTags([
-    ...(context.extraHeadTags || []),
-    ...get("site.head_tags", []), // Custom head tags to inject into the document.
-  ]);
+  // Process generated favicon/manifest head tags
+  const extraHeadTags = buildHeadTags(context.extraHeadTags || []).filter(
+    (t) => !(t.tagName === "meta" && t.attributes && t.attributes.name === "theme-color")
+  );
+  const userHeadTags = buildHeadTags(get("site.head_tags", [])); // Custom head tags to inject into the document.
 
-  // Separate regular head tags from meta tags
-  const regularHeadTags = allHeadTags.filter((t) => t.tagName !== "meta");
-  const customMetaTags = allHeadTags
+  // Regular and meta tags for user-defined tags
+  const regularUserHeadTags = userHeadTags.filter((t) => t.tagName !== "meta");
+  const customUserMetaTags = userHeadTags
     .filter((t) => t.tagName === "meta")
     .map((t) => t.attributes);
 
@@ -115,7 +116,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     tagline: siteTagline,
     url: siteUrl,
     baseUrl: sitePath,
-    favicon: siteFavicon,
+    favicon: "/favicon/favicon.ico",
     organizationName: siteName,
     onBrokenAnchors: get("site.on_broken_anchors", "throw"), // Behavior when a link anchor (#) is missing.
     onBrokenLinks: get("site.on_broken_links", "throw"), // Behavior when a link is broken.
@@ -124,11 +125,19 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     staticDirectories,
 
     headTags: [
-      ...regularHeadTags,
+      ...regularUserHeadTags,
+      ...(env.NODE_ENV !== "production"
+        ? extraHeadTags.filter((t) => t.tagName !== "meta")
+        : []),
       {
         tagName: "script",
         attributes: {},
         innerHTML: `window.process = window.process || { env: { NODE_ENV: '${process.env.NODE_ENV || "production"}' } };`,
+      },
+      {
+        tagName: "script",
+        attributes: {},
+        innerHTML: getThemeColorSyncScript(),
       },
     ],
 
@@ -160,8 +169,12 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       image: resolveAsset(get("site.social_card", "")) || undefined, // Preview image used when sharing your site on social media.
       metadata: [
         { name: "generator", content: `Portosaur v${porto.version}` },
-        { name: "theme-color", content: "var(--ifm-background-color)" },
-        ...customMetaTags,
+        ...customUserMetaTags,
+        ...(env.NODE_ENV !== "production"
+          ? extraHeadTags
+              .filter((t) => t.tagName === "meta")
+              .map((t) => t.attributes)
+          : []),
       ],
       colorMode: {
         defaultMode: defaultTheme,
@@ -574,14 +587,16 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             [
               "@docusaurus/plugin-pwa",
               {
-                debug: false,
                 offlineModeActivationStrategies: [
                   "appInstalled",
                   "standalone",
                   "queryString",
-                  "mobile",
                   "saveData",
                 ],
+                pwaHead: extraHeadTags.map((t) => ({
+                  tagName: t.tagName,
+                  ...t.attributes,
+                })),
               },
             ],
           ]

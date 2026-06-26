@@ -7,8 +7,49 @@ import {
   hasCommand,
   getPortoDotDir,
   loadUserConfig,
+  generateFavicons,
+  getCssVar,
 } from "@portosaur/core";
 import { logger } from "@portosaur/logger";
+
+/**
+ * Centralized site asset generator. Resolves the active theme color
+ * from CSS color scheme files and runs the favicon generator.
+ *
+ * @param {string} UserRoot - The user's project directory.
+ * @param {Object} userConfig - The parsed Portosaur user config.
+ * @param {Object} portoPaths - Paths to Portosaur assets and theme.
+ * @returns {Promise<Object>} An object containing the generated HTML head tags.
+ */
+export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
+  const colorScheme = userConfig.theme?.color_scheme || "nord";
+  const cssFilesToParse = [
+    colorScheme.endsWith(".css") ||
+    colorScheme.includes("/") ||
+    colorScheme.includes("\\")
+      ? path.resolve(UserRoot, colorScheme)
+      : path.join(portoPaths.theme, `css/colors/${colorScheme}.css`),
+    path.join(portoPaths.theme, "css/infima.css"),
+    path.join(portoPaths.theme, "css/custom.css"),
+    path.join(portoPaths.theme, "css/overrides/variables.css"),
+  ];
+
+  const themeColor =
+    getCssVar("--ifm-navbar-background-color", cssFilesToParse) || "#2e3440";
+
+  const faviconRes = await generateFavicons(UserRoot, {
+    imagePath: userConfig.home_page?.hero?.profile_pic,
+    siteTitle: userConfig.site?.title,
+    siteTagline: userConfig.site?.tagline,
+    staticDirs: ["static"],
+    portoAssetsDir: portoPaths.assets,
+    themeColor: themeColor,
+  });
+
+  return {
+    extraHeadTags: faviconRes.html,
+  };
+}
 
 /**
  * Generates a static Docusaurus config file by evaluating the Portosaur config

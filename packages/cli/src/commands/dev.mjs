@@ -7,8 +7,10 @@ import {
   runDocusaurus,
   validateProject,
   ensureContentDirs,
+  generateSiteAssets,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
+import { loadUserConfig } from "@portosaur/core";
 
 export async function devCommand(siteDir, options = {}) {
   const extraArgs = [];
@@ -52,9 +54,14 @@ export async function devCommand(siteDir, options = {}) {
     plugins: path.join(Paths.theme, "src/plugins"),
   };
 
+  let configContext = { extraHeadTags: [] };
+
   try {
-    const configPath = writeConfigShim(UserRoot, portoPaths);
-    logResolvedSiteLocation(UserRoot, portoPaths);
+    const userConfig = loadUserConfig(UserRoot, { portoRoot: Paths.theme });
+    configContext = await generateSiteAssets(UserRoot, userConfig, portoPaths);
+    const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
+
+    logResolvedSiteLocation(UserRoot, portoPaths, configContext);
 
     // Watch for config.yml changes to trigger Docusaurus reload
     if (configYaml) {
@@ -66,8 +73,20 @@ export async function devCommand(siteDir, options = {}) {
           // Regenerate the static config shim with the updated values,
           // which triggers Docusaurus' own file watcher to hot-reload.
           try {
-            writeConfigShim(UserRoot, portoPaths);
-            logResolvedSiteLocation(UserRoot, portoPaths);
+            const userConfig = loadUserConfig(UserRoot, {
+              portoRoot: Paths.theme,
+            });
+
+            generateSiteAssets(UserRoot, userConfig, portoPaths)
+              .then((res) => {
+                configContext = res;
+
+                writeConfigShim(UserRoot, portoPaths, configContext);
+                logResolvedSiteLocation(UserRoot, portoPaths, configContext);
+              })
+              .catch((err) => {
+                logger.warn(`Failed to regenerate assets: ${err.message}`);
+              });
           } catch (err) {
             logger.warn(`Failed to regenerate config: ${err.message}`);
           }
@@ -98,8 +117,8 @@ export async function devCommand(siteDir, options = {}) {
           if (filename && filename.endsWith(".mjs")) {
             logger.info(`Detected backend change (${filename}), reloading...`);
             try {
-              writeConfigShim(UserRoot, portoPaths, {}, true); // forceRefresh = true
-              logResolvedSiteLocation(UserRoot, portoPaths);
+              writeConfigShim(UserRoot, portoPaths, configContext, true); // forceRefresh = true
+              logResolvedSiteLocation(UserRoot, portoPaths, configContext);
             } catch (err) {
               logger.warn(`Failed to regenerate config: ${err.message}`);
             }

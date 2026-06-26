@@ -1,19 +1,22 @@
 import fs from "fs";
 import { logger } from "@portosaur/logger";
 
-// Cache for CSS content and parsed variables to avoid redundant reads
-const cssCache = new Map();
-const varCache = new Map();
-
 /**
  * Extracts a CSS variable's value from an array of CSS files.
  * Supports resolving nested variables (e.g., var(--other-var)).
  *
  * @param {string} varName - The CSS variable name to find (e.g., '--ifm-color-primary').
  * @param {string[]} cssFiles - Array of absolute paths to CSS files to search in.
+ * @param {Map<string, string>} [varCache] - Optional map to cache parsed variables during resolution.
+ * @param {Map<string, string>} [cssCache] - Optional map to cache CSS file content.
  * @returns {string|null} The resolved CSS variable value, or null if not found.
  */
-export function getCssVar(varName, cssFiles = []) {
+export function getCssVar(
+  varName,
+  cssFiles = [],
+  varCache = new Map(),
+  cssCache = new Map(),
+) {
   // Return cached value if exists
   if (varCache.has(varName)) {
     return varCache.get(varName);
@@ -48,7 +51,12 @@ export function getCssVar(varName, cssFiles = []) {
         if (nestedMatch) {
           const nestedVar = nestedMatch[1];
           try {
-            const resolvedValue = getCssVar(nestedVar, cssFiles);
+            const resolvedValue = getCssVar(
+              nestedVar,
+              cssFiles,
+              varCache,
+              cssCache,
+            );
             if (resolvedValue) {
               varCache.set(varName, resolvedValue);
               return resolvedValue;
