@@ -1071,6 +1071,12 @@
   display: block !important;
 }
 
+:global(body.pv-dock-active) :global([class*="backToTopButton"]) {
+  right: calc(
+    var(--pv-dock-width, 380px) + var(--ifm-spacing-horizontal, 1rem)
+  ) !important;
+}
+
 /* Ensure the main content column expands and doesn't hit a max-width cap when docked */
 :global(body.pv-dock-active) :global([class*="docItemCol_"]) {
   max-width: none !important;

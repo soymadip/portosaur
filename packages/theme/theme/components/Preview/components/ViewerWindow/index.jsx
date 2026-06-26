@@ -229,12 +229,17 @@ export function ViewerRoot({ children }) {
 
     if (isDockMode && isOpen) {
       document.body.classList.add("pv-dock-active");
+      document.body.style.setProperty("--pv-dock-width", `${dockWidth}px`);
     } else {
       document.body.classList.remove("pv-dock-active");
+      document.body.style.removeProperty("--pv-dock-width");
     }
 
-    return () => document.body.classList.remove("pv-dock-active");
-  }, [isDockMode, isOpen]);
+    return () => {
+      document.body.classList.remove("pv-dock-active");
+      document.body.style.removeProperty("--pv-dock-width");
+    };
+  }, [dockWidth, isDockMode, isOpen]);
 
   // --- Scroll & Global Zoom Lock ---
   useEffect(() => {
