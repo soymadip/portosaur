@@ -50,12 +50,20 @@ function processManifest(manifestFile, outputDir, appVersion, options) {
       manifest.icons = patchedIcons;
     }
 
-    let shortcutIcon = [{ src: "/favicon/android-chrome-192x192.png", sizes: "192x192", purpose: "any" }];
+    let shortcutIcon = [
+      {
+        src: "/favicon/android-chrome-192x192.png",
+        sizes: "192x192",
+        purpose: "any",
+      },
+    ];
 
     if (manifest.icons && manifest.icons.length > 0) {
-      const icon192 = manifest.icons.find(i => i.sizes === "192x192");
+      const icon192 = manifest.icons.find((i) => i.sizes === "192x192");
       if (icon192) {
-        shortcutIcon = [{ src: icon192.src, sizes: icon192.sizes, purpose: "any" }];
+        shortcutIcon = [
+          { src: icon192.src, sizes: icon192.sizes, purpose: "any" },
+        ];
       }
     }
 
@@ -64,14 +72,26 @@ function processManifest(manifestFile, outputDir, appVersion, options) {
         name: "Notes",
         short_name: "Notes",
         url: `/${options?.notesRoute || "notes"}`,
-        icons: [{ src: "/img/svg/icon-note.svg", type: "image/svg+xml", purpose: "any" }]
+        icons: [
+          {
+            src: "/img/svg/icon-note.svg",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+        ],
       },
       {
         name: "Blog",
         short_name: "Blog",
         url: `/${options?.blogRoute || "blog"}`,
-        icons: [{ src: "/img/svg/icon-blog.svg", type: "image/svg+xml", purpose: "any" }]
-      }
+        icons: [
+          {
+            src: "/img/svg/icon-blog.svg",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+        ],
+      },
     ];
 
     if (options?.tasksEnabled) {
@@ -79,7 +99,13 @@ function processManifest(manifestFile, outputDir, appVersion, options) {
         name: "Tasks",
         short_name: "Tasks",
         url: "/tasks",
-        icons: [{ src: "/img/svg/icon-tasks.svg", type: "image/svg+xml", purpose: "any" }]
+        icons: [
+          {
+            src: "/img/svg/icon-tasks.svg",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+        ],
       });
     }
 
