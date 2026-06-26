@@ -27,7 +27,7 @@ function cleanupFile(filePath) {
   return false;
 }
 
-function processManifest(manifestFile, outputDir, appVersion) {
+function processManifest(manifestFile, outputDir, appVersion, options) {
   try {
     const manifest = JSON.parse(manifestFile.contents);
     manifest.version = appVersion;
@@ -50,13 +50,47 @@ function processManifest(manifestFile, outputDir, appVersion) {
       manifest.icons = patchedIcons;
     }
 
+    let shortcutIcon = [{ src: "/favicon/android-chrome-192x192.png", sizes: "192x192", purpose: "any" }];
+
+    if (manifest.icons && manifest.icons.length > 0) {
+      const icon192 = manifest.icons.find(i => i.sizes === "192x192");
+      if (icon192) {
+        shortcutIcon = [{ src: icon192.src, sizes: icon192.sizes, purpose: "any" }];
+      }
+    }
+
+    manifest.shortcuts = [
+      {
+        name: "Notes",
+        short_name: "Notes",
+        url: `/${options?.notesRoute || "notes"}`,
+        icons: [{ src: "/img/svg/icon-note.svg", type: "image/svg+xml", purpose: "any" }]
+      },
+      {
+        name: "Blog",
+        short_name: "Blog",
+        url: `/${options?.blogRoute || "blog"}`,
+        icons: [{ src: "/img/svg/icon-blog.svg", type: "image/svg+xml", purpose: "any" }]
+      }
+    ];
+
+    if (options?.tasksEnabled) {
+      manifest.shortcuts.push({
+        name: "Tasks",
+        short_name: "Tasks",
+        url: "/tasks",
+        icons: [{ src: "/img/svg/icon-tasks.svg", type: "image/svg+xml", purpose: "any" }]
+      });
+    }
+
+    manifestFile.contents = Buffer.from(JSON.stringify(manifest, null, 2));
     fs.writeFileSync(
       path.join(outputDir, manifestFile.name),
-      JSON.stringify(manifest, null, 2),
+      manifestFile.contents,
     );
     return true;
   } catch (err) {
-    logger.error(`Failed to process manifest: ${err.message}`);
+    logger.warn(`Failed to process manifest: ${err.message}`);
     fs.writeFileSync(
       path.join(outputDir, manifestFile.name),
       manifestFile.contents,
@@ -69,7 +103,7 @@ function processManifest(manifestFile, outputDir, appVersion) {
  * Converts a raw HTML tag string from the favicons library into a Docusaurus
  * headTag object: { tagName, attributes }.
  *
- * Example input:  '<link rel="icon" href="/favicon/favicon.ico">'
+ * Example i#nput:  '<link rel="icon" href="/favicon/favicon.ico">'
  * Example output: { tagName: 'link', attributes: { rel: 'icon', href: '/favicon/favicon.ico' } }
  */
 function parseHtmlTagString(htmlString) {
@@ -150,7 +184,7 @@ export async function generateFavicons(siteDir, options = {}) {
     const primaryColor = options.themeColor || "#3578e5";
     const bgColor = options.backgroundColor || "#ffffff";
     const iconColor = { color: primaryColor };
-    const iconsToGenerate = ["note", "blog"];
+    const iconsToGenerate = ["note", "blog", "tasks"];
     for (const icon of iconsToGenerate) {
       try {
         await extractSvg(icon, imgDir, {
@@ -255,7 +289,7 @@ export async function generateFavicons(siteDir, options = {}) {
     if (Array.isArray(response.files)) {
       for (const file of response.files) {
         if (file.name.includes("manifest")) {
-          processManifest(file, outputDir, appVersion);
+          processManifest(file, outputDir, appVersion, options);
         } else {
           fs.writeFileSync(path.join(outputDir, file.name), file.contents);
         }
