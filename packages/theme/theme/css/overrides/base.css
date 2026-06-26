@@ -17,6 +17,21 @@ html {
   background-color: var(--ifm-background-color) !important;
 }
 
+[class*="backToTopButton"] {
+  right: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  background: var(--ifm-color-emphasis-200) !important;
+  color: var(--ifm-font-color-base) !important;
+  border: 1px solid var(--ifm-color-emphasis-400) !important;
+  box-shadow: var(--ifm-global-shadow-lw) !important;
+}
+
+[class*="backToTopButton"]:hover {
+  background: var(--ifm-color-emphasis-300) !important;
+  border-color: var(--ifm-color-emphasis-500) !important;
+}
+
 .center {
   display: flex;
   justify-content: center;
