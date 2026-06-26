@@ -13,16 +13,57 @@ export default function Btn({
   as,
   href,
   sameTab,
+
   desc,
   hint,
+  hintTop,
+  hintRight,
+  hintLeft,
+  hintBottom,
+
   primary,
   danger,
   success,
   warning,
   info,
   secondary,
+
   ...rest
 }) {
+  const checkDuplicate = (props) => {
+    if (process.env.NODE_ENV === "production") {
+      return;
+    }
+
+    const active = Object.entries(props)
+      .filter(([, value]) => value !== undefined && value !== false)
+      .map(([key]) => key);
+
+    if (active.length > 1) {
+      throw new Error(
+        `[Btn] Props ${active.join(", ")} are mutually exclusive. ` +
+          `Choose only one of: ${Object.keys(props).join(", ")}.`,
+      );
+    }
+  };
+
+  checkDuplicate({
+    primary,
+    secondary,
+    success,
+    warning,
+    danger,
+    info,
+  });
+
+  checkDuplicate("hint", {
+    hint,
+    hintTop,
+    hintRight,
+    hintLeft,
+    hintBottom,
+  });
+
   const Component = as || (href ? Link : "button");
   const isDocusaurusLink = Component === Link;
   const linkProps = {};
@@ -56,8 +97,9 @@ export default function Btn({
     variantClass = styles.buttonSecondary;
   }
 
-  const combinedClassName =
-    `${styles.button} ${variantClass} ${disabled ? styles.buttonDisabled : ""} ${className}`.trim();
+  const combinedClassName = `${styles.button} ${variantClass} ${
+    disabled ? styles.buttonDisabled : ""
+  } ${className}`.trim();
 
   const renderIcon = () => {
     if (!icon) {
@@ -69,9 +111,11 @@ export default function Btn({
         icon.match(/\.(svg|png|jpg|jpeg|gif|webp)$/i) ||
         icon.startsWith("http") ||
         icon.startsWith("/");
+
       if (isUrl) {
         return <img src={icon} alt="" className={styles.icon} />;
       }
+
       return (
         <span className={styles.icon} style={{ fontSize: "1em" }}>
           {icon}
@@ -96,9 +140,7 @@ export default function Btn({
           return;
         }
 
-        if (onClick) {
-          onClick(e);
-        }
+        onClick?.(e);
       }}
       disabled={Component === "button" ? disabled : undefined}
       aria-disabled={disabled ? "true" : undefined}
@@ -112,10 +154,27 @@ export default function Btn({
     </Component>
   );
 
-  const tooltipMsg = desc || hint;
+  let tooltipMsg = desc;
+  const hintProps = {};
+
+  if (!tooltipMsg) {
+    if (hint !== undefined || hintTop !== undefined) {
+      tooltipMsg = hint ?? hintTop;
+    } else if (hintRight !== undefined) {
+      tooltipMsg = hintRight;
+      hintProps.right = true;
+    } else if (hintLeft !== undefined) {
+      tooltipMsg = hintLeft;
+      hintProps.left = true;
+    } else if (hintBottom !== undefined) {
+      tooltipMsg = hintBottom;
+      hintProps.bottom = true;
+    }
+  }
+
   if (tooltipMsg) {
     return (
-      <Hint msg={tooltipMsg} noUl gap={10}>
+      <Hint msg={tooltipMsg} noUl gap={10} {...hintProps}>
         {buttonElement}
       </Hint>
     );

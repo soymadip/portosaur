@@ -1,5 +1,5 @@
 .button {
-  background-color: var(--ifm-color-emphasis-400);
+  background-color: var(--ifm-button-color);
   color: var(--ifm-font-color-base) !important;
   font-size: 0.75rem;
   font-weight: 600;
