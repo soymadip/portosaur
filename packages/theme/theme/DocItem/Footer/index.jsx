@@ -34,7 +34,7 @@ export default function FooterWrapper(props) {
               transform: "translateY(-50%)",
             }}
           >
-            <Pv href={sourceRaw} activeIdx={0} underline={false}>
+            <Pv href={sourceRaw} activeIdx={0} noUl>
               <div className={styles.footerSourceBtn}>
                 <svg
                   width="17"
