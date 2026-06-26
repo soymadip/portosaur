@@ -139,3 +139,10 @@ html[data-theme="dark"] {
   --ifm-footer-padding-horizontal: 0.1rem;
   --ifm-footer-padding-vertical: 0.1rem;
 }
+
+/* Mobile Overrides */
+@media (max-width: 996px) {
+  :root {
+    --ifm-navbar-shadow: none !important;
+  }
+}
