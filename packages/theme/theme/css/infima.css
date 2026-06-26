@@ -33,7 +33,7 @@ html[data-theme="dark"] {
   --ifm-color-danger-rgb: var(--porto-danger-rgb);
   --ifm-color-info: var(--porto-info);
 
-  /* Auto-generated tinted grayscale palette */
+  /* Tinted grayscale palette */
   --ifm-color-gray-0: var(--porto-gray-0);
   --ifm-color-gray-100: var(--porto-gray-100);
   --ifm-color-gray-200: var(--porto-gray-200);
@@ -105,21 +105,38 @@ html[data-theme="dark"] {
 
   /* Borders & Shadows */
   --ifm-shadow-color: var(--porto-surface-1);
-  --ifm-button-color: var(--porto-border);
+  --ifm-button-color: var(--ifm-color-emphasis-500);
   --ifm-hover-overlay: rgba(var(--porto-surface-2-rgb), 0.5) !important;
+
+  /* Hr */
+  --ifm-hr-background-color: var(--porto-gray-600) !important;
 }
 
+
+/* Global Component Spacing Overrides */
 :root {
   --ifm-heading-font-family:
     "Geologica Variable", system-ui, -apple-system, sans-serif;
 
   --ifm-font-family-base: "Alata", system-ui, -apple-system, sans-serif;
 
+  /* Navbar */
+  --ifm-navbar-item-padding-horizontal: 0.5rem;
+
+  /* Breadcrumb */
+  --ifm-breadcrumb-separator-size: 0.4rem;
+  --ifm-breadcrumb-spacing: 0.03rem;
+
+  /* Scroll Margin */
   --ifm-scroll-margin-top: 38px;
   --ifm-scroll-margin-top-mobile: 32px;
 
-  /* Global Component Spacing Overrides */
+
+  /* Hr tag */
+  --ifm-hr-height: 2px !important;
+  --ifm-hr-margin-vertical: 2.5rem;
+
+  /* Footer */
   --ifm-footer-padding-horizontal: 0.1rem;
   --ifm-footer-padding-vertical: 0.1rem;
-  --ifm-navbar-item-padding-horizontal: 0.5rem;
 }
