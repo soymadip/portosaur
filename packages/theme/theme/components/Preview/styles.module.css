@@ -1071,10 +1071,18 @@
   display: block !important;
 }
 
+/* The ScrollToTop Button - push it to the center of doc area */
 :global(body.pv-dock-active) :global([class*="backToTopButton"]) {
-  right: calc(
-    var(--pv-dock-width, 380px) + var(--ifm-spacing-horizontal, 1rem)
-  ) !important;
+  right: auto !important;
+  left: calc((100vw - var(--pv-dock-width, 380px)) / 2) !important;
+  transform: translateX(-50%);
+  color: var(--ifm-font-color-base) !important;
+  border: 1px solid var(--ifm-color-emphasis-400) !important;
+  box-shadow: var(--ifm-global-shadow-lw) !important;
+}
+:global(body.pv-dock-active) :global([class*="backToTopButton"]:hover) {
+  background: var(--ifm-color-emphasis-300) !important;
+  border-color: var(--ifm-color-emphasis-500) !important;
 }
 
 /* Ensure the main content column expands and doesn't hit a max-width cap when docked */
