@@ -73,6 +73,7 @@ html[data-theme="dark"] {
   --ifm-navbar-background-color: var(--porto-bg) !important;
   --ifm-navbar-search-input-color: var(--porto-text);
   --ifm-navbar-search-input-background-color: var(--porto-surface-0);
+  --ifm-navbar-search-input-placeholder-color: var(--porto-text-muted);
 
   /* Footer & Hero */
   --ifm-footer-background-color: var(--porto-bg-alt) !important;
@@ -112,7 +113,6 @@ html[data-theme="dark"] {
   --ifm-hr-background-color: var(--porto-gray-600) !important;
 }
 
-
 /* Global Component Spacing Overrides */
 :root {
   --ifm-heading-font-family:
@@ -130,7 +130,6 @@ html[data-theme="dark"] {
   /* Scroll Margin */
   --ifm-scroll-margin-top: 38px;
   --ifm-scroll-margin-top-mobile: 32px;
-
 
   /* Hr tag */
   --ifm-hr-height: 2px !important;

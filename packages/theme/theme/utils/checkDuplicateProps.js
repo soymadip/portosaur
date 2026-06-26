@@ -11,18 +11,18 @@
  * @throws {Error} If more than one prop in the group is provided.
  */
 export default function checkDuplicateProps(component, group, props) {
-    if (process.env.NODE_ENV === "production") {
-        return;
-    }
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
 
-    const active = Object.entries(props)
-        .filter(([, value]) => value !== undefined && value !== false)
-        .map(([key]) => key);
+  const active = Object.entries(props)
+    .filter(([, value]) => value !== undefined && value !== false)
+    .map(([key]) => key);
 
-    if (active.length > 1) {
-        throw new Error(
-            `[${component}] ${group}: Props ${active.join(", ")} are mutually exclusive. ` +
-            `Choose only one of: ${Object.keys(props).join(", ")}.`,
-        );
-    }
+  if (active.length > 1) {
+    throw new Error(
+      `[${component}] ${group}: Props ${active.join(", ")} are mutually exclusive. ` +
+        `Choose only one of: ${Object.keys(props).join(", ")}.`,
+    );
+  }
 }

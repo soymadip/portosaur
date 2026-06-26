@@ -28,7 +28,7 @@
   --nord-light-crust: #d5dce8;
 
   /* Mid-tones to bridge the Polar Night <-> Snow Storm gap */
-  --nord-mix-1: #6f788a; 
+  --nord-mix-1: #6f788a;
   --nord-mix-2: #929aaa;
   --nord-mix-3: #b5bcc9;
 
@@ -98,7 +98,7 @@
   --porto-surface-2-rgb: 213, 220, 232;
 
   --porto-text: var(--nord0);
-  --porto-text-muted: var(--nord3);
+  --porto-text-muted: var(--nord-mix-1);
   --porto-border: var(--nord-light-crust);
   --porto-code: var(--nord11);
 
@@ -159,7 +159,7 @@
   --porto-surface-2-rgb: var(--nord3-rgb);
 
   --porto-text: var(--nord5);
-  --porto-text-muted: var(--nord4);
+  --porto-text-muted: var(--nord-mix-2);
   --porto-border: var(--nord-crust);
   --porto-code: var(--nord11);
 

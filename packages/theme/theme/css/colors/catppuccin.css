@@ -157,7 +157,7 @@
   --porto-surface-2-rgb: var(--ctp-latte-surface2-rgb);
 
   --porto-text: var(--ctp-latte-text);
-  --porto-text-muted: var(--ctp-latte-subtext0);
+  --porto-text-muted: var(--ctp-latte-overlay1);
   --porto-border: var(--ctp-latte-crust);
   --porto-code: var(--ctp-latte-red);
 
@@ -217,7 +217,7 @@
   --porto-surface-2-rgb: var(--ctp-mocha-surface2-rgb);
 
   --porto-text: var(--ctp-mocha-text);
-  --porto-text-muted: var(--ctp-mocha-subtext0);
+  --porto-text-muted: var(--ctp-mocha-overlay1);
   --porto-border: var(--ctp-mocha-crust);
   --porto-code: var(--ctp-mocha-red);
 
