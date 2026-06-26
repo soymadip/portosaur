@@ -2,6 +2,7 @@ import React from "react";
 import Link from "@docusaurus/Link";
 import Hint from "../../Hint";
 import styles from "./styles.module.css";
+import checkDuplicateProps from "../../../utils/checkDuplicateProps.js";
 
 export default function Btn({
   children,
@@ -30,24 +31,7 @@ export default function Btn({
 
   ...rest
 }) {
-  const checkDuplicate = (props) => {
-    if (process.env.NODE_ENV === "production") {
-      return;
-    }
-
-    const active = Object.entries(props)
-      .filter(([, value]) => value !== undefined && value !== false)
-      .map(([key]) => key);
-
-    if (active.length > 1) {
-      throw new Error(
-        `[Btn] Props ${active.join(", ")} are mutually exclusive. ` +
-          `Choose only one of: ${Object.keys(props).join(", ")}.`,
-      );
-    }
-  };
-
-  checkDuplicate({
+  checkDuplicateProps("Btn", "variant", {
     primary,
     secondary,
     success,
@@ -56,7 +40,7 @@ export default function Btn({
     info,
   });
 
-  checkDuplicate("hint", {
+  checkDuplicateProps("Btn", "hint", {
     hint,
     hintTop,
     hintRight,
