@@ -1081,6 +1081,8 @@
 :global(body.pv-dock-active) :global([class*="docItemCol_"]) {
   max-width: none !important;
   flex: 1 !important;
+  padding-left: calc(var(--ifm-spacing-horizontal, 1rem) * 0.4) !important;
+  padding-right: calc(var(--ifm-spacing-horizontal, 1rem) * 0.4) !important;
 }
 
 :global(body.pv-dock-active)
