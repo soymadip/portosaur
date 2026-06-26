@@ -80,7 +80,7 @@ html[data-theme="dark"] {
 
   /* Cards & Alerts */
   --ifm-card-background-color: var(--porto-surface-0);
-  --ifm-table-border-color: var(--porto-border) !important;
+  --ifm-table-border-color: var(--porto-gray-600) !important;
   --ifm-table-stripe-background: var(--porto-surface-0) !important;
 
   /* Menu (Sidebar) */

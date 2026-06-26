@@ -89,7 +89,7 @@
   --porto-surface-0: var(--nord5);
   --porto-surface-0-rgb: var(--nord5-rgb);
   --porto-surface-1: var(--nord4);
-  --porto-surface-2: var(--nord3);
+  --porto-surface-2: var(--nord4);
   --porto-surface-2-rgb: var(--nord4-rgb);
 
   --porto-text: var(--nord0);
@@ -160,16 +160,18 @@
   /* text: nord5 (#e5e9f0) — main foreground (like CTP mocha text #cdd6f4) */
   --porto-text: var(--nord5);
 
-  /* text-muted: nord3 (#4c566a) is too dark on Polar Night — use nord4 dimmed */
+  /* text-muted: nord4 (#d8dee9) — slightly dimmer than nord5, like CTP subtext0 */
   --porto-text-muted: var(--nord4);
 
   /* Border — crust equivalent, darker than bg */
   --porto-border: var(--nord-crust);
 
-  /* code: nord8 (cyan) is the conventional inline code color in Nord dark */
-  --porto-code: var(--nord7);
+  /* code: nord11 (Aurora red) — consistent with light mode and Catppuccin's use of red for code */
+  --porto-code: var(--nord11);
 
-  /* Grayscale — mapped clean from darkest (crust) to lightest (snow storm) */
+  /* Grayscale — crust (darkest) to Snow Storm (lightest).
+     Nord has no mid-tones between Polar Night and Snow Storm,
+     so gray-600+ jumps into Snow Storm — unavoidable with the Nord palette. */
   --porto-gray-0: var(--nord-crust);
   --porto-gray-100: var(--nord-mantle);
   --porto-gray-200: var(--nord0);
@@ -179,6 +181,6 @@
   --porto-gray-600: var(--nord4);
   --porto-gray-700: var(--nord5);
   --porto-gray-800: var(--nord6);
-  --porto-gray-900: var(--nord6);
-  --porto-gray-1000: var(--nord6);
+  --porto-gray-900: #f2f4f8;
+  --porto-gray-1000: #f8f9fb;
 }
