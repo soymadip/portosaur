@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import TOCOriginal from "@theme-init/TOC";
 
+// Fix bug where the active link in the TOC is not visible when scrolling through the page
 export default function TOCWrapper(props) {
   const containerRef = useRef(null);
 

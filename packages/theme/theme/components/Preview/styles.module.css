@@ -174,7 +174,7 @@
 .modeDock .windowFrame {
   border-radius: 0;
   border: none;
-  border-left: 1px solid var(--ifm-color-emphasis-400);
+  border-left: 1px solid var(--ifm-toc-border-color);
   width: var(--pv-dock-width, 380px);
   height: 100%;
 }
