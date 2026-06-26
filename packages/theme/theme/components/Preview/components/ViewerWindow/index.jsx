@@ -57,7 +57,7 @@ export function ViewerRoot({ children }) {
   const corsProxyList = customFields?.corsProxyList || [];
   const location = useLocation();
 
-  useGlobalZoomDisable(isOpen);
+  useGlobalZoomDisable(isOpen && isPopupMode);
 
   const [mounted, setMounted] = useState(typeof window !== "undefined");
   const [isOnline, setIsOnline] = useState(
@@ -243,7 +243,7 @@ export function ViewerRoot({ children }) {
 
   // --- Scroll & Global Zoom Lock ---
   useEffect(() => {
-    if (typeof document === "undefined" || !isOpen) return;
+    if (typeof document === "undefined" || !isOpen || !isPopupMode) return;
 
     const handleGlobalWheel = (e) => {
       if (e.ctrlKey) {

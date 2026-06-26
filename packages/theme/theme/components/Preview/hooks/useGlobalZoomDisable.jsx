@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 
-export function useGlobalZoomDisable(isOpen) {
+export function useGlobalZoomDisable(isActive) {
   useEffect(() => {
-    if (!isOpen || typeof window === "undefined") {
+    if (!isActive || typeof window === "undefined") {
       return;
     }
 
@@ -24,5 +24,5 @@ export function useGlobalZoomDisable(isOpen) {
     return () => {
       window.removeEventListener("wheel", handleWheel, { capture: true });
     };
-  }, [isOpen]);
+  }, [isActive]);
 }
