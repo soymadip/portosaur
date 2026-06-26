@@ -37,7 +37,7 @@
 
 .buttonPrimary {
   background-color: var(--ifm-color-primary) !important;
-  color: var(--ifm-button-color) !important;
+  color: var(--ifm-background-color) !important;
 }
 
 .buttonPrimary:hover {
@@ -46,7 +46,7 @@
 
 .buttonSecondary {
   background-color: var(--ifm-color-secondary) !important;
-  color: var(--ifm-color-secondary-contrast-background) !important;
+  color: var(--ifm-color-black) !important;
 }
 
 .buttonSecondary:hover {
@@ -55,7 +55,7 @@
 
 .buttonSuccess {
   background-color: var(--ifm-color-success) !important;
-  color: var(--ifm-color-success-contrast-background) !important;
+  color: var(--ifm-color-black) !important;
 }
 
 .buttonSuccess:hover {
@@ -64,7 +64,7 @@
 
 .buttonInfo {
   background-color: var(--ifm-color-info) !important;
-  color: var(--ifm-color-info-contrast-background) !important;
+  color: var(--ifm-color-black) !important;
 }
 
 .buttonInfo:hover {
@@ -73,7 +73,7 @@
 
 .buttonWarning {
   background-color: var(--ifm-color-warning) !important;
-  color: var(--ifm-color-warning-contrast-background) !important;
+  color: var(--ifm-color-black) !important;
 }
 
 .buttonWarning:hover {
@@ -82,7 +82,7 @@
 
 .buttonDanger {
   background-color: var(--ifm-color-danger) !important;
-  color: var(--ifm-color-danger-contrast-background) !important;
+  color: var(--ifm-color-black) !important;
 }
 
 .buttonDanger:hover {
