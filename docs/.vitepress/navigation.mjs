@@ -18,7 +18,6 @@ export const baseSidebar = [
           { text: "Reference", link: "/user/config/reference" },
         ],
       },
-      { text: "CLI Reference", link: "/user/cli" },
       {
         text: "Markdown Features",
         link: "/user/markdown/overview",
@@ -34,6 +33,8 @@ export const baseSidebar = [
           { text: "UI Components", link: "/user/markdown/ui-components" },
         ],
       },
+      { text: "CLI Reference", link: "/user/cli" },
+      { text: "Progressive Web App (PWA)", link: "/user/pwa" },
       {
         text: "Deployment",
         link: "/user/deploy/overview",

@@ -6,6 +6,7 @@ import { downloadImage } from "../utils/imageDownloader.mjs";
 import { reshapeImage } from "../utils/imageProcessor.mjs";
 import { extractSvg } from "../utils/iconExtractor.mjs";
 import { logger } from "@portosaur/logger";
+import sharp from "sharp";
 
 //  Helper Functions
 
@@ -27,10 +28,65 @@ function cleanupFile(filePath) {
   return false;
 }
 
-function processManifest(manifestFile, outputDir, appVersion, options) {
+async function processManifest(
+  manifestFile,
+  outputDir,
+  appVersion,
+  options,
+  siteDir,
+) {
   try {
     const manifest = JSON.parse(manifestFile.contents);
     manifest.version = appVersion;
+    manifest.id = "/?source=pwa";
+
+    // Auto-detect screenshots
+    const screenshotsDir = path.join(siteDir, "assets", "screenshots");
+    if (fs.existsSync(screenshotsDir)) {
+      const files = fs.readdirSync(screenshotsDir);
+      const manifestScreenshots = [];
+      const outScreenshotsDir = path.join(outputDir, "screenshots");
+
+      fs.mkdirSync(outScreenshotsDir, { recursive: true });
+
+      for (const file of files) {
+        if (file.match(/\.(png|jpe?g|webp)$/i)) {
+          const srcPath = path.join(screenshotsDir, file);
+          const metadata = await sharp(srcPath).metadata();
+          const formFactor =
+            metadata.width > metadata.height ? "wide" : "narrow";
+
+          fs.copyFileSync(srcPath, path.join(outScreenshotsDir, file));
+
+          manifestScreenshots.push({
+            src: `/favicon/screenshots/${file}`,
+            sizes: `${metadata.width}x${metadata.height}`,
+            type: `image/${metadata.format === "jpeg" ? "jpeg" : metadata.format}`,
+            form_factor: formFactor,
+          });
+        }
+      }
+
+      if (manifestScreenshots.length > 0) {
+        manifestScreenshots.sort((a, b) => {
+          // 1. Mobile (narrow) before Desktop (wide)
+          if (a.form_factor === "narrow" && b.form_factor !== "narrow")
+            return -1;
+          if (a.form_factor !== "narrow" && b.form_factor === "narrow")
+            return 1;
+
+          // 2. Prioritize files named "home-" (e.g. home-mobile, home-desktop)
+          const aIsHome = a.src.match(/\/home-/i);
+          const bIsHome = b.src.match(/\/home-/i);
+          if (aIsHome && !bIsHome) return -1;
+          if (!aIsHome && bIsHome) return 1;
+
+          // 3. Fallback to alphabetical sorting for predictable order
+          return a.src.localeCompare(b.src);
+        });
+        manifest.screenshots = manifestScreenshots;
+      }
+    }
 
     if (manifest.icons && Array.isArray(manifest.icons)) {
       const patchedIcons = [];
@@ -315,7 +371,7 @@ export async function generateFavicons(siteDir, options = {}) {
     if (Array.isArray(response.files)) {
       for (const file of response.files) {
         if (file.name.includes("manifest")) {
-          processManifest(file, outputDir, appVersion, options);
+          await processManifest(file, outputDir, appVersion, options, siteDir);
         } else {
           fs.writeFileSync(path.join(outputDir, file.name), file.contents);
         }
