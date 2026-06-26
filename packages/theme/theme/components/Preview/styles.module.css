@@ -171,13 +171,16 @@
 .modeDock.pvVisible {
   width: var(--pv-dock-width, 380px);
 }
+
 .modeDock .windowFrame {
   border-radius: 0;
   border: none;
   border-left: 1px solid var(--ifm-toc-border-color);
+  border-bottom: 0.5px solid var(--ifm-toc-border-color);
   width: var(--pv-dock-width, 380px);
   height: 100%;
 }
+
 .dockResizeHandle {
   pointer-events: auto;
   position: absolute;
