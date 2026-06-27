@@ -19,7 +19,7 @@ export { buildDocuConfig } from "./generators/docusaurusConfig.mjs";
 export {
   resolveSiteUrl,
   resolveBasePath,
-  createStaticAssetResolver,
+  createAssetValidator,
   buildHeadTags,
   cleanFrontMatterSlug,
   resolveSiteCssFiles,

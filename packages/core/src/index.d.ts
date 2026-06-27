@@ -23,9 +23,17 @@ export interface DocusaurusContext {
   extraHeadTags?: any[];
 }
 
+export interface ResolveVarsContext {
+  /** The absolute path to the project root */
+  site_root?: string;
+  /** The absolute path to the theme static directory */
+  porto_static?: string;
+  [key: string]: any;
+}
+
 /**
  * Loads, parses, and validates the user's `config.yml` file.
- * Optionally resolves template variables (like `{{siteRoot}}` or `{{portoRoot}}`)
+ * Optionally resolves template variables (like `{{site_root}}` or `{{porto_static}}`)
  * immediately if `systemVars` are provided.
  *
  * @param projectDir - The absolute path to the user's project directory.
@@ -34,7 +42,7 @@ export interface DocusaurusContext {
  */
 export function loadUserConfig(
   projectDir: string,
-  systemVars?: Record<string, any>,
+  systemVars?: ResolveVarsContext,
 ): any;
 
 // ----------------------------------------------------------------------------
@@ -235,9 +243,9 @@ export function resolveBasePath(
 ): string;
 
 /**
- * Creates a function to resolve static asset paths from the provided directories.
+ * Creates a function to validate and resolve static asset paths from the provided directories.
  */
-export function createStaticAssetResolver(
+export function createAssetValidator(
   _projectDir: string,
   staticDir: string,
   assetsDir: string,

@@ -66,7 +66,7 @@ export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
       userConfig.home_page?.hero?.desc ||
       "Portfolio",
 
-    staticDirs: ["static"],
+    staticDirs: ["static", portoPaths.static],
     portoAssetsDir: portoPaths.assets,
     themeColor: themeColor,
     backgroundColor: backgroundColor,
@@ -123,7 +123,7 @@ export default async function createConfig() {
   const rawConf = loadUserConfig(UserRoot);
   return buildDocuConfig(rawConf, UserRoot, {
     portoPaths: ${JSON.stringify(portoPaths)},
-    portoRoot: ${JSON.stringify(path.resolve(portoPaths.root))},
+    portoRoot: ${JSON.stringify(portoPaths.themeRoot)},
     ...${JSON.stringify(context)}
   });
 }
@@ -146,7 +146,7 @@ export function logResolvedSiteLocation(UserRoot, portoPaths, context = {}) {
   const rawConf = loadUserConfig(UserRoot);
   const docuConfig = buildDocuConfig(rawConf, UserRoot, {
     portoPaths,
-    portoRoot: path.resolve(portoPaths.root),
+    portoRoot: portoPaths.themeRoot,
     ...context,
   });
 

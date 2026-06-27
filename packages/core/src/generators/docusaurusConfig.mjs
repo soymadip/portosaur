@@ -8,7 +8,7 @@ import { getPortoDotDir } from "../utils/fs.mjs";
 import {
   resolveSiteUrl,
   resolveBasePath,
-  createStaticAssetResolver,
+  createAssetValidator,
   buildHeadTags,
   createSidebarItemsGenerator,
   cleanFrontMatterSlug,
@@ -41,7 +41,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const siteUrl = resolveSiteUrl(rawGet("site.url", "auto"), env);
   const sitePath = resolveBasePath(rawGet("site.base_url", "auto"), env);
 
-  const resolveAsset = createStaticAssetResolver(
+  const validateAsset = createAssetValidator(
     projectDir,
     staticDir,
     portoStaticDir,
@@ -74,9 +74,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
   const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
   const siteName = get("site.title", titleName); // Global site title.
-  const siteFavicon = resolveAsset(
+  const siteFavicon = validateAsset(
     get("site.favicon", ""), // Path to site's favicon (Default: home_page.hero.profile_pic).
-    resolveAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"), // Path/URL to profile picture in the hero section.
+    validateAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"), // Path/URL to profile picture in the hero section.
   );
 
   const siteTagline = get(
@@ -173,7 +173,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     },
 
     themeConfig: {
-      image: resolveAsset(get("site.social_card", "")) || undefined, // Preview image used when sharing your site on social media.
+      image: validateAsset(get("site.social_card", "")) || undefined, // Preview image used when sharing your site on social media.
       metadata: [
         { name: "generator", content: `Portosaur v${porto.version}` },
         ...customUserMetaTags,
@@ -372,7 +372,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       },
 
       heroSection: {
-        profilePic: resolveAsset(
+        profilePic: validateAsset(
           get("home_page.hero.profile_pic", ""),
           "img/icon.png",
         ),
@@ -393,12 +393,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         enable: get("home_page.about.enable", true),
         heading: get("home_page.about.heading", "About Me"), // Heading for the About Me section.
         name: get("site.title", "Your Name"), // Global site title.
-        image: resolveAsset(
-          get(
-            "home_page.about.image", // Image used in the About Me section.
-            "home_page.hero.profile_pic",
-            "img/icon.png",
-          ),
+        image: validateAsset(
+          get("home_page.about.image", "home_page.hero.profile_pic", ""),
+          "img/icon.png",
         ),
         bio: get("home_page.about.bio", []), // Paragraphs for your biography.
         skills: get("home_page.about.skills", []),
@@ -414,7 +411,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           "A collection of all my works, with featured projects highlighted",
         ),
         autoplay: get("home_page.project_shelf.autoplay", true), // Autoplay the project carousel.
-        projects: get("home_page.project_shelf.projects", []), // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
+
+        // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
+        projects: get("home_page.project_shelf.projects", []).map(
+          (project) => ({
+            ...project,
+            icon: validateAsset(project.icon, "img/project-blank.png"),
+          }),
+        ),
       },
 
       experienceSection: {
