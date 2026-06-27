@@ -65,10 +65,20 @@ export default function HeroSection({ id, className }) {
         {/* Right: profile picture */}
         <div className={styles.rightSection}>
           <img
-            src={useBaseUrl(profilePic)}
+            src={useBaseUrl(
+              typeof profilePic === "string" ? profilePic : profilePic.src,
+            )}
             alt="profile"
             className={styles.profilePic}
             loading="lazy"
+            onError={
+              typeof profilePic === "object" && profilePic.fallback
+                ? (e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = profilePic.fallback;
+                  }
+                : undefined
+            }
           />
         </div>
       </div>

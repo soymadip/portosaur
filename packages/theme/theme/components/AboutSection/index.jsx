@@ -47,9 +47,22 @@ export default function AboutSection({ id, className }) {
               {aboutMe.image && (
                 <div className={styles.imageWrapper}>
                   <img
-                    src={useBaseUrl(aboutMe.image)}
+                    src={useBaseUrl(
+                      typeof aboutMe.image === "string"
+                        ? aboutMe.image
+                        : aboutMe.image.src,
+                    )}
                     alt={aboutMe.name || "About Me"}
                     className={styles.aboutImage}
+                    onError={
+                      typeof aboutMe.image === "object" &&
+                      aboutMe.image.fallback
+                        ? (e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = aboutMe.image.fallback;
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               )}

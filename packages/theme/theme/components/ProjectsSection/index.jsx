@@ -353,10 +353,23 @@ export default function ProjectsSection({ id, className }) {
                           }}
                         >
                           <img
-                            src={project.icon}
+                            src={
+                              typeof project.icon === "string"
+                                ? project.icon
+                                : project.icon.src
+                            }
                             alt={project.title}
                             className={styles.projectImage}
                             loading="lazy"
+                            onError={
+                              typeof project.icon === "object" &&
+                              project.icon.fallback
+                                ? (e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = project.icon.fallback;
+                                  }
+                                : undefined
+                            }
                           />
                           {project.tags?.length > 0 &&
                             (() => {

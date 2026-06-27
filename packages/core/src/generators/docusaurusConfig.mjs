@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { createRequire } from "module";
 import { getGitDate } from "../utils/system.mjs";
 import { porto } from "../app.mjs";
@@ -65,6 +66,17 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
   const get = (key, ...fallbacks) =>
     getNestedValue(userConfig, key, ...fallbacks);
+
+  const genFallback = (img) => {
+    if (img && /^https?:\/\//.test(img)) {
+      const hash = crypto.createHash("md5").update(img).digest("hex");
+      return {
+        src: img,
+        fallback: `/fallbacks/${hash}.png`,
+      };
+    }
+    return img;
+  };
 
   const defaultTheme =
     get("theme.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
@@ -371,9 +383,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       },
 
       heroSection: {
-        profilePic: validateAsset(
-          get("home_page.hero.profile_pic", ""), // Path/URL to profile picture in the hero section.
-          "img/icon.png",
+        profilePic: genFallback(
+          validateAsset(
+            get("home_page.hero.profile_pic", ""), // Path/URL to profile picture in the hero section.
+            "img/icon.png",
+          ),
         ),
 
         intro: get("home_page.hero.intro", "Hello there, I'm"), // Intro text before name.
@@ -392,9 +406,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         enable: get("home_page.about.enable", true),
         heading: get("home_page.about.heading", "About Me"), // Heading for the About Me section.
         name: get("site.title", "Your Name"), // Global site title.
-        image: validateAsset(
-          get("home_page.about.image", "home_page.hero.profile_pic", ""),
-          "img/icon.png",
+        image: genFallback(
+          validateAsset(
+            get("home_page.about.image", "home_page.hero.profile_pic", ""),
+            "img/icon.png",
+          ),
         ),
         bio: get("home_page.about.bio", []), // Paragraphs for your biography.
         skills: get("home_page.about.skills", []),
@@ -415,7 +431,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         projects: get("home_page.project_shelf.projects", []).map(
           (project) => ({
             ...project,
-            icon: validateAsset(project.icon, "img/project-blank.png"),
+            icon: genFallback(
+              validateAsset(project.icon, "img/project-blank.png"),
+            ),
           }),
         ),
       },

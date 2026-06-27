@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { logger } from "@portosaur/logger";
+import crypto from "crypto";
 
 import { getPortoDotDir } from "../utils/fs.mjs";
 import {
@@ -138,6 +139,31 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     }
   }
 
+  // Collect remote images for offline fallbacks
+  const remoteFallbacks = [];
+
+  const addFallback = (url) => {
+    if (url && /^https?:\/\//.test(url)) {
+      if (!remoteFallbacks.some((f) => f.url === url)) {
+        remoteFallbacks.push({
+          url,
+          name: crypto.createHash("md5").update(url).digest("hex") + ".png",
+        });
+      }
+    }
+  };
+
+  addFallback(userConfig.home_page?.hero?.profile_pic);
+  addFallback(userConfig.home_page?.about?.image);
+
+  const projects = userConfig.home_page?.project_shelf?.projects || [];
+  projects.forEach((proj) => addFallback(proj.icon));
+
+  for (const fallback of remoteFallbacks) {
+    fallback.state = await fetchRemoteFileState(fallback.url);
+    fileStates.push(fallback.state);
+  }
+
   const hashFilePath = path.join(outputDir, ".favicon.hash");
   const configHash = Buffer.from(
     JSON.stringify({
@@ -212,6 +238,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   const reshapedImagePath = path.join(cacheDir, "profile_pic_reshaped.png");
   const tempFiles = [];
 
+  logger.info("Generating Shortcut icons...");
   try {
     const iconColor = { color: themeColor };
     for (const icon of shortcutIcons) {
@@ -221,6 +248,34 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
         await processSvg(srcPath, destPath, iconColor);
       } catch (e) {}
+    }
+
+    const fallbacksDir = path.join(
+      getPortoDotDir(siteDir),
+      "static",
+      "fallbacks",
+    );
+    if (remoteFallbacks.length > 0) {
+      logger.info("Downloading images for offline fallbacks...");
+      fs.mkdirSync(fallbacksDir, { recursive: true });
+    }
+
+    for (const fallback of remoteFallbacks) {
+      logger.info(`Downloading offline fallback: ${fallback.url}`);
+      try {
+        const downloaded = await downloadImage({
+          url: fallback.url,
+          destDir: cacheDir,
+          fileName: fallback.name,
+          proxies,
+          cacheDir: path.join(cacheDir, "downloads"),
+          remoteState: fallback.state,
+        });
+        fs.copyFileSync(downloaded, path.join(fallbacksDir, fallback.name));
+        tempFiles.push(downloaded);
+      } catch (e) {
+        throw new Error(`Broken image URL detected in config: ${fallback.url} (${e.message})`);
+      }
     }
 
     // Resolve image source
@@ -314,6 +369,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     }
 
     //-------- Process screenshots --------
+    logger.info("Processing PWA screenshots...");
     const screenshotsDir = path.join(siteDir, "assets", "screenshots");
     let manifestScreenshots = [];
 
@@ -371,6 +427,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     }
 
     // Generate manifest.webmanifest
+    logger.info("Generating Web App Manifest...");
     const manifest = {
       name: siteTitle,
       short_name: siteTitle,
