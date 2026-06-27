@@ -60,6 +60,9 @@
 
 .noteIcon {
   font-size: 2.8rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0.2rem;
   color: var(--note-color);
   transition: transform 0.3s ease;
 }
@@ -163,7 +166,13 @@
     justify-content: center;
   }
 
-  .noteIcon,
+  .noteIcon {
+    font-size: 2.8rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0.2rem;
+  }
+
   .textIcon {
     font-size: 2.8rem;
   }
@@ -193,7 +202,8 @@
   .mobileChevron {
     display: block;
     margin-left: auto;
-    font-size: 1.4rem;
+    width: 1.4rem;
+    height: 1.4rem;
     opacity: 0.6;
     color: var(--ifm-color-primary);
   }

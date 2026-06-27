@@ -1,7 +1,8 @@
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Link from "@docusaurus/Link";
-import { FaBook, FaChevronRight } from "react-icons/fa";
+import IconNote from "../../../assets/svg/icon-note.svg";
+import IconRight from "../../../assets/svg/icon-right.svg";
 import Hint from "../Hint/index.jsx";
 import { guessDocPermalink } from "../../utils/docsUtils.js";
 import {
@@ -139,7 +140,7 @@ function NoteCard({ note, index, docsBasePath }) {
     });
   }
 
-  const Icon = defaultIconData.icon || FaBook;
+  const Icon = defaultIconData.icon || IconNote;
 
   const tooltipContent = description ? description : null;
 
@@ -162,7 +163,7 @@ function NoteCard({ note, index, docsBasePath }) {
           {title}
         </h3>
       </div>
-      <FaChevronRight className={styles.mobileChevron} />
+      <IconRight className={styles.mobileChevron} />
     </Link>
   );
 

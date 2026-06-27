@@ -1,8 +1,9 @@
 import React from "react";
 import { Rnd } from "react-rnd";
-import IconChevronLeft from "../../../../../../assets/img/svg/icon-chevron-left.svg";
-import IconChevronRight from "../../../../../../assets/img/svg/icon-chevron-right.svg";
+
 import styles from "../../../styles.module.css";
+import IconLeft from "../../../../../../assets/svg/icon-left.svg";
+import IconRight from "../../../../../../assets/svg/icon-right.svg";
 
 export default function PipLayout({
   isVisible,
@@ -118,9 +119,9 @@ export default function PipLayout({
             }}
           >
             {isHiddenLeft ? (
-              <IconChevronRight className={styles.svgIcon} />
+              <IconRight className={styles.svgIcon} />
             ) : (
-              <IconChevronLeft className={styles.svgIcon} />
+              <IconLeft className={styles.svgIcon} />
             )}
           </div>
 
