@@ -39,9 +39,10 @@ jobs:
         run: bunx {{meta.pkg.name}} build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./build
+          include-hidden-files: true
 
   deploy:
     environment:
