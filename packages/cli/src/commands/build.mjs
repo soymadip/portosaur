@@ -7,7 +7,6 @@ import {
   runDocusaurus,
   validateProject,
   ensureContentDirs,
-  generateSiteAssets,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
 import {
@@ -15,6 +14,7 @@ import {
   generateRobotsTxt,
   resolveSiteUrl,
   resolveBasePath,
+  generateSiteAssets,
 } from "@portosaur/core";
 
 /**
@@ -57,11 +57,11 @@ export async function buildCommand(siteDir, options = {}) {
 
     logger.info("Generating site assets...");
 
-    const configContext = await generateSiteAssets(
+    const configContext = await generateSiteAssets({
       UserRoot,
       userConfig,
       portoPaths,
-    );
+    });
     const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
 
     logResolvedSiteLocation(UserRoot, portoPaths, configContext);

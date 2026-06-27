@@ -6,18 +6,76 @@ import crypto from "crypto";
 import { logger } from "@portosaur/logger";
 
 //  Cache & Utilities
-function getCacheKey(url) {
-  return crypto.createHash("md5").update(url).digest("hex");
+function getCacheKey(url, remoteState = null) {
+  const base = remoteState ? `${url}-${remoteState}` : url;
+  return crypto.createHash("md5").update(base).digest("hex");
 }
 
-//  Main Download Function
-export async function downloadImage(url, destDir, fileName, options = {}) {
-  const {
-    proxies = [],
-    redirectCount = 0,
-    cacheDir,
-    cacheTTL = 43200000,
-  } = options;
+/**
+ * Fetches the ETag and Last-Modified headers of a remote file using a HEAD request.
+ *
+ * @param {string} url - The URL to fetch headers for.
+ * @param {number} [redirectCount=0] - Internal count for tracking redirects.
+ * @returns {Promise<string>} A string representing the remote file state (e.g. "remote:etag:lastModified:size").
+ */
+export async function fetchRemoteFileState(url, redirectCount = 0) {
+  if (redirectCount > 5) return "remote:missing";
+
+  return new Promise((resolve) => {
+    const protocol = url.startsWith("https") ? https : http;
+    const req = protocol.request(url, { method: "HEAD" }, (res) => {
+      if (
+        res.statusCode &&
+        [301, 302, 303, 307, 308].includes(res.statusCode) &&
+        res.headers.location
+      ) {
+        const redirectUrl = new URL(res.headers.location, url).toString();
+        resolve(fetchRemoteFileState(redirectUrl, redirectCount + 1));
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        resolve(`remote:error:${res.statusCode}`);
+        return;
+      }
+
+      const etag = res.headers["etag"] || "no-etag";
+      const lastModified = res.headers["last-modified"] || "no-last-modified";
+      const size = res.headers["content-length"] || "unknown-size";
+
+      resolve(`remote:${etag}:${lastModified}:${size}`);
+    });
+
+    req.on("error", () => resolve("remote:missing"));
+    req.end();
+  });
+}
+
+/**
+ * Downloads a remote image with fallback to proxies and caching support.
+ *
+ * @param {Object} options - Configuration options for the download.
+ * @param {string} options.url - The URL of the image to download.
+ * @param {string} options.destDir - The directory where the image should be saved.
+ * @param {string} options.fileName - The filename to save the image as.
+ * @param {string[]} [options.proxies=[]] - Optional list of proxy URLs to try if the download fails.
+ * @param {number} [options.redirectCount=0] - Internal count to prevent infinite redirect loops.
+ * @param {string} [options.cacheDir] - Directory to use for caching downloaded raw images.
+ * @param {string|null} [options.remoteState=null] - Optional ETag/Last-Modified string used to build a robust cache key.
+ * @returns {Promise<string>} A promise that resolves to the absolute path of the downloaded image.
+ */
+export async function downloadImage({
+  url,
+  destDir,
+  fileName,
+  proxies = [],
+  redirectCount = 0,
+  cacheDir,
+  remoteState = null,
+}) {
+  if (!url) throw new Error("downloadImage: 'url' is required");
+  if (!destDir) throw new Error("downloadImage: 'destDir' is required");
+  if (!fileName) throw new Error("downloadImage: 'fileName' is required");
 
   if (redirectCount > 5) {
     throw new Error("Too many redirects");
@@ -32,18 +90,13 @@ export async function downloadImage(url, destDir, fileName, options = {}) {
   const forceDownload = process.env.PORTO_FORCE_DOWNLOAD === "1";
 
   if (cacheDir && !forceDownload) {
-    const cacheKey = getCacheKey(url);
+    const cacheKey = getCacheKey(url, remoteState);
     const cachedPath = path.join(cacheDir, `${cacheKey}-${fileName}`);
 
     if (fs.existsSync(cachedPath)) {
-      const stats = fs.statSync(cachedPath);
-      const age = Date.now() - stats.mtimeMs;
-
-      if (age < cacheTTL) {
-        logger.info(`Using cached image (${Math.round(age / 60000)}m old)`);
-        fs.copyFileSync(cachedPath, destPath);
-        return destPath;
-      }
+      logger.info(`Using cached image (Key matched)`);
+      fs.copyFileSync(cachedPath, destPath);
+      return destPath;
     }
   }
 
@@ -69,9 +122,14 @@ export async function downloadImage(url, destDir, fileName, options = {}) {
           );
 
           resolve(
-            downloadImage(redirectUrl, destDir, fileName, {
-              ...options,
+            downloadImage({
+              url: redirectUrl,
+              destDir,
+              fileName,
+              proxies,
               redirectCount: redirectCount + 1,
+              cacheDir,
+              remoteState,
             }),
           );
 
@@ -107,7 +165,7 @@ export async function downloadImage(url, destDir, fileName, options = {}) {
             // Cache the downloaded image
             if (cacheDir) {
               try {
-                const cacheKey = getCacheKey(url);
+                const cacheKey = getCacheKey(url, remoteState);
                 const cachedPath = path.join(
                   cacheDir,
                   `${cacheKey}-${fileName}`,
@@ -141,9 +199,14 @@ export async function downloadImage(url, destDir, fileName, options = {}) {
         );
 
         resolve(
-          downloadImage(proxyUrl, destDir, fileName, {
-            ...options,
+          downloadImage({
+            url: proxyUrl,
+            destDir,
+            fileName,
             proxies: remainingProxies,
+            redirectCount,
+            cacheDir,
+            remoteState,
           }),
         );
       } else {

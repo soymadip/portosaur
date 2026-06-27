@@ -1,11 +1,17 @@
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
+import { logger } from "@portosaur/logger";
+
 import { getPortoDotDir } from "../utils/fs.mjs";
-import { downloadImage } from "../utils/imageDownloader.mjs";
+import {
+  downloadImage,
+  fetchRemoteFileState,
+} from "../utils/imageDownloader.mjs";
 import { reshapeImage } from "../utils/imageProcessor.mjs";
 import { processSvg } from "../utils/svgProcessor.mjs";
-import { logger } from "@portosaur/logger";
-import sharp from "sharp";
+import { getCssVar } from "../utils/cssExtractor.mjs";
+import { resolveSiteCssFiles, resolveBasePath } from "../utils/docusaurus.mjs";
 
 function cleanupFile(filePath) {
   if (filePath && fs.existsSync(filePath)) {
@@ -19,47 +25,65 @@ function cleanupFile(filePath) {
 
 /**
  * Generates modern favicon assets and PWA manifests using pure sharp.
+ * Resolves necessary parameters from the user's configuration and theme CSS.
  *
- * @param {string} siteDir - The root directory of the Docusaurus site.
- * @param {Object} options - Configuration options for generation.
- * @param {string} [options.baseUrl="/"] - Base URL of the site.
- * @param {string} [options.imagePath="img/icon.png"] - Path or URL to the source image.
- * @param {string} [options.appVersion="1.0"] - Version of the application.
- * @param {string} [options.shape="squircle"] - Shape of the generated favicons ("circle", "squircle", "none").
- * @param {string} [options.outputPath="favicon"] - Directory name inside .porto/ to store generated assets.
- * @param {string} [options.themeColor="#3cd759"] - Primary theme color for the PWA.
- * @param {string} [options.backgroundColor="#ffffff"] - Background color for the PWA manifest.
- * @param {string} [options.siteTitle="Portfolio"] - Site title for the manifest.
- * @param {string} [options.siteTagline="Portfolio"] - Site description for the manifest.
- * @param {Array} [options.proxies=[]] - Optional proxies for downloading remote images.
- * @param {Array} [options.staticDirs=["static"]] - Static directories to search for local images.
- * @param {string} [options.portoAssetsDir] - Path to the @portosaur/theme assets directory.
- * @param {string} [options.notesRoute="notes"] - Route path for the notes shortcut.
- * @param {string} [options.blogRoute="blog"] - Route path for the blog shortcut.
- * @param {boolean} [options.tasksEnabled=false] - Whether tasks are enabled (adds a tasks shortcut).
- * @returns {Promise<{success: boolean, html: Array<{tagName: string, attributes: Object}>}>}
+ * @param {Object} options - Configuration options.
+ * @param {string} options.UserRoot - The root directory of the Docusaurus site.
+ * @param {Object} options.userConfig - The user configuration object.
+ * @param {Object} options.portoPaths - The resolved paths object for the theme/core.
+ * @returns {Promise<{extraHeadTags: string}>}
  */
-export async function generateFavicons(
-  siteDir,
-  {
-    baseUrl = "/",
-    imagePath = "img/icon.png",
-    appVersion = "1.0",
-    shape = "squircle",
-    outputPath = "favicon",
-    themeColor = "#3cd759",
-    backgroundColor = "#1d2c1e",
-    siteTitle = "Portfolio",
-    siteTagline = "Portfolio",
-    proxies = [],
-    staticDirs = ["static"],
-    portoAssetsDir,
-    notesRoute = "notes",
-    blogRoute = "blog",
-    tasksEnabled = false,
-  } = {},
-) {
-  logger.info("Generating favicons...");
+export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
+  const cssFilesToParse = resolveSiteCssFiles(
+    UserRoot,
+    userConfig,
+    portoPaths.theme,
+  );
+
+  const backgroundColor = getCssVar(
+    "--ifm-background-surface-color",
+    cssFilesToParse,
+  );
+  const themeColor = getCssVar(
+    "--ifm-navbar-background-color",
+    cssFilesToParse,
+  );
+
+  if (!themeColor) {
+    throw new Error(
+      "Failed to resolve PWA theme color from CSS variables (--ifm-navbar-background-color).",
+    );
+  }
+  if (!backgroundColor) {
+    throw new Error(
+      "Failed to resolve PWA background color from CSS variables (--ifm-background-color).",
+    );
+  }
+
+  const siteDir = UserRoot;
+  const baseUrl = resolveBasePath(userConfig.site?.base_url || "auto");
+
+  const siteTitle =
+    userConfig.site?.title || userConfig.home_page?.hero?.title || "Portfolio";
+  const siteTagline =
+    userConfig.site?.tagline || userConfig.home_page?.hero?.desc || "Portfolio";
+
+  const imagePath =
+    userConfig.site?.favicon || userConfig.home_page?.hero?.profile_pic;
+
+  const notesRoute = userConfig.site?.notes?.route || "notes";
+  const blogRoute = userConfig.site?.blog?.route || "blog";
+  const tasksEnabled = userConfig.tasks?.enable || false;
+
+  const staticDirs = ["static", portoPaths.static];
+  const portoAssetsDir = portoPaths.assets;
+
+  const outputPath = "favicon";
+  const shape = "squircle";
+  const appVersion = "1.0";
+  const proxies = [];
+
+  logger.info("Generating Site Assets...");
 
   const shortcutIcons = ["icon-note.svg", "icon-blog.svg", "icon-tasks.svg"];
   const outputDir = path.join(getPortoDotDir(siteDir), "static", outputPath);
@@ -74,6 +98,7 @@ export async function generateFavicons(
   };
 
   const fileStates = [];
+
   if (portoAssetsDir) {
     for (const icon of shortcutIcons) {
       const srcPath = path.resolve(portoAssetsDir, "svg", icon);
@@ -82,8 +107,12 @@ export async function generateFavicons(
   }
 
   const isRemote = /^https?:\/\//.test(imagePath);
+  let remoteState = null;
 
-  if (!isRemote) {
+  if (isRemote) {
+    remoteState = await fetchRemoteFileState(imagePath);
+    fileStates.push(remoteState);
+  } else {
     let localPath = null;
     for (const sDir of staticDirs) {
       const fullPath = path.resolve(siteDir, sDir, imagePath);
@@ -166,7 +195,7 @@ export async function generateFavicons(
     if (existingHash === configHash) {
       if (fs.existsSync(path.join(outputDir, "favicon.ico"))) {
         logger.info("Favicons are up to date, skipping generation.");
-        return { success: true, html: headTags };
+        return { extraHeadTags: headTags };
       }
     }
   }
@@ -194,12 +223,14 @@ export async function generateFavicons(
     const isRemote = /^https?:\/\//.test(imagePath);
 
     if (isRemote) {
-      downloadedRes = await downloadImage(
-        imagePath,
-        cacheDir,
-        "profile_pic_src.png",
-        { proxies, cacheDir: path.join(cacheDir, "downloads") },
-      );
+      downloadedRes = await downloadImage({
+        url: imagePath,
+        destDir: cacheDir,
+        fileName: "profile_pic_src.png",
+        proxies,
+        cacheDir: path.join(cacheDir, "downloads"),
+        remoteState,
+      });
       tempFiles.push(downloadedRes);
     } else {
       let localPath = null;
@@ -435,7 +466,7 @@ export async function generateFavicons(
     tempFiles.forEach(cleanupFile);
 
     logger.success("Generated Favicon assets successfully.");
-    return { success: true, html: headTags };
+    return { extraHeadTags: headTags };
   } catch (error) {
     logger.error(`Favicon generation failed: ${error.message}`);
     tempFiles.forEach(cleanupFile);

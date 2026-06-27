@@ -7,10 +7,9 @@ import {
   runDocusaurus,
   validateProject,
   ensureContentDirs,
-  generateSiteAssets,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
-import { loadUserConfig } from "@portosaur/core";
+import { loadUserConfig, generateSiteAssets } from "@portosaur/core";
 
 export async function devCommand(siteDir, options = {}) {
   const extraArgs = [];
@@ -53,7 +52,11 @@ export async function devCommand(siteDir, options = {}) {
 
   try {
     const userConfig = loadUserConfig(UserRoot, { portoRoot: Paths.theme });
-    configContext = await generateSiteAssets(UserRoot, userConfig, portoPaths);
+    configContext = await generateSiteAssets({
+      UserRoot,
+      userConfig,
+      portoPaths,
+    });
     const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
 
     logResolvedSiteLocation(UserRoot, portoPaths, configContext);
