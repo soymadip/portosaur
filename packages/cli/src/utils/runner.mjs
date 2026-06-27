@@ -324,7 +324,11 @@ export async function runDocusaurus(
     return Promise.resolve();
   }
 
-  const childEnv = { ...process.env, FORCE_COLOR: "true" };
+  const childEnv = {
+    ...process.env,
+    FORCE_COLOR: "true",
+    DOCUSAURUS_GENERATED_FILES_DIR_NAME: ".portosaur",
+  };
 
   const child = spawn(runtime, args, {
     stdio: "inherit",

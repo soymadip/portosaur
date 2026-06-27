@@ -8,7 +8,7 @@ import { text } from "../app.mjs";
  * @returns {string} The resolved path.
  */
 export function getPortoDotDir(siteDir) {
-  return path.join(siteDir, ".docusaurus", ".portosaur");
+  return path.join(siteDir, ".portosaur");
 }
 
 /**

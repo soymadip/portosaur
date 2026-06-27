@@ -46,7 +46,6 @@ describe("Integration: Scaffold & Build", () => {
 
     const shimPath = path.join(
       projectPath,
-      ".docusaurus",
       ".portosaur",
       "docusaurus.config.js",
     );

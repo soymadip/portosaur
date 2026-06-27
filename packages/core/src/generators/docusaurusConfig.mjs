@@ -38,7 +38,6 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const staticDir = path.resolve(projectDir, "static");
   const portoStaticDir = portoPaths.static ?? "";
 
-
   const siteUrl = resolveSiteUrl(rawGet("site.url", "auto"), env);
   const sitePath = resolveBasePath(rawGet("site.base_url", "auto"), env);
 
@@ -90,7 +89,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const staticDirectories = [
     "static",
     portoStaticDir,
-    getPortoDotDir(projectDir),
+    path.join(getPortoDotDir(projectDir), "static"),
   ].filter((dir) => dir && fs.existsSync(dir));
 
   // Process generated favicon/manifest head tags

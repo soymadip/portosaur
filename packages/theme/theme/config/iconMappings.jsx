@@ -14,7 +14,7 @@ import {
   PiMicrosoftOutlookLogo,
   PiMicrosoftPowerpointLogo,
   PiMicrosoftWordLogo,
-  PiNoteFill
+  PiNoteFill,
 } from "react-icons/pi";
 import { BiLogoPostgresql, BiLogoWindows } from "react-icons/bi";
 import {

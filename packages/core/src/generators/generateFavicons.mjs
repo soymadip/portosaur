@@ -62,7 +62,7 @@ export async function generateFavicons(
   logger.info("Generating favicons...");
 
   const shortcutIcons = ["icon-note.svg", "icon-blog.svg", "icon-tasks.svg"];
-  const outputDir = path.join(getPortoDotDir(siteDir), outputPath);
+  const outputDir = path.join(getPortoDotDir(siteDir), "static", outputPath);
 
   const getFileState = (filePath) => {
     try {
@@ -237,7 +237,7 @@ export async function generateFavicons(
     //
     // -------- Generate Favicon Pics ------------
 
-    logger.info(`Generating favicon assets from ${finalImagePath} using sharp`);
+    logger.info(`Generating assets from ${finalImagePath}...`);
 
     const baseImage = await sharp(finalImagePath).png().toBuffer();
 

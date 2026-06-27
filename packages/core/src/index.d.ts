@@ -44,7 +44,7 @@ export function loadUserConfig(
 /**
  * Gets the standardized path to the hidden Portosaur data directory.
  * @param siteDir - The project root directory.
- * @returns The resolved path (e.g., `<siteDir>/.docusaurus/.portosaur`).
+ * @returns The resolved path (e.g., `<siteDir>/.portosaur`).
  */
 export function getPortoDotDir(siteDir: string): string;
 
