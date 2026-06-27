@@ -12,15 +12,15 @@ Use double curly braces to reference a variable: `\{{variable_path}}`. Paths can
 
 These variables are automatically provided by the engine during the build process:
 
-- `\{{portoVersion}}` — Current {{meta.project.title}} version.
-- `\{{compileYear}}` — Year at build time (useful for copyright notices).
-- `\{{compileDate}}` — Date at build time.
-- `\{{siteUrl}}` — The fully resolved URL of your site.
-- `\{{baseUrl}}` — The base path of your site (e.g., `/my-portfolio/`).
-- `\{{lastUpdated}}` — The timestamp of the last git commit.
-- `\{{isProd}}` / `{{isDev}}` — Booleans indicating the current build environment.
-- `\{{siteRoot}}` — The absolute path to your local project directory.
-- `\{{portoRoot}}` — The absolute path to the `@{{meta.project.title}}/theme` installation.
+- `\{{porto_version}}` — Current {{meta.project.title}} version.
+- `\{{compile_year}}` — Year at build time (useful for copyright notices).
+- `\{{compile_date}}` — Date at build time.
+- `\{{site_url}}` — The fully resolved URL of your site.
+- `\{{base_url}}` — The base path of your site (e.g., `/my-portfolio/`).
+- `\{{last_updated}}` — The timestamp of the last git commit.
+- `\{{is_prod}}` / `{{is_dev}}` — Booleans indicating the current build environment.
+- `\{{site_root}}` — The absolute path to your local project directory.
+- `\{{porto_static}}` — The absolute path to the `@{{meta.project.title}}/theme` static assets directory.
 
 ### Configuration References
 

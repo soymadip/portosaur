@@ -3,27 +3,27 @@ vcs_providers:
     name: GitHub
     domain: github.com
     default_hosting: github-pages
-    url: "https://{{domain}}/{{user}}/{{projectName}}.git"
-    new_url: "https://{{domain}}/new?name={{projectName}}"
+    url: "https://{{domain}}/{{user}}/{{project_name}}.git"
+    new_url: "https://{{domain}}/new?name={{project_name}}"
 
   gitlab:
     name: GitLab
     domain: gitlab.com
     default_hosting: gitlab-pages
-    url: "https://{{domain}}/{{user}}/{{projectName}}.git"
+    url: "https://{{domain}}/{{user}}/{{project_name}}.git"
     new_url: "https://{{domain}}/projects/new#blank_project"
 
   codeberg:
     name: Codeberg
     domain: codeberg.org
     default_hosting: codeberg-pages
-    url: "https://{{domain}}/{{user}}/{{projectName}}.git"
+    url: "https://{{domain}}/{{user}}/{{project_name}}.git"
     new_url: "https://codeberg.org/repo/create"
 
   sourcehut:
     name: SourceHut
     domain: git.sr.ht
-    url: "https://{{domain}}/~{{user}}/{{projectName}}.git"
+    url: "https://{{domain}}/~{{user}}/{{project_name}}.git"
     new_url: "https://{{domain}}/create"
 
 # --------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ hosting_platforms:
       ideal_name: "{{user}}.github.io"
       mismatch_msg: |-
         For automatic GitHub Pages hosting,
-        your repository should be named '{{idealName}}' (exactly your username + .github.io)."
+        your repository should be named '{{ideal_name}}' (exactly your username + .github.io)."
 
   gitlab-pages:
     name: GitLab Pages
@@ -48,8 +48,8 @@ hosting_platforms:
     repo:
       ideal_name: "{{user}}.gitlab.io"
       mismatch_msg: |-
-        As Your project name is not '{{idealName}}',
-        Your site will be available at: https://{{user}}.{{domain}}/{{projectName}}/
+        As Your project name is not '{{ideal_name}}',
+        Your site will be available at: https://{{user}}.{{domain}}/{{project_name}}/
         Instead of: https://{{user}}.{{domain}}/
     post_setup_tips:
       - Site will be available once the CI pipeline finishes.
@@ -63,7 +63,7 @@ hosting_platforms:
       ideal_name: pages
       mismatch_msg: |-
         As Your project name is not 'pages',
-        Your site will be available at: https://{{user}}.{{domain}}/{{projectName}}/
+        Your site will be available at: https://{{user}}.{{domain}}/{{project_name}}/
         Instead of: https://{{user}}.{{domain}}/
     post_setup_tips:
       - Ensure Codeberg Actions are enabled for your repository.
@@ -78,7 +78,7 @@ hosting_platforms:
       ideal_name: pages
       mismatch_msg: |-
         As Your project name is not 'pages',
-        Your site will be available at: https://{{user}}.{{domain}}/{{projectName}}/
+        Your site will be available at: https://{{user}}.{{domain}}/{{project_name}}/
         Instead of: https://{{user}}.{{domain}}/
     post_setup_tips:
       - Ensure Woodpecker is enabled for your repository.

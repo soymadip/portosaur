@@ -6,9 +6,9 @@
 
 # User variables for use in your values as {{vars.key}}
 vars:
-  twitter: "@{{userName}}"
-  github: "{{userName}}"
-  linkedin: "{{userName}}"
+  twitter: "@{{user_name}}"
+  github: "{{user_name}}"
+  linkedin: "{{user_name}}"
 
 # Site Metadata, SEO, Parser behavior
 site:
@@ -23,21 +23,21 @@ theme:
 # Page Content & Sections
 home_page:
   hero:
-    title: "{{fullName}}"
+    title: "{{full_name}}"
     profession: "Your Profession"
     desc: "Short description about you, your passion, your goals etc."
-    profile_pic: "{{portoRoot}}/assets/svg/icon.svg"
+    profile_pic: "img/icon.png"
 
     social:
       - name: "LinkedIn"
-        url: "https://www.linked.com/in/{{userName}}"
+        url: "https://www.linked.com/in/{{user_name}}"
 
       - name: "GitHub"
         icon: "githubalt" # TODO: needs documentation
-        url: "https://github.com/{{userName}}"
+        url: "https://github.com/{{user_name}}"
 
       - name: "Telegram"
-        url: "https://t.me/{{userName}}"
+        url: "https://t.me/{{user_name}}"
 
   about:
     enable: true
@@ -50,7 +50,7 @@ home_page:
       - "skill 1"
       - "skill 2"
       - "skill 3"
-    resume: "{{portoRoot}}/static/sample-resume.pdf"
+    resume: "{{porto_static}}/sample-resume.pdf"
 
   project_shelf:
     enable: true
@@ -64,7 +64,7 @@ home_page:
         repo: "https://github.com/yourname/project1"
 
       - title: "Your Awesome Project 2"
-        icon: "{{portoRoot}}/assets/svg/icon.svg"
+        icon: "img/project-blank.png"
         bg: "#5c8f2d"
         tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"]
         featured: true
@@ -101,11 +101,11 @@ home_page:
 
       - name: "LinkedIn"
         desc: "Connect on LinkedIn"
-        url: "https://linkedin.com/in/{{userName}}"
+        url: "https://linkedin.com/in/{{user_name}}"
 
       - name: "Telegram"
         desc: "Reach me on Telegram"
-        url: "https://t.me/{{userName}}"
+        url: "https://t.me/{{user_name}}"
 
       - name: "Discord"
         desc: "Become my friend"
@@ -113,15 +113,15 @@ home_page:
 
       - name: "Twitter"
         desc: "Find me on Twitter"
-        url: "https://twitter.com/{{userName}}"
+        url: "https://twitter.com/{{user_name}}"
 
       - name: "GitLab"
         desc: "View my GitLab profile"
-        url: "https://gitlab.com/{{userName}}"
+        url: "https://gitlab.com/{{user_name}}"
 
       - name: "Anilist"
         desc: "If you are otaku, check out!"
-        url: "https://anilist.co/user/{{userName}}"
+        url: "https://anilist.co/user/{{user_name}}"
 
 tasks:
   enable: true

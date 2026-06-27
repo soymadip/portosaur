@@ -159,17 +159,17 @@ The project shelf is a curated showcase of your best work. You can feature speci
 
 #### `home_page.project_shelf.projects`
 
-| Key        | Type   | Default            | Description                                                                                                                                |
-| :--------- | :----- | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`    | `str`  | `"Future Project"` | Name of the project.                                                                                                                       |
-| `img`      | `str`  | `(blank icon)`     | Path to project thumbnail. Supports internal paths using `{{portoRoot}}` (e.g., `{{portoRoot}}/src/assets/img/icon.png`) or external URLs. |
-| `state`    | `str`  | `"active"`         | Project status badge (`active`, `completed`, `maintenance`, `paused`, `archived`, `planned`). Rendered as a themed pill in the top-right.  |
-| `featured` | `bool` | `false`            | If true, the project gets a prominent border and is **automatically sorted to the beginning** of the carousel.                             |
-| `desc`     | `str`  | `"Coming soon..."` | Brief desc of the project and tech stack.                                                                                                  |
-| `tags`     | `list` | `[]`               | Tech keywords (e.g., `["React", "Node"]`). Displayed as micro-glass pills inside the image container.                                      |
-| `website`  | `str`  | `null`             | URL to the live website or production version.                                                                                             |
-| `repo`     | `str`  | `null`             | URL to the source code repository (e.g., GitHub).                                                                                          |
-| `demo`     | `str`  | `null`             | URL to a live demo or interactive preview.                                                                                                 |
+| Key        | Type   | Default            | Description                                                                                                                                    |
+| :--------- | :----- | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`    | `str`  | `"Future Project"` | Name of the project.                                                                                                                           |
+| `img`      | `str`  | `(blank icon)`     | Path to project thumbnail. Supports internal paths using `{{porto_static}}` (e.g., `{{porto_static}}/img/project-blank.png`) or external URLs. |
+| `state`    | `str`  | `"active"`         | Project status badge (`active`, `completed`, `maintenance`, `paused`, `archived`, `planned`). Rendered as a themed pill in the top-right.      |
+| `featured` | `bool` | `false`            | If true, the project gets a prominent border and is **automatically sorted to the beginning** of the carousel.                                 |
+| `desc`     | `str`  | `"Coming soon..."` | Brief desc of the project and tech stack.                                                                                                      |
+| `tags`     | `list` | `[]`               | Tech keywords (e.g., `["React", "Node"]`). Displayed as micro-glass pills inside the image container.                                          |
+| `website`  | `str`  | `null`             | URL to the live website or production version.                                                                                                 |
+| `repo`     | `str`  | `null`             | URL to the source code repository (e.g., GitHub).                                                                                              |
+| `demo`     | `str`  | `null`             | URL to a live demo or interactive preview.                                                                                                     |
 
 ### `home_page.experience`
 

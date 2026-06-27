@@ -48,18 +48,18 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   );
 
   const userConfig = resolveVars(rawUserConfig, rawUserConfig, {
-    siteRoot: projectDir,
-    portoRoot: context.portoRoot ?? "",
-    compileYear: new Date().getFullYear(),
-    compileDate: new Date().toLocaleDateString(),
-    portoVersion,
-    projectVersion: context.projectVersion ?? "0.0.0",
-    siteUrl,
-    baseUrl: sitePath,
-    lastUpdated,
-    isProd: env.NODE_ENV === "production",
-    isDev: env.NODE_ENV === "development",
-    nodeEnv: env.NODE_ENV ?? "development",
+    site_root: projectDir,
+    porto_static: portoStaticDir,
+    compile_year: new Date().getFullYear(),
+    compile_date: new Date().toLocaleDateString(),
+    porto_version: portoVersion,
+    project_version: context.projectVersion ?? "0.0.0",
+    site_url: siteUrl,
+    base_url: sitePath,
+    last_updated: lastUpdated,
+    is_prod: env.NODE_ENV === "production",
+    is_dev: env.NODE_ENV === "development",
+    node_env: env.NODE_ENV ?? "development",
     vars: rawGet("vars", {}),
   });
 

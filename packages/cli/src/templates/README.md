@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>{{projectName}}</h1>
+  <h1>{{project_name}}</h1>
 </div>
 
 Welcome to my digital personality and portfolio! 👋
@@ -8,7 +8,7 @@ This is my personal space on the web to express myself, share my thoughts, and s
 
 ## About This Repository
 
-This repository contains content for my personal website, built with [Portosaur]({{portoHome}}).  
+This repository contains content for my personal website, built with [Portosaur]({{porto_home}}).  
 It serves as my:
 
 - **Portfolio**: Highlighting my projects, skills, and professional experience.
@@ -29,8 +29,8 @@ If you'd like to explore the code or run this site locally:
 1. **Clone the repository:**
 
    ```bash
-   git clone {{cloneUrl}}
-   cd {{projectName}}
+   git clone {{clone_url}}
+   cd {{project_name}}
    ```
 
 2. **Start the development server:**
@@ -44,6 +44,6 @@ If you'd like to explore the code or run this site locally:
 
 <div align="center">
 
-_Powered by [Portosaur]({{portoHome}})_
+_Powered by [Portosaur]({{porto_home}})_
 
 </div>

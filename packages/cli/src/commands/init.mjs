@@ -390,13 +390,13 @@ export async function initCommand(options = {}) {
   const cloneUrl = state.gitRemoteUrl || "<your-repository-url>";
 
   const templateVars = {
-    projectName: state.projectName,
-    userName: state.userName || "",
-    fullName: state.fullName || "",
-    cloneUrl,
-    portoVersion,
-    portoHome: porto.homepage || "",
-    portoRepo: porto.repository || "",
+    project_name: state.projectName,
+    user_name: state.userName || "",
+    full_name: state.fullName || "",
+    clone_url: cloneUrl,
+    porto_version: portoVersion,
+    porto_home: porto.homepage || "",
+    porto_repo: porto.repository || "",
   };
 
   try {
