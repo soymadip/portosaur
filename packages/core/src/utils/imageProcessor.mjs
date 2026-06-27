@@ -3,7 +3,16 @@ import path from "path";
 import sharp from "sharp";
 import { logger } from "@portosaur/logger";
 
-//  Image Processing Pipeline
+// Image Processing Pipeline
+/**
+ * Processes an image by cropping it to a square and applying a shape mask.
+ *
+ * @param {string} inputPath - The path to the input image file.
+ * @param {string} outputPath - The path where the processed image should be saved.
+ * @param {string} [shape="circle"] - The shape mask to apply ("circle", "squircle", or "none"/"square").
+ * @returns {Promise<string>} A promise that resolves to the outputPath on success.
+ * @throws {Error} If the input file is not found or if image processing fails.
+ */
 export async function reshapeImage(inputPath, outputPath, shape = "circle") {
   try {
     // Validate input file
@@ -42,6 +51,13 @@ export async function reshapeImage(inputPath, outputPath, shape = "circle") {
       );
 
       pipeline = pipeline.composite([{ input: circleSvg, blend: "dest-in" }]);
+    } else if (shape === "squircle") {
+      const rx = size * 0.225;
+      const squircleSvg = Buffer.from(
+        `<svg><rect x="0" y="0" width="${size}" height="${size}" rx="${rx}" ry="${rx}" /></svg>`,
+      );
+
+      pipeline = pipeline.composite([{ input: squircleSvg, blend: "dest-in" }]);
     }
 
     // Write output file

@@ -159,7 +159,6 @@ export function getCssVar(varName: string, cssFiles?: string[]): string | null;
 export interface FaviconOptions {
   imagePath?: string;
   appVersion?: string;
-  circular?: boolean;
   shape?: string;
   proxies?: string[];
   outputPath?: string;
@@ -169,6 +168,10 @@ export interface FaviconOptions {
   siteTagline?: string;
   staticDirs?: string[];
   portoAssetsDir?: string;
+  notesRoute?: string;
+  blogRoute?: string;
+  tasksEnabled?: boolean;
+  baseUrl?: string;
 }
 
 export interface FaviconResult {
@@ -177,7 +180,7 @@ export interface FaviconResult {
 }
 
 /**
- * Generates favicon assets and PWA manifests using the `favicons` library.
+ * Generates modern favicon assets and PWA manifests using pure sharp.
  */
 export function generateFavicons(
   siteDir: string,
@@ -254,6 +257,15 @@ export function cleanFrontMatterSlug(params: {
   projectDir: string;
   contentDirName?: string;
 }): Record<string, any>;
+
+/**
+ * Resolves the absolute paths of all CSS files required for the site.
+ */
+export function resolveSiteCssFiles(
+  projectDir: string,
+  userConfig: any,
+  themeDir: string,
+): string[];
 
 // ----------------------------------------------------------------------------
 // Configuration Utilities (utils/config.mjs & utils/validate.mjs)

@@ -32,7 +32,6 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@portosaur/logger": "workspace:*",
-    "favicons": "^7.2.0",
     "js-yaml": "^4.1.1",
     "prism-react-renderer": "^2.4.1",
     "rehype-katex": "7",

@@ -65,7 +65,7 @@ You can pass Emojis, image URLs, or SVG React components directly to the `icon` 
 <Btn icon="https://github.githubassets.com/favicons/favicon.svg">GitHub</Btn>
 
 {/* Using an SVG React Component */}
-import IconClose from '@site/assets/img/svg/icon-close.svg';
+import IconClose from '@site/assets/svg/icon-close.svg';
 
 <Btn danger icon={<IconClose />}>
   Close

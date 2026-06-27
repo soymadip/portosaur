@@ -26,18 +26,23 @@ export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
   const baseUrl = resolveBasePath(userConfig.site?.base_url || "auto");
 
   const faviconRes = await generateFavicons(UserRoot, {
-    imagePath: userConfig.home_page?.hero?.profile_pic,
+    imagePath:
+      userConfig.site?.favicon || userConfig.home_page?.hero?.profile_pic,
+
     siteTitle:
       userConfig.site?.title ||
       userConfig.home_page?.hero?.title ||
       "Portfolio",
+
     siteTagline:
       userConfig.site?.tagline ||
       userConfig.home_page?.hero?.desc ||
       "Portfolio",
+
     staticDirs: ["static"],
     portoAssetsDir: portoPaths.assets,
     themeColor: themeColor,
+    backgroundColor: backgroundColor,
     notesRoute: userConfig.site?.notes?.route || "notes",
     blogRoute: userConfig.site?.blog?.route || "blog",
     tasksEnabled: userConfig.tasks?.enable || false,
