@@ -274,7 +274,9 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
         fs.copyFileSync(downloaded, path.join(fallbacksDir, fallback.name));
         tempFiles.push(downloaded);
       } catch (e) {
-        throw new Error(`Broken image URL detected in config: ${fallback.url} (${e.message})`);
+        throw new Error(
+          `Broken image URL detected in config: ${fallback.url} (${e.message})`,
+        );
       }
     }
 
