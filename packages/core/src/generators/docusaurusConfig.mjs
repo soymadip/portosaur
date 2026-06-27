@@ -34,7 +34,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const lastUpdated = gitDate ?? getGitDate(projectDir);
 
   const staticDir = path.resolve(projectDir, "static");
-  const assetsDir = portoPaths.assets ?? "";
+  const portoStaticDir = portoPaths.static ?? "";
+
 
   const siteUrl = resolveSiteUrl(rawGet("site.url", "auto"), env);
   const sitePath = resolveBasePath(rawGet("site.base_url", "auto"), env);
@@ -42,7 +43,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const resolveAsset = createStaticAssetResolver(
     projectDir,
     staticDir,
-    assetsDir,
+    portoStaticDir,
   );
 
   const userConfig = resolveVars(rawUserConfig, rawUserConfig, {
