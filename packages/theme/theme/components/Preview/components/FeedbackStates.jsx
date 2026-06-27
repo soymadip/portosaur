@@ -1,8 +1,8 @@
 import styles from "../styles.module.css";
 import { Btn } from "../../UI/index.jsx";
-import IconWarning from "../../../../assets/img/svg/icon-warning.svg";
-import IconOffline from "../../../../assets/img/svg/icon-offline.svg";
-import IconRetry from "../../../../assets/img/svg/icon-retry.svg";
+import IconWarning from "../../../../assets/svg/icon-warning.svg";
+import IconOffline from "../../../../assets/svg/icon-offline.svg";
+import IconRetry from "../../../../assets/svg/icon-retry.svg";
 
 export function LoadingState() {
   return (

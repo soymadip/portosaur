@@ -26,7 +26,7 @@ home_page:
     title: "{{fullName}}"
     profession: "Your Profession"
     desc: "Short description about you, your passion, your goals etc."
-    profile_pic: "{{portoRoot}}/assets/img/svg/icon.svg"
+    profile_pic: "{{portoRoot}}/assets/svg/icon.svg"
 
     social:
       - name: "LinkedIn"
@@ -50,7 +50,7 @@ home_page:
       - "skill 1"
       - "skill 2"
       - "skill 3"
-    resume: "{{portoRoot}}/assets/sample-resume.pdf"
+    resume: "{{portoRoot}}/static/sample-resume.pdf"
 
   project_shelf:
     enable: true
@@ -64,7 +64,7 @@ home_page:
         repo: "https://github.com/yourname/project1"
 
       - title: "Your Awesome Project 2"
-        icon: "{{portoRoot}}/assets/img/svg/icon.svg"
+        icon: "{{portoRoot}}/assets/svg/icon.svg"
         bg: "#5c8f2d"
         tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"]
         featured: true

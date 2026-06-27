@@ -9,6 +9,7 @@ export interface PortoPaths {
   assets?: string;
   root?: string;
   theme?: string;
+  static?: string;
   [key: string]: any;
 }
 

@@ -83,10 +83,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     "Short description about you, your passion, your goals etc.",
   );
 
-  // Collect static directories: local site static/, theme assets/, and portosaur assets dir.
+  // Collect static directories: local site static/, theme static/, and portosaur dot dir.
   const staticDirectories = [
     "static",
-    assetsDir,
+    portoStaticDir,
     getPortoDotDir(projectDir),
   ].filter((dir) => dir && fs.existsSync(dir));
 

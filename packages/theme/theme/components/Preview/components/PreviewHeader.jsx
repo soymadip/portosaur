@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import { Btn, Dropdown } from "../../UI/index.jsx";
 import Hint from "../../Hint/index.jsx";
 import styles from "../styles.module.css";
-import IconDock from "../../../../assets/img/svg/icon-dock.svg";
-import IconPopup from "../../../../assets/img/svg/icon-popup.svg";
-import IconPip from "../../../../assets/img/svg/icon-pip.svg";
-import IconSave from "../../../../assets/img/svg/icon-save.svg";
-import IconLink from "../../../../assets/img/svg/icon-link.svg";
-import IconClose from "../../../../assets/img/svg/icon-close.svg";
-import IconZoom from "../../../../assets/img/svg/icon-zoom.svg";
-import IconMinimize from "../../../../assets/img/svg/icon-minimize.svg";
+import IconDock from "../../../../assets/svg/icon-dock.svg";
+import IconPopup from "../../../../assets/svg/icon-popup.svg";
+import IconPip from "../../../../assets/svg/icon-pip.svg";
+import IconSave from "../../../../assets/svg/icon-save.svg";
+import IconLink from "../../../../assets/svg/icon-link.svg";
+import IconClose from "../../../../assets/svg/icon-close.svg";
+import IconZoom from "../../../../assets/svg/icon-zoom.svg";
+import IconMinimize from "../../../../assets/svg/icon-minimize.svg";
 
 export default function PreviewHeader({
   displayTitle,

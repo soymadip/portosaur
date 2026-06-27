@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./packages/theme/assets/img/icon.png" width=110>
+    <img src="./packages/theme/static/img/icon.png" width=110>
     <h1>Portosaur</h1>
     <p>Complete portfolio and personal website solution for your digital personality.</p>
     <br />
