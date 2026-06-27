@@ -23,8 +23,10 @@ export default function Home() {
   :root {
     --ifm-navbar-shadow: none !important;
   }
-  .navbar__brand {
-    display: none !important;
+  @media (orientation: landscape) {
+    .navbar__brand {
+      display: none !important;
+    }
   }
   `;
 
