@@ -65,11 +65,16 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   const siteTitle =
     userConfig.site?.title || userConfig.home_page?.hero?.title || "Portfolio";
+
   const siteTagline =
-    userConfig.site?.tagline || userConfig.home_page?.hero?.desc || "Portfolio";
+    userConfig.site?.tagline ||
+    userConfig.home_page?.hero?.desc ||
+    "Welcome to my Portfolio";
 
   const imagePath =
-    userConfig.site?.favicon || userConfig.home_page?.hero?.profile_pic;
+    userConfig.site?.favicon ||
+    userConfig.home_page?.hero?.profile_pic ||
+    "img/icon.png";
 
   const notesRoute = userConfig.site?.notes?.route || "notes";
   const blogRoute = userConfig.site?.blog?.route || "blog";

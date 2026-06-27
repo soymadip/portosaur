@@ -74,10 +74,6 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
   const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
   const siteName = get("site.title", titleName); // Global site title.
-  const siteFavicon = validateAsset(
-    get("site.favicon", ""), // Path to site's favicon (Default: home_page.hero.profile_pic).
-    validateAsset(get("home_page.hero.profile_pic", ""), "img/icon.png"), // Path/URL to profile picture in the hero section.
-  );
 
   const siteTagline = get(
     "home_page.hero.desc", // Short description about You.
@@ -193,7 +189,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         title: siteName,
         logo: {
           alt: `${siteName} logo`,
-          src: siteFavicon,
+          src: "/favicon/favicon.ico",
         },
         hideOnScroll: get("theme.navigation.hide_navbar_on_scroll", true), // Automatically hide the navbar when scrolling down.
         items: [
@@ -363,6 +359,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     customFields: {
       portoVersion,
 
+      // Dummy property so the schema generator discovers it
+      _schemaSiteFavicon: get("site.favicon", ""), // Path to site's favicon.
+
       preview: {
         timeout: get("site.preview.timeout", 15) * 1000, // Timeout in seconds for fetching preview content (default: 15s).
       },
@@ -373,7 +372,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       heroSection: {
         profilePic: validateAsset(
-          get("home_page.hero.profile_pic", ""),
+          get("home_page.hero.profile_pic", ""), // Path/URL to profile picture in the hero section.
           "img/icon.png",
         ),
 
