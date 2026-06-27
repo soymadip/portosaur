@@ -47,4 +47,16 @@ export const Paths = {
       return path.resolve(pkgDir, "../theme");
     }
   },
+
+  /** Resolved theme and asset paths. */
+  get portoPaths() {
+    return {
+      root: this.root,
+      themeRoot: this.theme,
+      static: path.join(this.theme, "static"),
+      assets: path.join(this.theme, "assets"),
+      theme: path.join(this.theme, "theme"),
+      plugins: path.join(this.theme, "src/plugins"),
+    };
+  },
 };

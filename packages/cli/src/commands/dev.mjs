@@ -47,13 +47,7 @@ export async function devCommand(siteDir, options = {}) {
    * ====================== Path Resolution ======================
    */
 
-  const portoPaths = {
-    root: Paths.root,
-    static: path.join(Paths.theme, "static"),
-    assets: path.join(Paths.theme, "assets"),
-    theme: path.join(Paths.theme, "theme"),
-    plugins: path.join(Paths.theme, "src/plugins"),
-  };
+  const portoPaths = Paths.portoPaths;
 
   let configContext = { extraHeadTags: [] };
 
