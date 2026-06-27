@@ -23,6 +23,9 @@ export default function Home() {
   :root {
     --ifm-navbar-shadow: none !important;
   }
+  .navbar__brand {
+    display: none !important;
+  }
   `;
 
   return (
