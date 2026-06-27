@@ -163,8 +163,8 @@ You can pass a custom element (like a custom styled `<Btn>`) or a plain HTML tag
 Dropdown items support rendering leading icons (Emojis or SVGs) and standard links (`href` / `sameTab`):
 
 ```jsx
-import IconMoon from "@site/assets/img/svg/icon-moon.svg";
-import IconSun from "@site/assets/img/svg/icon-sun.svg";
+import IconMoon from "@site/assets/svg/icon-moon.svg";
+import IconSun from "@site/assets/svg/icon-sun.svg";
 
 <Dropdown
   label="Settings"
