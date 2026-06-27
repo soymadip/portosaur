@@ -26,7 +26,6 @@
 - [ ] Modify `renderIconElement` to first search in mappings, and if not found, fallback directly to react-icons.
 - [ ] Bring the theme button in navbar before nav items.
 - [ ] Export Components from package?
-- [ ] Scrollbars looks wierd in chromium, should customize?
 - [ ] Allow hint/Preview to show certain lines of current/another note.
 
 ## Refactor
