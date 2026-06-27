@@ -14,6 +14,7 @@ import {
   PiMicrosoftOutlookLogo,
   PiMicrosoftPowerpointLogo,
   PiMicrosoftWordLogo,
+  PiNoteFill
 } from "react-icons/pi";
 import { BiLogoPostgresql, BiLogoWindows } from "react-icons/bi";
 import {
@@ -290,8 +291,8 @@ export const iconMap = {
   snapchat: { icon: FaSnapchatGhost, color: "#FFFC00" },
   tiktok: { icon: FaTiktok, color: "#000000" },
   threads: { icon: SiThreads, color: "#000000" },
-  note: { icon: SiObsidian, color: "#7C3AED" },
-  notes: { icon: SiObsidian, color: "#7C3AED" },
+  note: { icon: PiNoteFill, color: "#d0be91ff" },
+  notes: { icon: PiNoteFill, color: "#d0be91ff" },
   document: { icon: SiNotion, color: "#000000" },
   docs: { icon: SiNotion, color: "#000000" },
   calendar: { icon: FaCalendar, color: "#4285F4" },
