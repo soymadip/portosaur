@@ -22,6 +22,7 @@ export {
   createStaticAssetResolver,
   buildHeadTags,
   cleanFrontMatterSlug,
+  resolveSiteCssFiles,
 } from "./utils/docusaurus.mjs";
 
 export { resolveVars, getNestedValue } from "./utils/config.mjs";

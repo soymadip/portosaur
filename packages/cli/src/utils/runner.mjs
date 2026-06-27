@@ -9,6 +9,8 @@ import {
   loadUserConfig,
   generateFavicons,
   getCssVar,
+  resolveSiteCssFiles,
+  resolveBasePath,
 } from "@portosaur/core";
 import { logger } from "@portosaur/logger";
 
@@ -22,6 +24,31 @@ import { logger } from "@portosaur/logger";
  * @returns {Promise<Object>} An object containing the generated HTML head tags.
  */
 export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
+  const cssFilesToParse = resolveSiteCssFiles(
+    UserRoot,
+    userConfig,
+    portoPaths.theme,
+  );
+
+  const backgroundColor = getCssVar(
+    "--ifm-background-surface-color",
+    cssFilesToParse,
+  );
+  const themeColor = getCssVar(
+    "--ifm-navbar-background-color",
+    cssFilesToParse,
+  );
+
+  if (!themeColor) {
+    throw new Error(
+      "Failed to resolve PWA theme color from CSS variables (--ifm-navbar-background-color).",
+    );
+  }
+  if (!backgroundColor) {
+    throw new Error(
+      "Failed to resolve PWA background color from CSS variables (--ifm-background-color).",
+    );
+  }
 
   const baseUrl = resolveBasePath(userConfig.site?.base_url || "auto");
 

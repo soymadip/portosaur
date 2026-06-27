@@ -13,6 +13,8 @@ import {
   createSidebarItemsGenerator,
   cleanFrontMatterSlug,
   getThemeColorSyncScript,
+  resolveSiteCssFiles,
+  DEFAULT_COLOR_SCHEME,
 } from "../utils/docusaurus.mjs";
 
 import remarkMath from "remark-math";
@@ -68,7 +70,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const defaultTheme =
     get("theme.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
 
-  const colorScheme = get("theme.color_scheme", "nord"); // The site's color scheme. Can be a built-in theme ("nord", "dracula", "github", "catppuccin", "gruvbox", "portosaur") or a path to a custom .css file.
+  const colorScheme = get("theme.color_scheme", DEFAULT_COLOR_SCHEME); // The site's color scheme. Can be a built-in theme ("nord", "dracula", "github", "catppuccin", "gruvbox", "portosaur") or a path to a custom .css file.
   const selectedPrism = prismThemeMap[colorScheme] || prismThemeMap.nord;
 
   const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
@@ -500,28 +502,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             },
           },
           theme: {
-            customCss: [
-              colorScheme.endsWith(".css") ||
-              colorScheme.includes("/") ||
-              colorScheme.includes("\\")
-                ? path.resolve(projectDir, colorScheme)
-                : path.resolve(
-                    portoPaths.theme ?? context.portoRoot ?? "",
-                    `css/colors/${colorScheme}.css`,
-                  ),
-              path.resolve(
-                portoPaths.theme ?? context.portoRoot ?? "",
-                "css/infima.css",
-              ),
-              path.resolve(
-                portoPaths.theme ?? context.portoRoot ?? "",
-                "css/custom.css",
-              ),
-              ...[get("theme.custom_css")] // Inject custom CSS files. Can be a single path string or an array of paths relative to the project directory. @type {string|array} @items { type: "string" }
-                .flat()
-                .filter(Boolean)
-                .map((cssPath) => path.resolve(projectDir, cssPath)),
-            ],
+            customCss: resolveSiteCssFiles(
+              projectDir,
+              userConfig,
+              portoPaths.theme ?? context.portoRoot ?? "",
+            ),
           },
         },
       ],

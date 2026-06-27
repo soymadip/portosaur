@@ -10,7 +10,12 @@ import {
   generateSiteAssets,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
-import { loadUserConfig, generateRobotsTxt } from "@portosaur/core";
+import {
+  loadUserConfig,
+  generateRobotsTxt,
+  resolveSiteUrl,
+  resolveBasePath,
+} from "@portosaur/core";
 
 /**
  * Builds the static Portosaur site.
@@ -88,12 +93,17 @@ export async function buildCommand(siteDir, options = {}) {
       logger.warn(`Failed to create .nojekyll in build dir: ${e.message}`);
     }
 
+    const resolvedSiteUrl = resolveSiteUrl(userConfig.site?.url || "auto");
+    const resolvedBaseUrl = resolveBasePath(
+      userConfig.site?.base_url || "auto",
+    );
+
     await generateRobotsTxt(UserRoot, {
       enable: userConfig.site?.robots_txt?.enable,
       rules: userConfig.site?.robots_txt?.rules,
       customLines: userConfig.site?.robots_txt?.custom_lines,
-      siteUrl: userConfig.site?.url,
-      baseUrl: userConfig.site?.base_url,
+      siteUrl: resolvedSiteUrl,
+      baseUrl: resolvedBaseUrl,
       outDir: finalOutDir,
     });
 

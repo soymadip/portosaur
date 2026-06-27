@@ -15,7 +15,9 @@
 
 ## Improvements
 
-- [ ] When there is no space, automatically hide button label and show only icon
+- [ ] Implement custom scrollbars, looks ugly in chromium browsers
+- [ ] Move away from react icons
+- [ ] When there is no space, automatically hide Btn's label and show only icon
 - [ ] Use pure css for project corosaul
 - [ ] Port more manual styling to --ifm variables. like border, shadow, radius etc.
 - [ ] Customize the Heading Tags size, style. make them distinguishable. take a look at docs style.
