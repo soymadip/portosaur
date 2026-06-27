@@ -46,7 +46,7 @@ describe("buildDocuConfig", () => {
       {
         site: {
           url: "auto",
-          path: "auto",
+          base_url: "auto",
         },
         home_page: {
           hero: {
@@ -75,7 +75,7 @@ describe("buildDocuConfig", () => {
       {
         site: {
           url: "auto",
-          path: "auto",
+          base_url: "auto",
         },
         home_page: {
           hero: {

@@ -22,20 +22,8 @@ import { logger } from "@portosaur/logger";
  * @returns {Promise<Object>} An object containing the generated HTML head tags.
  */
 export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
-  const colorScheme = userConfig.theme?.color_scheme || "nord";
-  const cssFilesToParse = [
-    colorScheme.endsWith(".css") ||
-    colorScheme.includes("/") ||
-    colorScheme.includes("\\")
-      ? path.resolve(UserRoot, colorScheme)
-      : path.join(portoPaths.theme, `css/colors/${colorScheme}.css`),
-    path.join(portoPaths.theme, "css/infima.css"),
-    path.join(portoPaths.theme, "css/custom.css"),
-    path.join(portoPaths.theme, "css/overrides/variables.css"),
-  ];
 
-  const themeColor =
-    getCssVar("--ifm-navbar-background-color", cssFilesToParse) || "#2e3440";
+  const baseUrl = resolveBasePath(userConfig.site?.base_url || "auto");
 
   const faviconRes = await generateFavicons(UserRoot, {
     imagePath: userConfig.home_page?.hero?.profile_pic,
@@ -53,6 +41,7 @@ export async function generateSiteAssets(UserRoot, userConfig, portoPaths) {
     notesRoute: userConfig.site?.notes?.route || "notes",
     blogRoute: userConfig.site?.blog?.route || "blog",
     tasksEnabled: userConfig.tasks?.enable || false,
+    baseUrl: baseUrl,
   });
 
   return {

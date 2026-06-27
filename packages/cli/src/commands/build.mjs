@@ -92,7 +92,7 @@ export async function buildCommand(siteDir, options = {}) {
       rules: userConfig.site?.robots_txt?.rules,
       customLines: userConfig.site?.robots_txt?.custom_lines,
       siteUrl: userConfig.site?.url,
-      baseUrl: userConfig.site?.path,
+      baseUrl: userConfig.site?.base_url,
       outDir: finalOutDir,
     });
 

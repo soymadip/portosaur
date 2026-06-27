@@ -37,7 +37,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const assetsDir = portoPaths.assets ?? "";
 
   const siteUrl = resolveSiteUrl(rawGet("site.url", "auto"), env);
-  const sitePath = resolveBasePath(rawGet("site.path", "auto"), env);
+  const sitePath = resolveBasePath(rawGet("site.base_url", "auto"), env);
 
   const resolveAsset = createStaticAssetResolver(
     projectDir,

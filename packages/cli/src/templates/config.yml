@@ -13,7 +13,7 @@ vars:
 # Site Metadata, SEO, Parser behavior
 site:
   url: "auto"
-  path: "auto"
+  base_url: "auto"
 
 # UI, Navigation Behavior
 theme:
