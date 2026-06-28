@@ -220,7 +220,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       tagName: "link",
       attributes: {
         rel: "manifest",
-        href: `${cleanBaseUrl}${outputPath}/manifest.webmanifest`,
+        href: `${cleanBaseUrl}manifest.webmanifest`,
       },
     },
     {
@@ -435,12 +435,11 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
     //-------- Process screenshots --------
     logger.info("Processing PWA screenshots...");
-    const screenshotsDir = path.join(siteDir, "assets", "screenshots");
     let manifestScreenshots = [];
 
     if (fs.existsSync(screenshotsDir)) {
       const files = fs.readdirSync(screenshotsDir);
-      const outScreenshotsDir = path.join(outputDir, "screenshots");
+      const outScreenshotsDir = path.join(getPortoDotDir(siteDir), "static", "screenshots");
 
       fs.mkdirSync(outScreenshotsDir, { recursive: true });
 
@@ -463,7 +462,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
           await sharp(srcPath).webp({ quality: 80 }).toFile(destPath);
 
           manifestScreenshots.push({
-            src: `${cleanBaseUrl}${outputPath}/screenshots/${destFileName}`,
+            src: `${cleanBaseUrl}screenshots/${destFileName}`,
             sizes: `${metadata.width}x${metadata.height}`,
             type: "image/webp",
             form_factor: formFactor,
@@ -585,7 +584,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     }
 
     fs.writeFileSync(
-      path.join(outputDir, "manifest.webmanifest"),
+      path.join(getPortoDotDir(siteDir), "static", "manifest.webmanifest"),
       JSON.stringify(manifest, null, 2),
     );
 
