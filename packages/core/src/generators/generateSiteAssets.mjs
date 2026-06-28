@@ -489,6 +489,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       version: appVersion,
       id: `${cleanBaseUrl}?source=pwa`,
       start_url: `${cleanBaseUrl}?source=pwa`,
+      scope: cleanBaseUrl,
       theme_color: themeColor,
       background_color: backgroundColor,
       display: "standalone",
