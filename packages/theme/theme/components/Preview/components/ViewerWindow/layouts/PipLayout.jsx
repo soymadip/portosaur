@@ -16,9 +16,11 @@ export default function PipLayout({
   isMobile,
 }) {
   const [isResizing, setIsResizing] = React.useState(false);
+  const [isDragging, setIsDragging] = React.useState(false);
   const dragStartPos = React.useRef({ x: 0, y: 0 });
 
   const handleDragStart = (_e, d) => {
+    setIsDragging(true);
     dragStartPos.current = { x: d.x, y: d.y };
   };
 
@@ -26,6 +28,7 @@ export default function PipLayout({
     let finalX = d.x;
     let finalY = d.y;
     setFloatingState({ x: finalX, y: finalY });
+    setIsDragging(false);
 
     const dx = Math.abs(finalX - dragStartPos.current.x);
     const dy = Math.abs(finalY - dragStartPos.current.y);
@@ -57,22 +60,12 @@ export default function PipLayout({
     }
   };
 
-  const handleHidePip = () => {
-    const windowWidth = document.documentElement.clientWidth;
-    const centerX = pipX + pipWidth / 2;
-    if (centerX < windowWidth / 2) {
-      setFloatingState({ x: -pipWidth + margin });
-    } else {
-      setFloatingState({ x: windowWidth - margin });
-    }
-  };
-
   return (
     <div
       className={`${styles.previewSystem} ${styles.modePip} ${isVisible ? styles.pvVisible : ""}`}
     >
       <Rnd
-        className={`${styles.rndWrapper} ${isResizing ? styles.pipResizing : ""}`}
+        className={`${styles.rndWrapper} ${isResizing || isDragging ? styles.pipResizing : ""}`}
         position={{ x: pipX, y: pipY }}
         size={{ width: pipWidth, height: pipHeight }}
         enableResizing={true}
@@ -129,10 +122,7 @@ export default function PipLayout({
           <div
             className={`${styles.pipContent} ${isHidden ? styles.pipContentHidden : ""}`}
           >
-            {React.cloneElement(children, {
-              isPipMode: true,
-              handleHidePip,
-            })}
+            {children}
           </div>
         </div>
       </Rnd>

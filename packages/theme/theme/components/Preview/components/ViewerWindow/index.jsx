@@ -70,6 +70,16 @@ export function ViewerRoot({ children }) {
     typeof window !== "undefined" ? document.documentElement.clientHeight : 800,
   );
 
+  const [cacheNode] = useState(() => {
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.style.width = "100%";
+      el.style.height = "100%";
+      return el;
+    }
+    return null;
+  });
+
   useEffect(() => {
     setMounted(true);
     const handleOnline = () => setIsOnline(true);
@@ -96,6 +106,10 @@ export function ViewerRoot({ children }) {
   const closeTimerRef = useRef(null);
   const switchTimerRef = useRef(null);
   const isVisibleRef = useRef(isVisible);
+  const savedScrollRef = useRef(0);
+
+  // We need the ref higher up to access it before unmount
+  const popupBodyRef = useRef(null);
 
   useEffect(() => {
     isVisibleRef.current = isVisible;
@@ -105,6 +119,10 @@ export function ViewerRoot({ children }) {
   useEffect(() => {
     if (displayMode !== mode) {
       if (switchTimerRef.current) clearTimeout(switchTimerRef.current);
+
+      if (popupBodyRef.current) {
+        savedScrollRef.current = popupBodyRef.current.scrollTop;
+      }
 
       if (isOpen && isVisibleRef.current) {
         setIsVisible(false); // Fade out old mode
@@ -162,15 +180,6 @@ export function ViewerRoot({ children }) {
     }
   }, [location.pathname, isOpen, closePreview]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e) => {
-      if (e.key === "Escape") closePreview();
-    };
-    window.addEventListener("keydown", handler, { capture: true });
-    return () =>
-      window.removeEventListener("keydown", handler, { capture: true });
-  }, [isOpen, closePreview]);
 
   // --- Sidebar Collapse Sync ---
   const weCollapsedSidebar = useRef(false);
@@ -284,7 +293,6 @@ export function ViewerRoot({ children }) {
   // --- UI Controls ---
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
-  const popupBodyRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) setZoomLevel(1);
@@ -344,6 +352,17 @@ export function ViewerRoot({ children }) {
     }
   }, [fileUrl, currentFile, corsProxyList]);
 
+  const handleHidePip = useCallback(() => {
+    const margin = isMobile ? 16 : 20;
+    const windowWidth = document.documentElement.clientWidth;
+    const centerX = layout.pipX + layout.pipWidth / 2;
+    if (centerX < windowWidth / 2) {
+      setFloatingState({ x: -layout.pipWidth + margin });
+    } else {
+      setFloatingState({ x: windowWidth - margin });
+    }
+  }, [layout.pipX, layout.pipWidth, isMobile, setFloatingState]);
+
   const displayTitle =
     currentFile?.title || currentFile?.url?.split("/").pop() || "Preview";
 
@@ -375,6 +394,7 @@ export function ViewerRoot({ children }) {
       isOpen={isOpen}
       isMobileDock={isMobileDock}
       isPipMode={isPipMode}
+      handleHidePip={handleHidePip}
     />
   );
 
@@ -396,12 +416,51 @@ export function ViewerRoot({ children }) {
     closePreview,
     setFloatingState,
     layout,
-    frame,
+    cacheNode,
+    savedScrollRef,
   };
 
   return (
-    <ViewerContext.Provider value={ctx}>{children}</ViewerContext.Provider>
+    <ViewerContext.Provider value={ctx}>
+      {children}
+      {cacheNode && isMounted && createPortal(frame, cacheNode)}
+    </ViewerContext.Provider>
   );
+}
+
+function PortalSlot({ node, savedScrollRef }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (node && ref.current) {
+      // Find all scrolling elements inside the cacheNode (handles PDFs, code, etc.)
+      const scrollableElements = Array.from(node.querySelectorAll('*')).filter(
+        el => el.scrollTop > 0 || el.scrollLeft > 0
+      );
+      
+      // Save their exact scroll positions
+      const savedScrolls = scrollableElements.map(el => ({
+        el,
+        top: el.scrollTop,
+        left: el.scrollLeft
+      }));
+
+      // Physically move the DOM node (this resets native scroll state)
+      ref.current.appendChild(node);
+
+      // Restore scroll state for all elements in the same synchronous tick
+      savedScrolls.forEach(({ el, top, left }) => {
+        el.scrollTop = top;
+        el.scrollLeft = left;
+      });
+
+      // Also restore the primary saved scroll if applicable (for when switching modes from top level)
+      const primaryScrollEl = node.querySelector('[class*="popupBody"]');
+      if (primaryScrollEl && savedScrollRef && savedScrollRef.current) {
+         primaryScrollEl.scrollTop = Math.max(primaryScrollEl.scrollTop, savedScrollRef.current);
+      }
+    }
+  }, [node, savedScrollRef]);
+  return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 }
 
 function useViewer() {
@@ -419,7 +478,7 @@ export function PreviewDock() {
   // If ViewerRoot hasn't mounted yet (SSR or not yet rendered), render nothing
   if (!ctx || !ctx.mounted) return null;
 
-  const { isMounted, isVisible, isDockMode, dockWidth, setDockWidth, frame } =
+  const { isMounted, isVisible, isDockMode, dockWidth, setDockWidth, cacheNode } =
     ctx;
 
   // Non-dock modes are handled by ViewerWindow via portal
@@ -431,7 +490,7 @@ export function PreviewDock() {
       dockWidth={dockWidth}
       setDockWidth={setDockWidth}
     >
-      {frame}
+      <PortalSlot node={cacheNode} savedScrollRef={ctx.savedScrollRef} />
     </DockLayout>
   );
 }
@@ -459,7 +518,7 @@ export default function PreviewViewer() {
     closePreview,
     setFloatingState,
     layout,
-    frame,
+    cacheNode,
   } = ctx;
 
   const portalRoot = document.getElementById("pv-portal-root") || document.body;
@@ -477,7 +536,7 @@ export default function PreviewViewer() {
             setPeekHeight={setPeekHeight}
             closePreview={closePreview}
           >
-            {frame}
+            <PortalSlot node={cacheNode} savedScrollRef={ctx.savedScrollRef} />
           </MobileDockLayout>
         )}
 
@@ -487,7 +546,7 @@ export default function PreviewViewer() {
             closePreview={closePreview}
             isMobileOrTablet={isMobile || isTabletPortrait}
           >
-            {frame}
+            <PortalSlot node={cacheNode} savedScrollRef={ctx.savedScrollRef} />
           </PopupLayout>
         )}
 
@@ -501,7 +560,7 @@ export default function PreviewViewer() {
             setFloatingState={setFloatingState}
             isMobile={isMobile}
           >
-            {frame}
+            <PortalSlot node={cacheNode} savedScrollRef={ctx.savedScrollRef} />
           </PipLayout>
         )}
       </>
