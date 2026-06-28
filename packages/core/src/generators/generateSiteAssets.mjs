@@ -86,6 +86,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   const staticDirs = ["static", portoPaths.static];
   const portoAssetsDir = portoPaths.assets;
+  const screenshotsDir = path.join(siteDir, "assets", "screenshots");
 
   const outputPath = "favicon";
   const shape = "squircle";
@@ -139,6 +140,16 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     }
     if (localPath) {
       fileStates.push(getFileState(localPath));
+    }
+  }
+
+  // Include screenshots directory state in the configHash to invalidate cache when screenshots change
+  if (fs.existsSync(screenshotsDir)) {
+    const screenshotFiles = fs.readdirSync(screenshotsDir);
+    for (const file of screenshotFiles.sort()) {
+      if (file.match(/\.(png|jpe?g|webp)$/i)) {
+        fileStates.push(getFileState(path.join(screenshotsDir, file)));
+      }
     }
   }
 
