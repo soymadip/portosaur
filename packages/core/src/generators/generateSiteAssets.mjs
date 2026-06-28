@@ -42,16 +42,12 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     portoPaths.theme,
   );
 
-  const backgroundColor = getCssVar(
-    "--ifm-background-surface-color",
-    cssFilesToParse,
-  );
+  const primaryColor = getCssVar("--ifm-color-primary", cssFilesToParse);
+  const backgroundColor = getCssVar("--ifm-background-color", cssFilesToParse);
   const themeColor = getCssVar(
     "--ifm-navbar-background-color",
     cssFilesToParse,
   );
-  const primaryColor =
-    getCssVar("--ifm-color-primary", cssFilesToParse) || themeColor;
 
   if (!themeColor) {
     throw new Error(
