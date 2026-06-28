@@ -439,7 +439,11 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
     if (fs.existsSync(screenshotsDir)) {
       const files = fs.readdirSync(screenshotsDir);
-      const outScreenshotsDir = path.join(getPortoDotDir(siteDir), "static", "screenshots");
+      const outScreenshotsDir = path.join(
+        getPortoDotDir(siteDir),
+        "static",
+        "screenshots",
+      );
 
       fs.mkdirSync(outScreenshotsDir, { recursive: true });
 

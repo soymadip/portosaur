@@ -180,7 +180,6 @@ export function ViewerRoot({ children }) {
     }
   }, [location.pathname, isOpen, closePreview]);
 
-
   // --- Sidebar Collapse Sync ---
   const weCollapsedSidebar = useRef(false);
   useEffect(() => {
@@ -433,15 +432,15 @@ function PortalSlot({ node, savedScrollRef }) {
   useEffect(() => {
     if (node && ref.current) {
       // Find all scrolling elements inside the cacheNode (handles PDFs, code, etc.)
-      const scrollableElements = Array.from(node.querySelectorAll('*')).filter(
-        el => el.scrollTop > 0 || el.scrollLeft > 0
+      const scrollableElements = Array.from(node.querySelectorAll("*")).filter(
+        (el) => el.scrollTop > 0 || el.scrollLeft > 0,
       );
-      
+
       // Save their exact scroll positions
-      const savedScrolls = scrollableElements.map(el => ({
+      const savedScrolls = scrollableElements.map((el) => ({
         el,
         top: el.scrollTop,
-        left: el.scrollLeft
+        left: el.scrollLeft,
       }));
 
       // Physically move the DOM node (this resets native scroll state)
@@ -456,7 +455,10 @@ function PortalSlot({ node, savedScrollRef }) {
       // Also restore the primary saved scroll if applicable (for when switching modes from top level)
       const primaryScrollEl = node.querySelector('[class*="popupBody"]');
       if (primaryScrollEl && savedScrollRef && savedScrollRef.current) {
-         primaryScrollEl.scrollTop = Math.max(primaryScrollEl.scrollTop, savedScrollRef.current);
+        primaryScrollEl.scrollTop = Math.max(
+          primaryScrollEl.scrollTop,
+          savedScrollRef.current,
+        );
       }
     }
   }, [node, savedScrollRef]);
@@ -478,8 +480,14 @@ export function PreviewDock() {
   // If ViewerRoot hasn't mounted yet (SSR or not yet rendered), render nothing
   if (!ctx || !ctx.mounted) return null;
 
-  const { isMounted, isVisible, isDockMode, dockWidth, setDockWidth, cacheNode } =
-    ctx;
+  const {
+    isMounted,
+    isVisible,
+    isDockMode,
+    dockWidth,
+    setDockWidth,
+    cacheNode,
+  } = ctx;
 
   // Non-dock modes are handled by ViewerWindow via portal
   if (!isDockMode) return null;
