@@ -50,6 +50,8 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     "--ifm-navbar-background-color",
     cssFilesToParse,
   );
+  const primaryColor =
+    getCssVar("--ifm-color-primary", cssFilesToParse) || themeColor;
 
   if (!themeColor) {
     throw new Error(
@@ -243,7 +245,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   logger.info("Generating Shortcut icons...");
   try {
-    const iconColor = { color: themeColor };
+    const iconColor = { color: primaryColor };
 
     for (const icon of shortcutIcons) {
       try {
@@ -401,7 +403,21 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
       if (fs.existsSync(svgPath)) {
         try {
-          await sharp(svgPath).resize(192, 192).png().toFile(pngPath);
+          // Add 24px padding to fix cropping in menu
+          await sharp(svgPath)
+            .resize(144, 144, {
+              fit: "contain",
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .extend({
+              top: 24,
+              bottom: 24,
+              left: 24,
+              right: 24,
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .png()
+            .toFile(pngPath);
         } catch (e) {
           throw new Error(
             `Failed to generate PNG for shortcut: ${icon}. ${e.message}`,
