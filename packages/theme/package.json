@@ -32,6 +32,7 @@
     "@docusaurus/plugin-pwa": "^3.10.1",
     "@docusaurus/preset-classic": "^3.10.1",
     "@easyops-cn/docusaurus-search-local": "^0.55.2",
+    "@embedpdf/react-pdf-viewer": "^2.14.4",
     "@fontsource-variable/geologica": "^5.2.8",
     "@fontsource-variable/lexend": "^5.2.11",
     "@fontsource/alata": "^5.2.8",

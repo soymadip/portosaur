@@ -126,7 +126,6 @@
 
 [data-theme="dark"] .windowFrame {
   background: var(--ifm-background-surface-color);
-  backdrop-filter: blur(20px);
   border: 1px solid var(--ifm-color-emphasis-800);
   box-shadow: var(--ifm-global-shadow-lw);
 }
@@ -159,9 +158,10 @@
   top: 0;
   align-self: flex-start;
   flex-shrink: 0;
-  z-index: 1000;
+  z-index: 10;
   width: 0;
   height: 100vh;
+  margin-top: calc(-1 * var(--ifm-navbar-height));
   overflow: hidden;
   transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   /* Allow overflow on left so resize handle glow renders outside */
@@ -211,7 +211,7 @@
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modeMobileDock.pvVisible {
-  transform: translateY(0);
+  transform: none;
 }
 .modeMobileDock .windowFrame {
   border-radius: 12px 12px 0 0;
@@ -228,16 +228,13 @@
 /* 4. POPUP MODE (Centered Modal) */
 .modePopup {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
+  inset: 0;
+  margin: auto;
   width: min(80vw, 1000px);
   height: min(80vh, 800px);
   z-index: 1000;
   opacity: 0;
-  transition:
-    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
-    opacity 0.2s ease;
+  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 .modePopup.modePopupPhone {
@@ -250,12 +247,12 @@
   border-radius: 16px 16px 0 0;
 }
 .modePopup.pvVisible {
-  transform: translate(-50%, -50%) scale(1);
+  transform: none;
   opacity: 1;
   pointer-events: auto;
 }
 .modePopup.modePopupPhone.pvVisible {
-  transform: translateY(0);
+  transform: none;
 }
 .modePopup .windowFrame {
   border-radius: 12px;
@@ -357,21 +354,15 @@
 
 /* --- Window Components: Header --- */
 .revealHeader {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
   height: var(--ifm-navbar-height, 60px);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 20px;
+  background: var(--ifm-background-color);
   opacity: 0.9;
   pointer-events: none;
-}
-
-:global(body.pv-navbar-hidden) .previewSystem.modeDock .revealHeader {
-  display: flex;
 }
 
 .revealHeader .popupTitle {

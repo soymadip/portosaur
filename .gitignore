@@ -55,5 +55,6 @@ temp/
 wiki/
 ifm-vars-list.css
 .playground---/
+.embed-pdf-viewer
 📦 plugin-pwa  Docusaurus.md
 implementation_plan*.md
