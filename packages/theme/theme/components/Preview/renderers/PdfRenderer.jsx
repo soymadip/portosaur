@@ -57,6 +57,11 @@ export default function PdfRenderer({ fileUrl, onError }) {
           theme: { preference: colorMode },
           tabBar: "never",
           zoom: { defaultZoomLevel: "fit-width" },
+          disabledCategories: [
+            "document-open",
+            "document-close",
+            "document-export",
+          ],
         }}
       />
     </div>

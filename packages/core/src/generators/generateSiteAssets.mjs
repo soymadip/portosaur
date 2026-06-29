@@ -121,7 +121,10 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   // Resolve offline state once before doing any network activities
   let isOffline = false;
-  if (isRemote || fallbackTargets.some((url) => url && /^https?:\/\//.test(url))) {
+  if (
+    isRemote ||
+    fallbackTargets.some((url) => url && /^https?:\/\//.test(url))
+  ) {
     isOffline = await new Promise((resolve) => {
       dns.lookup("dns.google", (err) => resolve(!!err));
     });
