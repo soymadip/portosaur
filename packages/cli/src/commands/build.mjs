@@ -55,8 +55,6 @@ export async function buildCommand(siteDir, options = {}) {
 
     // ------- Asset Generation -------
 
-    logger.info("Generating site assets...");
-
     const configContext = await generateSiteAssets({
       UserRoot,
       userConfig,

@@ -119,8 +119,20 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   const isRemote = /^https?:\/\//.test(imagePath);
   let remoteState = null;
 
+  // Resolve offline state once before doing any network activities
+  let isOffline = false;
+  if (isRemote || fallbackTargets.some((url) => url && /^https?:\/\//.test(url))) {
+    isOffline = await new Promise((resolve) => {
+      dns.lookup("dns.google", (err) => resolve(!!err));
+    });
+  }
+
   if (isRemote) {
-    remoteState = await fetchRemoteFileState(imagePath);
+    if (isOffline) {
+      remoteState = "remote:offline";
+    } else {
+      remoteState = await fetchRemoteFileState(imagePath);
+    }
     fileStates.push(remoteState);
   } else {
     let localPath = null;
@@ -172,7 +184,11 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   fallbackTargets.forEach(addFallback);
 
   for (const fallback of remoteFallbacks) {
-    fallback.state = await fetchRemoteFileState(fallback.url);
+    if (isOffline) {
+      fallback.state = "remote:offline";
+    } else {
+      fallback.state = await fetchRemoteFileState(fallback.url);
+    }
     fileStates.push(fallback.state);
   }
 
@@ -270,11 +286,20 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     );
 
     if (remoteFallbacks.length > 0) {
-      logger.info("Downloading images for offline fallbacks...");
-      fs.mkdirSync(fallbacksDir, { recursive: true });
+      if (isOffline) {
+        logger.warn(
+          `System is offline. Skipping all offline fallback downloads.`,
+        );
+      } else {
+        logger.info("Downloading images for offline fallbacks...");
+        fs.mkdirSync(fallbacksDir, { recursive: true });
+      }
     }
 
     for (const fallback of remoteFallbacks) {
+      if (isOffline) {
+        continue;
+      }
       logger.info(`Downloading offline fallback: ${fallback.url}`);
 
       try {
@@ -289,11 +314,11 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
         fs.copyFileSync(downloaded, path.join(fallbacksDir, fallback.name));
         tempFiles.push(downloaded);
       } catch (e) {
-        const isOffline = await new Promise((resolve) => {
+        const stillOffline = await new Promise((resolve) => {
           dns.lookup("dns.google", (err) => resolve(!!err));
         });
 
-        if (isOffline) {
+        if (stillOffline) {
           logger.warn(
             `System is offline. Skipping offline fallback download for: ${fallback.url}`,
           );
@@ -310,22 +335,27 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     const isRemote = /^https?:\/\//.test(imagePath);
 
     if (isRemote) {
-      try {
-        downloadedRes = await downloadImage({
-          url: imagePath,
-          destDir: cacheDir,
-          fileName: "profile_pic_src.png",
-          proxies,
-          cacheDir: path.join(cacheDir, "downloads"),
-          remoteState,
-        });
-        tempFiles.push(downloadedRes);
-      } catch (e) {
-        const isOffline = await new Promise((resolve) => {
-          dns.lookup("dns.google", (err) => resolve(!!err));
-        });
+      if (isOffline) {
+        const downloadsDir = path.join(cacheDir, "downloads");
+        let foundCached = null;
+        if (fs.existsSync(downloadsDir)) {
+          try {
+            const cachedFiles = fs.readdirSync(downloadsDir);
+            const profilePicFile = cachedFiles.find((f) =>
+              f.endsWith("-profile_pic_src.png"),
+            );
+            if (profilePicFile) {
+              foundCached = path.join(downloadsDir, profilePicFile);
+            }
+          } catch (e) {}
+        }
 
-        if (isOffline) {
+        if (foundCached && fs.existsSync(foundCached)) {
+          logger.info("System is offline. Using cached profile picture.");
+          const destPath = path.join(cacheDir, "profile_pic_src.png");
+          fs.copyFileSync(foundCached, destPath);
+          downloadedRes = destPath;
+        } else {
           logger.warn(
             `System is offline and profile picture is not cached. Falling back to default theme icon for asset generation.`,
           );
@@ -337,10 +367,61 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
             "img",
             "icon.png",
           );
-        } else {
-          throw new Error(
-            `Failed to download profile picture: ${imagePath} (${e.message})`,
-          );
+        }
+      } else {
+        try {
+          downloadedRes = await downloadImage({
+            url: imagePath,
+            destDir: cacheDir,
+            fileName: "profile_pic_src.png",
+            proxies,
+            cacheDir: path.join(cacheDir, "downloads"),
+            remoteState,
+          });
+          tempFiles.push(downloadedRes);
+        } catch (e) {
+          const stillOffline = await new Promise((resolve) => {
+            dns.lookup("dns.google", (err) => resolve(!!err));
+          });
+
+          if (stillOffline) {
+            const downloadsDir = path.join(cacheDir, "downloads");
+            let foundCached = null;
+            if (fs.existsSync(downloadsDir)) {
+              try {
+                const cachedFiles = fs.readdirSync(downloadsDir);
+                const profilePicFile = cachedFiles.find((f) =>
+                  f.endsWith("-profile_pic_src.png"),
+                );
+                if (profilePicFile) {
+                  foundCached = path.join(downloadsDir, profilePicFile);
+                }
+              } catch (e) {}
+            }
+
+            if (foundCached && fs.existsSync(foundCached)) {
+              logger.info("System is offline. Using cached profile picture.");
+              const destPath = path.join(cacheDir, "profile_pic_src.png");
+              fs.copyFileSync(foundCached, destPath);
+              downloadedRes = destPath;
+            } else {
+              logger.warn(
+                `System is offline and profile picture is not cached. Falling back to default theme icon for asset generation.`,
+              );
+
+              // fallback to default image
+              downloadedRes = path.resolve(
+                portoPaths.theme,
+                "static",
+                "img",
+                "icon.png",
+              );
+            }
+          } else {
+            throw new Error(
+              `Failed to download profile picture: ${imagePath} (${e.message})`,
+            );
+          }
         }
       }
     } else {
