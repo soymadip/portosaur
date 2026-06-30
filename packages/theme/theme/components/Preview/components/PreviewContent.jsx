@@ -54,10 +54,7 @@ export default function PreviewContent({
       );
     case "pdf":
       return (
-        <PdfRenderer
-          fileUrl={fileUrl}
-          onError={(msg) => setError(path, msg)}
-        />
+        <PdfRenderer fileUrl={fileUrl} onError={(msg) => setError(path, msg)} />
       );
     case "video":
       return (

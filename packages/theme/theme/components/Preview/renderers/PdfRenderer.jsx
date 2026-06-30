@@ -8,7 +8,33 @@ export default function PdfRenderer({ fileUrl, onError }) {
   const { colorMode } = useColorMode();
 
   useEffect(() => {
+    const handleUnhandledRejection = (event) => {
+      const isFullscreenDenial =
+        event.reason &&
+        (event.reason.message === "Fullscreen request denied" ||
+          (event.reason.name === "TypeError" &&
+            event.reason.message.toLowerCase().includes("fullscreen")));
+      if (isFullscreenDenial) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    const handleFullscreenKeys = (e) => {
+      if (e.key === "F11") {
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener("keydown", handleFullscreenKeys, { capture: true });
+
     return () => {
+      window.removeEventListener(
+        "unhandledrejection",
+        handleUnhandledRejection,
+      );
+      window.removeEventListener("keydown", handleFullscreenKeys, {
+        capture: true,
+      });
       delete window.__pdfViewerExport;
     };
   }, []);
