@@ -8,7 +8,7 @@
   top: calc(100% + 8px);
   left: calc(50% + var(--menu-offset, 0px));
   background-color: var(--ifm-dropdown-background-color);
-  border: none;
+  border: 1px solid var(--ifm-color-emphasis-400);
   border-radius: var(--ifm-global-radius);
   box-shadow: var(--ifm-global-shadow-md);
   padding: 0.5rem;
