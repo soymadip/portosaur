@@ -1,11 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PDFViewer, ZoomMode } from "@embedpdf/react-pdf-viewer";
 import { useColorMode } from "@docusaurus/theme-common";
 import { LoadingState } from "../components/FeedbackStates";
 
-export default function PdfRenderer({ fileUrl, onError }) {
+export default function PdfRenderer({ fileUrl }) {
   const [loaded, setLoaded] = useState(false);
   const { colorMode } = useColorMode();
+  const viewerRef = useRef(null);
+
+  useEffect(() => {
+    viewerRef.current?.container?.setTheme(colorMode);
+  }, [colorMode]);
 
   useEffect(() => {
     const handleUnhandledRejection = (event) => {
@@ -142,17 +147,19 @@ export default function PdfRenderer({ fileUrl, onError }) {
         </div>
       )}
       <PDFViewer
+        ref={viewerRef}
         onReady={handleReady}
         style={{ width: "100%", height: "100%" }}
         config={{
           src: fileUrl,
-          theme: { preference: colorMode },
+          theme: {
+            preference: colorMode,
+          },
           zoom: { defaultZoomLevel: ZoomMode.FitWidth },
           disabledCategories: [
             "document-open",
             "document-close",
             "document-export",
-            "security",
             "comment",
             "panel-comment",
           ],
