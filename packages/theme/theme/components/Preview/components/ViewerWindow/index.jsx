@@ -260,21 +260,35 @@ export function ViewerRoot({ children }) {
       }
     };
 
-    window.addEventListener("wheel", handleGlobalWheel, { passive: false });
+    const handleTouchMove = (e) => {
+      if (cacheNode && !cacheNode.contains(e.target)) {
+        e.preventDefault();
+      }
+    };
 
-    let originalOverflow = "";
+    window.addEventListener("wheel", handleGlobalWheel, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    let originalBodyOverflow = "";
+    let originalHtmlOverflow = "";
+
     if (isPopupMode) {
-      originalOverflow = document.body.style.overflow;
+      originalBodyOverflow = document.body.style.overflow;
+      originalHtmlOverflow = document.documentElement.style.overflow;
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("wheel", handleGlobalWheel);
+      window.removeEventListener("touchmove", handleTouchMove);
+
       if (isPopupMode) {
-        document.body.style.overflow = originalOverflow;
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
       }
     };
-  }, [isOpen, isPopupMode, isMobileDock]);
+  }, [isOpen, isPopupMode, isMobileDock, cacheNode]);
 
   // --- Data Fetching & State ---
   const currentFile = sources[activeIndex] ?? sources[0] ?? null;
