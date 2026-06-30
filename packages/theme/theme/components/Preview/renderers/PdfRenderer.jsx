@@ -60,6 +60,9 @@ export default function PdfRenderer({ fileUrl, onError }) {
             "document-open",
             "document-close",
             "document-export",
+            "security",
+            "comment",
+            "panel-comment",
           ],
         }}
       />
