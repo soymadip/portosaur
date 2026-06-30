@@ -341,19 +341,28 @@ export function ViewerRoot({ children }) {
       }
 
       const downloadName =
-        currentFile.title || currentFile.url.split("/").pop() || "download";
+        currentFile.url.split("?")[0].split("/").pop() || // Fetch name from URL
+        currentFile.title ||
+        "download";
 
       const triggerBlobDownload = async (url) => {
         const resp = await fetch(url, { mode: "cors", cache: "no-cache" });
-        if (!resp.ok) throw new Error("Fetch failed");
+
+        if (!resp.ok) {
+          throw new Error("Fetch failed");
+        }
+
         const blob = await resp.blob();
         const blobUrl = URL.createObjectURL(blob);
+
         const a = document.createElement("a");
         a.href = blobUrl;
         a.download = downloadName;
+
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+
         setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
       };
 
