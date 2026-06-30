@@ -16,6 +16,7 @@ import { useDeepLinkHash } from "../../hooks/useDeepLinkHash.jsx";
 import { useAdaptiveSizing } from "../../hooks/useAdaptiveSizing.jsx";
 import { useTouchZoom } from "../../hooks/useTouchZoom.jsx";
 import { useGlobalZoomDisable } from "../../hooks/useGlobalZoomDisable.jsx";
+import { useMobileDockResize } from "../../hooks/useMobileDockResize.jsx";
 
 // Import Layouts and Frame
 import WindowFrame from "./WindowFrame.jsx";
@@ -300,6 +301,18 @@ export function ViewerRoot({ children }) {
   useTouchZoom({ containerRef: popupBodyRef, isOpen, zoomLevel, setZoomLevel });
   useDeepLinkHash(isOpen, sources, activeIndex, displayMode, baseSlug);
 
+  const mobileDockRef = useRef(null);
+  const {
+    handlePointerDown: handlePeekPointerDown,
+    handlePointerMove,
+    handlePointerUp,
+  } = useMobileDockResize({
+    dockRef: mobileDockRef,
+    peekHeight,
+    setPeekHeight,
+    closePreview,
+  });
+
   const handleDownload = useCallback(async () => {
     if (!fileUrl) return;
     setIsDownloading(true);
@@ -410,6 +423,7 @@ export function ViewerRoot({ children }) {
       isMobileDock={isMobileDock}
       isPipMode={isPipMode}
       handleHidePip={handleHidePip}
+      handlePeekPointerDown={handlePeekPointerDown}
     />
   );
 
@@ -433,6 +447,9 @@ export function ViewerRoot({ children }) {
     layout,
     cacheNode,
     savedScrollRef,
+    mobileDockRef,
+    handlePointerMove,
+    handlePointerUp,
   };
 
   return (
@@ -481,7 +498,7 @@ function PortalSlot({ node, savedScrollRef }) {
   return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 }
 
-function useViewer() {
+export function useViewer() {
   return useContext(ViewerContext);
 }
 

@@ -67,6 +67,7 @@ export default function WindowFrame({
           modeSwitch={modeSwitch}
           isPipMode={isPipMode}
           handleHidePip={handleHidePip}
+          isMobileDock={isMobileDock}
         />
       </div>
 

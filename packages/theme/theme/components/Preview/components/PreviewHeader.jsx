@@ -25,6 +25,7 @@ export default function PreviewHeader({
   modeSwitch = true,
   isPipMode = false,
   handleHidePip,
+  isMobileDock = false,
 }) {
   const isMobileSize =
     typeof window !== "undefined" && window.innerWidth <= 768;
@@ -73,7 +74,7 @@ export default function PreviewHeader({
   return (
     <>
       {/* Reveal header shown only in dock mode on desktop */}
-      {mode === "dock" && !isMobileSize && (
+      {mode === "dock" && !isMobileDock && (
         <div className={styles.revealHeader}>
           <h1 className={styles.popupTitle}>
             <span className={styles.primaryText}>PREVIEW</span>
