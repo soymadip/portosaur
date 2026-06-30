@@ -10,6 +10,18 @@ export default function Dropdown({
   hoverDelay = 150,
   className = "",
   style,
+
+  top = false,
+  left = false,
+  right = false,
+
+  // Button styling props to mirror Btn API
+  primary = false,
+  secondary = false,
+  outline = false,
+
+  size = "md",
+
   ...buttonProps
 }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -17,6 +29,9 @@ export default function Dropdown({
   const menuTimer = useRef(null);
   const containerRef = useRef(null);
   const menuRef = useRef(null);
+
+  // Resolve direction string from boolean props
+  const direction = top ? "top" : left ? "left" : right ? "right" : "bottom";
 
   const handleMouseEnter = () => {
     if (menuTimer.current) clearTimeout(menuTimer.current);
@@ -27,36 +42,78 @@ export default function Dropdown({
     menuTimer.current = setTimeout(() => setShowMenu(false), hoverDelay);
   };
 
+  // Edge-aware correction for bottom/top directions — finds nearest scrolling container
+  // to handle popups that are smaller than the window.
   useEffect(() => {
-    if (showMenu && menuRef.current && containerRef.current) {
-      const menuWidth = menuRef.current.offsetWidth;
-      const triggerRect = containerRef.current.getBoundingClientRect();
-      const padding = 12;
-
-      const triggerCenter = triggerRect.left + triggerRect.width / 2;
-      const defaultMenuLeft = triggerCenter - menuWidth / 2;
-      const defaultMenuRight = triggerCenter + menuWidth / 2;
-
-      let offset = 0;
-
-      if (defaultMenuLeft < padding) {
-        offset = padding - defaultMenuLeft;
-      } else if (defaultMenuRight > window.innerWidth - padding) {
-        offset = window.innerWidth - padding - defaultMenuRight;
-      }
-
-      setMenuOffset(offset);
+    if (!showMenu || !menuRef.current || !containerRef.current) { return; }
+    if (direction !== "bottom" && direction !== "top") {
+      setMenuOffset(0);
+      return;
     }
-  }, [showMenu]);
+
+    const menuWidth = menuRef.current.offsetWidth;
+    const triggerRect = containerRef.current.getBoundingClientRect();
+    const padding = 12;
+
+    const triggerCenter = triggerRect.left + triggerRect.width / 2;
+    const defaultMenuLeft = triggerCenter - menuWidth / 2;
+    const defaultMenuRight = triggerCenter + menuWidth / 2;
+
+    // Walk up DOM to find the nearest scrolling/clipping container
+    // This ensures correctness inside popups that are narrower than the window.
+    let rightBound = window.innerWidth - padding;
+    let leftBound = padding;
+    let el = containerRef.current.parentElement;
+
+    while (el && el !== document.body) {
+      const cs = window.getComputedStyle(el);
+      const overflowX = cs.overflowX;
+
+      if (overflowX === "auto" || overflowX === "scroll" || overflowX === "hidden") {
+        const r = el.getBoundingClientRect();
+        rightBound = Math.min(rightBound, r.right - padding);
+        leftBound = Math.max(leftBound, r.left + padding);
+        break;
+      }
+      el = el.parentElement;
+    }
+
+    let offset = 0;
+    if (defaultMenuLeft < leftBound) {
+      offset = leftBound - defaultMenuLeft;
+    } else if (defaultMenuRight > rightBound) {
+      offset = rightBound - defaultMenuRight;
+    }
+
+    setMenuOffset(offset);
+  }, [showMenu, direction]);
 
   // Resolve trigger element: default to a Btn if a string, or if omitted (using label)
   let triggerElement = trigger;
   if (!triggerElement) {
     triggerElement = (
-      <Btn {...buttonProps}>{label !== undefined ? label : "Menu"}</Btn>
+      <Btn
+        primary={primary}
+        secondary={secondary}
+        outline={outline}
+        size={size}
+        {...buttonProps}
+      >
+        {label !== undefined ? label : "Menu"}
+      </Btn>
     );
   } else if (typeof triggerElement === "string") {
-    triggerElement = <Btn {...buttonProps}>{triggerElement}</Btn>;
+    triggerElement = (
+      <Btn
+        primary={primary}
+        secondary={secondary}
+        outline={outline}
+        size={size}
+        {...buttonProps}
+      >
+        {triggerElement}
+      </Btn>
+    );
   }
 
   const isDefaultOrBtn =
@@ -93,11 +150,17 @@ export default function Dropdown({
       <div
         ref={menuRef}
         className={styles.dropdownMenu}
+        data-direction={direction}
         style={{
           "--menu-offset": `${menuOffset}px`,
         }}
       >
         {items.map((item, idx) => {
+          // Separator item — renders a visual divider
+          if (item.type === "separator") {
+            return <hr key={idx} className={styles.dropdownSeparator} />;
+          }
+
           const {
             id,
             label,
@@ -107,6 +170,7 @@ export default function Dropdown({
             href,
             sameTab,
           } = item;
+
           const Component = href ? Link : "button";
           const linkProps = {};
           if (href) {
@@ -119,6 +183,7 @@ export default function Dropdown({
               linkProps.rel = "noopener noreferrer";
             }
           }
+
           return (
             <Component
               key={id || idx}

@@ -29,6 +29,10 @@ export default function Btn({
   info,
   secondary,
 
+  // Consumed but not forwarded to DOM
+  outline,
+  size,
+
   ...rest
 }) {
   checkDuplicateProps("Btn", "variant", {

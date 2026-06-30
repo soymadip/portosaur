@@ -3,6 +3,8 @@
   display: inline-flex;
 }
 
+/* ------------------- Default (bottom) ------------------- */
+
 .dropdownMenu {
   position: absolute;
   top: calc(100% + 8px);
@@ -25,10 +27,11 @@
     visibility var(--ifm-transition-fast) var(--ifm-transition-timing-default);
 }
 
+/* Caret arrow — default (bottom) */
 .dropdownMenu::before {
   content: "";
   position: absolute;
-  top: -2px;
+  top: -5px;
   left: calc(50% - var(--menu-offset, 0px));
   width: 10px;
   height: 10px;
@@ -43,6 +46,67 @@
   transform: translateX(-50%) translateY(-1px);
   visibility: visible;
 }
+
+/* ---------------------- Top direction ---------------------- */
+
+.dropdownMenu[data-direction="top"] {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.dropdownMenu[data-direction="top"]::before {
+  top: auto;
+  bottom: -5px;
+  box-shadow: 1px 1px 1px var(--ifm-shadow-color);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.dropdownShow .dropdownMenu[data-direction="top"] {
+  transform: translateX(-50%) translateY(1px);
+}
+
+/* ---------------- Left direction ---------------- */
+
+.dropdownMenu[data-direction="left"] {
+  top: 50%;
+  left: auto;
+  right: calc(100% + 8px);
+  transform: translateY(-50%) translateX(-4px);
+}
+
+.dropdownMenu[data-direction="left"]::before {
+  top: calc(50% - 5px);
+  left: auto;
+  right: -5px;
+  box-shadow: 1px -1px 1px var(--ifm-shadow-color);
+  transform: rotate(45deg);
+}
+
+.dropdownShow .dropdownMenu[data-direction="left"] {
+  transform: translateY(-50%) translateX(1px);
+}
+
+/* ----------------- Right direction ---------------- */
+
+.dropdownMenu[data-direction="right"] {
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%) translateX(4px);
+}
+
+.dropdownMenu[data-direction="right"]::before {
+  top: calc(50% - 5px);
+  left: -5px;
+  box-shadow: -1px 1px 1px var(--ifm-shadow-color);
+  transform: rotate(45deg);
+}
+
+.dropdownShow .dropdownMenu[data-direction="right"] {
+  transform: translateY(-50%) translateX(-1px);
+}
+
+/* ----------------- Menu items ---------------- */
 
 .dropdownMenuItem {
   display: flex;
@@ -79,6 +143,16 @@
   background-color: var(--ifm-dropdown-hover-background-color);
   color: var(--ifm-link-color);
 }
+
+/* ----------------- Separator ---------------- */
+
+.dropdownSeparator {
+  border: none;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  margin: 0.35rem 0.4rem;
+}
+
+/* ----------------- Caret arrow (default / btn) ---------------- */
 
 .dropdownArrow {
   display: inline-block;
