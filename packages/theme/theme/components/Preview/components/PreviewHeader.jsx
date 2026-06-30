@@ -31,6 +31,24 @@ export default function PreviewHeader({
 
   const [displayZoom, setDisplayZoom] = useState(zoomLevel);
   const [isCopied, setIsCopied] = useState(false);
+  const [hasAnnotations, setHasAnnotations] = useState(() => {
+    return (
+      fileType === "pdf" &&
+      typeof window !== "undefined" &&
+      !!localStorage.getItem(`pdf_annotations_${fileUrl}`)
+    );
+  });
+
+  useEffect(() => {
+    if (fileType !== "pdf") return;
+    const handleUpdate = () => {
+      setHasAnnotations(!!localStorage.getItem(`pdf_annotations_${fileUrl}`));
+    };
+    window.addEventListener("pdf-annotations-changed", handleUpdate);
+    return () => {
+      window.removeEventListener("pdf-annotations-changed", handleUpdate);
+    };
+  }, [fileUrl, fileType]);
 
   const handleCopyLink = (e) => {
     e.stopPropagation();
@@ -111,7 +129,13 @@ export default function PreviewHeader({
             <Btn
               onClick={onDownload}
               disabled={isDownloading}
-              title={isDownloading ? "Downloading..." : "Download file"}
+              title={
+                isDownloading
+                  ? "Downloading..."
+                  : hasAnnotations
+                    ? "Download PDF with edits"
+                    : "Download file"
+              }
               icon={
                 isDownloading ? (
                   <div className={styles.spinnerSmall} />
@@ -121,7 +145,13 @@ export default function PreviewHeader({
               }
               primary
             >
-              {isMobileSize ? null : isDownloading ? "Saving" : "Save"}
+              {isMobileSize
+                ? null
+                : isDownloading
+                  ? "Saving"
+                  : hasAnnotations
+                    ? "Save Edited"
+                    : "Save"}
             </Btn>
           )}
 

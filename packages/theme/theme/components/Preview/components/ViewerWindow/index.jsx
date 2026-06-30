@@ -304,8 +304,18 @@ export function ViewerRoot({ children }) {
     if (!fileUrl) return;
     setIsDownloading(true);
     try {
+      if (
+        fileType === "pdf" &&
+        typeof window !== "undefined" &&
+        window.__pdfViewerExport
+      ) {
+        await window.__pdfViewerExport();
+        return;
+      }
+
       const downloadName =
         currentFile.title || currentFile.url.split("/").pop() || "download";
+
       const triggerBlobDownload = async (url) => {
         const resp = await fetch(url, { mode: "cors", cache: "no-cache" });
         if (!resp.ok) throw new Error("Fetch failed");
@@ -319,13 +329,16 @@ export function ViewerRoot({ children }) {
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
       };
+
       try {
         const bustUrl = fileUrl.includes("?")
           ? `${fileUrl}&cb=${Date.now()}`
           : `${fileUrl}?cb=${Date.now()}`;
+
         await triggerBlobDownload(bustUrl);
       } catch (e1) {
         let proxySuccess = false;
+
         for (const proxyBaseUrl of corsProxyList) {
           try {
             const proxyUrl = `${proxyBaseUrl}${encodeURIComponent(fileUrl)}`;
@@ -334,8 +347,10 @@ export function ViewerRoot({ children }) {
             break;
           } catch (pE) {}
         }
+
         if (!proxySuccess) {
           const link = document.createElement("a");
+
           link.href = fileUrl;
           link.target = "_blank";
           link.setAttribute("download", downloadName);
@@ -355,6 +370,7 @@ export function ViewerRoot({ children }) {
     const margin = isMobile ? 16 : 20;
     const windowWidth = document.documentElement.clientWidth;
     const centerX = layout.pipX + layout.pipWidth / 2;
+
     if (centerX < windowWidth / 2) {
       setFloatingState({ x: -layout.pipWidth + margin });
     } else {
