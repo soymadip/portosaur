@@ -1086,3 +1086,76 @@
   :global(.container[class*="docItemWrapperEnhanced_"]) {
   max-width: none !important;
 }
+
+/* Docusaurus Code Block Copy Button Replica */
+.codeContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.copyButton {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--prism-background-color, var(--ifm-background-color));
+  color: var(--prism-color, var(--ifm-font-color-base));
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius, 4px);
+  padding: 0.4rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--ifm-transition-fast, 0.2s) ease-in-out;
+}
+
+.codeContainer:hover .copyButton,
+.copyButton:focus-visible {
+  opacity: 0.4;
+}
+
+.copyButton:hover {
+  opacity: 1 !important;
+}
+
+.copyButtonIcons {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+  display: block;
+}
+
+.copyIcon,
+.successIcon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  transition: all var(--ifm-transition-fast, 0.2s) ease;
+}
+
+.successIcon {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.33);
+  opacity: 0;
+  color: var(--ifm-color-success, red);
+}
+
+.copyButtonCopied .copyIcon {
+  transform: scale(0.33);
+  opacity: 0;
+}
+
+.copyButtonCopied .successIcon {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition-delay: 0.075s;
+}
