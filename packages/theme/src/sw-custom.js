@@ -1,4 +1,12 @@
-import { registerRoute } from "workbox-routing";
+import {
+  setCatchHandler,
+  registerRoute,
+  NavigationRoute,
+} from "workbox-routing";
+
+// --- Offline fallback ---
+
+const OFFLINE_FALLBACK_URL = "/offline";
 
 // --- Navigation allowlist ---
 
@@ -11,6 +19,7 @@ const ALLOWED_PATH_PATTERNS = [
   /^\/notes(\/|$)/, // /notes and everything under it
   /^\/tasks(\/|$)/, // /tasks and everything under it
   /^\/blog(\/|$)/, // /blog and everything under it
+  /^\/offline(\/|$)/, // /offline fallback page
 ];
 
 // --- Blog RSS notification constants ---
@@ -157,6 +166,18 @@ export default function swCustom({ debug }) {
       denylist: ALLOWED_PATH_PATTERNS,
     }),
   );
+
+  // Serve the offline page when a navigation request fails (no network, not in cache).
+  // This only fires for portfolio paths since non-portfolio navigations are
+  // already handled by the route above.
+  setCatchHandler(async ({ request }) => {
+    if (request.mode === "navigate") {
+      const cached = await caches.match(OFFLINE_FALLBACK_URL);
+      return cached ?? Response.error();
+    }
+
+    return Response.error();
+  });
 
   // Periodic Background Sync: check the RSS feed every 12 hours.
   self.addEventListener("periodicsync", (event) => {
