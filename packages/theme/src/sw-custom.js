@@ -2,7 +2,9 @@ import { registerRoute } from "workbox-routing";
 
 // --- Navigation allowlist ---
 
-// Paths the PWA owns. Navigating to anything else exits the PWA shell.
+// Paths the portfolio PWA owns. Navigating to anything outside this list
+// (e.g. /StaticShort/, /KireiSakura-Kit/) is forwarded directly to the network
+// so other same-origin apps are not intercepted by this service worker.
 const ALLOWED_PATH_PATTERNS = [
   /^\/$/, // root / home
   /^\/docs(\/|$)/, // /docs and everything under it
@@ -145,21 +147,15 @@ async function checkForNewPosts(debug) {
  * @param {{ debug: boolean, offlineMode: boolean }} params
  */
 export default function swCustom({ debug }) {
-  // Restrict PWA navigation to only the allowed routes.
-  // Any path NOT in the allowlist is forwarded to the network so the
-  // browser opens it as a normal page, breaking out of the PWA shell.
+  // Forward navigations that fall outside the portfolio to the network.
+  // This prevents the SW from intercepting other apps on the same origin
+  // (e.g. /StaticShort/ on soymadip.github.io). Paths that match
+  // PORTFOLIO_PATH_PATTERNS are excluded from this route so Workbox's
+  // own precache routing can handle them.
   registerRoute(
-    ({ request }) => request.mode === "navigate",
-    async ({ event, url }) => {
-      const allowed = ALLOWED_PATH_PATTERNS.some((p) => p.test(url.pathname));
-
-      if (!allowed) {
-        return fetch(event.request);
-      }
-
-      const cached = await caches.match("/index.html", { ignoreSearch: true });
-      return cached ?? fetch(event.request);
-    },
+    new NavigationRoute(({ event }) => fetch(event.request), {
+      denylist: ALLOWED_PATH_PATTERNS,
+    }),
   );
 
   // Periodic Background Sync: check the RSS feed every 12 hours.
