@@ -55,8 +55,7 @@ export default function PdfRenderer({ fileUrl, onError }) {
         config={{
           src: fileUrl,
           theme: { preference: colorMode },
-          tabBar: "never",
-          zoom: { defaultZoomLevel: "fit-width" },
+          zoom: { defaultZoomLevel: ZoomMode.FitWidth },
           disabledCategories: [
             "document-open",
             "document-close",
