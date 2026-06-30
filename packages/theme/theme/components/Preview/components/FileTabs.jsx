@@ -18,16 +18,34 @@ export default function FileTabs({ sources, activeIndex, onSelect }) {
     }
   }, [activeIndex]);
 
-  // Slide the ink-bar indicator to the active tab using CSS transform.
-  // This works in all modes including PiP, since it's relative to the parent
-  // and doesn't do any absolute screen-coordinate tracking.
   useLayoutEffect(() => {
+    const updateIndicator = () => {
+      const activeTab = tabRefs.current[activeIndex];
+      const indicator = indicatorRef.current;
+      if (activeTab && indicator) {
+        indicator.style.width = `${activeTab.offsetWidth}px`;
+        indicator.style.transform = `translateX(${activeTab.offsetLeft}px)`;
+      }
+    };
+
+    updateIndicator();
+
+    if (typeof window === "undefined" || !window.ResizeObserver) return;
+
+    const observer = new ResizeObserver(updateIndicator);
     const activeTab = tabRefs.current[activeIndex];
-    const indicator = indicatorRef.current;
-    if (activeTab && indicator) {
-      indicator.style.width = `${activeTab.offsetWidth}px`;
-      indicator.style.transform = `translateX(${activeTab.offsetLeft}px)`;
+
+    if (activeTab) {
+      observer.observe(activeTab);
+      const parent = activeTab.parentElement;
+      if (parent) {
+        observer.observe(parent);
+      }
     }
+
+    return () => {
+      observer.disconnect();
+    };
   }, [activeIndex, sources]);
 
   if (!sources || sources.length <= 1) return null;
