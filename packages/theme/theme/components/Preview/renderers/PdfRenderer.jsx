@@ -3,6 +3,46 @@ import { PDFViewer, ZoomMode } from "@embedpdf/react-pdf-viewer";
 import { useColorMode } from "@docusaurus/theme-common";
 import { LoadingState } from "../components/FeedbackStates";
 
+const themeColors = {
+  accent: {
+    primary: "var(--ifm-color-primary)",
+    primaryHover: "var(--ifm-color-primary-dark)",
+    primaryActive: "var(--ifm-color-primary-darker)",
+    primaryLight: "var(--ifm-color-primary-lightest)",
+  },
+  background: {
+    app: "var(--ifm-background-color)",
+    surface: "var(--ifm-background-surface-color)",
+    surfaceAlt: "var(--ifm-color-emphasis-100)",
+    elevated: "var(--ifm-dropdown-background-color)",
+    input: "var(--ifm-background-color)",
+  },
+  foreground: {
+    primary: "var(--ifm-font-color-base)",
+    secondary: "var(--ifm-font-color-base)",
+    muted: "var(--ifm-color-emphasis-800)",
+  },
+  border: {
+    default: "var(--ifm-color-emphasis-500)",
+    subtle: "var(--ifm-color-emphasis-400)",
+    strong: "var(--ifm-color-emphasis-700)",
+  },
+  interactive: {
+    hover: "var(--ifm-color-emphasis-100)",
+    selected: "var(--ifm-color-emphasis-200)",
+  },
+  state: {
+    error: "var(--ifm-color-danger)",
+    errorLight: "rgba(var(--ifm-color-danger-rgb), 0.15)",
+    warning: "var(--ifm-color-warning)",
+    warningLight: "rgba(var(--ifm-color-warning-rgb), 0.15)",
+    success: "var(--ifm-color-success)",
+    successLight: "rgba(var(--ifm-color-success-rgb), 0.15)",
+    info: "var(--ifm-color-info)",
+    infoLight: "rgba(var(--ifm-color-info-rgb), 0.15)",
+  },
+};
+
 export default function PdfRenderer({ fileUrl }) {
   const [loaded, setLoaded] = useState(false);
   const { colorMode } = useColorMode();
@@ -154,6 +194,8 @@ export default function PdfRenderer({ fileUrl }) {
           src: fileUrl,
           theme: {
             preference: colorMode,
+            light: themeColors,
+            dark: themeColors,
           },
           zoom: { defaultZoomLevel: ZoomMode.FitWidth },
           disabledCategories: [

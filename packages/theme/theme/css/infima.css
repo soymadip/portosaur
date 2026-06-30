@@ -32,6 +32,7 @@ html[data-theme="dark"] {
   --ifm-color-danger: var(--porto-danger);
   --ifm-color-danger-rgb: var(--porto-danger-rgb);
   --ifm-color-info: var(--porto-info);
+  --ifm-color-info-rgb: var(--porto-info-rgb);
 
   /* Tinted grayscale palette */
   --ifm-color-gray-0: var(--porto-gray-0);
@@ -107,6 +108,9 @@ html[data-theme="dark"] {
   /* Borders & Shadows */
   --ifm-shadow-color: var(--porto-surface-1);
   --ifm-button-color: var(--ifm-color-emphasis-500);
+  --ifm-global-shadow-lw: 0 1px 2px 0 rgba(var(--ifm-shadow-color), 0.12);
+  --ifm-global-shadow-md: 0 5px 40px rgba(var(--ifm-shadow-color), 0.15);
+  --ifm-global-shadow-tl: 0 12px 28px 0 rgba(var(--ifm-shadow-color), 0.2);
   --ifm-hover-overlay: rgba(var(--porto-surface-2-rgb), 0.5) !important;
 
   /* Hr */
