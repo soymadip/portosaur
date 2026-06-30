@@ -10,7 +10,7 @@
     },
     "docs": {
       "name": "@portosaur/docs",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "devDependencies": {
         "debug": "^4.4.3",
         "js-yaml": "^4.2.0",
@@ -24,7 +24,7 @@
     },
     "packages/cli": {
       "name": "@portosaur/cli",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "bin": {
         "porto": "bin/porto.mjs",
       },
@@ -38,7 +38,7 @@
     },
     "packages/core": {
       "name": "@portosaur/core",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "dependencies": {
         "@portosaur/logger": "workspace:*",
         "js-yaml": "^4.1.1",
@@ -50,7 +50,7 @@
     },
     "packages/logger": {
       "name": "@portosaur/logger",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "dependencies": {
         "@docusaurus/logger": "^3.10.0",
         "chalk": "^5.6.2",
@@ -59,12 +59,28 @@
     },
     "packages/theme": {
       "name": "@portosaur/theme",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "dependencies": {
         "@docusaurus/core": "^3.10.1",
         "@docusaurus/plugin-pwa": "^3.10.1",
         "@docusaurus/preset-classic": "^3.10.1",
         "@easyops-cn/docusaurus-search-local": "^0.55.2",
+        "@embedpdf/core": "^2.14.4",
+        "@embedpdf/engines": "^2.14.4",
+        "@embedpdf/models": "^2.14.4",
+        "@embedpdf/pdfium": "^2.14.4",
+        "@embedpdf/plugin-annotation": "^2.14.4",
+        "@embedpdf/plugin-export": "^2.14.4",
+        "@embedpdf/plugin-fullscreen": "^2.14.4",
+        "@embedpdf/plugin-history": "^2.14.4",
+        "@embedpdf/plugin-interaction-manager": "^2.14.4",
+        "@embedpdf/plugin-pan": "^2.14.4",
+        "@embedpdf/plugin-print": "^2.14.4",
+        "@embedpdf/plugin-rotate": "^2.14.4",
+        "@embedpdf/plugin-search": "^2.14.4",
+        "@embedpdf/plugin-selection": "^2.14.4",
+        "@embedpdf/plugin-spread": "^2.14.4",
+        "@embedpdf/plugin-tiling": "^2.14.4",
         "@embedpdf/react-pdf-viewer": "^2.14.4",
         "@fontsource-variable/geologica": "^5.2.8",
         "@fontsource-variable/lexend": "^5.2.11",
@@ -91,7 +107,7 @@
     },
     "packages/wizard": {
       "name": "@portosaur/wizard",
-      "version": "0.16.0",
+      "version": "0.17.1",
       "dependencies": {
         "@clack/prompts": "^1.2.0",
         "chalk": "^5.6.2",
