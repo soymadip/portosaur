@@ -1,4 +1,3 @@
-import React from "react";
 import {
   HtmlClassNameProvider,
   ThemeClassNames,
@@ -14,6 +13,7 @@ import clsx from "clsx";
 import { FaPenNib } from "react-icons/fa";
 
 import styles from "./styles.module.css";
+import NotifyButton from "./NotifyButton.jsx";
 
 function EmptyBlog() {
   return (
@@ -45,6 +45,12 @@ function BlogListPageMetadata({ metadata }) {
 }
 
 function BlogListPageContent({ metadata, items, sidebar }) {
+  const {
+    siteConfig: { customFields },
+  } = useDocusaurusContext();
+  const isPwaEnabled = customFields?.pwa?.enable;
+  const isNotificationsEnabled = customFields?.pwa?.notifications;
+
   if (items.length === 0) {
     return (
       <Layout>
@@ -55,6 +61,7 @@ function BlogListPageContent({ metadata, items, sidebar }) {
 
   return (
     <BlogLayout sidebar={sidebar}>
+      {isPwaEnabled && isNotificationsEnabled && <NotifyButton />}
       <BlogPostItems items={items} />
       <BlogListPaginator metadata={metadata} />
     </BlogLayout>

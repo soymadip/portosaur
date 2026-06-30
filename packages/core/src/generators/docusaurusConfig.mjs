@@ -139,6 +139,20 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
     staticDirectories,
 
+    // Client module that registers the Periodic Background Sync from the main thread.
+    // Only included in production (service worker is only active in production).
+    clientModules:
+      env.NODE_ENV === "production" &&
+      get("site.pwa.enable", true) &&
+      get("site.pwa.notifications", false)
+        ? [
+            path.resolve(
+              portoPaths.theme ?? context.portoRoot ?? "",
+              "src/clientModules/periodicSync.js",
+            ),
+          ]
+        : [],
+
     headTags: [
       ...regularUserHeadTags,
       ...(env.NODE_ENV !== "production"
@@ -465,6 +479,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         list: get("tasks.list", []), // @items { title: string, status: string, desc?: string }
       },
 
+      pwa: {
+        enable: get("site.pwa.enable", true), // enable/disable PWA support
+        notifications: get("site.pwa.notifications", false), // toggle background sync for new blog posts
+      },
+
       toolsConfig: {
         linkShortener: {
           enable: get("tools.link_shortener.enable", false), // Toggle the internal link shortener.
@@ -593,7 +612,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           };
         },
       }),
-      ...(env.NODE_ENV === "production"
+      ...(env.NODE_ENV === "production" && get("site.pwa.enable", true)
         ? [
             [
               "@docusaurus/plugin-pwa",

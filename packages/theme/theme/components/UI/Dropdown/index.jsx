@@ -45,7 +45,9 @@ export default function Dropdown({
   // Edge-aware correction for bottom/top directions — finds nearest scrolling container
   // to handle popups that are smaller than the window.
   useEffect(() => {
-    if (!showMenu || !menuRef.current || !containerRef.current) { return; }
+    if (!showMenu || !menuRef.current || !containerRef.current) {
+      return;
+    }
     if (direction !== "bottom" && direction !== "top") {
       setMenuOffset(0);
       return;
@@ -69,7 +71,11 @@ export default function Dropdown({
       const cs = window.getComputedStyle(el);
       const overflowX = cs.overflowX;
 
-      if (overflowX === "auto" || overflowX === "scroll" || overflowX === "hidden") {
+      if (
+        overflowX === "auto" ||
+        overflowX === "scroll" ||
+        overflowX === "hidden"
+      ) {
         const r = el.getBoundingClientRect();
         rightBound = Math.min(rightBound, r.right - padding);
         leftBound = Math.max(leftBound, r.left + padding);
