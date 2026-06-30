@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { PDFViewer } from "@embedpdf/react-pdf-viewer";
+import { useState, useEffect } from "react";
+import { PDFViewer, ZoomMode } from "@embedpdf/react-pdf-viewer";
 import { useColorMode } from "@docusaurus/theme-common";
 import { LoadingState } from "../components/FeedbackStates";
 

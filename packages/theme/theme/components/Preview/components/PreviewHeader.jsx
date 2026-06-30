@@ -125,9 +125,10 @@ export default function PreviewHeader({
             </Btn>
           )}
 
-          {/* Zoom picker (desktop, non-web, non-video) */}
+          {/* Zoom picker (desktop, non-web, non-video, non-pdf) */}
           {fileType !== "web" &&
             fileType !== "video" &&
+            fileType !== "pdf" &&
             (() => {
               const presets = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5];
               const roundedZoom = Math.round(displayZoom * 100);

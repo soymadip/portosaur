@@ -1,5 +1,3 @@
-import React from "react";
-import styles from "../styles.module.css";
 import { LoadingState, ErrorState, OfflineState } from "./FeedbackStates";
 import ImageRenderer from "../renderers/ImageRenderer";
 import PdfRenderer from "../renderers/PdfRenderer";
@@ -58,7 +56,6 @@ export default function PreviewContent({
       return (
         <PdfRenderer
           fileUrl={fileUrl}
-          zoomLevel={zoomLevel}
           onError={(msg) => setError(path, msg)}
         />
       );
