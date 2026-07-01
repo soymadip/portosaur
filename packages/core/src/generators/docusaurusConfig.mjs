@@ -88,9 +88,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const siteName = get("site.title", titleName); // Global site title.
 
   const siteTagline = get(
-    "home_page.hero.desc", // Short description about You.
     "site.tagline", // Global site tagline.
-    "Short description about you, your passion, your goals etc.",
+    "My Digital space, personal knowledge base & blogging platform",
   );
 
   // Collect static directories: local site static/, theme static/, and portosaur dot dir.
@@ -408,7 +407,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         title: titleName,
         subtitle: get("home_page.hero.subtitle", "I am a"), // Subtitle text after name.
         profession: get("home_page.hero.profession", "Your Profession"),
-        desc: get("home_page.hero.desc", "Welcome to my portfolio."),
+        desc: get(
+          "home_page.hero.desc", // Short description about you, your passion, goals etc.
+          "Short description about you, your passion, your goals etc.",
+        ),
         learnMoreButtonTxt: get(
           "home_page.hero.learn_more_button_txt", // Text for the call-to-action button.
           "Learn More",
@@ -612,7 +614,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           };
         },
       }),
-      ...(env.NODE_ENV === "production" && get("site.pwa.enable", true)
+      ...(get("site.pwa.enable", true)
         ? [
             [
               "@docusaurus/plugin-pwa",
