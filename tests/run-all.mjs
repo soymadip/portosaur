@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { disableGpgSign, restoreGpgSign } from "../utils/gpg-sign.mjs";
+import { disableGpgSign, restoreGpgSign } from "./utils/gpg-sign.mjs";
 
 const colors = {
   success: (str) => `\x1b[32m${str}\x1b[0m`,

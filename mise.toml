@@ -2,6 +2,7 @@
 uv = "latest"
 "pipx:commitizen" = "latest"
 bun = "latest"
+prettier = "latest"
 
 [env]
 CZ_CONFIG = 'src/cz/cz.yaml'
@@ -14,6 +15,8 @@ bump = "cz --config $CZ_CONFIG  bump"
 commit = "cz --config $CZ_CONFIG commit"
 changelog = "cz --config $CZ_CONFIG changelog"
 pr = "gh pr create"
+"format:check" = "prettier --check ."
+format = "prettier --write ."
 
 [tasks.changelog-latest]
 run = """
