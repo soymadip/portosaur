@@ -2,7 +2,7 @@
   "name": "@portosaur/docs",
   "description": "Portosaur Docs: Documentation for Portosaur.",
   "private": true,
-  "version": "0.18.0",
+  "version": "0.19.0",
   "license": "GPL-3.0-only",
   "author": "soymadip",
   "homepage": "https://soymadip.github.io/portosaur",
