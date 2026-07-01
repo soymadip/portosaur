@@ -1,9 +1,3 @@
-import {
-  setCatchHandler,
-  registerRoute,
-  NavigationRoute,
-} from "workbox-routing";
-
 // --- Offline fallback ---
 
 const OFFLINE_FALLBACK_URL = "/offline";
@@ -20,6 +14,7 @@ const ALLOWED_PATH_PATTERNS = [
   /^\/tasks(\/|$)/, // /tasks and everything under it
   /^\/blog(\/|$)/, // /blog and everything under it
   /^\/offline(\/|$)/, // /offline fallback page
+  /^\/redirect(\/|$|\?)/, // /redirect page used to open non-allowed paths externally
 ];
 
 // --- Blog RSS notification constants ---
@@ -148,6 +143,49 @@ async function checkForNewPosts(debug) {
   );
 }
 
+// Navigation requests to paths OUTSIDE the portfolio (e.g. /StaticShort/)
+//   are forwarded directly to the network so other same-origin apps are not
+//  intercepted by this service worker.
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
+  // Only intercept same-origin navigation requests.
+  if (request.mode !== "navigate") {
+    return;
+  }
+
+  let url;
+  try {
+    url = new URL(request.url);
+  } catch {
+    return;
+  }
+
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  const isPortfolioPath = ALLOWED_PATH_PATTERNS.some((re) =>
+    re.test(url.pathname),
+  );
+
+  // Non-allowed navigation — redirect to the /redirect page which opens the
+  // URL outside the PWA window (or shows a tap-able link on iOS).
+  if (!isPortfolioPath) {
+    const to = "/redirect?url=" + encodeURIComponent(request.url);
+    event.respondWith(Response.redirect(to, 302));
+    return;
+  }
+
+  // Allowed path — try network first, fall back to /offline on failure.
+  event.respondWith(
+    fetch(request).catch(async () => {
+      const cached = await caches.match(OFFLINE_FALLBACK_URL);
+      return cached ?? Response.error();
+    }),
+  );
+});
+
 // --- Workbox custom service-worker injection ---
 
 /**
@@ -156,29 +194,6 @@ async function checkForNewPosts(debug) {
  * @param {{ debug: boolean, offlineMode: boolean }} params
  */
 export default function swCustom({ debug }) {
-  // Forward navigations that fall outside the portfolio to the network.
-  // This prevents the SW from intercepting other apps on the same origin
-  // (e.g. /StaticShort/ on soymadip.github.io). Paths that match
-  // PORTFOLIO_PATH_PATTERNS are excluded from this route so Workbox's
-  // own precache routing can handle them.
-  registerRoute(
-    new NavigationRoute(({ event }) => fetch(event.request), {
-      denylist: ALLOWED_PATH_PATTERNS,
-    }),
-  );
-
-  // Serve the offline page when a navigation request fails (no network, not in cache).
-  // This only fires for portfolio paths since non-portfolio navigations are
-  // already handled by the route above.
-  setCatchHandler(async ({ request }) => {
-    if (request.mode === "navigate") {
-      const cached = await caches.match(OFFLINE_FALLBACK_URL);
-      return cached ?? Response.error();
-    }
-
-    return Response.error();
-  });
-
   // Periodic Background Sync: check the RSS feed every 12 hours.
   self.addEventListener("periodicsync", (event) => {
     if (event.tag !== PERIODIC_SYNC_TAG) {

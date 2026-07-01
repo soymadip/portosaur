@@ -626,7 +626,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                   "saveData",
                 ],
                 swCustom: path.resolve(
-                  portoPaths.theme ?? context.portoRoot ?? "",
+                  context.portoRoot ?? "",
                   "src/sw-custom.js",
                 ),
                 pwaHead: extraHeadTags.map((t) => ({

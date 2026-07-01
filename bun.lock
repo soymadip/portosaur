@@ -10,7 +10,7 @@
     },
     "docs": {
       "name": "@portosaur/docs",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "devDependencies": {
         "debug": "^4.4.3",
         "js-yaml": "^4.2.0",
@@ -24,7 +24,7 @@
     },
     "packages/cli": {
       "name": "@portosaur/cli",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "bin": {
         "porto": "bin/porto.mjs",
       },
@@ -38,7 +38,7 @@
     },
     "packages/core": {
       "name": "@portosaur/core",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "dependencies": {
         "@portosaur/logger": "workspace:*",
         "js-yaml": "^4.1.1",
@@ -50,7 +50,7 @@
     },
     "packages/logger": {
       "name": "@portosaur/logger",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "dependencies": {
         "@docusaurus/logger": "^3.10.0",
         "chalk": "^5.6.2",
@@ -59,7 +59,7 @@
     },
     "packages/theme": {
       "name": "@portosaur/theme",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "dependencies": {
         "@docusaurus/core": "^3.10.1",
         "@docusaurus/plugin-pwa": "^3.10.1",
@@ -107,7 +107,7 @@
     },
     "packages/wizard": {
       "name": "@portosaur/wizard",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "dependencies": {
         "@clack/prompts": "^1.2.0",
         "chalk": "^5.6.2",
@@ -3393,7 +3393,7 @@
 
     "workbox-streams": ["workbox-streams@7.4.0", "", { "dependencies": { "workbox-core": "7.4.0", "workbox-routing": "7.4.0" } }, "sha512-QHPBQrey7hQbnTs5GrEVoWz7RhHJXnPT+12qqWM378orDMo5VMJLCkCM1cnCk+8Eq92lccx/VgRZ7WAzZWbSLg=="],
 
-    "workbox-sw": ["workbox-sw@7.4.0", "", {}, "sha512-ltU+Kr3qWR6BtbdlMnCjobZKzeV1hN+S6UvDywBrwM19TTyqA03X66dzw1tEIdJvQ4lYKkBFox6IAEhoSEZ8Xw=="],
+   "workbox-sw": ["workbox-sw@7.4.0", "", {}, "sha512-ltU+Kr3qWR6BtbdlMnCjobZKzeV1hN+S6UvDywBrwM19TTyqA03X66dzw1tEIdJvQ4lYKkBFox6IAEhoSEZ8Xw=="],
 
     "workbox-window": ["workbox-window@7.4.0", "", { "dependencies": { "@types/trusted-types": "^2.0.2", "workbox-core": "7.4.0" } }, "sha512-/bIYdBLAVsNR3v7gYGaV4pQW3M3kEPx5E8vDxGvxo6khTrGtSSCS7QiFKv9ogzBgZiy0OXLP9zO28U/1nF1mfw=="],
 
