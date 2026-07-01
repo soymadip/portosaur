@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runPlayground } from "./playground.mjs";
+import { runPlayground } from "../../src/playground.mjs";
+import { disableGpgSign, restoreGpgSign } from "../utils/gpg-sign.mjs";
 
 const colors = {
   info: (str) => `\x1b[34m${str}\x1b[0m`,
@@ -13,10 +14,17 @@ const colors = {
 const dir = ".smoke-test-site";
 const start = Date.now();
 
+// Disable GPG signing for the duration of the test so cz bump
+const gpgWasEnabled = disableGpgSign();
+
 try {
   console.log(
     `\n${colors.info("=================== Starting Smoke Test ===================")}\n`,
   );
+
+  if (gpgWasEnabled) {
+    console.log(colors.dim(">>> GPG signing disabled for test duration."));
+  }
 
   runPlayground({ siteName: dir, runCommand: "build", prune: true });
 
@@ -38,5 +46,12 @@ try {
     recursive: true,
     force: true,
   });
-  console.log(`${colors.dim(">>> Clean up done.")}\n`);
+  console.log(`${colors.dim(">>> Clean up done.")}`);
+
+  // Restore GPG signing to its original state (only if it was enabled before).
+  restoreGpgSign(gpgWasEnabled);
+
+  if (gpgWasEnabled) {
+    console.log(`${colors.dim(">>> GPG signing re-enabled.")}\n`);
+  }
 }

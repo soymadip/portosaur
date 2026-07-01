@@ -22,8 +22,8 @@
     "build": "bun run playground build",
     "dev": "bun run playground dev",
     "dev:docs": "bun run --cwd docs dev",
-    "test:all": "bun run schema && bun test",
-    "test:smoke": "bun run src/smoke-test.mjs"
+    "test:all": "bun run tests/run-all.mjs",
+    "test:smoke": "bun run tests/smoke/smoke-test.mjs"
   },
   "devDependencies": {
     "prettier": "latest"
