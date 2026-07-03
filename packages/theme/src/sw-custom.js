@@ -143,49 +143,6 @@ async function checkForNewPosts(debug) {
   );
 }
 
-// Navigation requests to paths OUTSIDE the portfolio (e.g. /StaticShort/)
-//   are forwarded directly to the network so other same-origin apps are not
-//  intercepted by this service worker.
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-
-  // Only intercept same-origin navigation requests.
-  if (request.mode !== "navigate") {
-    return;
-  }
-
-  let url;
-  try {
-    url = new URL(request.url);
-  } catch {
-    return;
-  }
-
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  const isPortfolioPath = ALLOWED_PATH_PATTERNS.some((re) =>
-    re.test(url.pathname),
-  );
-
-  // Non-allowed navigation — redirect to the /redirect page which opens the
-  // URL outside the PWA window (or shows a tap-able link on iOS).
-  if (!isPortfolioPath) {
-    const to = "/redirect?url=" + encodeURIComponent(request.url);
-    event.respondWith(Response.redirect(to, 302));
-    return;
-  }
-
-  // Allowed path — try network first, fall back to /offline on failure.
-  event.respondWith(
-    fetch(request).catch(async () => {
-      const cached = await caches.match(OFFLINE_FALLBACK_URL);
-      return cached ?? Response.error();
-    }),
-  );
-});
-
 // --- Workbox custom service-worker injection ---
 
 /**
