@@ -70,7 +70,8 @@ export default function HeroSection({ id, className }) {
             )}
             alt="profile"
             className={styles.profilePic}
-            loading="lazy"
+            loading="eager"
+            fetchpriority="high"
             onError={
               typeof profilePic === "object" && profilePic.fallback
                 ? (e) => {
