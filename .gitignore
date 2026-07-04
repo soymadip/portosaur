@@ -44,7 +44,8 @@ test+.js
 TEST*/
 .smoke-test-site/
 .playground/
-.docusaurus*/
+.*-source
+
 
 ss.*
 *tmp*
