@@ -95,7 +95,7 @@
   color: var(--ifm-font-color-base);
 }
 
-.heroImage {
+.heroIcon {
   flex: 1;
   position: relative;
   display: flex;
@@ -103,7 +103,7 @@
   align-items: center;
 }
 
-.image {
+.icon {
   position: relative;
   z-index: 1;
   max-width: 100%;
@@ -196,11 +196,11 @@
   }
 
   .title {
-    font-size: 3rem;
+    font-size: 2.7rem;
   }
 
   .tagline {
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
 
   .description {
@@ -211,16 +211,20 @@
     justify-content: center;
   }
 
-  .heroImage {
+  .heroIcon {
     width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
 
-  .image {
-    max-height: 250px;
+  .icon {
+    max-height: 180px;
   }
 
   .featureIcon {
     margin-bottom: 0.5rem;
+  }
+
+  .featuresSection {
+    padding-bottom: 3.4rem;
   }
 }

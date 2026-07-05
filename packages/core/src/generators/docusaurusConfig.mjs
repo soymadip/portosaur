@@ -538,7 +538,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
       },
 
       docsHome: {
-        image: genFallback(
+        icon: genFallback(
           validateAsset(get("docs_home.icon", ""), "img/icon.png"), // Project icon.
         ),
         title: titleName,

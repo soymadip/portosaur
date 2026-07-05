@@ -65,7 +65,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   const fallbackTargets = [
     ...(siteMode === "docs"
       ? [
-          userConfig.docs_home?.image,
+          userConfig.docs_home?.icon,
           ...(userConfig.docs_home?.features || []).map((f) => f.icon),
           ...(userConfig.docs_home?.actions || []).map((a) => a.icon),
         ]
@@ -98,7 +98,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   const imagePath =
     (siteMode === "docs"
-      ? userConfig.docs_home?.image
+      ? userConfig.docs_home?.icon
       : userConfig.home_page?.hero?.profile_pic) || "img/icon.png";
 
   const notesRoute =

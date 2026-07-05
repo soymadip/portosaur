@@ -16,7 +16,7 @@ export default function DocsHomeSection() {
     return null;
   }
 
-  const { title, tagline, desc, actions, features, image } = docsHome;
+  const { title, tagline, desc, actions, features, icon } = docsHome;
 
   return (
     <div className={styles.docsHome}>
@@ -55,19 +55,19 @@ export default function DocsHomeSection() {
             )}
           </div>
 
-          {image && (
-            <div className={styles.heroImage}>
+          {icon && (
+            <div className={styles.heroIcon}>
               <img
-                src={withBaseUrl(typeof image === "string" ? image : image.src)}
+                src={withBaseUrl(typeof icon === "string" ? icon : icon.src)}
                 alt="Hero"
                 loading="eager"
                 fetchPriority="high"
-                className={styles.image}
+                className={styles.icon}
                 onError={
-                  typeof image === "object" && image.fallback
+                  typeof icon === "object" && icon.fallback
                     ? (e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = withBaseUrl(image.fallback);
+                        e.currentTarget.src = withBaseUrl(icon.fallback);
                       }
                     : undefined
                 }
