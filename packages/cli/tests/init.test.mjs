@@ -97,11 +97,12 @@ describe("CLI: init", () => {
 
     currentWizardMock = async () => ({
       confirm: true,
-      vcs: "github",
-      hosting: "github-pages",
-      userName: "yourusername",
+      vcsProvider: "github",
+      hostingPlatform: "github-pages",
+      vcsUsername: "yourusername",
       fullName: "Prompted Person",
       projectName: "prompted-project",
+      repoName: "prompted-project",
       openBrowser: false,
       repoCreated: true,
     });
@@ -215,24 +216,25 @@ describe("CLI: init", () => {
       capturedWizardOpts = opts;
       // Simulate choosing GitHub and GitHub Pages
       const state = {
-        vcs: "github",
-        hosting: "github-pages",
-        userName: "tester",
+        vcsProvider: "github",
+        hostingPlatform: "github-pages",
+        vcsUsername: "tester",
       };
 
-      // Find the projectNameType step
-      const step = opts.steps.find((s) => s.id === "projectNameType");
+      // Find the repoNameChoice step
+      const step = opts.steps.find((s) => s.id === "repoNameChoice");
       const options = step.options(state);
 
-      expect(options[0].label).toBe("tester.github.io");
+      expect(options[0].label).toBe("Use tester.github.io");
       expect(options[0].value).toBe("ideal");
 
       return {
         confirm: true,
         projectName: "tester.github.io",
-        vcs: "github",
-        hosting: "github-pages",
-        userName: "tester",
+        repoName: "tester.github.io",
+        vcsProvider: "github",
+        hostingPlatform: "github-pages",
+        vcsUsername: "tester",
         repoCreated: true,
         openBrowser: false,
       };
