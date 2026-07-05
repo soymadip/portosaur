@@ -111,7 +111,8 @@ export function ensureContentDirs(UserRoot, overrideSiteType = null) {
   } catch (e) {
     // Gracefully handle missing config during project initialization
   }
-  const siteMode = overrideSiteType || (userConfig.docs_home ? "docs" : "portfolio");
+  const siteMode =
+    overrideSiteType || (userConfig.docs_home ? "docs" : "portfolio");
   const docsDir =
     siteMode === "docs"
       ? userConfig.site?.docs?.dir || "docs"

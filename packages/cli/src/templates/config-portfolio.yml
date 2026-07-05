@@ -15,7 +15,6 @@ site:
   url: "auto"
   base_url: "auto"
 
-
 # Page Content & Sections
 home_page:
   hero:

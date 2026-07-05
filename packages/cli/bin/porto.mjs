@@ -33,7 +33,7 @@ program
     new Option("--site-type <type>", "Type of site to initialize").choices([
       "portfolio",
       "docs",
-    ])
+    ]),
   )
   .option("-k, --no-install", "Skip dependency installation")
   .option("--ci-only", "Setup Only CI/CD workflows for an existing project")

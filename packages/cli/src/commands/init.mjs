@@ -117,7 +117,8 @@ export async function initCommand(options = {}) {
             return "my-portfolio";
           },
           validate: (value) => {
-            if (/[^a-zA-Z0-9_.-]/.test(value)) return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
+            if (/[^a-zA-Z0-9_.-]/.test(value))
+              return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
           },
           transform: (v) => v.trim(),
         },
@@ -279,7 +280,8 @@ export async function initCommand(options = {}) {
           },
           initialValue: () => "my-portfolio",
           validate: (value) => {
-            if (/[^a-zA-Z0-9_.-]/.test(value)) return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
+            if (/[^a-zA-Z0-9_.-]/.test(value))
+              return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
           },
           transform: (v) => v.trim(),
         },
