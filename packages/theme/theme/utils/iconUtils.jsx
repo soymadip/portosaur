@@ -41,6 +41,7 @@ export function renderIconElement({
   className,
   style,
   alt = "",
+  withBaseUrl,
 }) {
   if (!iconVal) {
     return null;
@@ -48,7 +49,10 @@ export function renderIconElement({
 
   if (
     typeof iconVal === "function" ||
-    (typeof iconVal === "object" && iconVal !== null)
+    (typeof iconVal === "object" &&
+      iconVal !== null &&
+      !iconVal.src &&
+      !iconVal.fallback)
   ) {
     const IconComp = iconVal;
     return (
@@ -59,16 +63,34 @@ export function renderIconElement({
     );
   }
 
-  if (typeof iconVal === "string") {
-    if (iconVal.startsWith("/") || iconVal.startsWith("http")) {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const imgSrc = iconVal.startsWith("/") ? useBaseUrl(iconVal) : iconVal;
+  const isFallbackObj =
+    typeof iconVal === "object" &&
+    iconVal !== null &&
+    (iconVal.src || iconVal.fallback);
+
+  const iconStr = isFallbackObj ? iconVal.src : iconVal;
+
+  if (typeof iconStr === "string") {
+    if (iconStr.startsWith("/") || iconStr.startsWith("http")) {
+      const resolveUrl = withBaseUrl || ((url) => url);
+      const imgSrc = iconStr.startsWith("/") ? resolveUrl(iconStr) : iconStr;
+
       return (
         <img
           src={imgSrc}
           className={className}
-          style={{ width: "24px", height: "24px", ...style }}
+          width="24"
+          height="24"
+          style={style}
           alt={alt}
+          onError={
+            isFallbackObj && iconVal.fallback
+              ? (e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = resolveUrl(iconVal.fallback);
+                }
+              : undefined
+          }
         />
       );
     }
@@ -77,7 +99,7 @@ export function renderIconElement({
       return (
         <div
           className={className}
-          style={{ width: "24px", height: "24px", ...style }}
+          style={style}
           dangerouslySetInnerHTML={{ __html: iconVal }}
           aria-hidden="true"
         />
