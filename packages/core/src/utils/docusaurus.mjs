@@ -407,7 +407,9 @@ export function getThemeColorSyncScript() {
 /**
  * The default color scheme to use when no color scheme is specified.
  */
-export const DEFAULT_COLOR_SCHEME = "nord";
+export function getDefaultColorScheme(userConfig) {
+  return userConfig?.docs_home ? "dracula" : "nord";
+}
 
 /**
  * Resolves the absolute paths of all CSS files required for the site
@@ -419,7 +421,7 @@ export const DEFAULT_COLOR_SCHEME = "nord";
  * @returns {string[]} Resolved paths to CSS files.
  */
 export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
-  const colorScheme = userConfig.theme?.color_scheme || DEFAULT_COLOR_SCHEME;
+  const colorScheme = userConfig.theme?.color_scheme || getDefaultColorScheme(userConfig);
   const presetCss =
     colorScheme.endsWith(".css") ||
     colorScheme.includes("/") ||

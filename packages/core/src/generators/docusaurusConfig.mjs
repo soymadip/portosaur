@@ -15,7 +15,7 @@ import {
   cleanFrontMatterSlug,
   getThemeColorSyncScript,
   resolveSiteCssFiles,
-  DEFAULT_COLOR_SCHEME,
+  getDefaultColorScheme,
 } from "../utils/docusaurus.mjs";
 
 import remarkMath from "remark-math";
@@ -81,10 +81,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const defaultTheme =
     get("theme.default_mode", "dark") === "light" ? "light" : "dark"; // Default theme mode (light or dark).
 
-  const colorScheme = get("theme.color_scheme", DEFAULT_COLOR_SCHEME); // The site's color scheme. Can be a built-in theme ("nord", "dracula", "github", "catppuccin", "gruvbox", "portosaur") or a path to a custom .css file.
-  const selectedPrism = prismThemeMap[colorScheme] || prismThemeMap.nord;
-
   const siteMode = rawGet("docs_home") ? "docs" : "portfolio";
+
+  const colorScheme = get(
+    "theme.color_scheme",
+    getDefaultColorScheme(userConfig),
+  ); // The site's color scheme.
+
+  const selectedPrism = prismThemeMap[colorScheme] || prismThemeMap.nord;
   const titleName =
     siteMode === "docs"
       ? get("docs_home.title", "Your Name") // Your project's title
