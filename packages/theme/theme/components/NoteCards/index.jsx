@@ -1,4 +1,4 @@
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Link from "@docusaurus/Link";
 import IconNote from "../../../assets/svg/icon-note.svg";
@@ -95,7 +95,8 @@ function getAllNotesData() {
  */
 function NoteCard({ note, index, docsBasePath }) {
   const { title, slug, description, iconStr, colorStr } = note;
-  const noteUrl = useBaseUrl(`${docsBasePath}/${slug}`);
+  const { withBaseUrl } = useBaseUrlUtils();
+  const noteUrl = withBaseUrl(`${docsBasePath}/${slug}`);
 
   // Resolve icon: explicit frontmatter first, then slug/title guessing, then default
   let resolvedIconData = resolveIconFromMap(iconStr);
@@ -137,6 +138,7 @@ function NoteCard({ note, index, docsBasePath }) {
             ? styles.svgIcon
             : styles.textIcon,
       alt: `${title} icon`,
+      withBaseUrl,
     });
   }
 

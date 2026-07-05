@@ -15,7 +15,7 @@ export default function SocialIcons({ showAll = false, links = null }) {
   const isBrowser = useIsBrowser();
   const [animationDelays, setAnimationDelays] = useState({});
 
-  const allSocialLinks = customFields.socialSection?.links || [];
+  const allSocialLinks = customFields.homePage?.socialSection?.links || [];
   const socialLinks = useMemo(() => {
     if (links) return links;
     return showAll ? allSocialLinks : allSocialLinks.filter((link) => link.pin);

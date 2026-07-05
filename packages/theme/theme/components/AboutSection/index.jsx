@@ -1,5 +1,5 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import { FaDownload } from "react-icons/fa";
 import { Pv } from "../Preview/index.jsx";
@@ -8,6 +8,7 @@ import styles from "./styles.module.css";
 
 export default function AboutSection({ id, className }) {
   const { siteConfig } = useDocusaurusContext();
+  const { withBaseUrl } = useBaseUrlUtils();
   const brokenLinks = useBrokenLinks();
 
   if (id) {
@@ -15,7 +16,7 @@ export default function AboutSection({ id, className }) {
   }
 
   const { customFields } = siteConfig;
-  const aboutMe = customFields.aboutSection || {};
+  const aboutMe = customFields.homePage?.aboutSection || {};
 
   if (aboutMe.enable === false) {
     return null;
@@ -47,7 +48,7 @@ export default function AboutSection({ id, className }) {
               {aboutMe.image && (
                 <div className={styles.imageWrapper}>
                   <img
-                    src={useBaseUrl(
+                    src={withBaseUrl(
                       typeof aboutMe.image === "string"
                         ? aboutMe.image
                         : aboutMe.image.src,
@@ -59,7 +60,7 @@ export default function AboutSection({ id, className }) {
                       aboutMe.image.fallback
                         ? (e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = aboutMe.image.fallback;
+                            e.currentTarget.src = withBaseUrl(aboutMe.image.fallback);
                           }
                         : undefined
                     }

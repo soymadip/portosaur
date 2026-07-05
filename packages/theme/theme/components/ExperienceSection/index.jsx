@@ -10,7 +10,8 @@ export default function ExperienceSection({ id, className }) {
     brokenLinks.collectAnchor(id);
   }
 
-  const experience = siteConfig.customFields?.experienceSection || {};
+  const { customFields } = siteConfig;
+  const { experienceSection: experience } = customFields.homePage || {};
 
   if (experience.enable === false) {
     return null;

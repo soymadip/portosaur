@@ -395,83 +395,86 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         enableByDefaults: get("site.notes.topic_list", true), // Toggle automatically adding topic lists to notes pages.
       },
 
-      heroSection: {
-        profilePic: genFallback(
-          validateAsset(
-            get("home_page.hero.profile_pic", ""), // Path/URL to profile picture in the hero section.
-            "img/icon.png",
-          ),
-        ),
+      siteMode,
 
-        intro: get("home_page.hero.intro", "Hello there, I'm"), // Intro text before name.
-        title: titleName,
-        subtitle: get("home_page.hero.subtitle", "I am a"), // Subtitle text after name.
-        profession: get("home_page.hero.profession", "Your Profession"),
-        desc: get(
-          "home_page.hero.desc", // Short description about you, your passion, goals etc.
-          "Short description about you, your passion, your goals etc.",
-        ),
-        learnMoreButtonTxt: get(
-          "home_page.hero.learn_more_button_txt", // Text for the call-to-action button.
-          "Learn More",
-        ),
-        social: get("home_page.hero.social", []), // List of social links. @items { name: string, url: string, icon?: string }
-      },
-
-      aboutSection: {
-        enable: get("home_page.about.enable", true),
-        heading: get("home_page.about.heading", "About Me"), // Heading for the About Me section.
-        name: get("site.title", "Your Name"), // Global site title.
-        image: genFallback(
-          validateAsset(
-            get("home_page.about.image", "home_page.hero.profile_pic", ""),
-            "img/icon.png",
-          ),
-        ),
-        bio: get("home_page.about.bio", []), // Paragraphs for your biography.
-        skills: get("home_page.about.skills", []),
-        skillsHeading: get("home_page.about.skills_heading", "My Skills"), // Heading for the skills list.
-        resume: get("home_page.about.resume", "none"),
-      },
-
-      projectShelf: {
-        enable: get("home_page.project_shelf.enable", true),
-        heading: get("home_page.project_shelf.heading", "My Projects"), // Heading for the projects section.
-        subheading: get(
-          "home_page.project_shelf.subheading", // Subheading for the projects section.
-          "A collection of all my works, with featured projects highlighted",
-        ),
-        autoplay: get("home_page.project_shelf.autoplay", true), // Autoplay the project carousel.
-
-        // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
-        projects: get("home_page.project_shelf.projects", []).map(
-          (project) => ({
-            ...project,
-            icon: genFallback(
-              validateAsset(project.icon, "img/project-blank.png"),
+      homePage: {
+        heroSection: {
+          profilePic: genFallback(
+            validateAsset(
+              get("home_page.hero.profile_pic", ""), // Path/URL to profile picture in the hero section.
+              "img/icon.png",
             ),
-          }),
-        ),
-      },
+          ),
+          intro: get("home_page.hero.intro", "Hello there, I'm"), // Intro text before name.
+          title: titleName,
+          subtitle: get("home_page.hero.subtitle", "I am a"), // Subtitle text after name.
+          profession: get("home_page.hero.profession", "Your Profession"),
+          desc: get(
+            "home_page.hero.desc", // Short description about you, your passion, goals etc.
+            "Short description about you, your passion, your goals etc.",
+          ),
+          learnMoreButtonTxt: get(
+            "home_page.hero.learn_more_button_txt", // Text for the call-to-action button.
+            "Learn More",
+          ),
+          social: get("home_page.hero.social", []), // List of social links. @items { name: string, url: string, icon?: string }
+        },
 
-      experienceSection: {
-        enable: get("home_page.experience.enable", false),
-        heading: get("home_page.experience.heading", "Experience"), // Heading for the experience section.
-        subheading: get(
-          "home_page.experience.subheading", // Subheading for the experience section.
-          "My professional journey, in a glance",
-        ),
-        list: get("home_page.experience.list", []), // @items { company: string, role: string, duration?: string, desc?: string }
-      },
+        aboutSection: {
+          enable: get("home_page.about.enable", true),
+          heading: get("home_page.about.heading", "About Me"), // Heading for the About Me section.
+          name: get("site.title", "Your Name"), // Global site title.
+          image: genFallback(
+            validateAsset(
+              get("home_page.about.image", "home_page.hero.profile_pic", ""),
+              "img/icon.png",
+            ),
+          ),
+          bio: get("home_page.about.bio", []), // Paragraphs for your biography.
+          skills: get("home_page.about.skills", []),
+          skillsHeading: get("home_page.about.skills_heading", "My Skills"), // Heading for the skills list.
+          resume: get("home_page.about.resume", "none"),
+        },
 
-      socialSection: {
-        enable: get("home_page.social.enable", true),
-        heading: get("home_page.social.heading", "Get In Touch"), // Heading for the social links section.
-        subheading: get(
-          "home_page.social.subheading", // Subheading for the social links section.
-          "Feel free to reach out for collaborations, questions, or just to say hello!",
-        ),
-        links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
+        projectShelf: {
+          enable: get("home_page.project_shelf.enable", true),
+          heading: get("home_page.project_shelf.heading", "My Projects"), // Heading for the projects section.
+          subheading: get(
+            "home_page.project_shelf.subheading", // Subheading for the projects section.
+            "A collection of all my works, with featured projects highlighted",
+          ),
+          autoplay: get("home_page.project_shelf.autoplay", true), // Autoplay the project carousel.
+          // @items { title: string, icon?: string|null, bg?: string, state?: enum[active|completed|maintenance|paused|archived|planned], desc?: string, tags?: array, featured?: boolean, website?: string, repo?: string, demo?: string }
+          projects: get("home_page.project_shelf.projects", []).map(
+            (project) => ({
+              ...project,
+              icon: genFallback(
+                validateAsset(project.icon, "img/project-blank.png"),
+              ),
+            }),
+          ),
+        },
+
+        experienceSection: {
+          enable: get("home_page.experience.enable", false),
+          heading: get("home_page.experience.heading", "Experience"), // Heading for the experience section.
+          subheading: get(
+            "home_page.experience.subheading", // Subheading for the experience section.
+            "My professional journey, in a glance",
+          ),
+          list: get("home_page.experience.list", []), // @items { company: string, role: string, duration?: string, desc?: string }
+        },
+
+        socialSection: {
+          enable: get("home_page.social.enable", true),
+          heading: get("home_page.social.heading", "Get In Touch"), // Heading for the social links section.
+          subheading: get(
+            "home_page.social.subheading", // Subheading for the social links section.
+            "Feel free to reach out for collaborations, questions, or just to say hello!",
+          ),
+          links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
+        },
+      },
       },
 
       tasks: {

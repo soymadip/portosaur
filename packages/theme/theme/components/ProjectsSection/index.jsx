@@ -24,7 +24,8 @@ export default function ProjectsSection({ id, className }) {
     brokenLinks.collectAnchor(id);
   }
 
-  const projectShelf = siteConfig.customFields?.projectShelf || {};
+  const { customFields } = siteConfig;
+  const { projectShelf } = customFields.homePage || {};
 
   if (projectShelf.enable === false) {
     return null;

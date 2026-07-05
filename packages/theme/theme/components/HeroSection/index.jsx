@@ -1,11 +1,12 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import SocialLinks from "../SocialLinks/index.jsx";
 import styles from "./styles.module.css";
 
 export default function HeroSection({ id, className }) {
   const { siteConfig } = useDocusaurusContext();
+  const { withBaseUrl } = useBaseUrlUtils();
   const brokenLinks = useBrokenLinks();
 
   if (id) {
@@ -13,7 +14,7 @@ export default function HeroSection({ id, className }) {
   }
 
   const { customFields } = siteConfig;
-  const { heroSection } = customFields;
+  const { heroSection } = customFields.homePage;
 
   const intro = heroSection.intro;
   const title = heroSection.title;
@@ -65,7 +66,7 @@ export default function HeroSection({ id, className }) {
         {/* Right: profile picture */}
         <div className={styles.rightSection}>
           <img
-            src={useBaseUrl(
+            src={withBaseUrl(
               typeof profilePic === "string" ? profilePic : profilePic.src,
             )}
             alt="profile"
@@ -76,7 +77,7 @@ export default function HeroSection({ id, className }) {
               typeof profilePic === "object" && profilePic.fallback
                 ? (e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = profilePic.fallback;
+                    e.currentTarget.src = withBaseUrl(profilePic.fallback);
                   }
                 : undefined
             }
