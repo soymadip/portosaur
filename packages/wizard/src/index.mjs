@@ -35,13 +35,17 @@ export async function runWizard({ intro, outro, steps, initialState = {} }) {
   const maxSteps = steps.length;
   let isAltScreenActive = false;
 
+  if (intro) {
+    console.log();
+    prmpt.intro(intro);
+  }
+
   const handleInterrupt = (_char, key) => {
     if (key?.ctrl && key.name === "c") {
       if (isAltScreenActive) {
         process.stdout.write(EXIT_ALT_SCREEN);
       }
-      process.stdout.write("\x1B[2A\x1B[0J");
-      process.stdout.write(`\n${chalk.gray("│")}\n`);
+      process.stdout.write(`${chalk.gray("│")}\n`);
       prmpt.cancel("Setup aborted.");
       process.exit(130);
     }
@@ -129,13 +133,11 @@ export async function runWizard({ intro, outro, steps, initialState = {} }) {
 
       if (prmpt.isCancel(answer)) {
         if (currentStep === 0) {
-          process.stdout.write("\x1B[2A\x1B[0J");
-          process.stdout.write(`\n${chalk.gray("│")}\n`);
-          prmpt.cancel("Setup aborted.");
-
           if (isAltScreenActive) {
             process.stdout.write(EXIT_ALT_SCREEN);
           }
+          process.stdout.write(`${chalk.gray("│")}\n`);
+          prmpt.cancel("Setup aborted.");
           process.exit(0);
         }
         goBack();
