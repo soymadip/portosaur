@@ -75,7 +75,7 @@ export async function devCommand(siteDir, options = {}) {
               portoRoot: Paths.theme,
             });
 
-            generateSiteAssets(UserRoot, userConfig, portoPaths)
+            generateSiteAssets({ UserRoot, userConfig, portoPaths })
               .then((res) => {
                 configContext = res;
 
