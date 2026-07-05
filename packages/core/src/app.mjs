@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 
 /**
@@ -7,11 +7,13 @@ import { fileURLToPath } from "url";
 export const porto = (() => {
   try {
     const pkgPath = fileURLToPath(new URL("../package.json", import.meta.url));
+    const gitPath = fileURLToPath(new URL("../../../.git", import.meta.url));
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+    const isDev = existsSync(gitPath);
 
     return {
       name: pkg.name,
-      version: pkg.version,
+      version: isDev ? `${pkg.version}-dev` : pkg.version,
       description: pkg.description,
       license: pkg.license,
       homepage: pkg.homepage,
