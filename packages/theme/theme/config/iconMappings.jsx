@@ -187,6 +187,7 @@ import {
   FaMicrosoft,
   FaGoogleDrive,
   FaLinkedin,
+  FaBook,
 } from "react-icons/fa";
 export const iconMap = {
   python: { icon: SiPython, color: "#3776AB" },
@@ -428,4 +429,5 @@ export const iconMap = {
   gdrive: { icon: SiGoogledrive, color: "#0F9D58" },
   font: { icon: FaFont, color: "#6b6a6aff" },
   fafont: { icon: FaFont, color: "#616060ff" },
+  book: { icon: FaBook, color: "#333333" },
 };

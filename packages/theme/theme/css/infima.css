@@ -150,3 +150,8 @@ html[data-theme="dark"] {
     --ifm-navbar-shadow: none !important;
   }
 }
+
+/* Hide root index from sidebar but keep it in DOM/metadata */
+.sidebar-item-hidden {
+  display: none !important;
+}
