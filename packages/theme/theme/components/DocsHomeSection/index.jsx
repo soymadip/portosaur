@@ -1,5 +1,6 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
+import Head from "@docusaurus/Head";
 import Link from "@docusaurus/Link";
 import {
   renderIconElement,
@@ -56,23 +57,32 @@ export default function DocsHomeSection() {
           </div>
 
           {icon && (
-            <div className={styles.heroIcon}>
-              <img
-                src={withBaseUrl(typeof icon === "string" ? icon : icon.src)}
-                alt="Hero"
-                loading="eager"
-                fetchPriority="high"
-                className={styles.icon}
-                onError={
-                  typeof icon === "object" && icon.fallback
-                    ? (e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = withBaseUrl(icon.fallback);
-                      }
-                    : undefined
-                }
-              />
-            </div>
+            <>
+              <Head>
+                <link
+                  rel="preload"
+                  as="image"
+                  href={withBaseUrl(typeof icon === "string" ? icon : icon.src)}
+                />
+              </Head>
+              <div className={styles.heroIcon}>
+                <img
+                  src={withBaseUrl(typeof icon === "string" ? icon : icon.src)}
+                  alt="Hero"
+                  loading="eager"
+                  fetchPriority="high"
+                  className={styles.icon}
+                  onError={
+                    typeof icon === "object" && icon.fallback
+                      ? (e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = withBaseUrl(icon.fallback);
+                        }
+                      : undefined
+                  }
+                />
+              </div>
+            </>
           )}
         </div>
       </header>
