@@ -50,8 +50,10 @@ export default function TopicList({
   desc,
   className,
   descClass,
+  items: propItems,
+  forceRender = false,
   style = {
-    marginTop: "1.8rem",
+    marginTop: "1rem",
     marginBottom: "1.9rem",
     textAlign: "center",
   },
@@ -134,14 +136,16 @@ export default function TopicList({
     return enableByDefaults && isIndexPage(metadata?.source);
   })();
 
-  // Get sidebar items — may throw if not on a sidebar category page
-  let items;
-  try {
-    const category = useCurrentSidebarCategory();
-    items = category.items;
-  } catch (e) {}
+  let items = propItems;
+  if (!items) {
+    try {
+      const category = useCurrentSidebarCategory();
+      items = category.items;
+    } catch (e) {}
+  }
 
-  if (!shouldRender || !items || items.length === 0) return null;
+  if ((!shouldRender && !forceRender) || !items || items.length === 0)
+    return null;
 
   const filteredItems = filterDocCardListItems(items).filter(
     (item) =>
