@@ -139,7 +139,7 @@
   transition: opacity 0.2s ease-out;
   z-index: 2000;
 }
-.modePip.pvVisible {
+.modePip.pvVisible .rndWrapper {
   pointer-events: auto;
 }
 .modePip .windowFrame {
