@@ -100,6 +100,17 @@ export function ViewerRoot({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        closePreview();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, closePreview]);
+
   // --- Display Mode State for Cross-fade ---
   const [displayMode, setDisplayMode] = useState(mode);
   const [isVisible, setIsVisible] = useState(false);
