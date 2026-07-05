@@ -5,5 +5,9 @@ export default function DocCategoryGeneratedIndexPageWrapper(props) {
   if (props.categoryGeneratedIndex?.title === "Notes") {
     return <NoteCards />;
   }
-  return <DocCategoryGeneratedIndexPage {...props} />;
+  return (
+    <div className="portosaur-generated-index">
+      <DocCategoryGeneratedIndexPage {...props} />
+    </div>
+  );
 }

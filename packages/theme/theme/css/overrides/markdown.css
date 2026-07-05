@@ -17,7 +17,8 @@
   background-color: transparent !important;
 }
 
-.markdown h1 {
+.markdown h1,
+.portosaur-generated-index h1 {
   text-align: center;
   color: var(--ifm-color-primary);
   margin-top: 0.3rem;
