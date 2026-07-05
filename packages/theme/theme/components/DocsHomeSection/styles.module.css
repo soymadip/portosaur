@@ -118,8 +118,8 @@
 
 /* Features Grid */
 .featuresSection {
-  padding: 1.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.7rem;
+  padding-bottom: 0.4rem;
   display: flex;
   justify-content: center;
 }
