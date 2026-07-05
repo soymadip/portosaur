@@ -49,6 +49,10 @@
   --gh-dark-text: #c9d1d9;
   --gh-dark-text-rgb: 201, 209, 217;
   --gh-dark-text-muted: #8b949e; /* muted text */
+  --gh-dark-text-subtle: #6e7681; /* subtle muted text */
+  --gh-dark-text-bright: #b1bac4; /* brighter text */
+  --gh-dark-text-pure: #f0f6fc; /* pure white text */
+  --gh-dark-bg-deep: #04070a; /* deepest background */
   --gh-dark-secondary: #8b949e; /* like Catppuccin Mocha lavender – muted accent */
 }
 
@@ -165,15 +169,15 @@
   --porto-code: #ffa657;
 
   /* Grayscale */
-  --porto-gray-0: #04070a;
+  --porto-gray-0: var(--gh-dark-bg-deep);
   --porto-gray-100: var(--gh-dark-mantle);
   --porto-gray-200: var(--gh-dark-bg);
-  --porto-gray-300: #161b22;
-  --porto-gray-400: #1c2128;
+  --porto-gray-300: var(--gh-dark-surface0);
+  --porto-gray-400: var(--gh-dark-surface1);
   --porto-gray-500: var(--gh-dark-crust);
-  --porto-gray-600: var(--gh-dark-surface0);
-  --porto-gray-700: var(--gh-dark-surface1);
-  --porto-gray-800: var(--gh-dark-surface2);
-  --porto-gray-900: var(--gh-dark-text-muted);
-  --porto-gray-1000: var(--gh-dark-text);
+  --porto-gray-600: var(--gh-dark-text-subtle);
+  --porto-gray-700: var(--gh-dark-text-muted);
+  --porto-gray-800: var(--gh-dark-text-bright);
+  --porto-gray-900: var(--gh-dark-text);
+  --porto-gray-1000: var(--gh-dark-text-pure);
 }

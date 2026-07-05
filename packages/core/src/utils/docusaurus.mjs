@@ -421,7 +421,8 @@ export function getDefaultColorScheme(userConfig) {
  * @returns {string[]} Resolved paths to CSS files.
  */
 export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
-  const colorScheme = userConfig.theme?.color_scheme || getDefaultColorScheme(userConfig);
+  const colorScheme =
+    userConfig.theme?.color_scheme || getDefaultColorScheme(userConfig);
   const presetCss =
     colorScheme.endsWith(".css") ||
     colorScheme.includes("/") ||
