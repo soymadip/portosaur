@@ -14,13 +14,13 @@ tasks:
       bun install
   - build: |
       export PATH=$HOME/.bun/bin:$PATH
-      cd {{projectName}}
+      cd {{repo_name}}
       bun run build
   - deploy: |
       export PATH=$HOME/.bun/bin:$PATH
-      cd {{projectName}}
+      cd {{repo_name}}
       # Note: SURGE_LOGIN and SURGE_TOKEN must be added to your SourceHut build secrets
-      bunx surge ./build --domain {{projectName}}.surge.sh
+      bunx surge ./build --domain {{repo_name}}.surge.sh
 environment:
   SURGE_LOGIN: ""
   SURGE_TOKEN: ""

@@ -30,7 +30,7 @@ If you'd like to explore the code or run this site locally:
 
    ```bash
    git clone {{clone_url}}
-   cd {{project_name}}
+   cd {{repo_name}}
    ```
 
 2. **Start the development server:**

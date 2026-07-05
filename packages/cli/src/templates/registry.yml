@@ -93,7 +93,7 @@ hosting_platforms:
       sourcehut: surge/sourcehut
       codeberg: surge/codeberg
     repo:
-      ideal_name: "{{user}}.surge.sh"
+      ideal_name: "{{user}}"
     post_setup_tips:
       - "You must set SURGE_LOGIN and SURGE_TOKEN in your CI/CD Secrets!"
       - "Your site will be deployed to https://{{user}}.surge.sh"
