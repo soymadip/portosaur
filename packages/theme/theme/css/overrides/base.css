@@ -45,3 +45,9 @@ th {
 .hide-this {
   display: none !important;
 }
+
+/* Unify Docusaurus auto-generated DocCard styles with custom TopicList styles */
+.portosaur-generated-index .card h2,
+.portosaur-generated-index .card h2 svg {
+  color: var(--ifm-color-primary) !important;
+}
