@@ -208,7 +208,7 @@ export async function initCommand(options = {}) {
               const vcsConfig = registry.vcs_providers[state.vcs];
               const newRepoUrl = vcsConfig.new_url
                 .replace("{{user}}", state.userName)
-                .replace("{{projectName}}", state.projectName)
+                .replace("{{project_name}}", state.projectName)
                 .replace("{{domain}}", vcsConfig.domain);
 
               openInBrowser(newRepoUrl);
@@ -241,7 +241,7 @@ export async function initCommand(options = {}) {
             const vcsConfig = registry.vcs_providers[state.vcs];
             return vcsConfig.url
               .replace("{{user}}", state.userName)
-              .replace("{{projectName}}", state.projectName)
+              .replace("{{project_name}}", state.projectName)
               .replace("{{domain}}", vcsConfig.domain);
           },
           transform: (v) => v.trim(),
