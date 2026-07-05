@@ -77,3 +77,9 @@
 .navbar__items--right > * {
   order: 2;
 }
+
+/* Add margin to sidebar menu links so active/hover highlight doesn't touch the right edge */
+.theme-doc-sidebar-menu .menu__link,
+.theme-doc-sidebar-menu .menu__list-item-collapsible {
+  margin-right: 6px;
+}
