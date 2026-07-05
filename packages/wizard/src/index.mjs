@@ -48,7 +48,7 @@ export async function runWizard({ intro, outro, steps, initialState = {} }) {
   };
 
   if (process.stdin.isTTY) {
-    readline.emitKeypressEvents(process.stdin);
+    readline.emitKeypressEvents(process.stdin, { escapeCodeTimeout: 50 });
     process.stdin.on("keypress", handleInterrupt);
 
     if (process.stdout.isTTY) {
