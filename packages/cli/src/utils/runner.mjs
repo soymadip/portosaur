@@ -104,9 +104,14 @@ export function validateProject(UserRoot) {
  * Ensure essential user content directories exist.
  * @param {string} UserRoot - The project root directory.
  */
-export function ensureContentDirs(UserRoot) {
-  const userConfig = loadUserConfig(UserRoot);
-  const siteMode = userConfig.docs_home ? "docs" : "portfolio";
+export function ensureContentDirs(UserRoot, overrideSiteType = null) {
+  let userConfig = {};
+  try {
+    userConfig = loadUserConfig(UserRoot);
+  } catch (e) {
+    // Gracefully handle missing config during project initialization
+  }
+  const siteMode = overrideSiteType || (userConfig.docs_home ? "docs" : "portfolio");
   const docsDir =
     siteMode === "docs"
       ? userConfig.site?.docs?.dir || "docs"

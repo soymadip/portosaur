@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://soymadip.github.io/portosaur/user/config/schema.json
+#
+# Portosaur Project Configuration
+# Check full Config Docs: https://soymadip.github.io/portosaur/docs
+#
+
+# User variables for use in your values as {{vars.key}}
+vars:
+  twitter: "@{{user_name}}"
+  github: "{{user_name}}"
+  linkedin: "{{user_name}}"
+
+# Site Metadata, SEO, Parser behavior
+site:
+  url: "auto"
+  base_url: "auto"
+  edit_url: "{{clone_url}}/edit/main/"
+
+# Documentation Home Config
+docs_home:
+  title: "{{project_name}}"
+  tagline: "Your project tagline"
+  desc: "A brief description of what this project does and the tech used."
+  icon: "img/icon.png"
+
+  actions:
+    - text: "Get Started"
+      link: "/docs"
+      icon: "rocket"
+
+    - text: "GitHub"
+      link: "{{clone_url}}"
+      icon: "github"
+
+  features:
+    - title: "Feature 1"
+      icon: "⭐"
+      desc: "This project this feature 1, quite good and useful for you"
+
+    - title: "Feature 2"
+      icon: "⚡"
+      desc: "Feature 2, the mega problem solving feature, the revolution"
+
+    - title: "Feature 3"
+      icon: "💻"
+      desc: "Feature 3, the productivity monster, the efficiency machine, the optimization engine"

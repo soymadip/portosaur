@@ -15,10 +15,6 @@ site:
   url: "auto"
   base_url: "auto"
 
-# UI, Navigation Behavior
-theme:
-  navigation:
-    collapsable_sidebar: true
 
 # Page Content & Sections
 home_page:

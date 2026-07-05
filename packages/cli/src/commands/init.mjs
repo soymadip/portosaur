@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, renameSync } from "fs";
 import path from "path";
 import os from "os";
 import { execSync, execFileSync } from "child_process";
@@ -34,12 +34,30 @@ export async function initCommand(options = {}) {
 
   const isInteractive = getInteractivity(options);
 
+  const resolveFinalRepoName = (state, opts, reg) => {
+    if (opts.projectName) return opts.projectName;
+
+    if (state.siteType === "portfolio") {
+      if (state.repoNameChoice === "ideal") {
+        const hConfig = reg.hosting_platforms[state.hostingPlatform];
+        const vcsConfig = reg.vcs_providers[state.vcsProvider];
+        return hConfig.repo.ideal_name
+          .replace("{{user}}", state.vcsUsername)
+          .replace("{{domain}}", vcsConfig.domain);
+      }
+      return state.customRepoName;
+    }
+    return state.repoName;
+  };
+
   let state = {
-    vcs: null,
-    hosting: null,
-    userName: null,
+    siteType: null,
+    vcsProvider: null,
+    hostingPlatform: null,
+    vcsUsername: null,
     fullName: null,
-    projectName: options.projectName || null,
+    projectName: null,
+    repoName: options.projectName || null,
     addRemote: false,
     gitRemoteUrl: null,
   };
@@ -56,9 +74,67 @@ export async function initCommand(options = {}) {
 
       steps: [
         {
-          id: "vcs",
+          prompt: "What type of site do you want?",
+          id: "siteType",
           type: "select",
+          options: [
+            {
+              label: "Portfolio Site",
+              value: "portfolio",
+              hint: "Showcase your digital personality, projects & write notes, blogs",
+            },
+            {
+              label: "Documentation Site",
+              value: "docs",
+              hint: "Create documentation site for a project",
+            },
+          ],
+        },
+        {
+          prompt: "Enter project name",
+          id: "projectName",
+          type: "text",
+          hint: "The name of your project (e.g. 'Portosaur')",
+          required: true,
+          runIf: (state) => state.siteType === "docs",
+          initialValue: () => "My Project",
+          transform: (v) => v.trim(),
+        },
+        {
+          prompt: "Enter directory/repo name",
+          id: "repoName",
+          type: "text",
+          hint: "The name of the local folder and git repository",
+          required: true,
+          runIf: (state) => !options.projectName && state.siteType === "docs",
+          initialValue: (state) => {
+            if (state.siteType === "docs" && state.projectName) {
+              return state.projectName
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-|-$/g, "");
+            }
+            return "my-portfolio";
+          },
+          validate: (value) => {
+            if (/[^a-zA-Z0-9_.-]/.test(value)) return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
+          },
+          transform: (v) => v.trim(),
+        },
+        {
+          prompt: "Enter your full name",
+          id: "fullName",
+          type: "text",
+          hint: "Used for the site title etc..",
+          required: true,
+          runIf: (state) => !options.name && state.siteType === "portfolio",
+          initialValue: () => gitConfig["user.name"] || osUser || "Your Name",
+          transform: (v) => v.trim(),
+        },
+        {
           prompt: "Choose Your VCS Provider",
+          id: "vcsProvider",
+          type: "select",
           options: [
             ...Object.entries(registry.vcs_providers).map(([id, cfg]) => ({
               value: id,
@@ -68,13 +144,24 @@ export async function initCommand(options = {}) {
           ],
         },
         {
-          id: "hosting",
+          prompt: (state) =>
+            `Enter your ${registry.vcs_providers[state.vcsProvider]?.name || state.vcsProvider} ${state.siteType === "docs" ? "username/organization" : "username"}`,
+          id: "vcsUsername",
+          type: "text",
+          required: true,
+          runIf: (state) => state.vcsProvider !== "none",
+          initialValue: (state) =>
+            getPlatformUserGuess(state.vcsProvider, gitConfig) || osUser,
+          transform: (v) => v.trim(),
+        },
+        {
+          prompt: "Where do you want to host your site?",
+          id: "hostingPlatform",
           type: "select",
-          prompt: "Where do you want host your portfolio site?",
           hint: "Auto deployment (CI/CD) will be setup",
-          runIf: (state) => state.vcs !== "none",
+          runIf: (state) => state.vcsProvider !== "none",
           options: (state) => {
-            const vcsConfig = registry.vcs_providers[state.vcs];
+            const vcsConfig = registry.vcs_providers[state.vcsProvider];
             return [
               ...Object.entries(registry.hosting_platforms)
                 .filter(([id, cfg]) => {
@@ -85,10 +172,10 @@ export async function initCommand(options = {}) {
 
                   const canProvideTemplate =
                     typeof cfg.template_dir === "string" ||
-                    cfg.template_dir?.[state.vcs];
+                    cfg.template_dir?.[state.vcsProvider];
 
                   return (
-                    (isAgnostic || supported.includes(state.vcs)) &&
+                    (isAgnostic || supported.includes(state.vcsProvider)) &&
                     canProvideTemplate
                   );
                 })
@@ -103,112 +190,117 @@ export async function initCommand(options = {}) {
             ];
           },
           initialValue: (state) =>
-            registry.vcs_providers[state.vcs]?.default_hosting || "none",
+            registry.vcs_providers[state.vcsProvider]?.default_hosting ||
+            "none",
         },
         {
-          id: "userName",
-          type: "text",
-          required: true,
-          prompt: (state) =>
-            `Enter your ${registry.vcs_providers[state.vcs]?.name || state.vcs} username`,
-          runIf: (state) => state.vcs !== "none",
-          initialValue: (state) =>
-            getPlatformUserGuess(state.vcs, gitConfig) || osUser,
-          transform: (v) => v.trim(),
-        },
-        {
-          id: "fullName",
-          type: "text",
-          required: true,
-          prompt: "Enter your full name",
-          hint: "Used for the site title etc..",
-          runIf: () => !options.name,
-          initialValue: () => gitConfig["user.name"] || osUser || "Your Name",
-          transform: (v) => v.trim(),
-        },
-        {
-          id: "projectNameType",
+          prompt: "Choose your portfolio's repository name",
+          id: "repoNameChoice",
           type: "select",
-          prompt: "Choose your project name",
-          hint: (state) =>
-            state.hosting !== "none" &&
-            registry.hosting_platforms[state.hosting]?.repo?.ideal_name
-              ? "We recommend sticking with the default name"
-              : "The name of the directory/repository",
-          runIf: (state) =>
-            !state.projectName &&
-            state.hosting !== "none" &&
-            registry.hosting_platforms[state.hosting]?.repo?.ideal_name,
+          hint: "This will be used as dir name too",
+          runIf: (state) => {
+            if (
+              options.projectName ||
+              state.siteType === "docs" ||
+              state.hostingPlatform === "none" ||
+              state.vcsProvider === "none"
+            )
+              return false;
+            const hConfig = registry.hosting_platforms[state.hostingPlatform];
+            return !!hConfig?.repo?.ideal_name;
+          },
           options: (state) => {
-            const hConfig = registry.hosting_platforms[state.hosting];
-            const vcsConfig = registry.vcs_providers[state.vcs];
-            const ideal = hConfig.repo.ideal_name
-              .replace("{{user}}", state.userName)
+            const hConfig = registry.hosting_platforms[state.hostingPlatform];
+            const vcsConfig = registry.vcs_providers[state.vcsProvider];
+            const idealName = hConfig.repo.ideal_name
+              .replace("{{user}}", state.vcsUsername)
               .replace("{{domain}}", vcsConfig.domain);
             return [
-              { label: ideal, value: "ideal", hint: "recommended" },
-              { label: "Custom Name", value: "custom" },
+              {
+                value: "ideal",
+                label: `Use ${idealName}`,
+                hint: `Becomes: 'https://${state.vcsUsername}.${hConfig.domain}/'`,
+              },
+              {
+                value: "custom",
+                label: "Custom...",
+                hint: `Becomes: 'https://${state.vcsUsername}.${hConfig.domain}/<custom-repo-name>/'. Not recommended!`,
+              },
             ];
           },
         },
         {
-          id: "confirmCustomName",
+          prompt: (state) => {
+            const hConfig = registry.hosting_platforms[state.hostingPlatform];
+            const vcsConfig = registry.vcs_providers[state.vcsProvider];
+
+            const idealName = hConfig.repo.ideal_name
+              .replace("{{user}}", state.vcsUsername)
+              .replace("{{domain}}", vcsConfig.domain);
+
+            const finalName = "<custom-name>";
+
+            const msg = hConfig.repo.mismatch_msg
+              .replace("{{ideal_name}}", idealName)
+              .replace("{{user}}", state.vcsUsername)
+              .replace("{{domain}}", hConfig.domain)
+              .replace("{{project_name}}", finalName);
+
+            return `${colors.yellow(msg)}\nAre You Sure?`;
+          },
+          id: "repoNameWarning",
           type: "confirm",
-          level: "warn",
-          prompt: "Are you sure?",
-          hint: "Custom names may break auto-deployments on some platforms",
-          runIf: (state) =>
-            state.projectNameType === "custom" && state.hosting !== "none",
-          initialValue: false,
+          runIf: (state) => {
+            return (
+              state.siteType === "portfolio" &&
+              state.repoNameChoice === "custom"
+            );
+          },
+          initialValue: true,
+          onResponse: (value, state) => {
+            if (!value) {
+              logger.info("\nSetup aborted.");
+              process.exit(0);
+            }
+          },
         },
         {
-          id: "projectName",
+          prompt: "Enter custom directory/repo name",
+          id: "customRepoName",
           type: "text",
+          hint: "The name of the local folder and git repository",
           required: true,
-          level: (state) =>
-            state.projectNameType === "custom" && state.hosting !== "none"
-              ? "warn"
-              : undefined,
-          prompt: "Enter project name",
-          hint: (state) =>
-            state.projectNameType === "custom" && state.hosting !== "none"
-              ? colors.warn("Warning! Custom names may break auto-deployments")
-              : "The name of the directory/repository",
           runIf: (state) => {
-            if (state.projectName) return false;
-            if (state.hosting === "none") return true;
-            if (state.projectNameType === "ideal") return false;
-            if (state.projectNameType === "custom")
-              return state.confirmCustomName;
-            return true;
+            if (state.siteType === "docs" || options.projectName) return false;
+            return (
+              state.repoNameChoice === "custom" ||
+              state.repoNameChoice === undefined
+            );
           },
-          initialValue: (state) => {
-            if (state.projectNameType === "ideal" && state.vcs !== "none") {
-              const hConfig = registry.hosting_platforms[state.hosting];
-              const vcsConfig = registry.vcs_providers[state.vcs];
-              if (hConfig && vcsConfig) {
-                return hConfig.repo.ideal_name
-                  .replace("{{user}}", state.userName)
-                  .replace("{{domain}}", vcsConfig.domain);
-              }
-            }
-            return state.projectName || "my-portfolio";
+          initialValue: () => "my-portfolio",
+          validate: (value) => {
+            if (/[^a-zA-Z0-9_.-]/.test(value)) return "Repository name can only contain letters, numbers, hyphens, and underscores (no spaces).";
           },
           transform: (v) => v.trim(),
         },
         {
+          prompt: "Open browser to create the repository?",
           id: "openBrowser",
           type: "confirm",
-          prompt: "Open browser to create the repository?",
           hint: "Redirects you to the 'New Repository' page on your Git host",
-          runIf: (state) => state.vcs !== "none",
+          runIf: (state) => state.vcsProvider !== "none",
           initialValue: true,
           onResponse: (val, state) => {
-            if (val && state.vcs !== "none") {
-              const vcsConfig = registry.vcs_providers[state.vcs];
+            if (val && state.vcsProvider !== "none") {
+              const vcsConfig = registry.vcs_providers[state.vcsProvider];
+              const finalRepoName = resolveFinalRepoName(
+                state,
+                options,
+                registry,
+              );
               const newRepoUrl = vcsConfig.new_url
-                .replace("{{user}}", state.userName)
-                .replace("{{project_name}}", state.projectName)
+                .replace("{{user}}", state.vcsUsername)
+                .replace("{{project_name}}", finalRepoName)
                 .replace("{{domain}}", vcsConfig.domain);
 
               openInBrowser(newRepoUrl);
@@ -221,27 +313,30 @@ export async function initCommand(options = {}) {
           prompt:
             "Create the repository on your Git host, then press Enter to continue",
           runIf: (state) => {
-            if (state.vcs === "none") return false;
-            // If unset, show the pause (openBrowser prompt runs before this step)
+            if (state.vcsProvider === "none") return false;
             if (state.openBrowser === undefined) return true;
-            // Accept boolean false and common string equivalents as "no"
             if (state.openBrowser === false) return false;
             const sval = String(state.openBrowser).toLowerCase();
             return !(sval === "false" || sval === "0" || sval === "no");
           },
         },
         {
+          prompt: "Confirm git repository URL",
           id: "gitRemoteUrl",
           type: "text",
-          required: true,
-          prompt: "Confirm git repository URL",
           hint: "Needed to link your local project to the remote repository",
-          runIf: (state) => state.vcs !== "none",
+          required: true,
+          runIf: (state) => state.vcsProvider !== "none",
           initialValue: (state) => {
-            const vcsConfig = registry.vcs_providers[state.vcs];
+            const vcsConfig = registry.vcs_providers[state.vcsProvider];
+            const finalRepoName = resolveFinalRepoName(
+              state,
+              options,
+              registry,
+            );
             return vcsConfig.url
-              .replace("{{user}}", state.userName)
-              .replace("{{project_name}}", state.projectName)
+              .replace("{{user}}", state.vcsUsername)
+              .replace("{{project_name}}", finalRepoName)
               .replace("{{domain}}", vcsConfig.domain);
           },
           transform: (v) => v.trim(),
@@ -262,6 +357,12 @@ export async function initCommand(options = {}) {
     }
 
     state = { ...state, ...wizardState };
+
+    // Map semantic variables back to legacy state so downstream code doesn't break
+    state.repoName = resolveFinalRepoName(state, options, registry);
+    state.vcs = state.vcsProvider;
+    state.hosting = state.hostingPlatform;
+    state.userName = state.vcsUsername;
 
     /*
      * ====================== Non-Interactive Mode ======================
@@ -285,6 +386,7 @@ export async function initCommand(options = {}) {
     }
 
     //--------- Set state values------------
+    state.siteType = options.siteType || "portfolio";
     state.vcs = vcsProvider || Object.keys(registry.vcs_providers)[0];
     state.hosting =
       hosting || registry.vcs_providers[state.vcs]?.default_hosting || "none";
@@ -293,13 +395,13 @@ export async function initCommand(options = {}) {
       options.username || getPlatformUserGuess(state.vcs, gitConfig) || osUser;
     state.fullName = options.name || gitConfig["user.name"] || osUser || "User";
 
-    state.projectName = options.projectName || "my-portfolio";
+    state.repoName = options.projectName || "my-portfolio";
 
     if (state.vcs !== "none") {
       const vcsConfig = registry.vcs_providers[state.vcs];
       state.gitRemoteUrl = vcsConfig.url
         .replace("{{user}}", state.userName)
-        .replace("{{projectName}}", state.projectName)
+        .replace("{{project_name}}", state.repoName)
         .replace("{{domain}}", vcsConfig.domain);
     }
 
@@ -315,7 +417,7 @@ export async function initCommand(options = {}) {
 
   //========================== Execution ==========================
 
-  const newProjDir = path.resolve(process.cwd(), state.projectName);
+  const newProjDir = path.resolve(process.cwd(), state.repoName);
   let hadError = false;
 
   //--------- Clear the console ----------------
@@ -325,7 +427,7 @@ export async function initCommand(options = {}) {
   });
 
   if (existsSync(newProjDir)) {
-    logger.error(`Directory "${state.projectName}" already exists.`);
+    logger.error(`Directory "${state.repoName}" already exists.`);
     process.exit(1);
   }
 
@@ -374,7 +476,7 @@ export async function initCommand(options = {}) {
   logger.info("Bootstrapping project directories...");
 
   try {
-    ensureContentDirs(newProjDir);
+    ensureContentDirs(newProjDir, state.siteType);
   } catch (e) {
     logger.error(`Failed to bootstrap: ${e.message}`);
     process.exitCode = 1;
@@ -390,7 +492,8 @@ export async function initCommand(options = {}) {
   const cloneUrl = state.gitRemoteUrl || "<your-repository-url>";
 
   const templateVars = {
-    project_name: state.projectName,
+    project_name: state.projectName || state.repoName,
+    repo_name: state.repoName,
     user_name: state.userName || "",
     full_name: state.fullName || "",
     clone_url: cloneUrl,
@@ -406,7 +509,21 @@ export async function initCommand(options = {}) {
       mirrorIgnores.push("gitignore");
     }
 
+    if (state.siteType === "docs") {
+      mirrorIgnores.push("notes", "config-portfolio.yml");
+    } else {
+      mirrorIgnores.push("docs", "config-docs.yml");
+    }
+
     mirrorSync(Paths.templates, newProjDir, templateVars, mirrorIgnores);
+
+    // Rename the appropriate config file
+    const configSource =
+      state.siteType === "docs" ? "config-docs.yml" : "config-portfolio.yml";
+    renameSync(
+      path.join(newProjDir, configSource),
+      path.join(newProjDir, "config.yml"),
+    );
   } catch (e) {
     logger.error(`Failed to create project files: ${e.message}`);
     process.exitCode = 1;
@@ -507,7 +624,7 @@ export async function initCommand(options = {}) {
     logger.success.box(`Project successfully initialized!`);
   } else {
     logger.newLine();
-    logger.success(`Project '${state.projectName}' initialized`);
+    logger.success(`Project '${templateVars.project_name}' initialized`);
     logger.warn("Some non-critical errors occurred (check logs above).");
     logger.newLine();
   }
@@ -523,7 +640,7 @@ export async function initCommand(options = {}) {
 
   logger.newLine();
   logger.info(
-    `Next Steps:\n    ${colors.command(`cd ${state.projectName} && ${pm.name} run dev`)}`,
+    `Next Steps:\n    ${colors.command(`cd ${state.repoName} && ${pm.name} run dev`)}`,
   );
 
   logger.newLine();
