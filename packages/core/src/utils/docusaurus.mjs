@@ -164,20 +164,34 @@ export function createSidebarItemsGenerator() {
       ...args,
     });
 
-    const enrichItems = (items) => {
+    const enrichItems = (items, depth = 0) => {
       return items.map((item) => {
-        if (item.type === "doc") {
-          const doc = args.docs.find((d) => d.id === item.id);
-          if (doc && doc.frontMatter) {
-            item.customProps = {
-              ...item.customProps,
-              icon: doc.frontMatter.icon,
-              color: doc.frontMatter.color,
-            };
+        if (item.type === "category") {
+          // Find index/README in this category's children to use as the category landing page
+          const rootIndexPos = item.items
+            ? item.items.findIndex((subItem) => {
+                if (subItem.type !== "doc") return false;
+                const id = subItem.id.toLowerCase();
+                return (
+                  id.endsWith("/readme") ||
+                  id.endsWith("/index") ||
+                  id === "readme" ||
+                  id === "index"
+                );
+              })
+            : -1;
+
+          if (rootIndexPos !== -1 && !item.link) {
+            // Turn this category into a link to its index doc and remove the redundant doc item!
+            const rootDoc = item.items.splice(rootIndexPos, 1)[0];
+            item.link = { type: "doc", id: rootDoc.id };
+          } else if (!item.link && depth === 0 && item.label === "Docs") {
+            // Fallback for root Docs category if no index is present
+            item.link = { type: "generated-index", slug: "/" };
           }
-        } else if (item.type === "category") {
+
           if (item.items) {
-            item.items = enrichItems(item.items);
+            item.items = enrichItems(item.items, depth + 1);
           }
           if (item.link && item.link.type === "doc") {
             const doc = args.docs.find((d) => d.id === item.link.id);
@@ -186,11 +200,27 @@ export function createSidebarItemsGenerator() {
                 ...item.customProps,
                 icon: doc.frontMatter.icon,
                 color: doc.frontMatter.color,
-
-                // Inject description: prefer frontmatter, fall back to auto-extracted first paragraph
                 description:
                   doc.frontMatter.description ?? doc.description ?? undefined,
               };
+            }
+          }
+        } else if (item.type === "doc") {
+          const doc = args.docs.find((d) => d.id === item.id);
+
+          if (doc && doc.frontMatter) {
+            item.customProps = {
+              ...item.customProps,
+              icon: doc.frontMatter.icon,
+              color: doc.frontMatter.color,
+            };
+
+            // Force hide the root index/README from the sidebar list (since it acts as the category link)
+            const lowerId = item.id.toLowerCase();
+            if (depth === 0 && (lowerId === "index" || lowerId === "readme")) {
+              item.className = item.className
+                ? item.className + " sidebar-item-hidden"
+                : "sidebar-item-hidden";
             }
           }
         }
@@ -235,7 +265,18 @@ export function cleanFrontMatterSlug({
       currentPhysicalPath = path.join(currentPhysicalPath, segment);
 
       let resolvedSlug = null;
-      const indexNames = ["index.mdx", "index.md", "README.mdx", "README.md"];
+      const indexNames = [
+        "index.mdx",
+        "index.md",
+        "Index.mdx",
+        "Index.md",
+        "README.mdx",
+        "README.md",
+        "Readme.mdx",
+        "Readme.md",
+        "readme.mdx",
+        "readme.md",
+      ];
       for (const name of indexNames) {
         const indexPath = path.join(currentPhysicalPath, name);
         const fm = parseFileFrontmatter(indexPath);
@@ -272,17 +313,21 @@ export function cleanFrontMatterSlug({
           finalSlug = path.posix.resolve(currentRoutePath, userSlug);
         }
       } else {
-        const lastDirSegment = pathParts[pathParts.length - 2];
-        let cleaned = lastDirSegment.replace(
-          /^\d+(?:\.\d+)*\s*(?:-\s*|\.\s*)/,
-          "",
-        );
+        if (pathParts.length === 1) {
+          finalSlug = currentRoutePath;
+        } else {
+          const lastDirSegment = pathParts[pathParts.length - 2];
+          let cleaned = lastDirSegment.replace(
+            /^\d+(?:\.\d+)*\s*(?:-\s*|\.\s*)/,
+            "",
+          );
 
-        cleaned = cleaned
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-        finalSlug = path.posix.resolve(currentRoutePath, cleaned);
+          cleaned = cleaned
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+          finalSlug = path.posix.resolve(currentRoutePath, cleaned);
+        }
       }
     } else {
       if (userSlug) {

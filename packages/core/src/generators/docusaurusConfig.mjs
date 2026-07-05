@@ -84,7 +84,11 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
   const colorScheme = get("theme.color_scheme", DEFAULT_COLOR_SCHEME); // The site's color scheme. Can be a built-in theme ("nord", "dracula", "github", "catppuccin", "gruvbox", "portosaur") or a path to a custom .css file.
   const selectedPrism = prismThemeMap[colorScheme] || prismThemeMap.nord;
 
-  const titleName = get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
+  const siteMode = rawGet("docs_home") ? "docs" : "portfolio";
+  const titleName =
+    siteMode === "docs"
+      ? get("docs_home.title", "Your Name") // Your project's title
+      : get("home_page.hero.title", "Your Name"); // Main title or name in the hero section.
   const siteName = get("site.title", titleName); // Global site title.
 
   const siteTagline = get(
@@ -116,11 +120,20 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     .filter((t) => t.tagName === "meta")
     .map((t) => t.attributes);
 
-  const notesDir = get("site.notes.dir", "notes"); // Notes directory name. Relative to project root.
-  const notesRoute = get("site.notes.route", "notes"); // Notes Route (eg, my-notes -> my-website.in/my-notes)
+  const notesDir =
+    siteMode === "docs"
+      ? get("site.docs.dir", "docs") // Docs directory name for docs mode. Relative to project Root.
+      : get("site.notes.dir", "notes"); // Notes directory name. Relative to project root.
+
+  const notesRoute =
+    siteMode === "docs"
+      ? get("site.docs.route", "docs") // Docs route for docs mode.
+      : get("site.notes.route", "notes"); // Notes Route (eg, my-notes -> my-website.in/my-notes)
 
   const blogDir = get("site.blog.dir", "blog"); // Blog directory name. Relative to project root.
   const blogRoute = get("site.blog.route", "blog"); // Blog Route (eg, my-blog -> my-website.in/my-blog)
+
+  const customNavbarItems = get("theme.navigation.navbar_items", []); // List of custom navbar items. @items { label: string, to?: string, href?: string, position?: string }
 
   // ------- Configuration Setup -------
 
@@ -178,7 +191,35 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         fileContent,
         defaultParseFrontMatter,
       }) => {
-        const result = await defaultParseFrontMatter({ filePath, fileContent });
+        let contentToParse = fileContent;
+        const filename = path.basename(filePath).toLowerCase();
+        const dir = path.dirname(filePath);
+
+        const isRootIndex =
+          dir === path.resolve(projectDir, notesDir) &&
+          (filename === "index.md" ||
+            filename === "index.mdx" ||
+            filename === "readme.md" ||
+            filename === "readme.mdx");
+
+        if (isRootIndex) {
+          // Change actual # README or # Index markdown headings to # Docs so the page renders it correctly
+          contentToParse = contentToParse.replace(
+            /^#\s+(?:README|Index)\s*$/im,
+            "# Docs",
+          );
+        }
+
+        const result = await defaultParseFrontMatter({
+          filePath,
+          fileContent: contentToParse,
+        });
+
+        if (isRootIndex && !result.frontMatter.title) {
+          // Force the metadata title to "Docs" if the user hasn't explicitly set one
+          result.frontMatter.title = "Docs";
+        }
+
         result.frontMatter = cleanFrontMatterSlug({
           filePath,
           frontMatter: result.frontMatter,
@@ -223,7 +264,17 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             position: "right",
             className: "navbar-search-bar",
           },
-          ...(get("home_page.about.enable", true) // Toggle the About Me section.
+          ...(siteMode === "docs"
+            ? [
+                {
+                  label: "Docs",
+                  to: `/${notesRoute}`,
+                  position: "right",
+                  activeBasePath: notesRoute,
+                },
+              ]
+            : []),
+          ...(siteMode === "portfolio" && get("home_page.about.enable", true) // Toggle the About Me section.
             ? [
                 {
                   label: "About Me",
@@ -233,7 +284,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.project_shelf.enable", true) // Toggle the Project Shelf section.
+          ...(siteMode === "portfolio" &&
+          get("home_page.project_shelf.enable", true) // Toggle the Project Shelf section.
             ? [
                 {
                   label: "Projects",
@@ -243,7 +295,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.experience.enable", false) // Toggle the Experience section.
+          ...(siteMode === "portfolio" &&
+          get("home_page.experience.enable", false) // Toggle the Experience section.
             ? [
                 {
                   label: "Experience",
@@ -253,7 +306,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
-          ...(get("home_page.social.enable", true) // Toggle the Social Links section.
+          ...(siteMode === "portfolio" && get("home_page.social.enable", true) // Toggle the Social Links section.
             ? [
                 {
                   label: "Contact",
@@ -263,13 +316,21 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 },
               ]
             : []),
+          ...customNavbarItems.map((item) => ({
+            label: item.label,
+            to: item.to || undefined,
+            href: item.href || undefined,
+            position: item.position || "right",
+          })),
           {
             type: "dropdown",
             label: "More",
             position: "right",
             className: "_navbar-more-items",
             items: [
-              { label: "Notes", to: `/${notesRoute}` },
+              ...(siteMode !== "docs"
+                ? [{ label: "Notes", to: `/${notesRoute}` }]
+                : []),
               { label: "Blog", to: `/${blogRoute}` },
               ...(get("tasks.enable", false) // Toggle the Tasks page.
                 ? [{ label: "Tasks", to: "/tasks" }]
@@ -475,6 +536,42 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
         },
       },
+
+      docsHome: {
+        image: genFallback(
+          validateAsset(get("docs_home.icon", ""), "img/icon.png"), // Project icon.
+        ),
+        title: titleName,
+        tagline: get("docs_home.tagline", "this is my awsome project"), // Your project's tagline
+        desc: get(
+          "docs_home.desc", // Short description about the project
+          "A awsome project for solving this practical projblem",
+        ),
+        actions: get("docs_home.actions", []).map((a) => {
+          const isFilePath =
+            a.icon && (a.icon.includes(".") || a.icon.includes("/"));
+          return {
+            ...a,
+            icon: a.icon
+              ? isFilePath
+                ? genFallback(validateAsset(a.icon, ""))
+                : a.icon
+              : undefined,
+          };
+        }), // Action buttons. @items { text: string, link: string, icon?: string }
+
+        features: get("docs_home.features", []).map((f) => {
+          const isFilePath =
+            f.icon && (f.icon.includes(".") || f.icon.includes("/"));
+          return {
+            ...f,
+            icon: f.icon
+              ? isFilePath
+                ? genFallback(validateAsset(f.icon, ""))
+                : f.icon
+              : undefined,
+          };
+        }), // Project Features. @items { title: string, desc: string, icon?: string, link?: string }
       },
 
       tasks: {
@@ -551,6 +648,9 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               userConfig,
               portoPaths.theme ?? context.portoRoot ?? "",
             ),
+          },
+          pages: {
+            exclude: siteMode === "docs" ? ["**/notes.jsx"] : [],
           },
         },
       ],

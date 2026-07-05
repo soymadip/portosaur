@@ -105,7 +105,14 @@ export function validateProject(UserRoot) {
  * @param {string} UserRoot - The project root directory.
  */
 export function ensureContentDirs(UserRoot) {
-  for (const dir of ["notes", "blog", "static"]) {
+  const userConfig = loadUserConfig(UserRoot);
+  const siteMode = userConfig.docs_home ? "docs" : "portfolio";
+  const docsDir =
+    siteMode === "docs"
+      ? userConfig.site?.docs?.dir || "docs"
+      : userConfig.site?.notes?.dir || "notes";
+
+  for (const dir of [docsDir, "blog", "static"]) {
     if (!fs.existsSync(path.join(UserRoot, dir))) {
       fs.mkdirSync(path.join(UserRoot, dir), { recursive: true });
     }

@@ -144,7 +144,8 @@ export default function TopicList({
   if (!shouldRender || !items || items.length === 0) return null;
 
   const filteredItems = filterDocCardListItems(items).filter(
-    (item) => !item.className || !item.className.includes("sidebar-item-hidden")
+    (item) =>
+      !item.className || !item.className.includes("sidebar-item-hidden"),
   );
 
   // Class / Layout resolution priority:

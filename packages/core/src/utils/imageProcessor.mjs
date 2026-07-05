@@ -13,7 +13,12 @@ import { logger } from "@portosaur/logger";
  * @returns {Promise<string>} A promise that resolves to the outputPath on success.
  * @throws {Error} If the input file is not found or if image processing fails.
  */
-export async function reshapeImage(inputPath, outputPath, shape = "circle", fitMode = "cover") {
+export async function reshapeImage(
+  inputPath,
+  outputPath,
+  shape = "circle",
+  fitMode = "cover",
+) {
   try {
     // Validate input file
     if (!fs.existsSync(inputPath)) {
@@ -42,7 +47,7 @@ export async function reshapeImage(inputPath, outputPath, shape = "circle", fitM
       finalSize = Math.max(metadata.width, metadata.height);
       // Add 15% padding so the image doesn't touch the edges of the circle (matches PWA logic)
       padding = Math.floor(finalSize * 0.15);
-      resizeSize = finalSize - (padding * 2);
+      resizeSize = finalSize - padding * 2;
     } else {
       finalSize = Math.min(metadata.width, metadata.height);
       resizeSize = finalSize;
@@ -52,7 +57,7 @@ export async function reshapeImage(inputPath, outputPath, shape = "circle", fitM
       width: resizeSize,
       height: resizeSize,
       fit: fitMode,
-      background: { r: 0, g: 0, b: 0, alpha: 0 }
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
     });
 
     if (padding > 0) {
@@ -61,7 +66,7 @@ export async function reshapeImage(inputPath, outputPath, shape = "circle", fitM
         bottom: padding,
         left: padding,
         right: padding,
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
       });
     }
 

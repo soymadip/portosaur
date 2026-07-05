@@ -60,27 +60,51 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     );
   }
 
+  const siteMode = userConfig.docs_home ? "docs" : "portfolio";
+
   const fallbackTargets = [
-    ...(userConfig.home_page?.project_shelf?.projects || []).map((p) => p.icon),
-  ];
+    ...(siteMode === "docs"
+      ? [
+          userConfig.docs_home?.image,
+          ...(userConfig.docs_home?.features || []).map((f) => f.icon),
+          ...(userConfig.docs_home?.actions || []).map((a) => a.icon),
+        ]
+      : [
+          userConfig.home_page?.hero?.profile_pic,
+          ...(userConfig.home_page?.project_shelf?.projects || []).map(
+            (p) => p.icon,
+          ),
+        ]),
+  ].filter(Boolean);
 
   const siteDir = UserRoot;
   const baseUrl = resolveBasePath(userConfig.site?.base_url || "auto");
 
   const siteTitle =
-    userConfig.site?.title || userConfig.home_page?.hero?.title || "Portfolio";
+    userConfig.site?.title ||
+    (siteMode === "docs"
+      ? userConfig.docs_home?.title
+      : userConfig.home_page?.hero?.title) ||
+    userConfig.site?.title ||
+    "My Site";
 
   const siteTagline =
     userConfig.site?.tagline ||
-    userConfig.home_page?.hero?.desc ||
-    "Welcome to my Portfolio";
+    (siteMode === "docs"
+      ? userConfig.docs_home?.desc
+      : userConfig.home_page?.hero?.desc) ||
+    userConfig.site?.tagline ||
+    "A Portosaur Site";
 
   const imagePath =
-    userConfig.site?.favicon ||
-    userConfig.home_page?.hero?.profile_pic ||
-    "img/icon.png";
+    (siteMode === "docs"
+      ? userConfig.docs_home?.image
+      : userConfig.home_page?.hero?.profile_pic) || "img/icon.png";
 
-  const notesRoute = userConfig.site?.notes?.route || "notes";
+  const notesRoute =
+    siteMode === "docs"
+      ? userConfig.site?.docs?.route || "docs"
+      : userConfig.site?.notes?.route || "notes";
   const blogRoute = userConfig.site?.blog?.route || "blog";
   const tasksEnabled = userConfig.tasks?.enable || false;
 
@@ -455,7 +479,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       downloadedRes,
       reshapedImagePath,
       shape,
-      fitMode
+      fitMode,
     );
     if (finalImagePath !== downloadedRes) {
       tempFiles.push(finalImagePath);

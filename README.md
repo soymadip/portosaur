@@ -44,10 +44,9 @@ This repository is a monorepo structured for performance and extensibility:
 
 ## Credits
 
-- [Docusaurus](https://docusaurus.io/) - The core engine.
-- [Catppuccin](https://github.com/catppuccin/catppuccin) - Color inspiration.
-- [Hugo Profile](https://hugo-profile.netlify.app/) - Design inspiration.
-- [VitePress](https://vitepress.dev) - Documentation site
+- [Docusaurus](https://docusaurus.io/) - The underlying engine.
+- [Hugo Profile](https://hugo-profile.netlify.app/) - Design inspiration for portfolio landing page
+- [VitePress](https://vitepress.dev) - Design inspiration for Doc mode homepage.
 
 ---
 

@@ -7,6 +7,7 @@ import ProjectsSection from "../components/ProjectsSection/index.jsx";
 import ContactSection from "../components/ContactSection/index.jsx";
 import ExperienceSection from "../components/ExperienceSection/index.jsx";
 import NavArrow from "../components/NavArrow/index.jsx";
+import DocsHomeSection from "../components/DocsHomeSection/index.jsx";
 
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
@@ -29,6 +30,18 @@ export default function Home() {
     }
   }
   `;
+
+  const siteMode = siteConfig.customFields?.siteMode || "portfolio";
+
+  if (siteMode === "docs") {
+    return (
+      <Layout title="Home" description={siteConfig.tagline}>
+        <main>
+          <DocsHomeSection />
+        </main>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Me" description="My portfolio website">

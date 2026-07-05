@@ -60,7 +60,9 @@ export default function AboutSection({ id, className }) {
                       aboutMe.image.fallback
                         ? (e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = withBaseUrl(aboutMe.image.fallback);
+                            e.currentTarget.src = withBaseUrl(
+                              aboutMe.image.fallback,
+                            );
                           }
                         : undefined
                     }
