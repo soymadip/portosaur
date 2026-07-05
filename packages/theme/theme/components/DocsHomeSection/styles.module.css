@@ -4,6 +4,28 @@
   padding-bottom: 0;
 }
 
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .heroSection {
   padding: 5rem 2rem 3rem;
   display: flex;
@@ -32,6 +54,30 @@
   line-height: 1.05;
   margin-bottom: 0;
   color: var(--ifm-color-primary);
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s forwards;
+}
+
+.title:hover {
+  transform: translateY(-2px);
+}
+
+.title::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 4px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--ifm-color-primary);
+  transition: width 0.3s ease;
+}
+
+.title:hover::after {
+  width: 100%;
 }
 
 .tagline {
@@ -41,6 +87,16 @@
   color: var(--ifm-heading-color);
   margin-top: 0.5rem;
   margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s forwards;
+}
+
+.tagline:hover {
+  transform: translateY(-2px);
+  color: var(--porto-secondary);
 }
 
 .description {
@@ -48,12 +104,16 @@
   line-height: 1.4;
   color: var(--ifm-color-emphasis-600);
   margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s forwards;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  opacity: 0;
+  animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s forwards;
 }
 
 .button {
@@ -73,6 +133,8 @@
 
 .button:hover {
   text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-global-shadow-md);
 }
 
 .buttonBrand {
@@ -111,9 +173,16 @@
   max-height: 280px;
   object-fit: cover;
   border-radius: 20%;
+  opacity: 0;
+  animation: floatIn 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s forwards;
   transition:
-    transform 0.5s ease,
-    box-shadow 0.5s ease;
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.icon:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--ifm-global-shadow-tl);
 }
 
 /* Features Grid */
@@ -138,6 +207,9 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  animation-delay: calc(0.5s + var(--animation-order, 0) * 0.15s);
   transition:
     transform 0.2s ease,
     background-color 0.2s ease;

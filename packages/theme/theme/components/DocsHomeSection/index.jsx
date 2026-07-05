@@ -91,7 +91,11 @@ export default function DocsHomeSection() {
         <section className={styles.featuresSection}>
           <div className={styles.featuresContainer}>
             {features.map((feature, index) => (
-              <div key={index} className={styles.featureCard}>
+              <div
+                key={index}
+                className={styles.featureCard}
+                style={{ "--animation-order": index }}
+              >
                 {feature.icon &&
                   (() => {
                     const resolved = resolveIconFromMap(feature.icon);
