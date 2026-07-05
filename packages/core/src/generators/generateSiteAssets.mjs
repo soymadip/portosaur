@@ -89,7 +89,8 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   const screenshotsDir = path.join(siteDir, "assets", "screenshots");
 
   const outputPath = "favicon";
-  const shape = "squircle";
+  const shape = "circle";
+  const fitMode = siteMode === "docs" ? "contain" : "cover";
   const appVersion = "1.0";
   const proxies = [];
 
@@ -200,6 +201,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     JSON.stringify({
       imagePath,
       shape,
+      fitMode,
       outputPath,
       themeColor,
       backgroundColor,
@@ -453,6 +455,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       downloadedRes,
       reshapedImagePath,
       shape,
+      fitMode
     );
     if (finalImagePath !== downloadedRes) {
       tempFiles.push(finalImagePath);
