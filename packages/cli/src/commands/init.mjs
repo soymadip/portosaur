@@ -488,7 +488,8 @@ export async function initCommand(options = {}) {
   logger.info("Creating project files...");
 
   // Prepare Template Variables
-  const portoVersion = `^${porto.version || "0.0.0"}`;
+  const cleanVersion = porto.version?.split("-")[0] || "0.0.0";
+  const portoVersion = `^${cleanVersion}`;
   const cloneUrl = state.gitRemoteUrl || "<your-repository-url>";
 
   const templateVars = {
