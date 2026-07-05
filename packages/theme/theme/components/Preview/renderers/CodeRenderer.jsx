@@ -49,7 +49,6 @@ export default function CodeRenderer({ code, language, zoomLevel = 1 }) {
             className={className}
             style={{
               ...style,
-              "--zoom": zoomLevel,
               margin: 0,
               borderRadius: 0,
               padding: "14px 0",
