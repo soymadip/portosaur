@@ -622,6 +622,21 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       }
     }
 
+    // --- Conditionally copy sample resume ---
+    if (portoAssetsDir) {
+      const resumeRef = userConfig.home_page?.about?.resume;
+      // Because `{{porto_static}}` resolves to `/`, the resolved path in config might be `/sample-resume.pdf`
+      // Check if it ends with sample-resume.pdf and there isn't a custom http link
+      if (resumeRef && resumeRef.endsWith("sample-resume.pdf") && !/^https?:\/\//.test(resumeRef)) {
+        const srcResume = path.resolve(portoAssetsDir, "sample-resume.pdf");
+        const destResume = path.join(getPortoDotDir(siteDir), "static", "sample-resume.pdf");
+        if (fs.existsSync(srcResume)) {
+          fs.mkdirSync(path.dirname(destResume), { recursive: true });
+          fs.copyFileSync(srcResume, destResume);
+        }
+      }
+    }
+
     // Generate manifest.webmanifest
     logger.info("Generating Web App Manifest...");
     const manifest = {
