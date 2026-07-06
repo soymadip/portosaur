@@ -94,7 +94,15 @@ import Hint from "../Hint";
 
 import { prefixMap } from "../../../src/utils/iconPrefixes.cjs";
 
-export default function Icon({ id, className, style, size, color, ...props }) {
+export default function Icon({
+  id,
+  className,
+  style,
+  size,
+  color,
+  addSpace,
+  ...props
+}) {
   const [apiFailed, setApiFailed] = useState(false);
 
   if (!id) return null;
@@ -131,17 +139,20 @@ export default function Icon({ id, className, style, size, color, ...props }) {
         `[Icon] Missing offline icon: ${mappedId}. Fetching from API in dev mode...`,
       );
       return (
-        <IconifyIcon
-          icon={apiId}
-          className={clsx(styles.icon, className)}
-          style={{
-            ...(size ? { fontSize: size } : {}),
-            ...(displayColor ? { color: displayColor } : {}),
-            ...style,
-          }}
-          aria-hidden="true"
-          {...props}
-        />
+        <>
+          <IconifyIcon
+            icon={apiId}
+            className={clsx(styles.icon, className)}
+            style={{
+              ...(size ? { fontSize: size } : {}),
+              ...(displayColor ? { color: displayColor } : {}),
+              ...style,
+            }}
+            aria-hidden="true"
+            {...props}
+          />
+          {addSpace && " "}
+        </>
       );
     }
 
@@ -150,55 +161,61 @@ export default function Icon({ id, className, style, size, color, ...props }) {
     }
 
     return (
-      <Hint
-        msg={
-          isOffline ? (
-            <span>
-              You are offline. Go online or restart dev server to fetch '
-              <strong>{mappedId}</strong>'.
-            </span>
-          ) : (
-            <span>
-              Icon '<strong>{mappedId}</strong>' not found. Check for typos!
-            </span>
-          )
-        }
-      >
-        <svg
-          width="1em"
-          height="1em"
-          viewBox="0 0 24 24"
-          className={clsx(styles.icon, className)}
-          style={{
-            ...(size ? { fontSize: size } : {}),
-            color: "#ff00ff", // Bright magenta to stand out
-            ...style,
-          }}
-          role="img"
-          aria-label={`Invalid icon: ${mappedId}`}
-          {...props}
+      <>
+        <Hint
+          msg={
+            isOffline ? (
+              <span>
+                You are offline. Go online or restart dev server to fetch '
+                <strong>{mappedId}</strong>'.
+              </span>
+            ) : (
+              <span>
+                Icon '<strong>{mappedId}</strong>' not found. Check for typos!
+              </span>
+            )
+          }
         >
-          <path
-            fill="currentColor"
-            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-          />
-        </svg>
-      </Hint>
+          <svg
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            className={clsx(styles.icon, className)}
+            style={{
+              ...(size ? { fontSize: size } : {}),
+              color: "#ff00ff", // Bright magenta to stand out
+              ...style,
+            }}
+            role="img"
+            aria-label={`Invalid icon: ${mappedId}`}
+            {...props}
+          >
+            <path
+              fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+            />
+          </svg>
+        </Hint>
+        {addSpace && " "}
+      </>
     );
   }
 
   return (
-    <svg
-      {...iconData.attributes}
-      className={clsx(styles.icon, className)}
-      style={{
-        ...(size ? { fontSize: size } : {}),
-        ...(displayColor ? { color: displayColor } : {}),
-        ...style,
-      }}
-      dangerouslySetInnerHTML={{ __html: iconData.body }}
-      aria-hidden="true"
-      {...props}
-    />
+    <>
+      <svg
+        {...iconData.attributes}
+        className={clsx(styles.icon, className)}
+        style={{
+          ...(size ? { fontSize: size } : {}),
+          ...(displayColor ? { color: displayColor } : {}),
+          ...style,
+        }}
+        dangerouslySetInnerHTML={{ __html: iconData.body }}
+        aria-hidden="true"
+        {...props}
+      />
+      {addSpace && " "}
+    </>
   );
 }

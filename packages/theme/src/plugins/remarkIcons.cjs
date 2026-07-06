@@ -34,9 +34,10 @@ module.exports = function remarkIconsPlugin() {
 
       for (const match of matches) {
         if (match.index > lastIndex) {
+          let betweenText = node.value.slice(lastIndex, match.index);
           newNodes.push({
             type: "text",
-            value: node.value.slice(lastIndex, match.index),
+            value: betweenText,
           });
         }
 
@@ -44,20 +45,40 @@ module.exports = function remarkIconsPlugin() {
         const iconName = match[2];
         const fullId = `${prefix}:${iconName}`;
 
+        let hasTrailingSpace = false;
+        const nextIndex = match.index + match[0].length;
+        if (node.value[nextIndex] === " ") {
+          hasTrailingSpace = true;
+        }
+
+        const attributes = [
+          {
+            type: "mdxJsxAttribute",
+            name: "id",
+            value: fullId,
+          },
+        ];
+
+        if (hasTrailingSpace) {
+          attributes.push({
+            type: "mdxJsxAttribute",
+            name: "addSpace",
+            value: "true",
+          });
+        }
+
         newNodes.push({
           type: "mdxJsxTextElement",
           name: "Icon",
-          attributes: [
-            {
-              type: "mdxJsxAttribute",
-              name: "id",
-              value: fullId,
-            },
-          ],
+          attributes,
           children: [],
         });
 
-        lastIndex = match.index + match[0].length;
+        lastIndex = nextIndex;
+
+        if (hasTrailingSpace) {
+          lastIndex++; // skip the space!
+        }
       }
 
       if (lastIndex < node.value.length) {
@@ -68,6 +89,7 @@ module.exports = function remarkIconsPlugin() {
       }
 
       parent.children.splice(index, 1, ...newNodes);
+
       return index + newNodes.length;
     });
   };
