@@ -1,6 +1,6 @@
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
-import Icon, { techMap } from "@theme/components/Icon";
+import Icon, { techMap } from "../index.jsx";
 
 export { techMap };
 

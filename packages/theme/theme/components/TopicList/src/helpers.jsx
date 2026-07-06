@@ -12,7 +12,7 @@ import {
   useDocCardDescriptionCategoryItemsPlural,
 } from "@docusaurus/theme-common/internal";
 
-import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
+import { DynamicIcon, techMap } from "@theme/components/Icon";
 
 import styles from "../styles.module.css";
 

@@ -93,6 +93,7 @@ import { Icon as IconifyIcon, loadIcon } from "@iconify/react";
 import Hint from "../Hint";
 import { getPrefixMap } from "../../../src/utils/iconPrefixes.cjs";
 import Search from "./Search/index.jsx";
+import Dynamic from "./Dynamic/index.jsx";
 
 const prefixMap = getPrefixMap();
 
@@ -223,4 +224,5 @@ export default function Icon({
 }
 
 Icon.Search = Search;
-export { Search as IconSearch };
+Icon.Dynamic = Dynamic;
+export { Search as IconSearch, Dynamic as DynamicIcon };

@@ -4,7 +4,7 @@ import Link from "@docusaurus/Link";
 import Hint from "../Hint/index.jsx";
 import { guessDocPermalink } from "../../utils/docsUtils.js";
 import Icon from "@theme/components/Icon";
-import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
+import { DynamicIcon, techMap } from "@theme/components/Icon";
 import styles from "./styles.module.css";
 
 /**

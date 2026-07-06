@@ -3,7 +3,7 @@ import styles from "./styles.module.css";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useIsBrowser from "@docusaurus/useIsBrowser";
 import Hint from "../Hint";
-import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
+import { DynamicIcon, techMap } from "@theme/components/Icon";
 
 const DEFAULT_ICON_ID = "md:help-circle";
 const DEFAULT_COLOR = "var(--ifm-color-primary)";

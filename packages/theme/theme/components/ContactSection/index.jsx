@@ -1,5 +1,5 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
+import { DynamicIcon, techMap } from "@theme/components/Icon";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import styles from "./styles.module.css";
