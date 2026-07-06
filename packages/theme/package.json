@@ -38,6 +38,7 @@
     "@fontsource-variable/lexend": "^5.2.11",
     "@fontsource/alata": "^5.2.8",
     "@iconify-json/devicon": "^1.2.62",
+    "@iconify-json/fa7-solid": "^1.2.5",
     "@iconify-json/line-md": "^1.2.16",
     "@iconify-json/logos": "^1.2.11",
     "@iconify-json/lucide": "^1.2.116",

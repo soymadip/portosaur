@@ -155,7 +155,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     tagline: siteTagline,
     url: siteUrl,
     baseUrl: sitePath,
-    favicon: "/favicon/favicon.ico",
+    favicon: "/favicon/icon-192x192.png",
     organizationName: siteName,
     onBrokenAnchors: get("site.on_broken_anchors", "warn"), // Behavior when a link anchor (#) is missing.
     onBrokenLinks: get("site.on_broken_links", "throw"), // Behavior when a link is broken.

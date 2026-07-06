@@ -120,7 +120,11 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   logger.info("Generating Site Assets...");
 
-  const shortcutIcons = ["icon-note.svg", "icon-blog.svg", "icon-tasks.svg"];
+  const shortcutIcons = [
+    { id: "mdi:notebook", name: "icon-note.svg" },
+    { id: "fa7-solid:blog", name: "icon-blog.svg" },
+    { id: "fa7-solid:tasks", name: "icon-tasks.svg" },
+  ];
   const outputDir = path.join(getPortoDotDir(siteDir), "static", outputPath);
 
   const getFileState = (filePath) => {
@@ -133,13 +137,6 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
   };
 
   const fileStates = [];
-
-  if (portoAssetsDir) {
-    for (const icon of shortcutIcons) {
-      const srcPath = path.resolve(portoAssetsDir, "svg", icon);
-      fileStates.push(getFileState(srcPath));
-    }
-  }
 
   const isRemote = /^https?:\/\//.test(imagePath);
   let remoteState = null;
@@ -297,15 +294,35 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
   logger.info("Generating Shortcut icons...");
   try {
-    const iconColor = { color: primaryColor };
+    const { createRequire } = await import("node:module");
+    const require = createRequire(import.meta.url);
 
     for (const icon of shortcutIcons) {
       try {
-        const srcPath = path.resolve(portoAssetsDir, "svg", icon);
-        const destPath = path.join(cacheDir, icon);
+        const destPath = path.join(cacheDir, icon.name);
 
-        await processSvg(srcPath, destPath, iconColor);
-      } catch (e) {}
+        const [prefix, name] = icon.id.split(":");
+        const jsonPath = require.resolve(`@iconify-json/${prefix}/icons.json`, {
+          paths: [portoPaths.themeRoot || process.cwd()],
+        });
+        
+        const iconData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+        const iconMeta = iconData.icons[name];
+        
+        if (!iconMeta) continue;
+
+        const width = iconMeta.width || iconData.info?.width || iconData.width || 24;
+        const height = iconMeta.height || iconData.info?.height || iconData.height || 24;
+
+        // Apply primaryColor by replacing currentColor
+        const body = iconMeta.body.replace(/currentColor/g, primaryColor);
+
+        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">${body}</svg>`;
+
+        fs.writeFileSync(destPath, svgContent, "utf-8");
+      } catch (e) {
+        logger.warn(`Failed to generate shortcut icon ${icon.id}: ${e.message}`);
+      }
     }
 
     const fallbacksDir = path.join(
@@ -514,9 +531,9 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
     // ---- Convert SVGs to PNG for shortcuts ---
 
     for (const icon of shortcutIcons) {
-      const svgPath = path.join(cacheDir, icon);
+      const svgPath = path.join(cacheDir, icon.name);
 
-      const baseName = icon.replace(/\.svg$/, "");
+      const baseName = icon.name.replace(/\.svg$/, "");
       const pngPath = path.join(outputDir, `${baseName}-192x192.png`);
 
       if (fs.existsSync(svgPath)) {
@@ -538,7 +555,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
             .toFile(pngPath);
         } catch (e) {
           throw new Error(
-            `Failed to generate PNG for shortcut: ${icon}. ${e.message}`,
+            `Failed to generate PNG for shortcut: ${icon.name}. ${e.message}`,
           );
         }
       }

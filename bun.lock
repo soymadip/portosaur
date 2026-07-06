@@ -71,6 +71,7 @@
         "@fontsource-variable/lexend": "^5.2.11",
         "@fontsource/alata": "^5.2.8",
         "@iconify-json/devicon": "^1.2.62",
+        "@iconify-json/fa7-solid": "^1.2.5",
         "@iconify-json/line-md": "^1.2.16",
         "@iconify-json/logos": "^1.2.11",
         "@iconify-json/lucide": "^1.2.116",
@@ -679,6 +680,8 @@
     "@hapi/topo": ["@hapi/topo@5.1.0", "", { "dependencies": { "@hapi/hoek": "^9.0.0" } }, "sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg=="],
 
     "@iconify-json/devicon": ["@iconify-json/devicon@1.2.62", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-X0o0+fOJL2t5JTbDCGLRzrmvf8Pv5q8dr86+fW+F/VJ9qvXTtny6lqGIwjE9AY4VTLm3i8f/N+VtRheSW6OkEg=="],
+
+    "@iconify-json/fa7-solid": ["@iconify-json/fa7-solid@1.2.5", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-e9EOtXuvDhiv6gBjbuW1q4bSR2tU5HmsDxqbLElQt2w2dR1Byh2mXfPLdRgEVwEr50uQV5tKxE3YAL6LTa+1fA=="],
 
     "@iconify-json/line-md": ["@iconify-json/line-md@1.2.16", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-esHPUQUp30NyqJWa7MNu6ExdG8z/aEFC5r56rVyRGhtJ7acOme6YtYPnDOgVu6p+kk24rM8602xkFuBC6g6x+w=="],
 
