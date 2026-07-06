@@ -1,8 +1,6 @@
 import styles from "../styles.module.css";
 import { Btn } from "../../UI/index.jsx";
-import IconWarning from "../../../../assets/svg/icon-warning.svg";
-import IconOffline from "../../../../assets/svg/icon-offline.svg";
-import IconRetry from "../../../../assets/svg/icon-retry.svg";
+import Icon from "@theme/components/Icon";
 
 export function LoadingState() {
   return (
@@ -32,7 +30,7 @@ function BaseErrorState({ icon, title, description, actions }) {
 export function ErrorState({ path, message, fileType, fileUrl, onRetry }) {
   return (
     <BaseErrorState
-      icon={<IconWarning className={styles.warningIcon} />}
+      icon={<Icon id="md:alert" className={styles.warningIcon} />}
       title="Failed to Load"
       description={
         <>
@@ -46,7 +44,7 @@ export function ErrorState({ path, message, fileType, fileUrl, onRetry }) {
       }
       actions={
         <>
-          <Btn primary onClick={onRetry} icon={<IconRetry />}>
+          <Btn primary onClick={onRetry} icon={<Icon id="md:refresh" />}>
             Try Again
           </Btn>
           {fileType === "web" && (
@@ -68,11 +66,11 @@ export function ErrorState({ path, message, fileType, fileUrl, onRetry }) {
 export function OfflineState({ onRetry }) {
   return (
     <BaseErrorState
-      icon={<IconOffline className={styles.offlineIcon} />}
+      icon={<Icon id="md:wifi-off" className={styles.offlineIcon} />}
       title="No Connection"
       description={<p>This resource requires an active internet connection.</p>}
       actions={
-        <Btn primary onClick={onRetry} icon={<IconRetry />}>
+        <Btn primary onClick={onRetry} icon={<Icon id="md:refresh" />}>
           Try Again
         </Btn>
       }

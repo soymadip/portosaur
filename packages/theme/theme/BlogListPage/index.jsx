@@ -10,7 +10,7 @@ import BlogPostItems from "@theme/BlogPostItems";
 import SearchMetadata from "@theme/SearchMetadata";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import clsx from "clsx";
-import { FaPenNib } from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 
 import styles from "./styles.module.css";
 import NotifyButton from "./NotifyButton.jsx";
@@ -19,7 +19,7 @@ function EmptyBlog() {
   return (
     <div className={styles.emptyState}>
       <div className={styles.emptyIcon}>
-        <FaPenNib aria-hidden="true" />
+        <Icon id="md:fountain-pen-tip" aria-hidden="true" size="3rem" />
       </div>
       <h2 className={styles.emptyTitle}>No posts yet</h2>
       <p className={styles.emptyDesc}>

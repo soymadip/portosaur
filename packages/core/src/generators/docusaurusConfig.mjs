@@ -139,6 +139,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
   const customNavbarItems = get("theme.navigation.navbar_items", []); // List of custom navbar items. @items { label: string, to?: string, href?: string, position?: string }
 
+  const require = createRequire(import.meta.url);
+  const remarkIconsPlugin = require(
+    path.resolve(
+      portoPaths.themeRoot ?? context.portoRoot ?? "",
+      "src/plugins/remarkIcons.cjs",
+    ),
+  );
+
   // ------- Configuration Setup -------
 
   return {
@@ -149,7 +157,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     baseUrl: sitePath,
     favicon: "/favicon/favicon.ico",
     organizationName: siteName,
-    onBrokenAnchors: get("site.on_broken_anchors", "throw"), // Behavior when a link anchor (#) is missing.
+    onBrokenAnchors: get("site.on_broken_anchors", "warn"), // Behavior when a link anchor (#) is missing.
     onBrokenLinks: get("site.on_broken_links", "throw"), // Behavior when a link is broken.
     i18n: { defaultLocale: "en", locales: ["en"] },
 
@@ -624,7 +632,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             ...(get("site.edit_url", "") // Base URL for Edit this page links.
               ? { editUrl: get("site.edit_url", "") }
               : {}),
-            remarkPlugins: [remarkMath],
+            remarkPlugins: [remarkMath, remarkIconsPlugin],
             rehypePlugins: [rehypeKatex],
             sidebarItemsGenerator: createSidebarItemsGenerator(),
           },
@@ -635,7 +643,7 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             ...(get("site.edit_url", "")
               ? { editUrl: get("site.edit_url", "") }
               : {}),
-            remarkPlugins: [remarkMath],
+            remarkPlugins: [remarkMath, remarkIconsPlugin],
             rehypePlugins: [rehypeKatex],
             feedOptions: {
               type: get("site.rss.enable", true) ? "all" : null, // Toggle RSS feed generation for the blog.
@@ -721,6 +729,19 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           };
         },
       }),
+
+      // Run the Build-Time Icon Scanner plugin
+      [
+        path.resolve(
+          portoPaths.themeRoot ?? context.portoRoot ?? "",
+          "src/plugins/iconsPlugin.mjs",
+        ),
+        {
+          portoRoot: portoPaths.themeRoot ?? context.portoRoot ?? "",
+          projectDir: projectDir,
+        },
+      ],
+
       ...(get("site.pwa.enable", true)
         ? [
             [

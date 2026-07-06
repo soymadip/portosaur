@@ -12,11 +12,7 @@ import {
   useDocCardDescriptionCategoryItemsPlural,
 } from "@docusaurus/theme-common/internal";
 
-import { FaFolder, FaFileAlt, FaLink } from "react-icons/fa";
-import {
-  resolveIconFromMap,
-  renderIconElement,
-} from "../../../utils/iconUtils";
+import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
 
 import styles from "../styles.module.css";
 
@@ -64,49 +60,40 @@ export function getIconTitleProps(item, customProps, href) {
   const extracted = extractLeadingEmoji(item.label);
   const title = extracted.rest.trim();
 
-  if (customProps?.icon) {
-    const iconData = resolveIconFromMap(customProps.icon) || {
-      icon: customProps.icon,
-    };
-    const { icon: iconVal } = iconData;
-    const resolvedColor = "var(--ifm-color-primary)";
-
-    const iconElement = renderIconElement({
-      iconVal,
-      color: resolvedColor,
-      style: { width: "24px", height: "24px" },
-    });
-
-    return {
-      icon: iconElement,
-      title,
-    };
-  }
-
   // If there's an emoji explicitly prefixed in the label, use that
   if (extracted.emoji) {
     return { icon: extracted.emoji, title };
   }
 
-  // No explicit icon and no label emoji - use clean React Icons
-  const IconComp =
-    item.type === "category"
-      ? FaFolder
-      : isInternalUrl(href)
-        ? FaFileAlt
-        : FaLink;
+  let fallbackId = "md:link";
+
+  if (item.type === "category") {
+    fallbackId = "md:folder";
+  } else if (isInternalUrl(href)) {
+    fallbackId = "md:notebook";
+  }
+
+  const slugLower = title.toLowerCase();
+  const iconStrLower = (customProps?.icon || "").toLowerCase();
+  const mappedColor = techMap[iconStrLower]?.color || techMap[slugLower]?.color;
+
+  // The overall card color should not use mappedColor (unless explicitly set via customProps)
+  const color = customProps?.color || "var(--ifm-color-primary)";
 
   const iconElement = (
-    <IconComp
+    <DynamicIcon
+      iconStr={customProps?.icon}
+      slug={title}
+      fallbackIcon={fallbackId}
       style={{
-        width: "20px",
-        height: "20px",
-        color: "var(--ifm-color-primary)",
+        width: "23px",
+        height: "23px",
+        color: mappedColor || "inherit",
       }}
     />
   );
 
-  return { icon: iconElement, title };
+  return { icon: iconElement, title, color };
 }
 
 export function CardCategory({ item }) {
@@ -117,7 +104,11 @@ export function CardCategory({ item }) {
     return null;
   }
 
-  const { icon, title } = getIconTitleProps(item, item.customProps, href);
+  const { icon, title, color } = getIconTitleProps(
+    item,
+    item.customProps,
+    href,
+  );
 
   const descriptionRaw = item.description || item.customProps?.description;
   const itemsCount = categoryItemsPlural(item.items.length);
@@ -131,6 +122,7 @@ export function CardCategory({ item }) {
         href={href}
         className={clsx("card padding--lg", styles.cardContainer)}
         title={descriptionString}
+        style={{ "--topic-color": color }}
       >
         <h2 className={styles.cardTitle} title={title}>
           <span className={styles.cardIcon}>{icon}</span>
@@ -159,7 +151,7 @@ export function CardLink({ item }) {
     ...doc?.frontMatter,
     ...item.customProps,
   };
-  const { icon, title } = getIconTitleProps(item, customProps, href);
+  const { icon, title, color } = getIconTitleProps(item, customProps, href);
   const description = item.description ?? doc?.description;
 
   return (
@@ -168,6 +160,7 @@ export function CardLink({ item }) {
         href={href}
         className={clsx("card padding--lg", styles.cardContainer)}
         title={description || undefined}
+        style={{ "--topic-color": color }}
       >
         <h2 className={styles.cardTitle} title={title}>
           <span className={styles.cardIcon}>{icon}</span>

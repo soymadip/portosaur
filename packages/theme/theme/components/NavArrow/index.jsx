@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 import Hint from "../Hint";
 import styles from "./styles.module.css";
 
@@ -105,9 +105,13 @@ export default function NavArrow() {
       >
         <div className={`${styles.iconWrapper} ${styles[direction]}`}>
           {direction === "down" ? (
-            <FaChevronDown className={styles.chevron} />
+            <Icon
+              id="md:chevron-down"
+              className={styles.chevron}
+              size="2.5rem"
+            />
           ) : (
-            <FaChevronUp className={styles.chevron} />
+            <Icon id="md:chevron-up" className={styles.chevron} size="2.5rem" />
           )}
         </div>
       </Hint>

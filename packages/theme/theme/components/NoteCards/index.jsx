@@ -1,14 +1,10 @@
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Link from "@docusaurus/Link";
-import IconNote from "../../../assets/svg/icon-note.svg";
-import IconRight from "../../../assets/svg/icon-right.svg";
 import Hint from "../Hint/index.jsx";
 import { guessDocPermalink } from "../../utils/docsUtils.js";
-import {
-  resolveIconFromMap,
-  renderIconElement,
-} from "../../utils/iconUtils.jsx";
+import Icon from "@theme/components/Icon";
+import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
 import styles from "./styles.module.css";
 
 /**
@@ -98,51 +94,11 @@ function NoteCard({ note, index, docsBasePath }) {
   const { withBaseUrl } = useBaseUrlUtils();
   const noteUrl = withBaseUrl(`${docsBasePath}/${slug}`);
 
-  // Resolve icon: explicit frontmatter first, then slug/title guessing, then default
-  let resolvedIconData = resolveIconFromMap(iconStr);
-
-  if (!resolvedIconData) {
-    // Guess from first slug segment
-    const firstSlugSegment = slug.split("/")[0].toLowerCase();
-    resolvedIconData = resolveIconFromMap(firstSlugSegment);
-
-    if (!resolvedIconData && firstSlugSegment.match(/[-_]/)) {
-      const subParts = firstSlugSegment.split(/[-_]/);
-      for (const part of subParts) {
-        resolvedIconData = resolveIconFromMap(part);
-        if (resolvedIconData) {
-          break;
-        }
-      }
-    }
-
-    if (!resolvedIconData) {
-      resolvedIconData = resolveIconFromMap(title.toLowerCase());
-    }
-  }
-
-  const defaultIconData = resolvedIconData || {};
-  const color = colorStr || defaultIconData.color || "var(--ifm-color-primary)";
-
-  // Render explicit custom icon (img, svg, text)
-  let customIconElement = null;
-
-  if (iconStr && !resolveIconFromMap(iconStr)) {
-    customIconElement = renderIconElement({
-      iconVal: iconStr,
-      color,
-      className:
-        iconStr.startsWith("/") || iconStr.startsWith("http")
-          ? styles.imgIcon
-          : iconStr.trim().startsWith("<svg")
-            ? styles.svgIcon
-            : styles.textIcon,
-      alt: `${title} icon`,
-      withBaseUrl,
-    });
-  }
-
-  const Icon = defaultIconData.icon || IconNote;
+  // Resolve color: explicit frontmatter first, then techMap guessing, then default
+  const slugLower = slug.toLowerCase();
+  const iconStrLower = (iconStr || "").toLowerCase();
+  const mappedColor = techMap[iconStrLower]?.color || techMap[slugLower]?.color;
+  const color = colorStr || mappedColor || "var(--ifm-color-primary)";
 
   const tooltipContent = description ? description : null;
 
@@ -154,18 +110,19 @@ function NoteCard({ note, index, docsBasePath }) {
       aria-label={`Read note: ${title}`}
     >
       <div className={styles.iconWrapper}>
-        {customIconElement ? (
-          customIconElement
-        ) : (
-          <Icon className={styles.noteIcon} />
-        )}
+        <DynamicIcon
+          iconStr={iconStr}
+          slug={slug}
+          fallbackIcon="md:book"
+          className={styles.noteIcon}
+        />
       </div>
       <div className={styles.cardContent}>
         <h3 className={styles.noteTitle} title={title}>
           {title}
         </h3>
       </div>
-      <IconRight className={styles.mobileChevron} />
+      <Icon id="md:chevron-right" className={styles.mobileChevron} />
     </Link>
   );
 

@@ -1,6 +1,5 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import { iconMap } from "../../config/iconMappings";
-import { FaQuestionCircle } from "react-icons/fa";
+import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import styles from "./styles.module.css";
@@ -67,11 +66,11 @@ export default function ContactSection({ id, className }) {
             aria-label="Social media and contact links"
           >
             {socialLinks.map((social, index) => {
-              const iconKey = (social.icon || social.name || "").toLowerCase();
-              const iconData = iconMap[iconKey] || {};
               const name = social.name;
-              const Icon = iconData.icon || FaQuestionCircle;
-              const iconColor = iconData.color || "var(--ifm-color-primary)";
+              const slugLower = (name || "").toLowerCase();
+              const mappedColor = techMap[slugLower]?.color;
+              const iconColor =
+                social.color || mappedColor || "var(--ifm-color-primary)";
               const desc = social.desc || `Connect with me on ${name}`;
               const url = social.url;
 
@@ -89,11 +88,14 @@ export default function ContactSection({ id, className }) {
                   aria-label={`Connect with me on ${name}: ${desc}`}
                   role="listitem"
                 >
-                  {Icon && (
-                    <div className={styles.socialIcon}>
-                      <Icon aria-hidden="true" />
-                    </div>
-                  )}
+                  <div className={styles.socialIcon}>
+                    <DynamicIcon
+                      iconStr={social.icon}
+                      slug={name}
+                      fallbackIcon="md:help-circle"
+                      aria-hidden="true"
+                    />
+                  </div>
                   <h3 className={styles.socialTitle}>{name}</h3>
                   <p className={styles.socialDesc}>{desc}</p>
                 </a>

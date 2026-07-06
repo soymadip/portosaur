@@ -2,8 +2,7 @@ import React from "react";
 import { Rnd } from "react-rnd";
 
 import styles from "../../../styles.module.css";
-import IconLeft from "../../../../../../assets/svg/icon-left.svg";
-import IconRight from "../../../../../../assets/svg/icon-right.svg";
+import Icon from "@theme/components/Icon";
 
 export default function PipLayout({
   isVisible,
@@ -112,9 +111,9 @@ export default function PipLayout({
             }}
           >
             {isHiddenLeft ? (
-              <IconRight className={styles.svgIcon} />
+              <Icon id="md:chevron-right" className={styles.svgIcon} />
             ) : (
-              <IconLeft className={styles.svgIcon} />
+              <Icon id="md:chevron-left" className={styles.svgIcon} />
             )}
           </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PageMetadata } from "@docusaurus/theme-common";
 import Layout from "@theme/Layout";
-import { MdOpenInNew } from "react-icons/md";
+import Icon from "@theme/components/Icon";
 import { Btn } from "../components/UI/index.jsx";
 
 import styles from "../NotFound/styles.module.css";
@@ -46,7 +46,7 @@ export default function RedirectPage() {
       <Layout>
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
-            <MdOpenInNew aria-hidden="true" />
+            <Icon id="md:open-in-new" aria-hidden="true" size="3rem" />
           </div>
           <h2 className={styles.emptyTitle}>
             {blocked ? "This page is outside the app" : "Opening in browser…"}

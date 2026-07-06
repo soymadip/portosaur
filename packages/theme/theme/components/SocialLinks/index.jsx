@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./styles.module.css";
-import { FaQuestionCircle } from "react-icons/fa";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useIsBrowser from "@docusaurus/useIsBrowser";
 import Hint from "../Hint";
-import { iconMap } from "../../config/iconMappings";
+import DynamicIcon, { techMap } from "@theme/components/DynamicIcon";
 
-const DEFAULT_ICON = FaQuestionCircle;
+const DEFAULT_ICON_ID = "md:help-circle";
 const DEFAULT_COLOR = "var(--ifm-color-primary)";
 
 export default function SocialIcons({ showAll = false, links = null }) {
@@ -45,21 +44,6 @@ export default function SocialIcons({ showAll = false, links = null }) {
     return () => window.removeEventListener("resize", handleResize);
   }, [isBrowser, calculateDelays]);
 
-  const getIconDetails = (iconName) => {
-    if (!iconName) {
-      return { icon: DEFAULT_ICON, color: DEFAULT_COLOR };
-    }
-    const formattedIconName = iconName.toLowerCase();
-    const iconDetails = iconMap[formattedIconName];
-    if (!iconDetails) {
-      return { icon: DEFAULT_ICON, color: DEFAULT_COLOR };
-    }
-    return {
-      icon: iconDetails.icon,
-      color: iconDetails.color || DEFAULT_COLOR,
-    };
-  };
-
   if (socialLinks.length === 0) {
     return null;
   }
@@ -67,11 +51,11 @@ export default function SocialIcons({ showAll = false, links = null }) {
   return (
     <div className={styles.socialIcons}>
       {socialLinks.map((social, index) => {
-        const { icon: IconComponent, color: iconColor } = getIconDetails(
-          social.icon || social.name,
-        );
         const href = social.url || "#";
-        const displayColor = social.color || iconColor;
+        const slugLower = (social.name || "").toLowerCase();
+        const mappedColor = techMap[slugLower]?.color;
+        const displayColor =
+          social.color || mappedColor || "var(--ifm-color-primary)";
 
         return (
           <Hint
@@ -93,7 +77,12 @@ export default function SocialIcons({ showAll = false, links = null }) {
               }}
               aria-label={social.name || social.icon || "social link"}
             >
-              <IconComponent size={24} />
+              <DynamicIcon
+                iconStr={social.icon}
+                slug={social.name}
+                fallbackIcon="md:help-circle"
+                size={24}
+              />
             </a>
           </Hint>
         );

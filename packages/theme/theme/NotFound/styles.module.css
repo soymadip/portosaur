@@ -12,13 +12,13 @@
 .emptyIcon {
   font-size: 4.5rem;
   color: var(--porto-text-muted);
-  margin-bottom: 0.5rem;
   opacity: 0.6;
 }
 
 .emptyTitle {
-  font-size: 2rem;
+  font-size: 2.2rem;
   color: var(--ifm-heading-color);
+  margin-top: -0.8rem;
   margin-bottom: 1rem;
 }
 

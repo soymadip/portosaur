@@ -2,14 +2,7 @@ import { useState, useEffect } from "react";
 import { Btn, Dropdown } from "../../UI/index.jsx";
 import Hint from "../../Hint/index.jsx";
 import styles from "../styles.module.css";
-import IconDock from "../../../../assets/svg/icon-dock.svg";
-import IconPopup from "../../../../assets/svg/icon-popup.svg";
-import IconPip from "../../../../assets/svg/icon-pip.svg";
-import IconSave from "../../../../assets/svg/icon-save.svg";
-import IconLink from "../../../../assets/svg/icon-link.svg";
-import IconClose from "../../../../assets/svg/icon-close.svg";
-import IconZoom from "../../../../assets/svg/icon-zoom.svg";
-import IconMinimize from "../../../../assets/svg/icon-minimize.svg";
+import Icon from "@theme/components/Icon";
 
 export default function PreviewHeader({
   displayTitle,
@@ -122,7 +115,7 @@ export default function PreviewHeader({
               target="_blank"
               rel="noopener noreferrer"
               title="Open externally"
-              icon={<IconLink />}
+              icon={<Icon id="md:open-in-new" />}
             >
               {isMobileSize ? null : "Visit"}
             </Btn>
@@ -141,7 +134,7 @@ export default function PreviewHeader({
                 isDownloading ? (
                   <div className={styles.spinnerSmall} />
                 ) : (
-                  <IconSave />
+                  <Icon id="md:download" />
                 )
               }
               primary
@@ -197,7 +190,7 @@ export default function PreviewHeader({
                 <Dropdown
                   label={isMobileSize ? null : `${roundedZoom}%`}
                   primary
-                  icon={<IconZoom />}
+                  icon={<Icon id="md:magnify-plus" />}
                   title="Change Zoom"
                   items={items}
                 />
@@ -208,7 +201,8 @@ export default function PreviewHeader({
           {modeSwitch &&
             (() => {
               const MobileAwareDockIcon = (props) => (
-                <IconDock
+                <Icon
+                  id="md:dock-left"
                   {...props}
                   style={{
                     transform: isMobileSize ? "rotate(90deg)" : "none",
@@ -218,9 +212,17 @@ export default function PreviewHeader({
               );
 
               const MODE_OPTIONS = [
-                { id: "popup", label: "Popup", icon: IconPopup },
+                {
+                  id: "popup",
+                  label: "Popup",
+                  icon: () => <Icon id="md:application" />,
+                },
                 { id: "dock", label: "Dock", icon: MobileAwareDockIcon },
-                { id: "pip", label: "PiP", icon: IconPip },
+                {
+                  id: "pip",
+                  label: "PiP",
+                  icon: () => <Icon id="md:picture-in-picture-bottom-right" />,
+                },
               ];
               const activeModeOption =
                 MODE_OPTIONS.find((m) => m.id === mode) || MODE_OPTIONS[0];
@@ -263,12 +265,19 @@ export default function PreviewHeader({
                 e.stopPropagation();
               }}
               title="Minimize PiP"
-              icon={<IconMinimize className={styles.headerIcon} />}
+              icon={
+                <Icon id="md:fullscreen-exit" className={styles.headerIcon} />
+              }
             />
           )}
 
           {/* Close */}
-          <Btn onClick={onClose} title="Close" danger icon={<IconClose />} />
+          <Btn
+            onClick={onClose}
+            title="Close"
+            danger
+            icon={<Icon id="md:close" />}
+          />
         </div>
       </div>
     </>

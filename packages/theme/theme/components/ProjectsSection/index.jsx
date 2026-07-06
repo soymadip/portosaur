@@ -1,20 +1,19 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import {
-  FaCode,
-  FaGlobe,
-  FaPlay,
-  FaChevronLeft,
-  FaChevronRight,
-  FaStar,
-} from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import Hint from "../Hint/index.jsx";
+import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import styles from "./styles.module.css";
 
 export default function ProjectsSection({ id, className }) {
   const { siteConfig } = useDocusaurusContext();
   const [sectionRef, isVisible] = useScrollReveal();
+  const brokenLinks = useBrokenLinks();
+
+  if (id) {
+    brokenLinks.collectAnchor(id);
+  }
 
   const { projectShelf } = siteConfig.customFields?.homePage || {};
   if (projectShelf?.enable === false) return null;
@@ -109,7 +108,7 @@ export default function ProjectsSection({ id, className }) {
               disabled={!canScrollLeft}
               aria-label="Previous project"
             >
-              <FaChevronLeft />
+              <Icon id="md:chevron-left" size="1.8rem" />
             </button>
           )}
 
@@ -132,24 +131,31 @@ export default function ProjectsSection({ id, className }) {
                         backgroundColor: project.bg || "rgba(255,255,255,0.05)",
                       }}
                     >
-                      <img
-                        src={
-                          typeof project.icon === "string"
-                            ? project.icon
-                            : project.icon?.src
-                        }
-                        alt={project.title}
-                        className={styles.icon}
-                        loading="lazy"
-                        onError={(e) => {
-                          if (
-                            project.icon?.fallback &&
-                            e.currentTarget.src !== project.icon.fallback
-                          ) {
-                            e.currentTarget.src = project.icon.fallback;
+                      {typeof project.icon === "string" &&
+                      !project.icon.startsWith("http") &&
+                      !project.icon.startsWith("/") &&
+                      !project.icon.startsWith(".") ? (
+                        <Icon id={project.icon} className={styles.icon} />
+                      ) : (
+                        <img
+                          src={
+                            typeof project.icon === "string"
+                              ? project.icon
+                              : project.icon?.src
                           }
-                        }}
-                      />
+                          alt={project.title}
+                          className={styles.icon}
+                          loading="lazy"
+                          onError={(e) => {
+                            if (
+                              project.icon?.fallback &&
+                              e.currentTarget.src !== project.icon.fallback
+                            ) {
+                              e.currentTarget.src = project.icon.fallback;
+                            }
+                          }}
+                        />
+                      )}
 
                       {project.state && (
                         <div className={styles.stateBadgeWrapper}>
@@ -163,7 +169,7 @@ export default function ProjectsSection({ id, className }) {
 
                       {project.featured && (
                         <div className={styles.featuredBadge} title="Featured">
-                          <FaStar />
+                          <Icon id="md:star" fill="currentColor" />
                         </div>
                       )}
 
@@ -205,7 +211,7 @@ export default function ProjectsSection({ id, className }) {
                           rel="noreferrer"
                           className={styles.link}
                         >
-                          <FaGlobe /> Website
+                          <Icon id="md:web" /> Website
                         </a>
                       )}
                       {project.repo && (
@@ -215,7 +221,7 @@ export default function ProjectsSection({ id, className }) {
                           rel="noreferrer"
                           className={styles.link}
                         >
-                          <FaCode /> Source
+                          <Icon id="md:xml" /> Source
                         </a>
                       )}
                       {project.demo && (
@@ -225,7 +231,7 @@ export default function ProjectsSection({ id, className }) {
                           rel="noreferrer"
                           className={styles.link}
                         >
-                          <FaPlay /> Demo
+                          <Icon id="md:play" /> Demo
                         </a>
                       )}
                     </div>
@@ -242,7 +248,7 @@ export default function ProjectsSection({ id, className }) {
               disabled={!canScrollRight}
               aria-label="Next project"
             >
-              <FaChevronRight />
+              <Icon id="md:chevron-right" size="1.8rem" />
             </button>
           )}
         </div>

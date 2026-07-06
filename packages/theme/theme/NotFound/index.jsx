@@ -1,6 +1,6 @@
 import { PageMetadata } from "@docusaurus/theme-common";
 import Layout from "@theme/Layout";
-import { FaMapSigns } from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 import { Btn } from "../components/UI/index.jsx";
 
 import styles from "./styles.module.css";
@@ -12,7 +12,7 @@ export default function NotFound() {
       <Layout>
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
-            <FaMapSigns aria-hidden="true" />
+            <Icon id="line-md:emoji-cry" aria-hidden="true" size="5rem" />
           </div>
           <h2 className={styles.emptyTitle}>Page Not Found</h2>
           <p className={styles.emptyDesc}>

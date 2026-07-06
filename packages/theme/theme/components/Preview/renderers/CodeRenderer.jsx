@@ -2,8 +2,7 @@ import { useState } from "react";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { Highlight } from "prism-react-renderer";
 import styles from "../styles.module.css";
-import IconCopy from "../../../../assets/svg/icon-copy.svg";
-import IconCheck from "../../../../assets/svg/icon-check.svg";
+import Icon from "@theme/components/Icon";
 
 export default function CodeRenderer({ code, language, zoomLevel = 1 }) {
   const { siteConfig } = useDocusaurusContext();
@@ -31,8 +30,8 @@ export default function CodeRenderer({ code, language, zoomLevel = 1 }) {
         title="Copy Code"
       >
         <span className={styles.copyButtonIcons}>
-          <IconCopy className={styles.copyIcon} />
-          <IconCheck className={styles.successIcon} />
+          <Icon id="md:content-copy" className={styles.copyIcon} />
+          <Icon id="md:check" className={styles.successIcon} />
         </span>
       </button>
 

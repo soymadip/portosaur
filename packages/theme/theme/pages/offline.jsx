@@ -1,6 +1,6 @@
 import { PageMetadata } from "@docusaurus/theme-common";
 import Layout from "@theme/Layout";
-import { MdWifiOff } from "react-icons/md";
+import Icon from "@theme/components/Icon";
 import { Btn } from "../components/UI/index.jsx";
 
 import styles from "../NotFound/styles.module.css";
@@ -12,7 +12,11 @@ export default function OfflinePage() {
       <Layout>
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
-            <MdWifiOff aria-hidden="true" />
+            <Icon
+              id="line-md:cloud-alt-off-loop"
+              aria-hidden="true"
+              size="5rem"
+            />
           </div>
           <h2 className={styles.emptyTitle}>You're Offline</h2>
           <p className={styles.emptyDesc}>

@@ -2,6 +2,7 @@
   --ifm-link-color: var(--ifm-color-emphasis-200);
   --ifm-link-hover-color: var(--ifm-color-emphasis-300);
   --ifm-link-hover-decoration: none;
+  --topic-color: var(--ifm-color-primary);
 
   display: flex;
   flex-direction: column;
@@ -14,7 +15,7 @@
 }
 
 .cardContainer:hover {
-  border-color: var(--ifm-color-primary);
+  border-color: var(--topic-color);
   box-shadow: var(--ifm-global-shadow-md);
 }
 
@@ -23,7 +24,7 @@
 }
 
 .cardTitle {
-  color: var(--ifm-color-primary) !important;
+  color: var(--topic-color) !important;
   font-size: 1.4rem !important;
   font-weight: 750 !important;
   margin-bottom: 1.05rem;

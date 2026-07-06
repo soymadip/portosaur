@@ -1,7 +1,7 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import useScrollReveal from "../../hooks/useScrollReveal";
-import { FaDownload } from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 import { Pv } from "../Preview/index.jsx";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import styles from "./styles.module.css";
@@ -75,7 +75,7 @@ export default function AboutSection({ id, className }) {
                   <div className={styles.resumeContainer}>
                     <Pv href={aboutMe.resume} title="My Resume">
                       <span className={styles.resumeButton}>
-                        <FaDownload /> View Resume
+                        <Icon id="md:download" /> View Resume
                       </span>
                     </Pv>
                   </div>

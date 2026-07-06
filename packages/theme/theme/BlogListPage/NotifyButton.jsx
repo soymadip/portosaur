@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaBell, FaBellSlash } from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 import styles from "./styles.module.css";
 
 // States the button can be in.
@@ -78,11 +78,11 @@ export default function NotifyButton() {
     >
       {isSubscribed ? (
         <>
-          <FaBell aria-hidden="true" /> Subscribed
+          <Icon id="md:bell" aria-hidden="true" /> Subscribed
         </>
       ) : (
         <>
-          <FaBell aria-hidden="true" /> Notify me of new posts
+          <Icon id="md:bell" aria-hidden="true" /> Notify me of new posts
         </>
       )}
     </button>

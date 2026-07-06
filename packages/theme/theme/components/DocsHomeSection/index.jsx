@@ -2,10 +2,7 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import Head from "@docusaurus/Head";
 import Link from "@docusaurus/Link";
-import {
-  renderIconElement,
-  resolveIconFromMap,
-} from "../../utils/iconUtils.jsx";
+import Icon from "@theme/components/Icon";
 import styles from "./styles.module.css";
 
 export default function DocsHomeSection() {
@@ -39,16 +36,21 @@ export default function DocsHomeSection() {
                     to={withBaseUrl(action.link)}
                   >
                     {action.icon &&
-                      (() => {
-                        const resolved = resolveIconFromMap(action.icon);
-                        const iconVal = resolved ? resolved.icon : action.icon;
-                        const color = resolved ? resolved.color : undefined;
-                        return renderIconElement({
-                          iconVal,
-                          color,
-                          withBaseUrl,
-                        });
-                      })()}
+                      (typeof action.icon === "object" ||
+                      action.icon.includes(".") ||
+                      action.icon.includes("/") ? (
+                        <img
+                          src={withBaseUrl(
+                            typeof action.icon === "string"
+                              ? action.icon
+                              : action.icon.src,
+                          )}
+                          alt=""
+                          className={styles.actionImg}
+                        />
+                      ) : (
+                        <Icon id={action.icon} />
+                      ))}
                     {action.label || action.text}
                   </Link>
                 ))}
@@ -97,16 +99,24 @@ export default function DocsHomeSection() {
                 style={{ "--animation-order": index }}
               >
                 {feature.icon &&
-                  (() => {
-                    const resolved = resolveIconFromMap(feature.icon);
-                    const iconVal = resolved ? resolved.icon : feature.icon;
-                    const color = resolved ? resolved.color : undefined;
-                    return (
-                      <div className={styles.featureIcon}>
-                        {renderIconElement({ iconVal, color, withBaseUrl })}
-                      </div>
-                    );
-                  })()}
+                  (typeof feature.icon === "object" ||
+                  feature.icon.includes(".") ||
+                  feature.icon.includes("/") ? (
+                    <div className={styles.featureIcon}>
+                      <img
+                        src={withBaseUrl(
+                          typeof feature.icon === "string"
+                            ? feature.icon
+                            : feature.icon.src,
+                        )}
+                        alt=""
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles.featureIcon}>
+                      <Icon id={feature.icon} />
+                    </div>
+                  ))}
                 <h2 className={styles.featureTitle}>{feature.title}</h2>
                 <p className={styles.featureDesc}>
                   {feature.details || feature.desc}

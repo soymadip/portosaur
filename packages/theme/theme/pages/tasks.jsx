@@ -4,17 +4,7 @@ import Head from "@docusaurus/Head";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import styles from "../css/tasks.module.css";
 import clsx from "clsx";
-import {
-  FaClipboardList,
-  FaSyncAlt,
-  FaClock,
-  FaCheckCircle,
-  FaFire,
-  FaThermometerHalf,
-  FaSnowflake,
-  FaTasks,
-  FaExclamationTriangle,
-} from "react-icons/fa";
+import Icon from "@theme/components/Icon";
 
 // --- TaskList ---
 
@@ -22,7 +12,10 @@ function TaskList({ filterStatus, taskList }) {
   if (!taskList || !Array.isArray(taskList)) {
     return (
       <div className={styles["task-empty-state"]}>
-        <FaTasks className={styles["task-empty-icon"]} />
+        <Icon
+          id="md:format-list-checks"
+          className={styles["task-empty-icon"]}
+        />
         <p>No tasks available</p>
       </div>
     );
@@ -35,7 +28,10 @@ function TaskList({ filterStatus, taskList }) {
   if (filteredTasks.length === 0) {
     return (
       <div className={styles["task-empty-state"]}>
-        <FaTasks className={styles["task-empty-icon"]} />
+        <Icon
+          id="md:format-list-checks"
+          className={styles["task-empty-icon"]}
+        />
         <p>No tasks in this category</p>
       </div>
     );
@@ -99,12 +95,17 @@ function TaskList({ filterStatus, taskList }) {
                 >
                   {task.status === "completed" && (
                     <>
-                      <FaCheckCircle className={styles["badge-icon"]} /> Done
+                      <Icon
+                        id="md:check-circle"
+                        className={styles["badge-icon"]}
+                      />{" "}
+                      Done
                     </>
                   )}
                   {task.status === "active" && (
                     <>
-                      <FaSyncAlt
+                      <Icon
+                        id="md:loading"
                         className={clsx(styles["badge-icon"], styles["spin"])}
                       />{" "}
                       In Progress
@@ -112,7 +113,11 @@ function TaskList({ filterStatus, taskList }) {
                   )}
                   {task.status === "pending" && (
                     <>
-                      <FaClock className={styles["badge-icon"]} /> Planned
+                      <Icon
+                        id="md:clock-outline"
+                        className={styles["badge-icon"]}
+                      />{" "}
+                      Planned
                     </>
                   )}
                 </span>
@@ -143,18 +148,26 @@ function TaskList({ filterStatus, taskList }) {
                 >
                   {task.priority === "high" && (
                     <>
-                      <FaFire className={styles["badge-icon"]} /> High
+                      <Icon id="md:fire" className={styles["badge-icon"]} />{" "}
+                      High
                     </>
                   )}
                   {task.priority === "medium" && (
                     <>
-                      <FaThermometerHalf className={styles["badge-icon"]} />{" "}
+                      <Icon
+                        id="md:thermometer"
+                        className={styles["badge-icon"]}
+                      />{" "}
                       Medium
                     </>
                   )}
                   {task.priority === "low" && (
                     <>
-                      <FaSnowflake className={styles["badge-icon"]} /> Low
+                      <Icon
+                        id="md:snowflake"
+                        className={styles["badge-icon"]}
+                      />{" "}
+                      Low
                     </>
                   )}
                 </span>
@@ -239,25 +252,25 @@ function TaskTabs({ taskList }) {
     {
       id: "all",
       label: "All Tasks",
-      icon: <FaClipboardList />,
+      icon: <Icon id="md:clipboard-text" />,
       count: taskList.length,
     },
     {
       id: "active",
       label: "In Progress",
-      icon: <FaSyncAlt className={styles["spin"]} />,
+      icon: <Icon id="md:loading" className={styles["spin"]} />,
       count: taskList.filter((t) => t.status === "active").length,
     },
     {
       id: "pending",
       label: "Planned",
-      icon: <FaClock />,
+      icon: <Icon id="md:clock-outline" />,
       count: taskList.filter((t) => t.status === "pending").length,
     },
     {
       id: "completed",
       label: "Completed",
-      icon: <FaCheckCircle />,
+      icon: <Icon id="md:check-circle" />,
       count: taskList.filter((t) => t.status === "completed").length,
     },
   ];
@@ -338,7 +351,7 @@ export default function TasksPage() {
           <div className={styles["tasks-content"]}>
             <div className={styles["tasks-disabled-notice"]}>
               <div className={styles["disabled-icon"]}>
-                <FaExclamationTriangle aria-hidden="true" />
+                <Icon id="ml:alert" aria-hidden="true" />
               </div>
               <h2 className={styles["disabled-title"]}>
                 Tasks are currently disabled

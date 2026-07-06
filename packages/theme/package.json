@@ -37,17 +37,26 @@
     "@fontsource-variable/geologica": "^5.2.8",
     "@fontsource-variable/lexend": "^5.2.11",
     "@fontsource/alata": "^5.2.8",
+    "@iconify-json/devicon": "^1.2.62",
+    "@iconify-json/line-md": "^1.2.16",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.116",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/octicon": "^1.2.29",
+    "@iconify-json/simple-icons": "^1.2.89",
+    "@iconify-json/streamline-sharp": "^1.2.0",
+    "@iconify/react": "^6.0.2",
+    "@iconify/utils": "^3.1.4",
     "@portosaur/core": "workspace:*",
     "chalk": "^5.6.2",
     "clsx": "^2.1.1",
     "katex": "^0.17.0",
     "prism-react-renderer": "^2.4.1",
-    "react-icons": "^5.6.0",
     "react-rnd": "^10.5.3"
   },
   "devDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
