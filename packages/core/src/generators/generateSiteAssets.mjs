@@ -305,14 +305,17 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
         const jsonPath = require.resolve(`@iconify-json/${prefix}/icons.json`, {
           paths: [portoPaths.themeRoot || process.cwd()],
         });
-        
+
         const iconData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
         const iconMeta = iconData.icons[name];
-        
+
         if (!iconMeta) continue;
 
-        const width = iconMeta.width || iconData.info?.width || iconData.width || 24;
-        const height = iconMeta.height || iconData.info?.height || iconData.height || 24;
+        const width =
+          iconMeta.width || iconData.info?.width || iconData.width || 24;
+
+        const height =
+          iconMeta.height || iconData.info?.height || iconData.height || 24;
 
         // Apply primaryColor by replacing currentColor
         const body = iconMeta.body.replace(/currentColor/g, primaryColor);
@@ -321,7 +324,9 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
 
         fs.writeFileSync(destPath, svgContent, "utf-8");
       } catch (e) {
-        logger.warn(`Failed to generate shortcut icon ${icon.id}: ${e.message}`);
+        logger.warn(
+          `Failed to generate shortcut icon ${icon.id}: ${e.message}`,
+        );
       }
     }
 
@@ -627,9 +632,17 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
       const resumeRef = userConfig.home_page?.about?.resume;
       // Because `{{porto_static}}` resolves to `/`, the resolved path in config might be `/sample-resume.pdf`
       // Check if it ends with sample-resume.pdf and there isn't a custom http link
-      if (resumeRef && resumeRef.endsWith("sample-resume.pdf") && !/^https?:\/\//.test(resumeRef)) {
+      if (
+        resumeRef &&
+        resumeRef.endsWith("sample-resume.pdf") &&
+        !/^https?:\/\//.test(resumeRef)
+      ) {
         const srcResume = path.resolve(portoAssetsDir, "sample-resume.pdf");
-        const destResume = path.join(getPortoDotDir(siteDir), "static", "sample-resume.pdf");
+        const destResume = path.join(
+          getPortoDotDir(siteDir),
+          "static",
+          "sample-resume.pdf",
+        );
         if (fs.existsSync(srcResume)) {
           fs.mkdirSync(path.dirname(destResume), { recursive: true });
           fs.copyFileSync(srcResume, destResume);

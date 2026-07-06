@@ -16,7 +16,8 @@ function visit(tree, type, visitor) {
   walk(tree, null, null);
 }
 
-const { prefixRegexString } = require("../utils/iconPrefixes.cjs");
+const { getPrefixRegex } = require("../utils/iconPrefixes.cjs");
+const prefixRegexString = getPrefixRegex();
 
 module.exports = function remarkIconsPlugin() {
   return (tree) => {

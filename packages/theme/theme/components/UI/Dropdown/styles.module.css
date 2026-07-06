@@ -163,6 +163,11 @@
   vertical-align: middle;
   opacity: 0.95;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.dropdownShow .dropdownArrow {
+  transform: rotate(180deg);
 }
 
 .dropdownArrowBtn {

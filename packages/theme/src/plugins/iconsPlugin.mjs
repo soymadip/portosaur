@@ -4,7 +4,9 @@ import { getIconData, iconToSVG } from "@iconify/utils";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const { prefixMap, prefixRegexString } = require("../utils/iconPrefixes.cjs");
+const { getPrefixMap, getPrefixRegex } = require("../utils/iconPrefixes.cjs");
+const prefixMap = getPrefixMap();
+const prefixRegexString = getPrefixRegex();
 
 const collections = {
   lucide: require("@iconify-json/lucide/icons.json"),

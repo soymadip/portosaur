@@ -6,7 +6,7 @@ import Hint from "./components/Hint";
 import TopicList from "./components/TopicList";
 import Indent from "./components/Indent";
 import { Btn, Dropdown } from "./components/UI";
-import Icon from "./components/Icon";
+import Icon, { IconSearch } from "./components/Icon";
 
 // Make useful Custom Components available by default
 export default {
@@ -20,4 +20,5 @@ export default {
   Btn,
   Dropdown,
   Icon,
+  IconSearch,
 };

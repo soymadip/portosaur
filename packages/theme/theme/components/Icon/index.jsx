@@ -91,8 +91,10 @@ import styles from "./styles.module.css";
 import clsx from "clsx";
 import { Icon as IconifyIcon, loadIcon } from "@iconify/react";
 import Hint from "../Hint";
+import { getPrefixMap } from "../../../src/utils/iconPrefixes.cjs";
+import Search from "./Search/index.jsx";
 
-import { prefixMap } from "../../../src/utils/iconPrefixes.cjs";
+const prefixMap = getPrefixMap();
 
 export default function Icon({
   id,
@@ -219,3 +221,6 @@ export default function Icon({
     </>
   );
 }
+
+Icon.Search = Search;
+export { Search as IconSearch };

@@ -1,0 +1,154 @@
+.container {
+  margin: 1.5rem 0;
+  font-family: var(--ifm-font-family-base);
+  width: 100%;
+  position: relative;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background-color: var(--ifm-color-emphasis-100);
+  border: 2px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  padding: 0.5rem 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.searchBox:focus-within {
+  border-color: var(--ifm-color-primary);
+}
+
+.searchIcon {
+  font-size: 1.2rem;
+  color: var(--ifm-color-emphasis-500);
+  margin-right: 0.5rem;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--ifm-font-color-base);
+  outline: none;
+  min-width: 0; /* Prevents overflow */
+}
+
+.searchInput::placeholder {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.matchCount {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-500);
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+
+.filterDropdown {
+  margin-left: auto;
+}
+
+.loadingIcon {
+  font-size: 1.2rem;
+  color: var(--ifm-color-primary);
+  margin-left: 0.5rem;
+}
+
+.resultsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--ifm-z-index-dropdown, 100);
+  display: flex;
+  flex-direction: column;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--ifm-dropdown-background-color);
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-md);
+  margin-top: 0.4rem;
+  padding: 0.5rem;
+
+  /* Scrollbar styles */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ifm-color-emphasis-400) transparent;
+}
+
+.resultsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultsList::-webkit-scrollbar-thumb {
+  background-color: var(--ifm-color-emphasis-400);
+  border-radius: 10px;
+}
+
+.iconRow {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--ifm-font-color-base);
+  text-align: left;
+  width: 100%;
+  margin-bottom: 0.2rem;
+}
+
+.iconRow:last-child {
+  margin-bottom: 0;
+}
+
+.iconRow:hover {
+  background-color: var(--ifm-dropdown-hover-background-color);
+}
+
+.iconRow:active {
+  background-color: var(--ifm-color-emphasis-300);
+}
+
+.iconPreview {
+  font-size: 1.5rem;
+  color: var(--ifm-font-color-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  margin-right: 1rem;
+}
+
+.iconName {
+  font-size: 0.9rem;
+  font-family: var(--ifm-font-family-monospace);
+  color: var(--ifm-font-color-base);
+  transition: color 0.2s ease;
+}
+
+.copiedText {
+  color: var(--ifm-color-success);
+  font-weight: bold;
+}
+
+.emptyState {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--ifm-z-index-dropdown, 100);
+  background-color: var(--ifm-dropdown-background-color);
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-md);
+  margin-top: 0.4rem;
+  text-align: center;
+  padding: 2rem;
+  color: var(--ifm-color-emphasis-500);
+  font-style: italic;
+}
