@@ -632,7 +632,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             ...(get("site.edit_url", "") // Base URL for Edit this page links.
               ? { editUrl: get("site.edit_url", "") }
               : {}),
-            remarkPlugins: [remarkMath, remarkIconsPlugin],
+            beforeDefaultRemarkPlugins: [remarkIconsPlugin],
+            remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
             sidebarItemsGenerator: createSidebarItemsGenerator(),
           },
@@ -643,7 +644,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
             ...(get("site.edit_url", "")
               ? { editUrl: get("site.edit_url", "") }
               : {}),
-            remarkPlugins: [remarkMath, remarkIconsPlugin],
+            beforeDefaultRemarkPlugins: [remarkIconsPlugin],
+            remarkPlugins: [remarkMath],
             rehypePlugins: [rehypeKatex],
             feedOptions: {
               type: get("site.rss.enable", true) ? "all" : null, // Toggle RSS feed generation for the blog.
