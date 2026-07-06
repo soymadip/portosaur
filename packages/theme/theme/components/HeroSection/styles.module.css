@@ -265,6 +265,7 @@
 
 .profilePic {
   height: 270px;
+  width: auto;
   border-radius: 20%;
   object-fit: cover;
   box-shadow: none;
@@ -320,6 +321,7 @@
   .profilePic {
     animation: gentleAppear 0.7s ease-out both;
     height: 180px;
+    width: auto;
     margin-top: -20px;
     margin-bottom: 1.2rem;
     margin-right: 0;
