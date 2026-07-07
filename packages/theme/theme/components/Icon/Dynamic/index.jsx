@@ -6,7 +6,7 @@ export { techMap };
 
 /**
  * A highly robust Icon component that resolves icons from frontmatter strings,
- * including raw SVGs, image paths, mapped devicons via techMap, and fallback options.
+ * including raw SVGs, image paths, emojis, mapped devicons via techMap, and fallback options.
  *
  * @param {object} props
  * @param {string|object} props.iconStr - The raw icon string/object from frontmatter
@@ -59,10 +59,36 @@ export default function DynamicIcon({
           className={className}
           style={style}
           {...props}
+          onError={
+            typeof iconStr === "object" && iconStr.fallback
+              ? (e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = withBaseUrl(iconStr.fallback);
+                }
+              : props.onError
+          }
         />
       );
+    } else if (/\p{Emoji}/u.test(iconStr)) {
+      // 3. Emoji Support
+      resolvedElement = (
+        <span
+          className={className}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            ...style,
+          }}
+          role="img"
+          aria-hidden="true"
+          {...props}
+        >
+          {iconStr}
+        </span>
+      );
     } else {
-      // 3. Explicit Iconify ID Support (e.g. "md:home")
+      // 4. Explicit Iconify ID check (e.g. "md:home")
       resolvedElement = (
         <Icon id={iconStr} className={className} style={style} {...props} />
       );
