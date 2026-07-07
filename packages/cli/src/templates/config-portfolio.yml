@@ -28,7 +28,7 @@ home_page:
         url: "https://www.linked.com/in/{{user_name}}"
 
       - name: "GitHub"
-        icon: "githubalt" # TODO: needs documentation
+        icon: "github" # TODO: needs documentation
         url: "https://github.com/{{user_name}}"
 
       - name: "Telegram"
