@@ -8,6 +8,7 @@ const portoPaths = {
   root: projectRoot,
   assets: path.join(projectRoot, "packages/theme/assets"),
   theme: path.join(projectRoot, "packages/theme/theme"),
+  themeRoot: path.join(projectRoot, "packages/theme"),
   plugins: path.join(projectRoot, "packages/theme/src/plugins"),
 };
 
