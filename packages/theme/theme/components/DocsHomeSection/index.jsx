@@ -2,7 +2,7 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import Head from "@docusaurus/Head";
 import Link from "@docusaurus/Link";
-import Icon from "@theme/components/Icon";
+import { DynamicIcon } from "@theme/components/Icon";
 import styles from "./styles.module.css";
 
 export default function DocsHomeSection() {
@@ -35,22 +35,12 @@ export default function DocsHomeSection() {
                     }`}
                     to={withBaseUrl(action.link)}
                   >
-                    {action.icon &&
-                      (typeof action.icon === "object" ||
-                      action.icon.includes(".") ||
-                      action.icon.includes("/") ? (
-                        <img
-                          src={withBaseUrl(
-                            typeof action.icon === "string"
-                              ? action.icon
-                              : action.icon.src,
-                          )}
-                          alt=""
-                          className={styles.actionImg}
-                        />
-                      ) : (
-                        <Icon id={action.icon} />
-                      ))}
+                    {action.icon && (
+                      <DynamicIcon
+                        iconStr={action.icon}
+                        className={styles.actionImg}
+                      />
+                    )}
                     {action.label || action.text}
                   </Link>
                 ))}
@@ -98,25 +88,11 @@ export default function DocsHomeSection() {
                 className={styles.featureCard}
                 style={{ "--animation-order": index }}
               >
-                {feature.icon &&
-                  (typeof feature.icon === "object" ||
-                  feature.icon.includes(".") ||
-                  feature.icon.includes("/") ? (
-                    <div className={styles.featureIcon}>
-                      <img
-                        src={withBaseUrl(
-                          typeof feature.icon === "string"
-                            ? feature.icon
-                            : feature.icon.src,
-                        )}
-                        alt=""
-                      />
-                    </div>
-                  ) : (
-                    <div className={styles.featureIcon}>
-                      <Icon id={feature.icon} />
-                    </div>
-                  ))}
+                {feature.icon && (
+                  <div className={styles.featureIcon}>
+                    <DynamicIcon iconStr={feature.icon} />
+                  </div>
+                )}
                 <h2 className={styles.featureTitle}>{feature.title}</h2>
                 <p className={styles.featureDesc}>
                   {feature.details || feature.desc}

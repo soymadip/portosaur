@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import Icon from "@theme/components/Icon";
+import Icon, { DynamicIcon } from "@theme/components/Icon";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useScrollReveal from "../../hooks/useScrollReveal";
 import Hint from "../Hint/index.jsx";
@@ -131,31 +131,11 @@ export default function ProjectsSection({ id, className }) {
                         backgroundColor: project.bg || "rgba(255,255,255,0.05)",
                       }}
                     >
-                      {typeof project.icon === "string" &&
-                      !project.icon.startsWith("http") &&
-                      !project.icon.startsWith("/") &&
-                      !project.icon.startsWith(".") ? (
-                        <Icon id={project.icon} className={styles.icon} />
-                      ) : (
-                        <img
-                          src={
-                            typeof project.icon === "string"
-                              ? project.icon
-                              : project.icon?.src
-                          }
-                          alt={project.title}
-                          className={styles.icon}
-                          loading="lazy"
-                          onError={(e) => {
-                            if (
-                              project.icon?.fallback &&
-                              e.currentTarget.src !== project.icon.fallback
-                            ) {
-                              e.currentTarget.src = project.icon.fallback;
-                            }
-                          }}
-                        />
-                      )}
+                      <DynamicIcon
+                        iconStr={project.icon}
+                        slug={project.slug}
+                        className={styles.icon}
+                      />
 
                       {project.state && (
                         <div className={styles.stateBadgeWrapper}>
