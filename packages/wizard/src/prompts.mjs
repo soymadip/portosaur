@@ -65,6 +65,7 @@ export async function renderStep(step, state) {
     case "select":
       return await prmpt.select({
         ...opts,
+        showInstructions: false,
         options:
           typeof step.options === "function"
             ? step.options(state)
@@ -74,6 +75,7 @@ export async function renderStep(step, state) {
     case "multiselect":
       return await prmpt.multiselect({
         ...opts,
+        showInstructions: false,
         options:
           typeof step.options === "function"
             ? step.options(state)

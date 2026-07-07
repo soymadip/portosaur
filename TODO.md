@@ -16,14 +16,9 @@
 ## Improvements
 
 - [ ] Implement custom scrollbars, looks ugly in chromium browsers
-- [ ] Move away from react icons
 - [ ] When there is no space, automatically hide Btn's label and show only icon
-- [ ] Use pure css for project corosaul
 - [ ] Port more manual styling to --ifm variables. like border, shadow, radius etc.
 - [ ] Customize the Heading Tags size, style. make them distinguishable. take a look at docs style.
-- [ ] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
-- [ ] Instead of react-icons, use something similar to mkdocs (like FontAwesome). Actually, maybe just directly fetch from react-icons if not found in `iconMappings`?
-- [ ] Modify `renderIconElement` to first search in mappings, and if not found, fallback directly to react-icons.
 - [ ] Bring the theme button in navbar before nav items.
 - [ ] Export Components from package?
 - [ ] Allow hint/Preview to show certain lines of current/another note.
@@ -42,3 +37,6 @@
 - [x] In `Pv` component, if array contains one string, then don't render tab.
 - [x] `<details>` tag not showing summary text, instead just showing details. And the summary is rendered inside details text, revealed when opened details section.
 - [x] Customize the callouts, details CSS to make them less ugly. (or maybe swizzle?)
+- [x] Use pure css for project corosaul
+
+- [x] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
