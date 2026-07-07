@@ -11,7 +11,6 @@ import {
   fetchRemoteFileState,
 } from "../utils/imageDownloader.mjs";
 import { reshapeImage } from "../utils/imageProcessor.mjs";
-import { processSvg } from "../utils/svgProcessor.mjs";
 import { getCssVar } from "../utils/cssExtractor.mjs";
 import { resolveSiteCssFiles, resolveBasePath } from "../utils/docusaurus.mjs";
 

@@ -22,15 +22,15 @@ export function loadUserConfig(projectDir, systemVars = {}) {
     throw new Error(`No config.yml found at ${configPath}`);
   }
 
-  const rawConfig = yaml.load(fs.readFileSync(configPath, "utf8"));
+  const rawConfig = yaml.load(fs.readFileSync(configPath, "utf8")) || {};
 
   // Validate for unknown keys and error early with a clear message.
   const violations = validateUserConfig(rawConfig);
 
   if (violations.length > 0) {
     const list = violations.map((v) => `  - ${v}`).join("\n");
-    throw new Error(
-      `Unknown key(s) in config:\n${list}\n\nCheck the config reference: ${pkg.homepage}/user/config/overview`,
+    throw new error(
+      `unknown key(s) in config:\n${list}\n\ncheck the config reference: ${pkg.homepage}/user/config/overview`,
     );
   }
 

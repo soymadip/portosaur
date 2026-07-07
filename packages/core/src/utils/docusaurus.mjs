@@ -422,7 +422,7 @@ export function getDefaultColorScheme(userConfig) {
  */
 export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
   const colorScheme =
-    userConfig.theme?.color_scheme || getDefaultColorScheme(userConfig);
+    userConfig?.theme?.color_scheme || getDefaultColorScheme(userConfig);
   const presetCss =
     colorScheme.endsWith(".css") ||
     colorScheme.includes("/") ||
@@ -436,7 +436,8 @@ export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
     path.resolve(themeDir, "css/custom.css"),
   ];
 
-  const customCss = userConfig.theme?.custom_css;
+  const customCss = userConfig?.theme?.custom_css;
+
   if (customCss) {
     const customPaths = Array.isArray(customCss) ? customCss : [customCss];
     for (const p of customPaths) {
