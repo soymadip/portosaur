@@ -134,7 +134,7 @@ export default function iconsPlugin(context, options) {
 
       // Return the generated icons object so Docusaurus can pass it to contentLoaded
       console.log(
-        `[Icons] Scanned and bundled ${Object.keys(generatedIcons).length} unique offline icons.`,
+        `[SUCCESS] Scanned & Bundled ${Object.keys(generatedIcons).length} svg icons.`,
       );
       return generatedIcons;
     },
