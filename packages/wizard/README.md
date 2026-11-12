@@ -12,7 +12,7 @@ A general-purpose interactive CLI prompt library designed for managing complex, 
 ## Installation
 
 ```bash
-Bun install @portosaur/wizard
+bun add @portosaur/wizard
 ```
 
 ## 📖 Usage

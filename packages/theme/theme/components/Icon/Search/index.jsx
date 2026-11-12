@@ -19,7 +19,7 @@ const getShorthand = (canonical) => {
   return iconPacks[canonical]?.shorthands[0] || canonical;
 };
 
-export default function IconSearch() {
+export default function IconSearch({ dropUp = false }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [results, setResults] = useState([]);
@@ -100,13 +100,14 @@ export default function IconSearch() {
             onClick: () => setFilter(opt.value),
             active: filter === opt.value,
           }))}
+          top={dropUp}
           size="sm"
           className={styles.filterDropdown}
         />
       </div>
 
       {results.length > 0 && (
-        <div className={styles.resultsList}>
+        <div className={`${styles.resultsList} ${dropUp ? styles.dropUp : ""}`}>
           {results.map((iconId) => (
             <button
               key={iconId}
@@ -128,7 +129,9 @@ export default function IconSearch() {
       )}
 
       {!loading && query && results.length === 0 && (
-        <div className={styles.emptyState}>No icons found for "{query}"</div>
+        <div className={`${styles.emptyState} ${dropUp ? styles.dropUp : ""}`}>
+          No icons found for "{query}"
+        </div>
       )}
     </div>
   );

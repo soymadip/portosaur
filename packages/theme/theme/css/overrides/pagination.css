@@ -10,12 +10,27 @@ article:has(.theme-doc-footer) + .pagination-nav {
   padding-top: 1.5rem;
 }
 
-/* Make content containers flex columns so pagination can stick to the bottom on short pages */
+/* Ensure the doc container hierarchy expands to fill available height */
+[class*="docsWrapper_"],
+[class*="docMainContainer_"],
+[class*="docMainContainer_"] > .container,
+[class*="docMainContainer_"] > .container > .row,
+[class*="docMainContainer_"] > .container > .row > [class*="docItemCol_"],
+.theme-blog-post-page main .container .row {
+  display: flex;
+  flex: 1 0 auto;
+}
+
+[class*="docMainContainer_"] > .container {
+  flex-direction: column;
+}
+
+/* Make content containers flex columns with container query support */
 [class*="docItemContainer_"],
 .theme-blog-post-page main .container .row > .col {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - var(--ifm-navbar-height) - 4.5rem);
+  flex: 1 0 auto;
   container-type: inline-size;
   container-name: docContainer;
 }
@@ -25,7 +40,7 @@ article:has(.theme-doc-footer) + .pagination-nav {
 .theme-blog-post-page main .container .row > .col > article {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 /* Push the doc footer ("Edit this page") to the bottom of the article */

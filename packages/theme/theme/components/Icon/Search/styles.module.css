@@ -74,8 +74,15 @@
   padding: 0.5rem;
 
   /* Scrollbar styles */
-  scrollbar-width: thin;
   scrollbar-color: var(--ifm-color-emphasis-400) transparent;
+}
+
+/* Drop-up: position above the search box instead of below */
+.resultsList.dropUp {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.4rem;
 }
 
 .resultsList::-webkit-scrollbar {
@@ -151,4 +158,11 @@
   padding: 2rem;
   color: var(--ifm-color-emphasis-500);
   font-style: italic;
+}
+
+.emptyState.dropUp {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.4rem;
 }

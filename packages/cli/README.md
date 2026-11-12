@@ -9,16 +9,16 @@ The primary command-line interface for Portosaur.
 bun install -g @portosaur/cli  # or npm install -g @portosaur/cli
 
 # Or use directly with bunx/npx
-bunx @portosaur/cli@latest # or npx @portosaur/cli@latest
+bunx @portosaur/cli@latest init # or npx @portosaur/cli@latest init
 ```
 
 ## Commands
 
-- `porto init [-P name]` — Initialize a new project (interactive mode recommended).
-- `porto init-ci [-h id]` — Set up CI/CD for an existing project.
-- `porto dev` — Start the development server.
-- `porto build` — Generate a static production build.
-- `porto serve` — Preview a production build locally.
+- `porto init` — Initialize a portfolio or documentation site (interactive mode recommended).
+- `porto providers` — List VCS Providers and Hosting Platforms.
+- `porto dev [siteDir]` — Start the development server. `porto start` is an alias.
+- `porto build [siteDir]` — Generate a static production build.
+- `porto serve [siteDir]` — Preview a production build locally.
 - `porto schema` — Output the JSON schema for validation.
 
 ## Usage
