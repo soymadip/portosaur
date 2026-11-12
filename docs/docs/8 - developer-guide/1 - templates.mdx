@@ -47,14 +47,14 @@ hosting_platforms:
 
 When Portosaur scaffolds a project or copies CI/CD workflows, it performs token replacement on all common text files (`.js`, `.mjs`, `.json`, `.yml`, `.yaml`, `.md`, `.mdx`, `.txt`):
 
-| Variable | Replacement Value |
-| :--- | :--- |
-| `{{projectName}}` | Name of the target project directory. |
-| `{{portoVer}}` | Current Portosaur CLI version. |
-| `{{portoHome}}` | Portosaur homepage URL. |
-| `{{portoRepo}}` | Portosaur GitHub repository URL. |
-| `{{userName}}` | VCS Provider username (or fallback default). |
-| `{{fullName}}` | Portfolio owner display name (or fallback default). |
+| Variable          | Replacement Value                                   |
+| :---------------- | :-------------------------------------------------- |
+| `{{projectName}}` | Name of the target project directory.               |
+| `{{portoVer}}`    | Current Portosaur CLI version.                      |
+| `{{portoHome}}`   | Portosaur homepage URL.                             |
+| `{{portoRepo}}`   | Portosaur GitHub repository URL.                    |
+| `{{userName}}`    | VCS Provider username (or fallback default).        |
+| `{{fullName}}`    | Portfolio owner display name (or fallback default). |
 
 ---
 
@@ -71,13 +71,13 @@ export async function postSetup({ logger, projectDir, projectName }) {
 
 The hook receives an execution context object:
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `logger` | `Logger` | Instance of `@portosaur/logger` (`info`, `success`, `warn`, `error`, `tip`). |
-| `projectDir` | `string` | Absolute path to the user's project root directory. |
-| `projectName`| `string` | Directory name of the project. |
-| `userName` | `string` | VCS username provided by the user. |
-| `fullName` | `string` | User's full name. |
+| Property      | Type     | Description                                                                  |
+| :------------ | :------- | :--------------------------------------------------------------------------- |
+| `logger`      | `Logger` | Instance of `@portosaur/logger` (`info`, `success`, `warn`, `error`, `tip`). |
+| `projectDir`  | `string` | Absolute path to the user's project root directory.                          |
+| `projectName` | `string` | Directory name of the project.                                               |
+| `userName`    | `string` | VCS username provided by the user.                                           |
+| `fullName`    | `string` | User's full name.                                                            |
 
 ---
 

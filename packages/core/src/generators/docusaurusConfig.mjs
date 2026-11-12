@@ -176,14 +176,14 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     // Only included in production (service worker is only active in production).
     clientModules:
       env.NODE_ENV === "production" &&
-        get("site.pwa.enable", true) &&
-        get("site.pwa.notifications", false)
+      get("site.pwa.enable", true) &&
+      get("site.pwa.notifications", false)
         ? [
-          path.resolve(
-            portoPaths.theme ?? context.portoRoot ?? "",
-            "src/clientModules/periodicSync.js",
-          ),
-        ]
+            path.resolve(
+              portoPaths.theme ?? context.portoRoot ?? "",
+              "src/clientModules/periodicSync.js",
+            ),
+          ]
         : [],
 
     headTags: [
@@ -262,8 +262,8 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         ...customUserMetaTags,
         ...(env.NODE_ENV !== "production"
           ? extraHeadTags
-            .filter((t) => t.tagName === "meta")
-            .map((t) => t.attributes)
+              .filter((t) => t.tagName === "meta")
+              .map((t) => t.attributes)
           : []),
       ],
       colorMode: {
@@ -287,55 +287,55 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
           },
           ...(siteMode === "docs"
             ? [
-              {
-                label: "Docs",
-                to: `/${notesRoute}`,
-                position: "right",
-                activeBasePath: notesRoute,
-              },
-            ]
+                {
+                  label: "Docs",
+                  to: `/${notesRoute}`,
+                  position: "right",
+                  activeBasePath: notesRoute,
+                },
+              ]
             : []),
           ...(siteMode === "portfolio" && get("home_page.about.enable", true) // Toggle the About Me section.
             ? [
-              {
-                label: "About Me",
-                to: "/#about",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "About Me",
+                  to: "/#about",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(siteMode === "portfolio" &&
-            get("home_page.project_shelf.enable", true) // Toggle the Project Shelf section.
+          get("home_page.project_shelf.enable", true) // Toggle the Project Shelf section.
             ? [
-              {
-                label: "Projects",
-                to: "/#projects",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Projects",
+                  to: "/#projects",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(siteMode === "portfolio" &&
-            get("home_page.experience.enable", false) // Toggle the Experience section.
+          get("home_page.experience.enable", false) // Toggle the Experience section.
             ? [
-              {
-                label: "Experience",
-                to: "/#experience",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Experience",
+                  to: "/#experience",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...(siteMode === "portfolio" && get("home_page.social.enable", true) // Toggle the Social Links section.
             ? [
-              {
-                label: "Contact",
-                to: "/#contact",
-                position: "right",
-                activeBasePath: "/never-match",
-              },
-            ]
+                {
+                  label: "Contact",
+                  to: "/#contact",
+                  position: "right",
+                  activeBasePath: "/never-match",
+                },
+              ]
             : []),
           ...customNavbarItems.map((item) => ({
             label: item.label,
@@ -358,26 +358,26 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
                 : []),
               ...(!get("theme.appearance.disable_project_link", false) // Hide the Project link in the navbar.
                 ? [
-                  {
-                    label: `Portosaur v${portoVersion}`,
-                    className:
-                      "_nav-portosaur-version desktop-only-portosaur-version",
-                    href: porto?.homepage ?? "#",
-                  },
-                ]
+                    {
+                      label: `Portosaur v${portoVersion}`,
+                      className:
+                        "_nav-portosaur-version desktop-only-portosaur-version",
+                      href: porto?.homepage ?? "#",
+                    },
+                  ]
                 : []),
             ],
           },
           ...(!get("theme.appearance.disable_project_link", false) // Hide the Project link in the navbar.
             ? [
-              {
-                label: `Portosaur v${portoVersion}`,
-                className:
-                  "_nav-portosaur-version mobile-only-portosaur-version",
-                href: porto?.homepage ?? "#",
-                position: "right",
-              },
-            ]
+                {
+                  label: `Portosaur v${portoVersion}`,
+                  className:
+                    "_nav-portosaur-version mobile-only-portosaur-version",
+                  href: porto?.homepage ?? "#",
+                  position: "right",
+                },
+              ]
             : []),
         ],
       },
@@ -449,16 +449,17 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       ...(get("theme.footer.enable", true) // Toggle the footer section.
         ? {
-          footer: {
-            copyright: get(
-              "theme.footer.message", // Custom copyright message.
-              `Copyright © ${new Date().getFullYear()} ${titleName}.${!get("theme.footer.disable_project_link", false) // Hide the Project link in the footer.
-                ? ` Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
-                : ""
-              }`,
-            ),
-          },
-        }
+            footer: {
+              copyright: get(
+                "theme.footer.message", // Custom copyright message.
+                `Copyright © ${new Date().getFullYear()} ${titleName}.${
+                  !get("theme.footer.disable_project_link", false) // Hide the Project link in the footer.
+                    ? ` Built with <a href="${porto?.homepage ?? "#"}" target="_blank" rel="noopener noreferrer">Portosaur.</a>`
+                    : ""
+                }`,
+              ),
+            },
+          }
         : {}),
     },
 
@@ -762,26 +763,26 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
 
       ...(get("site.pwa.enable", true)
         ? [
-          [
-            "@docusaurus/plugin-pwa",
-            {
-              offlineModeActivationStrategies: [
-                "appInstalled",
-                "standalone",
-                "queryString",
-                "saveData",
-              ],
-              swCustom: path.resolve(
-                context.portoRoot ?? "",
-                "src/sw-custom.js",
-              ),
-              pwaHead: extraHeadTags.map((t) => ({
-                tagName: t.tagName,
-                ...t.attributes,
-              })),
-            },
-          ],
-        ]
+            [
+              "@docusaurus/plugin-pwa",
+              {
+                offlineModeActivationStrategies: [
+                  "appInstalled",
+                  "standalone",
+                  "queryString",
+                  "saveData",
+                ],
+                swCustom: path.resolve(
+                  context.portoRoot ?? "",
+                  "src/sw-custom.js",
+                ),
+                pwaHead: extraHeadTags.map((t) => ({
+                  tagName: t.tagName,
+                  ...t.attributes,
+                })),
+              },
+            ],
+          ]
         : []),
 
       // Serve the theme's pages/ directory as page routes.

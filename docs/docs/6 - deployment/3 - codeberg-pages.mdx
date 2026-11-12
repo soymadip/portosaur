@@ -23,6 +23,7 @@ sidebar_position: 3
 ## 2. Generating the Workflow
 
 Codeberg supports two CI platforms:
+
 - **Forgejo Actions** (`codeberg-pages` — Recommended, GitHub Actions compatible).
 - **Woodpecker CI** (`woodpecker` — Legacy CI pipeline).
 
@@ -40,10 +41,11 @@ This generates `.forgejo/workflows/deploy.yml` configured to build with Bun and 
 
 :::important[Enable Forgejo Actions]
 You must enable Actions on Codeberg before workflows will run:
+
 1. Open your repository on Codeberg.
 2. Go to **Settings → Actions → General**.
 3. Check **Enable Actions for this repository** and click **Update Settings**.
-:::
+   :::
 
 ### Using Woodpecker CI (Legacy)
 

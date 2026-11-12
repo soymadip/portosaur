@@ -53,22 +53,22 @@ console.log(answers);
 
 Each step object in the wizard pipeline supports the following properties:
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| **`id`** | `string` | **(Required)** State key where the answer is stored in the results object. |
-| **`label`** | `string` | **(Required)** Short token shown in the left-hand progress history (e.g. `vcs › github`). |
-| **`prompt`** | `string \| Function` | **(Required)** Question displayed to the user. Accepts `(state) => string` for dynamic prompts. |
-| `type` | `string` | Prompt type: `"text"`, `"select"`, or `"confirm"`. |
-| `options` | `array` | Array of `{ label, value, hint }` objects for `select` prompts. |
-| `hint` | `string \| Function` | Secondary hint text displayed in parentheses. |
-| `initialValue` | `any \| Function` | Default pre-filled value. Automatically merged into state if step is skipped. |
-| `required` | `boolean` | If `true`, prevents blank or whitespace-only inputs. |
-| `validate` | `Function` | Custom validation function: `(value) => string | undefined`. Returning a string displays an error. |
-| `transform` | `Function` | Mutates the value before saving to state: `(value, state) => any`. |
-| `runIf` | `Function` | Visibility predicate: `(state) => boolean`. If `false`, the step is skipped. |
-| `backOn` | `any \| Function` | Triggers automatic back-navigation if the answer matches `backOn` or predicate returns `true`. |
-| `onResponse` | `Function` | Callback hook: `(value, state, tools) => void &#124; "back"`. |
-| `display` | `Function` | Formatter function for history view rendering: `(value, state) => string`. |
+| Property       | Type                 | Description                                                                                     |
+| :------------- | :------------------- | :---------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **`id`**       | `string`             | **(Required)** State key where the answer is stored in the results object.                      |
+| **`label`**    | `string`             | **(Required)** Short token shown in the left-hand progress history (e.g. `vcs › github`).       |
+| **`prompt`**   | `string \| Function` | **(Required)** Question displayed to the user. Accepts `(state) => string` for dynamic prompts. |
+| `type`         | `string`             | Prompt type: `"text"`, `"select"`, or `"confirm"`.                                              |
+| `options`      | `array`              | Array of `{ label, value, hint }` objects for `select` prompts.                                 |
+| `hint`         | `string \| Function` | Secondary hint text displayed in parentheses.                                                   |
+| `initialValue` | `any \| Function`    | Default pre-filled value. Automatically merged into state if step is skipped.                   |
+| `required`     | `boolean`            | If `true`, prevents blank or whitespace-only inputs.                                            |
+| `validate`     | `Function`           | Custom validation function: `(value) => string                                                  | undefined`. Returning a string displays an error. |
+| `transform`    | `Function`           | Mutates the value before saving to state: `(value, state) => any`.                              |
+| `runIf`        | `Function`           | Visibility predicate: `(state) => boolean`. If `false`, the step is skipped.                    |
+| `backOn`       | `any \| Function`    | Triggers automatic back-navigation if the answer matches `backOn` or predicate returns `true`.  |
+| `onResponse`   | `Function`           | Callback hook: `(value, state, tools) => void &#124; "back"`.                                   |
+| `display`      | `Function`           | Formatter function for history view rendering: `(value, state) => string`.                      |
 
 ---
 
