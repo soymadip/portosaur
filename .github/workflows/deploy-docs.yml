@@ -70,10 +70,13 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Core Config Schema
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema
+
       - name: Compile Site
         run: bun run --cwd ${{ env.DOCS_DIR }} build
 
-      - name: Generate Config Schema
+      - name: Generate Published Config Schema
         run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema -o ${{ env.DOCS_OUT_DIR }}/user/config/schema.json
 
       - name: Upload artifact

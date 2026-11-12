@@ -8,7 +8,7 @@ let _cachedSchema = null;
 
 /**
  * Loads and caches the generated configSchema.json from the package root.
- * The schema is committed to the repo and shipped with @portosaur/core.
+ * The schema is generated before builds and shipped with @portosaur/core.
  *
  * @returns {object} The parsed JSON Schema object.
  */
