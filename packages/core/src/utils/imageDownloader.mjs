@@ -30,11 +30,13 @@ export async function fetchRemoteFileState(url, redirectCount = 0) {
         res.headers.location
       ) {
         const redirectUrl = new URL(res.headers.location, url).toString();
+        res.resume();
         resolve(fetchRemoteFileState(redirectUrl, redirectCount + 1));
         return;
       }
 
       if (res.statusCode !== 200) {
+        res.resume();
         resolve(`remote:error:${res.statusCode}`);
         return;
       }
@@ -43,6 +45,7 @@ export async function fetchRemoteFileState(url, redirectCount = 0) {
       const lastModified = res.headers["last-modified"] || "no-last-modified";
       const size = res.headers["content-length"] || "unknown-size";
 
+      res.resume();
       resolve(`remote:${etag}:${lastModified}:${size}`);
     });
 
@@ -121,6 +124,7 @@ export async function downloadImage({
             `Following redirect (${response.statusCode}) to: ${redirectUrl}`,
           );
 
+          response.resume();
           resolve(
             downloadImage({
               url: redirectUrl,
@@ -138,6 +142,7 @@ export async function downloadImage({
 
         // Validate HTTP status
         if (response.statusCode !== 200) {
+          response.resume();
           tryProxyFallback(new Error(`HTTP ${response.statusCode}`));
           return;
         }
@@ -147,6 +152,7 @@ export async function downloadImage({
 
         if (!contentType.startsWith("image/") && !url.includes("raw=true")) {
           logger.warn(`Expected image but got ${contentType} from ${url}`);
+          response.resume();
           tryProxyFallback(new Error(`Invalid content type: ${contentType}`));
           return;
         }
