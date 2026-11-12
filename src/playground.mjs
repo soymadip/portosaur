@@ -1,4 +1,11 @@
-import { rmSync, existsSync, readFileSync, writeFileSync } from "fs";
+import {
+  rmSync,
+  existsSync,
+  readdirSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
@@ -60,44 +67,14 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Preparing package.json for testing..."));
 
-  // Strip auto-install steps and point Portosaur dependencies at the local workspace.
+  // Strip auto-install steps so the smoke test can control dependency installation.
   const pkgJsonPath = path.join(SITE_DIR, "package.json");
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
 
   if (pkgJson.dependencies) {
-    pkgJson.devDependencies ||= {};
-    const linkedPackages = new Set();
-
-    const linkLocalPackage = (packageName) => {
-      if (linkedPackages.has(packageName)) {
-        return;
-      }
-
-      linkedPackages.add(packageName);
-
-      const dependencyName = `@portosaur/${packageName}`;
-      const packageDir = path.join(REPO_ROOT, "packages", packageName);
-      const relativePackageDir = path.relative(SITE_DIR, packageDir);
-      const localPackage = JSON.parse(
-        readFileSync(path.join(packageDir, "package.json"), "utf8"),
-      );
-
-      pkgJson.dependencies[dependencyName] = `link:${relativePackageDir}`;
-
-      for (const [dependency, version] of Object.entries(
-        localPackage.dependencies || {},
-      )) {
-        if (dependency.startsWith("@portosaur/")) {
-          linkLocalPackage(dependency.replace("@portosaur/", ""));
-        } else {
-          pkgJson.devDependencies[dependency] = version;
-        }
-      }
-    };
-
     for (const dep of Object.keys(pkgJson.dependencies)) {
       if (dep.startsWith("@portosaur/")) {
-        linkLocalPackage(dep.replace("@portosaur/", ""));
+        pkgJson.dependencies[dep] = "*";
       }
     }
   }
@@ -114,8 +91,24 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Installing local packages..."));
 
-  // Install dependencies while preserving links to the local workspace packages.
+  // Install the published dependency graph, including Docusaurus and theme dependencies.
   run("bun install", { cwd: SITE_DIR, quiet: isExisting });
+
+  // Replace only the temporary project's Portosaur packages with this checkout.
+  // This avoids Bun's inconsistent workspace-link handling across supported versions.
+  const packagesDir = path.join(REPO_ROOT, "packages");
+  const smokePackagesDir = path.join(SITE_DIR, "node_modules", "@portosaur");
+  const packages = readdirSync(packagesDir).filter((packageName) =>
+    existsSync(path.join(packagesDir, packageName, "package.json")),
+  );
+
+  for (const packageName of packages) {
+    const target = path.join(smokePackagesDir, packageName);
+    const source = path.join(packagesDir, packageName);
+
+    rmSync(target, { recursive: true, force: true });
+    symlinkSync(source, target, "dir");
+  }
 
   const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
 
