@@ -63,7 +63,7 @@ export default function DocItemLayout({ children }) {
         </div>
       </div>
       {showDesktopRightCol && (
-        <div className="col col--3">
+        <div className={clsx("col col--3", pageStyles.desktopRail)}>
           <PageActions className={pageStyles.desktopOnly} />
           {docTOC.desktop}
         </div>

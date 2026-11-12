@@ -4,8 +4,6 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.35em;
-  position: relative;
-  z-index: 100;
 }
 
 @media (min-width: 997px) {
@@ -13,6 +11,35 @@
     margin-left: 1rem;
     margin-bottom: 0;
   }
+
+  .desktopRail {
+    position: sticky;
+    top: calc(var(--ifm-navbar-height, 60px) + 0.5rem);
+    z-index: var(--ifm-z-index-dropdown, 100);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    height: calc(100vh - (var(--ifm-navbar-height, 60px) + 1rem));
+    align-self: flex-start;
+  }
+
+  .desktopRail :global(.custom-toc-wrapper) {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+  }
+
+  .desktopRail :global(.theme-doc-toc-desktop) {
+    position: static;
+    top: auto !important;
+    max-height: 100%;
+  }
+
+  .desktopRail :global(.theme-doc-toc-desktop .table-of-contents) {
+    padding-top: 0.05rem;
+  }
+
   .mobileOnly {
     display: none !important;
   }
