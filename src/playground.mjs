@@ -65,13 +65,39 @@ export function runPlayground({
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
 
   if (pkgJson.dependencies) {
+    pkgJson.devDependencies ||= {};
+    const linkedPackages = new Set();
+
+    const linkLocalPackage = (packageName) => {
+      if (linkedPackages.has(packageName)) {
+        return;
+      }
+
+      linkedPackages.add(packageName);
+
+      const dependencyName = `@portosaur/${packageName}`;
+      const packageDir = path.join(REPO_ROOT, "packages", packageName);
+      const relativePackageDir = path.relative(SITE_DIR, packageDir);
+      const localPackage = JSON.parse(
+        readFileSync(path.join(packageDir, "package.json"), "utf8"),
+      );
+
+      pkgJson.dependencies[dependencyName] = `link:${relativePackageDir}`;
+
+      for (const [dependency, version] of Object.entries(
+        localPackage.dependencies || {},
+      )) {
+        if (dependency.startsWith("@portosaur/")) {
+          linkLocalPackage(dependency.replace("@portosaur/", ""));
+        } else {
+          pkgJson.devDependencies[dependency] = version;
+        }
+      }
+    };
+
     for (const dep of Object.keys(pkgJson.dependencies)) {
       if (dep.startsWith("@portosaur/")) {
-        const packageName = dep.replace("@portosaur/", "");
-        const packageDir = path.join(REPO_ROOT, "packages", packageName);
-        const relativePackageDir = path.relative(SITE_DIR, packageDir);
-
-        pkgJson.dependencies[dep] = `link:${relativePackageDir}`;
+        linkLocalPackage(dep.replace("@portosaur/", ""));
       }
     }
   }
