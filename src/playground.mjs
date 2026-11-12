@@ -123,6 +123,12 @@ export function runPlayground({
   }
   run(linkCmd, { cwd: SITE_DIR, quiet: isExisting });
 
+  // bun link replaces packages after their dependencies have been installed.
+  // Resolve once more so dependencies of the local workspace packages are available.
+  console.log(colors.info(">>> Resolving local package dependencies..."));
+
+  run("bun install", { cwd: SITE_DIR, quiet: isExisting });
+
   const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
 
   if (runCommand === "dev") {

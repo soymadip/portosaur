@@ -55,11 +55,15 @@ export async function buildCommand(siteDir, options = {}) {
 
     // ------- Asset Generation -------
 
-    const configContext = await generateSiteAssets({
-      UserRoot,
-      userConfig,
-      portoPaths,
-    });
+    // Integration tests exercise config generation without image processing or network access.
+    let configContext = {};
+    if (process.env.PORTO_TEST_MODE !== "true") {
+      configContext = await generateSiteAssets({
+        UserRoot,
+        userConfig,
+        portoPaths,
+      });
+    }
     const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
 
     logResolvedSiteLocation(UserRoot, portoPaths, configContext);
