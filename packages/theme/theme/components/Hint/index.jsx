@@ -15,6 +15,8 @@ export default function Hint({
   shadow,
   className = "",
   zIndex,
+  hideOnClick = false,
+  onClick,
 }) {
   if (!msg) {
     throw new Error("Hint: 'msg' prop is required to display hint content.");
@@ -220,7 +222,14 @@ export default function Hint({
       onMouseLeave={hide}
       onFocus={show}
       onBlur={hide}
-      onClick={() => (isVisible ? hide() : show())}
+      onClick={(event) => {
+        onClick?.(event);
+        if (hideOnClick || isVisible) {
+          hide();
+        } else {
+          show();
+        }
+      }}
       style={{ display: "contents" }}
     >
       {children}

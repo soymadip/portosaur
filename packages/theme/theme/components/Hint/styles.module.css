@@ -59,7 +59,7 @@
   overflow-wrap: anywhere;
   max-width: min(400px, 90vw);
   width: max-content;
-  z-index: var(--ifm-z-index-dropdown);
+  z-index: var(--ifm-z-index-overlay, 400);
   opacity: 0;
   filter: var(
     --tooltip-shadow,
