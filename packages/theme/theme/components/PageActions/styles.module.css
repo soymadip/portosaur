@@ -58,10 +58,6 @@
   .desktopOnly {
     display: none !important;
   }
-
-  .sourceBtn {
-    margin-right: auto;
-  }
 }
 
 .rightAlignMenu {
@@ -112,4 +108,14 @@
 .iconOnly {
   width: 16px;
   height: 16px;
+}
+
+:global(.theme-doc-footer .theme-edit-this-page) {
+  display: none !important;
+}
+
+:global(
+  .theme-doc-footer:not(:has(.theme-doc-footer-tags-row, .theme-last-updated))
+) {
+  display: none !important;
 }
