@@ -1,0 +1,52 @@
+.container {
+  position: relative;
+  flex: none;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 1200;
+  width: min(22rem, calc(100vw - 2rem));
+}
+
+.popover::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 1rem;
+  width: 10px;
+  height: 10px;
+  background-color: var(--ifm-background-surface-color);
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  border-left: 1px solid var(--ifm-color-emphasis-300);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+.popover[hidden] {
+  display: none;
+}
+
+.panel {
+  --ifm-toc-link-color: var(--ifm-font-color-base);
+
+  position: relative;
+  max-height: min(
+    65vh,
+    30rem,
+    calc(100dvh - var(--mobile-toolbar-top, 0px) - 4rem)
+  );
+  overflow: auto;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background-color: var(--ifm-background-surface-color);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.panel :global(.table-of-contents) {
+  margin: 0;
+  padding: 0.5rem;
+  border-left: 0;
+}

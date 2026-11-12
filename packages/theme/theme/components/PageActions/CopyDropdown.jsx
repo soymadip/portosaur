@@ -216,7 +216,7 @@ export default function CopyDropdown({ mobile = false, editUrl, sourceRaw }) {
       trigger={trigger}
       items={items}
       style={{ margin: 0 }}
-      menuClassName={styles.rightAlignMenu}
+      menuClassName={mobile ? styles.mobileActionMenu : styles.rightAlignMenu}
       openOnHover={false}
       noArrow
     />

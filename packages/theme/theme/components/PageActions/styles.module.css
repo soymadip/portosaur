@@ -11,6 +11,15 @@
 }
 
 @media (min-width: 997px) {
+  :global(.theme-doc-markdown h1[id]),
+  :global(.theme-doc-markdown h2[id]),
+  :global(.theme-doc-markdown h3[id]),
+  :global(.theme-doc-markdown h4[id]),
+  :global(.theme-doc-markdown h5[id]),
+  :global(.theme-doc-markdown h6[id]) {
+    scroll-margin-top: calc(var(--ifm-navbar-height, 60px) + 0.75rem);
+  }
+
   .container {
     margin-left: 1rem;
     margin-bottom: 0;
@@ -53,17 +62,31 @@
 }
 
 @media (max-width: 996px) {
-  .mobileToolbar {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.25rem;
-    margin: 0.5rem 0;
+  :global(.theme-doc-markdown h1[id]),
+  :global(.theme-doc-markdown h2[id]),
+  :global(.theme-doc-markdown h3[id]),
+  :global(.theme-doc-markdown h4[id]),
+  :global(.theme-doc-markdown h5[id]),
+  :global(.theme-doc-markdown h6[id]) {
+    scroll-margin-top: var(--mobile-doc-scroll-offset, 6rem);
   }
 
-  .mobileToolbar :global(.theme-doc-toc-mobile) {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
+  .mobileActionMenu {
+    max-height: calc(100dvh - var(--mobile-toolbar-top, 0px) - 3.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobileToolbar {
+    position: sticky;
+    top: var(--mobile-toolbar-top, 0px);
+    z-index: var(--ifm-z-index-dropdown, 100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0 0rem;
+    padding: 0.35rem 0;
   }
 
   .container {
