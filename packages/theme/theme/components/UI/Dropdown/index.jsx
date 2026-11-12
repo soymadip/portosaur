@@ -8,6 +8,7 @@ export default function Dropdown({
   label,
   items = [],
   hoverDelay = 150,
+  openOnHover = true,
   className = "",
   style,
 
@@ -43,6 +44,30 @@ export default function Dropdown({
   const handleMouseLeave = () => {
     menuTimer.current = setTimeout(() => setShowMenu(false), hoverDelay);
   };
+
+  useEffect(() => {
+    if (openOnHover || !showMenu) {
+      return;
+    }
+
+    const handlePointerDown = (event) => {
+      if (!containerRef.current?.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openOnHover, showMenu]);
 
   // Edge-aware correction for bottom/top directions — finds nearest scrolling container
   // to handle popups that are smaller than the window.
@@ -150,8 +175,8 @@ export default function Dropdown({
       ref={containerRef}
       className={`${styles.dropdown} ${showMenu ? styles.dropdownShow : ""} ${className}`.trim()}
       style={style}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={openOnHover ? handleMouseEnter : undefined}
+      onMouseLeave={openOnHover ? handleMouseLeave : undefined}
     >
       {enhancedTrigger}
 

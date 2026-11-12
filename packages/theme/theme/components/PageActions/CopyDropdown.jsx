@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dropdown } from "../UI/index.jsx";
 import Icon from "../Icon/index.jsx";
+import Hint from "../Hint/index.jsx";
 import styles from "./styles.module.css";
 
 import { extractPageMarkdownFromDocument } from "./htmlToMarkdown";
@@ -161,13 +162,16 @@ export default function CopyDropdown() {
     <div>
       <Dropdown
         trigger={
-          <div className={styles.actionBtn} title="Copy Page">
-            <Icon id="md:content-copy" className={styles.iconOnly} />
-          </div>
+          <Hint msg="Copy Page" noUl hideOnClick>
+            <div className={styles.actionBtn}>
+              <Icon id="md:content-copy" className={styles.iconOnly} />
+            </div>
+          </Hint>
         }
         items={items}
         style={{ margin: 0 }}
         menuClassName={styles.rightAlignMenu}
+        openOnHover={false}
         noArrow
       />
     </div>
