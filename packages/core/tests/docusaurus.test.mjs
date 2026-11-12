@@ -69,6 +69,8 @@ describe("buildDocuConfig", () => {
 
     expect(config.url).toBe("https://soymadip.github.io");
     expect(config.baseUrl).toBe("/");
+    expect(config.themeConfig.prism.additionalLanguages).toContain("jsx");
+    expect(config.themeConfig.prism.additionalLanguages).toContain("tsx");
   });
 
   test("auto-resolves GitHub project Pages URL and base path from build env", () => {
