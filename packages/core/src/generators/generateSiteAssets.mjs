@@ -411,12 +411,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
           );
 
           // fallback to default image
-          downloadedRes = path.resolve(
-            portoPaths.theme,
-            "static",
-            "img",
-            "icon.png",
-          );
+          downloadedRes = path.join(portoPaths.static, "img", "icon.png");
         }
       } else {
         try {
@@ -460,12 +455,7 @@ export async function generateSiteAssets({ UserRoot, userConfig, portoPaths }) {
               );
 
               // fallback to default image
-              downloadedRes = path.resolve(
-                portoPaths.theme,
-                "static",
-                "img",
-                "icon.png",
-              );
+              downloadedRes = path.join(portoPaths.static, "img", "icon.png");
             }
           } else {
             throw new Error(

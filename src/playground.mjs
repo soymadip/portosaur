@@ -1,10 +1,4 @@
-import {
-  rmSync,
-  existsSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from "fs";
+import { rmSync, existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
@@ -52,20 +46,6 @@ export function runPlayground({
   const isExisting = existsSync(SITE_DIR);
 
   if (!isExisting) {
-    console.log(colors.info(">>> Linking local packages..."));
-
-    const packagesDir = path.join(REPO_ROOT, "packages");
-    const packages = readdirSync(packagesDir).filter(
-      (f) =>
-        !f.startsWith(".") &&
-        existsSync(path.join(packagesDir, f, "package.json")),
-    );
-
-    for (const pkg of packages) {
-      run("bun link", { cwd: path.join(REPO_ROOT, "packages", pkg) });
-    }
-    console.log("Done..");
-
     console.log(colors.info("\n>>> Initializing new project..."));
     run(
       `bun run "${path.join(REPO_ROOT, "packages/cli/bin/porto.mjs")}" init --project-name "${siteName}" --vcs-provider none --no-install`,
@@ -80,15 +60,18 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Preparing package.json for testing..."));
 
-  // Strip the auto-install steps so future commands like 'bun run build' don't wipe out the symlinks
-  // Also force local portosaur packages to "*" so bun install pulls from npm registry
+  // Strip auto-install steps and point Portosaur dependencies at the local workspace.
   const pkgJsonPath = path.join(SITE_DIR, "package.json");
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
 
   if (pkgJson.dependencies) {
     for (const dep of Object.keys(pkgJson.dependencies)) {
       if (dep.startsWith("@portosaur/")) {
-        pkgJson.dependencies[dep] = "*";
+        const packageName = dep.replace("@portosaur/", "");
+        const packageDir = path.join(REPO_ROOT, "packages", packageName);
+        const relativePackageDir = path.relative(SITE_DIR, packageDir);
+
+        pkgJson.dependencies[dep] = `link:${relativePackageDir}`;
       }
     }
   }
@@ -105,28 +88,7 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Installing local packages..."));
 
-  // Run a real install to fetch transitive dependencies from npm
-  run("bun install", { cwd: SITE_DIR, quiet: isExisting });
-
-  // Overwrite the top-level generic packages with our local symlinks
-  const packagesDir = path.join(REPO_ROOT, "packages");
-  const packages = readdirSync(packagesDir).filter(
-    (f) =>
-      !f.startsWith(".") &&
-      existsSync(path.join(packagesDir, f, "package.json")),
-  );
-
-  const linkCmd = `bun link ${packages.map((p) => `@portosaur/${p}`).join(" ")}`;
-
-  if (isExisting) {
-    console.log(colors.info(">>> Overwriting with local symlinks..."));
-  }
-  run(linkCmd, { cwd: SITE_DIR, quiet: isExisting });
-
-  // bun link replaces packages after their dependencies have been installed.
-  // Resolve once more so dependencies of the local workspace packages are available.
-  console.log(colors.info(">>> Resolving local package dependencies..."));
-
+  // Install dependencies while preserving links to the local workspace packages.
   run("bun install", { cwd: SITE_DIR, quiet: isExisting });
 
   const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
