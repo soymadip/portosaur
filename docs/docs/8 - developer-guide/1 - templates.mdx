@@ -1,0 +1,92 @@
+---
+title: "Scaffolding & Templates"
+description: "How templates, variables, hooks, and registry.yml work in @portosaur/cli."
+icon: "📐"
+sidebar_position: 1
+---
+
+Portosaur's scaffolding engine lives in `@portosaur/cli`. It is responsible for creating new projects and generating CI/CD deployment workflows.
+
+---
+
+## Registry (`registry.yml`)
+
+The template registry (`packages/cli/src/templates/registry.yml`) serves as the central configuration for all supported VCS Providers and Hosting Platforms.
+
+### Provider Entry Example
+
+```yaml
+vcs_providers:
+  github:
+    name: GitHub
+    domain: github.com
+    default_hosting: github-pages
+    url: "https://{{domain}}/{{user}}/{{project_name}}.git"
+    new_url: "https://{{domain}}/new?name={{project_name}}"
+```
+
+### Hosting Entry Example
+
+```yaml
+hosting_platforms:
+  github-pages:
+    name: GitHub Pages
+    domain: "github.io"
+    supported_providers: [github]
+    template_dir: github
+    repo:
+      ideal_name: "{{user}}.github.io"
+      mismatch_msg: |-
+        For automatic GitHub Pages hosting,
+        your repository should be named '{{ideal_name}}' (exactly your username + .github.io)."
+```
+
+---
+
+## Template Variables
+
+When Portosaur scaffolds a project or copies CI/CD workflows, it performs token replacement on all common text files (`.js`, `.mjs`, `.json`, `.yml`, `.yaml`, `.md`, `.mdx`, `.txt`):
+
+| Variable | Replacement Value |
+| :--- | :--- |
+| `{{projectName}}` | Name of the target project directory. |
+| `{{portoVer}}` | Current Portosaur CLI version. |
+| `{{portoHome}}` | Portosaur homepage URL. |
+| `{{portoRepo}}` | Portosaur GitHub repository URL. |
+| `{{userName}}` | VCS Provider username (or fallback default). |
+| `{{fullName}}` | Portfolio owner display name (or fallback default). |
+
+---
+
+## Template Hooks (`hooks.mjs`)
+
+Workflow templates can export lifecycle hooks to display instructions or run post-setup tasks:
+
+```javascript title="packages/cli/src/templates/workflows/my-platform/hooks.mjs"
+export async function postSetup({ logger, projectDir, projectName }) {
+  logger.success(`Configured deployment for ${projectName}.`);
+  logger.tip(`Make sure you add API tokens to your CI secrets.`);
+}
+```
+
+The hook receives an execution context object:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `logger` | `Logger` | Instance of `@portosaur/logger` (`info`, `success`, `warn`, `error`, `tip`). |
+| `projectDir` | `string` | Absolute path to the user's project root directory. |
+| `projectName`| `string` | Directory name of the project. |
+| `userName` | `string` | VCS username provided by the user. |
+| `fullName` | `string` | User's full name. |
+
+---
+
+## Adding a New Hosting Platform
+
+To contribute a new hosting platform to Portosaur:
+
+1. **Create the Template Directory**: Add a directory under `packages/cli/src/templates/workflows/<platform-name>/`.
+2. **Add CI/CD Files**: Place your workflow files (e.g. `.github/workflows/deploy.yml` or `config.toml`) inside the template directory.
+3. **Optional Hook**: Add `hooks.mjs` if post-setup hints or validation are needed.
+4. **Register Platform**: Declare the platform in `packages/cli/src/templates/registry.yml` under `hosting_platforms`.
+5. **Verify**: Test both initial project scaffolding (`porto init`) and CI-only generation (`porto init --ci-only -h <platform-name>`).

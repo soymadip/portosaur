@@ -1,0 +1,76 @@
+---
+title: "Dynamic Variables"
+description: "Reuse values and inject environment variables across your site."
+icon: "md:code-braces"
+sidebar_position: 1
+---
+
+{vars.project.title} lets you define values once in `config.yml` & reference them dynamically throughout your config and Markdown/MDX pages.
+
+## Syntax Overview
+
+- **In `config.yml`**: Use double curly braces `{{path.to.key}}`.
+- **In `.md`/`.mdx` files**: Use single curly braces `{vars.<path.to.key>}` (or `{vars.<key>}`).
+
+```yaml title="config.yml"
+vars:
+  project:
+    title: "Portosaur"
+    repo: "https://github.com/soymadip/portosaur"
+  author:
+    name: "Octo Cat"
+    handle: "@octocat"
+
+site:
+  edit_url: "{{{vars.project.repo}}}/edit/main/docs/"
+  tagline: "Docs built for {{{vars.author.name}}}"
+```
+
+And in your Markdown files:
+
+```md title="docs/example.mdx"
+Welcome to {{vars.project.title}}!
+Check out the repository at [{{vars.project.title}} on GitHub]({{vars.project.repo}}).
+
+<!--Above gets resolved to:-->
+
+Welcome to {vars.project.title}!
+Check out the repository at [{vars.project.title} on GitHub]({vars.project.repo}).
+```
+
+## Variable Sources
+
+### 1. User Variables (`vars`)
+
+Any key declared under the `vars:` root block in `config.yml` is accessible as `{vars.<key>}` or `{{vars.<key>}}`.
+
+```yaml
+vars:
+  versions:
+    node_min: "24.15"
+    cli: "0.22.0"
+  company: "Acme Corp"
+```
+
+### 2. Environment Variables (`env`)
+
+Access environment variables during development and CI/CD builds:
+
+```yaml
+site:
+  url: "{{env.PORTOSAUR_DEPLOY_URL}}"
+```
+
+If an environment variable is unset, the placeholder resolves safely to an empty string.
+
+## Escaping Variables
+
+```markdown
+Use {{{vars.double.parenthesis}}} to reference your title.
+```
+
+The rendered output will be:
+
+```text
+Use {{vars.project.title}} to reference your title.
+```

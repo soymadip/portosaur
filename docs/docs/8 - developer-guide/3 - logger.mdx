@@ -1,0 +1,85 @@
+---
+title: "@portosaur/logger"
+description: "Docusaurus-compatible terminal logging library with custom boxes and colors."
+icon: "🪵"
+sidebar_position: 3
+---
+
+`@portosaur/logger` is a standalone, lightweight logging library designed to bring familiar Docusaurus-style terminal logging to any project.
+
+---
+
+## Installation
+
+```bash
+bun add @portosaur/logger
+```
+
+---
+
+## Log Levels
+
+Every log method formats messages with colored status prefixes:
+
+| Level | Prefix | Color | Notes |
+| :--- | :--- | :--- | :--- |
+| `logger.info(msg)` | `[INFO]` | Cyan | General informational messages. |
+| `logger.success(msg)` | `[SUCCESS]` | Green | Successful task completions. |
+| `logger.warn(msg)` | `[WARNING]` | Yellow | Warnings and deprecations. |
+| `logger.error(msg)` | `[ERROR]` | Red | Errors and exceptions. |
+| `logger.debug(msg)` | `[INFO]` | Cyan | Active only when `DEBUG=1` or `VERBOSE=1`. |
+| `logger.tip(msg)` | `[TIP]` | Magenta | Helpful hints and guidance. |
+| `logger.note(msg)` | `[NOTE]` | Gray | Contextual notes. |
+
+### Basic Usage
+
+```javascript
+import { logger } from "@portosaur/logger";
+
+logger.info("Initializing project...");
+logger.success("Project scaffolded successfully!");
+logger.warn("Port 3000 is already in use, trying 3001");
+logger.error("Failed to parse config.yml");
+logger.tip("Run 'porto dev' to preview your site");
+```
+
+---
+
+## Box Headings
+
+All logger levels are callable functions with a `.box()` method that renders bordered banner boxes in the terminal:
+
+```javascript
+logger.info.box("Portosaur v0.22.0", {
+  title: "STATUS",
+  border: "rounded",
+  padding: 1,
+});
+```
+
+### Box Options
+
+```typescript
+interface BoxOptions {
+  title?: string;
+  padding?: number;
+  border?: "rounded" | "single" | "double" | "none";
+}
+```
+
+:::tip[CI/CD Auto-Degradation]
+When running inside a continuous integration environment (`process.env.CI` is set), `.box()` calls automatically degrade to standard single-line logs to prevent ASCII formatting corruption in CI log viewers.
+:::
+
+---
+
+## ANSI Colors API
+
+`@portosaur/logger` also exports a zero-dependency terminal color utility:
+
+```javascript
+import { colors } from "@portosaur/logger";
+
+console.log(colors.cyan.bold("Portosaur"));
+console.log(colors.green("Ready in 500ms"));
+```

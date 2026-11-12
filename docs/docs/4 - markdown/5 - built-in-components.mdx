@@ -1,0 +1,148 @@
+---
+title: "Built-in MDX Components"
+description: "Tabs, disclosure details, tooltips, and indentation components."
+icon: "📦"
+sidebar_position: 5
+---
+
+The Docusaurus `<Tabs>`, `<TabItem>`, and `<Details>` components, along with Portosaur's `<Hint>`, `<Indent>`, and `<TopicList>`, are available in MDX without imports.
+
+---
+
+## `<Tabs>` & `<TabItem>`
+
+Organize alternatives or multi-language code snippets into tabbed switchers.
+
+```jsx
+<Tabs groupId="package-manager">
+  <TabItem value="bun" label="Bun" default>
+    Install with `bun install @portosaur/cli`.
+  </TabItem>
+  <TabItem value="npm" label="npm">
+    Install with `npm install @portosaur/cli`.
+  </TabItem>
+</Tabs>
+```
+
+### Props Reference
+
+#### `<Tabs />`
+
+| Prop           | Type                                              | Default                                | Description                                                                                                                                         |
+| :------------- | :------------------------------------------------ | :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultValue` | `string \| null`                                  | First tab, or the tab marked `default` | Selects the initially active tab. Use `null` to select the first tab.                                                                               |
+| `groupId`      | `string`                                          | None                                   | Persists and synchronizes the selected value across tab groups with the same ID.                                                                    |
+| `queryString`  | `boolean \| string`                               | `false`                                | Sync selection with the URL query string. `true` uses `groupId` as the key; a string uses that key directly. Requires `groupId` when set to `true`. |
+| `values`       | `Array<{ value, label?, default?, attributes? }>` | Derived from child `<TabItem>` props   | Explicitly defines tab values and labels, overriding values inferred from children.                                                                 |
+| `block`        | `boolean`                                         | `false`                                | Makes tab buttons fill the available width.                                                                                                         |
+| `lazy`         | `boolean`                                         | `false`                                | Renders only the selected tab panel.                                                                                                                |
+| `className`    | `string`                                          | None                                   | Additional class on the tab list.                                                                                                                   |
+
+#### `<TabItem />`
+
+| Prop         | Type      | Default     | Description                                                           |
+| :----------- | :-------- | :---------- | :-------------------------------------------------------------------- |
+| **`value`**  | `string`  | Required    | Unique identifier for this tab.                                       |
+| `label`      | `string`  | The `value` | Display text for the tab button.                                      |
+| `default`    | `boolean` | `false`     | Sets this tab as open by default when `Tabs.defaultValue` is not set. |
+| `attributes` | `object`  | None        | Additional attributes applied to this tab's button.                   |
+| `className`  | `string`  | None        | Additional class on this tab panel.                                   |
+
+---
+
+## `<Details>`
+
+Create collapsible disclosure accordions to tuck away secondary or advanced information.
+
+```jsx
+<Details summary="Click to inspect advanced configurations">
+  This content is hidden by default until the user clicks the accordion header.
+  You can include Markdown, tables, and code blocks inside.
+</Details>
+```
+
+### Props Reference
+
+| Prop                         | Type                     | Default         | Description                                           |
+| :--------------------------- | :----------------------- | :-------------- | :---------------------------------------------------- |
+| `summary`                    | `string \| ReactElement` | `"Details"`     | Content shown in the disclosure header.               |
+| `open`                       | `boolean`                | `false`         | Opens the disclosure initially.                       |
+| `className`                  | `string`                 | None            | Additional class on the details element.              |
+| Other `<details>` attributes | Varies                   | Native defaults | Native details attributes such as `id` are forwarded. |
+
+---
+
+## `<Hint>`
+
+Attach hover tooltips to any inline text or element.
+
+```jsx
+Hover over this <Hint msg="Portosaur automatically detects preview types!">intelligent preview</Hint> to learn more.
+```
+
+### Positioning & Styles
+
+```jsx
+<Hint msg="Tooltip pinned to the right" right>
+  Right tooltip
+</Hint>
+
+<Hint msg="Custom warning style" bg="#fef3c7" color="#92400e">
+  Warning note
+</Hint>
+```
+
+### Props Reference
+
+| Prop                        | Type        | Default               | Description                                       |
+| :-------------------------- | :---------- | :-------------------- | :------------------------------------------------ |
+| **`msg`**                   | `ReactNode` | Required              | Tooltip content.                                  |
+| `bottom` / `left` / `right` | `boolean`   | Top                   | Tooltip position relative to the trigger.         |
+| `noUl`                      | `boolean`   | `false`               | Remove the dotted underline from the trigger.     |
+| `bg` / `color`              | `string`    | Theme defaults        | Tooltip background and text colors.               |
+| `shadow`                    | `string`    | Default shadow        | Custom CSS `filter` value for the tooltip shadow. |
+| `gap`                       | `number`    | `5`                   | Distance in pixels between trigger and tooltip.   |
+| `className`                 | `string`    | `""`                  | Additional class on the trigger wrapper.          |
+| `zIndex`                    | `number`    | Default tooltip layer | Override tooltip stacking order.                  |
+| `hideOnClick`               | `boolean`   | `false`               | Hide the tooltip when the trigger is clicked.     |
+| `onClick`                   | `function`  | None                  | Click handler for the trigger wrapper.            |
+
+---
+
+## `<Indent>`
+
+Indents child content cleanly without introducing fragile raw HTML spacing:
+
+```jsx
+First-level text.<Indent level={1} />Indented text.<Indent level={2} />More indented text.
+```
+
+`Indent` inserts an inline spacer; it does not wrap or indent child content.
+
+| Prop    | Type     | Default | Description                    |
+| :------ | :------- | :------ | :----------------------------- |
+| `level` | `number` | `1`     | Spacer width is `level * 2em`. |
+
+---
+
+## `<TopicList>`
+
+Generates a responsive grid of card links from the current sidebar category. By default, the automatic topic list is rendered on category index pages. A manually added `<TopicList />` outside an enabled index page needs `forceRender`; it also needs category items or an explicit `items` list.
+
+```jsx
+<TopicList />
+```
+
+Each card automatically inherits its document's `title`, `description`, and `icon` from frontmatter.
+
+### Props Reference
+
+| Prop          | Type             | Default                                                              | Description                                                                           |
+| :------------ | :--------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| `children`    | `ReactNode`      | None                                                                 | Custom description content; takes precedence over `desc`.                             |
+| `desc`        | `string \| null` | Frontmatter description or fallback text                             | Description above the cards. `null` hides the description block.                      |
+| `className`   | `string`         | None                                                                 | Additional class on the card grid.                                                    |
+| `descClass`   | `string`         | None                                                                 | Additional class on the description wrapper.                                          |
+| `style`       | `object`         | `{ marginTop: "1rem", marginBottom: "1.9rem", textAlign: "center" }` | Inline styles for the description wrapper.                                            |
+| `items`       | `array`          | Current sidebar category items                                       | Explicit card items; overrides the current category items.                            |
+| `forceRender` | `boolean`        | `false`                                                              | Render outside the automatic category-index condition. Items must still be available. |

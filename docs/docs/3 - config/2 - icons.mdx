@@ -1,0 +1,114 @@
+---
+title: "Icons & Emoji"
+description: "Use emojis, open-source icon sets, and tree-shaken SVGs across your site."
+icon: "md:emoji"
+sidebar_position: 2
+---
+
+You can use emojis, icon identifiers, and SVGs across your site in `config.yml`, Markdown/MDX frontmatter, and content.
+
+<details>
+<summary>Where Icons/Emojis Can Be Used?</summary>
+
+Icons and emojis can be used in the following places:
+
+1. `config.yml`
+
+```yaml title="config.yml"
+docs_home:
+  features:
+    - title: "Fast Performance"
+      icon: "⚡"
+      desc: "Instant static builds with zero runtime overhead."
+    - title: "Developer Friendly"
+      icon: "🛠️"
+      desc: "CLI-first workflow with modern toolchains."
+```
+
+2. Markdown/MDX Frontmatter
+
+```yaml title="docs/example.mdx"
+---
+title: "Quick Start"
+icon: "🚀"
+---
+```
+
+3. Markdown/MDX Content
+
+```markdown title="docs/example.mdx"
+Welcome to my site! 🚀
+```
+
+</details>
+
+## Ways to Use Icons/Emojis
+
+### Literal Unicode Emojis/Icons
+
+You can use any unicode emoji character directly:
+
+```markdown title="docs/raw-emojis.mdx"
+# Welcome! 🚀
+
+Portosaur is fast ⚡ and easy to configure!
+
+- Direct emojis: 💡 📦 🎨
+```
+
+---
+
+### GH Style Short Codes
+
+Any GitHub-style shortcode is rendered as emoji without including any extra icon assets:
+
+**Example**: `:rocket:` → 🚀, `:zap:` → ⚡, `:sparkles:` → ✨
+
+:::tip[Resources]
+
+- Find the full list of supported shortcodes [here]({vars.icons.gh_emoji_codes}).
+- You can Disable this via `site.markdown.render_emoji_shortcodes: false` in `config.yml`
+
+:::
+
+---
+
+### Icon Identifiers (`prefix:name`)
+
+You can reference thousands of high-quality vector icons using the `<prefix>:<name>` syntax:
+
+```yaml title="config.yml"
+docs_home:
+  actions:
+    - text: "Get Started"
+      link: "/docs"
+      icon: "md:settings"
+    - text: "GitHub"
+      link: "https://github.com/soymadip/portosaur"
+      icon: "si:github"
+```
+
+<details>
+    <summary>Supported Icon Packs & Prefixes</summary>
+
+{vars.project.title} bundles following icon collections.
+
+| Collection                                                   | Prefix                   | Example Identifier                     |
+| :----------------------------------------------------------- | :----------------------- | :------------------------------------- |
+| [**Lucide**]({vars.icons.lucide})                            | `lu`, `lucide`           | `lu:rocket`, `lucide:rocket`           |
+| [**Simple Icons**]({vars.icons.simple_icons})                | `si`, `simple-icons`     | `si:github`, `si:react`                |
+| [**Material Design Icons**]({vars.icons.mdi})                | `md`, `mdi`              | `md:settings`, `mdi:account`           |
+| [**Devicon**]({vars.icons.devicon})                          | `di`, `devicon`          | `di:nodejs`, `devicon:python`          |
+| [**GitHub Octicons**]({vars.icons.octicon})                  | `oc`, `octicon`          | `oc:mark-github`, `octicon:repo`       |
+| [**Logos**]({vars.icons.logos})                              | `lo`, `logos`            | `lo:javascript`, `logos:vue`           |
+| [**Line MD**]({vars.icons.line_md}) (animated / clean lines) | `ml`, `line-md`          | `ml:confirm`, `line-md:loading`        |
+| [**Streamline**]({vars.icons.streamline})                    | `sl`, `streamline-sharp` | `sl:computer`, `streamline-sharp:star` |
+| [**FontAwesome**]({vars.icons.fontawesome})                  | `fa`, `fas`, `fa7-solid` | `fa:coffee`, `fas:user`                |
+
+</details>
+
+### Icon Search
+
+Search Icon Identifiers across all supported icon packs using below:
+
+<IconSearch dropUp />

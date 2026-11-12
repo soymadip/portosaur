@@ -1,0 +1,74 @@
+---
+title: "Progressive Web App (PWA)"
+description: "Turn your site into an installable application with app shortcuts and automated screenshots."
+icon: "📱"
+---
+
+Portosaur turns both portfolio and documentation sites into fully compliant Progressive Web Apps (PWAs) out of the box. Users on mobile devices, ChromeOS, Windows, and macOS can install your site directly to their home screen or desktop like a native application.
+
+---
+
+## Configuration
+
+PWA support is enabled by default in `config.yml`. You can customize or disable it under the `site.pwa` block:
+
+```yaml
+site:
+  pwa:
+    enable: true
+    notifications: false
+```
+
+---
+
+## App Shortcuts
+
+When a user installs your Portosaur site and long-presses (on mobile) or right-clicks (on desktop) the app icon, the operating system displays instant **App Shortcuts**.
+
+Portosaur configures shortcuts adaptively based on the active site mode:
+
+- **Documentation Mode**:
+  - **Documentation** (`/docs`)
+  - **Blog** (`/blog`)
+- **Portfolio Mode**:
+  - **Notes Vault** (`/notes`)
+  - **Blog** (`/blog`)
+  - **Tasks** (`/tasks`) _(included when public tasks are enabled)_
+
+Shortcut icons are dynamically extracted from theme assets and tinted to match your site's active primary color palette.
+
+---
+
+## Automated Screenshots (Zero-Config)
+
+When a user selects "Install App" in Chromium-based browsers, a rich installation prompt is displayed featuring device screenshots (similar to an app store carousel).
+
+Portosaur automates screenshot detection with zero configuration:
+
+1. **Capture Screenshots**: Capture screenshots of your site on a desktop browser (widescreen/landscape) and on a mobile device (portrait/tall screen). Save them as `.png`, `.jpg`, or `.webp` files.
+2. **Drop into Assets**: Place your screenshot files into your static assets directory (e.g. `static/screenshots/` or project assets).
+3. **Automated Dimension Detection**: When you run `porto dev` or `porto build`, Portosaur scans this directory, reads the image dimensions using `image-size`, determines whether each image is landscape or portrait, and injects compliant W3C manifest entries.
+
+:::tip[Screenshot Naming Recommendation]
+Prefix your primary homepage screenshots with `home-` (e.g. `home-mobile.png`, `home-desktop.png`). Portosaur ensures these appear first in the installation prompt. Other screenshots can follow descriptive names like `docs-desktop.png` or `blog-mobile.png`.
+:::
+
+:::caution[Aspect Ratio Requirements]
+PWA installation prompts require widescreen landscape screenshots (desktop) and tall portrait screenshots (mobile). Square screenshots are rejected by the browser manifest specification for app install carousels.
+:::
+
+---
+
+## Offline Support & Caching
+
+The generated Service Worker automatically caches static assets, fonts, icons, and visited documentation pages. If a user loses connectivity, previously visited pages continue to load instantly, and unvisited pages display a themed offline indicator.
+
+---
+
+## Testing Your PWA
+
+You can verify your site's PWA compliance using [PWABuilder](https://www.pwabuilder.com/) or Chrome DevTools:
+
+1. In Chrome, open **DevTools (F12) → Application → Manifest**.
+2. Verify that the manifest, theme colors, icons, shortcuts, and screenshots are recognized without errors.
+3. Test installation by clicking the install icon in the browser address bar.

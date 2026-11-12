@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://soymadip.github.io/portosaur/user/config/schema.json
+#
+
+# User variables for use in your values as {{vars.key}}
+vars:
+  project:
+    title: Portosaur
+    tagline: "for your digital personality"
+    desc: "Complete portfolio cum personal website solution for your digital personality."
+    repo: "https://github.com/soymadip/portosaur"
+
+  pkg:
+    name: portosaur
+    bin: porto
+
+  defaults:
+    hostingList: "github-pages, gitlab-pages etc.."
+    vcsList: "github, gitlab"
+    vcs: "github"
+
+  tools:
+    bun: "https://bun.sh/"
+    docusaurus: "https://docusaurus.io/"
+    vitepress: "https://vitepress.dev/"
+    yaml: "https://yaml.org/"
+    staticShort: "https://github.com/soymadip/staticshort"
+    git: "https://git-scm.com/"
+    mdx: "https://mdxjs.com/"
+
+  icons:
+    gh_emoji_codes: "https://gist.github.com/soymadip/5a58d7548df3568e9b22f87718aab027"
+    search: "https://icon-sets.iconify.design/"
+    lucide: "https://lucide.dev/icons/"
+    simple_icons: "https://simpleicons.org/"
+    mdi: "https://pictogrammers.com/library/mdi/"
+    devicon: "https://devicon.dev/"
+    octicon: "https://primer.style/foundations/icons/"
+    logos: "https://svgl.app/"
+    line_md: "https://icon-sets.iconify.design/line-md/"
+    streamline: "https://streamlinehq.com/"
+    fontawesome: "https://fontawesome.com/icons"
+
+  versions:
+    node_min: 24.15
+    portosaur: "0.22.0"
+
+# Site Metadata, SEO, Parser behavior
+site:
+  url: "auto"
+  base_url: "auto"
+  edit_url: "{{vars.project.repo}}/edit/main/docs/"
+
+theme:
+  color_scheme: catppuccin
+
+# Documentation Home Config
+docs_home:
+  title: "{{vars.project.title}}"
+  tagline: "{{vars.project.tagline}}"
+  desc: "{{vars.project.desc}}"
+  icon: "img/icon.png"
+
+  actions:
+    - text: "Get Started"
+      link: "/docs"
+      icon: "si:rocket"
+
+    - text: "Configuration"
+      link: "/docs/config"
+      icon: "md:settings"
+
+  features:
+    - title: "Fully Featured Portfolio"
+      icon: "👨‍💻"
+      desc: "Showcase yourself, your projects, skills, experience & social identity."
+
+    - title: "Knowledge Base"
+      icon: "📚"
+      desc: "Never forget a thing. Build your digital second brain with integrated notes vault."
+
+    - title: "Blogging Platform"
+      icon: "📝"
+      desc: "Share your journey in blog that's easy to write & beautiful to read."
+
+    - title: "Task Tracking"
+      icon: "📋"
+      desc: "Track your plans with priority levels & completion status"
+
+    - title: "Mobile Optimized"
+      icon: "📱"
+      desc: "Adapts seamlessly on all devices, from desktop to mobiles."
+
+    - title: "Highly Configurable"
+      icon: "🛠️"
+      desc: "Extensive customization options through a central, logic-less config."

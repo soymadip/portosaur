@@ -11,7 +11,8 @@
   },
   "packageManager": "bun@1.3.12",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "docs"
   ],
   "scripts": {
     "format:check": "prettier --check .",

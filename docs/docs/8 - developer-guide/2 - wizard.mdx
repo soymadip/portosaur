@@ -1,0 +1,81 @@
+---
+title: "@portosaur/wizard"
+description: "Interactive prompt library with back-navigation, history replaying, and dynamic branching."
+icon: "🧙"
+sidebar_position: 2
+---
+
+`@portosaur/wizard` is a standalone, state-aware interactive CLI prompt library designed for complex multi-step terminal workflows.
+
+Unlike standard linear prompt engines, `@portosaur/wizard` features built-in **back-navigation** (`Escape` to return to any previous question) and **history replaying** (maintains a vertical progress history in the terminal).
+
+---
+
+## Installation
+
+```bash
+bun add @portosaur/wizard
+```
+
+---
+
+## Basic Example
+
+```javascript
+import { wizard } from "@portosaur/wizard";
+
+const answers = await wizard([
+  {
+    id: "siteType",
+    label: "site",
+    prompt: "Choose site archetype",
+    type: "select",
+    options: [
+      { label: "Portfolio Site", value: "portfolio" },
+      { label: "Documentation Site", value: "docs" },
+    ],
+  },
+  {
+    id: "projectName",
+    label: "name",
+    prompt: "Enter project name",
+    type: "text",
+    required: true,
+  },
+]);
+
+console.log(answers);
+```
+
+---
+
+## Step Configuration Options
+
+Each step object in the wizard pipeline supports the following properties:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| **`id`** | `string` | **(Required)** State key where the answer is stored in the results object. |
+| **`label`** | `string` | **(Required)** Short token shown in the left-hand progress history (e.g. `vcs › github`). |
+| **`prompt`** | `string \| Function` | **(Required)** Question displayed to the user. Accepts `(state) => string` for dynamic prompts. |
+| `type` | `string` | Prompt type: `"text"`, `"select"`, or `"confirm"`. |
+| `options` | `array` | Array of `{ label, value, hint }` objects for `select` prompts. |
+| `hint` | `string \| Function` | Secondary hint text displayed in parentheses. |
+| `initialValue` | `any \| Function` | Default pre-filled value. Automatically merged into state if step is skipped. |
+| `required` | `boolean` | If `true`, prevents blank or whitespace-only inputs. |
+| `validate` | `Function` | Custom validation function: `(value) => string | undefined`. Returning a string displays an error. |
+| `transform` | `Function` | Mutates the value before saving to state: `(value, state) => any`. |
+| `runIf` | `Function` | Visibility predicate: `(state) => boolean`. If `false`, the step is skipped. |
+| `backOn` | `any \| Function` | Triggers automatic back-navigation if the answer matches `backOn` or predicate returns `true`. |
+| `onResponse` | `Function` | Callback hook: `(value, state, tools) => void &#124; "back"`. |
+| `display` | `Function` | Formatter function for history view rendering: `(value, state) => string`. |
+
+---
+
+## Keyboard Controls
+
+Users navigating a wizard workflow have full control over their session:
+
+- **`Enter`**: Submit the current answer and advance to the next step.
+- **`Escape`**: Return to the previous question (history rewinds and state is restored).
+- **`Ctrl+C`**: Cancel and exit the process cleanly.

@@ -1,0 +1,150 @@
+---
+title: "UI Components"
+description: "Interactive buttons, dropdown menus, and icon utilities."
+icon: "🧩"
+sidebar_position: 4
+---
+
+Portosaur exports custom UI components globally through `@portosaur/theme`. You do not need to import them into your MDX files.
+
+---
+
+## `<Btn>`
+
+The `<Btn>` component provides styled action buttons with built-in client-side routing, icons, and tooltips.
+
+### Basic Usage
+
+```jsx
+<Btn>Default Button</Btn>
+```
+
+### Color Variants
+
+Apply semantic color variants using boolean props:
+
+```jsx
+<Btn primary>Primary</Btn>
+<Btn secondary>Secondary</Btn>
+<Btn success>Success</Btn>
+<Btn info>Info</Btn>
+<Btn warning>Warning</Btn>
+<Btn danger>Danger</Btn>
+```
+
+### Links & Navigation
+
+Passing `href` transforms the button into a Docusaurus `<Link>`:
+
+- **Internal Links**: Routes seamlessly via client-side SPA navigation without full page reloads.
+- **External Links**: Automatically opens securely in a new tab with `target="_blank"` and `rel="noopener noreferrer"`.
+- **`sameTab`**: Forces external links to open within the existing tab.
+
+```jsx
+<Btn primary href="/docs/getting-started/installation">
+  Install Now
+</Btn>
+
+<Btn secondary href="https://github.com/soymadip/portosaur">
+  GitHub Repo
+</Btn>
+```
+
+### Props Reference
+
+| Prop                                                                | Type                     | Default                                | Description                                                                                                      |
+| :------------------------------------------------------------------ | :----------------------- | :------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| `primary` / `secondary` / `success` / `info` / `warning` / `danger` | `boolean`                | `false`                                | Sets the button's semantic color.                                                                                |
+| `href`                                                              | `string`                 | `null`                                 | Link destination. Internal URLs use Docusaurus routing; external URLs open in a new tab unless `sameTab` is set. |
+| `sameTab`                                                           | `boolean`                | `false`                                | Keep an external `href` in the current tab.                                                                      |
+| `icon`                                                              | `string \| ReactElement` | None                                   | Leading text/emoji, image path/URL, or icon component. Use `<Icon id="..." />` for a bundled vector icon.        |
+| `desc`                                                              | `ReactNode`              | None                                   | Tooltip content.                                                                                                 |
+| `hint` / `hintTop`                                                  | `ReactNode`              | None                                   | Tooltip content positioned above the button.                                                                     |
+| `hintRight` / `hintLeft` / `hintBottom`                             | `ReactNode`              | None                                   | Tooltip content and position.                                                                                    |
+| `disabled`                                                          | `boolean`                | `false`                                | Disables button interaction and applies disabled styling.                                                        |
+| `onClick`                                                           | `function`               | None                                   | Click handler. Receives the click event.                                                                         |
+| `as`                                                                | `ElementType`            | `Link` with `href`, otherwise `button` | Render a different element or component.                                                                         |
+| `title`                                                             | `string`                 | None                                   | Native title attribute on the rendered element.                                                                  |
+| `className`                                                         | `string`                 | None                                   | Additional class on the rendered element.                                                                        |
+
+Other standard button/link attributes are forwarded to the rendered element. Pass an `<Icon>` component for a vector icon; a string such as `"lucide:download"` is rendered as text, not resolved as an icon:
+
+```jsx
+<Btn icon={<Icon id="lucide:download" />} primary>
+  Download
+</Btn>
+```
+
+---
+
+## `<Dropdown>`
+
+Renders an interactive dropdown menu for links or action items.
+
+```jsx
+<Dropdown
+  label="Downloads"
+  items={[
+    { label: "Linux (x64)", href: "/downloads/linux-x64.tar.gz" },
+    { label: "macOS (Apple Silicon)", href: "/downloads/darwin-arm64.tar.gz" },
+    { label: "Windows (x64)", href: "/downloads/win-x64.zip" },
+  ]}
+/>
+```
+
+### Props Reference
+
+| Prop                     | Type                  | Default  | Description                                                                                                                     |
+| :----------------------- | :-------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| `label`                  | `string`              | `"Menu"` | Text for the default trigger.                                                                                                   |
+| `trigger`                | `ReactNode \| string` | None     | Custom trigger. If omitted, `label` and button props are used.                                                                  |
+| `items`                  | `DropdownItem[]`      | `[]`     | Menu entries described below.                                                                                                   |
+| `openOnHover`            | `boolean`             | `true`   | Open on hover. The trigger also toggles on click. Set `false` for click-only behavior; outside click and Escape close the menu. |
+| `hoverDelay`             | `number`              | `150`    | Delay before closing after the pointer leaves when hover behavior is enabled.                                                   |
+| `top` / `left` / `right` | `boolean`             | Bottom   | Menu placement relative to the trigger.                                                                                         |
+| `noArrow`                | `boolean`             | `false`  | Hide the trigger arrow.                                                                                                         |
+| `className`              | `string`              | `""`     | Additional class on the dropdown wrapper.                                                                                       |
+| `style`                  | `object`              | None     | Inline styles on the dropdown wrapper.                                                                                          |
+| `menuClassName`          | `string`              | `""`     | Additional class on the menu.                                                                                                   |
+| `primary` / `secondary`  | `boolean`             | `false`  | Variant props for the default `<Btn>` trigger.                                                                                  |
+
+Regular items support `label`, `href`, `icon`, `sameTab`, `onClick`, `active`, and `desc`. External links open in a new tab unless `sameTab` is true. Use `{ type: "separator" }` for a divider. An item can instead provide `render: ({ closeMenu }) => ReactNode` for custom content and to close the menu programmatically.
+
+---
+
+## `<Icon>` & `<DynamicIcon>`
+
+Display bundled vector icons by passing the identifier through the required `id` prop:
+
+```jsx
+<Icon id="si:github" />
+<Icon id="md:settings" />
+<Icon id="lucide:rocket" />
+```
+
+`Icon` also accepts `size`, `color`, `className`, `style`, and `addSpace` (append a space after the icon).
+
+`<DynamicIcon>` resolves a frontmatter-style icon value, a slug, or a fallback icon:
+
+```jsx
+<DynamicIcon iconStr="🚀" />
+<DynamicIcon slug="react" fallbackIcon="md:code" />
+```
+
+`iconStr` accepts an icon identifier, emoji, image path/URL, inline SVG string, or `{ src, fallback }` object. Without `iconStr`, `slug` is checked against Portosaur's technology map and bundled devicons before `fallbackIcon` is used. It also accepts `className` and `style`.
+
+---
+
+## `<IconSearch>`
+
+An interactive icon explorer widget that allows users to search, filter, and copy icon identifiers directly within your documentation pages:
+
+```jsx
+<IconSearch />
+```
+
+Use `dropUp` to position the filter menu and results above the search field when space below is limited:
+
+```jsx
+<IconSearch dropUp />
+```

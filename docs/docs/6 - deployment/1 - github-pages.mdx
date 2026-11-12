@@ -1,0 +1,122 @@
+---
+title: "GitHub Pages"
+description: "Deploy your Portosaur site to GitHub Pages with GitHub Actions."
+icon: "🐙"
+sidebar_position: 1
+---
+
+GitHub Pages is one of the most popular hosting platforms for static sites. Portosaur automates GitHub Pages deployment using modern GitHub Actions workflows.
+
+---
+
+## 1. Repository Setup
+
+The repository name determines your default site URL:
+
+- **User / Organization Site (Root Domain)**:
+  - Repository name: `<username>.github.io`
+  - URL: `https://<username>.github.io/`
+  - Configuration: `site.url: "auto"`, `site.base_url: "auto"` (resolves to `/`)
+- **Project Site (Subpath)**:
+  - Repository name: `<my-project>`
+  - URL: `https://<username>.github.io/<my-project>/`
+  - Configuration: `site.url: "auto"`, `site.base_url: "auto"` (automatically resolves to `/<my-project>/`)
+
+:::tip[Automated Base Path Detection]
+Portosaur inspects your Git remote origin and environment variables (`GITHUB_REPOSITORY`) during builds to automatically configure `site.url` and `site.base_url`. Leaving them set to `"auto"` in `config.yml` prevents routing bugs.
+:::
+
+---
+
+## 2. Generating the Deployment Workflow
+
+### In a New Project
+
+Choose **GitHub** as the VCS Provider and **GitHub Pages** as the Hosting Platform during `porto init`:
+
+```bash
+porto init -p github -h github-pages -u octocat
+```
+
+### In an Existing Project
+
+Run the following command inside your project directory:
+
+```bash
+porto init --ci-only -h github-pages
+```
+
+This generates `.github/workflows/deploy.yml`:
+
+```yaml title=".github/workflows/deploy.yml"
+name: Deploy Portosaur site to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build site
+        run: bun run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./build"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+---
+
+## 3. Enable GitHub Actions in Repository Settings
+
+Before your site will deploy, you must grant GitHub Actions permission to publish Pages:
+
+1. Navigate to your repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment → Source**, change the dropdown from **Deploy from a branch** to **GitHub Actions**.
+
+Once set, push a commit to the `main` branch. GitHub Actions will build your site and publish it immediately.
+
+---
+
+## 4. Custom Domains
+
+If you are using a custom domain (e.g. `docs.example.com` or `myportfolio.com`):
+
+1. Set your custom domain under **Settings → Pages → Custom domain**.
+2. Add a `CNAME` file containing your domain inside your project's `static/` directory (e.g. `static/CNAME`). Portosaur copies everything from `static/` into the root of `build/` during compilation.
+3. Update `site.url` in `config.yml` to your custom domain:
+   ```yaml
+   site:
+     url: "https://docs.example.com"
+     base_url: "/"
+   ```

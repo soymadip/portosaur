@@ -1,0 +1,63 @@
+---
+title: "Developer Overview"
+description: "Architecture, package dependency flow, and internal packages for contributors."
+icon: "🧰"
+---
+
+Welcome to the **Portosaur Developer Guide**. This section is intended for developers, contributors, and power users who want to extend Portosaur or understand its internal mechanics.
+
+---
+
+## In This Section
+
+<TopicList />
+
+---
+
+## Monorepo Architecture
+
+Portosaur is architected as an ESM-first monorepo using Bun Workspaces.
+
+```txt
+packages/
+├── cli/       # CLI entry point, command orchestrator, scaffolding engine
+├── core/      # YAML configuration parser, variable resolver, validation, asset generator
+├── logger/    # Unified terminal logging and ANSI styling
+├── theme/     # Docusaurus plugins, React components, CSS themes, and assets
+└── wizard/    # Standalone interactive prompt engine with history replaying
+```
+
+---
+
+## Architectural Principles
+
+1. **Unidirectional Dependency Flow**:
+   - `cli` → `core` → `logger`
+   - `theme` depends on `core`
+   - No circular dependencies are allowed.
+2. **Lightweight CLI**:
+   - `@portosaur/cli` MUST NOT depend on `@portosaur/theme`, React, or heavy Docusaurus packages.
+   - The theme is injected into the user project's local `package.json` to keep global CLI installations instantaneous.
+3. **Internal Workspace Imports**:
+   - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../logger`.
+4. **Strict Typing & Documentation**:
+   - Every library package maintains an explicit `index.d.ts` in `src/` linked via the `types` field in `package.json`.
+   - APIs are documented with complete JSDoc annotations in `.mjs` source files and synchronized in `index.d.ts`.
+5. **Runtime Compatibility**:
+   - Package management and fast runs are powered by **Bun**, while keeping full **Node.js compatibility** across all packages.
+
+---
+
+## Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/soymadip/portosaur.git
+cd portosaur
+
+# Install all workspace dependencies
+bun install
+
+# Run the test suite
+bun test
+```

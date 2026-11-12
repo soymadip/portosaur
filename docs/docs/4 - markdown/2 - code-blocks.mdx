@@ -1,0 +1,115 @@
+---
+title: "Code Blocks"
+description: "Syntax highlighting, magic comments, line numbers, and file titles."
+icon: "💻"
+sidebar_position: 2
+---
+
+{vars.project.title} includes built-in syntax highlighting powered by Prism.js, complete with line numbers, file titles, and magic comment annotations.
+
+---
+
+## Basic Code Blocks
+
+Create code blocks using standard Markdown triple-backticks with an optional language identifier:
+
+````markdown
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
+```
+````
+
+---
+
+## File Titles
+
+Add a file path or title tab to the header of the code block using `title="..."`:
+
+````markdown
+```javascript title="src/utils/math.js"
+export function add(a, b) {
+  return a + b;
+}
+```
+````
+
+---
+
+## Line Numbers
+
+Display line numbers by appending `showLineNumbers` to the code fence:
+
+````markdown
+```typescript showLineNumbers
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+```
+````
+
+---
+
+## Magic Comments
+
+Annotate specific lines in your code blocks using magic comments. Portosaur parses these comments and applies custom background styling while stripping the comment from view.
+
+### Highlight Next Line
+
+Use `// highlight-next-line` to draw attention to an important line:
+
+````markdown
+```javascript
+function connect() {
+  // highlight-next-line
+  const client = new DatabaseClient({ retries: 5 });
+  return client.start();
+}
+```
+````
+
+### Highlight Block
+
+Wrap multiple lines between `// highlight-start` and `// highlight-end`:
+
+````markdown
+```javascript
+function bootstrap() {
+  // highlight-start
+  loadEnvironment();
+  initLogger();
+  validateConfig();
+  // highlight-end
+  runServer();
+}
+```
+````
+
+### Error Highlighting
+
+Indicate erroneous lines or anti-patterns using `// error-next-line` or `// error-start` / `// error-end`:
+
+````markdown
+```javascript
+function processData(input) {
+  // error-next-line
+  const result = eval(input); // Dangerous: avoid eval
+  return result;
+}
+```
+````
+
+---
+
+## Dynamic Variables in Code Blocks
+
+Dynamic variables defined in `config.yml` can also be injected inside code blocks using the `{vars.<key>}` token:
+
+````markdown
+```bash
+bun install -g @portosaur/cli@{vars.versions.portosaur}
+```
+````

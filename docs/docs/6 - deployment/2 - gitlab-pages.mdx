@@ -1,0 +1,65 @@
+---
+title: "GitLab Pages"
+description: "Deploy your Portosaur site to GitLab Pages using GitLab CI/CD."
+icon: "🦊"
+sidebar_position: 2
+---
+
+GitLab provides built-in static site hosting through **GitLab Pages**. Portosaur includes a complete `.gitlab-ci.yml` workflow configured to compile your site using Bun and export the static artifacts.
+
+---
+
+## 1. Repository Setup
+
+- **User/Group Site (Root Domain)**:
+  - Repository name: `<username>.gitlab.io`
+  - URL: `https://<username>.gitlab.io/`
+- **Project Site (Subpath)**:
+  - Repository name: `<my-project>`
+  - URL: `https://<username>.gitlab.io/<my-project>/`
+
+---
+
+## 2. Generating the GitLab CI Configuration
+
+### In a New Project
+
+```bash
+porto init -p gitlab -h gitlab-pages -u gitlabuser
+```
+
+### In an Existing Project
+
+```bash
+porto init --ci-only -h gitlab-pages
+```
+
+This generates `.gitlab-ci.yml` in your project root:
+
+```yaml title=".gitlab-ci.yml"
+image: oven/bun:latest
+
+pages:
+  stage: deploy
+  script:
+    - bun install --frozen-lockfile
+    - bun run build
+    - mv build public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+GitLab Pages expects a build artifact directory named `public`. The pipeline compiles the site into `build/` and moves it to `public` before publishing.
+
+---
+
+## 3. Deployment & Access
+
+Once you push your code to your default branch (`main`), GitLab CI starts the pipeline. After the job completes:
+
+- Your site is available at:
+  `https://<username>.gitlab.io/<project-name>/`
+- Check your deployment status under **Deploy → Pages** in your GitLab repository sidebar.

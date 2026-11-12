@@ -7,9 +7,9 @@ on:
     paths:
       - ".github/workflows/deploy-docs.yml"
       - "docs/**"
-      - "packages/cli/src/commands/schema.*"
-      - "packages/core/src/index.mjs"
-      - "packages/core/src/generators/docusaurusConfig.mjs"
+      - "packages/cli/bin/porto.mjs"
+      - "packages/cli/src/commands/build.mjs"
+      - "packages/cli/src/commands/schema.mjs"
       - "package.json"
       - "bun.lock"
 
@@ -22,7 +22,7 @@ permissions:
 
 env:
   DOCS_DIR: docs
-  DOCS_OUT_DIR: docs/.vitepress/dist
+  DOCS_OUT_DIR: docs/build
   CLI_DIR: packages/cli
 
 jobs:
@@ -62,15 +62,13 @@ jobs:
         with:
           path: |
             ~/.bun/install/cache
-            ${{ env.DOCS_DIR }}/.vitepress/cache
-          key: ${{ runner.os }}-cache-${{ github.run_number }}
+            ${{ env.DOCS_DIR }}/.docusaurus
+          key: ${{ runner.os }}-docs-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cache-
+            ${{ runner.os }}-docs-
 
       - name: Install Dependencies
-        run: |-
-          bun install --cwd ${{ env.DOCS_DIR }}
-          bun install --cwd ${{ env.CLI_DIR }}
+        run: bun install --frozen-lockfile
 
       - name: Compile Site
         run: bun run --cwd ${{ env.DOCS_DIR }} build
@@ -82,6 +80,7 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ env.DOCS_OUT_DIR }}
+          include-hidden-files: true
 
       - name: Deploy to GitHub Pages
         id: deployment

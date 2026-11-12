@@ -1,0 +1,124 @@
+---
+title: "Interactive Previews"
+description: "Embed interactive previews of PDFs, videos, code, images, and websites."
+icon: "🔍"
+sidebar_position: 3
+---
+
+The `<Pv />` (Preview) component enables seamless in-page previews for multiple media and document formats without navigating away from the current page.
+
+Instead of navigating the browser to a raw asset link, clicking a `<Pv>` element opens an interactive viewport.
+
+---
+
+## Basic Usage
+
+### Single Asset
+
+```jsx
+View my <Pv href="/sample-resume.pdf">Resume</Pv> in an interactive viewer.
+```
+
+### Multiple Assets
+
+Pass an array of URLs or source objects to allow users to switch between files inside a single preview window. A source object accepts `href` (or `path`), `label`, `desc`, `title`, `id`, and `type`:
+
+```jsx
+Review the <Pv href={["/sample-resume.pdf", "/sample-design.png"]}>Design & Spec</Pv>.
+```
+
+```jsx
+<Pv
+  href={[
+    { href: "/src/app.js", label: "JavaScript", type: "text" },
+    { href: "/src/app.css", label: "CSS", type: "text" },
+  ]}
+>
+  View source files
+</Pv>
+```
+
+---
+
+## Supported Formats & Automatic Detection
+
+Portosaur detects file types automatically based on file extensions:
+
+- **PDF Documents**: In-browser PDF reader with zoom and paging.
+- **Source Code**: Syntax highlighting across 100+ languages with line numbers.
+- **Images**: High-resolution image preview with click-to-zoom.
+- **Videos**: Native HTML5 player supporting `.mp4`, `.webm`, `.ogg`, and `.mkv`.
+- **Websites**: Embedded responsive iframe with external link fallback.
+
+### Forcing a Renderer Type
+
+If your target URL does not have an explicit file extension (e.g. an API endpoint or dynamic stream), force the renderer with the `type` prop:
+
+```jsx
+<Pv href="https://example.com/api/raw-stream" type="video">
+  Live Demo Stream
+</Pv>
+```
+
+Valid forced `type` values: `pdf`, `text`, `image`, `video`, and `web`. By default, the type is inferred from the URL.
+
+---
+
+## Layout Modes
+
+The `<Pv />` component supports three distinct display modes:
+
+### 1. Popup (Default)
+
+A focused, centered modal overlay on top of the document content.
+
+```jsx
+<Pv href="/sample-resume.pdf">Open Modal</Pv>
+```
+
+### 2. Picture-in-Picture (`pip`)
+
+A non-blocking floating window that remains visible while the user scrolls through the page:
+
+- **Desktop**: A sleek floating panel you can drag anywhere across the screen.
+- **Mobile**: Collapses into a YouTube-style mini-player pinned to the bottom.
+
+```jsx
+<Pv href="/walkthrough.mp4" pip>
+  Watch Tutorial in PiP
+</Pv>
+```
+
+### 3. Split-Screen Dock (`dock`)
+
+Splits the viewport to display the document and preview side-by-side:
+
+- **Desktop**: Pushes documentation to the left and locks the preview panel to the right.
+- **Mobile**: Becomes an interactive bottom peek sheet.
+
+```jsx
+<Pv href="/example-script.js" dock>
+  View Source Side-by-Side
+</Pv>
+```
+
+---
+
+## `<Pv />` Props Reference
+
+| Prop         | Type                                              | Default                                    | Description                                                     |
+| :----------- | :------------------------------------------------ | :----------------------------------------- | :-------------------------------------------------------------- |
+| **`href`**   | `string \| PvSource \| Array<string \| PvSource>` | Required                                   | Asset URL/path, source object, or array of either.              |
+| `children`   | `ReactNode`                                       | Source label or filename                   | Custom clickable trigger content.                               |
+| `type`       | `string`                                          | Inferred from URL                          | Force renderer type: `pdf`, `text`, `image`, `video`, or `web`. |
+| `title`      | `string`                                          | Trigger text or filename                   | Custom title in the preview window header.                      |
+| `desc`       | `string`                                          | None                                       | Tooltip description for the trigger.                            |
+| `id`         | `string`                                          | Generated from title, trigger text, or URL | Identifier used for preview deep links.                         |
+| `dock`       | `boolean`                                         | `false`                                    | Open in split-screen Dock mode.                                 |
+| `pip`        | `boolean`                                         | `false`                                    | Open in floating Picture-in-Picture mode.                       |
+| `modeSwitch` | `boolean`                                         | `true`                                     | Allow switching layout mode from the preview header.            |
+| `activeIdx`  | `number`                                          | `0`                                        | Initially selected source when `href` is an array.              |
+| `noUl`       | `boolean`                                         | `false`                                    | Remove the default trigger underline.                           |
+| `className`  | `string`                                          | None                                       | Additional class on the trigger link.                           |
+
+The default layout is Popup. Use `dock` or `pip` to open directly in another mode.

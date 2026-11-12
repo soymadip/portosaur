@@ -1,0 +1,93 @@
+---
+title: "Installation & Setup"
+description: "Install Portosaur and scaffold your first project."
+icon: "🛠️"
+sidebar_position: 1
+---
+
+## Prerequisites
+
+Before starting, ensure your machine has the following tools installed and available in your `PATH`:
+
+- **[Bun]({vars.tools.bun})**: The recommended runtime and package manager.
+- **[Git]({vars.tools.git})**: Required for repository initialization and CI/CD templates.
+
+---
+
+## Installation
+
+### On-Demand with `bunx` (Recommended)
+
+You can scaffold a new project immediately without installing any global packages:
+
+```bash
+bunx @portosaur/cli@latest init
+```
+
+### Global Installation
+
+To make the `porto` command globally accessible across your terminal:
+
+```bash
+bun install -g @portosaur/cli
+```
+
+Verify your installation:
+
+```bash
+porto --version
+```
+
+---
+
+## Initializing a Site
+
+The `porto init` command walks you through configuring your new site.
+
+### Interactive Mode
+
+Running `porto init` without arguments triggers the interactive wizard:
+
+```bash
+porto init
+```
+
+The wizard will ask you for:
+
+1. **Site Type**: Portfolio site or Documentation site.
+2. **Project Name**: The directory name (and repository name).
+3. **VCS Provider**: Where you host your code (GitHub, GitLab, Codeberg, SourceHut, or `none`).
+4. **VCS Username**: Your account username on the selected provider.
+5. **Hosting Platform**: Where the site should be deployed (GitHub Pages, GitLab Pages, Codeberg Pages, Woodpecker, Surge, Netlify, or `none`).
+6. **Owner Name**: Your full name (for portfolio metadata).
+
+### Non-Interactive Mode
+
+You can bypass the wizard by passing flags. When automating or running in scripts, provide `--site-type`:
+
+```bash
+# Initialize a documentation site
+porto init --site-type docs -P my-project-docs -p github -h github-pages -u octocat
+
+# Initialize a portfolio site
+porto init --site-type portfolio -P octocat.github.io -p github -h github-pages -u octocat -n "Octo Cat"
+```
+
+| Option                        | Description                                                                                                       | Default             |
+| :---------------------------- | :---------------------------------------------------------------------------------------------------------------- | :------------------ |
+| `--site-type <type>`          | Type of site to initialize (`portfolio` or `docs`).                                                               | Interactive prompt  |
+| `-P`, `--project-name <name>` | Name of the directory to create.                                                                                  | Ideal platform name |
+| `-p`, `--vcs-provider <id>`   | VCS Provider ID (`github`, `gitlab`, `codeberg`, `sourcehut`, `none`).                                            | Interactive prompt  |
+| `-h`, `--hosting <id>`        | Hosting Platform ID (`github-pages`, `gitlab-pages`, `codeberg-pages`, `woodpecker`, `surge`, `netlify`, `none`). | Default for VCS     |
+| `-u`, `--username <user>`     | Your username on the VCS Provider.                                                                                | Git user guess      |
+| `-n`, `--name <name>`         | Full name used for site headings and meta tags.                                                                   | Git user name       |
+| `-k`, `--no-install`          | Skip automatic `bun install` after scaffolding.                                                                   | `false`             |
+| `--ci-only`                   | Generate only the CI/CD workflow for an existing project.                                                         | -                   |
+| `--gitignore-only`            | Generate only the default `.gitignore` for an existing project.                                                   | -                   |
+
+:::tip[Repository Names for Root Domains]
+
+- Most git hosting platforms require a specific repository name (e.g. `username.github.io` on GitHub, `username.gitlab.io` on GitLab, or `pages` on Codeberg) to serve your site from the root domain.
+- Portosaur's interactive wizard suggests the ideal project name automatically.
+
+:::

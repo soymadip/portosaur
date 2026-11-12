@@ -1,0 +1,95 @@
+---
+title: "Project Structure"
+description: "Understand the files and directories inside a Portosaur project."
+icon: "📁"
+sidebar_position: 2
+---
+
+## Directory Layout
+
+The `porto init` command generates a project directory with the following structure:
+
+```bash
+my-site/
+├── [workflow file/dir]        # CI/CD deployment workflow (e.g. .github/workflows/deploy.yml)
+├── blog/                      # Long-form blog posts and articles
+├── notes/                     # Portfolio sites only: Markdown/MDX digital notebook
+├── docs/                      # Documentation sites only: Markdown/MDX technical documentation
+├── static/                    # Static assets served at the root (images, icons, PDFs)
+├── config.yml                 # Primary configuration file (single source of truth)
+├── package.json               # Local project dependencies and build scripts
+└── README.md                  # Project overview and instructions
+```
+
+<details>
+  <summary>Site Modes: Portfolio vs Documentation</summary>
+
+Portosaur automatically determines the mode based on your `config.yml`:
+
+- **Documentation Mode** (`docs_home` block defined):
+  - Renders a project documentation homepage configured via `docs_home`.
+  - Serves content from the `docs/` folder (URL route `/docs` by default).
+  - Perfect for software libraries, developer tools, and product documentation.
+
+- **Portfolio Mode** (`home_page` block defined):
+  - Renders a rich personal portfolio with Hero, About, Projects, Experience, and Social contact sections.
+  - Serves a digital knowledge vault from the `notes/` folder (URL route `/notes` by default).
+  - Supports public task tracking (`tasks` block).
+
+Both site modes share the `blog/` platform, `static/` asset directory, and `config.yml`.
+
+</details>
+
+## Key Files & Directories
+
+### `config.yml`
+
+The single configuration file for your entire site. It handles site metadata, theming, navigation, and section content. Portosaur validates this file against a strict schema during development and builds, ensuring syntax and property errors are caught immediately.
+
+### `docs/` or `notes/`
+
+Your Markdown and MDX documents live here.
+
+- Subdirectories automatically become sidebar categories.
+- Prefix filenames or directories with numbers (e.g. `1 - introduction.mdx`) to enforce sidebar ordering.
+- Adding a `README.mdx` or `index.mdx` inside a folder turns that file into the category landing page and automatically generates a `<TopicList />` of child documents.
+
+### `blog/`
+
+Contains your articles. Supports standard Docusaurus blog conventions, author attribution, and tag organization.
+
+### `static/`
+
+Files placed here are copied verbatim to the root of the production build (e.g. `static/favicon.ico` is served at `/favicon.ico`).
+
+---
+
+## Running Your Site
+
+### Development Server
+
+Start the local development server with hot-module reloading:
+
+```bash
+bun run dev
+```
+
+The site will be available at `http://localhost:3000`.
+
+### Production Build
+
+Compile your site into static assets ready for deployment:
+
+```bash
+bun run build
+```
+
+Assets are written to the `build/` directory (or the custom directory configured in `site.build.output_dir`).
+
+### Local Production Preview
+
+Preview your built static files locally before deploying:
+
+```bash
+bun run serve
+```

@@ -1,0 +1,105 @@
+---
+title: "Frontmatter"
+description: "Configure document metadata, icons, routing, and source previews."
+icon: "si:yaml"
+sidebar_position: 1
+source: "https://example.com"
+---
+
+Frontmatter is the YAML block at the very top of your Markdown (`.md` or `.mdx`) files between triple-dashed lines `---`.
+
+It lets you configure document metadata and behavior. Portosaur adds note-specific options on top of the standard Docusaurus fields used by docs and blog posts.
+
+```yaml
+---
+title: JavaScript Tips
+slug: custom-url-path
+description: Advanced tricks and tips for JS.
+icon: 🚀
+color: "#F7DF1E"
+sidebar_label: JS Tips
+sidebar_position: 1
+pagination_label: JavaScript
+hide_table_of_contents: false
+topic_list:
+  enable: true
+  desc: "A custom introduction above the topic cards."
+  class: "my-custom-grid-row"
+  desc_class: "text--left margin-bottom--md"
+---
+```
+
+## Frontmatter Reference
+
+These options apply to documents in the configured notes/docs directory. Docusaurus also accepts standard metadata fields; see the blog reference below for common blog fields.
+
+| Field                        | Type        | Default                                | Description                                                                                                                                                                                                                      |
+| :--------------------------- | :---------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`title`**                  | `str`       | 1st heading or filename                | Document title.                                                                                                                                                                                                                  |
+| **`description`**            | `str`       | 1st para when available                | Summary used for page metadata, note cards & topic-list. Use `description`, not `desc`, for the page description.                                                                                                                |
+| **`slug`**                   | `str`       | Generated from the file path           | Overrides the URL path.<br/>- Portosaur removes numeric ordering prefixes from generated paths.<br/>- A leading `/` makes the slug relative to the configured docs/notes route, otherwise it is relative to the containing path. |
+| **`icon`**                   | `str`       | `null`                                 | Emoji or icon identifier shown in note and topic cards.                                                                                                                                                                          |
+| **`color`**                  | `str`       | Theme/default card color               | CSS color used as the card accent, for example `#FF0000` or `rgb(0, 0, 0)`.                                                                                                                                                      |
+| **`sidebar_label`**          | `str`       | `title`                                | Custom label shown in the sidebar.                                                                                                                                                                                               |
+| **`sidebar_position`**       | `int`       | filename                               | Position used to order sidebar entries and note cards. Lower numbers appear first in note cards.                                                                                                                                 |
+| **`pagination_label`**       | `str`       | `title`                                | Label used for previous/next document navigation.                                                                                                                                                                                |
+| **`hide_table_of_contents`** | `bool`      | `false`                                | Hides the desktop and mobile table of contents for this document.                                                                                                                                                                |
+| **`draft`**                  | `bool`      | `false`                                | Draft notes are omitted from Portosaur note-card lists in production. This does not by itself prevent direct access to the document.                                                                                             |
+| **`unlisted`**               | `bool`      | `false`                                | Omits the note from Portosaur note-card lists in all environments. It does not by itself prevent direct access to the document.                                                                                                  |
+| **`image`**                  | `str`       | `null`                                 | Image path or URL used for page/social metadata where supported by Docusaurus.                                                                                                                                                   |
+| **`topic_list`**             | `bool/obj`  | Global setting on category index pages | Shows or hides the child-topic card list.<br/> See the options [below](#topic_list-options).                                                                                                                                     |
+| **`source`**                 | `str/str[]` | `null`                                 | URL or list of URLs for the preview button in the action bar above toc.                                                                                                                                                          |
+
+### `topic_list` Options
+
+- Set `topic_list` to `false` to disable the list, or `true` to enable it on the page.
+- Use an object to configure the list:
+
+| Option           | Type             | Default                                                 | Description                                                                                                                |
+| :--------------- | :--------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------- |
+| **`enable`**     | `boolean`        | Automatic on category index pages when globally enabled | Enables or disables the list on this page.                                                                                 |
+| **`desc`**       | `string \| null` | Page `description` or a fallback sentence               | Text above the cards. Set to `null` to hide the description block, or use an empty string for no visible description text. |
+| **`class`**      | `string`         | None                                                    | Additional CSS class name(s) on the topic-card grid.                                                                       |
+| **`desc_class`** | `string`         | None                                                    | Additional CSS class name(s) on the description wrapper.                                                                   |
+
+<br />
+
+:::info
+By default, topic lists are automatically added to category landing pages such as `README.mdx` and `index.mdx`.
+
+- Configure `site.notes.topic_list: false` in `config.yml` to disable this default globally.
+- An explicit `topic_list: true` or `topic_list.enable: true` can enable a list on an individual page then.
+
+:::
+
+---
+
+## Blog Frontmatter
+
+Blog posts use the Docusaurus blog plugin. Common fields include:
+
+```yaml
+---
+title: My First Post
+description: Notes from the first release.
+date: 2026-11-12T10:00
+authors: [you]
+tags: [release, notes]
+draft: false
+image: /img/blog-cover.jpg
+slug: first-release
+---
+```
+
+| Field             | Type                 | Default                                    | Description                                                                            |
+| :---------------- | :------------------- | :----------------------------------------- | :------------------------------------------------------------------------------------- |
+| **`title`**       | `string`             | Filename                                   | Post title.                                                                            |
+| **`description`** | `string`             | None                                       | Short post summary used in metadata and previews.                                      |
+| **`slug`**        | `string`             | Generated from the file path/date          | Overrides the post URL.                                                                |
+| **`date`**        | `date`               | Date in filename or file modification time | Publication date.                                                                      |
+| **`authors`**     | `string \| string[]` | None                                       | Author key or keys defined in the blog's authors configuration.                        |
+| **`tags`**        | `string[]`           | None                                       | Tags used to categorize the post.                                                      |
+| **`draft`**       | `boolean`            | `false`                                    | Draft posts are available during local development and omitted from production builds. |
+| **`image`**       | `string`             | None                                       | Cover image path or URL used for social sharing and previews.                          |
+
+Other Docusaurus frontmatter fields may also be used. For Portosaur's `{vars.*}` variables in Markdown and MDX, see [Dynamic Variables](../3%20-%20config/1%20-%20dynamic-variables.mdx).

@@ -3,12 +3,15 @@
   "version": "0.22.0",
   "private": true,
   "scripts": {
-    "dev": "$npm_execpath install && porto dev",
-    "build": "$npm_execpath install && porto build",
+    "dev": "porto dev",
+    "build": "porto build",
     "serve": "porto serve"
   },
   "dependencies": {
-    "@portosaur/cli": "^0.21.2",
-    "@portosaur/theme": "^0.21.2"
+    "@portosaur/cli": "workspace:*",
+    "@portosaur/theme": "workspace:*"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   }
 }

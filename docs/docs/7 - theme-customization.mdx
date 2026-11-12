@@ -1,0 +1,177 @@
+---
+title: "Theme Customization"
+description: "Build custom color palettes and configure appearance."
+icon: "🎨"
+---
+
+Portosaur uses a two-step CSS variable architecture for theming. This ensures color harmony across light and dark modes while maintaining strict contrast and accessibility standards.
+
+Instead of hardcoding colors into components, theming is split into two phases:
+
+1. **The Master Palette**: Defining a raw inventory of your brand colors in `:root`.
+2. **Functional Mapping**: Assigning those raw colors to specific `--porto-*` variables inside `[data-theme="light"]` and `[data-theme="dark"]`.
+
+---
+
+## Bundled Schemes
+
+Portosaur includes several curated color schemes ready out of the box:
+
+- `portosaur`: Modern cyan/teal brand palette.
+- `dracula`: High-contrast dark fantasy theme.
+- `nord`: Arctic, north-bluish palette.
+
+Activate any scheme in `config.yml`:
+
+```yaml
+theme:
+  color_scheme: "portosaur"
+  default_mode: "dark" # "light", "dark", or "system"
+```
+
+---
+
+## Creating a Custom Theme
+
+To build your own custom theme, create a CSS file (e.g. `src/css/custom-theme.css`) and link it in `config.yml`:
+
+```yaml
+theme:
+  color_scheme: "./src/css/custom-theme.css"
+```
+
+### Step 1: The Master Palette (`:root`)
+
+The `:root` block holds your brand's raw colors as a single source of truth:
+
+```css title="src/css/custom-theme.css"
+:root {
+  /* Core Brand Colors */
+  --brand-blue: #0284c7;
+  --brand-blue-rgb: 2, 132, 199;
+  --brand-blue-bright: #38bdf8;
+
+  /* Surfaces & Backgrounds */
+  --brand-surface-light: #ffffff;
+  --brand-surface-dark: #0f172a;
+}
+```
+
+### Step 2: Functional Mapping
+
+Map your raw colors to functional `--porto-*` variables for light and dark modes:
+
+```css title="src/css/custom-theme.css"
+[data-theme="light"] {
+  --porto-primary: var(--brand-blue);
+  --porto-primary-rgb: var(--brand-blue-rgb);
+  --porto-bg-0: var(--brand-surface-light);
+  --porto-fg-0: #0f172a;
+}
+
+[data-theme="dark"] {
+  --porto-primary: var(--brand-blue-bright);
+  --porto-primary-rgb: 56, 189, 248;
+  --porto-bg-0: var(--brand-surface-dark);
+  --porto-fg-0: #f8fafc;
+}
+```
+
+---
+
+## Full Theming Boilerplate
+
+Copy this boilerplate into `src/css/my-theme.css` to build a complete custom scheme:
+
+```css title="src/css/my-theme.css"
+/**
+ * 🎨 Portosaur Custom Theme Boilerplate
+ */
+
+/* STEP 1: RAW PALETTE */
+:root {
+  --theme-red: #ef4444;
+  --theme-orange: #f97316;
+  --theme-yellow: #eab308;
+  --theme-green: #22c55e;
+  --theme-teal: #14b8a6;
+  --theme-blue: #3b82f6;
+  --theme-purple: #a855f7;
+  --theme-pink: #ec4899;
+
+  /* RGB Triplet Variants for Opacity/Alpha */
+  --theme-blue-rgb: 59, 130, 246;
+  --theme-green-rgb: 34, 197, 94;
+  --theme-red-rgb: 239, 68, 68;
+}
+
+/* STEP 2: LIGHT MODE MAPPING */
+[data-theme="light"] {
+  --porto-primary: var(--theme-blue);
+  --porto-primary-rgb: var(--theme-blue-rgb);
+  --porto-secondary: var(--theme-purple);
+  --porto-success: var(--theme-green);
+  --porto-warning: var(--theme-yellow);
+  --porto-danger: var(--theme-red);
+  --porto-info: var(--theme-blue);
+
+  /* Backgrounds (0 = base canvas, 1 = cards, 2 = popups) */
+  --porto-bg-0: #ffffff;
+  --porto-bg-1: #f8fafc;
+  --porto-bg-2: #f1f5f9;
+  --porto-bg-3: #e2e8f0;
+
+  /* Text & Foreground */
+  --porto-fg-0: #0f172a;
+  --porto-fg-1: #334155;
+  --porto-fg-2: #64748b;
+
+  /* Grayscale Continuum */
+  --porto-gray-0: #ffffff;
+  --porto-gray-100: #f8fafc;
+  --porto-gray-200: #f1f5f9;
+  --porto-gray-300: #e2e8f0;
+  --porto-gray-400: #cbd5e1;
+  --porto-gray-500: #94a3b8;
+  --porto-gray-600: #64748b;
+  --porto-gray-700: #475569;
+  --porto-gray-800: #334155;
+  --porto-gray-900: #1e293b;
+  --porto-gray-1000: #0f172a;
+}
+
+/* STEP 3: DARK MODE MAPPING */
+[data-theme="dark"] {
+  --porto-primary: #60a5fa;
+  --porto-primary-rgb: 96, 165, 250;
+  --porto-secondary: #c084fc;
+  --porto-success: #4ade80;
+  --porto-warning: #fde047;
+  --porto-danger: #f87171;
+  --porto-info: #60a5fa;
+
+  /* Inverted Backgrounds */
+  --porto-bg-0: #0f172a;
+  --porto-bg-1: #1e293b;
+  --porto-bg-2: #334155;
+  --porto-bg-3: #475569;
+
+  /* Inverted Text & Foreground */
+  --porto-fg-0: #f8fafc;
+  --porto-fg-1: #e2e8f0;
+  --porto-fg-2: #94a3b8;
+
+  /* Inverted Grayscale Continuum */
+  --porto-gray-0: #0f172a;
+  --porto-gray-100: #1e293b;
+  --porto-gray-200: #334155;
+  --porto-gray-300: #475569;
+  --porto-gray-400: #64748b;
+  --porto-gray-500: #94a3b8;
+  --porto-gray-600: #cbd5e1;
+  --porto-gray-700: #e2e8f0;
+  --porto-gray-800: #f1f5f9;
+  --porto-gray-900: #f8fafc;
+  --porto-gray-1000: #ffffff;
+}
+```

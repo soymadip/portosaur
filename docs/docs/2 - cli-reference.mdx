@@ -1,0 +1,147 @@
+---
+title: "CLI Reference"
+description: "Complete command-line interface reference for the porto command."
+icon: "⌨️"
+---
+
+The `porto` command-line interface provides the tools you need to create, develop, compile, and preview your Portosaur site.
+
+```bash
+porto [options] [command]
+```
+
+---
+
+## Global Options
+
+The following options apply to `porto` globally:
+
+| Option            | Description                                 |
+| :---------------- | :------------------------------------------ |
+| `-v`, `--version` | Print the installed Portosaur version.      |
+| `--help`          | Display command usage and help information. |
+
+---
+
+## `porto init`
+
+Scaffolds a new Portosaur project, sets up the directory layout, generates `config.yml`, and optionally initializes Git and automated CI/CD workflows.
+
+```bash
+porto init [options]
+```
+
+### Options
+
+| Option                        | Description                                                                                                               |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| `-p`, `--vcs-provider <id>`   | VCS Provider identifier (`github`, `gitlab`, `codeberg`, `sourcehut`, `none`).                                            |
+| `-h`, `--hosting <id>`        | Hosting Platform identifier (`github-pages`, `gitlab-pages`, `codeberg-pages`, `woodpecker`, `surge`, `netlify`, `none`). |
+| `-u`, `--username <user>`     | Your username on the selected VCS provider.                                                                               |
+| `-n`, `--name <name>`         | Full name used for portfolio owner metadata and site title.                                                               |
+| `-P`, `--project-name <name>` | Name of the project directory to create.                                                                                  |
+| `--site-type <type>`          | Site archetype to scaffold: `portfolio` or `docs`.                                                                        |
+| `-k`, `--no-install`          | Skip automatic dependency installation (`bun install`).                                                                   |
+| `--ci-only`                   | Configure **only** CI/CD deployment files for an existing project without touching content.                               |
+| `--gitignore-only`            | Generate **only** the default `.gitignore` file for an existing project.                                                  |
+
+### Examples
+
+```bash
+# Interactive setup
+porto init
+
+# Scaffold a documentation site
+porto init --site-type docs -P my-docs -p github -h github-pages -u octocat
+
+# Add CI/CD to an existing site for GitLab Pages
+porto init --ci-only -h gitlab-pages
+```
+
+---
+
+## `porto providers`
+
+Lists all VCS Providers and Hosting Platforms supported by the installed Portosaur release.
+
+```bash
+porto providers [options]
+```
+
+### Options
+
+| Option                | Description                                       |
+| :-------------------- | :------------------------------------------------ |
+| `-t`, `--type <type>` | Filter list by provider type: `vcs` or `hosting`. |
+
+### Examples
+
+```bash
+# List all providers
+porto providers
+
+# List only hosting platforms
+porto providers --type hosting
+```
+
+---
+
+## `porto dev` (alias: `porto start`)
+
+Starts the local development server with hot-module reloading and file watching.
+
+```bash
+porto dev [siteDir] [options]
+# or
+porto start [siteDir] [options]
+```
+
+### Options
+
+| Option                | Description                                                        | Default     |
+| :-------------------- | :----------------------------------------------------------------- | :---------- |
+| `-p`, `--port <port>` | Port number for the local HTTP server.                             | `3000`      |
+| `-h`, `--host <host>` | Host address to bind (use `0.0.0.0` for container/network access). | `localhost` |
+| `--no-browser`        | Prevent the browser from automatically opening on start.           | `false`     |
+| `--poll [interval]`   | Use polling for file changes (useful inside Docker or WSL).        | `false`     |
+
+---
+
+## `porto build`
+
+Compiles your Portosaur project into static HTML, CSS, and JavaScript assets ready for production hosting.
+
+```bash
+porto build [siteDir] [options]
+```
+
+### Options
+
+| Option                  | Description                                                  | Default                              |
+| :---------------------- | :----------------------------------------------------------- | :----------------------------------- |
+| `-o`, `--out-dir <dir>` | Custom output directory name.                                | `build` (or `site.build.output_dir`) |
+| `--bundle-analyzer`     | Launch an interactive webpack bundle analysis visualization. | `false`                              |
+| `--no-minify`           | Disable asset minification for easier production debugging.  | `false`                              |
+
+---
+
+## `porto serve`
+
+Spins up a lightweight local HTTP server to preview your static production build.
+
+:::warning[Run Build First]
+You must run `porto build` before running `porto serve`.
+:::
+
+```bash
+porto serve [siteDir] [options]
+```
+
+### Options
+
+| Option                  | Description                                     | Default     |
+| :---------------------- | :---------------------------------------------- | :---------- |
+| `-o`, `--out-dir <dir>` | Directory containing static files to serve.     | `build`     |
+| `-p`, `--port <port>`   | Port number to serve on.                        | `3000`      |
+| `-h`, `--host <host>`   | Host address to bind.                           | `localhost` |
+| `--no-browser`          | Prevent the browser from automatically opening. | `false`     |

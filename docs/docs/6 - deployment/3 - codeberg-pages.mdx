@@ -1,0 +1,56 @@
+---
+title: "Codeberg Pages"
+description: "Deploy to Codeberg Pages with Forgejo Actions or Woodpecker CI."
+icon: "🏔️"
+sidebar_position: 3
+---
+
+[Codeberg](https://codeberg.org) is an open-source, non-profit Git hosting platform based on Forgejo. Codeberg provides free static hosting through **Codeberg Pages**.
+
+---
+
+## 1. Repository Setup
+
+- **Root Domain Site**:
+  - Name your repository `pages` (e.g. `codeberg.org/<username>/pages`).
+  - Site URL: `https://<username>.codeberg.page/`
+- **Project Site**:
+  - Any custom repository name (e.g. `codeberg.org/<username>/<project>`).
+  - Site URL: `https://<username>.codeberg.page/<project>/`
+
+---
+
+## 2. Generating the Workflow
+
+Codeberg supports two CI platforms:
+- **Forgejo Actions** (`codeberg-pages` — Recommended, GitHub Actions compatible).
+- **Woodpecker CI** (`woodpecker` — Legacy CI pipeline).
+
+### Using Forgejo Actions (Recommended)
+
+```bash
+# In a new project
+porto init -p codeberg -h codeberg-pages -u mycodeberguser
+
+# Or in an existing project
+porto init --ci-only -h codeberg-pages
+```
+
+This generates `.forgejo/workflows/deploy.yml` configured to build with Bun and push the compiled `build/` files to the `pages` deployment branch.
+
+:::important[Enable Forgejo Actions]
+You must enable Actions on Codeberg before workflows will run:
+1. Open your repository on Codeberg.
+2. Go to **Settings → Actions → General**.
+3. Check **Enable Actions for this repository** and click **Update Settings**.
+:::
+
+### Using Woodpecker CI (Legacy)
+
+If your Codeberg repository uses Woodpecker:
+
+```bash
+porto init --ci-only -h woodpecker
+```
+
+This creates `.woodpecker/deploy.yml`. Ensure your repository is activated at [ci.codeberg.org](https://ci.codeberg.org).

@@ -1,0 +1,63 @@
+---
+title: "Other Providers (Netlify, Vercel, Cloudflare)"
+description: "Deploy Portosaur to Netlify, Vercel, and Cloudflare Pages."
+icon: "☁️"
+sidebar_position: 5
+---
+
+Because Portosaur compiles to standard, production-ready static assets in `build/`, it can be deployed to any modern cloud hosting provider.
+
+---
+
+## Netlify
+
+Portosaur includes a dedicated template for Netlify.
+
+### Automated Setup
+
+Generate `netlify.toml` in your project root:
+
+```bash
+porto init --ci-only -h netlify
+```
+
+This creates a pre-configured `netlify.toml`:
+
+```toml title="netlify.toml"
+[build]
+  command = "bun run build"
+  publish = "build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+### Dashboard Setup
+
+1. Connect your Git repository in the [Netlify Dashboard](https://app.netlify.com).
+2. Set **Build command**: `bun run build` (or `bunx @portosaur/cli build`).
+3. Set **Publish directory**: `build`.
+4. Under **Environment variables**, set `BUN_VERSION` or `NODE_VERSION` to `20` or higher.
+
+---
+
+## Vercel
+
+1. Import your Git repository into the [Vercel Dashboard](https://vercel.com).
+2. For **Framework Preset**, select **Other**.
+3. Set **Build Command**: `bun run build`.
+4. Set **Output Directory**: `build`.
+5. Under **Node.js Version**, ensure `20.x` or higher is selected.
+
+---
+
+## Cloudflare Pages
+
+1. Log into the Cloudflare Dashboard and select **Workers & Pages → Create Application → Pages → Connect to Git**.
+2. Select your repository.
+3. For **Framework Preset**, choose **None** or **Docusaurus**.
+4. Set **Build command**: `bun run build`.
+5. Set **Build output directory**: `build`.
+6. Add an environment variable `NODE_VERSION` with value `20` (or `24`).

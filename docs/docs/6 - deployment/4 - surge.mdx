@@ -1,0 +1,61 @@
+---
+title: "Surge.sh"
+description: "Deploy your site to Surge.sh with zero configuration."
+icon: "⚡"
+sidebar_position: 4
+---
+
+[Surge.sh](https://surge.sh/) is a simple, fast static web publishing service. Portosaur supports automated deployments to Surge using GitHub Actions, GitLab CI, or Codeberg Forgejo.
+
+---
+
+## 1. Retrieve Your Surge Token
+
+Before configuring automated deployments, obtain an authentication token from your local terminal:
+
+```bash
+# 1. Install the Surge CLI
+bun install -g surge
+
+# 2. Log in with your Surge credentials
+surge login
+
+# 3. Print your secret token
+surge token
+```
+
+Copy the generated token string.
+
+---
+
+## 2. Generating the Workflow
+
+```bash
+# In a new project
+porto init -h surge
+
+# Or in an existing project
+porto init --ci-only -h surge
+```
+
+Portosaur detects your Git remote provider (GitHub, GitLab, or Codeberg) and generates the corresponding Surge deployment workflow.
+
+---
+
+## 3. Set Up Repository Secrets
+
+Add your credentials as encrypted secrets in your repository settings:
+- **GitHub**: **Settings → Secrets and variables → Actions**.
+- **GitLab**: **Settings → CI/CD → Variables**.
+- **Codeberg**: **Settings → Secrets → Actions**.
+
+| Secret Name | Value |
+| :--- | :--- |
+| `SURGE_LOGIN` | Your Surge account email address. |
+| `SURGE_TOKEN` | The token string generated via `surge token`. |
+
+---
+
+## 4. Deploy
+
+Commit and push your changes. The CI pipeline will automatically build your site and deploy it to `https://<username>.surge.sh`.
