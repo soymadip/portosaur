@@ -7,10 +7,18 @@ import clsx from "clsx";
 import CopyDropdown from "./CopyDropdown.jsx";
 import styles from "./styles.module.css";
 
-export default function PageActions({ className }) {
+export default function PageActions({ className, mobile = false }) {
   const { frontMatter, metadata } = useDoc();
   const sourceRaw = frontMatter?.source;
   const editUrl = metadata?.editUrl;
+
+  if (mobile) {
+    return (
+      <div className={clsx(styles.container, className)}>
+        <CopyDropdown mobile editUrl={editUrl} sourceRaw={sourceRaw} />
+      </div>
+    );
+  }
 
   return (
     <div className={clsx(styles.container, className)}>

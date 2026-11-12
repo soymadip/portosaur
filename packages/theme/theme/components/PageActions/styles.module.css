@@ -6,6 +6,10 @@
   margin-bottom: 0.35em;
 }
 
+.mobileToolbar {
+  display: none;
+}
+
 @media (min-width: 997px) {
   .container {
     margin-left: 1rem;
@@ -49,9 +53,25 @@
 }
 
 @media (max-width: 996px) {
+  .mobileToolbar {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 0.5rem 0;
+  }
+
+  .mobileToolbar :global(.theme-doc-toc-mobile) {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+
   .container {
     justify-content: flex-end;
+    gap: 0.25rem;
+    margin-bottom: 0;
   }
+
   .mobileOnly {
     display: flex !important;
   }

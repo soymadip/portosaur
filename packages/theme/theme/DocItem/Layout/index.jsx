@@ -53,9 +53,10 @@ export default function DocItemLayout({ children }) {
             <DocBreadcrumbs />
             <DocVersionBadge />
 
-            <PageActions className={pageStyles.mobileOnly} />
-
-            {docTOC.mobile}
+            <div className={pageStyles.mobileToolbar}>
+              {docTOC.mobile}
+              <PageActions mobile className={pageStyles.mobileOnly} />
+            </div>
             <DocItemContent>{children}</DocItemContent>
             <DocItemFooter />
           </article>

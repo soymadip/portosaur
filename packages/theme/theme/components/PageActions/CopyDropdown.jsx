@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Dropdown } from "../UI/index.jsx";
 import Icon from "../Icon/index.jsx";
 import Hint from "../Hint/index.jsx";
+import Pv from "../Preview/components/Triggers/Pv.jsx";
+import dropdownStyles from "../UI/Dropdown/styles.module.css";
 import styles from "./styles.module.css";
 
 import { extractPageMarkdownFromDocument } from "./htmlToMarkdown";
 
-export default function CopyDropdown() {
+export default function CopyDropdown({ mobile = false, editUrl, sourceRaw }) {
   const [pageContent, setPageContent] = useState("");
 
   useEffect(() => {
@@ -117,6 +119,17 @@ export default function CopyDropdown() {
   };
 
   const items = [
+    ...(mobile && editUrl
+      ? [
+          {
+            id: "edit-page",
+            label: "Edit this page",
+            href: editUrl,
+            sameTab: true,
+            icon: <Icon id="lucide:pencil" />,
+          },
+        ]
+      : []),
     {
       id: "copy",
       label: "Copy Markdown",
@@ -124,6 +137,28 @@ export default function CopyDropdown() {
       icon: <Icon id="md:content-copy" />,
       onClick: () => copyToClipboard(pageContent),
     },
+    ...(mobile && sourceRaw
+      ? [
+          {
+            id: "source-preview",
+            render: ({ closeMenu }) => (
+              <span style={{ display: "contents" }} onClick={closeMenu}>
+                <Pv
+                  href={sourceRaw}
+                  activeIdx={0}
+                  noUl
+                  className={dropdownStyles.dropdownMenuItem}
+                >
+                  <Icon id="lucide:code-xml" />
+                  {Array.isArray(sourceRaw) && sourceRaw.length > 1
+                    ? "View Sources"
+                    : "View Source"}
+                </Pv>
+              </span>
+            ),
+          },
+        ]
+      : []),
     {
       type: "separator",
     },
@@ -158,22 +193,32 @@ export default function CopyDropdown() {
     },
   ];
 
+  const trigger = mobile ? (
+    <Hint msg="Page actions" noUl hideOnClick>
+      <button
+        type="button"
+        className={styles.actionBtn}
+        aria-label="Page actions"
+      >
+        <Icon id="lucide:ellipsis-vertical" className={styles.iconOnly} />
+      </button>
+    </Hint>
+  ) : (
+    <Hint msg="Copy Page" noUl hideOnClick>
+      <div className={styles.actionBtn}>
+        <Icon id="md:content-copy" className={styles.iconOnly} />
+      </div>
+    </Hint>
+  );
+
   return (
-    <div>
-      <Dropdown
-        trigger={
-          <Hint msg="Copy Page" noUl hideOnClick>
-            <div className={styles.actionBtn}>
-              <Icon id="md:content-copy" className={styles.iconOnly} />
-            </div>
-          </Hint>
-        }
-        items={items}
-        style={{ margin: 0 }}
-        menuClassName={styles.rightAlignMenu}
-        openOnHover={false}
-        noArrow
-      />
-    </div>
+    <Dropdown
+      trigger={trigger}
+      items={items}
+      style={{ margin: 0 }}
+      menuClassName={styles.rightAlignMenu}
+      openOnHover={false}
+      noArrow
+    />
   );
 }

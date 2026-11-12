@@ -189,6 +189,14 @@ export default function Dropdown({
         }}
       >
         {items.map((item, idx) => {
+          if (typeof item.render === "function") {
+            return (
+              <React.Fragment key={item.id || idx}>
+                {item.render({ closeMenu: () => setShowMenu(false) })}
+              </React.Fragment>
+            );
+          }
+
           // Separator item — renders a visual divider
           if (item.type === "separator") {
             return <hr key={idx} className={styles.dropdownSeparator} />;
