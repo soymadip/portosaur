@@ -93,10 +93,12 @@ export default function DocsHomeSection() {
                     <DynamicIcon iconStr={feature.icon} />
                   </div>
                 )}
-                <h2 className={styles.featureTitle}>{feature.title}</h2>
-                <p className={styles.featureDesc}>
-                  {feature.details || feature.desc}
-                </p>
+                <div className={styles.featureContent}>
+                  <h2 className={styles.featureTitle}>{feature.title}</h2>
+                  <p className={styles.featureDesc}>
+                    {feature.details || feature.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
