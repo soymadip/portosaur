@@ -20,9 +20,9 @@ let currentWizardMock = async () => ({
 mock.module("@portosaur/wizard", () => {
   return {
     runWizard: async (opts) => currentWizardMock(opts),
-    spinner: () => ({ start: () => {}, stop: () => {} }),
-    intro: () => {},
-    outro: () => {},
+    spinner: () => ({ start: () => { }, stop: () => { } }),
+    intro: () => { },
+    outro: () => { },
   };
 });
 
@@ -81,8 +81,8 @@ mock.module("../src/utils/index.mjs", () => {
       return "";
     },
     validateProject: () => true,
-    printWorkflowTips: () => {},
-    warnIfRepoNameMismatch: () => {},
+    printWorkflowTips: () => { },
+    warnIfRepoNameMismatch: () => { },
     isInteractive: (options = {}) => {
       const hasConfigOptions = Object.keys(options).some((key) => {
         if (key === "install") return false;
@@ -147,6 +147,16 @@ describe("CLI: init-ci", () => {
     expect(fs.existsSync(path.join(testRoot, ".gitlab-ci.yml"))).toBe(true);
   });
 
+  test("should substitute the repository name in Surge's deployment domain", async () => {
+    await initCiCommand({ hosting: "surge" });
+
+    const workflowPath = path.join(testRoot, ".github/workflows/deploy.yml");
+    const workflow = fs.readFileSync(workflowPath, "utf8");
+
+    expect(workflow).toContain(`--domain ${path.basename(testRoot)}.surge.sh`);
+    expect(workflow).not.toContain("{{repo_name}}");
+  });
+
   test("should fail for invalid hosting platform", async () => {
     let exitCode = 0;
     process.exit = (code) => {
@@ -156,7 +166,7 @@ describe("CLI: init-ci", () => {
 
     try {
       await initCiCommand({ hosting: "invalid-platform" });
-    } catch (e) {}
+    } catch (e) { }
 
     expect(exitCode).toBe(1);
   });

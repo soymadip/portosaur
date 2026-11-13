@@ -166,6 +166,7 @@ export async function initCiCommand(options = {}) {
 
   const templateVars = {
     projectName: path.basename(projectDir),
+    repo_name: path.basename(projectDir),
     userName,
     fullName,
     portoVer,
