@@ -5,54 +5,63 @@ icon: "di:codeberg"
 sidebar_position: 3
 ---
 
-[Codeberg](https://codeberg.org) is an open-source, non-profit Git hosting platform based on Forgejo. Codeberg provides free static hosting through **Codeberg Pages**.
+[Codeberg Pages](https://docs.codeberg.org/codeberg-pages/) serves static sites at `codeberg.page` domains. Portosaur supports deployment through Codeberg's Forgejo Actions and provides a legacy Woodpecker CI template.
 
----
+## 1. Choose a Repository and URL
 
-## 1. Repository Setup
+Codeberg Pages supports user/organization sites and per-repository sites:
 
-- **Root Domain Site**:
-  - Name your repository `pages` (e.g. `codeberg.org/<username>/pages`).
-  - Site URL: `https://<username>.codeberg.page/`
-- **Project Site**:
-  - Any custom repository name (e.g. `codeberg.org/<username>/<project>`).
-  - Site URL: `https://<username>.codeberg.page/<project>/`
+- **User or organization site**: use a public repository named `pages`. Its site is served at `https://<owner>.codeberg.page/`.
+- **Repository site**: use a public repository with your project name. Its site is served at `https://<owner>.codeberg.page/<repository>/`.
 
----
+For a repository site, set the path prefix explicitly in `config.yml`:
 
-## 2. Generating the Workflow
+```yaml
+site:
+  url: "https://<owner>.codeberg.page"
+  base_url: "/<repository>/"
+```
 
-Codeberg supports two CI platforms:
+For a user or organization site, use the root path `base_url: "/"`. Codeberg's Pages URLs are not automatically inferred by Portosaur's `auto` URL settings.
 
-- **Forgejo Actions** (`codeberg-pages` — Recommended, GitHub Actions compatible).
-- **Woodpecker CI** (`woodpecker` — Legacy CI pipeline).
+## 2. Generate a Forgejo Actions Workflow
 
-### Using Forgejo Actions (Recommended)
+For a new project, select **Codeberg** as the VCS Provider and **Codeberg Pages (Forgejo CI)** as the Hosting Platform:
 
 ```bash
-# In a new project
-porto init -p codeberg -h codeberg-pages -u mycodeberguser
+porto init -p codeberg -h codeberg-pages -u <codeberg-username>
+```
 
-# Or in an existing project
+For an existing project, run:
+
+```bash
 porto init --ci-only -h codeberg-pages
 ```
 
-This generates `.forgejo/workflows/deploy.yml` configured to build with Bun and push the compiled `build/` files to the `pages` deployment branch.
+This creates `.forgejo/workflows/deploy.yml`. On a push to `main`, the workflow installs dependencies, runs `bunx portosaur build`, then invokes the Codeberg Pages action to publish the `build/` directory.
 
-:::important[Enable Forgejo Actions]
-You must enable Actions on Codeberg before workflows will run:
+The generated action's `site` setting includes the repository path. For a `pages` repository used as a user or organization homepage, edit that setting in `.forgejo/workflows/deploy.yml` to use `https://<owner>.codeberg.page/` without `/pages/`.
 
-1. Open your repository on Codeberg.
+## 3. Enable Actions and Deploy
+
+Forgejo Actions must be enabled for the repository:
+
+1. Open the repository on Codeberg.
 2. Go to **Settings → Actions → General**.
-3. Check **Enable Actions for this repository** and click **Update Settings**.
-   :::
+3. Enable Actions and save the setting.
 
-### Using Woodpecker CI (Legacy)
+Push the workflow to `main`, then check the repository's **Actions** tab for the run. The repository must be public for Codeberg Pages. After a successful run, open the URL selected in the workflow's `site` setting.
 
-If your Codeberg repository uses Woodpecker:
+## 4. Use Woodpecker CI (Legacy)
+
+If the repository still uses Woodpecker, generate its pipeline instead:
 
 ```bash
 porto init --ci-only -h woodpecker
 ```
 
-This creates `.woodpecker/deploy.yml`. Ensure your repository is activated at [ci.codeberg.org](https://ci.codeberg.org).
+This creates `.woodpecker/deploy.yml`. Activate the repository at [ci.codeberg.org](https://ci.codeberg.org). The generated pipeline builds the site and pushes `build/` to a `pages` branch, so its deploy step needs permission to push to that repository branch. Forgejo Actions is the recommended option for new setups.
+
+## 5. Use a Custom Domain
+
+Configure the custom domain through Codeberg Pages and set the matching origin and path in `config.yml`. Use `/` for a root-domain site or the repository path for a repository site. Follow [Codeberg's custom-domain instructions](https://docs.codeberg.org/codeberg-pages/using-custom-domain/) for DNS and HTTPS setup.

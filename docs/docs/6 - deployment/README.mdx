@@ -2,62 +2,10 @@
 title: "Deployment Guide"
 description: "Deploy your Portosaur site with automated CI/CD workflows."
 icon: "md:autorenew"
+topic_list:
+  desc: ""
 ---
 
-Deploying a Portosaur site is straightforward because it compiles to pure, static HTML, CSS, and JavaScript. The compiled assets can be hosted on any static hosting platform or CDN for free.
+As {vars.project.title} is a static site generator, it can be deployed to any static hosting provider. 
 
----
-
-## In This Section
-
-<TopicList />
-
----
-
-## The Core Concept
-
-Deploying a Portosaur site consists of two steps:
-
-1. **Build**: Run `porto build` (or `bun run build`) to produce compiled production files in `build/`.
-2. **Host**: Point your static host to serve the contents of the `build/` directory.
-
----
-
-## Automated CI/CD Setup
-
-Portosaur provides built-in CI/CD workflow templates for all major platforms. You can configure deployment during initial setup or add it to an existing project at any time:
-
-### For New Projects
-
-When running `porto init`, select your target **Hosting Platform** in the wizard:
-
-```bash
-porto init
-```
-
-### For Existing Projects
-
-Run `porto init --ci-only` inside your project directory to generate the workflow files without modifying your content or configuration:
-
-```bash
-# Auto-detects VCS from git remote and generates default CI/CD
-porto init --ci-only
-
-# Or specify a target hosting platform explicitly
-porto init --ci-only -h github-pages
-```
-
----
-
-## Supported Hosting Platforms
-
-Portosaur includes first-class CI/CD templates for:
-
-| Platform ID      | Name                             | Default VCS | Output File / Directory           |
-| :--------------- | :------------------------------- | :---------- | :-------------------------------- |
-| `github-pages`   | GitHub Pages                     | GitHub      | `.github/workflows/deploy.yml`    |
-| `gitlab-pages`   | GitLab Pages                     | GitLab      | `.gitlab-ci.yml`                  |
-| `codeberg-pages` | Codeberg Pages (Forgejo Actions) | Codeberg    | `.forgejo/workflows/deploy.yml`   |
-| `woodpecker`     | Codeberg Pages (Woodpecker CI)   | Codeberg    | `.woodpecker/deploy.yml`          |
-| `surge`          | Surge.sh                         | Any         | `.github/...` or `.gitlab-ci.yml` |
-| `netlify`        | Netlify                          | Any         | `netlify.toml`                    |
+Below covers the most common providers and their configuration:

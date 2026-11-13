@@ -5,59 +5,68 @@ icon: "md:cloud"
 sidebar_position: 5
 ---
 
-Because Portosaur compiles to standard, production-ready static assets in `build/`, it can be deployed to any modern cloud hosting provider.
+Portosaur builds a static site into `build/`, so the output can be hosted by any static provider. Portosaur generates a Netlify configuration file; Vercel and Cloudflare Pages are configured in their dashboards rather than through `porto init` workflows.
 
----
+For all providers below, configure the site URL in `config.yml` if the build environment does not provide a Pages URL automatically:
 
-## Netlify
+```yaml
+site:
+  url: "https://www.example.com"
+  base_url: "/"
+```
 
-Portosaur includes a dedicated template for Netlify.
+Use the provider's actual preview or production URL. If the site is hosted under a path prefix, set `base_url` to that path, including the leading and trailing slashes.
 
-### Automated Setup
+## 1. Netlify
 
-Generate `netlify.toml` in your project root:
+Portosaur includes a Netlify template. In an existing project, run:
 
 ```bash
 porto init --ci-only -h netlify
 ```
 
-This creates a pre-configured `netlify.toml`:
+This creates `netlify.toml` in the project root:
 
 ```toml title="netlify.toml"
 [build]
   command = "bun run build"
   publish = "build"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[build.environment]
+  BUN_VERSION = "latest"
 ```
 
-### Dashboard Setup
+Then:
 
-1. Connect your Git repository in the [Netlify Dashboard](https://app.netlify.com).
-2. Set **Build command**: `bun run build` (or `bunx @portosaur/cli build`).
-3. Set **Publish directory**: `build`.
-4. Under **Environment variables**, set `BUN_VERSION` or `NODE_VERSION` to `20` or higher.
+1. Import the Git repository in the [Netlify Dashboard](https://app.netlify.com).
+2. Keep the build command as `bun run build` and publish directory as `build`.
+3. Confirm the deploy branch matches the branch selected in Netlify.
+4. Push a commit and check the deploy log in **Deploys**.
 
----
+The generated file configures the build and publish directory; Netlify performs dependency installation in its build environment.
 
-## Vercel
+## 2. Vercel
 
-1. Import your Git repository into the [Vercel Dashboard](https://vercel.com).
-2. For **Framework Preset**, select **Other**.
-3. Set **Build Command**: `bun run build`.
-4. Set **Output Directory**: `build`.
-5. Under **Node.js Version**, ensure `20.x` or higher is selected.
+There is no Vercel-specific `porto init` template. Configure Vercel to run the Portosaur build:
 
----
+1. Import the repository in the [Vercel Dashboard](https://vercel.com).
+2. Set **Framework Preset** to **Other**.
+3. Set the build command to `bun run build` and the output directory to `build`.
+4. Ensure the build environment uses the Bun version from the project's `packageManager` field, or set `BUN_VERSION` to `1.3.12`.
+5. Set the production branch, then deploy and review the build log.
 
-## Cloudflare Pages
+Set `site.url` and `site.base_url` to the Vercel production URL and `/`, or configure a custom domain in Vercel and use that domain in `site.url`.
 
-1. Log into the Cloudflare Dashboard and select **Workers & Pages → Create Application → Pages → Connect to Git**.
-2. Select your repository.
-3. For **Framework Preset**, choose **None** or **Docusaurus**.
-4. Set **Build command**: `bun run build`.
-5. Set **Build output directory**: `build`.
-6. Add an environment variable `NODE_VERSION` with value `20` (or `24`).
+## 3. Cloudflare Pages
+
+There is no Cloudflare Pages template in `porto init`; configure the Pages project in Cloudflare:
+
+1. Open **Workers & Pages → Create application → Pages → Connect to Git** and select the repository.
+2. Choose **None** as the framework preset so Cloudflare uses the commands you provide.
+3. Set the build command to `bun run build` and the output directory to `build`.
+4. Select the production branch and ensure the build environment has Bun `1.3.12` available (for example, through `BUN_VERSION`).
+5. Save the settings, push a commit, then check the deployment logs and assigned Pages URL.
+
+Set `site.url` to the assigned Cloudflare Pages URL or your custom domain, and set `site.base_url` to `/` unless hosting under a path prefix.
+
+The repository's separate Cloudflare Worker proxy is not the same as Cloudflare Pages hosting for this static site.

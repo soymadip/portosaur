@@ -5,58 +5,55 @@ icon: "lo:surge"
 sidebar_position: 4
 ---
 
-[Surge.sh](https://surge.sh/) is a simple, fast static web publishing service. Portosaur supports automated deployments to Surge using GitHub Actions, GitLab CI, or Codeberg Forgejo.
+[Surge](https://surge.sh/) publishes static sites from a directory. Portosaur's generated workflows build the site and deploy `build/` to a Surge domain named after your project repository.
 
----
+## 1. Create Surge Credentials
 
-## 1. Retrieve Your Surge Token
-
-Before configuring automated deployments, obtain an authentication token from your local terminal:
+Install and authenticate the Surge CLI on your computer, then retrieve an API token:
 
 ```bash
-# 1. Install the Surge CLI
-bun install -g surge
-
-# 2. Log in with your Surge credentials
-surge login
-
-# 3. Print your secret token
-surge token
+bunx surge login
+bunx surge token
 ```
 
-Copy the generated token string.
+Keep the token private. Do not put it in `config.yml` or commit it to your repository.
 
----
+## 2. Generate a Deployment Workflow
 
-## 2. Generating the Workflow
+For a new project, select your VCS Provider and **Surge.sh** as the Hosting Platform. For example:
 
 ```bash
-# In a new project
-porto init -h surge
+porto init -p github -h surge -u <username> -P <project-name>
+```
 
-# Or in an existing project
+Replace `github` with `gitlab`, `codeberg`, or `sourcehut` when using a different provider. For an existing project, run this inside the repository:
+
+```bash
 porto init --ci-only -h surge
 ```
 
-Portosaur detects your Git remote provider (GitHub, GitLab, or Codeberg) and generates the corresponding Surge deployment workflow.
+The existing-project command detects the provider from the Git remote and creates the matching workflow. Depending on the provider, it creates a file under `.github/workflows/`, `.gitlab-ci.yml`, `.forgejo/workflows/`, or `.build.yml`.
 
----
+The generated workflow runs on pushes to `main`, installs dependencies, builds the site, and deploys `build/` to `https://<repository-name>.surge.sh`.
 
-## 3. Set Up Repository Secrets
+## 3. Add Repository Secrets
 
-Add your credentials as encrypted secrets in your repository settings:
+Add the following protected secrets or CI variables in the repository hosting service:
+
+| Name          | Value                                          |
+| :------------ | :--------------------------------------------- |
+| `SURGE_LOGIN` | The email address used for your Surge account. |
+| `SURGE_TOKEN` | The token returned by `bunx surge token`.      |
+
+Use the secret settings for your provider:
 
 - **GitHub**: **Settings → Secrets and variables → Actions**.
-- **GitLab**: **Settings → CI/CD → Variables**.
-- **Codeberg**: **Settings → Secrets → Actions**.
+- **GitLab**: **Settings → CI/CD → Variables**; mask and protect both values where available.
+- **Codeberg/Forgejo**: **Settings → Secrets → Actions**.
+- **SourceHut**: add them to the build's secrets/environment configuration.
 
-| Secret Name   | Value                                         |
-| :------------ | :-------------------------------------------- |
-| `SURGE_LOGIN` | Your Surge account email address.             |
-| `SURGE_TOKEN` | The token string generated via `surge token`. |
+## 4. Deploy and Verify
 
----
+Commit and push to `main`. Open the provider's CI page and confirm the build and deploy steps pass. Visit `https://<repository-name>.surge.sh` to verify the published site.
 
-## 4. Deploy
-
-Commit and push your changes. The CI pipeline will automatically build your site and deploy it to `https://<username>.surge.sh`.
+The default domain is based on the repository name, not the VCS username. To use a custom domain, change the generated `surge --domain` argument and configure that domain in Surge. Set `site.url` in `config.yml` to the chosen origin and `site.base_url` to `/`.
