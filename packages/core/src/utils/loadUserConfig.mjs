@@ -30,7 +30,7 @@ export function loadUserConfig(projectDir, systemVars = {}) {
   if (violations.length > 0) {
     const list = violations.map((v) => `  - ${v}`).join("\n");
     throw new Error(
-      `unknown key(s) in config:\n${list}\n\ncheck the config reference: ${pkg.homepage}/user/config/overview`,
+      `unknown key(s) in config:\n${list}\n\ncheck the config reference: ${pkg.homepage}/docs/config/reference`,
     );
   }
 
