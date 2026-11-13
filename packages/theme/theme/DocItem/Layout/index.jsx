@@ -124,6 +124,12 @@ export default function DocItemLayout({ children }) {
   const { metadata } = useDoc();
   const windowSize = useWindowSize();
   const showDesktopRightCol = windowSize === "desktop" || windowSize === "ssr";
+  const mobileToolbar = (
+    <MobileToolbar>
+      <PageActions mobile className={pageStyles.mobileOnly} />
+      {docTOC.mobile}
+    </MobileToolbar>
+  );
 
   return (
     <div className="row">
@@ -135,11 +141,9 @@ export default function DocItemLayout({ children }) {
             <DocBreadcrumbs />
             <DocVersionBadge />
 
-            <MobileToolbar>
-              <PageActions mobile className={pageStyles.mobileOnly} />
-              {docTOC.mobile}
-            </MobileToolbar>
-            <DocItemContent>{children}</DocItemContent>
+            <DocItemContent mobileToolbar={mobileToolbar}>
+              {children}
+            </DocItemContent>
             <DocItemFooter />
           </article>
           <DocItemPaginator />

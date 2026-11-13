@@ -71,6 +71,10 @@
     scroll-margin-top: var(--mobile-doc-scroll-offset, 6rem);
   }
 
+  :global(.theme-doc-markdown h1):has(+ .mobileToolbar) {
+    margin-bottom: 0.4rem !important;
+  }
+
   .mobileActionMenu {
     max-height: calc(100dvh - var(--mobile-toolbar-top, 0px) - 3.5rem);
     overflow-y: auto;
@@ -86,7 +90,7 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin: 0 0rem;
-    padding: 0.35rem 0;
+    padding: 0.35rem 0 1rem;
   }
 
   .container {
