@@ -56,7 +56,7 @@
   color: var(--ifm-color-primary);
   transition: all 0.3s ease;
   position: relative;
-  display: block;
+  display: inline-block;
   opacity: 0;
   animation: slideUpFade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s forwards;
 }
@@ -321,5 +321,52 @@
 
   .featuresSection {
     padding-bottom: 3.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 2.6rem;
+  }
+
+  .tagline {
+    font-size: 1.5rem;
+  }
+
+  .description {
+    margin-inline: -0.8rem;
+  }
+
+  .heroIcon {
+    margin-top: 0.8rem;
+  }
+
+  .icon {
+    max-height: 160px;
+  }
+
+  .button {
+    flex: 0 0 auto;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.45rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .actionImg {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 359px) {
+  .actions {
+    gap: 0.25rem;
+  }
+
+  .button {
+    gap: 0.25rem;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.75rem;
   }
 }

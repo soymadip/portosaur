@@ -112,10 +112,19 @@ export function runPlayground({
 
   const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
 
-  if (runCommand === "dev") {
-    console.log(colors.info(`\n>>> Starting dev server in ${siteName}...`));
-    const hostArg = extraArgs.includes("--host") ? "" : " --host 0.0.0.0";
-    run(`bun run dev${hostArg}${extraArgsStr}`, { cwd: SITE_DIR });
+  if (runCommand === "dev" || runCommand === "serve") {
+    console.log(
+      colors.info(`\n>>> Starting ${runCommand} server in ${siteName}...`),
+    );
+
+    const hasHostArg = extraArgs.some(
+      (arg) => arg === "--host" || arg === "-h" || arg.startsWith("--host="),
+    );
+
+    const hostArg = hasHostArg ? "" : " --host 0.0.0.0";
+
+    run(`bun run ${runCommand}${hostArg}${extraArgsStr}`, { cwd: SITE_DIR });
+
   } else if (runCommand === "build") {
     console.log(colors.info(`\n>>> Building ${siteName}...`));
     run(`bun run build${extraArgsStr}`, { cwd: SITE_DIR });
@@ -141,6 +150,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "dev") {
       runCommand = "dev";
+    } else if (args[i] === "serve") {
+      runCommand = "serve";
     } else if (args[i] === "build") {
       runCommand = "build";
     } else if (args[i] === "-p" || args[i] === "--prune") {

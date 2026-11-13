@@ -51,7 +51,7 @@ site:
   edit_url: "{{vars.project.repo}}/edit/main/docs/"
 
 theme:
-  color_scheme: catppuccin
+  color_scheme: portosaur
 
 # Documentation Home Config
 docs_home:
