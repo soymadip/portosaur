@@ -82,25 +82,30 @@ export default function DocsHomeSection() {
       {features && features.length > 0 && (
         <section className={styles.featuresSection}>
           <div className={styles.featuresContainer}>
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className={styles.featureCard}
-                style={{ "--animation-order": index }}
-              >
-                {feature.icon && (
-                  <div className={styles.featureIcon}>
-                    <DynamicIcon iconStr={feature.icon} />
+            {features.map((feature, index) => {
+              const FeatureWrapper = feature.link ? Link : "div";
+
+              return (
+                <FeatureWrapper
+                  key={index}
+                  className={styles.featureCard}
+                  style={{ "--animation-order": index }}
+                  {...(feature.link ? { to: withBaseUrl(feature.link) } : {})}
+                >
+                  {feature.icon && (
+                    <div className={styles.featureIcon}>
+                      <DynamicIcon iconStr={feature.icon} />
+                    </div>
+                  )}
+                  <div className={styles.featureContent}>
+                    <h2 className={styles.featureTitle}>{feature.title}</h2>
+                    <p className={styles.featureDesc}>
+                      {feature.details || feature.desc}
+                    </p>
                   </div>
-                )}
-                <div className={styles.featureContent}>
-                  <h2 className={styles.featureTitle}>{feature.title}</h2>
-                  <p className={styles.featureDesc}>
-                    {feature.details || feature.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+                </FeatureWrapper>
+              );
+            })}
           </div>
         </section>
       )}

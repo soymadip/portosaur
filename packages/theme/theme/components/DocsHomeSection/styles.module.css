@@ -238,6 +238,17 @@
     background-color 0.2s ease;
 }
 
+a.featureCard,
+a.featureCard:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.featureCard:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 3px;
+}
+
 .featureCard:hover {
   background-color: var(--ifm-color-emphasis-300);
 }

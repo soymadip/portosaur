@@ -124,7 +124,6 @@ export function runPlayground({
     const hostArg = hasHostArg ? "" : " --host 0.0.0.0";
 
     run(`bun run ${runCommand}${hostArg}${extraArgsStr}`, { cwd: SITE_DIR });
-
   } else if (runCommand === "build") {
     console.log(colors.info(`\n>>> Building ${siteName}...`));
     run(`bun run build${extraArgsStr}`, { cwd: SITE_DIR });
