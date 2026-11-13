@@ -74,7 +74,10 @@ export async function buildCommand(siteDir, options = {}) {
 
     logger.info("Building static site...");
 
-    let outDirName = options.outDir || userConfig.site?.build_dir || "build";
+    // Docusaurus only accepts outDir via the CLI flag, not the config file,
+    // so the configured directory is passed through here.
+    const outDirName =
+      options.outDir || userConfig.site?.build?.output_dir || "build";
     if (outDirName !== "build") {
       extraArgs.push("--out-dir", outDirName);
     }

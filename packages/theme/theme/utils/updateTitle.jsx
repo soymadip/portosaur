@@ -9,11 +9,12 @@ export default function UpdateTitle({
   const location = useLocation();
   const { siteConfig } = useDocusaurusContext();
   const [currentTitle, setCurrentTitle] = useState(null);
+  const [currentSection, setCurrentSection] = useState(null);
   const effectiveDefaultTitle = defaultTitle || siteConfig.title;
   useEffect(() => {
     if (!enabled) return;
     const sectionTitles = Object.keys(sections).length > 0 ? sections : {};
-    const updateTitle = () => {
+    const updateTitle = (syncHash = true) => {
       const sectionsToTrack = Object.keys(sectionTitles)
         .map((id) => document.getElementById(id))
         .filter(Boolean);
@@ -36,8 +37,14 @@ export default function UpdateTitle({
       });
       if (maxVisibleSection && sectionTitles[maxVisibleSection]) {
         setCurrentTitle(sectionTitles[maxVisibleSection]);
+        if (syncHash) {
+          setCurrentSection(maxVisibleSection);
+        }
       } else {
         setCurrentTitle(effectiveDefaultTitle);
+        if (syncHash) {
+          setCurrentSection(null);
+        }
       }
     };
     let isScrolling = false;
@@ -51,7 +58,10 @@ export default function UpdateTitle({
       }
     };
     window.addEventListener("scroll", handleScroll);
-    updateTitle();
+    // Set the title on load, but don't touch the URL hash until the user
+    // scrolls, so a deep-linked #section-id isn't clobbered before the
+    // browser's anchor scroll lands.
+    updateTitle(false);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -61,5 +71,10 @@ export default function UpdateTitle({
       document.title = currentTitle;
     }
   }, [currentTitle]);
+  useEffect(() => {
+    if (currentSection && window.location.hash !== `#${currentSection}`) {
+      window.history.replaceState(null, "", `#${currentSection}`);
+    }
+  }, [currentSection]);
   return null;
 }

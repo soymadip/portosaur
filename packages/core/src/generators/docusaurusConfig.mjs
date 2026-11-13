@@ -638,6 +638,13 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
         rules: rawGet("site.robots_txt.rules", []), // List of rules (e.g., user_agent, allow, disallow).
         customLines: rawGet("site.robots_txt.custom_lines", []), // Extra raw lines to append to robots.txt.
       },
+
+      // site.build.output_dir is consumed in build.mjs via the Docusaurus
+      // --out-dir flag, but we pass it through here so the schema generator
+      // discovers it without hardcoding.
+      build: {
+        outputDir: get("site.build.output_dir", "build"), // Directory name for the compiled site output. Relative to project root.
+      },
     },
 
     // ------- Presets -------

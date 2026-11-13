@@ -282,6 +282,17 @@
             }
           }
         },
+        "build": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "output_dir": {
+              "type": ["string", "null"],
+              "description": "Directory name for the compiled site output. Relative to project root.",
+              "default": "build"
+            }
+          }
+        },
         "edit_url": {
           "type": [
             "string",

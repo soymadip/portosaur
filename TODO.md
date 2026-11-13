@@ -1,7 +1,3 @@
-## Bugs
-
-- [ ] When scrolling in homepage, the url #section-id is not changed automatically.
-
 ## Features
 
 - [ ] Set up a GitHub Action using `capacitor` to automatically build an Android APK from the PWA and publish it to GitHub Releases.
@@ -39,3 +35,4 @@
 - [x] Decrease the padding of tooltip popup, also possibly increase the size of the popup. Also, when we hover over the popup keep it open even if we moved past the text.
 - [x] Add a component and syntax to replace `{meta.var_name}` with actual `var_value` (a remark plugin maybe?). Also, make the `config.yml`'s `vars` referable in notes and blog?
 - [x] Allow adding tooltip when hovering.
+- [x] When scrolling in homepage, the url #section-id is not changed automatically.

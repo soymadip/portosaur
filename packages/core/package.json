@@ -22,11 +22,6 @@
       "types": "./src/index.d.ts",
       "import": "./src/index.mjs",
       "default": "./src/index.mjs"
-    },
-    "./constants": {
-      "types": "./src/constants.d.ts",
-      "import": "./src/constants.mjs",
-      "default": "./src/constants.mjs"
     }
   },
   "types": "./src/index.d.ts",
