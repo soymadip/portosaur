@@ -5,7 +5,7 @@ icon: "md:emoji"
 sidebar_position: 2
 ---
 
-You can use emojis, icon identifiers, and SVGs across your site in `config.yml`, Markdown/MDX frontmatter, and content.
+You can use emojis, SVGs, Icon Packs across your site in `config.yml`, Markdown/MDX frontmatter, and content.
 
 <details>
 <summary>Where Icons/Emojis Can Be Used?</summary>
@@ -73,19 +73,16 @@ Any GitHub-style shortcode is rendered as emoji without including any extra icon
 
 ---
 
-### Icon Identifiers (`prefix:name`)
+### Icon Packs
 
-You can reference thousands of high-quality vector icons using the `<prefix>:<name>` syntax:
+You can reference thousands of vector icons using the **`<pack-code>:<icon-name>`** syntax:
 
 ```yaml title="config.yml"
 docs_home:
-  actions:
+  features:
     - text: "Get Started"
       link: "/docs"
       icon: "md:settings"
-    - text: "GitHub"
-      link: "https://github.com/soymadip/portosaur"
-      icon: "si:github"
 ```
 
 <details>
