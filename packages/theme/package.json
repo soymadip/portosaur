@@ -1,6 +1,6 @@
 {
   "name": "@portosaur/theme",
-  "version": "0.24.1",
+  "version": "0.24.2",
   "description": "Theme components for Portosaur - React components, static assets etc.",
   "license": "GPL-3.0-only",
   "author": "soymadip",
