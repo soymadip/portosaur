@@ -1,9 +1,11 @@
 import { expect, test, describe } from "bun:test";
 import path from "path";
+import { createRequire } from "module";
 import { buildDocuConfig } from "../src/generators/docusaurusConfig.mjs";
 import { resolveBasePath } from "../src/utils/docusaurus.mjs";
 
 const projectRoot = process.cwd();
+const projectRequire = createRequire(path.join(projectRoot, "package.json"));
 const portoPaths = {
   root: projectRoot,
   assets: path.join(projectRoot, "packages/theme/assets"),
@@ -42,6 +44,43 @@ describe("resolveBasePath", () => {
 });
 
 describe("buildDocuConfig", () => {
+  test("resolves Docusaurus context modules from the project", () => {
+    const config = buildDocuConfig(
+      {
+        site: {
+          url: "auto",
+          base_url: "auto",
+        },
+        home_page: {
+          hero: {
+            title: "Portosaur",
+          },
+        },
+      },
+      projectRoot,
+      { portoPaths },
+    );
+    const aliasPlugin = config.plugins.find(
+      (plugin) =>
+        typeof plugin === "function" && plugin().name === "portosaur-aliases",
+    )();
+    const aliases = aliasPlugin.configureWebpack().resolve.alias;
+    const resolveHostDependency = (packageName) =>
+      projectRequire.resolve(packageName, {
+        paths: [projectRoot, portoPaths.themeRoot],
+      });
+
+    expect(aliases["@docusaurus/plugin-content-docs/client$"]).toBe(
+      resolveHostDependency("@docusaurus/plugin-content-docs/client"),
+    );
+    expect(aliases["@docusaurus/theme-common$"]).toBe(
+      resolveHostDependency("@docusaurus/theme-common"),
+    );
+    expect(aliases["@docusaurus/theme-common/internal$"]).toBe(
+      resolveHostDependency("@docusaurus/theme-common/internal"),
+    );
+  });
+
   test("auto-resolves GitHub user Pages URL and base path from build env", () => {
     const config = buildDocuConfig(
       {

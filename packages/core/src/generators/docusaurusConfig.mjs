@@ -38,6 +38,10 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
     require.resolve(packageName, {
       paths: [themeRoot, projectDir].filter(Boolean),
     });
+  const resolveHostDependency = (packageName) =>
+    require.resolve(packageName, {
+      paths: [projectDir, themeRoot].filter(Boolean),
+    });
 
   const presetClassic = resolveThemeDependency("@docusaurus/preset-classic");
   const presetRequire = createRequire(presetClassic);
@@ -748,6 +752,16 @@ export function buildDocuConfig(rawUserConfig, projectDir, context = {}) {
               alias: {
                 "@portosaur-notes": path.resolve(projectDir, notesDir),
                 "@portosaur-blog": path.resolve(projectDir, blogDir),
+                "@docusaurus/plugin-content-docs/client$":
+                  resolveHostDependency(
+                    "@docusaurus/plugin-content-docs/client",
+                  ),
+                "@docusaurus/theme-common$": resolveHostDependency(
+                  "@docusaurus/theme-common",
+                ),
+                "@docusaurus/theme-common/internal$": resolveHostDependency(
+                  "@docusaurus/theme-common/internal",
+                ),
               },
             },
           };

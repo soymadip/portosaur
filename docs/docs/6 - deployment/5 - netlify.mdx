@@ -1,0 +1,32 @@
+---
+title: "Netlify"
+description: "Deploy Your Site to Netlify."
+icon: "lo:netlify"
+sidebar_position: 6
+---
+
+Portosaur includes a Netlify template. In an existing project, run:
+
+```bash
+porto init --ci-only -h netlify
+```
+
+This creates `netlify.toml` in the project root:
+
+```toml title="netlify.toml"
+[build]
+  command = "bun run build"
+  publish = "build"
+
+[build.environment]
+  BUN_VERSION = "latest"
+```
+
+Then:
+
+1. Import the Git repository in the [Netlify Dashboard](https://app.netlify.com).
+2. Keep the build command as `bun run build` and publish directory as `build`.
+3. Confirm the deploy branch matches the branch selected in Netlify.
+4. Push a commit and check the deploy log in **Deploys**.
+
+The generated file configures the build and publish directory; Netlify performs dependency installation in its build environment.
