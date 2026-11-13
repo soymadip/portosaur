@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { logger } from "@portosaur/logger";
+import { Paths } from "../utils/index.mjs";
 
 /**
  * Portosaur Discovery-Based Schema Generator [AI GENERATED]
@@ -362,18 +363,15 @@ function extractArgs(sourceCode, startIdx) {
 // ------- Main -------
 
 export async function schemaCommand(options = {}) {
-  const pkgDir = path.resolve(import.meta.dirname, "../");
-  const coreDir = path.resolve(pkgDir, "../../core");
-
   const SOURCE_FILE =
     typeof options.config === "string"
       ? path.resolve(process.cwd(), options.config)
-      : path.resolve(coreDir, "src/generators/docusaurusConfig.mjs");
+      : path.resolve(Paths.core, "src/generators/docusaurusConfig.mjs");
 
   const OUTPUT_FILE =
     typeof options.output === "string"
       ? path.resolve(process.cwd(), options.output)
-      : path.resolve(coreDir, "configSchema.json");
+      : path.resolve(process.cwd(), "schema.json");
 
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",

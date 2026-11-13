@@ -17,7 +17,7 @@
   "scripts": {
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "schema": "bun packages/cli/bin/porto.mjs schema",
+    "schema": "bun packages/cli/bin/porto.mjs schema -o packages/core/configSchema.json",
     "playground": "bun src/playground.mjs",
     "build": "bun run playground build",
     "dev": "bun run playground dev",
