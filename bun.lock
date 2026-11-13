@@ -56,8 +56,11 @@
       "version": "0.24.1",
       "dependencies": {
         "@docusaurus/core": "^3.10.2",
+        "@docusaurus/plugin-content-docs": "^3.10.2",
         "@docusaurus/plugin-pwa": "^3.10.2",
         "@docusaurus/preset-classic": "^3.10.2",
+        "@docusaurus/theme-classic": "^3.10.2",
+        "@docusaurus/theme-common": "^3.10.2",
         "@easyops-cn/docusaurus-search-local": "^0.55.2",
         "@embedpdf/react-pdf-viewer": "^2.14.4",
         "@embedpdf/snippet": "^2.14.4",
@@ -75,6 +78,7 @@
         "@iconify-json/streamline-sharp": "^1.2.0",
         "@iconify/react": "^6.0.2",
         "@iconify/utils": "^3.1.4",
+        "@mdx-js/react": "^3.0.0",
         "@portosaur/core": "workspace:*",
         "chalk": "^6.0.0",
         "clsx": "^2.1.1",
@@ -2405,7 +2409,7 @@
 
     "preact": ["preact@10.29.1", "", {}, "sha512-gQCLc/vWroE8lIpleXtdJhTFDogTdZG9AjMUpVkDf2iTCNwYNWA+u16dL41TqUDJO4gm2IgrcMv3uTpjd4Pwmg=="],
 
-    "prettier": ["prettier@3.9.6", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g=="],
+    "prettier": ["prettier@3.10.1", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-70vp3ZUYoPlFbF9uiTdXHUUCGEIp7d4+6p+8DYbkm2jP7x/3i/paXVF6dopSI3zd/CEitrZN1rc4i85xWmmXlg=="],
 
     "pretty-bytes": ["pretty-bytes@5.6.0", "", {}, "sha512-FFw039TmrBqFK8ma/7OL3sDz/VytdtJr044/QUJtH0wK9lb9jLq9tJyIxUwtQJHwar2BqtiA4iCWSwo9JLkzFg=="],
 

@@ -30,8 +30,12 @@
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.2",
+    "@docusaurus/plugin-content-docs": "^3.10.2",
     "@docusaurus/plugin-pwa": "^3.10.2",
     "@docusaurus/preset-classic": "^3.10.2",
+    "@docusaurus/theme-classic": "^3.10.2",
+    "@docusaurus/theme-common": "^3.10.2",
+    "@mdx-js/react": "^3.0.0",
     "@easyops-cn/docusaurus-search-local": "^0.55.2",
     "@embedpdf/react-pdf-viewer": "^2.14.4",
     "@embedpdf/snippet": "^2.14.4",

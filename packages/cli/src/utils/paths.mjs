@@ -59,3 +59,31 @@ export const Paths = {
     };
   },
 };
+
+/**
+ * Resolve the Portosaur theme paths from a user's installed theme package.
+ * Falls back to the local workspace package during Portosaur development.
+ *
+ * @param {string} UserRoot - The user's project directory.
+ * @returns {Object} Resolved paths for the theme package.
+ */
+export function resolvePortoPaths(UserRoot) {
+  let themeRoot;
+
+  try {
+    const userRequire = createRequire(path.join(UserRoot, "package.json"));
+    const themeEntry = userRequire.resolve("@portosaur/theme");
+    themeRoot = path.resolve(path.dirname(themeEntry), "..");
+  } catch {
+    themeRoot = Paths.theme;
+  }
+
+  return {
+    root: Paths.root,
+    themeRoot,
+    static: path.join(themeRoot, "static"),
+    assets: path.join(themeRoot, "assets"),
+    theme: path.join(themeRoot, "theme"),
+    plugins: path.join(themeRoot, "src/plugins"),
+  };
+}

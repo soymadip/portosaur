@@ -21,6 +21,7 @@ TestimonialsSection/
 
 # Env
 .env
+.secrets
 .env.*
 !.env.example
 # OS

@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import {
   Paths,
+  resolvePortoPaths,
   writeConfigShim,
   logResolvedSiteLocation,
   runDocusaurus,
@@ -46,12 +47,14 @@ export async function devCommand(siteDir, options = {}) {
    * ====================== Path Resolution ======================
    */
 
-  const portoPaths = Paths.portoPaths;
+  const portoPaths = resolvePortoPaths(UserRoot);
 
   let configContext = { extraHeadTags: [] };
 
   try {
-    const userConfig = loadUserConfig(UserRoot, { portoRoot: Paths.theme });
+    const userConfig = loadUserConfig(UserRoot, {
+      portoRoot: portoPaths.themeRoot,
+    });
     configContext = await generateSiteAssets({
       UserRoot,
       userConfig,
@@ -72,7 +75,7 @@ export async function devCommand(siteDir, options = {}) {
           // which triggers Docusaurus' own file watcher to hot-reload.
           try {
             const userConfig = loadUserConfig(UserRoot, {
-              portoRoot: Paths.theme,
+              portoRoot: portoPaths.themeRoot,
             });
 
             generateSiteAssets({ UserRoot, userConfig, portoPaths })
@@ -139,7 +142,7 @@ export async function devCommand(siteDir, options = {}) {
       });
     }
 
-    await runDocusaurus("start", UserRoot, configPath, extraArgs);
+    await runDocusaurus("start", UserRoot, configPath, extraArgs, portoPaths);
   } catch (error) {
     logger.error(
       `Failed to start dev server:\n${error.stack || error.message}`,

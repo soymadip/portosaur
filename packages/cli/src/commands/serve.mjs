@@ -2,7 +2,7 @@ import path from "path";
 import {
   runDocusaurus,
   validateProject,
-  Paths,
+  resolvePortoPaths,
   writeConfigShim,
 } from "../utils/index.mjs";
 import { logger } from "@portosaur/logger";
@@ -32,7 +32,7 @@ export async function serveCommand(siteDir, options = {}) {
 
   validateProject(UserRoot);
 
-  const portoPaths = Paths.portoPaths;
+  const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
     logger.info("Serving built site...");
@@ -49,7 +49,7 @@ export async function serveCommand(siteDir, options = {}) {
     }
 
     // Docusaurus serve looks for the 'build' directory by default.
-    await runDocusaurus("serve", UserRoot, configPath, extraArgs);
+    await runDocusaurus("serve", UserRoot, configPath, extraArgs, portoPaths);
   } catch (error) {
     logger.error(`Failed to serve site: ${error.message}`);
     process.exit(1);

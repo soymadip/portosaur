@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {
-  Paths,
+  resolvePortoPaths,
   writeConfigShim,
   logResolvedSiteLocation,
   runDocusaurus,
@@ -48,10 +48,12 @@ export async function buildCommand(siteDir, options = {}) {
    * ====================== Path Resolution ======================
    */
 
-  const portoPaths = Paths.portoPaths;
+  const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
-    const userConfig = loadUserConfig(UserRoot, { portoRoot: Paths.theme });
+    const userConfig = loadUserConfig(UserRoot, {
+      portoRoot: portoPaths.themeRoot,
+    });
 
     // ------- Asset Generation -------
 
@@ -79,7 +81,7 @@ export async function buildCommand(siteDir, options = {}) {
 
     const finalOutDir = path.resolve(UserRoot, outDirName);
 
-    await runDocusaurus("build", UserRoot, configPath, extraArgs);
+    await runDocusaurus("build", UserRoot, configPath, extraArgs, portoPaths);
 
     // ------- Post Build -------
 

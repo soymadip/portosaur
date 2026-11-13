@@ -17,6 +17,7 @@ const collections = {
   "line-md": require("@iconify-json/line-md/icons.json"),
   devicon: require("@iconify-json/devicon/icons.json"),
   "streamline-sharp": require("@iconify-json/streamline-sharp/icons.json"),
+  "fa7-solid": require("@iconify-json/fa7-solid/icons.json"),
 };
 
 function walkDir(dir, callback) {
