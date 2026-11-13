@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://soymadip.github.io/portosaur/config/schema.json
+# yaml-language-server: $schema=https://soymadip.github.io/portosaur/config-schema.json
 #
 # Portosaur Project Configuration
 # Check full Config Docs: https://soymadip.github.io/portosaur/docs/config

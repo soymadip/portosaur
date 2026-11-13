@@ -11,7 +11,7 @@
   },
   "files": [
     "src",
-    "configSchema.json"
+    "config-schema.json"
   ],
   "scripts": {
     "prepack": "bun ../cli/bin/porto.mjs schema"

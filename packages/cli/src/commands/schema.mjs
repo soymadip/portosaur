@@ -371,7 +371,7 @@ export async function schemaCommand(options = {}) {
   const OUTPUT_FILE =
     typeof options.output === "string"
       ? path.resolve(process.cwd(), options.output)
-      : path.resolve(process.cwd(), "schema.json");
+      : path.resolve(process.cwd(), "config-schema.json");
 
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",
