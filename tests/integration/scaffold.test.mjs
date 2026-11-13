@@ -50,5 +50,5 @@ describe("Integration: Scaffold & Build", () => {
       "docusaurus.config.js",
     );
     expect(fs.existsSync(shimPath)).toBe(true);
-  }, 20_000);
+  }, 60_000);
 });

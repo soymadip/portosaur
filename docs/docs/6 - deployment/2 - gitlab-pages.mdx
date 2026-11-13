@@ -33,7 +33,7 @@ porto init --ci-only -h gitlab-pages
 This creates `.gitlab-ci.yml` in the project root. The generated job runs on `main` and:
 
 1. Installs the project dependencies with Bun.
-2. Builds the site with `bunx portosaur build`.
+2. Builds the site with `bun run build`.
 3. Moves Portosaur's `build/` output to GitLab Pages' required `public/` directory.
 4. Publishes `public/` as a job artifact for Pages.
 

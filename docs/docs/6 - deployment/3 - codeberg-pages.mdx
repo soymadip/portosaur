@@ -38,7 +38,7 @@ For an existing project, run:
 porto init --ci-only -h codeberg-pages
 ```
 
-This creates `.forgejo/workflows/deploy.yml`. On a push to `main`, the workflow installs dependencies, runs `bunx portosaur build`, then invokes the Codeberg Pages action to publish the `build/` directory.
+This creates `.forgejo/workflows/deploy.yml`. On a push to `main`, the workflow installs dependencies, runs `bun run build`, then invokes the Codeberg Pages action to publish the `build/` directory.
 
 The generated action's `site` setting includes the repository path. For a `pages` repository used as a user or organization homepage, edit that setting in `.forgejo/workflows/deploy.yml` to use `https://<owner>.codeberg.page/` without `/pages/`.
 

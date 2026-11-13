@@ -6,7 +6,7 @@ steps:
     image: oven/bun:latest
     commands:
       - bun install
-      - bunx portosaur build
+      - bun run build
 
   - name: deploy
     image: appleboy/drone-git-push

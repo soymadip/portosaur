@@ -42,7 +42,7 @@ vars:
 
   versions:
     node_min: 24.15
-    portosaur: "0.22.0"
+    portosaur: "0.25.2"
 
 # Site Metadata, SEO, Parser behavior
 site:

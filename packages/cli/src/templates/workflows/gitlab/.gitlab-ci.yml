@@ -4,7 +4,7 @@ pages:
   stage: deploy
   script:
     - bun install
-    - bunx portosaur build
+    - bun run build
     - mv build public
   artifacts:
     paths:
