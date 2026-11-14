@@ -125,40 +125,48 @@ const hasToc = tocHeadings.length > 0;
   <div class="main-frame">
     <TwoColumnContent hasToc={hasToc}>
       <PageSidebar slot="right-sidebar" headings={tocHeadings} />
-      <ContentPanel>
-        {breadcrumbs.length > 0 && (
-          <nav class="breadcrumbs" aria-label="Breadcrumbs">
-            <ol>
-              <li>
-                <a href="/" aria-label="Home">
-                  ⌂
-                </a>
-              </li>
-              {breadcrumbs.map((crumb, index) => {
-                const isLast = index === breadcrumbs.length - 1;
-                // Categories without an index doc have href: null
-                // (see findSidebarPath) — plain text, not a link.
-                return (
-                  <li>
-                    {isLast || !crumb.href ? (
-                      <span
-                        class:list={[{ current: isLast }]}
-                        aria-current={isLast ? "page" : undefined}
-                      >
-                        {crumb.title}
-                      </span>
-                    ) : (
-                      <a href={crumb.href}>{crumb.title}</a>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
-        )}
-        {heading && <PageTitle title={heading} />}
-      </ContentPanel>
-      <ContentPanel>
+      {/* The header panel renders only when it has something in it:
+          with breadcrumbs off and no synthetic title it would be an
+          empty padded block above the content. */}
+      {(breadcrumbs.length > 0 || heading) && (
+        <ContentPanel>
+          {breadcrumbs.length > 0 && (
+            <nav class="breadcrumbs" aria-label="Breadcrumbs">
+              <ol>
+                <li>
+                  <a href="/" aria-label="Home">
+                    ⌂
+                  </a>
+                </li>
+                {breadcrumbs.map((crumb, index) => {
+                  const isLast = index === breadcrumbs.length - 1;
+                  // Categories without an index doc have href: null
+                  // (see findSidebarPath) — plain text, not a link.
+                  return (
+                    <li>
+                      {isLast || !crumb.href ? (
+                        <span
+                          class:list={[{ current: isLast }]}
+                          aria-current={isLast ? "page" : undefined}
+                        >
+                          {crumb.title}
+                        </span>
+                      ) : (
+                        <a href={crumb.href}>{crumb.title}</a>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          )}
+          {heading && <PageTitle title={heading} />}
+        </ContentPanel>
+      )}
+      {/* No separator when there is no synthetic title: the content
+          H1 is the page's title, so the heading sits at the top of
+          the content like OG instead of below a hairline. */}
+      <ContentPanel noBorder={!heading}>
         <MarkdownContent>
           <slot />
         </MarkdownContent>
