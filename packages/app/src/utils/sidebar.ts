@@ -43,10 +43,9 @@ import type { Frontmatter } from "./slug.ts";
  *   ]
  *
  * The collection home link (root index title + href, for pagination)
- * lives outside the tree — see `buildSidebarHome`. The notes sidebar
- * flattens the tree for display only — see `flattenSidebar`; the tree
- * itself stays hierarchical, so breadcrumbs and pagination keep their
- * category structure.
+ * lives outside the tree — see `buildSidebarHome`. Both modes render
+ * the tree as-is, categories and all, so breadcrumbs and pagination
+ * keep their category structure.
  */
 
 /** A collection entry, with its slug resolved by the canonical slug util. */
@@ -366,45 +365,4 @@ export function buildSidebarHome(
     title: rootIndex?.data?.title ?? sectionLabel,
     href: hrefForSlug(base, rootIndex?.slug ?? ""),
   };
-}
-
-/**
- * Flattens a sidebar tree into a plain doc list, depth-first, in
- * sidebar order: categories dissolve into their children, and a
- * category with an index doc keeps its page as a doc link (the
- * category label + link href, with the category's enrichment) ahead
- * of its children. Used by the notes sidebar, which lists every note
- * flat instead of grouping them into categories. Only the sidebar
- * presentation flattens — the tree itself stays hierarchical, so
- * breadcrumbs, pagination, and topic lists keep their categories,
- * and routes stay file-path based.
- *
- * A synthesized doc item has no entry id in the tree — its href is
- * unique per item, so it doubles as the id.
- */
-export function flattenSidebar(tree: SidebarItem[]): SidebarDocItem[] {
-  const docs: SidebarDocItem[] = [];
-
-  function walk(nodes: SidebarItem[]): void {
-    for (const node of nodes) {
-      if (node.type === "doc") {
-        docs.push(node);
-      } else {
-        if (node.link?.href) {
-          const item: SidebarDocItem = {
-            type: "doc",
-            label: node.label,
-            href: node.link.href,
-            id: node.link.href,
-          };
-          addEnrichment(item, node);
-          docs.push(item);
-        }
-        walk(node.items);
-      }
-    }
-  }
-
-  walk(tree);
-  return docs;
 }

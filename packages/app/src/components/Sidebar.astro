@@ -5,18 +5,17 @@
 //
 // The `porto:sidebar` tree is the root's children — the top-level
 // items, with no root wrapper (the old "Docs"/"Notes" root entry is
-// gone). Docs mode renders the tree as-is, categories and all; the
-// notes sidebar lists every note flat, with no category grouping
-// (`flattenSidebar`). The old root collapse chevron and the «
-// sidebar-collapse button are gone: Starlight has no sidebar
-// collapse; open/closed groups and scroll position persist across
-// navigations instead (SidebarPersister).
-import config from "porto:config";
+// gone). Both modes render the tree as-is, categories and all —
+// Docusaurus-style nesting in notes mode too (the notes sidebar was
+// flattened in `68797af`, reversed per user feedback: a flat list of
+// every note left no visual hierarchy). The old root collapse
+// chevron and the « sidebar-collapse button are gone: Starlight has
+// no sidebar collapse; open/closed groups and scroll position
+// persist across navigations instead (SidebarPersister).
 import sidebarTree from "porto:sidebar";
 import MobileMenuFooter from "./MobileMenuFooter.astro";
 import SidebarPersister from "./SidebarPersister.astro";
 import SidebarSublist from "./SidebarSublist.astro";
-import { flattenSidebar } from "../utils/sidebar.ts";
 
 interface Props {
   currentHref: string;
@@ -24,8 +23,7 @@ interface Props {
 
 const { currentHref } = Astro.props;
 
-const items =
-  config.siteMode === "docs" ? sidebarTree : flattenSidebar(sidebarTree);
+const items = sidebarTree;
 ---
 
 <SidebarPersister>
