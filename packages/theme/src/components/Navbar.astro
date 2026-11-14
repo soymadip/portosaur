@@ -4,14 +4,15 @@
 // in `themeConfig.navbar.items`:
 //
 //   - brand: site title + generated favicon logo
-//   - search form (GETs to /search?q=), theme toggle, then nav links —
-//     the old navbar.css reordered the right side into exactly this
-//     order (search, toggle, links). The search form only renders on
-//     pages under the notes/docs or blog route (the old search plugin's
-//     `searchContextByPaths` + `hideSearchBarWithNoSearchContext`); on
-//     mobile it collapses to a magnifier icon linking to /search, the
-//     hamburger moves to the left of the brand, and the theme toggle
-//     lives inside the slide-down menu instead of the bar.
+//   - search button (opens the Pagefind search modal), theme toggle,
+//     then nav links — the old navbar.css reordered the right side
+//     into exactly this order (search, toggle, links). The search
+//     button only renders on pages under the notes/docs or blog route
+//     (the old search plugin's `searchContextByPaths` +
+//     `hideSearchBarWithNoSearchContext`); on mobile it collapses to
+//     a magnifier icon button, the hamburger moves to the left of the
+//     brand, and the theme toggle lives inside the slide-down menu
+//     instead of the bar.
 //   - Docs (docs mode) / About Me, Projects, Experience, Contact
 //     anchors (portfolio mode, when each section is enabled)
 //   - custom `theme.navigation.navbar_items` (links + dropdowns)
@@ -22,6 +23,7 @@
 // Dropdowns are vanilla <details> (keyboard accessible via <summary>).
 // Hide-on-scroll and the mobile slide-down menu are vanilla scripts.
 import config from "porto:config";
+import Search from "./Search.astro";
 
 interface Props {
   /** True on the portfolio home page — removes the navbar shadow and
@@ -51,7 +53,7 @@ const normalizedPath = pathname.replace(/\/+$/, "") || "/";
 
 // Search visibility — port of the old `@easyops-cn/docusaurus-search-local`
 // setup (`searchContextByPaths: [notesRoute, blogRoute]` with
-// `hideSearchBarWithNoSearchContext: true`): the search box only shows on
+// `hideSearchBarWithNoSearchContext: true`): the search button only shows on
 // pages under the notes/docs route or the blog route, and is hidden on
 // home, /tasks, /offline, /search, 404, and (in docs mode, where the
 // notes route is "docs") the /notes NoteCards page. The plugin matches
@@ -290,46 +292,7 @@ const dropdownLink =
     )}
 
     <div class="ml-auto flex items-center gap-2">
-      {showSearch && (
-        <form
-          class="[@media(max-width:996px)]:hidden"
-          action={withBase("/search")}
-          method="get"
-          role="search"
-        >
-          <input
-            class="w-[130px] rounded-[1.25rem] border border-border bg-surface py-1.5 pr-2 pl-8 text-[0.85rem] text-foreground"
-            type="search"
-            name="q"
-            placeholder="Search"
-            aria-label="Search"
-          />
-        </form>
-      )}
-
-      {showSearch && (
-        <a
-          class="hidden items-center rounded-[1.25rem] border border-border bg-surface px-2 py-1.5 text-muted no-underline hover:text-foreground [@media(max-width:996px)]:flex"
-          href={withBase("/search")}
-          aria-label="Search"
-          title="Search"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-        </a>
-      )}
+      {showSearch && <Search />}
 
       {theme.showThemeSwitch && (
         <button

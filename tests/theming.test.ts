@@ -258,6 +258,20 @@ describe("theming", () => {
     expect(template.split("\n").length).toBeLessThan(80);
   });
 
+  test("Search component is a vanilla porto-search element with no --porto-*", () => {
+    const search = fs.readFileSync(
+      path.join(
+        REPO_ROOT,
+        "packages/theme/src/components/Search.astro",
+      ),
+      "utf8",
+    );
+    expect(search).not.toContain("--porto-");
+    expect(search).toContain("<porto-search");
+    expect(search).toContain("PagefindUI");
+    expect(search).not.toContain("preact");
+  });
+
   test("no --porto-* in theme source CSS", () => {
     for (const file of collectFiles(THEME_CSS_DIR, ".css")) {
       const css = fs.readFileSync(file, "utf8");
@@ -328,6 +342,24 @@ describe("theming", () => {
       const css = builtCss();
       expect(css).not.toContain("--ifm-");
       expect(css).not.toContain("--docusaurus-");
+    });
+
+    builtTest("docs page renders the search button", () => {
+      const html = fs.readFileSync(
+        path.join(DOCS_BUILD_DIR, "docs/index.html"),
+        "utf8",
+      );
+      expect(html).toContain("<porto-search");
+      expect(html).toContain("data-open-modal");
+    });
+
+    builtTest("home has no search button", () => {
+      const html = fs.readFileSync(
+        path.join(DOCS_BUILD_DIR, "index.html"),
+        "utf8",
+      );
+      expect(html).not.toContain("<porto-search");
+      expect(html).not.toContain("data-open-modal");
     });
 
     builtTest("docs home renders data-scheme and data-theme on <html>", () => {
