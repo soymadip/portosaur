@@ -53,6 +53,7 @@ ss.*
 *tmp*
 *.tmp
 *.temp
+*.patch
 temp/
 !templates/**
 wiki/

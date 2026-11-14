@@ -1,9 +1,4 @@
-import {
-  rmSync,
-  existsSync,
-  readFileSync,
-  writeFileSync,
-} from "fs";
+import { rmSync, existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
@@ -48,7 +43,27 @@ export function runPlayground({
     rmSync(SITE_DIR, { recursive: true, force: true });
   }
 
-  const isExisting = existsSync(SITE_DIR);
+  const dirExists = existsSync(SITE_DIR);
+
+  // A directory can exist without being an initialized site (e.g. an
+  // empty dir left behind by a deleted or interrupted scaffold). Only
+  // skip initialization when the site actually looks initialized;
+  // otherwise clear the broken directory and initialize fresh.
+  const isInitialized =
+    dirExists &&
+    existsSync(path.join(SITE_DIR, "package.json")) &&
+    existsSync(path.join(SITE_DIR, "config.yml"));
+
+  if (dirExists && !isInitialized) {
+    console.log(
+      colors.warn(
+        `\n>>> ${siteName} exists but is not initialized, re-initializing...`,
+      ),
+    );
+    rmSync(SITE_DIR, { recursive: true, force: true });
+  }
+
+  const isExisting = isInitialized;
 
   if (!isExisting) {
     console.log(colors.info("\n>>> Initializing new project..."));
