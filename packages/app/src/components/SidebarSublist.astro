@@ -14,9 +14,9 @@
 //   the active/hover background lives on the <summary> row, not the
 //   inner link, so the caret sits inside the box; the caret has its
 //   own hover background stacking on top of the row hover.
-// - Rows are Fumadocs-style: uniform size across levels, roomy
-//   0.5em vertical padding, and the caret pinned to the row's right
-//   edge (the label grows to fill the row).
+// - Rows are Fumadocs-style: uniform size across levels and the
+//   caret pinned to the row's right edge (the label grows to fill
+//   the row). Vertical padding is 0.3em — 0.5em felt too airy.
 // - Every row shows an icon: the frontmatter `icon` when the entry
 //   declares one, else DocCardList's fallbacks (folder for
 //   categories, notebook for docs) — Fumadocs-style. The frontmatter
@@ -178,7 +178,7 @@ function hasActiveDescendant(item: any): boolean {
     }
 
     .top-level > li + li {
-      margin-top: 0.75rem;
+      margin-top: 0.5rem;
     }
 
     summary {
@@ -187,7 +187,7 @@ function hasActiveDescendant(item: any): boolean {
       justify-content: space-between;
       /* Same vertical padding as a leaf link, so category rows and
          leaf rows are the same height. */
-      padding: 0.5em var(--porto-sidebar-item-padding-inline);
+      padding: 0.3em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
       cursor: pointer;
       user-select: none;
@@ -227,7 +227,7 @@ function hasActiveDescendant(item: any): boolean {
       border-radius: 0.25rem;
       text-decoration: none;
       color: var(--porto-color-gray-2);
-      padding: 0.5em var(--porto-sidebar-item-padding-inline);
+      padding: 0.3em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
     }
     a > * {
@@ -353,7 +353,7 @@ function hasActiveDescendant(item: any): boolean {
 
     @media (min-width: 50rem) {
       .top-level > li + li {
-        margin-top: 0.5rem;
+        margin-top: 0.25rem;
       }
       .large,
       a {
