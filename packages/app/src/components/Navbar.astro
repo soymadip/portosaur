@@ -310,20 +310,28 @@ const showThemeSwitch = theme.showThemeSwitch;
       border-radius: 0.25rem;
       padding: 0.5rem;
       background-color: transparent;
-      color: var(--porto-color-gray-2);
+      color: var(--porto-color-gray-1);
       cursor: pointer;
     }
     .menu-button:hover {
       color: var(--porto-color-white);
     }
 
-    /* VitePress's hamburger icon (VPNavBarHamburger): three lines in
-       a 16×14 box — top and bottom 12px, middle 8px, 2px thick, 6px
-       apart — measured off vitepress.dev (the lines are right-
-       staggered, not three equal bars). While the menu popover is
-       open the lines animate into an X; the button and the popover
-       are not siblings (the button lives in the header, the popover
-       in the layout), so the state reads off <body>. */
+    /* VitePress's hamburger icon (VPNavBarHamburger, MIT License),
+       ported from the source (vitepress 1.6.4): three 16px lines in a
+       16×14 box with overflow hidden. The stagger is NOT different
+       line widths — every line is 16px, and the default translateX
+       offsets (top 0, middle 8px, bottom 4px) clip the middle to 8px
+       and the bottom to 12px visible, all right-aligned. (An earlier
+       version here used 12/8/12 widths from a mis-measured
+       screenshot: the analysis window clipped the top line's left
+       edge, so it looked 12px. The source is authoritative.) Hover
+       shifts the stagger (top 4px, middle 0, bottom 8px). While the
+       menu popover is open the lines animate into an X — top rotates
+       225°, bottom 135°, middle slides fully out — and hovering the
+       open button dims the lines. The button and the popover are not
+       siblings (the button lives in the header, the popover in the
+       layout), so the open state reads off <body>. */
     .hamburger-container {
       position: relative;
       width: 16px;
@@ -333,37 +341,55 @@ const showThemeSwitch = theme.showThemeSwitch;
     .hamburger-line {
       position: absolute;
       left: 0;
+      width: 16px;
       height: 2px;
       background-color: currentColor;
       transition:
         top 0.25s,
-        transform 0.25s,
-        opacity 0.25s;
+        background-color 0.5s,
+        transform 0.25s;
     }
     .hamburger-line.top {
       top: 0;
-      width: 12px;
+      transform: translateX(0);
     }
     .hamburger-line.middle {
       top: 6px;
-      left: 4px;
-      width: 8px;
+      transform: translateX(8px);
     }
     .hamburger-line.bottom {
       top: 12px;
-      width: 12px;
+      transform: translateX(4px);
+    }
+    .menu-button:hover .hamburger-line.top {
+      transform: translateX(4px);
+    }
+    .menu-button:hover .hamburger-line.middle {
+      transform: translateX(0);
+    }
+    .menu-button:hover .hamburger-line.bottom {
+      transform: translateX(8px);
     }
     :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.top {
       top: 6px;
-      transform: rotate(45deg);
+      transform: translateX(0) rotate(225deg);
     }
     :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.middle {
-      opacity: 0;
-      transform: translateX(12px);
+      top: 6px;
+      transform: translateX(16px);
     }
     :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.bottom {
       top: 6px;
-      transform: rotate(-45deg);
+      transform: translateX(0) rotate(135deg);
+    }
+    :global(body:has(#porto__sidebar:popover-open))
+      .menu-button:hover
+      .hamburger-line {
+      background-color: var(--porto-color-gray-2);
+      transition:
+        top 0.25s,
+        background-color 0.25s,
+        transform 0.25s;
     }
 
     .right-group {
