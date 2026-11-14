@@ -18,6 +18,7 @@ import DocCardList from "../components/DocCardList.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import {
   pageTitle,
+  docPageTitles,
   isIndexEntry,
   contentRelativePath,
 } from "../utils/content.ts";
@@ -31,11 +32,18 @@ const rootIndex = notes.find(
   (entry) => isIndexEntry(entry) && !entry.id.includes("/"),
 );
 
-const heading = rootIndex?.data?.title ?? "Docs";
-const title = pageTitle(heading, siteTitle);
 const description = rootIndex?.data?.description;
 
-const Content = rootIndex ? (await render(rootIndex)).Content : null;
+const rendered = rootIndex ? await render(rootIndex) : null;
+const Content = rendered?.Content ?? null;
+// Same Docusaurus title rules as doc.astro: no synthetic h1 when the
+// index content has its own H1 (its fallback title is "Docs").
+const { heading, metaTitle } = docPageTitles(
+  rootIndex,
+  rendered?.headings ?? [],
+  "Docs",
+);
+const title = pageTitle(metaTitle, siteTitle);
 // The tree is the top-level items — the index cards list them directly.
 const items = sidebar;
 

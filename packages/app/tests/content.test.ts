@@ -4,6 +4,8 @@ import {
   findBreadcrumbs,
   findPrevNext,
   findCategoryItems,
+  contentTitleHeading,
+  docPageTitles,
 } from "../src/utils/content.ts";
 
 /**
@@ -124,5 +126,108 @@ describe("findCategoryItems", () => {
 
   test("returns an empty array for an unknown href", () => {
     expect(findCategoryItems(tree, "/docs/missing")).toEqual([]);
+  });
+});
+
+function h(depth: number, text: string) {
+  return { depth, slug: text.toLowerCase().replace(/ /g, "-"), text };
+}
+
+describe("contentTitleHeading", () => {
+  test("returns the first heading when it is an H1", () => {
+    expect(
+      contentTitleHeading([h(1, "Title"), h(2, "Section")]),
+    ).toEqual(h(1, "Title"));
+  });
+
+  test("returns null when the first heading is not an H1", () => {
+    expect(
+      contentTitleHeading([h(2, "Section"), h(1, "Later H1")]),
+    ).toBeNull();
+  });
+
+  test("returns null for no headings", () => {
+    expect(contentTitleHeading([])).toBeNull();
+  });
+});
+
+describe("docPageTitles", () => {
+  const fallback = "Variables Data Types";
+
+  test("content H1 suppresses the synthetic heading", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("1.4 - variables-data-types", "python/basics/variables", {
+        title: "Variables and Data Types",
+      }),
+      [h(1, "Variables and Data Types"), h(2, "Numeric Types")],
+      fallback,
+    );
+    expect(heading).toBeNull();
+    expect(metaTitle).toBe("Variables and Data Types");
+  });
+
+  test("content H1 becomes the metadata title without frontmatter", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("1.4 - variables-data-types", "python/basics/variables"),
+      [h(1, "Variables and Data Types")],
+      fallback,
+    );
+    expect(heading).toBeNull();
+    expect(metaTitle).toBe("Variables and Data Types");
+  });
+
+  test("no H1 renders the frontmatter title as the heading", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("intro", "intro", { title: "Intro" }),
+      [h(2, "Section")],
+      fallback,
+    );
+    expect(heading).toBe("Intro");
+    expect(metaTitle).toBe("Intro");
+  });
+
+  test("no H1 and no frontmatter title falls back to the file base", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("1.4 - variables-data-types", "python/basics/variables"),
+      [h(2, "Section")],
+      fallback,
+    );
+    expect(heading).toBe(fallback);
+    expect(metaTitle).toBe(fallback);
+  });
+
+  test("hide_title suppresses the synthetic heading", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("intro", "intro", { title: "Intro", hide_title: true }),
+      [h(2, "Section")],
+      fallback,
+    );
+    expect(heading).toBeNull();
+    expect(metaTitle).toBe("Intro");
+  });
+
+  test("hide_title does not remove a content H1", () => {
+    const { heading, metaTitle } = docPageTitles(
+      entry("intro", "intro", { hide_title: true }),
+      [h(1, "Intro")],
+      fallback,
+    );
+    expect(heading).toBeNull();
+    expect(metaTitle).toBe("Intro");
+  });
+
+  test("an H1 after the first heading does not count", () => {
+    const { heading } = docPageTitles(
+      entry("intro", "intro", { title: "Intro" }),
+      [h(2, "Section"), h(1, "Later H1")],
+      fallback,
+    );
+    expect(heading).toBe("Intro");
+  });
+
+  test("an undefined entry falls back (notes index without a root)", () => {
+    const { heading, metaTitle } = docPageTitles(undefined, [], "Docs");
+    expect(heading).toBe("Docs");
+    expect(metaTitle).toBe("Docs");
   });
 });

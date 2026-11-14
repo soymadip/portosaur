@@ -320,13 +320,62 @@ export function humanizeName(name: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+/** A doc's file-base title: the humanized last path segment. */
+export function docFileTitle(entry: ContentEntry): string {
+  const segments = entry.id.split("/");
+  return humanizeName(segments[segments.length - 1]);
+}
+
 /** A doc's display title: frontmatter title, else the humanized file base. */
 export function docTitle(entry: ContentEntry): string {
   if (entry.data?.title) {
     return entry.data.title;
   }
-  const segments = entry.id.split("/");
-  return humanizeName(segments[segments.length - 1]);
+  return docFileTitle(entry);
+}
+
+/**
+ * The content title heading: the first heading in Astro's `render()`
+ * headings array, when it is an H1. Mirrors Docusaurus's
+ * `contentTitle` remark plugin, which takes the first heading if it
+ * is depth 1 (and stops at the first thematic break — Astro's
+ * headings carry no thematic breaks, so that condition cannot be
+ * checked here; a break before the first H1 is vanishingly rare).
+ */
+export function contentTitleHeading(headings: TocHeading[]): TocHeading | null {
+  const first = headings[0];
+  if (first && first.depth === 1) {
+    return first;
+  }
+  return null;
+}
+
+/**
+ * A doc page's heading and metadata title, mirroring Docusaurus
+ * exactly (verified against `@docusaurus/plugin-content-docs` and
+ * Portosaur's own `DocItem/Content` on main):
+ *
+ * - Metadata title: frontmatter title, else the content H1, else
+ *   the caller-provided fallback (the humanized file base for doc
+ *   pages, "Docs" for the notes index) — Docusaurus's
+ *   `frontMatter.title ?? contentTitle ?? baseID`.
+ * - Page heading: the synthetic `<h1>` renders ONLY when the content
+ *   has no H1 of its own and `hide_title` is not set — OG renders
+ *   `metadata.title` as an h1 only when `contentTitle` is undefined,
+ *   so the content H1 is the page's one title when present and the
+ *   page never shows two.
+ */
+export function docPageTitles(
+  entry: ContentEntry | undefined,
+  headings: TocHeading[],
+  fallback: string,
+): { heading: string | null; metaTitle: string } {
+  const h1 = contentTitleHeading(headings);
+  const hideTitle = entry?.data?.hide_title === true;
+  const frontmatterTitle = entry?.data?.title;
+  const metaTitle = frontmatterTitle ?? h1?.text ?? fallback;
+  const heading = !h1 && !hideTitle ? (frontmatterTitle ?? fallback) : null;
+  return { heading, metaTitle };
 }
 
 /** A flat heading from Astro's `render()` (depth 2–3 after filtering). */

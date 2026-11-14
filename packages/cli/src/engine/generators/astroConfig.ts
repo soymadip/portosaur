@@ -156,6 +156,7 @@ import { glob${authorsImport} } from "astro/loaders";
 // Frontmatter Portosaur understands (§4.15). Unknown keys are stripped.
 const docSchema = z.object({
   title: z.string().optional(),
+  hide_title: z.boolean().optional(),
   description: z.string().optional(),
   icon: z.string().optional(),
   color: z.string().optional(),

@@ -1,13 +1,15 @@
 ---
 // Note/doc detail page (`/${notesRoute}/[...slug]`).
 //
-// Renders inside DocLayout: the frontmatter title is the h1 (passed
-// as DocLayout's `heading` prop — rendered there, not in the slot),
-// the full MDX content, then the automatic topic list (after the
-// content, like the Docusaurus `DocItem/Content` wrapper) on index
-// pages where the topic list is enabled. The root index (empty slug)
-// has no `[...slug]` page — its content renders at the notes index
-// route.
+// Renders inside DocLayout: the page h1 is the synthetic title
+// (passed as DocLayout's `heading` prop — rendered there, not in the
+// slot) ONLY when the content has no H1 of its own — when it does,
+// the content H1 is the page's one title (Docusaurus rule, so the
+// page never shows two). Then the full MDX content, then the
+// automatic topic list (after the content, like the Docusaurus
+// `DocItem/Content` wrapper) on index pages where the topic list is
+// enabled. The root index (empty slug) has no `[...slug]` page —
+// its content renders at the notes index route.
 //
 // The edit URL needs the entry's REAL file path: `entry.id` mangles
 // spaces to dashes (`1 - getting-started` becomes
@@ -29,7 +31,8 @@ import DocLayout from "../layouts/DocLayout.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import {
   pageTitle,
-  docTitle,
+  docFileTitle,
+  docPageTitles,
   withSlugs,
   topicListShouldRender,
   findCategoryItems,
@@ -52,8 +55,16 @@ const { Content, headings } = await render(entry);
 
 const siteTitle = config.site.title;
 const notesRoute = config.site.notesRoute;
-const heading = docTitle(entry);
-const title = pageTitle(heading, siteTitle);
+// Docusaurus title rules (see docPageTitles): the metadata title is
+// frontmatter, else the content H1, else the file base; the synthetic
+// page <h1> renders only when the content has no H1 of its own (and
+// `hide_title` is not set) — otherwise the page would show two.
+const { heading, metaTitle } = docPageTitles(
+  entry,
+  headings,
+  docFileTitle(entry),
+);
+const title = pageTitle(metaTitle, siteTitle);
 const currentHref = `/${notesRoute}/${slug}`;
 
 // The source file's path relative to the content dir (e.g.

@@ -38,8 +38,12 @@ import { findBreadcrumbs, findPrevNext } from "../utils/content.ts";
 interface Props {
   title: string;
   description?: string;
-  /** The page <h1> (rendered here by PageTitle, not in the slot). */
-  heading: string;
+  /**
+   * The page <h1> (rendered here by PageTitle, not in the slot).
+   * Null when the content has its own H1 (Docusaurus rule: the
+   * content H1 is the page's one title) or `hide_title` is set.
+   */
+  heading?: string | null;
   currentHref: string;
   headings?: { depth: number; slug: string; text: string }[];
   editUrl?: string;
@@ -152,7 +156,7 @@ const hasToc = tocHeadings.length > 0;
             </ol>
           </nav>
         )}
-        <PageTitle title={heading} />
+        {heading && <PageTitle title={heading} />}
       </ContentPanel>
       <ContentPanel>
         <MarkdownContent>
