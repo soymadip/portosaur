@@ -34,16 +34,18 @@ import PageTitle from "../components/PageTitle.astro";
 import Sidebar from "../components/Sidebar.astro";
 import TwoColumnContent from "../components/TwoColumnContent.astro";
 import { findBreadcrumbs, findPrevNext } from "../utils/content.ts";
+import type { PageHeading } from "../utils/content.ts";
 
 interface Props {
   title: string;
   description?: string;
   /**
-   * The page <h1> (rendered here by PageTitle, not in the slot).
-   * Null when the content has its own H1 (Docusaurus rule: the
-   * content H1 is the page's one title) or `hide_title` is set.
+   * The page <h1> (rendered here by PageTitle, not in the slot) —
+   * the content H1, hoisted by `remarkContentTitle`, or the
+   * synthetic title when the content has no H1. Null only when
+   * `hide_title` is set and there is no content H1 to hoist.
    */
-  heading?: string | null;
+  heading?: PageHeading | null;
   currentHref: string;
   headings?: { depth: number; slug: string; text: string }[];
   editUrl?: string;
@@ -160,13 +162,10 @@ const hasToc = tocHeadings.length > 0;
               </ol>
             </nav>
           )}
-          {heading && <PageTitle title={heading} />}
+          {heading && <PageTitle title={heading.text} id={heading.id} />}
         </ContentPanel>
       )}
-      {/* No separator when there is no synthetic title: the content
-          H1 is the page's title, so the heading sits at the top of
-          the content like OG instead of below a hairline. */}
-      <ContentPanel noBorder={!heading}>
+      <ContentPanel>
         <MarkdownContent>
           <slot />
         </MarkdownContent>

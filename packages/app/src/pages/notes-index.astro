@@ -16,6 +16,7 @@ import sidebar from "porto:sidebar";
 import DocLayout from "../layouts/DocLayout.astro";
 import DocCardList from "../components/DocCardList.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
+import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
 import {
   pageTitle,
   docPageTitles,
@@ -36,11 +37,12 @@ const description = rootIndex?.data?.description;
 
 const rendered = rootIndex ? await render(rootIndex) : null;
 const Content = rendered?.Content ?? null;
-// Same Docusaurus title rules as doc.astro: no synthetic h1 when the
-// index content has its own H1 (its fallback title is "Docs").
+// Same Docusaurus title rules as doc.astro: the index content's own
+// H1 is hoisted into the header panel when it has one (its fallback
+// title is "Docs").
 const { heading, metaTitle } = docPageTitles(
   rootIndex,
-  rendered?.headings ?? [],
+  rendered?.remarkPluginFrontmatter?.[CONTENT_TITLE_KEY] ?? null,
   "Docs",
 );
 const title = pageTitle(metaTitle, siteTitle);

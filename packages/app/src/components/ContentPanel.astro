@@ -2,20 +2,9 @@
 // Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
 // Starlight's ContentPanel, renamed (`sl-` → `porto-`). One padded
 // content block; consecutive panels are separated by a hairline.
-//
-// `noBorder` suppresses that separator: the hairline divides the
-// title block from the content, so when the page has no title block
-// (its H1 lives in the content itself, Docusaurus-style) there is
-// nothing to separate — and keeping the border would strand the
-// heading below it while synthetic-title pages show it above.
-interface Props {
-  noBorder?: boolean;
-}
-
-const { noBorder = false } = Astro.props;
 ---
 
-<div class:list={["content-panel", { "no-border": noBorder }]}>
+<div class="content-panel">
   <div class="porto-container">
     <slot />
   </div>
@@ -28,9 +17,6 @@ const { noBorder = false } = Astro.props;
     }
     .content-panel + .content-panel {
       border-top: 1px solid var(--porto-color-hairline);
-    }
-    .content-panel + .content-panel.no-border {
-      border-top: none;
     }
     /* The article is capped at 80rem and centered. Generous on
        purpose: at 1920px the middle column is ~1390px, so the cap

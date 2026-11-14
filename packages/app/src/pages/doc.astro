@@ -1,11 +1,12 @@
 ---
 // Note/doc detail page (`/${notesRoute}/[...slug]`).
 //
-// Renders inside DocLayout: the page h1 is the synthetic title
-// (passed as DocLayout's `heading` prop — rendered there, not in the
-// slot) ONLY when the content has no H1 of its own — when it does,
-// the content H1 is the page's one title (Docusaurus rule, so the
-// page never shows two). Then the full MDX content, then the
+// Renders inside DocLayout: the page h1 (passed as DocLayout's
+// `heading` prop — rendered there, not in the slot) is the content
+// H1, hoisted out of the MDX by `remarkContentTitle`, when the
+// content has one — else the synthetic title (Docusaurus rule, so
+// the page never shows two). Either way the heading sits above the
+// panel hairline. Then the full MDX content, then the
 // automatic topic list (after the content, like the Docusaurus
 // `DocItem/Content` wrapper) on index pages where the topic list is
 // enabled. The root index (empty slug) has no `[...slug]` page —
@@ -29,6 +30,7 @@ import config from "porto:config";
 import sidebar from "porto:sidebar";
 import DocLayout from "../layouts/DocLayout.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
+import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
 import {
   pageTitle,
   docFileTitle,
@@ -51,17 +53,20 @@ export async function getStaticPaths() {
 }
 
 const { entry, slug } = Astro.props;
-const { Content, headings } = await render(entry);
+const { Content, headings, remarkPluginFrontmatter } = await render(entry);
 
 const siteTitle = config.site.title;
 const notesRoute = config.site.notesRoute;
 // Docusaurus title rules (see docPageTitles): the metadata title is
-// frontmatter, else the content H1, else the file base; the synthetic
-// page <h1> renders only when the content has no H1 of its own (and
-// `hide_title` is not set) — otherwise the page would show two.
+// frontmatter, else the content H1, else the file base; the page
+// <h1> is the hoisted content H1 when the content has one, else the
+// synthetic title (unless `hide_title` is set) — otherwise the page
+// would show two. The hoisted title comes from the remark plugin's
+// frontmatter stash, NOT the headings array: the H1 is gone from
+// the headings by the time the page renders.
 const { heading, metaTitle } = docPageTitles(
   entry,
-  headings,
+  remarkPluginFrontmatter?.[CONTENT_TITLE_KEY] ?? null,
   docFileTitle(entry),
 );
 const title = pageTitle(metaTitle, siteTitle);

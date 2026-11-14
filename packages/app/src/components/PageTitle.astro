@@ -1,18 +1,21 @@
 ---
 // Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
-// Starlight's PageTitle, renamed. The page <h1> (id `_top`, the
-// skip-link target); the title arrives as a prop — Starlight reads
-// it from its route data instead.
+// Starlight's PageTitle, renamed. The page <h1> (id `_top` by
+// default, the scroll-spy's top marker); the title arrives as a
+// prop — Starlight reads it from its route data instead. A hoisted
+// content H1 passes its heading slug as `id`, so `#slug` anchors
+// still resolve (OG keeps the H1 in the content with the same id).
 import { PAGE_TITLE_ID } from "../constants.ts";
 
 interface Props {
   title: string;
+  id?: string;
 }
 
-const { title } = Astro.props;
+const { title, id = PAGE_TITLE_ID } = Astro.props;
 ---
 
-<h1 id={PAGE_TITLE_ID}>{title}</h1>
+<h1 id={id}>{title}</h1>
 
 <style>
   @layer porto.core {

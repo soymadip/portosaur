@@ -8,9 +8,11 @@
  * it. The integration builds that processor from this module's plugin
  * list.
  *
- * Plugin order matters: remark-directive runs before remarkAdmonitions
- * (which consumes its nodes); remarkIcons runs before remark-emoji so
- * icon shortcodes are claimed first. remarkGithubAlerts runs beside
+ * Plugin order matters: remarkContentTitle runs first — it hoists the
+ * page's first H1 into the title slot before any content transform
+ * sees it. remark-directive runs before remarkAdmonitions (which
+ * consumes its nodes); remarkIcons runs before remark-emoji so icon
+ * shortcodes are claimed first. remarkGithubAlerts runs beside
  * remarkAdmonitions — both emit the same admonition `<div>`s, from
  * `:::` directives and GitHub `[!NOTE]` blockquotes respectively.
  * remarkSpaceFormAdmonitions runs with them: it converts the MDX
@@ -27,6 +29,7 @@ import remarkDirective from "remark-directive";
 import remarkEmoji from "remark-emoji";
 import type { BuiltinTheme } from "shiki";
 
+import remarkContentTitle from "./plugins/remarkContentTitle.ts";
 import remarkVars from "./plugins/remarkVars.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
@@ -37,9 +40,9 @@ import { getShikiThemes } from "./config/shiki.ts";
 
 /**
  * The `@astrojs/mdx` options for a site: the remark/rehype plugins
- * (math, `{vars.*}`, icons, admonitions, GitHub alerts, emoji, JSX
- * `<img>` src unwrapping) and the Shiki themes for the site's color
- * scheme.
+ * (content-title hoisting, math, `{vars.*}`, icons, admonitions,
+ * GitHub alerts, emoji, JSX `<img>` src unwrapping) and the Shiki
+ * themes for the site's color scheme.
  */
 export interface PortosaurMdxOptions {
   remarkPlugins: any[];
@@ -71,6 +74,7 @@ export function portosaurMdxOptions({
   // undefined tree and crashes (`node.type` of undefined).
   return {
     remarkPlugins: [
+      remarkContentTitle,
       remarkMath,
       [remarkVars, userVars],
       remarkIcons,

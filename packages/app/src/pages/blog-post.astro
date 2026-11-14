@@ -22,6 +22,7 @@ import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogSidebar from "../components/BlogSidebar.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
+import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
 import { pageTitle, blogSlug, postDate } from "../utils/content.ts";
 import {
   localImageDimensions,
@@ -71,11 +72,18 @@ const {
   newer,
   older,
 } = Astro.props;
-const { Content } = await render(post);
+const { Content, remarkPluginFrontmatter } = await render(post);
 
 const siteTitle = config.site.title;
 const blogRoute = config.site.blogRoute;
-const heading = post.data.title ?? post.id;
+// OG blog strips the content H1 (`removeContentTitle`) and titles
+// the post from frontmatter, else the content H1, else the file id —
+// `remarkContentTitle` does the stripping here, and the hoisted
+// title is the fallback when there is no frontmatter title.
+const heading =
+  post.data.title ??
+  remarkPluginFrontmatter?.[CONTENT_TITLE_KEY]?.text ??
+  post.id;
 const title = pageTitle(heading, siteTitle);
 const date = dateProp ? new Date(dateProp) : null;
 const tags = post.data.tags ?? [];
