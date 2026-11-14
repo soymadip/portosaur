@@ -334,6 +334,13 @@ function hasActiveDescendant(item: any): boolean {
       align-items: center;
       justify-content: center;
       margin-inline-end: 0.5em;
+      /* Optical centering: the icon is geometrically centered on the
+         1.4 line box, but the text's visual (cap-height) center sits
+         ~0.4px above the line-box center, so the icon reads as
+         slightly low. The 0.5px bottom margin shifts it up ~0.35px
+         through flex centering (measured +0.39px low before this,
+         ~0 after; a full 1px overshot to -0.33px). */
+      margin-bottom: 0.5px;
     }
     .sidebar-icon:empty {
       display: none;
