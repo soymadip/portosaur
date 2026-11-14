@@ -23,6 +23,7 @@
 /docs/getting-started/installation/
 /docs/getting-started/project-structure/
 /docs/markdown/
+/docs/markdown/alerts/
 /docs/markdown/built-in-components/
 /docs/markdown/code-blocks/
 /docs/markdown/frontmatter/

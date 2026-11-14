@@ -1,5 +1,5 @@
 {
-  "generated_from": "Astro build of .playground/build — notes are docs content (playground-uses-docs commit)",
+  "generated_from": "Astro build — new docs page flows into playground notes: Markdown Alerts",
   "routes": [
     {
       "url": "/",
@@ -289,7 +289,17 @@
         "Code Blocks",
         "Preview Window",
         "🧩UI Components",
-        "Built-in MDX Components"
+        "Built-in MDX Components",
+        "Alerts"
+      ]
+    },
+    {
+      "url": "/notes/markdown/alerts/",
+      "title": "Alerts | Soumadip Das",
+      "headings": [
+        "Alerts",
+        "Docusaurus Admonitions",
+        "GitHub Alerts"
       ]
     },
     {

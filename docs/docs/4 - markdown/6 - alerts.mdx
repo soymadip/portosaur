@@ -1,0 +1,86 @@
+---
+title: "Alerts"
+description: "Callout boxes with Docusaurus admonitions and GitHub alerts."
+icon: "lu:triangle-alert"
+sidebar_position: 6
+---
+
+Callouts highlight information that deserves attention. Portosaur supports two syntaxes for them: Docusaurus admonitions (`:::`) and GitHub alerts (`> [!NOTE]`). Both render as the same callout boxes.
+
+---
+
+## Docusaurus Admonitions
+
+Fence a block with `:::` and a type. A title in square brackets after the type becomes the callout's heading; without one, the type's default title is used.
+
+```md
+:::tip[Pro tip]
+Use `bun` instead of `npm` — installs are much faster.
+:::
+
+:::warning
+This will delete your `build/` directory.
+:::
+```
+
+:::tip[Pro tip]
+Use `bun` instead of `npm` — installs are much faster.
+:::
+
+:::warning
+This will delete your `build/` directory.
+:::
+
+Available types: `note`, `tip`, `info`, `success`, `warning`, `caution`, and `danger`.
+
+---
+
+## GitHub Alerts
+
+Start a blockquote with an alert marker. The marker must be uppercase and on the blockquote's first line; anything else stays a plain quote.
+
+```md
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+```
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+There are five types, each with GitHub's color:
+
+| Marker         | Title     | Color  |
+| -------------- | --------- | ------ |
+| `[!NOTE]`      | Note      | Blue   |
+| `[!TIP]`       | Tip       | Green  |
+| `[!IMPORTANT]` | Important | Purple |
+| `[!WARNING]`   | Warning   | Orange |
+| `[!CAUTION]`   | Caution   | Red    |
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
+### Custom Titles
+
+Text placed right after the marker on the same line becomes the alert's title. The title is plain text — inline formatting is flattened.
+
+```md
+> [!NOTE] Heads up
+> The title of this alert is "Heads up", not "Note".
+```
+
+> [!NOTE] Heads up
+> The title of this alert is "Heads up", not "Note".
+
+### GitHub vs Docusaurus Colors
+
+The two syntaxes keep their own system's colors, so the same word can look different: a GitHub `[!NOTE]` is blue, while a Docusaurus `:::note` is grey, and `[!CAUTION]` is red where `:::caution` is orange.

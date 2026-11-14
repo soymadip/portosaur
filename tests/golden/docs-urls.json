@@ -1,5 +1,5 @@
 {
-  "generated_from": "Astro build of docs/build (Phase 3 re-baseline: intentional §4.11 content edits — logger retitle, templates Generated Files section, theme-customization rewrite)",
+  "generated_from": "Astro build — new docs page: Markdown Alerts (6 - alerts.mdx)",
   "routes": [
     {
       "url": "/",
@@ -269,7 +269,17 @@
         "Code Blocks",
         "Preview Window",
         "🧩UI Components",
-        "Built-in MDX Components"
+        "Built-in MDX Components",
+        "Alerts"
+      ]
+    },
+    {
+      "url": "/docs/markdown/alerts/",
+      "title": "Alerts | Portosaur",
+      "headings": [
+        "Alerts",
+        "Docusaurus Admonitions",
+        "GitHub Alerts"
       ]
     },
     {

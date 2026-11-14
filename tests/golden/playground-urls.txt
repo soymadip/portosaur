@@ -27,6 +27,7 @@
 /notes/getting-started/installation/
 /notes/getting-started/project-structure/
 /notes/markdown/
+/notes/markdown/alerts/
 /notes/markdown/built-in-components/
 /notes/markdown/code-blocks/
 /notes/markdown/frontmatter/

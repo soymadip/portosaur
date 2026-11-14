@@ -62,7 +62,11 @@ mark {
 /* === Callouts / Admonitions ===
  * Emitted by the admonitions plugin as `.admonition.admonition-<type>`
  * with `.admonition-heading` + `.admonition-content` children
- * (types: note, tip, info, success, warning, caution, danger).
+ * (types: note, tip, info, success, warning, caution, danger,
+ * important). The GitHub alerts plugin emits the same shape — NOTE
+ * maps to info (GitHub's NOTE is blue), CAUTION to danger (red),
+ * and IMPORTANT to important (purple) — so a `:::note` block and a
+ * `[!NOTE]` alert look different, as they do natively.
  * OG's construction (Docusaurus): 25% semantic hue over surface-0
  * (gray-6 here), border in the hue, text and heading in the text
  * color. The note type mixes 25% text-muted (gray-3) over gray-6. */
@@ -126,6 +130,16 @@ mark {
   background-color: color-mix(
     in srgb,
     var(--porto-color-red) 25%,
+    var(--porto-color-gray-6)
+  );
+}
+
+/* GitHub `[!IMPORTANT]` only — Docusaurus has no important type. */
+.porto-markdown-content .admonition-important {
+  border-color: var(--porto-color-purple);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-purple) 25%,
     var(--porto-color-gray-6)
   );
 }
