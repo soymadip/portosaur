@@ -3,29 +3,44 @@
 // buttons, feature cards (with optional links). Reads config directly
 // from `porto:config`.
 //
-// The hero layout is OG's (main branch `DocsHomeSection`): a
-// two-column hero — text left (title, tagline, description,
-// actions), image right with a primary glow behind it — restyled in
-// the current design language (Starlight-derived tokens, the shared
-// `.porto-link-button` actions). The feature cards are Starlight's
-// Card + CardGrid user-components (renamed `sl-` → `porto-`),
-// derived in part from Starlight (MIT License) — see
-// packages/app/NOTICE.md — except the icon chips, which are OG's:
-// a uniform neutral gray background with the icon in the primary
-// color, no per-card accent rotation (main branch `featureIcon`).
+// A port of main branch `DocsHomeSection` (Docusaurus) — the whole
+// page, hero and feature cards alike, translated to the current
+// token system. The earlier hybrid (OG hero + Starlight feature
+// cards) is gone: the user asked for OG's page, not a mix of the two.
 //
-// Portosaur differences from OG's hero:
-// - Feature titles stay <h2> (they are part of the page's heading
-//   list and the frozen URL snapshots) instead of Starlight's <p>.
-// - Actions take Portosaur's shape ({ label/text, link, icon }) with
-//   devicon/emoji icons via renderDynamicIcon; the first action is
-//   primary, the rest secondary.
+// Token mapping from OG's Docusaurus variables:
+// - `--ifm-color-primary` → `--porto-color-text-accent`; primary-light
+//   (brand-button hover) has no token, so it is the accent mixed 20%
+//   toward white.
+// - `--ifm-heading-color` → `--porto-color-white`.
+// - `--ifm-color-emphasis-100` (card bg) → `--porto-color-gray-6`
+//   (16% dark / 94% light, matching emphasis-100 in both modes).
+// - `--ifm-color-emphasis-200` (icon chip bg, mobile card border) → a
+//   15% gray-1 tint over black, as established for the chips.
+// - `--ifm-color-emphasis-300` (card hover, alt button) → a 20% tint;
+//   `--ifm-color-emphasis-400` (alt-button hover) → a 30% tint.
+// - `--ifm-color-emphasis-600` (descriptions) → `--porto-color-gray-2`
+//   (the body-text color).
+// - `--ifm-color-black` (brand-button text) → `--porto-color-black`,
+//   matching the shared link button.
+// - `--ifm-font-color-base` (alt-button text) → `--porto-color-text`.
+// - `--ifm-global-shadow-md` → `--porto-shadow-md`.
+//
+// Divergences from OG:
+// - The tagline hover in OG also recolors to `--porto-secondary`, but
+//   the secondary token was dropped with the old token set, so the
+//   hover keeps the lift only.
+// - OG's `.heroIcon:hover::before { opacity: 1.3 }` is dead code (the
+//   `floatIn` fill overrides it), so it is not ported.
+// - A `prefers-reduced-motion` guard is added: OG's entrance
+//   animations start at `opacity: 0`, which would hide content for
+//   users who disable animation.
 // - The hero image goes through Astro's `<Image />` when it is a
 //   local file the build can size (remote URLs and unsizable files
 //   keep a plain `<img>`, with the `onerror` fallback either way).
-// - Entrance animations are dropped (the current design language
-//   has none); the title hover underline, the image glow and the
-//   image hover lift stay.
+// - Actions take Portosaur's shape ({ label/text, link, icon }) with
+//   devicon/emoji icons via renderDynamicIcon; the first action is
+//   brand, the rest alt.
 import { Image } from "astro:assets";
 import config from "porto:config";
 import { PAGE_TITLE_ID } from "../../constants.ts";
@@ -55,93 +70,90 @@ const iconOnError = iconFallback
 
 {docsHome && (
   <div class="docs-home">
-    <div class="hero">
-      <div class="porto-flex stack">
-        <div class="porto-flex copy">
-          <h1 id={PAGE_TITLE_ID}>{docsHome.title}</h1>
-          {docsHome.tagline && <div class="tagline">{docsHome.tagline}</div>}
-          {docsHome.desc && <p class="desc">{docsHome.desc}</p>}
+    <header class="hero-section">
+      <div class="hero-container">
+        <div class="hero-text">
+          <h1 class="title" id={PAGE_TITLE_ID}>
+            {docsHome.title}
+          </h1>
+          {docsHome.tagline && <p class="tagline">{docsHome.tagline}</p>}
+          {docsHome.desc && <p class="description">{docsHome.desc}</p>}
+          {docsHome.actions && docsHome.actions.length > 0 && (
+            <div class="actions">
+              {docsHome.actions.map((action, index) => (
+                <a
+                  href={withBase(action.link, base)}
+                  class:list={[
+                    "button",
+                    index === 0 ? "button-brand" : "button-alt",
+                  ]}
+                >
+                  {action.icon && (
+                    <span
+                      class="action-img"
+                      set:html={renderDynamicIcon(action.icon, { base })}
+                    />
+                  )}
+                  {action.label || action.text}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
-        {docsHome.actions && docsHome.actions.length > 0 && (
-          <div class="porto-flex actions">
-            {docsHome.actions.map((action, index) => (
-              <a
-                href={withBase(action.link, base)}
-                class:list={[
-                  "porto-link-button",
-                  index === 0 ? "primary" : "secondary",
-                ]}
-              >
-                {action.icon && (
-                  <span
-                    class="action-icon"
-                    set:html={renderDynamicIcon(action.icon, { base })}
-                  />
-                )}
-                {action.label || action.text}
-              </a>
-            ))}
+        {icon && (
+          <div class="hero-icon">
+            {iconDims ? (
+              <Image
+                src={iconSrc}
+                alt="Hero"
+                width={iconDims.width}
+                height={iconDims.height}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                onerror={iconOnError}
+              />
+            ) : (
+              <img
+                src={iconSrc}
+                alt="Hero"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                width="400"
+                height="400"
+                onerror={iconOnError}
+              />
+            )}
           </div>
         )}
       </div>
-      <div class="hero-icon">
-        {icon && iconDims ? (
-          <Image
-            src={iconSrc}
-            alt="Hero"
-            width={iconDims.width}
-            height={iconDims.height}
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-            onerror={iconOnError}
-          />
-        ) : (
-          icon && (
-            <img
-              src={iconSrc}
-              alt="Hero"
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-              width="400"
-              height="400"
-              onerror={iconOnError}
-            />
-          )
-        )}
-      </div>
-    </div>
+    </header>
 
     {docsHome.features && docsHome.features.length > 0 && (
-      <section class="features">
-        <div class="card-grid">
-          {docsHome.features.map((feature) => {
-            const inner = (
-              <>
-                <div class="title-row porto-flex">
-                  {feature.icon && (
-                    <span
-                      class="icon"
-                      set:html={renderDynamicIcon(feature.icon, { base })}
-                    />
-                  )}
-                  <h2 class="title">{feature.title}</h2>
-                </div>
-                <div class="body">
-                  <p>{feature.details || feature.desc}</p>
-                </div>
-              </>
-            );
-            return feature.link ? (
-              <a
-                href={withBase(feature.link, base)}
-                class="card porto-flex card-link"
+      <section class="features-section">
+        <div class="features-container">
+          {docsHome.features.map((feature, index) => {
+            const Tag = feature.link ? "a" : "div";
+            return (
+              <Tag
+                class="feature-card"
+                style={{ "--animation-order": index }}
+                href={feature.link ? withBase(feature.link, base) : undefined}
               >
-                {inner}
-              </a>
-            ) : (
-              <div class="card porto-flex">{inner}</div>
+                {feature.icon && (
+                  <div
+                    class="feature-icon"
+                    set:html={renderDynamicIcon(feature.icon, { base })}
+                  />
+                )}
+                <div class="feature-content">
+                  {/* Feature titles stay <h2>: that is what OG uses, and
+                  the heading list in the URL snapshots expects it. */}
+                  <h2 class="feature-title">{feature.title}</h2>
+                  <p class="feature-desc">{feature.details || feature.desc}</p>
+                </div>
+              </Tag>
             );
           })}
         </div>
@@ -153,52 +165,72 @@ const iconOnError = iconFallback
 <style>
   @layer porto.core {
     .docs-home {
-      max-width: 72rem;
-      margin-inline: auto;
-      padding-inline: 1rem;
+      width: 100%;
     }
 
-    /* Hero — OG's layout (main branch `DocsHomeSection`): text left,
-       image right with a primary glow behind it. Mobile stacks
-       image-on-top, text centered (`column-reverse` — the text comes
-       first in the DOM, like OG). */
-    .hero {
+    @keyframes slide-up-fade {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .hero-section {
+      padding: 3.5rem 2rem 3rem;
       display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-      gap: 2rem;
-      padding-block: 3.5rem 3rem;
+      justify-content: center;
     }
 
-    .stack {
-      flex-direction: column;
-      gap: 1.5rem;
-      text-align: center;
+    .hero-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 72rem;
+      gap: 2rem;
+    }
+
+    .hero-text {
+      flex: 1.2;
+      text-align: left;
       max-width: 700px;
     }
 
-    .copy {
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .hero h1 {
+    .title {
+      font-size: 4.1rem;
+      font-weight: 700;
+      line-height: 1.05;
+      margin-bottom: 0;
+      color: var(--porto-color-text-accent);
+      transition: all 0.3s ease;
       position: relative;
       display: inline-block;
-      margin: 0;
-      font-size: clamp(2.7rem, calc(0.25rem + 5vw), var(--porto-text-6xl));
-      line-height: 1.05;
-      font-weight: 700;
-      color: var(--porto-color-text-accent);
-      transition: transform 0.3s ease;
+      opacity: 0;
+      animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s
+        forwards;
     }
 
-    .hero h1:hover {
+    .title:hover {
       transform: translateY(-2px);
     }
 
-    .hero h1::after {
+    .title::after {
       content: "";
       position: absolute;
       width: 0;
@@ -209,45 +241,112 @@ const iconOnError = iconFallback
       transition: width 0.3s ease;
     }
 
-    .hero h1:hover::after {
+    .title:hover::after {
       width: 100%;
     }
 
     .tagline {
-      font-size: clamp(1.7rem, calc(0.5rem + 3vw), 2.34rem);
+      font-size: 2.34rem;
       font-weight: 600;
       line-height: 1.2;
       color: var(--porto-color-white);
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      display: inline-block;
+      opacity: 0;
+      animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s
+        forwards;
     }
 
-    .desc {
-      margin: 0;
-      font-size: var(--porto-text-lg);
-      line-height: 1.5;
+    /* OG also recolors the tagline on hover, but the secondary token
+       it uses no longer exists (see the header comment). */
+    .tagline:hover {
+      transform: translateY(-2px);
+    }
+
+    .description {
+      font-size: 1.17rem;
+      line-height: 1.4;
       color: var(--porto-color-gray-2);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s
+        forwards;
     }
 
     .actions {
-      gap: 1rem;
+      display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      gap: 1rem;
+      opacity: 0;
+      animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s
+        forwards;
     }
 
-    .action-icon {
+    .button {
       display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+      transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
     }
 
-    /* The hero image, capped by height like OG (280px desktop,
-       180px mobile) with its squircle radius and primary glow. */
+    .button:hover {
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: var(--porto-shadow-md);
+    }
+
+    .button-brand {
+      background-color: var(--porto-color-text-accent);
+      color: var(--porto-color-black);
+    }
+
+    .button-brand:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-text-accent) 80%,
+        white
+      );
+      color: var(--porto-color-black);
+    }
+
+    .button-alt {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 20%,
+        var(--porto-color-black)
+      );
+      color: var(--porto-color-text);
+    }
+
+    .button-alt:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 30%,
+        var(--porto-color-black)
+      );
+      color: var(--porto-color-text);
+    }
+
     .hero-icon {
+      flex: 1;
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex: 1;
     }
 
+    /* Glow behind the hero image */
     .hero-icon::before {
       content: "";
       position: absolute;
@@ -260,6 +359,8 @@ const iconOnError = iconFallback
       );
       filter: blur(40px);
       z-index: 0;
+      opacity: 0;
+      animation: float-in 1s ease 0.4s forwards;
     }
 
     /* `:global(img)`: the hero image renders through Astro's
@@ -269,12 +370,18 @@ const iconOnError = iconFallback
     .hero-icon > :global(img) {
       position: relative;
       z-index: 1;
-      object-fit: cover;
+      max-width: 100%;
+      /* `width: auto` is not in OG's rule, but OG's `<img>` carries no
+         width/height attributes — Astro's `<Image />` does, and without
+         it the max-height cap distorts the box and `object-fit: cover`
+         crops the image. */
       width: auto;
       height: auto;
-      max-width: 100%;
-      max-height: 180px;
+      max-height: 280px;
+      object-fit: cover;
       border-radius: 20%;
+      opacity: 0;
+      animation: float-in 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s forwards;
       transition:
         transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
         box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -285,123 +392,274 @@ const iconOnError = iconFallback
       box-shadow: var(--porto-shadow-md);
     }
 
-    @media (min-width: 50rem) {
-      .hero {
-        flex-direction: row;
-        justify-content: space-between;
+    @media (max-width: 996px) {
+      .hero-container {
+        flex-direction: column-reverse;
+        text-align: center;
       }
 
-      .stack {
-        flex: 1.2;
-        text-align: start;
+      .hero-text {
+        text-align: center;
+        max-width: 100%;
+        margin-top: 0;
       }
 
-      .copy {
-        align-items: flex-start;
+      .title {
+        font-size: 2.7rem;
+      }
+
+      .tagline {
+        font-size: 1.7rem;
+      }
+
+      .description {
+        font-size: 1.1rem;
       }
 
       .actions {
-        justify-content: flex-start;
+        justify-content: center;
+      }
+
+      .hero-icon {
+        width: 100%;
+        margin-bottom: 0;
       }
 
       .hero-icon > :global(img) {
-        max-height: 280px;
+        max-height: 180px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .title {
+        font-size: 2.6rem;
+      }
+
+      .tagline {
+        font-size: 1.5rem;
+      }
+
+      .description {
+        margin-inline: -0.8rem;
+      }
+
+      .hero-icon {
+        margin-top: 0.8rem;
+      }
+
+      .hero-icon > :global(img) {
+        max-height: 160px;
+      }
+
+      .button {
+        flex: 0 0 auto;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.6rem 0.45rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+
+      .action-img {
+        flex-shrink: 0;
+      }
+    }
+
+    @media (max-width: 359px) {
+      .actions {
+        gap: 0.25rem;
+      }
+
+      .button {
+        gap: 0.25rem;
+        padding: 0.55rem 0.35rem;
+        font-size: 0.75rem;
       }
     }
   }
 
   @layer porto.components {
-    /* The action buttons use the shared `.porto-link-button`
-       (Starlight's LinkButton, in css/portfolio.css). */
-
-    /* CardGrid + Card — from Starlight's CardGrid/Card
-       user-components. */
-    .features {
-      padding-block: 1rem 2rem;
+    /* Features Grid */
+    .features-section {
+      padding: 0.7rem;
+      padding-bottom: 0.4rem;
+      display: flex;
+      justify-content: center;
     }
 
-    .card-grid {
+    .features-container {
       display: grid;
-      grid-template-columns: 100%;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-auto-rows: minmax(205px, auto);
       gap: 1rem;
+      width: 100%;
+      max-width: 72rem;
     }
 
-    .card-grid > :global(*) {
-      margin-top: 0 !important;
-    }
-
-    .card {
-      border: 1px solid var(--porto-color-gray-5);
-      background-color: var(--porto-color-black);
-      padding: clamp(1rem, calc(0.125rem + 3vw), 2.5rem);
+    .feature-card {
+      background-color: var(--porto-color-gray-6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
       flex-direction: column;
-      gap: clamp(0.5rem, calc(0.125rem + 1vw), 1rem);
+      opacity: 0;
+      animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+      animation-delay: calc(0.5s + var(--animation-order, 0) * 0.15s);
+      transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
     }
 
-    .card-link {
-      text-decoration: none;
+    a.feature-card,
+    a.feature-card:hover {
       color: inherit;
-    }
-    .card-link:hover {
-      border-color: var(--porto-color-gray-2);
+      text-decoration: none;
     }
 
-    /* The icon chip sits BESIDE the <h2>, not inside it — an emoji
-       icon inside the heading would enter the page's heading text
-       (the frozen URL snapshots capture h2 text). */
-    .title-row {
-      gap: 1rem;
-      align-items: center;
+    a.feature-card:focus-visible {
+      outline: 2px solid var(--porto-color-text-accent);
+      outline-offset: 3px;
     }
 
-    .title {
-      margin: 0;
-      font-weight: 600;
-      font-size: var(--porto-text-h4);
-      color: var(--porto-color-white);
-      line-height: var(--porto-line-height-headings);
+    .feature-card:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 20%,
+        var(--porto-color-black)
+      );
     }
 
-    /* OG's icon chip (main branch `featureIcon`): a uniform neutral
-       gray background — OG's `--ifm-color-emphasis-200`, a 15% text
-       tint over the card background — with the icon in the primary
-       color and no border. (Starlight's chips rotate a per-card
-       accent color; OG's are all the same.) */
-    .card .icon {
-      display: inline-flex;
+    .feature-icon {
+      display: flex;
       align-items: center;
       justify-content: center;
+      width: 48px;
+      height: 48px;
       background-color: color-mix(
         in srgb,
         var(--porto-color-gray-1) 15%,
         var(--porto-color-black)
       );
+      border-radius: 8px;
+      margin-bottom: 1rem;
       color: var(--porto-color-text-accent);
-      padding: 0.2em;
-      border-radius: 0.5rem;
-      flex-shrink: 0;
-      font-size: 1.333em;
+      font-size: 26px;
     }
 
-    .card .body {
-      margin: 0;
-      font-size: clamp(
-        var(--porto-text-sm),
-        calc(0.5rem + 1vw),
-        var(--porto-text-body)
-      );
+    /* `:global(...)`: the icons come from renderDynamicIcon (raw HTML
+       via set:html), so their svg/img children carry no scope
+       attribute. */
+    .feature-icon :global(svg),
+    .feature-icon :global(div svg),
+    .feature-icon :global(span svg),
+    .feature-icon :global(img) {
+      width: 24px;
+      height: 24px;
     }
 
-    .card .body p {
+    .feature-content {
+      width: 100%;
+    }
+
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--porto-color-white);
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: var(--porto-color-gray-2);
       margin: 0;
       line-height: 1.5;
-      color: var(--porto-color-gray-2);
     }
 
-    @media (min-width: 50rem) {
-      .card-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
+    @media (max-width: 996px) {
+      .feature-icon {
+        margin-bottom: 0.5rem;
+      }
+
+      .features-section {
+        padding-bottom: 3.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .features-section {
+        padding: 0.25rem 0.7rem 0.8rem;
+      }
+
+      .features-container {
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: auto;
+        gap: 0.5rem;
+      }
+
+      .feature-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem;
+        border: 1px solid
+          color-mix(
+            in srgb,
+            var(--porto-color-gray-1) 15%,
+            var(--porto-color-black)
+          );
+        border-radius: 8px;
+      }
+
+      .feature-card:hover {
+        background-color: var(--porto-color-gray-6);
+      }
+
+      .feature-icon {
+        flex: 0 0 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .feature-icon :global(svg),
+      .feature-icon :global(div svg),
+      .feature-icon :global(span svg),
+      .feature-icon :global(img) {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      .feature-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .feature-title {
+        font-size: 1.05rem;
+        line-height: 1.25;
+        margin-bottom: 0.25rem;
+      }
+
+      .feature-desc {
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+    }
+
+    /* Entrance animations start at `opacity: 0`; users who disable
+       animation must still see the content. This sits in the later
+       layer so it wins over the base rules in both layers. */
+    @media (prefers-reduced-motion: reduce) {
+      .title,
+      .tagline,
+      .description,
+      .actions,
+      .hero-icon::before,
+      .hero-icon > :global(img),
+      .feature-card {
+        animation: none;
+        opacity: 1;
       }
     }
   }
