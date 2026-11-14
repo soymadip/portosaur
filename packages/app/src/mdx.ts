@@ -10,7 +10,8 @@
  *
  * Plugin order matters: remark-directive runs before remarkAdmonitions
  * (which consumes its nodes); remarkIcons runs before remark-emoji so
- * icon shortcodes are claimed first.
+ * icon shortcodes are claimed first. remarkImageSrc only touches JSX
+ * `<img>` elements, so its position is free — it runs last.
  */
 
 import remarkMath from "remark-math";
@@ -22,12 +23,13 @@ import type { BuiltinTheme } from "shiki";
 import remarkVars from "./plugins/remarkVars.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
+import remarkImageSrc from "./plugins/remarkImageSrc.ts";
 import { getShikiThemes } from "./config/shiki.ts";
 
 /**
  * The `@astrojs/mdx` options for a site: the remark/rehype plugins
- * (math, `{vars.*}`, icons, admonitions, emoji) and the Shiki themes
- * for the site's color scheme.
+ * (math, `{vars.*}`, icons, admonitions, emoji, JSX `<img>` src
+ * unwrapping) and the Shiki themes for the site's color scheme.
  */
 export interface PortosaurMdxOptions {
   remarkPlugins: any[];
@@ -65,6 +67,7 @@ export function portosaurMdxOptions({
       remarkDirective,
       remarkAdmonitions,
       remarkEmoji,
+      remarkImageSrc,
     ],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
