@@ -190,7 +190,13 @@ const hasToc = tocHeadings.length > 0;
       width: 100%;
       background-color: var(--porto-color-black);
       overflow-y: auto;
-      scrollbar-gutter: stable;
+      /* No `scrollbar-gutter: stable` (Starlight reserves one): with
+         collapsed categories the sidebar usually fits the viewport,
+         so the reserved 16px gutter was pure dead space after the
+         caret — the row box ended 21px before the pane edge. Without
+         it the rows run to the content padding; a classic scrollbar
+         takes its own space when the content does overflow, and the
+         TOC panel already behaves this way. */
       transition: inset-block-start 0.2s ease-in-out;
     }
 
