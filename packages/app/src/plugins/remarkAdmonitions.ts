@@ -4,7 +4,10 @@
  * Turns Docusaurus-style admonition directives (`:::tip[Title]` …
  * `:::`) into callout `<div>`s. Runs after `remark-directive`, which
  * parses the fence into a `containerDirective` node with `name` (the
- * type) and `label` (the bracketed title, if any).
+ * type); the bracketed title is NOT a `label` property — it arrives
+ * as a leading paragraph child with `data.directiveLabel: true`.
+ * That paragraph becomes the heading (its inline children, so
+ * formatting in the title survives) and is removed from the body.
  *
  * Output shape (no heading elements — the title is a plain div, so the
  * URL snapshot's h1/h2 extraction is unaffected):
@@ -16,9 +19,13 @@
  *
  * Any container directive is converted, not just the known types —
  * unknown names keep their name as the class suffix.
+ *
+ * No `: RemarkPlugin` annotation: the annotation types the factory
+ * as returning a unified Plugin, which makes a direct call fail
+ * typecheck (`this: Processor` required) — and the tests invoke the
+ * plugin directly, as remarkImageSrc's do. mdx.ts takes the plugin
+ * into an `any[]` list, so nothing is lost.
  */
-
-import type { RemarkPlugin } from "@astrojs/markdown-remark";
 
 const DEFAULT_TITLES: Record<string, string> = {
   note: "Note",
@@ -70,19 +77,29 @@ function divElement(className: string, children: any[]): any {
   };
 }
 
-export default function remarkAdmonitionsPlugin(): RemarkPlugin {
-  return (tree) => {
+export default function remarkAdmonitionsPlugin() {
+  return (tree: any) => {
     visit(tree, "containerDirective", (node, index, parent) => {
       const type = node.name || "note";
-      const title =
-        node.label ||
-        DEFAULT_TITLES[type] ||
-        type.charAt(0).toUpperCase() + type.slice(1);
 
-      const heading = divElement("admonition-heading", [
-        { type: "text", value: title },
-      ]);
-      const content = divElement("admonition-content", node.children || []);
+      // The bracketed title arrives as a leading paragraph with
+      // `data.directiveLabel` (remark-directive has no `node.label`
+      // — reading it silently fell back to the default title and
+      // left the intended title as the body's first line).
+      let bodyChildren = node.children || [];
+      const first = bodyChildren[0];
+      let headingChildren: any[];
+      if (first && first.type === "paragraph" && first.data?.directiveLabel) {
+        headingChildren = first.children || [];
+        bodyChildren = bodyChildren.slice(1);
+      } else {
+        const title =
+          DEFAULT_TITLES[type] || type.charAt(0).toUpperCase() + type.slice(1);
+        headingChildren = [{ type: "text", value: title }];
+      }
+
+      const heading = divElement("admonition-heading", headingChildren);
+      const content = divElement("admonition-content", bodyChildren);
 
       const admonition = divElement(`admonition admonition-${type}`, [
         heading,
