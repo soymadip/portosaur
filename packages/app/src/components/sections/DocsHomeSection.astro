@@ -54,13 +54,20 @@
 //   a touch smaller on phones and tablets; desktop keeps 1.17rem.
 // - The tagline's top margin is 0.25rem (OG: 0.5rem) — the gap
 //   between the title and the subtitle is a touch tighter.
-// - `.hero-icon` has `overflow: hidden` (OG has none): the glow's
+// - `.hero-section` has `overflow-x: clip` (OG has none): the glow's
 //   `inset: -10%` box extends past the icon box, and with our 1rem
 //   section padding the icon box is wide enough that the glow
 //   reaches past the viewport on phones — Chrome then expands the
 //   layout viewport and a horizontal scrollbar appears. Clipping
-//   at the icon box is visually lossless: the gradient is already
-//   transparent there (it fades out at 70% of the ellipse).
+//   at the section cuts the glow exactly at the screen edge, where
+//   nothing is visible past it anyway. (Clipping at `.hero-icon`
+//   instead leaves a visible hard rectangle edge — the blur spreads
+//   the glow past the icon box, so the cut lands mid-glow.)
+// - Where the hero stacks (≤996px) the glow's blur drops from OG's
+//   40px to 20px: with the tighter 2rem top padding the 40px blur
+//   spreads the glow up behind the fixed navbar, and the navbar's
+//   bottom edge cuts it off visibly. 20px keeps the glow fading
+//   out before it reaches the navbar.
 // - A `prefers-reduced-motion` guard is added: OG's entrance
 //   animations start at `opacity: 0`, which would hide content for
 //   users who disable animation.
@@ -223,6 +230,12 @@ const iconOnError = iconFallback
       padding: 3.5rem 2rem 3rem;
       display: flex;
       justify-content: center;
+      /* Clip the glow's sideways overhang: the ::before extends
+         10% past the icon box, and on phones that reaches past the
+         viewport — Chrome expands the layout viewport and a
+         horizontal scrollbar appears. The cut lands exactly at the
+         screen edge, where nothing is visible past it anyway. */
+      overflow-x: clip;
     }
 
     .hero-container {
@@ -387,13 +400,6 @@ const iconOnError = iconFallback
       display: flex;
       justify-content: center;
       align-items: center;
-      /* Clip the glow's overhang: the ::before extends 10% past
-         this box, and on phones that reaches past the viewport —
-         Chrome expands the layout viewport and a horizontal
-         scrollbar appears. The clipped part is fully transparent
-         (the gradient fades out at 70% of the ellipse), so nothing
-         visible is lost. */
-      overflow: hidden;
     }
 
     /* Glow behind the hero image */
@@ -444,6 +450,14 @@ const iconOnError = iconFallback
          edge, so nothing looks cut off. */
       .hero-section {
         padding-top: 2rem;
+      }
+
+      /* Less blur where the hero stacks: with the tighter top
+         padding the 40px blur spreads the glow up behind the
+         fixed navbar, and the navbar's bottom edge cuts it off
+         visibly. 20px keeps it fading out before the navbar. */
+      .hero-icon::before {
+        filter: blur(20px);
       }
 
       .hero-container {
