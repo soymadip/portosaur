@@ -359,15 +359,15 @@ const iconOnError = iconFallback
     /* Action icons: bigger than OG's inherited 1rem, and centered
        on the text line — a bare inline SVG/emoji sits on the
        baseline and reads high, so the wrapper is inline-flex.
-       Nudged 2px up: the icon's optical center sits below its
+       Nudged 1px up: the icon's optical center sits below its
        box center (the rocket's mass is in its tail), so exact
-       centering still reads low. */
+       centering still reads low — but 2px read too high. */
     .action-img {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 1.25rem;
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     .hero-icon {
