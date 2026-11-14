@@ -77,8 +77,10 @@ function unwrapImage(value: ImageValue): string | null | undefined {
 }
 
 // Normalize the caller-provided logger: any missing method falls back to
-// the console equivalent (`success` has no console counterpart, so it
-// maps to `console.info`).
+// the console equivalent. `success` maps to the logger's `info` when the
+// logger has no `success` (Astro's logger doesn't) — success renders as
+// info, same as the CLI logger — and only reaches `console.info` when
+// there is no logger at all.
 function normalizeLogger(logger?: AssetLogger | null): Required<AssetLogger> {
   const fallback: Required<AssetLogger> = {
     info: console.info.bind(console),
@@ -93,7 +95,10 @@ function normalizeLogger(logger?: AssetLogger | null): Required<AssetLogger> {
     info: logger.info?.bind(logger) ?? fallback.info,
     warn: logger.warn?.bind(logger) ?? fallback.warn,
     error: logger.error?.bind(logger) ?? fallback.error,
-    success: logger.success?.bind(logger) ?? fallback.success,
+    success:
+      logger.success?.bind(logger) ??
+      logger.info?.bind(logger) ??
+      fallback.success,
   };
 }
 
