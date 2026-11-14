@@ -124,7 +124,10 @@
     --porto-nav-pad-x: 1rem;
     --porto-nav-pad-y: 0.75rem;
     --porto-mobile-toc-height: 3rem;
-    --porto-sidebar-width: 18.75rem;
+    /* 265px: the left sidebar and the right TOC panel share this
+       width (TwoColumnContent sizes the TOC from the same token),
+       and the content offset follows it via --porto-content-inline-start. */
+    --porto-sidebar-width: 16.5625rem;
     --porto-sidebar-pad-x: 1rem;
     --porto-content-width: 45rem;
     --porto-content-pad-x: 1rem;
