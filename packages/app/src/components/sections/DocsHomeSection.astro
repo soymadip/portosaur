@@ -19,7 +19,10 @@
 //   15% gray-1 tint over black, as established for the chips.
 // - `--ifm-color-emphasis-300` (card hover, alt button) → a 20% tint;
 //   `--ifm-color-emphasis-400` (alt-button hover) → a 30% tint.
-// - `--ifm-color-emphasis-600` (descriptions) → `--porto-color-gray-2`
+// - `--ifm-color-emphasis-600` (descriptions) → `--porto-color-gray-3`
+//   (the scheme's text-muted token — exactly OG's #a1a1aa dark /
+//   #52525b light in the portosaur scheme; gray-2 is body text and
+//   reads white)
 //   (the body-text color).
 // - `--ifm-color-black` (brand-button text) → `--porto-color-black`,
 //   matching the shared link button.
@@ -282,7 +285,7 @@ const iconOnError = iconFallback
     .description {
       font-size: 1.17rem;
       line-height: 1.4;
-      color: var(--porto-color-gray-2);
+      color: var(--porto-color-gray-3);
       margin-bottom: 1.5rem;
       opacity: 0;
       animation: slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s
@@ -601,7 +604,7 @@ const iconOnError = iconFallback
 
     .feature-desc {
       font-size: 0.95rem;
-      color: var(--porto-color-gray-2);
+      color: var(--porto-color-gray-3);
       margin: 0;
       line-height: 1.5;
     }
