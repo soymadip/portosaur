@@ -3,14 +3,20 @@
 // desktop widths) with Portosaur's nav content. Derived in part from
 // Starlight (MIT License) — see packages/app/NOTICE.md: the `.header`
 // frame styles come from Starlight's PageFrame, the `.header-inner`
-// grid from Starlight's Header; the nav entries, search visibility,
-// dropdowns, theme select, hide-on-scroll, and mobile menu are
-// Portosaur's own (converted from Tailwind utilities to plain CSS).
+// grid from Starlight's Header; the nav entries, dropdowns, theme
+// select, hide-on-scroll, and mobile menu are Portosaur's own
+// (converted from Tailwind utilities to plain CSS).
 //
-// On docs pages (`hasSidebar`), the navbar renders NO hamburger or
-// mobile menu — the sidebar popover (MobileMenuToggle +
-// MobileMenuFooter, in DocLayout) is the mobile navigation. On other
-// pages the hamburger + slide-down menu stay.
+// ONE navbar on every page (like OG Docusaurus — no homepage/docs
+// split): brand left; right cluster is the search icon, the theme
+// select (desktop only — on mobile it lives in the menu), the nav
+// links (desktop only), and the menu button (mobile only, right
+// side, VitePress-style). The menu button opens the MobileMenu
+// popover via `popovertarget` — the sidebar tree on docs pages, the
+// nav links + theme + version link elsewhere. Search shows on every
+// page (a deliberate divergence from OG's
+// `hideSearchBarWithNoSearchContext`, which hid it off the
+// notes/blog routes — a unified navbar can't have a missing button).
 //
 // The fixed header is positioned by the `.header` rules below;
 // BaseLayout's <main> reserves its height (padding-top).
@@ -19,48 +25,22 @@ import Icon from "./Icon.astro";
 import Search from "./Search.astro";
 import SiteTitle from "./SiteTitle.astro";
 import ThemeSelect from "./ThemeSelect.astro";
-import {
-  buildNavEntries,
-  isDropdown,
-  PORTO_HOMEPAGE,
-} from "../utils/navbar.ts";
+import { buildNavEntries, isDropdown } from "../utils/navbar.ts";
 
 interface Props {
   /** True on the portfolio home page — removes the header border and
    * hides the brand in landscape (ported from old `pages/index.jsx`). */
   isHome?: boolean;
-  /** True on docs pages — the sidebar popover owns mobile nav, so
-   * the hamburger + slide-down menu are omitted. */
-  hasSidebar?: boolean;
 }
 
-const { isHome = false, hasSidebar = false } = Astro.props;
+const { isHome = false } = Astro.props;
 
-const { leftEntries, rightEntries, moreItems, showProjectLink, versionLabel } =
-  buildNavEntries(config, Astro.url.pathname);
+const { leftEntries, rightEntries, moreItems } = buildNavEntries(
+  config,
+  Astro.url.pathname,
+);
 
-const site = config.site;
 const theme = config.theme;
-
-// Search visibility — port of the old `@easyops-cn/docusaurus-search-local`
-// setup (`searchContextByPaths: [notesRoute, blogRoute]` with
-// `hideSearchBarWithNoSearchContext: true`): the search button only shows on
-// pages under the notes/docs route or the blog route, and is hidden on
-// home, /tasks, /offline, /search, 404, and (in docs mode, where the
-// notes route is "docs") the /notes NoteCards page. The plugin matches
-// `uri === path || uri.startsWith(path + "/")` where uri is the pathname
-// minus the base URL.
-const base = site.baseUrl ?? "/";
-const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
-const uri = (
-  Astro.url.pathname.startsWith(basePrefix)
-    ? Astro.url.pathname.slice(basePrefix.length)
-    : Astro.url.pathname
-).replace(/^\/+/, "");
-const inSearchContext = (route: string) =>
-  uri === route || uri.startsWith(`${route}/`);
-const showSearch =
-  inSearchContext(site.notesRoute) || inSearchContext(site.blogRoute);
 
 const hideOnScroll = theme.hideNavbarOnScroll;
 const showThemeSwitch = theme.showThemeSwitch;
@@ -72,19 +52,6 @@ const showThemeSwitch = theme.showThemeSwitch;
   data-hide-on-scroll={hideOnScroll || undefined}
 >
   <div class="header-inner">
-    {!hasSidebar && (
-      <button
-        type="button"
-        class="menu-button porto-flex md:porto-hidden"
-        data-navbar-toggle
-        aria-expanded="false"
-        aria-controls="porto-mobile-menu"
-        aria-label="Toggle navigation menu"
-      >
-        <Icon name="bars" size="1.5rem" />
-      </button>
-    )}
-
     <div class="title-column">
       <div class:list={["title-wrapper", { "title-wrapper--home": isHome }]}>
         <SiteTitle />
@@ -130,7 +97,7 @@ const showThemeSwitch = theme.showThemeSwitch;
 
     <div class="porto-flex print:hidden right-group">
       <div class="porto-flex search-group">
-        {showSearch && <Search />}
+        <Search />
         {showThemeSwitch && (
           <div class="porto-hidden md:porto-flex">
             <ThemeSelect />
@@ -186,120 +153,23 @@ const showThemeSwitch = theme.showThemeSwitch;
           </ul>
         </details>
       </nav>
+      {/* Mobile menu button (right side, VitePress-style) — opens the
+          MobileMenu popover via the popover API, no JavaScript. */}
+      <button
+        type="button"
+        class="menu-button porto-flex md:porto-hidden"
+        popovertarget="porto__sidebar"
+        aria-label="Toggle navigation menu"
+      >
+        <Icon name="bars" size="1.5rem" class="open-menu" />
+        <Icon name="close" size="1.5rem" class="close-menu" />
+      </button>
     </div>
   </div>
-
-  {
-    /*
-      The header has a fixed height, so the open menu overflows it and
-      overlays the page — like the old sidebar. It needs its own opaque
-      background or the page shows through between the items.
-    */
-    !hasSidebar && (
-      <div class="mobile-menu" id="porto-mobile-menu" data-mobile-menu hidden>
-        <nav aria-label="Mobile">
-          {[...leftEntries, ...rightEntries].map((entry) =>
-            isDropdown(entry) ? (
-              <details class="porto-navbar__dropdown mobile-dropdown">
-                <summary class="nav-summary mobile-summary">
-                  {entry.label}
-                </summary>
-                <ul class="mobile-submenu">
-                  {entry.items.map((item) => (
-                    <li>
-                      <a
-                        class:list={["dropdown-link", { active: item.active }]}
-                        href={item.href}
-                        target={item.external ? "_blank" : undefined}
-                        rel={item.external ? "noopener noreferrer" : undefined}
-                      >
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ) : (
-              <a
-                class:list={[
-                  "nav-link",
-                  "mobile-link",
-                  { active: entry.active },
-                ]}
-                href={entry.href}
-                target={entry.external ? "_blank" : undefined}
-                rel={entry.external ? "noopener noreferrer" : undefined}
-              >
-                {entry.label}
-              </a>
-            ),
-          )}
-          <details class="porto-navbar__dropdown mobile-dropdown">
-            <summary class="nav-summary mobile-summary">More</summary>
-            <ul class="mobile-submenu">
-              {moreItems.map((item) => (
-                <li>
-                  <a
-                    class:list={["dropdown-link", { active: item.active }]}
-                    href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noopener noreferrer" : undefined}
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </details>
-        </nav>
-        {showThemeSwitch && (
-          <div class="mobile-theme-select">
-            <ThemeSelect />
-          </div>
-        )}
-        {showProjectLink && (
-          <a
-            class="version-link"
-            href={PORTO_HOMEPAGE}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {versionLabel}
-          </a>
-        )}
-      </div>
-    )
-  }
 </header>
 
 <script>
   const navbar = document.querySelector("[data-navbar]");
-  const toggle = document.querySelector("[data-navbar-toggle]");
-  const mobileMenu = document.querySelector("[data-mobile-menu]");
-
-  // Mobile slide-down menu (non-docs pages only — docs pages have no
-  // hamburger; the sidebar popover is the mobile nav there).
-  if (toggle && mobileMenu instanceof HTMLElement) {
-    const closeMenu = () => {
-      mobileMenu.hidden = true;
-      toggle.setAttribute("aria-expanded", "false");
-    };
-    toggle.addEventListener("click", () => {
-      const willOpen = mobileMenu.hidden;
-      mobileMenu.hidden = !willOpen;
-      toggle.setAttribute("aria-expanded", String(willOpen));
-    });
-    mobileMenu.addEventListener("click", (event) => {
-      if (event.target instanceof HTMLAnchorElement) {
-        closeMenu();
-      }
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !mobileMenu.hidden) {
-        closeMenu();
-      }
-    });
-  }
 
   // Close open dropdowns on outside click / Escape (<details> doesn't
   // close itself). The toggle click itself lands inside the <details>,
@@ -383,15 +253,6 @@ const showThemeSwitch = theme.showThemeSwitch;
       border-bottom-color: transparent;
     }
 
-    /* On docs pages the mobile menu button sits fixed at the top
-       right — reserve its space in the header. */
-    :global([data-has-sidebar]) .header {
-      padding-inline-end: calc(
-        var(--porto-nav-gap) + var(--porto-nav-pad-x) +
-          var(--porto-menu-button-size)
-      );
-    }
-
     /* Hide-on-scroll: the script toggles `.porto-navbar--hidden` on
        the header while scrolling down. */
     .porto-navbar--hidden {
@@ -432,6 +293,11 @@ const showThemeSwitch = theme.showThemeSwitch;
       }
     }
 
+    /* Mobile menu button (right side, VitePress-style) — a plain
+       icon button in the navbar's right cluster. It swaps its icon
+       while the popover is open; the button and the popover are not
+       siblings (the button lives in the header, the popover in the
+       layout), so the state reads off <body>. */
     .menu-button {
       align-items: center;
       border: 0;
@@ -443,6 +309,15 @@ const showThemeSwitch = theme.showThemeSwitch;
     }
     .menu-button:hover {
       color: var(--porto-color-white);
+    }
+    .menu-button .close-menu {
+      display: none;
+    }
+    :global(body:has(#porto__sidebar:popover-open)) .menu-button .open-menu {
+      display: none;
+    }
+    :global(body:has(#porto__sidebar:popover-open)) .menu-button .close-menu {
+      display: block;
     }
 
     .right-group {
@@ -532,60 +407,6 @@ const showThemeSwitch = theme.showThemeSwitch;
       padding-inline-start: 0.5rem;
     }
 
-    /* Mobile slide-down menu (non-docs pages). The margins
-       compensate for the header's padding so the menu starts exactly
-       at the header's bottom edge and spans the full width. */
-    .mobile-menu {
-      margin-top: var(--porto-nav-pad-y);
-      margin-inline: calc(-1 * var(--porto-nav-pad-x));
-      border-top: 1px solid var(--porto-color-hairline);
-      background-color: var(--porto-color-bg-nav);
-      padding: 0.5rem 1rem 1rem;
-    }
-
-    .mobile-link,
-    .mobile-summary {
-      display: block;
-    }
-
-    .mobile-dropdown {
-      position: static;
-    }
-
-    .mobile-submenu {
-      position: static;
-      margin: 0;
-      padding: 0 0 0 1rem;
-      list-style: none;
-      border: 0;
-      background-color: transparent;
-      box-shadow: none;
-    }
-
-    .mobile-theme-select {
-      /* Flex so the select shrink-wraps (Starlight always places
-        the select in a flex row; in a block context the label
-        stretches full width and the caret drifts to the far edge). */
-      display: flex;
-      margin-top: 0.5rem;
-      padding: 0.5rem 0.75rem;
-    }
-
-    .version-link {
-      display: block;
-      margin-top: 0.75rem;
-      border-top: 1px solid var(--porto-color-hairline);
-      padding-top: 0.75rem;
-      text-align: center;
-      font-size: 0.95rem;
-      text-decoration: none;
-      color: var(--porto-color-gray-3);
-      opacity: 0.64;
-    }
-    .version-link:hover {
-      color: var(--porto-color-white);
-    }
-
     @media (min-width: 50rem) {
       :global(:root[data-has-sidebar]) {
         --__porto-sidebar-pad: calc(2 * var(--porto-nav-pad-x));
@@ -629,9 +450,6 @@ const showThemeSwitch = theme.showThemeSwitch;
         so the cluster is right-aligned like OG Docusaurus. */
       .right-group {
         grid-column: 3;
-      }
-      :global([data-has-sidebar]) .header {
-        padding-inline-end: var(--porto-nav-pad-x);
       }
     }
   }

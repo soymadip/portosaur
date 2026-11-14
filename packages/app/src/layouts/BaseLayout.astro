@@ -31,6 +31,7 @@ import "porto:user-css";
 
 import config from "porto:config";
 import { getAssetHeadTags } from "../utils/assets.ts";
+import MobileMenu from "../components/MobileMenu.astro";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import SkipLink from "../components/SkipLink.astro";
@@ -206,7 +207,14 @@ const swUrl = withBase("sw.js");
   <body>
     <SkipLink />
 
-    <Navbar isHome={isPortfolioHome} hasSidebar={hasSidebar} />
+    <Navbar isHome={isPortfolioHome} />
+
+    {/*
+      The mobile menu popover on pages without a sidebar (docs pages
+      render it from DocLayout, with the sidebar tree inside). The
+      navbar's menu button opens it via `popovertarget`.
+    */}
+    {!hasSidebar && <MobileMenu />}
 
     <div class="porto-content-wrapper">
       <main id="main-content" class:list={[wrapperClassName]}>

@@ -1,7 +1,9 @@
 ---
 // Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
-// Starlight's Sidebar (persister + sublist + mobile menu footer),
-// renamed (`sl-` → `porto-`) and adapted to Portosaur's sidebar data.
+// Starlight's Sidebar (persister + sublist), renamed (`sl-` → `porto-`)
+// and adapted to Portosaur's sidebar data. (The mobile menu footer
+// lives in MobileMenu.astro, which wraps this sidebar on docs pages
+// and renders the footer alone on other pages.)
 //
 // The `porto:sidebar` tree is the root's children — the top-level
 // items, with no root wrapper (the old "Docs"/"Notes" root entry is
@@ -13,7 +15,6 @@
 // no sidebar collapse; open/closed groups and scroll position
 // persist across navigations instead (SidebarPersister).
 import sidebarTree from "porto:sidebar";
-import MobileMenuFooter from "./MobileMenuFooter.astro";
 import SidebarPersister from "./SidebarPersister.astro";
 import SidebarSublist from "./SidebarSublist.astro";
 
@@ -29,7 +30,3 @@ const items = sidebarTree;
 <SidebarPersister>
   <SidebarSublist items={items} currentHref={currentHref} />
 </SidebarPersister>
-
-<div class="md:porto-hidden">
-  <MobileMenuFooter />
-</div>

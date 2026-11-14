@@ -11,6 +11,10 @@
 // lazy-loads on idle and renders results inside. A vanilla custom
 // element (<porto-search>), zero framework.
 //
+// Portosaur difference from Starlight's Search: the button is a bare
+// magnifier icon at every width (Starlight renders a wide bar with a
+// "Search" label and the Ctrl+K hint at desktop widths).
+//
 // The Pagefind index is built at `astro:build:done`, so in dev the
 // dialog shows a message instead of the UI (same tone as /search).
 import config from "porto:config";
@@ -45,13 +49,6 @@ const isDev = import.meta.env.DEV;
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
     </svg>
-    <span class="porto-hidden md:porto-block" aria-hidden="true">
-      Search
-    </span>
-    <kbd class="porto-hidden md:porto-flex" style="display: none">
-      <kbd>Ctrl</kbd>
-      <kbd>K</kbd>
-    </kbd>
   </button>
 
   <dialog style="padding: 0" aria-label="Search">
@@ -77,25 +74,6 @@ const isDev = import.meta.env.DEV;
     </div>
   </dialog>
 </porto-search>
-
-{/**
- * This is intentionally inlined to avoid briefly showing an invalid shortcut.
- * Purposely using the deprecated `navigator.platform` property to detect Apple devices, as the
- * user agent is spoofed by some browsers when opening the devtools.
- */}
-<script is:inline>
-  (() => {
-    const openBtn = document.querySelector("button[data-open-modal]");
-    const shortcut = openBtn?.querySelector("kbd");
-    if (!openBtn || !(shortcut instanceof HTMLElement)) return;
-    const platformKey = shortcut.querySelector("kbd");
-    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
-      platformKey.textContent = "⌘";
-      openBtn.setAttribute("aria-keyshortcuts", "Meta+K");
-    }
-    shortcut.style.display = "";
-  })();
-</script>
 
 <script>
   class PortoSearch extends HTMLElement {
@@ -184,50 +162,23 @@ const isDev = import.meta.env.DEV;
     porto-search {
       display: contents;
     }
+    /* A bare icon button at every width — no bar, label, or
+       shortcut hint (see the header comment). */
     button[data-open-modal] {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       border: 0;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
       background-color: transparent;
       color: var(--porto-color-gray-1);
       cursor: pointer;
       height: 2.5rem;
       font-size: var(--porto-text-xl);
     }
-
-    @media (min-width: 50rem) {
-      button[data-open-modal] {
-        border: 1px solid var(--porto-color-gray-5);
-        border-radius: 0.5rem;
-        padding-inline-start: 0.75rem;
-        padding-inline-end: 0.5rem;
-        background-color: var(--porto-color-black);
-        color: var(--porto-color-gray-2);
-        font-size: var(--porto-text-sm);
-        width: 100%;
-        max-width: 22rem;
-      }
-      button[data-open-modal]:hover {
-        border-color: var(--porto-color-gray-2);
-        color: var(--porto-color-white);
-      }
-
-      button[data-open-modal] > :last-child {
-        margin-inline-start: auto;
-      }
-    }
-
-    button > kbd {
-      border-radius: 0.25rem;
-      font-size: var(--porto-text-2xs);
-      gap: 0.25em;
-      padding-inline: 0.375rem;
-      background-color: var(--porto-color-gray-6);
-    }
-
-    kbd {
-      font-family: var(--__porto-font);
+    button[data-open-modal]:hover {
+      color: var(--porto-color-white);
     }
 
     dialog {
