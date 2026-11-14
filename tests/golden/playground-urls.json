@@ -1,5 +1,5 @@
 {
-  "generated_from": "Docusaurus build of .playground/build",
+  "generated_from": "Astro build of .playground/build — notes are docs content (playground-uses-docs commit)",
   "routes": [
     {
       "url": "/",
@@ -72,25 +72,305 @@
       ]
     },
     {
-      "url": "/notes/personal-notes/",
-      "title": "Personal Notes | Soumadip Das",
+      "url": "/notes/cli-reference/",
+      "title": "CLI Reference | Soumadip Das",
       "headings": [
-        "Personal Notes",
-        "💭Random Thoughts"
+        "CLI Reference",
+        "Global Options",
+        "porto init",
+        "porto providers",
+        "porto dev (alias: porto start)",
+        "porto build",
+        "porto serve"
       ]
     },
     {
-      "url": "/notes/programming-tricks/",
-      "title": "Programming Tricks | Soumadip Das",
+      "url": "/notes/config/",
+      "title": "Configuration Guide | Soumadip Das",
       "headings": [
-        "Programming Tricks"
+        "Configuration Guide",
+        "Dynamic Variables",
+        "Icons & Emoji",
+        "Configuration Reference"
       ]
     },
     {
-      "url": "/notes/random/",
-      "title": "Random Thoughts | Soumadip Das",
+      "url": "/notes/config/dynamic-variables/",
+      "title": "Dynamic Variables | Soumadip Das",
       "headings": [
-        "Random Thoughts"
+        "Dynamic Variables",
+        "Syntax Overview",
+        "Variable Sources",
+        "Escaping Variables"
+      ]
+    },
+    {
+      "url": "/notes/config/icons/",
+      "title": "Icons & Emoji | Soumadip Das",
+      "headings": [
+        "Icons & Emoji",
+        "Ways to Use Icons/Emojis"
+      ]
+    },
+    {
+      "url": "/notes/config/reference/",
+      "title": "Configuration Reference | Soumadip Das",
+      "headings": [
+        "Configuration Reference",
+        "site",
+        "theme",
+        "docs_home",
+        "home_page",
+        "tasks",
+        "tools.link_shortener",
+        "vars",
+        "Custom Head Tags",
+        "Icon Values"
+      ]
+    },
+    {
+      "url": "/notes/deployment/",
+      "title": "Deployment Guide | Soumadip Das",
+      "headings": [
+        "Deployment Guide",
+        "GitHub Pages",
+        "GitLab Pages",
+        "Codeberg Pages",
+        "Surge.sh",
+        "Netlify",
+        "Other Providers (Vercel, Cloudflare)"
+      ]
+    },
+    {
+      "url": "/notes/deployment/codeberg-pages/",
+      "title": "Codeberg Pages | Soumadip Das",
+      "headings": [
+        "Codeberg Pages",
+        "1. Choose a Repository and URL",
+        "2. Generate a Forgejo Actions Workflow",
+        "3. Enable Actions and Deploy",
+        "4. Use Woodpecker CI (Legacy)",
+        "5. Use a Custom Domain"
+      ]
+    },
+    {
+      "url": "/notes/deployment/github-pages/",
+      "title": "GitHub Pages | Soumadip Das",
+      "headings": [
+        "GitHub Pages",
+        "1. Repository Setup",
+        "2. Generating the Workflow Files",
+        "3. Enable GitHub Actions in Repository Settings",
+        "4. Using Custom Domains"
+      ]
+    },
+    {
+      "url": "/notes/deployment/gitlab-pages/",
+      "title": "GitLab Pages | Soumadip Das",
+      "headings": [
+        "GitLab Pages",
+        "1. Repository and Site URL",
+        "2. Generate the CI Configuration",
+        "3. Enable and Run the Pipeline",
+        "4. Use a Custom Domain"
+      ]
+    },
+    {
+      "url": "/notes/deployment/netlify/",
+      "title": "Netlify | Soumadip Das",
+      "headings": [
+        "Netlify"
+      ]
+    },
+    {
+      "url": "/notes/deployment/other-providers/",
+      "title": "Other Providers (Vercel, Cloudflare) | Soumadip Das",
+      "headings": [
+        "Other Providers (Vercel, Cloudflare)",
+        "1. Vercel",
+        "2. Cloudflare Pages"
+      ]
+    },
+    {
+      "url": "/notes/deployment/surge/",
+      "title": "Surge.sh | Soumadip Das",
+      "headings": [
+        "Surge.sh",
+        "1. Create Surge Credentials",
+        "2. Generate a Deployment Workflow",
+        "3. Add Repository Secrets",
+        "4. Deploy and Verify"
+      ]
+    },
+    {
+      "url": "/notes/developer-guide/",
+      "title": "Developer Overview | Soumadip Das",
+      "headings": [
+        "Developer Overview",
+        "In This Section",
+        "📐Scaffolding & Templates",
+        "🧙@portosaur/wizard",
+        "🪵Logger",
+        "Monorepo Architecture",
+        "Architectural Principles",
+        "Development Setup",
+        "📐Scaffolding & Templates",
+        "🧙@portosaur/wizard",
+        "🪵Logger"
+      ]
+    },
+    {
+      "url": "/notes/developer-guide/logger/",
+      "title": "Logger | Soumadip Das",
+      "headings": [
+        "Logger",
+        "Log Levels",
+        "Box Headings",
+        "ANSI Colors API"
+      ]
+    },
+    {
+      "url": "/notes/developer-guide/templates/",
+      "title": "Scaffolding & Templates | Soumadip Das",
+      "headings": [
+        "Scaffolding & Templates",
+        "Registry (registry.yml)",
+        "Template Variables",
+        "Template Hooks (hooks.mjs)",
+        "Generated Files (.portosaur/)",
+        "Adding a New Hosting Platform"
+      ]
+    },
+    {
+      "url": "/notes/developer-guide/wizard/",
+      "title": "@portosaur/wizard | Soumadip Das",
+      "headings": [
+        "@portosaur/wizard",
+        "Installation",
+        "Basic Example",
+        "Step Configuration Options",
+        "Keyboard Controls"
+      ]
+    },
+    {
+      "url": "/notes/getting-started/",
+      "title": "Getting Started | Soumadip Das",
+      "headings": [
+        "Getting Started",
+        "Quick Overview"
+      ]
+    },
+    {
+      "url": "/notes/getting-started/installation/",
+      "title": "Installation & Setup | Soumadip Das",
+      "headings": [
+        "Installation & Setup",
+        "Prerequisites",
+        "Installation",
+        "Initializing a Site"
+      ]
+    },
+    {
+      "url": "/notes/getting-started/project-structure/",
+      "title": "Project Structure | Soumadip Das",
+      "headings": [
+        "Project Structure",
+        "Directory Layout",
+        "Key Files & Directories",
+        "Running Your Site"
+      ]
+    },
+    {
+      "url": "/notes/markdown/",
+      "title": "Markdown Features | Soumadip Das",
+      "headings": [
+        "Markdown Features",
+        "Frontmatter",
+        "Code Blocks",
+        "Preview Window",
+        "🧩UI Components",
+        "Built-in MDX Components"
+      ]
+    },
+    {
+      "url": "/notes/markdown/built-in-components/",
+      "title": "Built-in MDX Components | Soumadip Das",
+      "headings": [
+        "Built-in MDX Components",
+        "<Tabs> & <TabItem>",
+        "<Details>",
+        "<Hint>",
+        "<Indent>",
+        "<TopicList>"
+      ]
+    },
+    {
+      "url": "/notes/markdown/code-blocks/",
+      "title": "Code Blocks | Soumadip Das",
+      "headings": [
+        "Code Blocks",
+        "Basic Code Blocks",
+        "File Titles",
+        "Line Numbers",
+        "Magic Comments",
+        "Dynamic Variables in Code Blocks"
+      ]
+    },
+    {
+      "url": "/notes/markdown/frontmatter/",
+      "title": "Frontmatter | Soumadip Das",
+      "headings": [
+        "Frontmatter",
+        "Frontmatter Reference",
+        "Blog Frontmatter"
+      ]
+    },
+    {
+      "url": "/notes/markdown/interactive-previews/",
+      "title": "Preview Window | Soumadip Das",
+      "headings": [
+        "Preview Window",
+        "Basic Usage",
+        "Supported Formats & Automatic Detection",
+        "Layout Modes",
+        "<Pv /> Props Reference"
+      ]
+    },
+    {
+      "url": "/notes/markdown/ui-components/",
+      "title": "UI Components | Soumadip Das",
+      "headings": [
+        "UI Components",
+        "<Btn>",
+        "<Dropdown>",
+        "<Icon> & <DynamicIcon>",
+        "<IconSearch>"
+      ]
+    },
+    {
+      "url": "/notes/progressive-web-app/",
+      "title": "Progressive Web App (PWA) | Soumadip Das",
+      "headings": [
+        "Progressive Web App (PWA)",
+        "Configuration",
+        "App Shortcuts",
+        "Automated Screenshots (Zero-Config)",
+        "Offline Support & Caching",
+        "Testing Your PWA"
+      ]
+    },
+    {
+      "url": "/notes/theme-customization/",
+      "title": "Theme Customization | Soumadip Das",
+      "headings": [
+        "Theme Customization",
+        "How theming works",
+        "Bundled schemes",
+        "Tokens",
+        "Overriding tokens in custom_css",
+        "Creating a custom scheme",
+        "Stable selectors",
+        "--ifm-* → --porto-* mapping"
       ]
     },
     {

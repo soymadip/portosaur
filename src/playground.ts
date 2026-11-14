@@ -1,4 +1,10 @@
-import { rmSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  rmSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  cpSync,
+} from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -15,6 +21,92 @@ export interface PlaygroundOptions {
   runCommand?: "dev" | "serve" | "build" | null;
   prune?: boolean;
   extraArgs?: string[];
+}
+
+/**
+ * Line range of the top-level `vars:` block in a config.yml: from the
+ * `vars:` line up to (excluding) the next top-level key or column-0
+ * comment, with trailing blank lines trimmed. Returns null when the
+ * file has no top-level `vars:` block.
+ */
+function varsBlockRange(
+  lines: string[],
+): { start: number; end: number } | null {
+  const start = lines.findIndex((line) => line === "vars:");
+  if (start === -1) {
+    return null;
+  }
+  let end = start + 1;
+  while (end < lines.length && !/^[a-zA-Z#]/.test(lines[end])) {
+    end++;
+  }
+  while (end > start + 1 && lines[end - 1].trim() === "") {
+    end--;
+  }
+  return { start, end };
+}
+
+/**
+ * Merge the docs site's `vars:` block into a playground config: docs keys
+ * win, playground-only top-level keys are kept with their sub-trees.
+ * Returns null when either file has no top-level `vars:` block.
+ */
+function mergeVarsBlocks(
+  docsConfig: string,
+  playgroundConfig: string,
+): string | null {
+  const docsLines = docsConfig.split("\n");
+  const pgLines = playgroundConfig.split("\n");
+  const docsRange = varsBlockRange(docsLines);
+  const pgRange = varsBlockRange(pgLines);
+  if (!docsRange || !pgRange) {
+    return null;
+  }
+
+  const docsBody = docsLines.slice(docsRange.start + 1, docsRange.end);
+  const docsKeys = new Set(
+    docsBody
+      .map((line) => line.match(/^  ([A-Za-z0-9_-]+):/)?.[1])
+      .filter((key): key is string => key !== undefined),
+  );
+
+  // Playground-only chunks: each starts at a 2-space key line and runs
+  // until the next one.
+  const pgBody = pgLines.slice(pgRange.start + 1, pgRange.end);
+  const kept: string[] = [];
+  let current: string[] | null = null;
+  let keepCurrent = false;
+  const flush = () => {
+    if (keepCurrent && current) {
+      kept.push(...current);
+    }
+    current = null;
+  };
+  for (const line of pgBody) {
+    const keyMatch = line.match(/^  ([A-Za-z0-9_-]+):/);
+    if (keyMatch) {
+      flush();
+      current = [line];
+      keepCurrent = !docsKeys.has(keyMatch[1]);
+    } else if (current) {
+      current.push(line);
+    }
+  }
+  flush();
+
+  // Trim trailing blank lines from the docs body so the kept keys follow
+  // after exactly one blank line.
+  while (docsBody.length > 0 && docsBody[docsBody.length - 1].trim() === "") {
+    docsBody.pop();
+  }
+
+  return [
+    ...pgLines.slice(0, pgRange.start),
+    "vars:",
+    ...docsBody,
+    ...(kept.length > 0 ? ["", ...kept] : []),
+    ...pgLines.slice(pgRange.end),
+  ].join("\n");
 }
 
 export function runPlayground({
@@ -96,6 +188,35 @@ export function runPlayground({
         `\n>>> ${siteName} already exists, skipping initialization...`,
       ),
     );
+  }
+
+  console.log(colors.info("\n>>> Syncing docs content into notes..."));
+
+  // The playground's notes are the real docs content, not the scaffold's
+  // samples: copy docs/docs/ over <site>/notes/ on every run, so an
+  // existing playground (which skips init above) picks up docs changes
+  // too. Copy, not symlink — the playground is a standalone smoke site.
+  const docsDir = path.join(REPO_ROOT, "docs", "docs");
+  const notesDir = path.join(SITE_DIR, "notes");
+  if (existsSync(notesDir)) {
+    rmSync(notesDir, { recursive: true, force: true });
+  }
+  cpSync(docsDir, notesDir, { recursive: true });
+
+  // The docs pages reference {vars.*} keys (project, tools, icons, ...)
+  // that only exist in the docs site's config.yml — remarkVars throws on
+  // unknown keys, so sync the docs site's vars block into the playground
+  // config too. Playground-only vars keys are kept.
+  const docsConfigPath = path.join(REPO_ROOT, "docs", "config.yml");
+  const pgConfigPath = path.join(SITE_DIR, "config.yml");
+  const mergedConfig = mergeVarsBlocks(
+    readFileSync(docsConfigPath, "utf8"),
+    readFileSync(pgConfigPath, "utf8"),
+  );
+  if (mergedConfig === null) {
+    console.log(colors.warn(">>> No vars block found to sync, skipping..."));
+  } else {
+    writeFileSync(pgConfigPath, mergedConfig);
   }
 
   console.log(colors.info("\n>>> Preparing package.json for testing..."));
