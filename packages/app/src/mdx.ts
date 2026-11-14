@@ -13,8 +13,12 @@
  * icon shortcodes are claimed first. remarkGithubAlerts runs beside
  * remarkAdmonitions — both emit the same admonition `<div>`s, from
  * `:::` directives and GitHub `[!NOTE]` blockquotes respectively.
- * remarkImageSrc only touches JSX `<img>` elements, so its position
- * is free — it runs last.
+ * remarkSpaceFormAdmonitions runs with them: it converts the MDX
+ * v1-style `:::note Title` fences Docusaurus rewrites in its
+ * preprocessor (which Astro has no equivalent of), so the space
+ * form renders on the Astro port exactly as on OG. remarkImageSrc
+ * only touches JSX `<img>` elements, so its position is free — it
+ * runs last.
  */
 
 import remarkMath from "remark-math";
@@ -26,6 +30,7 @@ import type { BuiltinTheme } from "shiki";
 import remarkVars from "./plugins/remarkVars.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
+import remarkSpaceFormAdmonitions from "./plugins/remarkSpaceFormAdmonitions.ts";
 import remarkGithubAlerts from "./plugins/remarkGithubAlerts.ts";
 import remarkImageSrc from "./plugins/remarkImageSrc.ts";
 import { getShikiThemes } from "./config/shiki.ts";
@@ -71,6 +76,7 @@ export function portosaurMdxOptions({
       remarkIcons,
       remarkDirective,
       remarkAdmonitions,
+      remarkSpaceFormAdmonitions,
       remarkGithubAlerts,
       remarkEmoji,
       remarkImageSrc,
