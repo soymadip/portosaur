@@ -367,10 +367,15 @@ const showThemeSwitch = theme.showThemeSwitch;
       inset-block-start: 0;
       width: 100%;
       height: var(--porto-nav-height);
-      border-bottom: 1px solid var(--porto-color-hairline-shade);
+      /* Same separator as the TOC panel's left border. */
+      border-bottom: 1px solid var(--porto-color-hairline);
       padding: var(--porto-nav-pad-y) var(--porto-nav-pad-x);
       padding-inline-end: var(--porto-nav-pad-x);
-      background-color: var(--porto-color-bg-nav);
+      /* The header shares the content background — it is separated
+         by the border above, not by color. (--porto-color-bg-nav
+         stays for the dropdown and mobile-menu surfaces, which
+         must stand out from the background.) */
+      background-color: var(--porto-color-bg);
       transition: transform 0.2s ease-in-out;
     }
 

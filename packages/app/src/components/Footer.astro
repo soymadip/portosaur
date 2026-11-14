@@ -20,8 +20,9 @@ const footer = config.theme.footer;
 <style>
   @layer porto.core {
     footer {
-      /* The footer sits in the same panel color as the navbar/sidebar. */
-      background-color: var(--porto-color-bg-sidebar);
+      /* No background of its own: like the navbar and sidebar, the
+         footer sits on the content background, separated from the
+         content by its top border. */
       border-top: 1px solid var(--porto-color-hairline);
       /* Slim, matching the OG Portosaur footer: Docusaurus set
          --ifm-footer-padding-vertical to 0.1rem. Horizontal padding

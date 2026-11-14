@@ -47,8 +47,9 @@
     --porto-color-text-invert: var(--porto-color-accent-low);
     --porto-color-bg: var(--porto-color-black);
     --porto-color-bg-nav: var(--porto-color-gray-6);
-    /* Navbar and sidebar share one panel color. */
-    --porto-color-bg-sidebar: var(--porto-color-bg-nav);
+    /* Navbar, sidebar, and content share one background — panels
+       are separated by hairline borders, not color. */
+    --porto-color-bg-sidebar: var(--porto-color-bg);
     --porto-color-bg-inline-code: var(--porto-color-gray-5);
     --porto-color-bg-accent: var(--porto-color-accent-high);
     --porto-color-hairline-light: var(--porto-color-gray-5);
@@ -177,8 +178,9 @@
     --porto-color-text-accent: var(--porto-color-accent);
     --porto-color-text-invert: var(--porto-color-black);
     --porto-color-bg-nav: var(--porto-color-gray-7);
-    /* Navbar and sidebar share one panel color. */
-    --porto-color-bg-sidebar: var(--porto-color-bg-nav);
+    /* Navbar, sidebar, and content share one background — panels
+       are separated by hairline borders, not color. */
+    --porto-color-bg-sidebar: var(--porto-color-bg);
     --porto-color-bg-inline-code: var(--porto-color-gray-6);
     --porto-color-bg-accent: var(--porto-color-accent);
     --porto-color-hairline-light: var(--porto-color-gray-6);
