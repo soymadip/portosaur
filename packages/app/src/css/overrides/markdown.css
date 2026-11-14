@@ -63,83 +63,92 @@ mark {
  * Emitted by the admonitions plugin as `.admonition.admonition-<type>`
  * with `.admonition-heading` + `.admonition-content` children
  * (types: note, tip, info, success, warning, caution, danger,
- * important). The GitHub alerts plugin emits the same shape — NOTE
- * maps to info (GitHub's NOTE is blue), CAUTION to danger (red),
- * and IMPORTANT to important (purple) — so a `:::note` block and a
- * `[!NOTE]` alert look different, as they do natively.
- * OG's construction (Docusaurus): 25% semantic hue over surface-0
- * (gray-6 here), border in the hue, text and heading in the text
- * color. The note type mixes 25% text-muted (gray-3) over gray-6. */
+ * important). The GitHub alerts plugin emits the same shape.
+ *
+ * Styled after Starlight's asides (MIT License; see
+ * packages/app/NOTICE.md): a saturated variant background, a thick
+ * left accent border, and an icon + bold title in the variant's
+ * accent color. Portosaur's types map onto Starlight's four
+ * variants: note + info -> note (blue), tip + important + success
+ * -> tip (purple), warning + caution -> caution (amber), danger
+ * -> danger (red). The icons are Starlight's aside icons
+ * (information, rocket, warning, error), drawn through a CSS mask
+ * on the heading's ::before so no markup change is needed. */
 
 .porto-markdown-content .admonition {
-  /* Text is --porto-color-white (OG's admonition text color):
-     gray-2 on the mid-tone bg was 1.4–2.7:1 in every scheme.
-     The heading inherits this — OG does not color it separately. */
+  /* Note (blue) is the default: unknown types render as notes. */
+  --porto-color-asides-text-accent: var(--porto-color-blue-high);
+  --porto-color-asides-border: var(--porto-color-blue);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20d%3D%22M12%2011a1%201%200%200%200-1%201v4a1%201%200%200%200%202%200v-4a1%201%200%200%200-1-1Zm.38-3.92a1%201%200%200%200-.76%200%201%201%200%200%200-.33.21%201.15%201.15%200%200%200-.21.33%201%201%200%200%200%20.21%201.09c.097.088.209.16.33.21A1%201%200%200%200%2013%208a1.05%201.05%200%200%200-.29-.71%201%201%200%200%200-.33-.21ZM12%202a10%2010%200%201%200%200%2020%2010%2010%200%200%200%200-20Zm0%2018a8%208%200%201%201%200-16.001A8%208%200%200%201%2012%2020Z%22%2F%3E%3C%2Fsvg%3E");
   color: var(--porto-color-white);
-  border: 1px solid var(--porto-color-gray-5);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  background-color: var(--porto-color-blue-low);
+  padding: 1rem;
+  border-inline-start: 0.25rem solid var(--porto-color-asides-border);
   margin-bottom: 1rem;
 }
 
-.porto-markdown-content .admonition-heading {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.porto-markdown-content .admonition-note {
-  border-color: var(--porto-color-gray-3);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-3) 25%,
-    var(--porto-color-gray-6)
-  );
+.porto-markdown-content .admonition-note,
+.porto-markdown-content .admonition-info {
+  --porto-color-asides-text-accent: var(--porto-color-blue-high);
+  --porto-color-asides-border: var(--porto-color-blue);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20d%3D%22M12%2011a1%201%200%200%200-1%201v4a1%201%200%200%200%202%200v-4a1%201%200%200%200-1-1Zm.38-3.92a1%201%200%200%200-.76%200%201%201%200%200%200-.33.21%201.15%201.15%200%200%200-.21.33%201%201%200%200%200%20.21%201.09c.097.088.209.16.33.21A1%201%200%200%200%2013%208a1.05%201.05%200%200%200-.29-.71%201%201%200%200%200-.33-.21ZM12%202a10%2010%200%201%200%200%2020%2010%2010%200%200%200%200-20Zm0%2018a8%208%200%201%201%200-16.001A8%208%200%200%201%2012%2020Z%22%2F%3E%3C%2Fsvg%3E");
+  background-color: var(--porto-color-blue-low);
 }
 
 .porto-markdown-content .admonition-tip,
+.porto-markdown-content .admonition-important,
 .porto-markdown-content .admonition-success {
-  border-color: var(--porto-color-green);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-green) 25%,
-    var(--porto-color-gray-6)
-  );
-}
-
-.porto-markdown-content .admonition-info {
-  border-color: var(--porto-color-blue);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-blue) 25%,
-    var(--porto-color-gray-6)
-  );
+  --porto-color-asides-text-accent: var(--porto-color-purple-high);
+  --porto-color-asides-border: var(--porto-color-purple);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M1.44%208.855v-.001l3.527-3.516c.34-.344.802-.541%201.285-.548h6.649l.947-.947c3.07-3.07%206.207-3.072%207.62-2.868a1.821%201.821%200%200%201%201.557%201.557c.204%201.413.203%204.55-2.868%207.62l-.946.946v6.649a1.845%201.845%200%200%201-.549%201.286l-3.516%203.528a1.844%201.844%200%200%201-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847%201.847%200%200%201%20.98%2010.693a1.843%201.843%200%200%201%20.46-1.838Zm5.379%202.017-3.873-.776L6.32%206.733h4.638l-4.14%204.14Zm8.403-5.655c2.459-2.46%204.856-2.463%205.89-2.33.134%201.035.13%203.432-2.329%205.891l-6.71%206.71-3.561-3.56%206.71-6.711Zm-1.318%2015.837-.776-3.873%204.14-4.14v4.639l-3.364%203.374Z%22%20clip-rule%3D%22evenodd%22%2F%3E%3Cpath%20d%3D%22M9.318%2018.345a.972.972%200%200%200-1.86-.561c-.482%201.435-1.687%202.204-2.934%202.619a8.22%208.22%200%200%201-1.23.302c.062-.365.157-.79.303-1.229.415-1.247%201.184-2.452%202.62-2.935a.971.971%200%201%200-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012%202.588-3.493%204.033a10.383%2010.383%200%200%200-.51%202.845l-.001.016v.063c0%20.536.434.972.97.972H2.24a7.21%207.21%200%200%200%20.878-.065c.527-.063%201.248-.19%202.02-.447%201.445-.48%203.205-1.472%204.033-3.494a5.828%205.828%200%200%200%20.147-.407Z%22%2F%3E%3C%2Fsvg%3E");
+  background-color: var(--porto-color-purple-low);
 }
 
 .porto-markdown-content .admonition-warning,
 .porto-markdown-content .admonition-caution {
-  border-color: var(--porto-color-orange);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-orange) 25%,
-    var(--porto-color-gray-6)
-  );
+  --porto-color-asides-text-accent: var(--porto-color-orange-high);
+  --porto-color-asides-border: var(--porto-color-orange);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20d%3D%22M12%2016a1%201%200%201%200%200%202%201%201%200%200%200%200-2Zm10.67%201.47-8.05-14a3%203%200%200%200-5.24%200l-8%2014A3%203%200%200%200%203.94%2022h16.12a3%203%200%200%200%202.61-4.53Zm-1.73%202a1%201%200%200%201-.88.51H3.94a1%201%200%200%201-.88-.51%201%201%200%200%201%200-1l8-14a1%201%200%200%201%201.78%200l8.05%2014a1%201%200%200%201%20.05%201.02v-.02ZM12%208a1%201%200%200%200-1%201v4a1%201%200%200%200%202%200V9a1%201%200%200%200-1-1Z%22%2F%3E%3C%2Fsvg%3E");
+  background-color: var(--porto-color-orange-low);
 }
 
 .porto-markdown-content .admonition-danger {
-  border-color: var(--porto-color-red);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-red) 25%,
-    var(--porto-color-gray-6)
-  );
+  --porto-color-asides-text-accent: var(--porto-color-red-high);
+  --porto-color-asides-border: var(--porto-color-red);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20d%3D%22M12%207a1%201%200%200%200-1%201v4a1%201%200%200%200%202%200V8a1%201%200%200%200-1-1Zm0%208a1%201%200%201%200%200%202%201%201%200%200%200%200-2Zm9.71-7.44-5.27-5.27a1.05%201.05%200%200%200-.71-.29H8.27a1.05%201.05%200%200%200-.71.29L2.29%207.56a1.05%201.05%200%200%200-.29.71v7.46c.004.265.107.518.29.71l5.27%205.27c.192.183.445.286.71.29h7.46a1.05%201.05%200%200%200%20.71-.29l5.27-5.27a1.05%201.05%200%200%200%20.29-.71V8.27a1.05%201.05%200%200%200-.29-.71ZM20%2015.31%2015.31%2020H8.69L4%2015.31V8.69L8.69%204h6.62L20%208.69v6.62Z%22%2F%3E%3C%2Fsvg%3E");
+  background-color: var(--porto-color-red-low);
 }
 
-/* GitHub `[!IMPORTANT]` only — Docusaurus has no important type. */
-.porto-markdown-content .admonition-important {
-  border-color: var(--porto-color-purple);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-purple) 25%,
-    var(--porto-color-gray-6)
-  );
+.porto-markdown-content .admonition-heading {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: var(--porto-text-h5);
+  font-weight: 600;
+  line-height: var(--porto-line-height-headings);
+  color: var(--porto-color-asides-text-accent);
+}
+
+/* The icon is a CSS mask of the variant's Starlight icon, painted
+ * with the heading's accent color. */
+.porto-markdown-content .admonition-heading::before {
+  content: "";
+  flex: none;
+  width: 1.333em;
+  height: 1.333em;
+  background-color: currentColor;
+  -webkit-mask: var(--porto-admonition-icon) center / contain no-repeat;
+  mask: var(--porto-admonition-icon) center / contain no-repeat;
+}
+
+.porto-markdown-content .admonition-heading + .admonition-content {
+  margin-top: 0.5rem;
+}
+
+.porto-markdown-content .admonition-content:empty {
+  display: none;
+}
+
+.porto-markdown-content .admonition-content a {
+  color: var(--porto-color-asides-text-accent);
 }
