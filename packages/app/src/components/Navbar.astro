@@ -245,8 +245,8 @@ const showThemeSwitch = theme.showThemeSwitch;
       inset-block-start: 0;
       width: 100%;
       height: var(--porto-nav-height);
-      /* Same separator as the TOC panel's left border. */
-      border-bottom: 1px solid var(--porto-color-hairline);
+      /* No bottom border on mobile — it only appears at desktop
+         widths (see the media query below). */
       padding: var(--porto-nav-pad-y) var(--porto-nav-pad-x);
       padding-inline-end: var(--porto-nav-pad-x);
       /* The header shares the content background — it is separated
@@ -255,10 +255,6 @@ const showThemeSwitch = theme.showThemeSwitch;
          must stand out from the background.) */
       background-color: var(--porto-color-bg);
       transition: transform 0.2s ease-in-out;
-    }
-
-    .header--home {
-      border-bottom-color: transparent;
     }
 
     /* Hide-on-scroll: the script toggles `.porto-navbar--hidden` on
@@ -416,6 +412,17 @@ const showThemeSwitch = theme.showThemeSwitch;
     }
 
     @media (min-width: 50rem) {
+      /* Desktop only: the bottom border returns (same separator as
+         the TOC panel's left border). Home pages keep it transparent
+         — the override sits after the border rule (same specificity,
+         so source order decides). */
+      .header {
+        border-bottom: 1px solid var(--porto-color-hairline);
+      }
+      .header--home {
+        border-bottom-color: transparent;
+      }
+
       :global(:root[data-has-sidebar]) {
         --__porto-sidebar-pad: calc(2 * var(--porto-nav-pad-x));
       }
