@@ -28,12 +28,15 @@ import ThemeSelect from "./ThemeSelect.astro";
 import { buildNavEntries, isDropdown } from "../utils/navbar.ts";
 
 interface Props {
-  /** True on the portfolio home page — removes the header border and
-   * hides the brand in landscape (ported from old `pages/index.jsx`). */
+  /** True on any home page (docs or portfolio) — removes the header
+   * bottom border. */
   isHome?: boolean;
+  /** True on the portfolio home page only — hides the brand in
+   * landscape (ported from old `pages/index.jsx`). */
+  isPortfolioHome?: boolean;
 }
 
-const { isHome = false } = Astro.props;
+const { isHome = false, isPortfolioHome = false } = Astro.props;
 
 const { leftEntries, rightEntries, moreItems } = buildNavEntries(
   config,
@@ -53,7 +56,12 @@ const showThemeSwitch = theme.showThemeSwitch;
 >
   <div class="header-inner">
     <div class="title-column">
-      <div class:list={["title-wrapper", { "title-wrapper--home": isHome }]}>
+      <div
+        class:list={[
+          "title-wrapper",
+          { "title-wrapper--home": isPortfolioHome },
+        ]}
+      >
         <SiteTitle />
       </div>
       {leftEntries.length > 0 && (

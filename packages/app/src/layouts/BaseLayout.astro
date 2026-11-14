@@ -132,9 +132,9 @@ function absoluteUrl(value: string | undefined): string | undefined {
 }
 const socialCardUrl = absoluteUrl(site.socialCard);
 
-// Home-page detection for the ported index.jsx inline style (navbar
-// shadow removal + brand hiding in landscape), which only applied to
-// the portfolio home — the docs home never had it.
+// Home-page detection: the borderless header applies to both home
+// pages (docs and portfolio); the brand hiding in landscape stays
+// portfolio-only, like the ported index.jsx inline style.
 const pathname = Astro.url.pathname;
 const isHome =
   pathname === "/" ||
@@ -207,7 +207,7 @@ const swUrl = withBase("sw.js");
   <body>
     <SkipLink />
 
-    <Navbar isHome={isPortfolioHome} />
+    <Navbar isHome={isHome} isPortfolioHome={isPortfolioHome} />
 
     {/*
       The mobile menu popover on pages without a sidebar (docs pages
