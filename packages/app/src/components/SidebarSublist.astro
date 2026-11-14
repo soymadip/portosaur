@@ -185,6 +185,11 @@ function hasActiveDescendant(item: any): boolean {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      /* Same font size as a leaf link, so the 0.3em padding below
+         resolves to the same pixels — without this the summary
+         inherits the 16px base size and category rows come out
+         1.2px taller than leaf rows. */
+      font-size: var(--porto-text-sm);
       /* Same vertical padding as a leaf link, so category rows and
          leaf rows are the same height. */
       padding: 0.3em var(--porto-sidebar-item-padding-inline);
@@ -200,10 +205,11 @@ function hasActiveDescendant(item: any): boolean {
     .sidebar-caret {
       /* A square hit area around the chevron, with its own hover
          background (Docusaurus's caret button): the negative
-         margins keep the padded box from making the row taller
-         than a leaf row. Only the chevron itself rotates when the
-         group opens — the span and its hover background stay put,
-         so the hover box never spins through a diamond
+         margins more than cancel the padding, so the 1.25rem
+         chevron (20px) never makes the row taller than the 19.6px
+         text line sets it. Only the chevron itself rotates when
+         the group opens — the span and its hover background stay
+         put, so the hover box never spins through a diamond
          mid-animation. The svg is rendered by the Icon component,
          so the rotation rules have to be global: scoped styles
          can't reach it. */
@@ -212,7 +218,7 @@ function hasActiveDescendant(item: any): boolean {
       justify-content: center;
       flex-shrink: 0;
       padding: 0.2rem;
-      margin-block: -0.2rem;
+      margin-block: -0.25rem;
       border-radius: 0.25rem;
     }
     :global(.sidebar-caret svg) {
