@@ -21,7 +21,6 @@
 // The fixed header is positioned by the `.header` rules below;
 // BaseLayout's <main> reserves its height (padding-top).
 import config from "porto:config";
-import Icon from "./Icon.astro";
 import Search from "./Search.astro";
 import SiteTitle from "./SiteTitle.astro";
 import ThemeSelect from "./ThemeSelect.astro";
@@ -161,7 +160,9 @@ const showThemeSwitch = theme.showThemeSwitch;
           </ul>
         </details>
       </nav>
-      {/* Mobile menu button (right side, VitePress-style) — opens the
+      {/* Mobile menu button (right side) — VitePress's hamburger icon
+          (VPNavBarHamburger, MIT License): three staggered lines that
+          animate into an X while the menu is open. Opens the
           MobileMenu popover via the popover API, no JavaScript. */}
       <button
         type="button"
@@ -169,8 +170,11 @@ const showThemeSwitch = theme.showThemeSwitch;
         popovertarget="porto__sidebar"
         aria-label="Toggle navigation menu"
       >
-        <Icon name="bars" size="1.5rem" class="open-menu" />
-        <Icon name="close" size="1.5rem" class="close-menu" />
+        <span class="hamburger-container">
+          <span class="hamburger-line top"></span>
+          <span class="hamburger-line middle"></span>
+          <span class="hamburger-line bottom"></span>
+        </span>
       </button>
     </div>
   </div>
@@ -297,13 +301,11 @@ const showThemeSwitch = theme.showThemeSwitch;
       }
     }
 
-    /* Mobile menu button (right side, VitePress-style) — a plain
-       icon button in the navbar's right cluster. It swaps its icon
-       while the popover is open; the button and the popover are not
-       siblings (the button lives in the header, the popover in the
-       layout), so the state reads off <body>. */
+    /* Mobile menu button (right side) — a plain icon button in the
+       navbar's right cluster. */
     .menu-button {
       align-items: center;
+      justify-content: center;
       border: 0;
       border-radius: 0.25rem;
       padding: 0.5rem;
@@ -314,14 +316,54 @@ const showThemeSwitch = theme.showThemeSwitch;
     .menu-button:hover {
       color: var(--porto-color-white);
     }
-    .menu-button .close-menu {
-      display: none;
+
+    /* VitePress's hamburger icon (VPNavBarHamburger): three lines in
+       a 16×14 box — top and bottom 12px, middle 8px, 2px thick, 6px
+       apart — measured off vitepress.dev (the lines are right-
+       staggered, not three equal bars). While the menu popover is
+       open the lines animate into an X; the button and the popover
+       are not siblings (the button lives in the header, the popover
+       in the layout), so the state reads off <body>. */
+    .hamburger-container {
+      position: relative;
+      width: 16px;
+      height: 14px;
+      overflow: hidden;
     }
-    :global(body:has(#porto__sidebar:popover-open)) .menu-button .open-menu {
-      display: none;
+    .hamburger-line {
+      position: absolute;
+      left: 0;
+      height: 2px;
+      background-color: currentColor;
+      transition:
+        top 0.25s,
+        transform 0.25s,
+        opacity 0.25s;
     }
-    :global(body:has(#porto__sidebar:popover-open)) .menu-button .close-menu {
-      display: block;
+    .hamburger-line.top {
+      top: 0;
+      width: 12px;
+    }
+    .hamburger-line.middle {
+      top: 6px;
+      left: 4px;
+      width: 8px;
+    }
+    .hamburger-line.bottom {
+      top: 12px;
+      width: 12px;
+    }
+    :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.top {
+      top: 6px;
+      transform: rotate(45deg);
+    }
+    :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.middle {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    :global(body:has(#porto__sidebar:popover-open)) .hamburger-line.bottom {
+      top: 6px;
+      transform: rotate(-45deg);
     }
 
     .right-group {
