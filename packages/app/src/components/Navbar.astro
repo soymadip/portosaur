@@ -127,22 +127,23 @@ const showThemeSwitch = theme.showThemeSwitch;
       )}
     </div>
 
-    <div class="porto-flex print:hidden">{showSearch && <Search />}</div>
-
-    <div class="porto-hidden md:porto-flex print:hidden right-group">
-      {showThemeSwitch && (
-        <button
-          type="button"
-          class="theme-toggle porto-flex"
-          data-theme-toggle
-          aria-label="Toggle dark mode"
-          title="Toggle dark mode"
-        >
-          <Icon name="moon" size="1.25rem" class="light:porto-hidden" />
-          <Icon name="sun" size="1.25rem" class="dark:porto-hidden" />
-        </button>
-      )}
-      <nav class="primary-nav porto-flex" aria-label="Primary">
+    <div class="porto-flex print:hidden right-group">
+      <div class="porto-flex search-group">
+        {showThemeSwitch && (
+          <button
+            type="button"
+            class="theme-toggle porto-hidden md:porto-flex"
+            data-theme-toggle
+            aria-label="Toggle dark mode"
+            title="Toggle dark mode"
+          >
+            <Icon name="moon" size="1.25rem" class="light:porto-hidden" />
+            <Icon name="sun" size="1.25rem" class="dark:porto-hidden" />
+          </button>
+        )}
+        {showSearch && <Search />}
+      </div>
+      <nav class="primary-nav porto-hidden md:porto-flex" aria-label="Primary">
         {rightEntries.map((entry) =>
           isDropdown(entry) ? (
             <details class="porto-navbar__dropdown">
@@ -458,6 +459,11 @@ const showThemeSwitch = theme.showThemeSwitch;
       align-items: center;
     }
 
+    .search-group {
+      gap: var(--porto-nav-gap);
+      align-items: center;
+    }
+
     .theme-toggle {
       align-items: center;
       border: 0;
@@ -650,6 +656,12 @@ const showThemeSwitch = theme.showThemeSwitch;
           /* 3 (right items): use the space that these need. */
           auto;
         align-content: center;
+      }
+      /* The right cluster (theme + search + nav links) sits in the
+        third column; the 1fr middle column stays empty as a spacer,
+        so the cluster is right-aligned like OG Docusaurus. */
+      .right-group {
+        grid-column: 3;
       }
       :global([data-has-sidebar]) .header {
         padding-inline-end: var(--porto-nav-pad-x);
