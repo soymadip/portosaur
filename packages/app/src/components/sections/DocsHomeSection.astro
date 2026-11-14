@@ -1,22 +1,29 @@
 ---
 // DocsHomeSection — docs landing: icon/title/tagline/desc, action
 // buttons, feature cards (with optional links). Reads config directly
-// from `porto:config`. Derived in part from Starlight (MIT License) —
-// see packages/app/NOTICE.md: the hero layout comes from Starlight's
-// Hero, the feature cards from its Card + CardGrid user-components
-// (renamed `sl-` → `porto-`); the buttons use the shared
-// `.porto-link-button` (Starlight's LinkButton, in css/portfolio.css).
+// from `porto:config`.
 //
-// Portosaur differences from Starlight's splash:
+// The hero layout is OG's (main branch `DocsHomeSection`): a
+// two-column hero — text left (title, tagline, description,
+// actions), image right with a primary glow behind it — restyled in
+// the current design language (Starlight-derived tokens, the shared
+// `.porto-link-button` actions). The feature cards are Starlight's
+// Card + CardGrid user-components (renamed `sl-` → `porto-`),
+// derived in part from Starlight (MIT License) — see
+// packages/app/NOTICE.md.
+//
+// Portosaur differences from OG's hero:
 // - Feature titles stay <h2> (they are part of the page's heading
 //   list and the frozen URL snapshots) instead of Starlight's <p>.
 // - Actions take Portosaur's shape ({ label/text, link, icon }) with
 //   devicon/emoji icons via renderDynamicIcon; the first action is
-//   primary, the rest secondary (Starlight's variants are per-action).
+//   primary, the rest secondary.
 // - The hero image goes through Astro's `<Image />` when it is a
 //   local file the build can size (remote URLs and unsizable files
 //   keep a plain `<img>`, with the `onerror` fallback either way).
-// - Entrance animations and the image glow are dropped.
+// - Entrance animations are dropped (the current design language
+//   has none); the title hover underline, the image glow and the
+//   image hover lift stay.
 import { Image } from "astro:assets";
 import config from "porto:config";
 import { PAGE_TITLE_ID } from "../../constants.ts";
@@ -47,31 +54,6 @@ const iconOnError = iconFallback
 {docsHome && (
   <div class="docs-home">
     <div class="hero">
-      {icon && iconDims ? (
-        <Image
-          src={iconSrc}
-          alt="Hero"
-          width={iconDims.width}
-          height={iconDims.height}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          onerror={iconOnError}
-        />
-      ) : (
-        icon && (
-          <img
-            src={iconSrc}
-            alt="Hero"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-            width="400"
-            height="400"
-            onerror={iconOnError}
-          />
-        )
-      )}
       <div class="porto-flex stack">
         <div class="porto-flex copy">
           <h1 id={PAGE_TITLE_ID}>{docsHome.title}</h1>
@@ -98,6 +80,33 @@ const iconOnError = iconFallback
               </a>
             ))}
           </div>
+        )}
+      </div>
+      <div class="hero-icon">
+        {icon && iconDims ? (
+          <Image
+            src={iconSrc}
+            alt="Hero"
+            width={iconDims.width}
+            height={iconDims.height}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            onerror={iconOnError}
+          />
+        ) : (
+          icon && (
+            <img
+              src={iconSrc}
+              alt="Hero"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              width="400"
+              height="400"
+              onerror={iconOnError}
+            />
+          )
         )}
       </div>
     </div>
@@ -147,30 +156,23 @@ const iconOnError = iconFallback
       padding-inline: 1rem;
     }
 
-    /* Hero — from Starlight's Hero. */
+    /* Hero — OG's layout (main branch `DocsHomeSection`): text left,
+       image right with a primary glow behind it. Mobile stacks
+       image-on-top, text centered (`column-reverse` — the text comes
+       first in the DOM, like OG). */
     .hero {
-      display: grid;
-      grid-template-columns: 100%;
+      display: flex;
+      flex-direction: column-reverse;
       align-items: center;
-      gap: 1rem;
-      padding-bottom: 1rem;
-    }
-
-    /* `:global(img)`: the hero image renders through Astro's
-       `<Image />` (a child component), whose `<img>` carries no
-       scope attribute — a scoped `img` selector would not match it
-       (the plain-`<img>` fallback branch matches either way). */
-    .hero > :global(img) {
-      object-fit: contain;
-      width: min(70%, 20rem);
-      height: auto;
-      margin-inline: auto;
+      gap: 2rem;
+      padding-block: 3.5rem 3rem;
     }
 
     .stack {
       flex-direction: column;
-      gap: clamp(1.5rem, calc(1.5rem + 1vw), 2rem);
+      gap: 1.5rem;
       text-align: center;
+      max-width: 700px;
     }
 
     .copy {
@@ -179,40 +181,52 @@ const iconOnError = iconFallback
       align-items: center;
     }
 
-    .copy > * {
-      max-width: 50ch;
+    .hero h1 {
+      position: relative;
+      display: inline-block;
+      margin: 0;
+      font-size: clamp(2.7rem, calc(0.25rem + 5vw), var(--porto-text-6xl));
+      line-height: 1.05;
+      font-weight: 700;
+      color: var(--porto-color-text-accent);
+      transition: transform 0.3s ease;
     }
 
-    .hero h1 {
-      margin: 0;
-      font-size: clamp(
-        var(--porto-text-3xl),
-        calc(0.25rem + 5vw),
-        var(--porto-text-6xl)
-      );
-      line-height: var(--porto-line-height-headings);
-      font-weight: 600;
-      color: var(--porto-color-white);
+    .hero h1:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero h1::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 4px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--porto-color-text-accent);
+      transition: width 0.3s ease;
+    }
+
+    .hero h1:hover::after {
+      width: 100%;
     }
 
     .tagline {
-      font-size: clamp(
-        var(--porto-text-base),
-        calc(0.0625rem + 2vw),
-        var(--porto-text-xl)
-      );
-      color: var(--porto-color-gray-2);
+      font-size: clamp(1.7rem, calc(0.5rem + 3vw), 2.34rem);
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--porto-color-white);
     }
 
     .desc {
       margin: 0;
-      font-size: var(--porto-text-base);
+      font-size: var(--porto-text-lg);
       line-height: 1.5;
       color: var(--porto-color-gray-2);
     }
 
     .actions {
-      gap: 1rem 2rem;
+      gap: 1rem;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -222,19 +236,61 @@ const iconOnError = iconFallback
       align-items: center;
     }
 
+    /* The hero image, capped by height like OG (280px desktop,
+       180px mobile) with its squircle radius and primary glow. */
+    .hero-icon {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+    }
+
+    .hero-icon::before {
+      content: "";
+      position: absolute;
+      inset: -10%;
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse at center,
+        color-mix(in srgb, var(--porto-color-text-accent) 35%, transparent) 0%,
+        transparent 70%
+      );
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    /* `:global(img)`: the hero image renders through Astro's
+       `<Image />` (a child component), whose `<img>` carries no
+       scope attribute — a scoped `img` selector would not match it
+       (the plain-`<img>` fallback branch matches either way). */
+    .hero-icon > :global(img) {
+      position: relative;
+      z-index: 1;
+      object-fit: cover;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 20%;
+      transition:
+        transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .hero-icon > :global(img):hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: var(--porto-shadow-md);
+    }
+
     @media (min-width: 50rem) {
       .hero {
-        grid-template-columns: 7fr 4fr;
-        gap: 3%;
-        padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem);
-      }
-
-      .hero > :global(img) {
-        order: 2;
-        width: min(100%, 25rem);
+        flex-direction: row;
+        justify-content: space-between;
       }
 
       .stack {
+        flex: 1.2;
         text-align: start;
       }
 
@@ -244,6 +300,10 @@ const iconOnError = iconFallback
 
       .actions {
         justify-content: flex-start;
+      }
+
+      .hero-icon > :global(img) {
+        max-height: 280px;
       }
     }
   }
