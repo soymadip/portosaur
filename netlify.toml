@@ -1,4 +1,4 @@
 [build]
   base = "."
-  command = "bun run packages/cli/bin/porto.mjs schema -o packages/cli/config-schema.json && bun run --cwd docs build && bun run packages/cli/bin/porto.mjs schema -o docs/build/config-schema.json"
+  command = "bun run packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json && bun run --cwd docs build && bun run packages/cli/bin/porto.ts schema -o docs/build/config-schema.json"
   publish = "docs/build"

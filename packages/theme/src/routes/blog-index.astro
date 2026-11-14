@@ -6,7 +6,7 @@
 // has no posts, the empty state renders instead — the h2 "No posts yet"
 // is verbatim (the docs site's blog has no posts — only `authors.yml`).
 //
-// Dates resolve via the shared `postDate` helper in `lib/content.mjs`
+// Dates resolve via the shared `postDate` helper in `lib/content.ts`
 // (frontmatter `date` → the file's last git commit date → the file's
 // mtime — the Docusaurus fallback chain for undated posts).
 //
@@ -20,9 +20,9 @@ import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogSidebar from "../components/BlogSidebar.astro";
 import NotifyButton from "../components/NotifyButton.astro";
-import { pageTitle, blogSlug, postDate } from "../lib/content.mjs";
-import { portosaurMdxOptions } from "../mdx.mjs";
-import { renderIcon } from "../lib/icons.mjs";
+import { pageTitle, blogSlug, postDate } from "../lib/content.ts";
+import { portosaurMdxOptions } from "../mdx.ts";
+import { renderIcon } from "../lib/icons.ts";
 
 const PAGE_SIZE = 10;
 

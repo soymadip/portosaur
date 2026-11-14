@@ -6,7 +6,7 @@
 import { getCollection } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { pageTitle } from "../lib/content.mjs";
+import { pageTitle } from "../lib/content.ts";
 
 const siteTitle = config.site.title;
 const blogRoute = config.site.blogRoute;

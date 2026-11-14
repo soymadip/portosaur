@@ -11,7 +11,7 @@
 // `pages/index.jsx` rendered a nested <main> inside Layout's div —
 // that nesting is dropped in the port).
 import config from "porto:config";
-import { getAssetHeadTags } from "../lib/assets.mjs";
+import { getAssetHeadTags } from "../lib/assets.ts";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 
@@ -203,7 +203,7 @@ const swUrl = withBase("sw.js");
     {/*
       PWA: register the service worker in production builds only (the
       old @docusaurus/plugin-pwa behaved the same). The worker itself
-      (`sw.js`, from `sw-custom.js` via @vite-pwa/astro injectManifest)
+      (`sw.js`, from `sw-custom.ts` via @vite-pwa/astro injectManifest)
       is wired in Phase 5 — until then registration rejects and is
       ignored.
     */}
@@ -224,7 +224,7 @@ const swUrl = withBase("sw.js");
       requested by the NotifyButton's user gesture, never here.
     */}
     {pwaEnabled && pwaNotifications && <script>
-      import "../clientModules/periodicSync.js";
+      import "../clientModules/periodicSync.ts";
     </script>}
 
     <style is:global>

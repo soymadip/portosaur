@@ -65,7 +65,7 @@ pages:
     - bun install --cwd docs
     - bun install --cwd packages/cli
     - bun run --cwd docs build
-    - bun run packages/cli/bin/porto.mjs schema -o docs/build/config-schema.json
+    - bun run packages/cli/bin/porto.ts schema -o docs/build/config-schema.json
     - mv docs/build public
   artifacts:
     paths:

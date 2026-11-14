@@ -16,18 +16,21 @@
     "config-schema.json"
   ],
   "scripts": {
-    "prepack": "bun bin/porto.mjs schema && bun x prettier --write config-schema.json"
+    "prepack": "bun bin/porto.ts schema && bun x prettier --write config-schema.json"
   },
   "type": "module",
   "bin": {
-    "porto": "bin/porto.mjs"
+    "porto": "bin/porto.ts"
   },
-  "types": "./src/index.d.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "import": "./src/index.mjs",
-      "default": "./src/index.mjs"
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
     }
+  },
+  "engines": {
+    "node": ">=24.15.0"
   },
   "dependencies": {
     "@portosaur/wizard": "workspace:*",

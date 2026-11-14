@@ -17,13 +17,13 @@
 // - `unlisted` frontmatter is not in the content schema, so it cannot
 //   be filtered here (the old component hid unlisted notes).
 import config from "porto:config";
-import { guessDocPermalink } from "../../utils/slug.mjs";
+import { guessDocPermalink } from "../../utils/slug.ts";
 import {
   renderDynamicIcon,
   renderIcon,
   techMap,
   withBase,
-} from "../../lib/icons.mjs";
+} from "../../lib/icons.ts";
 
 interface Props {
   notes: Array<{

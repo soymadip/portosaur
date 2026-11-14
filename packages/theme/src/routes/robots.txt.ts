@@ -1,3 +1,4 @@
+import type { APIRoute } from "astro";
 import config from "porto:config";
 
 // Injected endpoint (`injectRoute`, pattern `/robots.txt`): renders the
@@ -39,7 +40,7 @@ function renderRobotsTxt(): string {
   return content;
 }
 
-export async function GET(): Promise<Response> {
+export const GET = (async () => {
   // The old generator returned early without writing a file when robots
   // generation was disabled; the endpoint equivalent is an empty 200
   // response (no rules served, no sitemap advertised).
@@ -54,4 +55,4 @@ export async function GET(): Promise<Response> {
     status: 200,
     headers: { "Content-Type": "text/plain" },
   });
-}
+}) satisfies APIRoute;

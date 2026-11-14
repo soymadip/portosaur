@@ -4,8 +4,8 @@
 // shared empty-state styles, cloud-off icon, "Try again" reload button.
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { pageTitle } from "../lib/content.mjs";
-import { renderIcon } from "../lib/icons.mjs";
+import { pageTitle } from "../lib/content.ts";
+import { renderIcon } from "../lib/icons.ts";
 
 const title = pageTitle("You're Offline", config.site.title);
 ---

@@ -1,0 +1,388 @@
+/**
+ * Shared helpers for the injected routes.
+ *
+ * Slug resolution mirrors the integration's `porto:sidebar` virtual module
+ * (same canonical slug util), so routes and the sidebar always agree.
+ * Topic-list rules mirror the Docusaurus `TopicList` component
+ * (`shouldRender` + `filterDocCardListItems` semantics, verified against
+ * the golden snapshots).
+ */
+
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { statSync } from "node:fs";
+import {
+  guessDocPermalink,
+  isIndexBase,
+  NUMBER_PREFIX_PATTERN,
+} from "../utils/slug.ts";
+import type { Frontmatter } from "../utils/slug.ts";
+import type { PortosaurOptions } from "../integration.ts";
+import type { SidebarItem } from "../utils/sidebar.ts";
+
+/** A content collection entry (Astro `getCollection` shape, frontmatter untyped). */
+export interface ContentEntry {
+  id: string;
+  data?: Frontmatter | null;
+  filePath?: string;
+}
+
+/** A collection entry with its canonical slug resolved. */
+export interface SluggedEntry {
+  entry: ContentEntry;
+  id: string;
+  slug: string;
+  data: Frontmatter;
+}
+
+/** One `{ title, href }` breadcrumb / prev-next link. */
+export interface SidebarLink {
+  title: string;
+  href: string;
+}
+
+/**
+ * The project-relative path of a content file, from an Astro glob-loader
+ * `filePath` — the root-relative form (`../docs/guide/setup.mdx`, relative
+ * to the generated `.portosaur/` project) or an absolute path. Leading
+ * `..` segments are stripped; absolute paths resolve against the build
+ * working directory first, then get the same treatment, so both shapes
+ * come back as e.g. `docs/guide/setup.mdx`. Returns `null` when no path
+ * is given or nothing remains after unwrapping.
+ *
+ * Callers strip their own content-dir prefix (e.g. the notes dir) when
+ * they need a content-relative path for edit URLs.
+ */
+export function contentRelativePath(filePath?: string | null): string | null {
+  if (!filePath) {
+    return null;
+  }
+  let relative: string;
+  if (path.isAbsolute(filePath)) {
+    relative = path.relative(process.cwd(), filePath);
+  } else {
+    relative = filePath;
+  }
+  const segments = relative.split(path.sep).join("/").split("/");
+  let index = 0;
+  while (segments[index] === "..") {
+    index += 1;
+  }
+  const rest = segments.slice(index).filter(Boolean);
+  return rest.join("/") || null;
+}
+
+/** Docusaurus-style page title: `{page} | {site}`. */
+export function pageTitle(page: string, siteTitle: string): string {
+  return `${page} | ${siteTitle}`;
+}
+
+/** Whether a collection entry is an index/README file. */
+export function isIndexEntry(entry: ContentEntry): boolean {
+  const segments = entry.id.split("/");
+  return isIndexBase(segments[segments.length - 1]);
+}
+
+/**
+ * Resolves canonical slugs for a list of collection entries.
+ * Returns `[{ entry, id, slug, data }]` — `slug` has no leading slash.
+ */
+export function withSlugs(entries: ContentEntry[]): SluggedEntry[] {
+  const parentSlugs: Record<string, string> = {};
+  for (const entry of entries) {
+    const segments = entry.id.split("/");
+    const base = segments[segments.length - 1];
+    if (isIndexBase(base) && entry.data?.slug) {
+      parentSlugs[segments.slice(0, -1).join("/")] = entry.data.slug;
+    }
+  }
+
+  return entries.map((entry) => ({
+    entry,
+    id: entry.id,
+    slug: guessDocPermalink(`${entry.id}.mdx`, entry.data ?? {}, parentSlugs)
+      .slug,
+    data: entry.data ?? {},
+  }));
+}
+
+/**
+ * Whether the automatic topic list renders on a doc page — the
+ * `TopicList` component's `shouldRender` rule: explicit frontmatter
+ * `topic_list` (false / true / `{ enable }`) wins; otherwise the list
+ * renders on index/README pages when globally enabled.
+ */
+export function topicListShouldRender(
+  entry: ContentEntry,
+  options: PortosaurOptions,
+): boolean {
+  const topicListConfig = entry.data?.topic_list;
+  const enableByDefaults = options.topicList?.enableByDefaults !== false;
+
+  if (topicListConfig === false) {
+    return false;
+  }
+  if (topicListConfig === true) {
+    return true;
+  }
+  if (typeof topicListConfig === "object" && topicListConfig !== null) {
+    if (topicListConfig.enable === false) {
+      return false;
+    }
+    if (topicListConfig.enable === true) {
+      return true;
+    }
+  }
+
+  return enableByDefaults && isIndexEntry(entry);
+}
+
+/** Normalizes an href for comparison (trailing slashes ignored). */
+function normalizeHref(href: string | null | undefined): string {
+  return (href ?? "").replace(/\/+$/, "") || "/";
+}
+
+/**
+ * The breadcrumb path for a sidebar href: the `{ title, href }` items
+ * from the root category down to the item matching `href` (trailing
+ * slashes ignored), or `[]` when no item matches. Categories without a
+ * link (no index doc) appear with `href: null` — the layout renders
+ * them as plain text, not links.
+ */
+export function findSidebarPath(
+  tree: SidebarItem[] | undefined,
+  href: string,
+): { title: string; href: string | null }[] {
+  const normalized = normalizeHref(href);
+  const path: { title: string; href: string | null }[] = [];
+
+  function walk(nodes: SidebarItem[]): boolean {
+    for (const node of nodes) {
+      const nodeHref =
+        node.type === "doc" ? node.href : (node.link?.href ?? null);
+      if (nodeHref && normalizeHref(nodeHref) === normalized) {
+        path.push({ title: node.label, href: nodeHref });
+        return true;
+      }
+      if (node.type === "category" && node.items) {
+        path.push({ title: node.label, href: nodeHref });
+        if (walk(node.items)) {
+          return true;
+        }
+        path.pop();
+      }
+    }
+    return false;
+  }
+
+  if (walk(tree ?? [])) {
+    return path;
+  }
+  return [];
+}
+
+/**
+ * Flattens the sidebar tree into its doc-link order: every doc item plus
+ * every category that has a link (its index doc), depth-first, in
+ * sidebar order. The root category's link (the collection home) comes
+ * first — it is a real page too.
+ */
+function flattenSidebarLinks(tree: SidebarItem[] | undefined): SidebarLink[] {
+  const links: SidebarLink[] = [];
+  function walk(nodes: SidebarItem[]): void {
+    for (const node of nodes) {
+      if (node.type === "doc") {
+        links.push({ title: node.label, href: node.href });
+      } else if (node.type === "category") {
+        if (node.link?.href) {
+          // A category link carries its index doc's title when one
+          // exists (the paginator uses the doc title, not the sidebar
+          // label — e.g. "Portosaur Docs", not "Docs").
+          links.push({
+            title: node.link.title ?? node.label,
+            href: node.link.href,
+          });
+        }
+        walk(node.items ?? []);
+      }
+    }
+  }
+  walk(tree ?? []);
+  return links;
+}
+
+/**
+ * The previous/next doc links around `href` in flattened sidebar
+ * doc-link order (trailing slashes ignored). Returns
+ * `{ prev, next }` where each side is `{ title, href }` or `null` at
+ * the ends — or when `href` is not in the tree at all.
+ */
+export function findPrevNext(
+  tree: SidebarItem[] | undefined,
+  href: string,
+): { prev: SidebarLink | null; next: SidebarLink | null } {
+  const normalized = normalizeHref(href);
+  const links = flattenSidebarLinks(tree);
+  const index = links.findIndex(
+    (link) => normalizeHref(link.href) === normalized,
+  );
+  if (index === -1) {
+    return { prev: null, next: null };
+  }
+  return {
+    prev: index > 0 ? links[index - 1] : null,
+    next: index < links.length - 1 ? links[index + 1] : null,
+  };
+}
+
+/**
+ * Finds a category node in the sidebar tree by its link href (trailing
+ * slashes ignored). Returns the category's `items` (docs + subcategories,
+ * in sidebar order) or an empty array.
+ */
+export function findCategoryItems(
+  tree: SidebarItem[],
+  href: string,
+): SidebarItem[] {
+  const normalized = href.replace(/\/+$/, "") || "/";
+  const stack = [...tree];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) {
+      continue;
+    }
+    if (node.type !== "category") {
+      continue;
+    }
+    const linkHref = (node.link?.href ?? "").replace(/\/+$/, "") || "/";
+    if (linkHref === normalized) {
+      return node.items ?? [];
+    }
+    stack.push(...(node.items ?? []));
+  }
+  return [];
+}
+
+/**
+ * The text a topic-list card renders for a sidebar item: an emoji icon
+ * (a literal emoji, not an `id:` icon reference, which renders as SVG
+ * and contributes no text) prepended directly to the label.
+ */
+export function topicCardTitle(item: SidebarItem): string {
+  const icon = item.icon;
+  const prefix = icon && !icon.includes(":") ? icon : "";
+  return `${prefix}${item.label}`;
+}
+
+/** Humanizes a raw file or directory name into a label. */
+export function humanizeName(name: string): string {
+  const stripped = name.replace(NUMBER_PREFIX_PATTERN, "");
+  return stripped
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/** A doc's display title: frontmatter title, else the humanized file base. */
+export function docTitle(entry: ContentEntry): string {
+  if (entry.data?.title) {
+    return entry.data.title;
+  }
+  const segments = entry.id.split("/");
+  return humanizeName(segments[segments.length - 1]);
+}
+
+/**
+ * A blog post's slug: the frontmatter `slug` wins (leading slash
+ * stripped); otherwise the file base name with a leading `YYYY-MM-DD-`
+ * date prefix stripped (the Docusaurus blog rule). Blog posts are flat —
+ * subdirectories do not appear in the slug.
+ */
+export function blogSlug(entry: ContentEntry): string {
+  if (entry.data?.slug) {
+    return String(entry.data.slug).replace(/^\//, "");
+  }
+  const segments = entry.id.split("/");
+  const base = segments[segments.length - 1];
+  return base.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+}
+
+/** Resolved post dates, keyed by file path — `postDate` shells out to
+ * git, so sorting must not re-resolve the same file on every compare. */
+const postDateCache = new Map<string, Date | null>();
+
+/**
+ * A blog post's date: frontmatter `date` (coerced by the schema) →
+ * the file's last git commit date (`git log -1`, the Docusaurus
+ * fallback) → the file's mtime. Null only when the source file
+ * cannot be found. File-derived dates are memoized per file for
+ * the build.
+ */
+export function postDate(entry: ContentEntry): Date | null {
+  const date = entry.data?.date;
+  if (date instanceof Date && !Number.isNaN(date.getTime())) {
+    return date;
+  }
+  const key = entry.filePath ?? entry.id;
+  if (postDateCache.has(key)) {
+    return postDateCache.get(key) ?? null;
+  }
+  const resolved = resolveFileDate(entry.filePath);
+  postDateCache.set(key, resolved);
+  return resolved;
+}
+
+/**
+ * Git commit date, else mtime, for a content file — null when the
+ * file cannot be found. `filePath` is an Astro glob-loader path
+ * (see `contentRelativePath`); resolution runs against the build
+ * working directory, which is the site root.
+ */
+function resolveFileDate(filePath?: string): Date | null {
+  const relativePath = contentRelativePath(filePath);
+  if (!relativePath) {
+    return null;
+  }
+  const absolutePath = path.join(process.cwd(), relativePath);
+  try {
+    const gitDate = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--", absolutePath],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+    if (gitDate) {
+      const parsed = new Date(gitDate);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Not a repo, untracked file, or git missing — fall to mtime.
+  }
+  try {
+    return statSync(absolutePath).mtime;
+  } catch {
+    return null;
+  }
+}
+
+/** Blog posts newest first; undated posts sort last, by id. */
+export function sortPostsByDateDesc(posts: ContentEntry[]): ContentEntry[] {
+  return [...posts].sort((a, b) => {
+    const dateA = postDate(a);
+    const dateB = postDate(b);
+    if (dateA && dateB) {
+      return dateB.getTime() - dateA.getTime();
+    }
+    if (dateA) {
+      return -1;
+    }
+    if (dateB) {
+      return 1;
+    }
+    return a.id.localeCompare(b.id);
+  });
+}

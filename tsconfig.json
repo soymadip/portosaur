@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "esnext",
+    "types": ["node", "bun-types"],
+    "verbatimModuleSyntax": true
+  },
+  "exclude": ["node_modules", "**/build", ".playground", "docs"],
+  "include": [
+    "packages/cli/src",
+    "packages/cli/bin",
+    "packages/cli/tests",
+    "packages/theme/src",
+    "packages/theme/tests",
+    "packages/wizard/src",
+    "packages/wizard/tests",
+    "src",
+    "tests"
+  ]
+}

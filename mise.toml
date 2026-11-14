@@ -8,7 +8,7 @@ prettier = "latest"
 CZ_CONFIG = 'src/cz/cz.yaml'
 
 [shell_alias]
-porto = './packages/cli/bin/porto.mjs'
+porto = './packages/cli/bin/porto.ts'
 
 [tasks]
 bump = "cz --config $CZ_CONFIG  bump"

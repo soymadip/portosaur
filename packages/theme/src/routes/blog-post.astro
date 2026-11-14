@@ -16,8 +16,8 @@ import { getCollection, render } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogSidebar from "../components/BlogSidebar.astro";
-import { mdxComponents } from "../components/mdx/index.mjs";
-import { pageTitle, blogSlug, postDate } from "../lib/content.mjs";
+import { mdxComponents } from "../components/mdx/index.ts";
+import { pageTitle, blogSlug, postDate } from "../lib/content.ts";
 
 export async function getStaticPaths() {
   const datedPosts = (await getCollection("blog"))

@@ -14,12 +14,12 @@ import config from "porto:config";
 import sidebar from "porto:sidebar";
 import DocLayout from "../layouts/DocLayout.astro";
 import DocCardList from "../components/DocCardList.astro";
-import { mdxComponents } from "../components/mdx/index.mjs";
+import { mdxComponents } from "../components/mdx/index.ts";
 import {
   pageTitle,
   isIndexEntry,
   contentRelativePath,
-} from "../lib/content.mjs";
+} from "../lib/content.ts";
 
 const siteTitle = config.site.title;
 const notesRoute = config.site.notesRoute;

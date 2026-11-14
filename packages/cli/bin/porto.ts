@@ -1,0 +1,94 @@
+#!/usr/bin/env bun
+
+import { Command, Option } from "commander";
+import { porto } from "../src/engine/index.ts";
+import { initCommand } from "../src/commands/init.ts";
+import { initCiCommand } from "../src/commands/initCi.ts";
+import { initIgnoreCommand } from "../src/commands/initIgnore.ts";
+import { devCommand } from "../src/commands/dev.ts";
+import { buildCommand } from "../src/commands/build.ts";
+import { serveCommand } from "../src/commands/serve.ts";
+import { schemaCommand } from "../src/commands/schema.ts";
+import { providersCommand } from "../src/commands/providers.ts";
+
+const program = new Command();
+
+program
+  .name("porto")
+  .description("CLI for Portosaur — The complete portfolio solution")
+  .version(porto.version, "-v, --version", "output the current version")
+  .helpOption("--help", "output usage information");
+
+program
+  .command("init")
+  .description(
+    "Initialize a new Portosaur project (or only generate CI/ignore)",
+  )
+  .option("-p, --vcs-provider <id>", "VCS Provider ID")
+  .option("-h, --hosting <id>", "Hosting Platform ID")
+  .option("-u, --username <user>", "VCS username")
+  .option("-n, --name <name>", "Full name for portfolio")
+  .option("-P, --project-name <name>", "Project name")
+  .addOption(
+    new Option("--site-type <type>", "Type of site to initialize").choices([
+      "portfolio",
+      "docs",
+    ]),
+  )
+  .option("-k, --no-install", "Skip dependency installation")
+  .option("--ci-only", "Setup Only CI/CD workflows for an existing project")
+  .option(
+    "--gitignore-only",
+    "Generate Only .gitignore file for an existing project",
+  )
+  .action((options) => {
+    if (options.ciOnly) return initCiCommand(options);
+    if (options.gitignoreOnly) return initIgnoreCommand();
+    return initCommand(options);
+  });
+
+program
+  .command("providers")
+  .description("List available VCS providers and hosting platforms")
+  .addOption(
+    new Option("-t, --type <type>", "Filter list by type").choices([
+      "vcs",
+      "hosting",
+    ]),
+  )
+  .action((options) => providersCommand(options.type));
+
+program
+  .command("dev [siteDir]")
+  .alias("start")
+  .description("Start the development server")
+  .option("-p, --port <port>", "Port to use")
+  .option("-h, --host <host>", "Host to use")
+  .option("--no-browser", "Do not open browser")
+  .option("--poll [interval]", "Use polling for file watching")
+  .action((siteDir, options) => devCommand(siteDir, options));
+
+program
+  .command("build [siteDir]")
+  .description("Build the static site")
+  .option("-o, --out-dir <dir>", "Custom output directory")
+  .option("--no-minify", "Do not minify the output")
+  .action((siteDir, options) => buildCommand(siteDir, options));
+
+program
+  .command("serve [siteDir]")
+  .description("Serve the built static site locally")
+  .option("-o, --out-dir <dir>", "Custom output directory")
+  .option("-p, --port <port>", "Port to use")
+  .option("-h, --host <host>", "Host to use")
+  .option("--no-browser", "Do not open browser")
+  .action((siteDir, options) => serveCommand(siteDir, options));
+
+program
+  .command("schema", { hidden: true })
+  .description("Generate the config schema")
+  .option("-c, --config <path>", "Path to the source file to scan")
+  .option("-o, --output <path>", "Path to output the schema file")
+  .action(schemaCommand);
+
+program.parse();

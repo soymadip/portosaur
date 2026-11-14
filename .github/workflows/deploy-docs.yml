@@ -7,9 +7,9 @@ on:
     paths:
       - ".github/workflows/deploy-docs.yml"
       - "docs/**"
-      - "packages/cli/bin/porto.mjs"
-      - "packages/cli/src/commands/build.mjs"
-      - "packages/cli/src/commands/schema.mjs"
+      - "packages/cli/bin/porto.ts"
+      - "packages/cli/src/commands/build.ts"
+      - "packages/cli/src/commands/schema.ts"
       - "package.json"
       - "bun.lock"
 
@@ -71,13 +71,13 @@ jobs:
         run: bun install --frozen-lockfile --linker=hoisted
 
       - name: Generate Core Config Schema
-        run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema -o packages/cli/config-schema.json
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o packages/cli/config-schema.json
 
       - name: Compile Site
         run: bun run --cwd ${{ env.DOCS_DIR }} build
 
       - name: Generate Published Config Schema
-        run: bun run ${{ env.CLI_DIR }}/bin/porto.mjs schema -o ${{ env.DOCS_OUT_DIR }}/config-schema.json
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o ${{ env.DOCS_OUT_DIR }}/config-schema.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

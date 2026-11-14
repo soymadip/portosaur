@@ -18,7 +18,7 @@ import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import NoteCards from "../components/sections/NoteCards.astro";
 import NavArrow from "../components/NavArrow.astro";
-import { pageTitle, isIndexEntry } from "../lib/content.mjs";
+import { pageTitle, isIndexEntry } from "../lib/content.ts";
 
 const siteTitle = config.site.title;
 const notesRoute = config.site.notesRoute;

@@ -4,6 +4,7 @@
   "version": "0.26.0",
   "license": "GPL-3.0-only",
   "private": true,
+  "type": "module",
   "homepage": "https://soymadip.github.io/portosaur",
   "repository": {
     "type": "git",
@@ -18,19 +19,28 @@
   "scripts": {
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "schema": "bun packages/cli/bin/porto.mjs schema -o packages/cli/config-schema.json",
-    "playground": "bun src/playground.mjs",
+    "typecheck": "tsc --noEmit",
+    "schema": "bun packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json",
+    "playground": "bun src/playground.ts",
     "build": "bun run playground build",
     "dev": "bun run playground dev",
     "dev:docs": "bun run --cwd docs dev",
-    "test:all": "bun run tests/run-all.mjs",
-    "test:smoke": "bun run tests/smoke/smoke-test.mjs"
+    "test:all": "bun run tests/run-all.ts",
+    "test:smoke": "bun run tests/smoke/smoke-test.ts"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
+    "bun-types": "^1.4.4",
     "prettier": "latest",
-    "prettier-plugin-astro": "^1.1.2"
+    "prettier-plugin-astro": "^1.1.2",
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=24.15.0"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-astro"
+    ]
   }
 }
