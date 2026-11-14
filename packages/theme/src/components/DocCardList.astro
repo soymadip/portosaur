@@ -19,7 +19,14 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<div class="porto-doc-card-list">
+{/*
+  Old Docusaurus DocCardList uses `col col--6` — two columns, full
+  width on small screens. `minmax(0, 1fr)`: the one-line truncated
+  description is `white-space: nowrap`, so its min-content width is
+  the full text — without the 0 minimum the tracks refuse to shrink
+  and the grid overflows the content column at desktop widths.
+*/}
+<div class="my-6 grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 [@media(max-width:768px)]:grid-cols-[minmax(0,1fr)]">
   {items.map((item) => {
     const href = item.href ?? item.link?.href ?? "#";
     const title = item.title ?? item.label ?? "";
@@ -37,13 +44,30 @@ const { items } = Astro.props;
       fallbackIcon: isCategory ? "md:folder" : "md:notebook",
     });
     return (
-      <a class="porto-doc-card" href={href}>
-        <h2 class="porto-doc-card__title" title={title}>
-          <span class="porto-doc-card__icon" set:html={iconHtml} />
-          <span class="porto-doc-card__title-text">{title}</span>
+      <a
+        class="flex min-w-0 flex-col gap-1 rounded-lg border border-border bg-background-alt p-6 text-foreground no-underline hover:border-primary"
+        href={href}
+      >
+        {/*
+          The `!` utilities below beat the unlayered
+          `overrides/markdown.css` rules (`.porto-markdown h2` /
+          `.porto-markdown p`) — this list renders inside the
+          `.porto-markdown` slot wrapper, and unlayered CSS beats
+          layered utilities. The old scoped rules won on specificity;
+          the important flag is what keeps that win.
+        */}
+        <h2
+          class="mt-0! mb-[1.05rem]! inline-flex w-full min-w-0 items-center gap-2 text-[1.4rem]! font-[750]! text-primary"
+          title={title}
+        >
+          <span
+            class="inline-flex shrink-0 items-center justify-center empty:hidden"
+            set:html={iconHtml}
+          />
+          <span class="truncate">{title}</span>
         </h2>
         {(itemsCount || description) && (
-          <p class="porto-doc-card__desc">
+          <p class="m-0! truncate text-[0.8rem] text-foreground opacity-60">
             {itemsCount && <strong>{itemsCount}</strong>}
             {itemsCount && description && (
               <>
@@ -58,84 +82,3 @@ const { items } = Astro.props;
     );
   })}
 </div>
-
-<style>
-  /* Old Docusaurus DocCardList uses `col col--6` — two columns, full
-     width on small screens. */
-  .porto-doc-card-list {
-    display: grid;
-    /* minmax(0, 1fr): the one-line truncated description is
-       `white-space: nowrap`, so its min-content width is the full
-       text — without the 0 minimum the tracks refuse to shrink and
-       the grid overflows the content column at desktop widths. */
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin: 1.5rem 0;
-  }
-
-  @media (max-width: 768px) {
-    .porto-doc-card-list {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  .porto-doc-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-    padding: 1.5rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    background: var(--porto-bg-alt, var(--porto-bg));
-    border: 1px solid var(--porto-border);
-    border-radius: 0.5rem;
-  }
-
-  .porto-doc-card:hover {
-    border-color: var(--porto-primary);
-  }
-
-  .porto-doc-card__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .porto-doc-card__icon:empty {
-    display: none;
-  }
-
-  /* Old TopicList .cardTitle: 1.4rem, weight 750, topic color (primary by
-     default), icon + truncated title inline. */
-  .porto-doc-card__title {
-    margin: 0 0 1.05rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-    width: 100%;
-    color: var(--porto-primary);
-    font-size: 1.4rem;
-    font-weight: 750;
-  }
-
-  .porto-doc-card__title-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Old TopicList truncates the description to one line
-     (`text--truncate`). */
-  .porto-doc-card__desc {
-    margin: 0;
-    color: var(--porto-text);
-    opacity: 0.6;
-    font-size: 0.8rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-</style>

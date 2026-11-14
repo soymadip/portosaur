@@ -50,24 +50,27 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="porto-blog-archive">
-    <h1>Archive</h1>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
+    <h1 class="mb-[-0.5rem]">Archive</h1>
     {sortedGroups.length === 0 ? (
-      <p class="porto-blog-archive__empty">No posts yet.</p>
+      <p class="text-muted">No posts yet.</p>
     ) : (
       sortedGroups.map(([year, yearPosts]) => (
         <section>
-          <h3>{year}</h3>
-          <ul class="porto-blog-archive__list">
+          <h3 class="mb-3">{year}</h3>
+          <ul class="m-0 flex list-none flex-col gap-[0.4rem] p-0">
             {yearPosts.map((post) => {
               const date = postDate(post);
               return (
                 <li>
-                  <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+                  <a
+                    class="text-foreground no-underline hover:text-primary"
+                    href={`/${blogRoute}/${blogSlug(post)}/`}
+                  >
                     {post.data.title ?? post.id}
                   </a>
                   {date && (
-                    <span class="porto-blog-archive__date">
+                    <span class="text-[0.9rem] text-muted">
                       {" — "}
                       <time datetime={date.toISOString()}>
                         {formatPostDate(date)}
@@ -83,50 +86,3 @@ function formatPostDate(date) {
     )}
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-archive {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .porto-blog-archive h1 {
-    margin-bottom: -0.5rem;
-  }
-
-  .porto-blog-archive__empty {
-    color: var(--porto-text-muted);
-  }
-
-  .porto-blog-archive section h3 {
-    margin: 0 0 0.75rem;
-  }
-
-  .porto-blog-archive__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .porto-blog-archive__list a {
-    color: var(--porto-text);
-    text-decoration: none;
-  }
-
-  .porto-blog-archive__list a:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-archive__date {
-    color: var(--porto-text-muted);
-    font-size: 0.9rem;
-  }
-</style>

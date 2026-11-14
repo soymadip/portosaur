@@ -4,7 +4,7 @@ import fs from "node:fs";
  * Extracts a CSS variable's value from an array of CSS files.
  * Supports resolving nested variables (e.g., var(--other-var)).
  *
- * @param varName - The CSS variable name to find (e.g., '--porto-primary').
+ * @param varName - The CSS variable name to find (e.g., '--color-primary').
  * @param cssFiles - Array of absolute paths to CSS files to search in.
  * @param varCache - Optional map to cache parsed variables during resolution.
  * @param cssCache - Optional map to cache CSS file content.

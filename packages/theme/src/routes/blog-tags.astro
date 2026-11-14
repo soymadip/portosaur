@@ -32,20 +32,23 @@ for (const tag of [...counts.keys()].sort((a, b) => a.localeCompare(b))) {
 ---
 
 <BaseLayout title={title}>
-  <div class="porto-blog-tags-page">
-    <h1>Tags</h1>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
+    <h1 class="mb-[-0.5rem]">Tags</h1>
     {groups.size === 0 ? (
-      <p class="porto-blog-tags-page__empty">No tags yet.</p>
+      <p class="text-muted">No tags yet.</p>
     ) : (
       [...groups.entries()].map(([letter, tags]) => (
         <section>
-          <h2>{letter}</h2>
-          <ul class="porto-blog-tags">
+          <h2 class="mb-3">{letter}</h2>
+          <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
             {tags.map((tag) => (
               <li>
-                <a href={`/${blogRoute}/tags/${tag}/`}>
+                <a
+                  class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.9rem] text-muted no-underline hover:border-primary hover:text-primary"
+                  href={`/${blogRoute}/tags/${tag}/`}
+                >
                   {tag}{" "}
-                  <span class="porto-blog-tags__count">
+                  <span class="text-[0.8em] text-muted">
                     ({counts.get(tag)})
                   </span>
                 </a>
@@ -57,56 +60,3 @@ for (const tag of [...counts.keys()].sort((a, b) => a.localeCompare(b))) {
     )}
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-tags-page {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .porto-blog-tags-page h1 {
-    margin-bottom: -0.5rem;
-  }
-
-  .porto-blog-tags-page section h2 {
-    margin: 0 0 0.75rem;
-  }
-
-  .porto-blog-tags-page__empty {
-    color: var(--porto-text-muted);
-  }
-
-  .porto-blog-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .porto-blog-tags a {
-    display: inline-block;
-    padding: 0.15rem 0.6rem;
-    color: var(--porto-text-muted);
-    text-decoration: none;
-    border: 1px solid var(--porto-border);
-    border-radius: 999px;
-    font-size: 0.9rem;
-  }
-
-  .porto-blog-tags a:hover {
-    color: var(--porto-primary);
-    border-color: var(--porto-primary);
-  }
-
-  .porto-blog-tags__count {
-    color: var(--porto-text-muted);
-    font-size: 0.8em;
-  }
-</style>

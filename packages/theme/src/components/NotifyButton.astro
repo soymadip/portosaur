@@ -12,7 +12,7 @@
 
 <button
   type="button"
-  class="porto-notify-btn"
+  class="inline-flex cursor-pointer items-center gap-2 rounded-[1.25rem] border border-border bg-surface px-4 py-2 text-[0.9rem] text-foreground hover:not-disabled:border-primary disabled:cursor-default disabled:opacity-80"
   data-notify-btn
   hidden
   title="Get notified when new posts arrive"
@@ -74,27 +74,3 @@
     }
   }
 </script>
-
-<style>
-  .porto-notify-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    color: var(--porto-text);
-    background: var(--porto-surface-0);
-    border: 1px solid var(--porto-border);
-    border-radius: 1.25rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-
-  .porto-notify-btn:hover:not(:disabled) {
-    border-color: var(--porto-primary);
-  }
-
-  .porto-notify-btn:disabled {
-    cursor: default;
-    opacity: 0.8;
-  }
-</style>

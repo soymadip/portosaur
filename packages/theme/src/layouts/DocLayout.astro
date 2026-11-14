@@ -47,34 +47,41 @@ const tocHeadings = headings.filter(
 ---
 
 <BaseLayout title={title} description={description}>
-  <div class="porto-doc-layout">
+  <div class="porto-doc-layout flex w-full items-start gap-8 p-4">
     {/*
       Expand button (»): only visible while the sidebar is collapsed
       (see the toggle script below); re-opens the sidebar.
     */}
     <button
       type="button"
-      class="porto-doc-sidebar__expand"
+      class="porto-doc-sidebar__expand sticky top-[calc(var(--navbar-height,60px)+1rem)] hidden size-8 shrink-0 items-center justify-center self-start rounded-md border border-border bg-background-alt p-0 text-[1.1rem] leading-none text-muted hover:border-primary hover:text-primary"
       data-sidebar-expand
       aria-label="Expand sidebar"
     >
       »
     </button>
-    <aside class="porto-doc-sidebar">
-      <nav class="porto-doc-sidebar__nav" aria-label="Docs sidebar">
+    <aside class="porto-doc-sidebar sticky top-[calc(var(--navbar-height,60px)+1rem)] h-[calc(100vh-var(--navbar-height,60px)-2rem)] w-[300px] shrink-0 [@media(max-width:996px)]:hidden">
+      <nav class="flex h-full flex-col" aria-label="Docs sidebar">
         <Sidebar currentHref={currentHref} />
       </nav>
     </aside>
 
-    <div class="porto-doc-main">
+    {/*
+      `@container/docContainer`: container-query context for the
+      pagination below (port of the old pagination.css `docContainer`):
+      the content column is ~660px wide at desktop widths, so the
+      container query — not a viewport media query — is what stacks
+      the prev/next cards.
+    */}
+    <div class="relative @container/docContainer flex min-w-0 flex-auto flex-col">
       {/*
         PageActions: edit + copy-link icon buttons at the top-right of
         the doc page (above the TOC area on desktop).
       */}
-      <div class="porto-page-actions">
+      <div class="absolute top-0 right-0 z-1 flex gap-2">
         {editUrl && (
           <a
-            class="porto-page-actions__button"
+            class="inline-flex size-8 items-center justify-center rounded-md border border-border bg-background-alt p-0 text-base leading-none text-foreground no-underline hover:border-primary hover:text-primary"
             href={editUrl}
             title="Edit this page"
             aria-label="Edit this page"
@@ -84,7 +91,7 @@ const tocHeadings = headings.filter(
         )}
         <button
           type="button"
-          class="porto-page-actions__button"
+          class="inline-flex size-8 items-center justify-center rounded-md border border-border bg-background-alt p-0 text-base leading-none text-foreground no-underline hover:border-primary hover:text-primary data-[copied=true]:border-primary data-[copied=true]:text-primary"
           data-copy-page-url
           title="Copy link"
           aria-label="Copy link"
@@ -93,12 +100,21 @@ const tocHeadings = headings.filter(
         </button>
       </div>
 
-      <article class="porto-doc-article">
+      {/*
+        The article column is capped for readability (~60rem) while the
+        layout itself is full-width: sidebar flush left, TOC flush right,
+        leftover space between the article and the TOC.
+      */}
+      <article class="flex w-full max-w-[60rem] flex-[1_0_auto] flex-col">
         {breadcrumbs.length > 0 && (
-          <nav class="porto-breadcrumbs" aria-label="Breadcrumbs">
-            <ol>
-              <li class="porto-breadcrumbs__item">
-                <a href="/" aria-label="Home">
+          <nav aria-label="Breadcrumbs">
+            <ol class="m-0 mb-4 flex list-none flex-wrap items-center gap-1 p-0 pr-20 text-[0.85rem]">
+              <li class="[li+&]:before:mr-1 [li+&]:before:text-muted [li+&]:before:content-['›']">
+                <a
+                  class="text-primary no-underline hover:underline"
+                  href="/"
+                  aria-label="Home"
+                >
                   ⌂
                 </a>
               </li>
@@ -107,13 +123,21 @@ const tocHeadings = headings.filter(
                 // Categories without an index doc have href: null
                 // (see findSidebarPath) — plain text, not a link.
                 return (
-                  <li class="porto-breadcrumbs__item">
+                  <li class="[li+&]:before:mr-1 [li+&]:before:text-muted [li+&]:before:content-['›']">
                     {isLast || !crumb.href ? (
-                      <span aria-current={isLast ? "page" : undefined}>
+                      <span
+                        class:list={[{ "text-primary": isLast }]}
+                        aria-current={isLast ? "page" : undefined}
+                      >
                         {crumb.title}
                       </span>
                     ) : (
-                      <a href={crumb.href}>{crumb.title}</a>
+                      <a
+                        class="text-primary no-underline hover:underline"
+                        href={crumb.href}
+                      >
+                        {crumb.title}
+                      </a>
                     )}
                   </li>
                 );
@@ -130,12 +154,14 @@ const tocHeadings = headings.filter(
         */}
         {tocHeadings.length > 0 && (
           <div
-            class="porto-mobile-toolbar"
+            class="hidden [@media(max-width:996px)]:sticky [@media(max-width:996px)]:top-[var(--mobile-toolbar-top,0px)] [@media(max-width:996px)]:z-100 [@media(max-width:996px)]:flex [@media(max-width:996px)]:items-center [@media(max-width:996px)]:bg-background [@media(max-width:996px)]:pt-[0.35rem] [@media(max-width:996px)]:pb-4"
             data-mobile-toolbar
             style="--mobile-toolbar-top: 0px"
           >
-            <details class="porto-mobile-toc">
-              <summary>On this page</summary>
+            <details>
+              <summary class="cursor-pointer font-semibold">
+                On this page
+              </summary>
               <TOC headings={tocHeadings} spy={false} />
             </details>
           </div>
@@ -146,8 +172,14 @@ const tocHeadings = headings.filter(
         </div>
 
         {(editUrl || lastUpdated) && (
-          <footer class="porto-doc-footer">
-            <span>{editUrl && <a href={editUrl}>Edit this page</a>}</span>
+          <footer class="mt-auto flex flex-wrap justify-between gap-4 pt-8 text-[0.9rem] text-muted">
+            <span>
+              {editUrl && (
+                <a class="text-primary no-underline" href={editUrl}>
+                  Edit this page
+                </a>
+              )}
+            </span>
             <span>
               {lastUpdated && <span>Last updated on {lastUpdated}</span>}
             </span>
@@ -156,23 +188,33 @@ const tocHeadings = headings.filter(
       </article>
 
       {(prev || next) && (
-        <nav class="porto-pagination" aria-label="Docs pages">
+        <nav
+          class:list={[
+            "mt-auto grid w-full max-w-[60rem] grid-cols-2 gap-4 [@container(max-width:768px)]:grid-cols-1 [@container(max-width:768px)]:gap-[0.15rem] [@media(max-width:996px)]:grid-cols-1 [@media(max-width:996px)]:gap-[0.15rem]",
+            editUrl || lastUpdated ? "pt-6" : "pt-[2.9rem]",
+          ]}
+          aria-label="Docs pages"
+        >
           {prev && (
             <a
-              class="porto-pagination__link porto-pagination__link--prev"
+              class="flex flex-col gap-1 rounded-lg border border-border bg-background-alt p-4 text-foreground no-underline hover:border-primary"
               href={prev.href}
             >
-              <span class="porto-pagination__sublabel">Previous</span>
-              <span class="porto-pagination__label">{prev.title}</span>
+              <span class="text-[0.85rem] text-muted">Previous</span>
+              <span class="flex items-center justify-start text-left text-[1.1rem] text-primary">
+                {prev.title}
+              </span>
             </a>
           )}
           {next && (
             <a
-              class="porto-pagination__link porto-pagination__link--next"
+              class="col-start-2 flex flex-col gap-1 rounded-lg border border-border bg-background-alt p-4 text-right text-foreground no-underline hover:border-primary [@container(max-width:768px)]:col-start-1 [@media(max-width:996px)]:col-start-1"
               href={next.href}
             >
-              <span class="porto-pagination__sublabel">Next</span>
-              <span class="porto-pagination__label">{next.title}</span>
+              <span class="text-[0.85rem] text-muted">Next</span>
+              <span class="flex items-center justify-end text-right text-[1.1rem] text-primary">
+                {next.title}
+              </span>
             </a>
           )}
         </nav>
@@ -180,7 +222,7 @@ const tocHeadings = headings.filter(
     </div>
 
     {tocHeadings.length > 0 && (
-      <aside class="porto-doc-toc">
+      <aside class="sticky top-[calc(var(--navbar-height,60px)+1rem)] max-h-[calc(100vh-var(--navbar-height,60px)-2rem)] w-[220px] shrink-0 overflow-y-auto [@media(max-width:996px)]:hidden">
         <TOC headings={tocHeadings} />
       </aside>
     )}
@@ -192,7 +234,7 @@ const tocHeadings = headings.filter(
     // hides/shows on scroll, and publish the scroll offset headings
     // need so anchor jumps don't land under the toolbar.
     const toolbar = document.querySelector("[data-mobile-toolbar]");
-    const navbar = document.querySelector(".porto-navbar");
+    const navbar = document.querySelector("[data-navbar]");
     if (toolbar instanceof HTMLElement && navbar instanceof HTMLElement) {
       let animationFrame = 0;
       const updateTop = () => {
@@ -310,58 +352,14 @@ const tocHeadings = headings.filter(
 </BaseLayout>
 
 <style>
-  .porto-doc-layout {
-    display: flex;
-    align-items: flex-start;
-    gap: 2rem;
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-
-  .porto-doc-sidebar {
-    flex-shrink: 0;
-    width: 300px;
-    position: sticky;
-    top: calc(var(--porto-navbar-height, 60px) + 1rem);
-    /* Full-height column: the list scrolls inside it and the « collapse
-       button stays pinned to the bottom (see Sidebar.astro). */
-    height: calc(100vh - var(--porto-navbar-height, 60px) - 2rem);
-  }
-
-  .porto-doc-sidebar__nav {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  /* Expand button (»): hidden unless the sidebar is collapsed. */
-  .porto-doc-sidebar__expand {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    align-self: flex-start;
-    position: sticky;
-    top: calc(var(--porto-navbar-height, 60px) + 1rem);
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    color: var(--porto-text-muted);
-    background: var(--porto-bg-alt, var(--porto-bg));
-    border: 1px solid var(--porto-border);
-    border-radius: 0.375rem;
-    font-size: 1.1rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  .porto-doc-sidebar__expand:hover {
-    color: var(--porto-primary);
-    border-color: var(--porto-primary);
-  }
-
+  /* Sidebar collapse (« at the sidebar bottom / » at the layout's
+     left edge): the script toggles
+     `.porto-doc-layout--sidebar-collapsed` on the layout, hiding the
+     sidebar and showing the expand button. A JS-toggled ancestor
+     class — plain CSS, not a utility (the unlayered rules beat the
+     layered `hidden` utility on the expand button). Below the 996px
+     breakpoint the sidebar is gone anyway, so the expand button
+     stays hidden even while collapsed. */
   .porto-doc-layout--sidebar-collapsed .porto-doc-sidebar {
     display: none;
   }
@@ -370,237 +368,9 @@ const tocHeadings = headings.filter(
     display: flex;
   }
 
-  .porto-doc-main {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    position: relative;
-    /* Container-query context for the pagination below (port of the old
-       pagination.css `docContainer`): the content column is ~660px wide
-       at desktop widths, so the container query — not a viewport media
-       query — is what stacks the prev/next cards. */
-    container-type: inline-size;
-    container-name: docContainer;
-  }
-
-  .porto-doc-article {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-  }
-
-  .porto-doc-toc {
-    flex-shrink: 0;
-    width: 220px;
-    position: sticky;
-    top: calc(var(--porto-navbar-height, 60px) + 1rem);
-    max-height: calc(100vh - var(--porto-navbar-height, 60px) - 2rem);
-    overflow-y: auto;
-  }
-
-  /* PageActions: edit ✎ + copy-link ⧉ buttons, top-right of the doc
-     page, on the breadcrumbs row. */
-  .porto-page-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1;
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .porto-page-actions__button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    color: var(--porto-text);
-    text-decoration: none;
-    background: var(--porto-bg-alt, var(--porto-bg));
-    border: 1px solid var(--porto-border);
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  .porto-page-actions__button:hover {
-    color: var(--porto-primary);
-    border-color: var(--porto-primary);
-  }
-
-  .porto-page-actions__button[data-copied="true"] {
-    color: var(--porto-primary);
-    border-color: var(--porto-primary);
-  }
-
-  .porto-breadcrumbs ol {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.25rem;
-    margin: 0 0 1rem;
-    padding: 0;
-    padding-right: 5rem;
-    list-style: none;
-    font-size: 0.85rem;
-  }
-
-  .porto-breadcrumbs__item + .porto-breadcrumbs__item::before {
-    content: "›";
-    margin-right: 0.25rem;
-    color: var(--porto-text-muted);
-  }
-
-  .porto-breadcrumbs a {
-    color: var(--porto-primary);
-    text-decoration: none;
-  }
-
-  .porto-breadcrumbs a:hover {
-    text-decoration: underline;
-  }
-
-  .porto-breadcrumbs [aria-current="page"] {
-    color: var(--porto-primary);
-  }
-
-  .porto-mobile-toolbar {
-    display: none;
-  }
-
-  .porto-mobile-toc summary {
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .porto-doc-footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: auto;
-    padding-top: 2rem;
-    color: var(--porto-text-muted);
-    font-size: 0.9rem;
-  }
-
-  .porto-doc-footer a {
-    color: var(--porto-primary);
-    text-decoration: none;
-  }
-
-  .porto-pagination {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: auto;
-    padding-top: 2.9rem;
-  }
-
-  article:has(.porto-doc-footer) + .porto-pagination {
-    padding-top: 1.5rem;
-  }
-
-  .porto-pagination__link {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 1rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    background: var(--porto-bg-alt, var(--porto-bg));
-    border: 1px solid var(--porto-border);
-    border-radius: 0.5rem;
-  }
-
-  .porto-pagination__link:hover {
-    border-color: var(--porto-primary);
-  }
-
-  .porto-pagination__link--next {
-    grid-column: 2;
-    text-align: right;
-  }
-
-  .porto-pagination__sublabel {
-    color: var(--porto-text-muted);
-    font-size: 0.85rem;
-  }
-
-  .porto-pagination__label {
-    display: flex;
-    align-items: center;
-    font-size: 1.1rem;
-    /* The old link inherits the anchor/primary color — golden labels
-       are green. */
-    color: var(--porto-primary);
-  }
-
-  .porto-pagination__link--prev .porto-pagination__label {
-    justify-content: flex-start;
-    text-align: left;
-  }
-
-  .porto-pagination__link--next .porto-pagination__label {
-    justify-content: flex-end;
-    text-align: right;
-  }
-
-  /* Stack prev/next cards full-width when the content column is narrow
-     (port of the old `@container docContainer (max-width: 768px)` rule
-     — the column is ~660px wide even at desktop viewports). */
-  @container docContainer (max-width: 768px) {
-    .porto-pagination {
-      grid-template-columns: 1fr;
-      gap: 0.15rem;
-    }
-
-    .porto-pagination__link--prev {
-      text-align: left;
-    }
-
-    .porto-pagination__link--next {
-      grid-column: 1;
-      text-align: right;
-    }
-  }
-
   @media (max-width: 996px) {
-    .porto-doc-sidebar,
-    .porto-doc-toc {
-      display: none;
-    }
-
     .porto-doc-layout--sidebar-collapsed .porto-doc-sidebar__expand {
       display: none;
-    }
-
-    .porto-mobile-toolbar {
-      position: sticky;
-      top: var(--mobile-toolbar-top, 0px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      padding: 0.35rem 0 1rem;
-      background: var(--porto-bg);
-    }
-
-    .porto-pagination {
-      grid-template-columns: 1fr;
-      gap: 0.15rem;
-    }
-
-    .porto-pagination__link--prev {
-      text-align: left;
-    }
-
-    .porto-pagination__link--next {
-      grid-column: 1;
-      text-align: right;
     }
   }
 </style>

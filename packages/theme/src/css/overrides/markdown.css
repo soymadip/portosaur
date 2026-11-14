@@ -5,7 +5,7 @@
  * custom-tuned to the design. */
 
 .porto-markdown {
-  font-family: var(--porto-font-markdown);
+  font-family: var(--font-markdown);
 }
 
 /* === Headings ===
@@ -79,25 +79,14 @@
   margin: 0 0 1rem;
 }
 
-.porto-breadcrumbs__link {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.2rem !important;
-  opacity: 76%;
-}
-
-.porto-breadcrumbs__item--active .porto-breadcrumbs__link {
-  border: none !important;
-  background-color: transparent !important;
-}
-
 .porto-markdown h1,
 .portosaur-generated-index h1 {
   text-align: center;
-  color: var(--porto-primary);
+  color: var(--color-primary);
 }
 
 .porto-markdown h2 {
-  color: var(--porto-primary);
+  color: var(--color-primary);
 }
 
 .porto-markdown big {
@@ -117,16 +106,16 @@
   display: block;
   margin: 0 auto;
   padding: 1px;
-  border: 2px solid var(--porto-surface-0);
+  border: 2px solid var(--color-surface);
   border-radius: 14px;
 }
 
 mark {
-  background-color: rgba(var(--porto-warning-rgb), 0.2);
-  color: var(--porto-text);
+  background-color: color-mix(in srgb, var(--color-warning) 20%, transparent);
+  color: var(--color-foreground);
   padding: 0.17rem 0.27rem;
   border-radius: 0.2rem;
-  border-bottom: 1px solid var(--porto-primary);
+  border-bottom: 1px solid var(--color-primary);
 }
 
 .porto-toc__link--active {
@@ -135,19 +124,19 @@ mark {
 
 /* Custom Magic Comments for Code Blocks */
 .code-block-error-line {
-  background-color: rgba(var(--porto-danger-rgb), 0.2);
+  background-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
   display: block;
-  margin: 0 calc(-1 * var(--porto-pre-padding));
-  padding: 0 var(--porto-pre-padding);
-  border-left: 3px solid var(--porto-danger);
+  margin: 0 calc(-1 * var(--pre-padding));
+  padding: 0 var(--pre-padding);
+  border-left: 3px solid var(--color-danger);
 }
 
 .code-block-success-line {
-  background-color: rgba(var(--porto-success-rgb), 0.2);
+  background-color: color-mix(in srgb, var(--color-success) 20%, transparent);
   display: block;
-  margin: 0 calc(-1 * var(--porto-pre-padding));
-  padding: 0 var(--porto-pre-padding);
-  border-left: 3px solid var(--porto-success);
+  margin: 0 calc(-1 * var(--pre-padding));
+  padding: 0 var(--pre-padding);
+  border-left: 3px solid var(--color-success);
 }
 
 /* === Callouts / Admonitions ===
@@ -156,9 +145,9 @@ mark {
  * (types: note, tip, info, success, warning, caution, danger). */
 
 .porto-markdown .admonition {
-  color: var(--porto-text);
-  border: 1px solid var(--porto-border);
-  border-radius: var(--porto-radius);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
@@ -169,70 +158,70 @@ mark {
 }
 
 .porto-markdown .admonition-note {
-  border-color: var(--porto-text-muted);
+  border-color: var(--color-muted);
   background-color: color-mix(
     in srgb,
-    var(--porto-text-muted) 25%,
-    var(--porto-surface-0)
+    var(--color-muted) 25%,
+    var(--color-surface)
   );
 }
 
 .porto-markdown .admonition-note .admonition-heading {
-  color: var(--porto-text-muted);
+  color: var(--color-muted);
 }
 
 .porto-markdown .admonition-tip,
 .porto-markdown .admonition-success {
-  border-color: var(--porto-success);
+  border-color: var(--color-success);
   background-color: color-mix(
     in srgb,
-    var(--porto-success) 25%,
-    var(--porto-surface-0)
+    var(--color-success) 25%,
+    var(--color-surface)
   );
 }
 
 .porto-markdown .admonition-tip .admonition-heading,
 .porto-markdown .admonition-success .admonition-heading {
-  color: var(--porto-success);
+  color: var(--color-success);
 }
 
 .porto-markdown .admonition-info {
-  border-color: var(--porto-info);
+  border-color: var(--color-info);
   background-color: color-mix(
     in srgb,
-    var(--porto-info) 25%,
-    var(--porto-surface-0)
+    var(--color-info) 25%,
+    var(--color-surface)
   );
 }
 
 .porto-markdown .admonition-info .admonition-heading {
-  color: var(--porto-info);
+  color: var(--color-info);
 }
 
 .porto-markdown .admonition-warning,
 .porto-markdown .admonition-caution {
-  border-color: var(--porto-warning);
+  border-color: var(--color-warning);
   background-color: color-mix(
     in srgb,
-    var(--porto-warning) 25%,
-    var(--porto-surface-0)
+    var(--color-warning) 25%,
+    var(--color-surface)
   );
 }
 
 .porto-markdown .admonition-warning .admonition-heading,
 .porto-markdown .admonition-caution .admonition-heading {
-  color: var(--porto-warning);
+  color: var(--color-warning);
 }
 
 .porto-markdown .admonition-danger {
-  border-color: var(--porto-danger);
+  border-color: var(--color-danger);
   background-color: color-mix(
     in srgb,
-    var(--porto-danger) 25%,
-    var(--porto-surface-0)
+    var(--color-danger) 25%,
+    var(--color-surface)
   );
 }
 
 .porto-markdown .admonition-danger .admonition-heading {
-  color: var(--porto-danger);
+  color: var(--color-danger);
 }

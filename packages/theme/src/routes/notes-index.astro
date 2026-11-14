@@ -68,16 +68,8 @@ if (projectRelative) {
 >
   <div class="portosaur-generated-index">
     <h1>{heading}</h1>
-    {description && <p class="porto-notes-index__description">{description}</p>}
+    {description && <p class="text-center">{description}</p>}
     {Content && <Content components={mdxComponents} />}
     {items.length > 0 && <DocCardList items={items} />}
   </div>
 </DocLayout>
-
-<style>
-  /* The intro description sits centered under the h1, like the golden
-     /docs/ screenshot. */
-  .porto-notes-index__description {
-    text-align: center;
-  }
-</style>

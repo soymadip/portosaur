@@ -22,29 +22,35 @@ try {
 ---
 
 <BaseLayout title={title}>
-  <div class="porto-blog-authors-page">
-    <h1>Authors</h1>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
+    <h1 class="mb-[-0.5rem]">Authors</h1>
     {authors.length === 0 ? (
-      <p class="porto-blog-authors-page__empty">No authors yet.</p>
+      <p class="text-muted">No authors yet.</p>
     ) : (
       authors.map((author) => {
         const name = author.data.name ?? author.id;
         const hasPage = author.data.page === true;
         return (
-          <section class="porto-blog-author">
-            <h2>
+          <section>
+            <h2 class="mb-1">
               {hasPage ? (
-                <a href={`/${blogRoute}/authors/${author.id}/`}>{name}</a>
+                <a
+                  class="text-foreground no-underline hover:text-primary"
+                  href={`/${blogRoute}/authors/${author.id}/`}
+                >
+                  {name}
+                </a>
               ) : (
                 name
               )}
             </h2>
             {author.data.title && (
-              <p class="porto-blog-author__title">{author.data.title}</p>
+              <p class="m-0 text-muted">{author.data.title}</p>
             )}
             {author.data.url && (
-              <p class="porto-blog-author__url">
+              <p class="mt-1">
                 <a
+                  class="text-primary no-underline hover:underline"
                   href={author.data.url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -59,54 +65,3 @@ try {
     )}
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-authors-page {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .porto-blog-authors-page h1 {
-    margin-bottom: -0.5rem;
-  }
-
-  .porto-blog-authors-page__empty {
-    color: var(--porto-text-muted);
-  }
-
-  .porto-blog-author h2 {
-    margin: 0 0 0.25rem;
-  }
-
-  .porto-blog-author h2 a {
-    color: var(--porto-text);
-    text-decoration: none;
-  }
-
-  .porto-blog-author h2 a:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-author__title {
-    color: var(--porto-text-muted);
-    margin: 0;
-  }
-
-  .porto-blog-author__url {
-    margin: 0.25rem 0 0;
-  }
-
-  .porto-blog-author__url a {
-    color: var(--porto-primary);
-    text-decoration: none;
-  }
-
-  .porto-blog-author__url a:hover {
-    text-decoration: underline;
-  }
-</style>

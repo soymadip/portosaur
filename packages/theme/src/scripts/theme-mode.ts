@@ -12,13 +12,13 @@
  * (no flash); this module — imported by `BaseLayout` on every page —
  * wires the toggle buttons (`[data-theme-toggle]`, rendered by
  * `Navbar`) and keeps the `theme-color` meta tag in sync with the
- * navbar token.
+ * background token.
  */
 
 const STORAGE_KEY = "theme";
 
 /** Tokens consulted for the theme-color meta, in order. */
-const THEME_COLOR_VARS = ["--porto-navbar-bg", "--porto-bg"];
+const THEME_COLOR_VARS = ["--color-background"];
 
 export type ThemeMode = "light" | "dark";
 
@@ -53,10 +53,10 @@ export function toggleTheme(): void {
 }
 
 /**
- * Syncs the `theme-color` meta tag with the navbar background token, so
- * the browser chrome matches the active mode. Port of the old
- * `getThemeColorSyncScript`, reading `--porto-*` tokens instead of the
- * old Infima navbar variable.
+ * Syncs the `theme-color` meta tag with the background token, so the
+ * browser chrome matches the active mode. Port of the old
+ * `getThemeColorSyncScript`, reading the `--color-background` token
+ * instead of the old Infima navbar variable.
  */
 export function updateThemeColor(): void {
   let meta = document.querySelector<HTMLMetaElement>(

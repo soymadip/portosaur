@@ -5,12 +5,18 @@
  * Custom scheme files (`theme.color_scheme` pointing at a path) load
  * after this file too, alongside the user CSS.
  *
- * Tailwind v4 (CSS-first config) + the `--porto-*` token system. No
+ * Tailwind v4 (CSS-first config) + the token system in `tokens.css`
+ * (short utilities like `bg-surface` / `text-muted`). No
  * `@tailwindcss/typography` — markdown prose is hand-written CSS in
  * `overrides/markdown.css`.
  */
 
 @import "tailwindcss";
+
+/* Dark variant follows Portosaur's `data-theme` attribute (set by the
+ * theme toggle), NOT the OS `prefers-color-scheme` — Tailwind v4's
+ * default `dark:` variant would follow the OS setting instead. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ----- Global Fonts ----- */
 @import "@fontsource/alata";
@@ -29,14 +35,9 @@
 
 /* ----- Global Styles ----- */
 @import "./animations.css";
-@import "./empty-state.css";
 
 /* ----- Component Overrides ----- */
 @import "./overrides/base.css";
-@import "./overrides/navbar.css";
-@import "./overrides/footer.css";
-@import "./overrides/search.css";
-@import "./overrides/pagination.css";
 @import "./overrides/markdown.css";
 @import "./shiki.css";
 

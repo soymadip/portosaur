@@ -51,71 +51,30 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="porto-blog-list">
-    <h1>{heading}</h1>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-10 p-4">
+    <h1 class="mb-[-1rem]">{heading}</h1>
     {posts.map((post) => {
       const date = postDate(post);
       return (
-        <article class="porto-blog-item">
-          <h2>
-            <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+        <article>
+          <h2 class="mb-2 text-[1.8rem]">
+            <a
+              class="text-foreground no-underline hover:text-primary"
+              href={`/${blogRoute}/${blogSlug(post)}/`}
+            >
               {post.data.title ?? post.id}
             </a>
           </h2>
-          <div class="porto-blog-meta">
+          <div class="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.9rem] text-muted">
             {date && (
               <time datetime={date.toISOString()}>{formatPostDate(date)}</time>
             )}
           </div>
           {post.data.description && (
-            <p class="porto-blog-desc">{post.data.description}</p>
+            <p class="mb-2 text-muted">{post.data.description}</p>
           )}
         </article>
       );
     })}
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-list {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .porto-blog-list h1 {
-    margin-bottom: -1rem;
-  }
-
-  .porto-blog-item h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.8rem;
-  }
-
-  .porto-blog-item h2 a {
-    color: var(--porto-text);
-    text-decoration: none;
-  }
-
-  .porto-blog-item h2 a:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    color: var(--porto-text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .porto-blog-desc {
-    color: var(--porto-text-muted);
-    margin: 0 0 0.5rem;
-  }
-</style>

@@ -61,17 +61,36 @@ function hasActiveDescendant(item: any): boolean {
 }
 
 const isRootActive = rootHref ? normalize(rootHref) === current : false;
+
+// Shared Tailwind class sets — the link/label styles repeat across the
+// root row, categories, and doc links. The color is a per-link ternary
+// (never a base color plus an overriding active color) so the two
+// never fight in the generated stylesheet.
+const sidebarLink =
+  "flex items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] no-underline hover:bg-surface";
+const sidebarSummaryLink =
+  "inline-flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] no-underline hover:bg-surface";
+const sidebarLabel =
+  "flex items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] font-semibold text-foreground";
+const sidebarLinkColor = (active: boolean) =>
+  active ? "bg-surface font-semibold text-primary" : "text-foreground";
 ---
 
-<ul class={depth === 0 ? "porto-sidebar" : "porto-sidebar__items"}>
+<ul
+  class={
+    depth === 0
+      ? "porto-sidebar m-0 flex-auto min-h-0 list-none overflow-y-auto p-0"
+      : "m-0 list-none p-0 pl-3"
+  }
+>
   {depth === 0 && root && (
-    <li class="porto-sidebar__item porto-sidebar__item--root">
+    <li class="porto-sidebar__item--root my-0.5 mr-1.5 flex items-center gap-1">
       {rootHref ? (
         <a
           class:list={[
-            "porto-sidebar__link",
-            "porto-sidebar__root-link",
-            { "porto-sidebar__link--active": isRootActive },
+            sidebarLink,
+            "flex-auto font-semibold",
+            sidebarLinkColor(isRootActive),
           ]}
           href={rootHref}
           aria-current={isRootActive ? "page" : undefined}
@@ -79,13 +98,11 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
           {root.label}
         </a>
       ) : (
-        <span class="porto-sidebar__label porto-sidebar__root-link">
-          {root.label}
-        </span>
+        <span class:list={[sidebarLabel, "flex-auto"]}>{root.label}</span>
       )}
       <button
         type="button"
-        class="porto-sidebar__root-toggle"
+        class="shrink-0 cursor-pointer rounded-md border-0 bg-transparent px-2 py-1.5 text-[0.9rem] leading-[1.5] text-muted hover:bg-surface hover:text-foreground"
         data-sidebar-root-toggle
         aria-expanded="true"
         aria-label="Collapse sidebar tree"
@@ -96,27 +113,15 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
   )}
   {nodes.map((item) =>
     item.type === "category" ? (
-      <li
-        class:list={[
-          "porto-sidebar__item",
-          "porto-sidebar__item--category",
-          { "porto-sidebar__item--active": hasActiveDescendant(item) },
-        ]}
-        data-color={item.color ?? undefined}
-      >
+      <li class="my-0.5 mr-1.5" data-color={item.color ?? undefined}>
         {collapsable ? (
-          <details
-            class="porto-sidebar__category"
-            open={hasActiveDescendant(item)}
-          >
-            <summary class="porto-sidebar__summary">
+          <details class="group" open={hasActiveDescendant(item)}>
+            <summary class="cursor-pointer list-none before:float-right before:text-[0.9em] before:leading-[1.75] before:text-muted before:content-['›'] group-open:before:content-['⌄'] [&::-webkit-details-marker]:hidden">
               {item.link?.href ? (
                 <a
                   class:list={[
-                    "porto-sidebar__link",
-                    {
-                      "porto-sidebar__link--active": isActiveItem(item),
-                    },
+                    sidebarSummaryLink,
+                    sidebarLinkColor(isActiveItem(item)),
                   ]}
                   href={item.link.href}
                   aria-current={isActiveItem(item) ? "page" : undefined}
@@ -124,7 +129,7 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
                   {item.label}
                 </a>
               ) : (
-                <span class="porto-sidebar__label">{item.label}</span>
+                <span class={sidebarLabel}>{item.label}</span>
               )}
             </summary>
             <Sidebar
@@ -138,11 +143,9 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
             {item.link?.href ? (
               <a
                 class:list={[
-                  "porto-sidebar__link",
-                  "porto-sidebar__label",
-                  {
-                    "porto-sidebar__link--active": isActiveItem(item),
-                  },
+                  sidebarLink,
+                  "font-semibold",
+                  sidebarLinkColor(isActiveItem(item)),
                 ]}
                 href={item.link.href}
                 aria-current={isActiveItem(item) ? "page" : undefined}
@@ -150,7 +153,7 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
                 {item.label}
               </a>
             ) : (
-              <span class="porto-sidebar__label">{item.label}</span>
+              <span class={sidebarLabel}>{item.label}</span>
             )}
             <Sidebar
               currentHref={currentHref}
@@ -161,12 +164,9 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
         )}
       </li>
     ) : (
-      <li class="porto-sidebar__item" data-color={item.color ?? undefined}>
+      <li class="my-0.5 mr-1.5" data-color={item.color ?? undefined}>
         <a
-          class:list={[
-            "porto-sidebar__link",
-            { "porto-sidebar__link--active": isActiveItem(item) },
-          ]}
+          class:list={[sidebarLink, sidebarLinkColor(isActiveItem(item))]}
           href={item.href}
           aria-current={isActiveItem(item) ? "page" : undefined}
         >
@@ -180,7 +180,7 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
 {depth === 0 && (
   <button
     type="button"
-    class="porto-sidebar__collapse"
+    class="block w-full shrink-0 cursor-pointer border-0 border-t border-t-border bg-background py-2 text-[1.1rem] leading-[1.5] text-muted hover:text-primary"
     data-sidebar-collapse
     aria-label="Collapse sidebar"
   >
@@ -189,136 +189,12 @@ const isRootActive = rootHref ? normalize(rootHref) === current : false;
 )}
 
 <style>
-  .porto-sidebar,
-  .porto-sidebar__items {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* The root list fills the sidebar column and scrolls; the collapse
-     button below it stays pinned to the bottom (the nav is a flex
-     column in DocLayout). */
-  .porto-sidebar {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-  }
-
-  .porto-sidebar__items {
-    padding-left: 0.75rem;
-  }
-
-  .porto-sidebar__item {
-    margin: 0.125rem 6px 0.125rem 0;
-  }
-
-  .porto-sidebar__link,
-  .porto-sidebar__label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 0.75rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    font-size: 0.95rem;
-    border-radius: 0.375rem;
-  }
-
-  .porto-sidebar__link:hover {
-    background: var(--porto-surface-0);
-  }
-
-  .porto-sidebar__link--active {
-    color: var(--porto-primary);
-    font-weight: 600;
-    background: var(--porto-surface-0);
-  }
-
-  .porto-sidebar__summary {
-    list-style: none;
-    cursor: pointer;
-  }
-
-  .porto-sidebar__summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .porto-sidebar__summary::before {
-    content: "⌄";
-    float: right;
-    color: var(--porto-text-muted);
-    font-size: 0.9em;
-    line-height: 1.75;
-  }
-
-  .porto-sidebar__category:not([open]) > .porto-sidebar__summary::before {
-    content: "›";
-  }
-
-  .porto-sidebar__summary .porto-sidebar__link {
-    display: inline-flex;
-    width: calc(100% - 1.25rem);
-  }
-
-  .porto-sidebar__label {
-    font-weight: 600;
-  }
-
-  /* Root header row: the tree root's label as a link to the collection
-     home, with a chevron button collapsing the whole tree (wired in
-     DocLayout). Collapsed, every item but the header row hides. */
-  .porto-sidebar__item--root {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .porto-sidebar__root-link {
-    flex: 1 1 auto;
-    font-weight: 600;
-  }
-
-  .porto-sidebar__root-toggle {
-    flex-shrink: 0;
-    padding: 0.375rem 0.5rem;
-    color: var(--porto-text-muted);
-    background: none;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    cursor: pointer;
-  }
-
-  .porto-sidebar__root-toggle:hover {
-    background: var(--porto-surface-0);
-    color: var(--porto-text);
-  }
-
+  /* Root header row collapse: the script in DocLayout sets
+     `data-root-collapsed` on the root list (queried there as
+     `.porto-sidebar`); while collapsed, every item but the header row
+     hides. A `:not()` child selector — plain CSS, not a utility. */
   .porto-sidebar[data-root-collapsed="true"]
     > li:not(.porto-sidebar__item--root) {
     display: none;
-  }
-
-  /* Bottom collapse button («): pinned to the bottom of the sidebar
-     column by the nav's flex layout; hides the whole sidebar (the
-     expand button + toggle wiring live in DocLayout). */
-  .porto-sidebar__collapse {
-    flex-shrink: 0;
-    display: block;
-    width: 100%;
-    padding: 0.5rem 0;
-    color: var(--porto-text-muted);
-    background: var(--porto-bg);
-    border: none;
-    border-top: 1px solid var(--porto-border);
-    font-size: 1.1rem;
-    line-height: 1.5;
-    cursor: pointer;
-  }
-
-  .porto-sidebar__collapse:hover {
-    color: var(--porto-primary);
   }
 </style>

@@ -1,251 +1,154 @@
-/* === Portosaur semantic tokens ===
+/* Token definitions — the single source of truth for Portosaur's theme.
  *
- * The `--porto-*` token set. Color values come from the scheme files
- * (`themes/*.css`, scoped by `[data-scheme][data-theme]`); this file
- * defines the fallback values (the portosaur light scheme, so no token
- * is ever undefined) plus every structural token — fonts, radii,
- * shadows, transitions, z-index, spacing — that the old Infima layer
- * used to supply. Components use tokens two ways: plain CSS
- * (`var(--porto-surface)`) and Tailwind utilities (`bg-porto-surface`,
- * `text-porto-text`, or the arbitrary form `bg-(--porto-surface)`).
+ * Tokens live directly in Tailwind's @theme: each --color-* / --font-* /
+ * --radius-* / --shadow-* entry generates utilities (bg-surface,
+ * text-muted, font-body, rounded-card, shadow-sm...), and the utilities
+ * reference the variables, so scheme blocks can override them per
+ * data-scheme / data-theme.
  *
- * The Tailwind v4 `@theme` block at the bottom maps the tokens to
- * utilities. It is plain `@theme` (not `@theme inline`) so the mapped
- * variables are emitted on `:root` and utilities resolve through them —
- * light/dark switching still works because the underlying `--porto-*`
- * values change with `data-theme`.
+ * The plain :root block below repeats the same values as fallbacks. It
+ * exists because Tailwind only emits a theme variable when something
+ * references it — a token no utility uses (or a token a custom scheme
+ * omits) would otherwise be undefined. The :root values are the
+ * portosaur light scheme; scheme files override them per
+ * data-scheme / data-theme.
+ *
+ * Shadows are inlined into the utilities by Tailwind and never emitted
+ * as variables from @theme; the :root block also makes var(--shadow-*)
+ * usable in plain CSS.
  */
 
-:root {
-  /* Color fallbacks — portosaur light. Every scheme file assigns all of
-     these per mode; the fallbacks only apply before a scheme matches. */
-
+@theme {
   /* Primary scale */
-  --porto-primary: #40a701;
-  --porto-primary-rgb: 64, 167, 1;
-  --porto-primary-dark: #378e01;
-  --porto-primary-darker: #2f7a01;
-  --porto-primary-darkest: #1e4d01;
-  --porto-primary-light: #48bb01;
-  --porto-primary-lighter: #60fc02;
-  --porto-primary-lightest: #80fd35;
+  --color-primary: #40a701;
+  --color-primary-dark: #378e01;
+  --color-primary-darker: #2f7a01;
+  --color-primary-light: #48bb01;
 
-  /* Semantic */
-  --porto-success: #10b981;
-  --porto-success-rgb: 16, 185, 129;
-  --porto-warning: #f59e0b;
-  --porto-warning-rgb: 245, 158, 11;
-  --porto-danger: #ef4444;
-  --porto-danger-rgb: 239, 68, 68;
-  --porto-info: #3b82f6;
-  --porto-info-rgb: 59, 130, 246;
-  --porto-secondary: #52525b;
+  /* Semantic colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-secondary: #52525b;
 
   /* Palette */
-  --porto-red: #ef4444;
-  --porto-orange: #f97316;
-  --porto-yellow: #eab308;
-  --porto-green: #22c55e;
-  --porto-teal: #14b8a6;
-  --porto-blue: #3b82f6;
-  --porto-purple: #8b5cf6;
-  --porto-pink: #ec4899;
+  --color-red: #ef4444;
+  --color-orange: #f97316;
+  --color-yellow: #eab308;
+  --color-green: #22c55e;
+  --color-teal: #14b8a6;
+  --color-blue: #3b82f6;
+  --color-purple: #8b5cf6;
+  --color-pink: #ec4899;
 
-  /* Backgrounds & text */
-  --porto-bg: #ffffff;
-  --porto-bg-alt: #f4f4f5;
-  --porto-surface-0: #e4e4e7;
-  --porto-surface-0-rgb: 228, 228, 231;
-  --porto-surface-1: #d4d4d8;
-  --porto-surface-2: #a1a1aa;
-  --porto-surface-2-rgb: 228, 228, 231;
-  --porto-text: #09090b;
-  --porto-text-muted: #52525b;
+  /* Surfaces */
+  --color-background: #ffffff;
+  --color-background-alt: #f4f4f5;
+  --color-surface: #e4e4e7;
+  --color-surface-1: #d4d4d8;
+  --color-surface-2: #a1a1aa;
+  --color-hover-overlay: rgba(228, 228, 231, 0.5);
 
-  /* Borders & code */
-  --porto-border: #e4e4e7;
-  --porto-code: #09090b;
+  /* Text and borders */
+  --color-foreground: #09090b;
+  --color-muted: #52525b;
+  --color-border: #e4e4e7;
 
-  /* Grayscale (0 = lightest, 1000 = darkest, in each mode) */
-  --porto-gray-0: #ffffff;
-  --porto-gray-100: #f4f4f5;
-  --porto-gray-200: #e4e4e7;
-  --porto-gray-300: #d4d4d8;
-  --porto-gray-400: #a1a1aa;
-  --porto-gray-500: #71717a;
-  --porto-gray-600: #52525b;
-  --porto-gray-700: #3f3f46;
-  --porto-gray-800: #27272a;
-  --porto-gray-900: #18181b;
-  --porto-gray-1000: #09090b;
+  /* Gray scale */
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
 
   /* Fonts */
-  --porto-font-heading:
-    "Geologica Variable", system-ui, -apple-system, sans-serif;
-  --porto-font-body: "Alata", system-ui, -apple-system, sans-serif;
-  --porto-font-markdown:
-    "Lexend Variable", system-ui, -apple-system, sans-serif;
-  --porto-font-mono:
-    SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
-    monospace;
-  --porto-line-height: 1.65;
+  --font-body:
+    "Alata", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-markdown:
+    "Lexend Variable", "Geologica", "Alata", "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Radii */
-  --porto-radius: 0.4rem;
-  --porto-radius-card: var(--porto-radius);
+  /* Radius */
+  --radius-card: 0.4rem;
 
-  /* Shadows — tinted with the surface color, as the old theme intended
-     (its `rgba(hex)` form was invalid CSS, so the tint never applied;
-     `color-mix` makes it real). */
-  --porto-shadow-lw: 0 1px 2px 0
-    color-mix(in srgb, var(--porto-surface-1) 12%, transparent);
-  --porto-shadow-md: 0 5px 40px
-    color-mix(in srgb, var(--porto-surface-1) 15%, transparent);
-  --porto-shadow-lg: 0 8px 24px 0
-    color-mix(in srgb, var(--porto-surface-1) 15%, transparent);
-  --porto-shadow-tl: 0 12px 28px 0
-    color-mix(in srgb, var(--porto-surface-1) 20%, transparent);
-  --porto-navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  /* Shadows (override Tailwind's defaults with Portosaur's values) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 5px 40px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 28px 0 rgba(0, 0, 0, 0.2);
 
-  /* Transitions */
-  --porto-transition-fast: 200ms;
-  --porto-transition-slow: 400ms;
-  --porto-transition-timing: cubic-bezier(0.08, 0.52, 0.52, 1);
-
-  /* Z-index */
-  --porto-z-dropdown: 100;
-  --porto-z-overlay: 200;
-
-  /* Navbar */
-  --porto-navbar-height: 3.75rem;
-  --porto-navbar-bg: var(--porto-bg);
-  --porto-navbar-sidebar-width: 83vw;
-
-  /* Footer */
-  --porto-footer-bg: var(--porto-bg-alt);
-
-  /* Cards */
-  --porto-card-bg: var(--porto-surface-0);
-
-  /* Code */
-  --porto-code-bg: var(--porto-bg-alt);
-  --porto-pre-padding: 1rem;
-  --porto-code-line-highlight: rgba(var(--porto-surface-2-rgb), 0.5);
-
-  /* Links */
-  --porto-link-color: var(--porto-primary);
-  --porto-link-hover-color: var(--porto-primary-dark);
-
-  /* Sidebar menu */
-  --porto-menu-color: var(--porto-text-muted);
-  --porto-menu-color-active: var(--porto-primary);
-  --porto-menu-bg-active: rgba(var(--porto-primary-rgb), 0.1);
-  --porto-menu-bg-hover: rgba(var(--porto-surface-0-rgb), 0.7);
-
-  /* Table of contents */
-  --porto-toc-link-color: var(--porto-text-muted);
-  --porto-toc-link-color-active: var(--porto-primary);
-  --porto-toc-border-color: var(--porto-border);
-
-  /* Hover overlay */
-  --porto-hover-overlay: rgba(var(--porto-surface-2-rgb), 0.5);
-
-  /* Spacing */
-  --porto-spacing-horizontal: 1rem;
-  --porto-spacing-md: 1rem;
-
-  /* Scroll margin (anchor offset below the navbar) */
-  --porto-scroll-margin-top: 38px;
-  --porto-scroll-margin-top-mobile: 32px;
-
-  /* Horizontal rules */
-  --porto-hr-height: 2px;
-  --porto-hr-margin-vertical: 2.5rem;
-  --porto-hr-bg: var(--porto-gray-600);
-  --porto-hr-border-color: var(--porto-gray-500);
-
-  /* Tables */
-  --porto-table-border-color: var(--porto-gray-400);
-  --porto-table-stripe-bg: var(--porto-surface-0);
-
-  /* Borders & buttons */
-  --porto-border-width: 1px;
-  --porto-button-color: var(--porto-gray-500);
-
-  /* Headings */
-  --porto-heading-color: var(--porto-text);
+  /* Structural */
+  --navbar-height: 3.75rem;
+  --navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --scroll-margin-top: 38px;
+  --pre-padding: 1rem;
+  --line-height: 1.65;
 }
 
-/* Per-mode tokens: text on primary backgrounds and on inverted
-   backgrounds is the mode's light color (white in light mode,
-   near-white text in dark mode). */
+/* UA behavior for each mode. */
 [data-theme="light"] {
   color-scheme: light;
-  --porto-on-primary: var(--porto-bg);
-  --porto-text-inverse: var(--porto-bg);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --porto-on-primary: var(--porto-text);
-  --porto-text-inverse: var(--porto-text);
 }
 
-/* === Tailwind v4 theme mapping ===
- * Maps the tokens to utilities: `bg-porto-bg`, `text-porto-text`,
- * `border-porto-border`, `font-porto-body`, `rounded-porto`,
- * `shadow-porto-md`, and so on. */
-@theme {
-  --color-porto-primary: var(--porto-primary);
-  --color-porto-primary-dark: var(--porto-primary-dark);
-  --color-porto-primary-darker: var(--porto-primary-darker);
-  --color-porto-primary-darkest: var(--porto-primary-darkest);
-  --color-porto-primary-light: var(--porto-primary-light);
-  --color-porto-primary-lighter: var(--porto-primary-lighter);
-  --color-porto-primary-lightest: var(--porto-primary-lightest);
-  --color-porto-success: var(--porto-success);
-  --color-porto-warning: var(--porto-warning);
-  --color-porto-danger: var(--porto-danger);
-  --color-porto-info: var(--porto-info);
-  --color-porto-secondary: var(--porto-secondary);
-  --color-porto-red: var(--porto-red);
-  --color-porto-orange: var(--porto-orange);
-  --color-porto-yellow: var(--porto-yellow);
-  --color-porto-green: var(--porto-green);
-  --color-porto-teal: var(--porto-teal);
-  --color-porto-blue: var(--porto-blue);
-  --color-porto-purple: var(--porto-purple);
-  --color-porto-pink: var(--porto-pink);
-  --color-porto-bg: var(--porto-bg);
-  --color-porto-bg-alt: var(--porto-bg-alt);
-  --color-porto-surface-0: var(--porto-surface-0);
-  --color-porto-surface-1: var(--porto-surface-1);
-  --color-porto-surface-2: var(--porto-surface-2);
-  --color-porto-text: var(--porto-text);
-  --color-porto-text-muted: var(--porto-text-muted);
-  --color-porto-border: var(--porto-border);
-  --color-porto-code: var(--porto-code);
-  --color-porto-gray-0: var(--porto-gray-0);
-  --color-porto-gray-100: var(--porto-gray-100);
-  --color-porto-gray-200: var(--porto-gray-200);
-  --color-porto-gray-300: var(--porto-gray-300);
-  --color-porto-gray-400: var(--porto-gray-400);
-  --color-porto-gray-500: var(--porto-gray-500);
-  --color-porto-gray-600: var(--porto-gray-600);
-  --color-porto-gray-700: var(--porto-gray-700);
-  --color-porto-gray-800: var(--porto-gray-800);
-  --color-porto-gray-900: var(--porto-gray-900);
-  --color-porto-gray-1000: var(--porto-gray-1000);
-
-  --font-porto-heading: var(--porto-font-heading);
-  --font-porto-body: var(--porto-font-body);
-  --font-porto-markdown: var(--porto-font-markdown);
-  --font-porto-mono: var(--porto-font-mono);
-
-  --radius-porto: var(--porto-radius);
-
-  --shadow-porto-lw: var(--porto-shadow-lw);
-  --shadow-porto-md: var(--porto-shadow-md);
-  --shadow-porto-lg: var(--porto-shadow-lg);
-  --shadow-porto-tl: var(--porto-shadow-tl);
+/* Fallback values (portosaur light) — see the header comment. Every
+ * token defined here is also defined in @theme above; the two blocks
+ * must stay in sync. */
+:root {
+  --color-primary: #40a701;
+  --color-primary-dark: #378e01;
+  --color-primary-darker: #2f7a01;
+  --color-primary-light: #48bb01;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-secondary: #52525b;
+  --color-red: #ef4444;
+  --color-orange: #f97316;
+  --color-yellow: #eab308;
+  --color-green: #22c55e;
+  --color-teal: #14b8a6;
+  --color-blue: #3b82f6;
+  --color-purple: #8b5cf6;
+  --color-pink: #ec4899;
+  --color-background: #ffffff;
+  --color-background-alt: #f4f4f5;
+  --color-surface: #e4e4e7;
+  --color-surface-1: #d4d4d8;
+  --color-surface-2: #a1a1aa;
+  --color-hover-overlay: rgba(228, 228, 231, 0.5);
+  --color-foreground: #09090b;
+  --color-muted: #52525b;
+  --color-border: #e4e4e7;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --font-body:
+    "Alata", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-markdown:
+    "Lexend Variable", "Geologica", "Alata", "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-card: 0.4rem;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 5px 40px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 28px 0 rgba(0, 0, 0, 0.2);
+  --navbar-height: 3.75rem;
+  --navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --scroll-margin-top: 38px;
+  --pre-padding: 1rem;
+  --line-height: 1.65;
 }

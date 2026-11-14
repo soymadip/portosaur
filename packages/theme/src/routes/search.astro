@@ -16,15 +16,16 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
 ---
 
 <BaseLayout title="Search the documentation">
-  <div class="porto-search">
+  <div class="mx-auto w-full max-w-[80rem] p-4">
     <h1>Search the documentation</h1>
-    <div class="porto-search__box">
+    <div class="my-6">
       <input
         id="porto-search-input"
         type="search"
         placeholder="Search the documentation…"
         aria-label="Search the documentation"
         autocomplete="off"
+        class="w-full rounded-lg border border-border bg-surface px-4 py-3 text-[1.1rem] text-foreground focus:border-primary focus:outline-none"
       />
     </div>
     <div id="porto-search-results" class="porto-search__results" role="status">
@@ -140,34 +141,12 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
 </BaseLayout>
 
 <style>
-  .porto-search {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-
-  .porto-search__box {
-    margin: 1.5rem 0;
-  }
-
-  .porto-search__box input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 1.1rem;
-    color: var(--porto-text);
-    background: var(--porto-surface-0);
-    border: 1px solid var(--porto-border);
-    border-radius: 0.5rem;
-  }
-
-  .porto-search__box input:focus {
-    outline: none;
-    border-color: var(--porto-primary);
-  }
-
+  /* Kept as plain CSS: both classes are set by the client script
+     (`porto-search__hint` via innerHTML when the query clears,
+     `porto-search-results__list` on the JS-created results list), so
+     they cannot be utilities on static markup. */
   .porto-search__hint {
-    color: var(--porto-text-muted);
+    color: var(--color-muted);
   }
 
   .porto-search-results__list {
@@ -180,7 +159,7 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
   }
 
   .porto-search-results__list a {
-    color: var(--porto-primary);
+    color: var(--color-primary);
     font-size: 1.1rem;
     font-weight: 600;
     text-decoration: none;
@@ -191,7 +170,7 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
   }
 
   .porto-search-results__list p {
-    color: var(--porto-text-muted);
+    color: var(--color-muted);
     margin: 0.25rem 0 0;
   }
 </style>

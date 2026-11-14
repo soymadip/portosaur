@@ -10,11 +10,12 @@
 //
 // Fixes vs the old page: the old `clsx` calls emitted the global class
 // strings `task-row-completed` / `task-row-striped` / `task-tab-active`,
-// which never matched the hashed CSS-module classes — here they are
-// real classes, so completed-row strikethrough, striping, and the
-// active tab actually style. The old JSX referenced a nonexistent
-// `tasks-subheading` class; the subheading uses the existing
-// `tasks-description` class. Unknown statuses (e.g. `done`) sort after
+// which never matched the hashed CSS-module classes — here the
+// completed-row strikethrough and striping are conditional Tailwind
+// utilities and `task-tab-active` is a real class (kept because the
+// filter script toggles it), so all three actually style. The old JSX
+// referenced a nonexistent `tasks-subheading` class; the subheading uses
+// the `tasks-description` styles, now utilities. Unknown statuses (e.g. `done`) sort after
 // the known ones and get a neutral badge with the raw status text
 // instead of the old empty badge; tasks without a priority get no
 // priority badge instead of an empty one.
@@ -85,66 +86,112 @@ const tabs = [
 ];
 
 const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
+
+// Shared Tailwind utility strings, kept as constants so the four badge
+// variants and six badge icons stay in sync. Font weight is NOT in
+// BADGE_BASE: the medium-priority badge is bold, the others semibold,
+// and two conflicting weight utilities on one element would resolve by
+// stylesheet order, not by intent.
+const BADGE_BASE =
+  "inline-flex items-center rounded-2xl px-[0.8rem] py-[0.35rem] text-[0.8rem] leading-[1.2] tracking-[0.02em] whitespace-nowrap capitalize shadow-sm max-[576px]:px-2 max-[576px]:py-1 max-[576px]:text-[0.7rem]";
+const BADGE_ICON =
+  "mr-[0.4rem] inline-flex items-center align-[-0.125em] text-[0.85rem] max-[576px]:mr-[0.2rem] max-[576px]:text-[0.7rem]";
 ---
 
 <BaseLayout title={title} description={description}>
-  <div class="tasks-container" data-porto-tasks>
+  <div
+    class="mb-8 flex min-h-[calc(100vh-60px)] flex-col items-center justify-center px-4 max-[768px]:px-2"
+    data-porto-tasks
+  >
     {!enabled ? (
-      <div class="tasks-content">
-        <div class="tasks-disabled-notice">
-          <div class="disabled-icon">
+      <div class="flex w-full max-w-[1000px] flex-col justify-center">
+        <div class="flex flex-col items-center justify-center p-8 text-center">
+          <div class="text-[4rem] text-muted">
             <span set:html={renderIcon("ml:alert")} />
           </div>
-          <h2 class="disabled-title">Tasks are currently disabled</h2>
-          <p class="disabled-help">
-            To enable tasks, set <code>tasks.enable</code> to <code>true</code>
+          <h2 class="mb-3 text-[2rem] text-foreground">
+            Tasks are currently disabled
+          </h2>
+          <p class="max-w-[500px] text-[1.1rem] leading-[1.5] text-muted">
+            To enable tasks, set{" "}
+            <code class="rounded-[3px] bg-gray-500 px-1 py-[2px] text-primary">
+              tasks.enable
+            </code>{" "}
+            to{" "}
+            <code class="rounded-[3px] bg-gray-500 px-1 py-[2px] text-primary">
+              true
+            </code>
           </p>
         </div>
       </div>
     ) : (
       <>
-        <div class="tasks-header">
-          <h1 class="tasks-heading">{heading}</h1>
-          {subheading && <p class="tasks-description">{subheading}</p>}
+        <div class="mt-6 text-center">
+          <h1 class="mb-[0.1rem] text-primary">{heading}</h1>
+          {subheading && (
+            <p class="mt-1 mb-6 text-[1.1rem] text-primary">{subheading}</p>
+          )}
         </div>
-        <div class="tasks-content">
-          <div class="stats-container">
-            <div class="stat-box">
-              <div class="stat-label">Total Tasks</div>
-              <div class="stat-value">{total}</div>
+        <div class="flex w-full max-w-[1000px] flex-col justify-center">
+          <div class="mb-8 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 max-[480px]:grid-cols-2 max-[480px]:gap-3">
+            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
+              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
+                Total Tasks
+              </div>
+              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-foreground">
+                {total}
+              </div>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">Completed</div>
-              <div class="stat-value stat-value-completed">
+            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
+              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
+                Completed
+              </div>
+              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-success">
                 {completedCount}
               </div>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">In Progress</div>
-              <div class="stat-value stat-value-active">{activeCount}</div>
+            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
+              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
+                In Progress
+              </div>
+              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-primary">
+                {activeCount}
+              </div>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">Planned</div>
-              <div class="stat-value stat-value-pending">{pendingCount}</div>
+            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
+              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
+                Planned
+              </div>
+              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-warning">
+                {pendingCount}
+              </div>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">Progress</div>
-              <div class="stat-value">{percentComplete}%</div>
-              <div class="progress-bar-container">
+            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
+              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
+                Progress
+              </div>
+              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-foreground">
+                {percentComplete}%
+              </div>
+              <div class="mt-2 h-2 w-full rounded-[0.25rem] bg-gray-800">
                 <div
-                  class="progress-bar"
+                  class="h-full rounded-[0.25rem] bg-primary"
                   style={`width: ${percentComplete}%`}
                 />
               </div>
             </div>
           </div>
 
-          <div class="task-tabs-container">
-            <div class="task-tabs" role="tablist" aria-label="Task categories">
+          <div class="mb-10 overflow-hidden rounded-card shadow-sm">
+            <div
+              class="grid grid-cols-4 border-b border-gray-700 bg-surface max-[768px]:grid-cols-2"
+              role="tablist"
+              aria-label="Task categories"
+            >
               {tabs.map((tab) => (
                 <button
                   type="button"
-                  class={`task-tab${tab.id === "all" ? " task-tab-active" : ""}`}
+                  class={`relative m-0 flex h-full cursor-pointer items-center justify-center border-b-[3px] border-b-transparent bg-transparent p-4 font-body text-base leading-(--line-height) text-foreground transition-all duration-200 ease-[ease] hover:bg-hover-overlay hover:text-primary focus:outline-none max-[768px]:px-2 max-[768px]:py-3 max-[768px]:text-[0.9rem] max-[480px]:justify-start max-[480px]:p-2 max-[480px]:text-left max-[480px]:text-[0.8rem]${tab.id === "all" ? " task-tab-active" : ""}`}
                   data-task-tab={tab.id}
                   role="tab"
                   aria-selected={tab.id === "all"}
@@ -152,53 +199,74 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
                   id={`tab-${tab.id}`}
                 >
                   <span
-                    class={`task-tab-icon${tab.spin ? " spin" : ""}`}
+                    class={`mr-2 flex items-center justify-center text-[1.25rem] max-[768px]:mr-[0.3rem] max-[768px]:text-base max-[768px]:leading-(--line-height)${tab.spin ? " spin" : ""}`}
                     aria-hidden="true"
                     set:html={renderIcon(tab.icon)}
                   />
-                  <span class="task-tab-label">{tab.label}</span>
-                  <span class="task-tab-count">{tab.count}</span>
+                  <span class="mr-2 whitespace-nowrap max-[480px]:mr-[0.3rem] max-[480px]:flex-1">
+                    {tab.label}
+                  </span>
+                  <span class="task-tab-count ml-[0.2rem] inline-flex size-[1.1rem] min-h-[1.1rem] min-w-[1.1rem] items-center justify-center rounded-full bg-gray-800 p-0 text-center text-[0.65rem] leading-none font-semibold text-gray-300 max-[768px]:size-4 max-[768px]:min-h-4 max-[768px]:min-w-4 max-[768px]:text-[0.6rem] max-[480px]:text-[0.55rem]">
+                    {tab.count}
+                  </span>
                 </button>
               ))}
             </div>
 
             <div
-              class="task-tab-content"
+              class="task-tab-content min-h-[300px] bg-transparent max-[768px]:p-4"
               role="tabpanel"
               data-task-panel
               id="tab-content-all"
               aria-labelledby="tab-all"
             >
               {list.length === 0 ? (
-                <div class="task-empty-state">
+                <div class="flex flex-col items-center justify-center px-4 py-12 text-center text-foreground max-[768px]:py-8">
                   <span
-                    class="task-empty-icon"
+                    class="mb-4 text-[3rem] opacity-30"
                     set:html={renderIcon("md:format-list-checks")}
                   />
                   <p>No tasks available</p>
                 </div>
               ) : (
                 <>
-                  <div class="task-list-table" data-task-table>
-                    <div class="task-list-header">
-                      <div class="task-cell task-cell-status">Status</div>
-                      <div class="task-cell task-cell-title">Task Details</div>
-                      <div class="task-cell task-cell-priority">Priority</div>
+                  <div
+                    class="mt-[-1px] w-full overflow-hidden rounded-b-porto bg-surface shadow-sm"
+                    data-task-table
+                  >
+                    <div class="relative z-[1] grid grid-cols-[120px_1fr_120px] border-b-2 border-primary bg-gray-300 text-[0.9rem] font-bold tracking-[0.5px] text-primary uppercase shadow-sm max-[768px]:grid-cols-[100px_1fr_100px] max-[576px]:grid-cols-[80px_1fr_80px] max-[576px]:text-[0.7rem]">
+                      <div class="flex items-center justify-center border-r border-gray-800 px-2 py-3 text-center text-primary max-[576px]:px-1 max-[576px]:py-2">
+                        Status
+                      </div>
+                      <div class="flex flex-col items-center justify-start border-x border-gray-800 py-3 pr-2 pl-4 text-left">
+                        Task Details
+                      </div>
+                      <div class="flex items-center justify-center border-l border-gray-800 px-2 py-3 text-center text-primary max-[576px]:px-1 max-[576px]:py-2">
+                        Priority
+                      </div>
                     </div>
                     <div>
                       {sorted.map((task, index) => (
                         <div
-                          class={`task-row${task.status === "completed" ? " task-row-completed" : ""}${index % 2 === 1 ? " task-row-striped" : ""}`}
+                          class={`grid grid-cols-[120px_1fr_120px] border-b border-gray-800 transition-all duration-150 ease-[ease] last:border-b-0 hover:bg-hover-overlay max-[768px]:grid-cols-[100px_1fr_100px] max-[576px]:grid-cols-[80px_1fr_80px] ${index % 2 === 1 ? "bg-surface-1" : "bg-surface"}`}
                           data-task-status={task.status}
                         >
-                          <div class="task-cell task-cell-status">
+                          <div class="flex items-center justify-center px-2 py-3 max-[576px]:px-1 max-[576px]:py-2">
                             <span
-                              class={`badge${KNOWN_STATUSES.has(task.status) ? ` badge-status-${task.status}` : ""}`}
+                              class={`${BADGE_BASE} font-semibold ${
+                                task.status === "completed"
+                                  ? "bg-success text-gray-300"
+                                  : task.status === "active"
+                                    ? "bg-primary-darker text-gray-300"
+                                    : task.status === "pending"
+                                      ? "bg-gray-800 text-background"
+                                      : ""
+                              }`}
                             >
                               {task.status === "completed" && (
                                 <>
                                   <span
-                                    class="badge-icon"
+                                    class={BADGE_ICON}
                                     set:html={renderIcon("md:check-circle")}
                                   />{" "}
                                   Done
@@ -207,7 +275,7 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
                               {task.status === "active" && (
                                 <>
                                   <span
-                                    class="badge-icon spin"
+                                    class={`${BADGE_ICON} spin`}
                                     set:html={renderIcon("md:loading")}
                                   />{" "}
                                   In Progress
@@ -216,7 +284,7 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
                               {task.status === "pending" && (
                                 <>
                                   <span
-                                    class="badge-icon"
+                                    class={BADGE_ICON}
                                     set:html={renderIcon("md:clock-outline")}
                                   />{" "}
                                   Planned
@@ -225,35 +293,59 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
                               {!KNOWN_STATUSES.has(task.status) && task.status}
                             </span>
                           </div>
-                          <div class="task-cell task-cell-title">
-                            <div class="task-title">{task.title}</div>
+                          <div class="flex flex-col items-start justify-center border-x border-gray-800 py-3 pr-2 pl-4">
+                            <div
+                              class={`mb-1 text-[1.1rem] font-semibold max-[576px]:text-base max-[576px]:leading-(--line-height) ${
+                                task.status === "completed"
+                                  ? "text-success opacity-80 line-through"
+                                  : task.status === "active"
+                                    ? "text-primary"
+                                    : "text-foreground"
+                              }`}
+                            >
+                              {task.title}
+                            </div>
                             {task.desc && (
-                              <div class="task-description">{task.desc}</div>
+                              <div
+                                class={`mt-[0.35rem] text-[0.8rem] leading-[1.4] text-foreground max-[576px]:text-[0.75rem] ${
+                                  task.status === "completed"
+                                    ? "opacity-70 line-through"
+                                    : "opacity-85"
+                                }`}
+                              >
+                                {task.desc}
+                              </div>
                             )}
                           </div>
-                          <div class="task-cell task-cell-priority">
+                          <div class="flex items-center justify-center px-2 py-3 max-[576px]:px-1 max-[576px]:py-2">
                             {task.priority === "high" && (
-                              <span class="badge badge-priority-high">
+                              <span
+                                class={`${BADGE_BASE} bg-danger font-semibold text-background`}
+                              >
                                 <span
-                                  class="badge-icon"
+                                  class={BADGE_ICON}
                                   set:html={renderIcon("md:fire")}
                                 />{" "}
                                 High
                               </span>
                             )}
                             {task.priority === "medium" && (
-                              <span class="badge badge-priority-medium">
+                              <span
+                                class={`${BADGE_BASE} bg-danger font-bold text-background`}
+                              >
                                 <span
-                                  class="badge-icon"
+                                  class={BADGE_ICON}
                                   set:html={renderIcon("md:thermometer")}
                                 />{" "}
                                 Medium
                               </span>
                             )}
                             {task.priority === "low" && (
-                              <span class="badge badge-priority-low">
+                              <span
+                                class={`${BADGE_BASE} bg-success font-semibold text-gray-300`}
+                              >
                                 <span
-                                  class="badge-icon"
+                                  class={BADGE_ICON}
                                   set:html={renderIcon("md:snowflake")}
                                 />{" "}
                                 Low
@@ -265,12 +357,12 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
                     </div>
                   </div>
                   <div
-                    class="task-empty-state"
+                    class="flex flex-col items-center justify-center px-4 py-12 text-center text-foreground max-[768px]:py-8"
                     data-task-empty
                     style="display: none"
                   >
                     <span
-                      class="task-empty-icon"
+                      class="mb-4 text-[3rem] opacity-30"
                       set:html={renderIcon("md:format-list-checks")}
                     />
                     <p>No tasks in this category</p>
@@ -301,220 +393,43 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
         This Page is completely Vibe coded. No code except small tweaks is written by me.
   */
 
-  /* Tasks page container */
-  .tasks-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 1rem;
-    margin-bottom: 2rem;
-    min-height: calc(100vh - 60px);
-    justify-content: center;
-  }
-
-  .tasks-content {
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  /* Header section with title and description */
-  .tasks-header {
-    text-align: center;
-    margin-top: 1.5rem;
-  }
-
-  .tasks-heading {
-    margin-bottom: 0.1rem;
-    color: var(--porto-primary);
-  }
-
-  /* Tasks disabled notice */
-  .tasks-disabled-notice {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .disabled-icon {
-    font-size: 4rem;
-    color: var(--porto-text-muted);
-    opacity: 1.6;
-  }
-
-  .disabled-title {
-    font-size: 2rem;
-    color: var(--porto-text);
-    margin-bottom: 0.75rem;
-  }
-
-  .disabled-message {
-    font-size: 1.1rem;
-    color: var(--porto-text-muted);
-    max-width: 400px;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-  }
-
-  .disabled-help {
-    font-size: 1.1rem;
-    color: var(--porto-text-muted);
-    max-width: 500px;
-    line-height: 1.5;
-  }
-
-  .disabled-help code {
-    background-color: var(--porto-gray-500);
-    padding: 2px 4px;
-    border-radius: 3px;
-    color: var(--porto-primary);
-  }
-
-  /* Tasks intro and footer sections */
-  .tasks-intro,
-  .tasks-footer {
-    padding: 1rem;
-    margin: 1.5rem 0;
-    border-radius: 0.4rem;
-    background-color: var(--porto-surface-0);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-  }
-
-  .tasks-intro {
-    border-left: 4px solid var(--porto-info);
-  }
-
-  .tasks-footer {
-    border-left: 4px solid var(--porto-warning);
-  }
-
-  .tasks-icon {
-    margin-right: 0.75rem;
-    font-size: 1.25rem;
-  }
-
-  /* Tasks text elements */
-  .tasks-description {
-    color: var(--porto-primary);
-    margin: 0.25rem 0 1.5rem;
-    font-size: 1.1rem;
-  }
-
-  .tasks-note {
-    font-style: italic;
-    color: var(--porto-warning);
-    margin: 1.5rem 0;
-    padding: 0.5rem 0;
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-
-  /* Add centered text class */
-  .centered-text {
-    text-align: center;
-  }
-
-  /* Tab System - Improved Styling */
-  .task-tabs-container {
-    margin-bottom: 2.5rem;
-    border-radius: 0.4rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-  }
-
-  .task-tabs {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    background-color: var(--porto-surface-0);
-    border-bottom: 1px solid var(--porto-gray-700);
-  }
-
-  .task-tab {
-    padding: 1rem;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    color: var(--porto-text);
-    border-bottom: 3px solid transparent;
-    margin: 0;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    font-size: 1rem;
-    position: relative;
-    height: 100%;
-  }
-
-  .task-tab:focus {
-    outline: none;
-  }
-
-  .task-tab:hover {
-    background-color: rgba(var(--porto-surface-2-rgb), 0.5);
-    color: var(--porto-primary);
-  }
+  /* What remains as plain CSS, and why:
+   * - `.task-tab-active` (+ `:hover`, + the count descendant): toggled by
+   *   `scripts/tasks-filter.ts` via `classList`, so it must stay a real
+   *   class. The `:hover` rule exists because unlayered component styles
+   *   beat Tailwind's layered utilities: without it the active tab would
+   *   keep its gray background on hover, where the old CSS let `:hover`
+   *   win on specificity.
+   * - `.task-tab-content` animation + the local `fadeIn` keyframes: the
+   *   local keyframes (opacity 0.7, translateY 5px) differ from the
+   *   global `fadeIn` in animations.css, and Astro scopes keyframe names
+   *   to this style block, so the animation must be declared here.
+   * - `.spin` + `spin` keyframes: keyframes don't fit utilities.
+   * Everything else moved to Tailwind utilities on the markup,
+   * including the dead rules (`.task-card*`, `.task-table-container`,
+   * `.tasks-intro`, `.tasks-footer`, `.disabled-message`, `.tasks-note`,
+   * `.centered-text`, `.task-section`, `.task-completed`), which had no
+   * matching markup and were dropped. `.badge-icon svg` was dropped too:
+   * `renderIcon` already emits 1em x 1em SVGs. */
 
   .task-tab-active {
-    border-bottom: 3px solid var(--porto-primary);
+    border-bottom: 3px solid var(--color-primary);
     font-weight: 600;
-    color: var(--porto-primary);
-    background-color: var(--porto-gray-300);
+    color: var(--color-primary);
+    background-color: var(--color-gray-300);
   }
 
-  .task-tab-icon {
-    font-size: 1.25rem;
-    margin-right: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .task-tab-label {
-    margin-right: 0.5rem;
-    white-space: nowrap;
-  }
-
-  /* Update task count badges to be smaller */
-  .task-tab-count {
-    background-color: var(--porto-gray-800);
-    color: var(--porto-gray-300);
-    border-radius: 50%;
-    padding: 0;
-    font-size: 0.65rem;
-    min-width: 1.1rem;
-    min-height: 1.1rem;
-    width: 1.1rem;
-    height: 1.1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-weight: 600;
-    line-height: 1;
-    margin-left: 0.2rem;
+  .task-tab-active:hover {
+    background-color: var(--color-hover-overlay);
   }
 
   .task-tab-active .task-tab-count {
-    background-color: var(--porto-primary);
-    color: var(--porto-bg);
+    background-color: var(--color-primary);
+    color: var(--color-background);
   }
 
   .task-tab-content {
-    padding: 0;
-    background-color: transparent;
     animation: fadeIn 0.3s ease;
-    min-height: 300px;
   }
 
   @keyframes fadeIn {
@@ -528,244 +443,6 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
     }
   }
 
-  /* Media queries for responsive tabs */
-  @media (max-width: 768px) {
-    .task-tabs {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .task-tab {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    .task-tab-icon {
-      font-size: 1rem;
-      margin-right: 0.3rem;
-    }
-
-    .task-tab-count {
-      min-width: 1rem;
-      min-height: 1rem;
-      width: 1rem;
-      height: 1rem;
-      font-size: 0.6rem;
-    }
-
-    .task-tab-content {
-      padding: 1rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .task-tabs {
-      grid-template-columns: repeat(1, 1fr);
-    }
-
-    .task-tab {
-      flex-direction: row;
-      justify-content: flex-start;
-      text-align: left;
-      padding: 0.75rem 1rem;
-    }
-
-    .task-tab-icon {
-      margin-right: 0.5rem;
-      margin-bottom: 0;
-    }
-
-    .task-tab-label {
-      margin-right: 0.5rem;
-      margin-bottom: 0;
-      flex: 1;
-    }
-  }
-
-  /* Stats section */
-  .stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-box {
-    background-color: var(--porto-surface-0);
-    border-radius: 0.4rem;
-    padding: 1.25rem 1rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    text-align: center;
-    transition: transform 0.2s ease;
-  }
-
-  .stat-box:hover {
-    transform: translateY(-2px);
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    color: var(--porto-primary);
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-value {
-    font-size: 2.25rem;
-    font-weight: bold;
-    color: var(--porto-text);
-    line-height: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .stat-value-completed {
-    color: var(--porto-success);
-  }
-
-  .stat-value-active {
-    color: var(--porto-primary);
-  }
-
-  .stat-value-pending {
-    color: var(--porto-warning);
-  }
-
-  .progress-bar-container {
-    width: 100%;
-    background-color: var(--porto-gray-800);
-    border-radius: 0.25rem;
-    height: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .progress-bar {
-    height: 100%;
-    border-radius: 0.25rem;
-    background-color: var(--porto-primary);
-  }
-
-  /* Task tables */
-  .task-section {
-    margin-bottom: 2rem;
-  }
-
-  .task-table-container {
-    overflow-x: auto;
-    margin-bottom: 1rem;
-  }
-
-  .task-table-container table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .task-table-container th {
-    text-align: left;
-    padding: 0.75rem;
-    border-bottom: 2px solid var(--porto-gray-700);
-    white-space: nowrap;
-  }
-
-  .task-table-container td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--porto-gray-800);
-  }
-
-  .task-table-container tr:last-child td {
-    border-bottom: none;
-  }
-
-  .task-table-container tr:nth-child(even) {
-    background-color: var(--porto-gray-900);
-  }
-
-  /* Responsive table adjustments */
-  @media (max-width: 768px) {
-    .task-table-container th,
-    .task-table-container td {
-      padding: 0.5rem;
-    }
-
-    .task-table-container table {
-      font-size: 0.9rem;
-    }
-  }
-
-  /* Task tables */
-  .task-completed {
-    text-decoration: line-through;
-    opacity: 0.7;
-  }
-
-  .task-description {
-    font-size: 0.8rem;
-    opacity: 0.8;
-  }
-
-  /* Badges */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.8rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: 1rem;
-    text-transform: capitalize;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    line-height: 1.2;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-
-  .badge-status-completed {
-    background-color: var(--porto-success);
-    color: var(--porto-gray-300);
-  }
-
-  .badge-status-active {
-    background-color: var(--porto-primary-darker);
-    color: var(--porto-gray-300);
-  }
-
-  .badge-status-pending {
-    background-color: var(--porto-gray-800);
-    color: var(--porto-bg);
-  }
-
-  /* Priority badges - improved contrast */
-  .badge-priority-high {
-    background-color: var(--porto-danger);
-    color: var(--porto-bg);
-  }
-
-  .badge-priority-medium {
-    background-color: var(--porto-danger);
-    color: var(--porto-bg);
-    font-weight: 700;
-  }
-
-  .badge-priority-low {
-    background-color: var(--porto-success);
-    color: var(--porto-gray-300);
-  }
-
-  /* Icon styling */
-  .badge-icon {
-    margin-right: 0.4rem;
-    font-size: 0.85rem;
-    vertical-align: -0.125em;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .badge-icon svg {
-    width: 1em;
-    height: 1em;
-  }
-
   .spin {
     animation: spin 2s linear infinite;
   }
@@ -776,360 +453,6 @@ const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
     }
     to {
       transform: rotate(360deg);
-    }
-  }
-
-  /* Task List Cards */
-  .task-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-  }
-
-  .task-card {
-    background-color: var(--porto-surface-0);
-    border-radius: 0.4rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-    transition: all 0.2s ease;
-    border-left: 4px solid var(--porto-primary);
-  }
-
-  .task-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
-  }
-
-  .task-card-completed {
-    opacity: 0.8;
-    border-left-color: var(--porto-success);
-  }
-
-  .task-card-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    background-color: var(--porto-surface-0);
-    border-bottom: 1px solid var(--porto-gray-800);
-  }
-
-  .task-card-content {
-    padding: 1rem;
-  }
-
-  .task-card-title {
-    font-size: 1rem;
-    margin: 0 0 0.5rem 0;
-    color: var(--porto-text);
-  }
-
-  .task-card-completed .task-card-title {
-    text-decoration: line-through;
-  }
-
-  .task-card-description {
-    font-size: 0.875rem;
-    margin: 0;
-    color: var(--porto-gray-300);
-  }
-
-  .task-card-completed .task-card-description {
-    opacity: 0.7;
-  }
-
-  .task-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-    text-align: center;
-    color: var(--porto-text);
-  }
-
-  .task-empty-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.3;
-  }
-
-  /* Make badges more compact for the header */
-  .task-card-header .badge {
-    padding: 0.15rem 0.5rem;
-    font-size: 0.7rem;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .task-list {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Task List - Table Style with unified appearance */
-  .task-list-table {
-    background-color: var(--porto-surface-0);
-    border-radius: 0.4rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-    width: 100%;
-    margin-top: -1px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-
-  /* Redesigned task list header - matching width with rows, darker background */
-  .task-list-header {
-    display: grid;
-    grid-template-columns: 120px 1fr 120px;
-    background-color: var(--porto-gray-300);
-    border-bottom: 2px solid var(--porto-primary);
-    font-weight: 700;
-    color: var(--porto-primary);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-    position: relative;
-    z-index: 1;
-  }
-
-  /* More consistent header cells */
-  .task-list-header .task-cell {
-    padding: 0.75rem 0.5rem;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .task-list-header .task-cell-status {
-    color: var(--porto-primary);
-    border-right: 1px solid var(--porto-gray-800);
-  }
-
-  .task-list-header .task-cell-title {
-    text-align: left;
-    justify-content: flex-start;
-    padding-left: 1rem;
-  }
-
-  .task-list-header .task-cell-priority {
-    color: var(--porto-primary);
-    border-left: 1px solid var(--porto-gray-800);
-  }
-
-  /* More consistent header cells */
-  .task-list-header .task-cell {
-    padding: 0.75rem 0.5rem;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .task-list-header .task-cell-status {
-    color: var(--porto-primary);
-    border-right: 1px solid var(--porto-gray-800);
-  }
-
-  .task-list-header .task-cell-title {
-    text-align: left;
-    justify-content: flex-start;
-    padding-left: 1rem;
-  }
-
-  .task-list-header .task-cell-priority {
-    color: var(--porto-primary);
-    border-left: 1px solid var(--porto-gray-800);
-  }
-
-  /* Consistent row styling */
-  .task-row {
-    display: grid;
-    grid-template-columns: 120px 1fr 120px;
-    border-bottom: 1px solid var(--porto-gray-800);
-    transition: all 0.15s ease;
-    background-color: var(--porto-surface-0);
-  }
-
-  .task-row-striped {
-    background-color: var(--porto-surface-1);
-  }
-
-  .task-row:last-child {
-    border-bottom: none;
-  }
-
-  .task-row:hover {
-    background-color: rgba(var(--porto-surface-2-rgb), 0.5);
-  }
-
-  /* Title styling based on task status */
-  /* NOTE: the old file used an Infima emphasis variable here, which mapped
-     to near-white in light mode / near-black in dark mode — invisible text
-     on the row in both modes. Fixed to the base text color. */
-  .task-row .task-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--porto-text);
-    font-size: 1.1rem;
-  }
-
-  .task-row:has(.badge-status-active) .task-title {
-    color: var(--porto-primary);
-  }
-
-  .task-row-completed .task-title {
-    text-decoration: line-through;
-    color: var(--porto-success);
-    opacity: 0.8;
-  }
-
-  .task-row:has(.badge-status-pending) .task-title {
-    color: var(--porto-text);
-  }
-
-  /* Description styling with improved visibility */
-  .task-description {
-    font-size: 0.8rem;
-    color: var(--porto-text);
-    margin-top: 0.35rem;
-    line-height: 1.4;
-    opacity: 0.85;
-  }
-
-  .task-row-completed .task-description {
-    text-decoration: line-through;
-    opacity: 0.7;
-  }
-
-  /* Consistent cell styling */
-  .task-cell {
-    padding: 0.75rem 0.5rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .task-cell-title {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    padding-left: 1rem;
-    padding-right: 0.5rem;
-    border-left: 1px solid var(--porto-gray-800);
-    border-right: 1px solid var(--porto-gray-800);
-  }
-
-  .task-cell-status,
-  .task-cell-priority {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Media queries for responsive layout */
-  @media (max-width: 768px) {
-    .task-tabs {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .task-tab {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    .task-tab-icon {
-      font-size: 1rem;
-      margin-right: 0.3rem;
-    }
-
-    .task-tab-count {
-      min-width: 1rem;
-      min-height: 1rem;
-      width: 1rem;
-      height: 1rem;
-      font-size: 0.6rem;
-    }
-
-    .task-tab-content {
-      padding: 1rem;
-    }
-
-    .task-list-header {
-      grid-template-columns: 100px 1fr 100px;
-    }
-
-    .task-row {
-      grid-template-columns: 100px 1fr 100px;
-    }
-
-    .task-empty-state {
-      padding: 2rem 1rem;
-    }
-
-    .tasks-container {
-      padding: 0 0.5rem;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .task-list-header {
-      grid-template-columns: 80px 1fr 80px;
-      font-size: 0.7rem;
-    }
-
-    .task-row {
-      grid-template-columns: 80px 1fr 80px;
-    }
-
-    .task-cell-status,
-    .task-cell-priority {
-      padding: 0.5rem 0.25rem;
-    }
-
-    .badge {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.7rem;
-    }
-
-    .badge-icon {
-      margin-right: 0.2rem;
-      font-size: 0.7rem;
-    }
-
-    .task-title {
-      font-size: 1rem;
-    }
-
-    .task-description {
-      font-size: 0.75rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .task-tabs {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .task-tab {
-      padding: 0.5rem;
-      font-size: 0.8rem;
-    }
-
-    .task-tab-icon {
-      margin-right: 0.3rem;
-    }
-
-    .task-tab-label {
-      margin-right: 0.3rem;
-    }
-
-    .task-tab-count {
-      font-size: 0.55rem;
-    }
-
-    .stats-container {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
     }
   }
 </style>

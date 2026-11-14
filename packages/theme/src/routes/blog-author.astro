@@ -56,33 +56,39 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="porto-blog-list">
-    <header>
-      <h1>{name}</h1>
-      {author.data.title && (
-        <p class="porto-blog-author__title">{author.data.title}</p>
-      )}
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-10 p-4">
+    <header class="mb-[-1rem]">
+      <h1 class="mb-1">{name}</h1>
+      {author.data.title && <p class="m-0 text-muted">{author.data.title}</p>}
       {author.data.url && (
-        <p class="porto-blog-author__url">
-          <a href={author.data.url} target="_blank" rel="noopener noreferrer">
+        <p class="mt-1">
+          <a
+            class="text-primary no-underline hover:underline"
+            href={author.data.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {author.data.url}
           </a>
         </p>
       )}
     </header>
     {posts.length === 0 ? (
-      <p class="porto-blog-author__empty">No posts by this author yet.</p>
+      <p class="text-muted">No posts by this author yet.</p>
     ) : (
       posts.map((post) => {
         const date = postDate(post);
         return (
-          <article class="porto-blog-item">
-            <h2>
-              <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+          <article>
+            <h2 class="mb-2 text-[1.8rem]">
+              <a
+                class="text-foreground no-underline hover:text-primary"
+                href={`/${blogRoute}/${blogSlug(post)}/`}
+              >
                 {post.data.title ?? post.id}
               </a>
             </h2>
-            <div class="porto-blog-meta">
+            <div class="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.9rem] text-muted">
               {date && (
                 <time datetime={date.toISOString()}>
                   {formatPostDate(date)}
@@ -90,7 +96,7 @@ function formatPostDate(date) {
               )}
             </div>
             {post.data.description && (
-              <p class="porto-blog-desc">{post.data.description}</p>
+              <p class="mb-2 text-muted">{post.data.description}</p>
             )}
           </article>
         );
@@ -98,73 +104,3 @@ function formatPostDate(date) {
     )}
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-list {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .porto-blog-list header {
-    margin-bottom: -1rem;
-  }
-
-  .porto-blog-list header h1 {
-    margin-bottom: 0.25rem;
-  }
-
-  .porto-blog-author__title {
-    color: var(--porto-text-muted);
-    margin: 0;
-  }
-
-  .porto-blog-author__url {
-    margin: 0.25rem 0 0;
-  }
-
-  .porto-blog-author__url a {
-    color: var(--porto-primary);
-    text-decoration: none;
-  }
-
-  .porto-blog-author__url a:hover {
-    text-decoration: underline;
-  }
-
-  .porto-blog-author__empty {
-    color: var(--porto-text-muted);
-  }
-
-  .porto-blog-item h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.8rem;
-  }
-
-  .porto-blog-item h2 a {
-    color: var(--porto-text);
-    text-decoration: none;
-  }
-
-  .porto-blog-item h2 a:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    color: var(--porto-text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .porto-blog-desc {
-    color: var(--porto-text-muted);
-    margin: 0 0 0.5rem;
-  }
-</style>

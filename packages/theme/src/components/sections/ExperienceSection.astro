@@ -19,22 +19,34 @@ const experience = config.homePage?.experienceSection || {};
 {experience.enable !== false && (
   <div
     id={id}
-    class={`experienceSection ${className || ""}`}
+    class={`flex min-h-[calc(100vh-45px)] w-full scroll-mt-[38px] items-center justify-center bg-background pt-[0.02rem] pb-[4.5rem] max-[768px]:scroll-mt-[70px] max-[768px]:pt-2 max-[768px]:pb-16 max-[480px]:scroll-mt-[32px] max-[480px]:pt-0 max-[480px]:pb-12 ${className || ""}`}
     role="region"
     aria-label="Experience section"
   >
-    <div class="experienceContainer">
+    <div class="relative z-1 mx-auto w-full max-w-[1300px] max-[768px]:px-6 max-[480px]:px-4">
       {/* Heading */}
-      <div class="experienceHeader">
-        <h2 class="experienceTitle">{experience.heading}</h2>
-        <p class="experienceSubtitle">{experience.subheading}</p>
+      <div class="-mt-56 mb-8 text-center max-[768px]:-mt-10 max-[768px]:mb-6 max-[480px]:-mt-8 max-[480px]:mb-[1.2rem]">
+        <h2 class="experienceTitle relative mb-[0.3rem] inline-block text-[2.5rem] font-semibold text-primary max-[768px]:text-[2.2rem] max-[480px]:text-[1.9rem]">
+          {experience.heading}
+        </h2>
+        <p class="experienceSubtitle mx-auto max-w-[600px] text-[0.95rem] text-muted max-[768px]:text-[0.9rem] max-[480px]:max-w-[90%] max-[480px]:text-[0.9rem]">
+          {experience.subheading}
+        </p>
       </div>
 
       {/* Placeholder */}
-      <div class="noticeWrapper">
-        <div class="noticeBox" role="status" aria-live="polite">
-          <p class="noticeText">Coming Soon!</p>
-          <p class="noticeDesc">This section is under construction.</p>
+      <div class="mt-36 flex items-center justify-center">
+        <div
+          class="noticeBox w-full max-w-[600px] rounded-card border border-gray-700 bg-surface-1 p-8 text-center transition-[translate,background-color] duration-300 ease-[ease] hover:-translate-y-[3px] hover:bg-surface"
+          role="status"
+          aria-live="polite"
+        >
+          <p class="mb-[0.8rem] text-[2rem] font-semibold text-primary-dark max-[768px]:text-[1.8rem] max-[480px]:text-[1.5rem]">
+            Coming Soon!
+          </p>
+          <p class="text-base leading-[1.4] text-muted max-[480px]:text-[0.9rem]">
+            This section is under construction.
+          </p>
         </div>
       </div>
     </div>
@@ -42,93 +54,10 @@ const experience = config.homePage?.experienceSection || {};
 )}
 
 <style>
-  .experienceSection {
-    scroll-margin-top: 38px;
-    min-height: calc(100vh - 45px);
-    margin-bottom: 0;
-    width: 100%;
-    padding: 0.02rem 0 4.5rem;
-    background-color: var(--porto-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .experienceContainer {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 0;
-    width: 100%;
-    position: relative;
-    z-index: 1;
-  }
-
-  .experienceHeader {
-    text-align: center;
-    margin-bottom: 2rem;
-    margin-top: -14rem;
-  }
-
-  .experienceTitle {
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: var(--porto-primary);
-    margin-bottom: 0.3rem;
-    animation: slideUp 0.5s ease-out forwards;
-    position: relative;
-    display: inline-block;
-  }
-
-  .experienceSubtitle {
-    font-size: 0.95rem;
-    color: var(--porto-text-muted);
-    max-width: 600px;
-    margin: 0rem auto 0;
-    animation: slideUp 0.5s ease-out 0.2s forwards;
-  }
-
-  /* Notice Box Styles */
-  .noticeWrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 9rem;
-  }
-
-  .noticeBox {
-    text-align: center;
-    padding: 2rem;
-    border-radius: 0.4rem;
-    background-color: var(--porto-surface-1);
-    border: 1px solid var(--porto-gray-700);
-    animation: fadeIn 0.5s ease-out 0.3s forwards;
-    opacity: 0;
-    transition:
-      transform 0.3s ease,
-      background-color 0.3s ease;
-    width: 100%;
-    max-width: 600px;
-  }
-
-  .noticeBox:hover {
-    transform: translateY(-3px);
-    background-color: var(--porto-surface-0);
-  }
-
-  .noticeText {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--porto-primary-dark);
-    margin-bottom: 0.8rem;
-  }
-
-  .noticeDesc {
-    font-size: 1rem;
-    color: var(--porto-text-muted);
-    line-height: 1.4;
-  }
-
-  /* Animations */
+  /* Load-in keyframes + animations. The local keyframes differ from
+     the global ones (20px rise here vs 30px for the global `slideUp`,
+     and this `fadeIn` has a rise while the global one is opacity-only),
+     so they stay local; everything else is Tailwind utilities. */
   @keyframes slideUp {
     from {
       opacity: 0;
@@ -151,66 +80,17 @@ const experience = config.homePage?.experienceSection || {};
     }
   }
 
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    .experienceSection {
-      scroll-margin-top: 70px;
-      padding: 0.5rem 0 4rem;
-    }
-
-    .experienceContainer {
-      padding: 0 1.5rem;
-    }
-
-    .experienceHeader {
-      margin-bottom: 1.5rem;
-      margin-top: -2.5rem;
-    }
-
-    .experienceTitle {
-      font-size: 2.2rem;
-    }
-
-    .experienceSubtitle {
-      font-size: 0.9rem;
-    }
-
-    .noticeText {
-      font-size: 1.8rem;
-    }
+  .experienceTitle {
+    animation: slideUp 0.5s ease-out forwards;
   }
 
-  @media (max-width: 480px) {
-    .experienceSection {
-      scroll-margin-top: 32px;
-      padding: 0rem 0 3rem;
-    }
+  .experienceSubtitle {
+    animation: slideUp 0.5s ease-out 0.2s forwards;
+  }
 
-    .experienceContainer {
-      padding: 0 1rem;
-    }
-
-    .experienceHeader {
-      margin-bottom: 1.2rem;
-      margin-top: -2rem;
-    }
-
-    .experienceTitle {
-      font-size: 1.9rem;
-    }
-
-    .experienceSubtitle {
-      font-size: 0.9rem;
-      max-width: 90%;
-    }
-
-    .noticeText {
-      font-size: 1.5rem;
-    }
-
-    .noticeDesc {
-      font-size: 0.9rem;
-    }
+  .noticeBox {
+    animation: fadeIn 0.5s ease-out 0.3s forwards;
+    opacity: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {

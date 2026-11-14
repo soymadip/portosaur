@@ -12,34 +12,18 @@ const footer = config.theme.footer;
 ---
 
 {footer.enable && (
-  <footer class="porto-footer">
-    <div class="porto-footer__copyright" set:html={footer.message} />
+  <footer class="border-t border-t-border bg-background-alt p-[0.1rem] text-center">
+    <div class="mt-0 pt-0 text-[0.8rem] text-muted" set:html={footer.message} />
   </footer>
 )}
 
 <style>
-  /* Thin strip, matching the old footer (`--ifm-footer-padding-vertical
-     / -horizontal: 0.1rem` in the old infima.css, and the global
-     overrides/footer.css): the scoped padding must say so explicitly,
-     or it beats the global override on specificity. */
-  .porto-footer {
-    padding: 0.1rem;
-    text-align: center;
-    border-top: 1px solid var(--porto-border);
-    background: var(--porto-bg-alt, var(--porto-bg));
-  }
-
-  .porto-footer__copyright {
-    font-size: 0.8rem;
-    color: var(--porto-text-muted);
-  }
-
   /* The "Built with Portosaur" link is primary-colored (golden renders
      it green). `:global(a)`: the link arrives via `set:html`, so it
      never carries this component's scope attribute — a plain scoped
      `a` selector compiles to `a[data-astro-cid-...]` and never
      matches. */
-  .porto-footer__copyright :global(a) {
-    color: var(--porto-primary);
+  footer :global(a) {
+    color: var(--color-primary);
   }
 </style>

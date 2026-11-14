@@ -8,7 +8,8 @@
 // there is no history), on block the tap-to-open fallback appears. The
 // old code has no URL validation and neither does the port. The React
 // `blocked` / `targetUrl` state becomes DOM updates (the heading text
-// swap + unhiding the fallback block).
+// swap + unhiding the fallback block). The empty-state layout is
+// Tailwind utilities (the old shared empty-state styles are inlined).
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../lib/content.ts";
@@ -18,20 +19,23 @@ const title = pageTitle("Opening in browser…", config.site.title);
 ---
 
 <BaseLayout title={title} description="Opening in browser…">
-  <div class="porto-empty-state">
-    <div class="porto-empty-state__icon">
+  <div class="flex min-h-[calc(100vh-var(--navbar-height)-100px)] flex-col items-center justify-center p-8 text-center">
+    <div class="text-[4.5rem] text-muted opacity-60">
       <span set:html={renderIcon("md:open-in-new", { size: "3rem" })} />
     </div>
-    <h2 class="porto-empty-state__title" id="redirect-title">
+    <h2
+      class="mt-[-0.8rem] mb-4 text-[2.2rem] text-foreground"
+      id="redirect-title"
+    >
       Opening in browser…
     </h2>
     <div id="redirect-blocked" hidden>
-      <p class="porto-empty-state__desc">
+      <p class="max-w-[500px] text-[1.1rem] text-muted">
         This link lives outside the portfolio app. Tap the button below to open
         it in your browser.
       </p>
       <a
-        class="porto-empty-state__btn"
+        class="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-primary px-[1.4rem] py-[0.6rem] text-base leading-(--line-height) font-semibold text-[#09090b] no-underline transition-[background-color_0.2s_ease,transform_0.2s_ease] hover:-translate-y-0.5 hover:bg-primary-light hover:shadow-md"
         id="redirect-link"
         target="_blank"
         rel="noopener noreferrer"
@@ -79,32 +83,3 @@ const title = pageTitle("Opening in browser…", config.site.title);
     }
   </script>
 </BaseLayout>
-
-<style>
-  /* Primary-button treatment (same as the docs-home action buttons);
-     the shared empty-state styles carry no button. */
-  .porto-empty-state__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    padding: 0.6rem 1.4rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 999px;
-    background-color: var(--porto-primary);
-    color: #09090b;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      transform 0.2s ease;
-  }
-
-  .porto-empty-state__btn:hover {
-    background-color: var(--porto-primary-light);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
-  }
-</style>

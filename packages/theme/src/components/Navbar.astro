@@ -177,21 +177,42 @@ if (showProjectLink) {
 const moreDropdown: NavDropdown = {
   label: "More",
   items: moreItems,
-  className: "porto-navbar__more",
+  // Divider between the nav links and the "More" dropdown.
+  className: "-ml-[7px] border-l-[1.5px] border-l-border pl-2",
 };
 
 const hideOnScroll = theme.hideNavbarOnScroll;
+
+// Shared Tailwind class sets — the link styles repeat across the
+// desktop navs, the dropdown menus, and the mobile menu. The color is
+// a per-link ternary (never a base color plus an overriding active
+// color) so the two never fight in the generated stylesheet.
+const navLink =
+  "cursor-pointer list-none rounded-md px-3 py-2 text-[0.95rem] no-underline hover:text-primary";
+const navSummary =
+  "cursor-pointer list-none rounded-md px-3 py-2 text-[0.95rem] text-foreground no-underline hover:text-primary after:ml-1 after:text-[0.75em] after:content-['▾'] [&::-webkit-details-marker]:hidden";
+const navLinkColor = (active: boolean | undefined) =>
+  active ? "font-semibold text-primary" : "text-foreground";
+const dropdownMenu =
+  "absolute top-[calc(100%+0.5rem)] right-0 z-[101] m-0 min-w-48 list-none rounded-lg border border-border bg-background py-2 shadow-[0_8px_24px_0_rgb(0_0_0/0.15)]";
+const dropdownLink =
+  "block px-4 py-2 text-[0.95rem] no-underline hover:bg-surface hover:text-primary";
 ---
 
 <header
-  class:list={["porto-navbar", { "porto-navbar--home": isHome }]}
+  class:list={[
+    "sticky top-0 z-100 h-(--navbar-height) bg-background transition-transform duration-200 ease-[ease]",
+    isHome
+      ? "border-b-0 shadow-none"
+      : "border-b border-b-border shadow-(--navbar-shadow)",
+  ]}
   data-navbar
   data-hide-on-scroll={hideOnScroll || undefined}
 >
-  <div class="porto-navbar__inner">
+  <div class="flex min-h-[60px] items-center gap-4 px-4">
     <button
       type="button"
-      class="porto-navbar__hamburger"
+      class="hidden cursor-pointer rounded-md border-0 bg-transparent p-2 text-foreground [@media(max-width:996px)]:flex"
       data-navbar-toggle
       aria-expanded="false"
       aria-controls="porto-mobile-menu"
@@ -213,29 +234,37 @@ const hideOnScroll = theme.hideNavbarOnScroll;
       </svg>
     </button>
 
-    <a class="porto-navbar__brand" href={withBase("/")}>
+    <a
+      class:list={[
+        "flex items-center gap-2 font-bold whitespace-nowrap text-foreground no-underline",
+        // Home page (portfolio mode): brand hidden in landscape —
+        // ported from the old pages/index.jsx inline style.
+        { "landscape:hidden": isHome },
+      ]}
+      href={withBase("/")}
+    >
       <img
-        class="porto-navbar__logo"
+        class="size-8 object-contain"
         src={withBase("/favicon/favicon.ico")}
         alt={`${site.title} logo`}
       />
-      <span class="porto-navbar__title">{site.title}</span>
+      <span>{site.title}</span>
     </a>
 
     {leftEntries.length > 0 && (
-      <nav class="porto-navbar__links" aria-label="Primary">
+      <nav
+        class="flex items-center gap-1 [@media(max-width:996px)]:hidden"
+        aria-label="Primary"
+      >
         {leftEntries.map((entry) =>
           isDropdown(entry) ? (
-            <details class="porto-navbar__dropdown">
-              <summary class="porto-navbar__link">{entry.label}</summary>
-              <ul class="porto-navbar__dropdown-menu">
+            <details class="porto-navbar__dropdown relative">
+              <summary class={navSummary}>{entry.label}</summary>
+              <ul class={dropdownMenu}>
                 {entry.items.map((item) => (
                   <li>
                     <a
-                      class:list={[
-                        "porto-navbar__dropdown-link",
-                        { "porto-navbar__link--active": item.active },
-                      ]}
+                      class:list={[dropdownLink, navLinkColor(item.active)]}
                       href={item.href}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
@@ -248,10 +277,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
             </details>
           ) : (
             <a
-              class:list={[
-                "porto-navbar__link",
-                { "porto-navbar__link--active": entry.active },
-              ]}
+              class:list={[navLink, navLinkColor(entry.active)]}
               href={entry.href}
               target={entry.external ? "_blank" : undefined}
               rel={entry.external ? "noopener noreferrer" : undefined}
@@ -263,15 +289,16 @@ const hideOnScroll = theme.hideNavbarOnScroll;
       </nav>
     )}
 
-    <div class="porto-navbar__items porto-navbar__items--right">
+    <div class="ml-auto flex items-center gap-2">
       {showSearch && (
         <form
-          class="porto-search"
+          class="[@media(max-width:996px)]:hidden"
           action={withBase("/search")}
           method="get"
           role="search"
         >
           <input
+            class="w-[130px] rounded-[1.25rem] border border-border bg-surface py-1.5 pr-2 pl-8 text-[0.85rem] text-foreground"
             type="search"
             name="q"
             placeholder="Search"
@@ -282,7 +309,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
 
       {showSearch && (
         <a
-          class="porto-search-icon"
+          class="hidden items-center rounded-[1.25rem] border border-border bg-surface px-2 py-1.5 text-muted no-underline hover:text-foreground [@media(max-width:996px)]:flex"
           href={withBase("/search")}
           aria-label="Search"
           title="Search"
@@ -307,13 +334,13 @@ const hideOnScroll = theme.hideNavbarOnScroll;
       {theme.showThemeSwitch && (
         <button
           type="button"
-          class="porto-theme-toggle"
+          class="flex items-center rounded-full border-0 bg-transparent p-2 text-foreground hover:bg-surface [@media(max-width:996px)]:hidden"
           data-theme-toggle
           aria-label="Toggle dark mode"
           title="Toggle dark mode"
         >
           <svg
-            class="porto-theme-toggle__moon"
+            class="hidden dark:inline"
             width="20"
             height="20"
             viewBox="0 0 24 24"
@@ -327,7 +354,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
           </svg>
           <svg
-            class="porto-theme-toggle__sun"
+            class="inline dark:hidden"
             width="20"
             height="20"
             viewBox="0 0 24 24"
@@ -351,19 +378,19 @@ const hideOnScroll = theme.hideNavbarOnScroll;
         </button>
       )}
 
-      <nav class="porto-navbar__links" aria-label="Primary">
+      <nav
+        class="flex items-center gap-1 [@media(max-width:996px)]:hidden"
+        aria-label="Primary"
+      >
         {rightEntries.map((entry) =>
           isDropdown(entry) ? (
-            <details class="porto-navbar__dropdown">
-              <summary class="porto-navbar__link">{entry.label}</summary>
-              <ul class="porto-navbar__dropdown-menu">
+            <details class="porto-navbar__dropdown relative">
+              <summary class={navSummary}>{entry.label}</summary>
+              <ul class={dropdownMenu}>
                 {entry.items.map((item) => (
                   <li>
                     <a
-                      class:list={[
-                        "porto-navbar__dropdown-link",
-                        { "porto-navbar__link--active": item.active },
-                      ]}
+                      class:list={[dropdownLink, navLinkColor(item.active)]}
                       href={item.href}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
@@ -376,10 +403,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
             </details>
           ) : (
             <a
-              class:list={[
-                "porto-navbar__link",
-                { "porto-navbar__link--active": entry.active },
-              ]}
+              class:list={[navLink, navLinkColor(entry.active)]}
               href={entry.href}
               target={entry.external ? "_blank" : undefined}
               rel={entry.external ? "noopener noreferrer" : undefined}
@@ -389,17 +413,17 @@ const hideOnScroll = theme.hideNavbarOnScroll;
           ),
         )}
         <details
-          class:list={["porto-navbar__dropdown", moreDropdown.className]}
+          class:list={[
+            "porto-navbar__dropdown relative",
+            moreDropdown.className,
+          ]}
         >
-          <summary class="porto-navbar__link">{moreDropdown.label}</summary>
-          <ul class="porto-navbar__dropdown-menu">
+          <summary class={navSummary}>{moreDropdown.label}</summary>
+          <ul class={dropdownMenu}>
             {moreDropdown.items.map((item) => (
               <li>
                 <a
-                  class:list={[
-                    "porto-navbar__dropdown-link",
-                    { "porto-navbar__link--active": item.active },
-                  ]}
+                  class:list={[dropdownLink, navLinkColor(item.active)]}
                   href={item.href}
                   target={item.external ? "_blank" : undefined}
                   rel={item.external ? "noopener noreferrer" : undefined}
@@ -414,8 +438,13 @@ const hideOnScroll = theme.hideNavbarOnScroll;
     </div>
   </div>
 
+  {/*
+    The header has a fixed height, so the open menu overflows it and
+    overlays the page — like the old sidebar. It needs its own opaque
+    background or the page shows through between the items.
+  */}
   <div
-    class="porto-navbar__mobile"
+    class="border-t border-t-border bg-background px-4 pt-2 pb-4"
     id="porto-mobile-menu"
     data-mobile-menu
     hidden
@@ -423,16 +452,13 @@ const hideOnScroll = theme.hideNavbarOnScroll;
     <nav aria-label="Mobile">
       {[...leftEntries, ...rightEntries].map((entry) =>
         isDropdown(entry) ? (
-          <details class="porto-navbar__dropdown">
-            <summary class="porto-navbar__link">{entry.label}</summary>
-            <ul class="porto-navbar__dropdown-menu">
+          <details class="porto-navbar__dropdown relative block">
+            <summary class:list={[navSummary, "block"]}>{entry.label}</summary>
+            <ul class="static m-0 list-none border-0 bg-background py-0 pl-4 shadow-none">
               {entry.items.map((item) => (
                 <li>
                   <a
-                    class:list={[
-                      "porto-navbar__dropdown-link",
-                      { "porto-navbar__link--active": item.active },
-                    ]}
+                    class:list={[dropdownLink, navLinkColor(item.active)]}
                     href={item.href}
                     target={item.external ? "_blank" : undefined}
                     rel={item.external ? "noopener noreferrer" : undefined}
@@ -445,10 +471,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
           </details>
         ) : (
           <a
-            class:list={[
-              "porto-navbar__link",
-              { "porto-navbar__link--active": entry.active },
-            ]}
+            class:list={[navLink, "block", navLinkColor(entry.active)]}
             href={entry.href}
             target={entry.external ? "_blank" : undefined}
             rel={entry.external ? "noopener noreferrer" : undefined}
@@ -457,16 +480,15 @@ const hideOnScroll = theme.hideNavbarOnScroll;
           </a>
         ),
       )}
-      <details class="porto-navbar__dropdown">
-        <summary class="porto-navbar__link">{moreDropdown.label}</summary>
-        <ul class="porto-navbar__dropdown-menu">
+      <details class="porto-navbar__dropdown relative block">
+        <summary class:list={[navSummary, "block"]}>
+          {moreDropdown.label}
+        </summary>
+        <ul class="static m-0 list-none border-0 bg-background py-0 pl-4 shadow-none">
           {moreDropdown.items.map((item) => (
             <li>
               <a
-                class:list={[
-                  "porto-navbar__dropdown-link",
-                  { "porto-navbar__link--active": item.active },
-                ]}
+                class:list={[dropdownLink, navLinkColor(item.active)]}
                 href={item.href}
                 target={item.external ? "_blank" : undefined}
                 rel={item.external ? "noopener noreferrer" : undefined}
@@ -481,13 +503,13 @@ const hideOnScroll = theme.hideNavbarOnScroll;
     {theme.showThemeSwitch && (
       <button
         type="button"
-        class="porto-theme-toggle porto-navbar__mobile-theme"
+        class="mt-2 flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-3 py-2 text-[0.95rem] text-foreground hover:bg-surface hover:text-primary"
         data-theme-toggle
         aria-label="Toggle dark mode"
         title="Toggle dark mode"
       >
         <svg
-          class="porto-theme-toggle__moon"
+          class="hidden dark:inline"
           width="20"
           height="20"
           viewBox="0 0 24 24"
@@ -501,7 +523,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
         </svg>
         <svg
-          class="porto-theme-toggle__sun"
+          class="inline dark:hidden"
           width="20"
           height="20"
           viewBox="0 0 24 24"
@@ -527,7 +549,7 @@ const hideOnScroll = theme.hideNavbarOnScroll;
     )}
     {showProjectLink && (
       <a
-        class="porto-navbar__version porto-navbar__version--mobile"
+        class="mt-3 block border-t-[1.2px] border-t-background pt-3 text-center text-muted no-underline opacity-[0.64]"
         href={PORTO_HOMEPAGE}
         target="_blank"
         rel="noopener noreferrer"
@@ -623,286 +645,10 @@ const hideOnScroll = theme.hideNavbarOnScroll;
 </script>
 
 <style>
-  .porto-navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--porto-navbar-bg, var(--porto-bg));
-    border-bottom: 1px solid var(--porto-border);
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
-    transition: transform 0.2s ease;
-  }
-
+  /* Hide-on-scroll: the script toggles `.porto-navbar--hidden` on the
+     header via `classList` while scrolling down, so the rule stays
+     plain CSS (utilities can't express a JS-toggled class). */
   .porto-navbar--hidden {
     transform: translateY(-100%);
-  }
-
-  /* Home page (portfolio mode): no shadow and no border-bottom, brand
-     hidden in landscape — ported from the old pages/index.jsx inline
-     style (`--ifm-navbar-shadow: none`; the Docusaurus navbar has no
-     border, only a shadow, so removing the shadow removes the divider
-     entirely). */
-  .porto-navbar--home {
-    box-shadow: none;
-    border-bottom: none;
-  }
-
-  @media (orientation: landscape) {
-    .porto-navbar--home .porto-navbar__brand {
-      display: none;
-    }
-  }
-
-  .porto-navbar__inner {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    min-height: 60px;
-    padding: 0 1rem;
-  }
-
-  .porto-navbar__brand {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .porto-navbar__logo {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-  }
-
-  .porto-navbar__links {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .porto-navbar__link {
-    padding: 0.5rem 0.75rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    font-size: 0.95rem;
-    border-radius: 0.375rem;
-    list-style: none;
-    cursor: pointer;
-  }
-
-  .porto-navbar__link::-webkit-details-marker {
-    display: none;
-  }
-
-  .porto-navbar__link:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-navbar__link--active {
-    color: var(--porto-primary);
-    font-weight: 600;
-  }
-
-  .porto-navbar__items--right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-left: auto;
-  }
-
-  .porto-search input {
-    width: 130px;
-    font-size: 0.85rem;
-    padding: 0.375rem 0.5rem 0.375rem 2rem;
-    color: var(--porto-text);
-    background-color: var(--porto-surface-0);
-    border: 1px solid var(--porto-border);
-    border-radius: 1.25rem;
-  }
-
-  /* Mobile search: the full input collapses to a magnifier icon button
-     (same pill styling as the input, icon only) linking to /search.
-     Hidden on desktop; shown under the 996px query, and only rendered
-     at all when the page is in a search context (see `showSearch`). */
-  .porto-search-icon {
-    display: none;
-    align-items: center;
-    padding: 0.375rem 0.5rem;
-    color: var(--porto-text-muted);
-    background-color: var(--porto-surface-0);
-    border: 1px solid var(--porto-border);
-    border-radius: 1.25rem;
-    text-decoration: none;
-  }
-
-  .porto-search-icon:hover {
-    color: var(--porto-text);
-  }
-
-  .porto-theme-toggle {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem;
-    color: var(--porto-text);
-    background: none;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  .porto-theme-toggle:hover {
-    background: var(--porto-surface-0);
-  }
-
-  /* Show the icon of the CURRENT mode (Docusaurus behavior): moon in
-     dark mode, sun in light mode. */
-  .porto-theme-toggle__moon {
-    display: none;
-  }
-
-  .porto-theme-toggle__sun {
-    display: inline;
-  }
-
-  :global(html[data-theme="dark"]) .porto-theme-toggle__moon {
-    display: inline;
-  }
-
-  :global(html[data-theme="dark"]) .porto-theme-toggle__sun {
-    display: none;
-  }
-
-  .porto-navbar__dropdown {
-    position: relative;
-  }
-
-  .porto-navbar__dropdown > summary::after {
-    content: "▾";
-    margin-left: 0.25rem;
-    font-size: 0.75em;
-  }
-
-  .porto-navbar__more {
-    padding-left: 8px;
-    margin-left: -7px;
-    border-left: 1.5px solid var(--porto-border);
-  }
-
-  .porto-navbar__dropdown-menu {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    min-width: 12rem;
-    margin: 0;
-    padding: 0.5rem 0;
-    list-style: none;
-    background: var(--porto-bg);
-    border: 1px solid var(--porto-border);
-    border-radius: 0.5rem;
-    box-shadow: 0 8px 24px 0 rgb(0 0 0 / 0.15);
-    z-index: 101;
-  }
-
-  .porto-navbar__dropdown-link {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    font-size: 0.95rem;
-  }
-
-  .porto-navbar__dropdown-link:hover {
-    color: var(--porto-primary);
-    background: var(--porto-surface-0);
-  }
-
-  .porto-navbar__hamburger {
-    display: none;
-    padding: 0.5rem;
-    color: var(--porto-text);
-    background: none;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-  }
-
-  .porto-navbar__mobile {
-    border-top: 1px solid var(--porto-border);
-    padding: 0.5rem 1rem 1rem;
-    /* The header has a fixed height (the global overrides/navbar.css
-       sets `height: var(--porto-navbar-height)`), so the open menu
-       overflows it and overlays the page — like the old sidebar. It
-       needs its own opaque background or the page shows through
-       between the items. */
-    background: var(--porto-navbar-bg, var(--porto-bg));
-  }
-
-  .porto-navbar__mobile .porto-navbar__link,
-  .porto-navbar__mobile .porto-navbar__dropdown {
-    display: block;
-  }
-
-  .porto-navbar__mobile .porto-navbar__dropdown-menu {
-    position: static;
-    box-shadow: none;
-    border: none;
-    padding: 0 0 0 1rem;
-  }
-
-  .porto-navbar__version--mobile {
-    display: block;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--porto-border);
-    color: var(--porto-text-muted);
-    text-align: center;
-    text-decoration: none;
-    opacity: 0.64;
-  }
-
-  /* Theme toggle inside the mobile menu (Docusaurus puts it in the
-     menu, not the mobile bar). Same `data-theme-toggle` attribute as
-     the bar toggle, so `theme-mode.ts` — which binds every matching
-     button — picks it up with no script change. The moon/sun icon
-     rules above apply here too. */
-  .porto-navbar__mobile-theme {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 0.95rem;
-  }
-
-  .porto-navbar__mobile-theme:hover {
-    color: var(--porto-primary);
-  }
-
-  @media (max-width: 996px) {
-    .porto-navbar__links {
-      display: none;
-    }
-
-    .porto-navbar__hamburger {
-      display: flex;
-    }
-
-    /* Mobile bar: the search input collapses to the icon button, and
-       the theme toggle moves into the slide-down menu. */
-    .porto-search {
-      display: none;
-    }
-
-    .porto-search-icon {
-      display: flex;
-    }
-
-    .porto-navbar__items--right .porto-theme-toggle {
-      display: none;
-    }
   }
 </style>

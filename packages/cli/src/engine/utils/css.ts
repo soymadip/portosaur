@@ -14,10 +14,10 @@ export function getDefaultColorScheme(userConfig: any): string {
  *
  * The theme's own files are bundled via BaseLayout's `src/css/custom.css`
  * import — they are listed here so the asset generator can read the
- * `--porto-*` tokens out of the active scheme file (theme-color,
+ * `--color-*` tokens out of the active scheme file (theme-color,
  * manifest colors) and so the layout can link the user's custom files.
  * There is no `infima.css` anymore: `--ifm-*` is gone, the scheme files
- * define `--porto-*` directly.
+ * define `--color-*` directly.
  *
  * @param {string} projectDir - The user's project directory.
  * @param {Object} userConfig - The parsed Portosaur user config.

@@ -126,7 +126,12 @@ const swUrl = withBase("sw.js");
 ---
 
 <!doctype html>
-<html lang="en" data-scheme={theme.colorScheme} data-theme={theme.defaultMode}>
+<html
+  lang="en"
+  class="h-full"
+  data-scheme={theme.colorScheme}
+  data-theme={theme.defaultMode}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -171,17 +176,20 @@ const swUrl = withBase("sw.js");
       })();
     </script>
   </head>
-  <body>
-    <a class="porto-skip-link" href="#main-content">
+  <body class="flex h-full min-h-screen flex-col">
+    <a
+      class="absolute -left-[9999px] top-0 z-200 bg-background px-4 py-2 text-foreground focus:left-2 focus:top-2"
+      href="#main-content"
+    >
       Skip to main content
     </a>
 
     <Navbar isHome={isPortfolioHome} />
 
-    <div class="porto-content-row">
+    <div class="flex flex-[1_0_auto] flex-row">
       <main
         id="main-content"
-        class:list={["porto-main-wrapper", wrapperClassName]}
+        class:list={["flex min-w-0 flex-auto flex-col", wrapperClassName]}
       >
         <slot />
       </main>
@@ -226,46 +234,5 @@ const swUrl = withBase("sw.js");
     {pwaEnabled && pwaNotifications && <script>
       import "../clientModules/periodicSync.ts";
     </script>}
-
-    <style is:global>
-      html,
-      body {
-        height: 100%;
-      }
-
-      body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-
-      .porto-content-row {
-        display: flex;
-        flex-direction: row;
-        flex: 1 0 auto;
-      }
-
-      .porto-main-wrapper {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-      }
-
-      .porto-skip-link {
-        position: absolute;
-        left: -9999px;
-        top: 0;
-        z-index: 200;
-        padding: 0.5rem 1rem;
-        color: var(--porto-text);
-        background: var(--porto-bg);
-      }
-
-      .porto-skip-link:focus {
-        left: 0.5rem;
-        top: 0.5rem;
-      }
-    </style>
   </body>
 </html>

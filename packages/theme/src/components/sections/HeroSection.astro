@@ -38,31 +38,61 @@ const profileFallback =
 
 <div
   id={id}
-  class={`hero ${className || ""}`}
+  class={`relative flex min-h-[calc(100vh-60px)] items-center justify-center py-8 font-body animate-[fadeIn_0.8s_ease-in-out] max-[768px]:min-h-screen max-[768px]:pt-4 max-[768px]:pb-12 max-[480px]:pt-2 max-[480px]:pb-8 motion-reduce:animate-none! motion-reduce:transition-none! ${className || ""}`}
   role="region"
   aria-label="Hero section"
 >
-  <div class="container">
+  {/*
+    `h-auto` on the container restores the old geometry: in the old block
+    layout the container's percentage height resolved to auto (the hero's
+    height is indefinite), so the container hugged its content and the
+    hero centered it. In this Astro layout the hero is a flex item, so
+    Chrome resolves the percentage to the full hero height — and with
+    `flex: 1` on both sections they each stretch to half of it, pushing
+    the image up behind the navbar.
+  */}
+  <div class="mx-auto mb-8 flex w-[90%] max-w-[1300px] flex-row items-center px-8 max-[768px]:h-auto max-[768px]:max-w-[500px] max-[768px]:flex-col-reverse max-[768px]:p-0 max-[768px]:text-center">
     {/* Left: text content */}
-    <div class="leftSection">
-      <p class="intro">{intro}</p>
+    {/*
+      `flex: 1` shares width in the desktop row; in the mobile column it
+      would share height and stretch the section, so it becomes
+      `flex-none` there (same for the right section).
+    */}
+    <div class="flex-1 pl-4 pr-12 text-left animate-[slideInLeft_0.8s_ease-out_0.2s_both] max-[768px]:mt-4 max-[768px]:flex max-[768px]:w-full max-[768px]:flex-none max-[768px]:flex-col max-[768px]:items-center max-[768px]:px-0 max-[768px]:animate-[fadeIn_0.8s_ease-out_0.3s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+      <p class="mb-[0.2rem] text-[1.1rem] font-medium text-muted animate-[slideUp_0.8s_ease-out_0.4s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.4s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        {intro}
+      </p>
 
-      <h1 class="title">
+      <h1 class="relative my-[0.2rem] inline-block text-[4.5rem] font-semibold leading-[1.2] text-primary transition-all duration-300 ease-[ease] after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:bg-primary after:transition-[width] after:duration-300 after:ease-[ease] hover:transform-[translateY(-2px)] hover:after:w-full animate-[slideUp_0.8s_ease-out_0.6s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.5s_both] max-[768px]:text-[3rem] max-[480px]:animate-[slideUp_0.5s_ease-out_0.3s_both] max-[480px]:text-[2.3rem] motion-reduce:animate-none! motion-reduce:transition-none!">
         {title}
-        <span class="titleComma">,</span>
+        <span class="ml-[0.1rem] mr-2 text-[1.1rem] font-medium text-muted animate-[slideUp_0.8s_ease-out_0.6s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.5s_both] max-[768px]:text-[0.9rem] max-[480px]:animate-[slideUp_0.5s_ease-out_0.3s_both] max-[480px]:text-[0.8rem] motion-reduce:animate-none! motion-reduce:transition-none!">
+          ,
+        </span>
       </h1>
 
-      <div class="subtitleWrapper">
-        <span class="subtitle">{subtitle}</span>
-        <h2 class="profession">{profession}</h2>
-        <span class="subtitle">.</span>
+      <div class="flex flex-wrap items-baseline animate-[slideUp_0.8s_ease-out_0.8s_both] max-[768px]:my-[0.2rem] max-[768px]:justify-center max-[768px]:animate-[slideUp_0.6s_ease-out_0.6s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        <span class="mr-2 text-[1.2rem] font-normal text-muted max-[768px]:mr-[0.4rem] max-[480px]:mr-[0.3rem] max-[480px]:text-base max-[480px]:leading-(--line-height)">
+          {subtitle}
+        </span>
+        <h2 class="relative m-0 inline-block text-[2.9rem] font-[550] text-secondary transition-all duration-300 ease-[ease] after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:bg-secondary after:transition-[width] after:duration-300 after:ease-[ease] hover:transform-[translateY(-2px)] hover:after:w-full max-[768px]:text-[2rem] max-[480px]:text-[1.5rem]">
+          {profession}
+        </h2>
+        <span class="mr-2 text-[1.2rem] font-normal text-muted max-[768px]:mr-[0.4rem] max-[480px]:mr-[0.3rem] max-[480px]:text-base max-[480px]:leading-(--line-height)">
+          .
+        </span>
       </div>
 
-      <p class="description">{desc}</p>
+      <p class="mt-6 max-w-[600px] text-left text-[1.1rem] leading-[1.7] text-muted animate-[slideUp_0.8s_ease-out_1s_both] max-[768px]:mx-auto max-[768px]:mt-[1.2rem] max-[768px]:max-w-[95%] max-[768px]:text-center max-[768px]:text-base max-[768px]:leading-[1.5] max-[768px]:animate-[slideUp_0.6s_ease-out_0.7s_both] max-[480px]:mx-auto max-[480px]:mt-2 max-[480px]:max-w-[92%] max-[480px]:text-[0.9rem] max-[480px]:leading-[1.4] max-[480px]:animate-[slideUp_0.5s_ease-out_0.5s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        {desc}
+      </p>
 
-      <div class="actionRow">
-        <div class="cta">
-          <a href="#about" class="ctaButton" aria-label="Learn more about me">
+      <div class="mt-10 flex items-center animate-[slideUp_0.8s_ease-out_1.2s_both] max-[768px]:mt-6 max-[768px]:w-full max-[768px]:flex-col max-[768px]:animate-[slideUp_0.6s_ease-out_0.8s_both] max-[480px]:animate-[slideUp_0.5s_ease-out_0.6s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        <div class="mr-[1.8rem] flex items-center max-[768px]:mb-[1.2rem] max-[768px]:mr-0 max-[768px]:w-full max-[768px]:justify-center">
+          <a
+            href="#about"
+            class="inline-block cursor-pointer rounded-card border-2 border-primary bg-primary px-[1.2rem] py-2 text-[0.95rem] font-medium text-background no-underline shadow-sm outline-none [transition:all_0.3s_ease,transform_0.2s_ease] hover:transform-[translateY(-3px)_scale(1.02)] hover:bg-transparent hover:text-primary hover:shadow-md focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] active:transform-[translateY(-2px)] max-[480px]:px-4 max-[480px]:py-[0.4rem] max-[480px]:text-[0.85rem]"
+            aria-label="Learn more about me"
+          >
             {learnMoreButtonText}
           </a>
         </div>
@@ -71,11 +101,11 @@ const profileFallback =
     </div>
 
     {/* Right: profile picture */}
-    <div class="rightSection">
+    <div class="flex flex-1 justify-end pr-8 animate-[slideInRight_0.8s_ease-out_0.3s_both] max-[768px]:-mt-2 max-[768px]:w-full max-[768px]:flex-none max-[768px]:justify-center max-[768px]:pr-0 max-[768px]:animate-[fadeIn_0.8s_ease-out_both] max-[480px]:-mt-8 motion-reduce:animate-none! motion-reduce:transition-none!">
       <img
         src={profileSrc}
         alt="profile"
-        class="profilePic"
+        class="relative -mt-[30px] mr-8 h-[270px] w-auto rounded-[20%] object-cover shadow-none transition-[transform,box-shadow] duration-500 ease-[ease] will-change-transform animate-[scaleIn_0.8s_ease-out_both] hover:transform-[scale(1.04)_translateY(-8px)] hover:shadow-[0_20px_40px_var(--color-surface-1)] max-[768px]:-mt-5 max-[768px]:mb-[1.2rem] max-[768px]:mr-0 max-[768px]:h-[180px] max-[768px]:animate-[gentleAppear_0.7s_ease-out_both] max-[768px]:hover:transform-[scale(1.03)] max-[768px]:hover:shadow-[0_6px_15px_var(--color-surface-1)] max-[480px]:-mt-[25px] max-[480px]:mb-6 max-[480px]:h-[160px] max-[480px]:animate-[gentleAppear_0.6s_ease-out_both] motion-reduce:animate-none! motion-reduce:transition-none!"
         loading="eager"
         fetchpriority="high"
         onerror={
@@ -89,16 +119,11 @@ const profileFallback =
 </div>
 
 <style>
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
+  /* `gentleAppear` is the only keyframe here that isn't already global:
+     `fadeIn`, `slideUp`, `slideInLeft`, `slideInRight` and `scaleIn`
+     live in `css/animations.css` with identical definitions. Astro does
+     not rename `@keyframes`, so the `animate-[gentleAppear_...]`
+     utilities above resolve to this definition. */
   @keyframes gentleAppear {
     from {
       opacity: 0;
@@ -107,499 +132,6 @@ const profileFallback =
     to {
       opacity: 1;
       transform: scale(1);
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  /* Base layout */
-  .hero {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 60px);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    animation: fadeIn 0.8s ease-in-out;
-    padding: 2rem 0;
-  }
-
-  .container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    max-width: 1300px;
-    width: 90%;
-    margin: 0 auto;
-    margin-bottom: 2rem;
-    padding: 0 2rem;
-  }
-
-  /* Left section */
-  .leftSection {
-    flex: 1;
-    text-align: left;
-    padding-right: 3rem;
-    padding-left: 1rem;
-    animation: slideInLeft 0.8s ease-out 0.2s both;
-  }
-
-  .intro {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--porto-text-muted);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    margin-bottom: 0.2rem;
-    animation: slideUp 0.8s ease-out 0.4s both;
-  }
-
-  .title {
-    font-size: 4.5rem;
-    font-weight: 600;
-    margin: 0.2rem 0;
-    color: var(--porto-primary);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    animation: slideUp 0.8s ease-out 0.6s both;
-    transition: all 0.3s ease;
-    position: relative;
-    display: inline-block;
-    line-height: 1.2;
-  }
-
-  .title:hover {
-    color: var(--porto-primary);
-    transform: translateY(-2px);
-  }
-
-  .title::after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 3px;
-    bottom: 0;
-    left: 0;
-    background-color: var(--porto-primary);
-    transition: width 0.3s ease;
-  }
-
-  .title:hover::after {
-    width: 100%;
-  }
-
-  .titleComma {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--porto-text-muted);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    margin-left: 0.1rem;
-    margin-right: 0.5rem;
-    animation: slideUp 0.8s ease-out 0.6s both;
-  }
-
-  /* Subtitle section */
-  .subtitleWrapper {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    animation: slideUp 0.8s ease-out 0.8s both;
-  }
-
-  .subtitle {
-    font-size: 1.2rem;
-    font-weight: 400;
-    color: var(--porto-text-muted);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    margin-right: 0.5rem;
-  }
-
-  .profession {
-    font-size: 2.9rem;
-    font-weight: 550;
-    color: var(--porto-secondary);
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    margin: 0;
-    position: relative;
-    display: inline-block;
-    transition: all 0.3s ease;
-  }
-
-  .profession:hover {
-    transform: translateY(-2px);
-  }
-
-  .profession::after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 3px;
-    bottom: 0;
-    left: 0;
-    background-color: var(--porto-secondary);
-    transition: width 0.3s ease;
-  }
-
-  .profession:hover::after {
-    width: 100%;
-  }
-
-  .description {
-    margin-top: 1.5rem;
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: var(--porto-text-muted);
-    max-width: 600px;
-    font-family:
-      "Alata",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    text-align: left;
-    animation: slideUp 0.8s ease-out 1s both;
-  }
-
-  /* Action row styling */
-  .actionRow {
-    display: flex;
-    align-items: center;
-    margin-top: 2.5rem;
-    animation: slideUp 0.8s ease-out 1.2s both;
-  }
-
-  .cta {
-    margin-top: 0;
-    margin-right: 1.8rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .ctaButton {
-    display: inline-block;
-    padding: 0.5rem 1.2rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    color: var(--porto-bg);
-    background-color: var(--porto-primary);
-    border-radius: 0.4rem;
-    transition:
-      all 0.3s ease,
-      transform 0.2s ease;
-    border: 2px solid var(--porto-primary);
-    cursor: pointer;
-    outline: none;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-  }
-
-  .ctaButton:hover {
-    background-color: transparent;
-    color: var(--porto-primary);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
-    text-decoration: none;
-  }
-
-  .ctaButton:active {
-    transform: translateY(-2px);
-  }
-
-  .ctaButton:focus {
-    box-shadow: 0 0 0 3px rgba(var(--porto-primary-rgb), 0.3);
-  }
-
-  /* Right section - Profile image */
-  .rightSection {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 0;
-    padding-right: 2rem;
-    animation: slideInRight 0.8s ease-out 0.3s both;
-  }
-
-  .profilePic {
-    height: 270px;
-    width: auto;
-    border-radius: 20%;
-    object-fit: cover;
-    box-shadow: none;
-    margin-top: -30px;
-    margin-right: 2rem;
-    transition:
-      transform 0.5s ease,
-      box-shadow 0.5s ease;
-    animation: scaleIn 0.8s ease-out both;
-    will-change: transform;
-    position: relative;
-  }
-
-  .profilePic:hover {
-    transform: scale(1.04) translateY(-8px);
-    box-shadow: 0 20px 40px var(--porto-surface-1);
-  }
-
-  /* Responsive styles for sections */
-  @media (max-width: 768px) {
-    .intro {
-      animation: slideUp 0.6s ease-out 0.4s both;
-    }
-
-    .hero {
-      min-height: 100vh;
-      padding: 1rem 0 3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-
-    .container {
-      flex-direction: column-reverse;
-      align-items: center;
-      text-align: center;
-      width: 90%;
-      max-width: 500px;
-      /* NOT height: 100%: in the old block layout the percentage
-         resolved to auto (the hero's height is indefinite), so the
-         container hugged its content and the hero centered it. In this
-         Astro layout the hero is a flex item, so Chrome resolves the
-         percentage to the full hero height — and with `flex: 1` on
-         both sections they each stretch to half of it, pushing the
-         image up behind the navbar. `auto` restores the old geometry. */
-      height: auto;
-      padding: 0;
-    }
-
-    .rightSection {
-      animation: fadeIn 0.8s ease-out both;
-      padding-right: 0;
-      justify-content: center;
-      margin-bottom: 0;
-      margin-top: -0.5rem;
-      width: 100%;
-      /* `flex: 1` shares width in the desktop row; in this column it
-         would share height and stretch the section (see above). */
-      flex: none;
-    }
-
-    .profilePic {
-      animation: gentleAppear 0.7s ease-out both;
-      height: 180px;
-      width: auto;
-      margin-top: -20px;
-      margin-bottom: 1.2rem;
-      margin-right: 0;
-      box-shadow: none;
-    }
-
-    .profilePic:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 15px var(--porto-surface-1);
-    }
-
-    .leftSection {
-      animation: fadeIn 0.8s ease-out 0.3s both;
-      padding-right: 0;
-      padding-left: 0;
-      width: 100%;
-      margin-top: 1rem;
-      margin-bottom: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* As with .rightSection above: `flex: 1` is for the desktop row. */
-      flex: none;
-    }
-
-    .title {
-      animation: slideUp 0.6s ease-out 0.5s both;
-      font-size: 3rem;
-      margin: 0.2rem 0;
-    }
-
-    .titleComma {
-      font-size: 0.9rem;
-      animation: slideUp 0.6s ease-out 0.5s both;
-    }
-
-    .subtitleWrapper {
-      animation: slideUp 0.6s ease-out 0.6s both;
-      justify-content: center;
-      margin: 0.2rem 0;
-    }
-
-    .description {
-      animation: slideUp 0.6s ease-out 0.7s both;
-      margin: 1.2rem auto 0;
-      max-width: 95%;
-      font-size: 1rem;
-      padding: 0;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .actionRow {
-      animation: slideUp 0.6s ease-out 0.8s both;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 1.5rem;
-      width: 100%;
-    }
-
-    .subtitle {
-      font-size: 1.2rem;
-      margin-right: 0.4rem;
-    }
-
-    .profession {
-      font-size: 2rem;
-    }
-
-    .cta {
-      margin-right: 0;
-      margin-bottom: 1.2rem;
-      width: 100%;
-      justify-content: center;
-    }
-  }
-
-  /* Responsive styles for mobile devices */
-  @media (max-width: 480px) {
-    .hero {
-      min-height: calc(100vh);
-      padding: 0.5rem 0 2rem;
-    }
-
-    .rightSection {
-      margin-top: -2rem;
-      margin-bottom: 0;
-    }
-
-    .profilePic {
-      animation: gentleAppear 0.6s ease-out both;
-      height: 160px;
-      margin-top: -25px;
-      margin-bottom: 1.5rem;
-      box-shadow: none;
-    }
-
-    .title {
-      font-size: 2.3rem;
-      animation: slideUp 0.5s ease-out 0.3s both;
-    }
-
-    .titleComma {
-      font-size: 0.8rem;
-      animation: slideUp 0.5s ease-out 0.3s both;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      margin-right: 0.3rem;
-    }
-
-    .profession {
-      font-size: 1.5rem;
-    }
-
-    .description {
-      animation: slideUp 0.5s ease-out 0.5s both;
-      margin: 0.7rem auto 0;
-      margin-top: 0.5rem;
-      max-width: 92%;
-      line-height: 1.4;
-      font-size: 0.9rem;
-    }
-
-    .actionRow {
-      animation: slideUp 0.5s ease-out 0.6s both;
-    }
-
-    .ctaButton {
-      padding: 0.4rem 1rem;
-      font-size: 0.85rem;
-    }
-  }
-
-  /* Consolidated Accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    .hero,
-    .leftSection,
-    .rightSection,
-    .profilePic,
-    .intro,
-    .title,
-    .titleComma,
-    .subtitleWrapper,
-    .description,
-    .actionRow {
-      animation: none !important;
-      transition: none !important;
     }
   }
 </style>

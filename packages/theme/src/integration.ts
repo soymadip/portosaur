@@ -34,7 +34,7 @@
  * and serves them (plus theme `static/`) through Vite middleware.
  *
  * Styling is Tailwind v4 (CSS-first config, `@tailwindcss/vite`) + the
- * `--porto-*` token system (`src/css/`). The Tailwind Vite plugin is
+ * token system (`src/css/tokens.css`). The Tailwind Vite plugin is
  * registered here so the theme CSS entry (`src/css/custom.css`) is
  * processed whenever a layout imports it.
  */

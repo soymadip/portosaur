@@ -164,35 +164,42 @@ function postUrl(other) {
 ---
 
 <BaseLayout title={title} description={post.data.description}>
-  <div class="porto-blog-layout">
+  <div class="mx-auto flex w-full max-w-7xl gap-8 p-4">
     <BlogSidebar posts={sidebarPosts} currentUrl={currentUrl} />
-    <article class="porto-blog-post">
-      <header class="porto-blog-post__header">
-        <h1>{heading}</h1>
+    <article class="min-w-0 max-w-[46rem] flex-1 max-[996px]:max-w-none">
+      <header>
+        <h1 class="mb-2 text-[3rem] leading-[1.2] text-primary">{heading}</h1>
         {date && (
-          <time class="porto-blog-post__date" datetime={date.toISOString()}>
+          <time
+            class="mb-3 block text-[0.9rem] text-muted"
+            datetime={date.toISOString()}
+          >
             {formatPostDate(date)}
           </time>
         )}
         {postAuthors.length > 0 && (
-          <div class="porto-blog-authors-block">
+          <div class="mb-6 flex flex-wrap gap-4">
             {postAuthors.map((author) => (
-              <div class="porto-blog-author">
+              <div class="flex items-center gap-3">
                 {author.image && (
                   <img
-                    class="porto-blog-author__avatar"
+                    class="h-10 w-10 rounded-full object-cover"
                     src={resolveAuthorImage(author.image)}
                     alt=""
                   />
                 )}
-                <div class="porto-blog-author__details">
-                  <span class="porto-blog-author__name">
+                <div class="flex flex-col leading-[1.3]">
+                  <span class="font-bold">
                     {author.hasPage ? (
-                      <a href={`/${blogRoute}/authors/${author.key}/`}>
+                      <a
+                        class="text-primary no-underline hover:underline"
+                        href={`/${blogRoute}/authors/${author.key}/`}
+                      >
                         {author.name}
                       </a>
                     ) : author.url ? (
                       <a
+                        class="text-primary no-underline hover:underline"
                         href={author.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -204,7 +211,9 @@ function postUrl(other) {
                     )}
                   </span>
                   {author.title && (
-                    <span class="porto-blog-author__title">{author.title}</span>
+                    <span class="text-[0.85rem] text-muted">
+                      {author.title}
+                    </span>
                   )}
                 </div>
               </div>
@@ -218,12 +227,17 @@ function postUrl(other) {
       </div>
 
       {tags.length > 0 && (
-        <footer class="porto-blog-post__tags">
+        <footer class="mt-8 flex flex-wrap items-center gap-[0.6rem] border-t border-border pt-4 text-muted">
           <span>Tags:</span>
-          <ul class="porto-blog-tags">
+          <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
             {tags.map((tag) => (
               <li>
-                <a href={`/${blogRoute}/tags/${tag}/`}>{tag}</a>
+                <a
+                  class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.8rem] text-muted no-underline hover:border-primary hover:text-primary"
+                  href={`/${blogRoute}/tags/${tag}/`}
+                >
+                  {tag}
+                </a>
               </li>
             ))}
           </ul>
@@ -231,31 +245,27 @@ function postUrl(other) {
       )}
 
       {(newer || older) && (
-        <nav class="porto-blog-paginator" aria-label="Blog posts">
+        <nav class="mt-8 grid grid-cols-2 gap-4" aria-label="Blog posts">
           {newer ? (
             <a
-              class="porto-blog-paginator__link porto-blog-paginator__link--prev"
+              class="flex flex-col gap-1 rounded-lg border border-border p-4 text-foreground no-underline hover:border-primary"
               href={postUrl(newer)}
               rel="prev"
             >
-              <span class="porto-blog-paginator__sublabel">Newer post</span>
-              <span class="porto-blog-paginator__label">
-                {newer.data.title ?? newer.id}
-              </span>
+              <span class="text-[0.85rem] text-muted">Newer post</span>
+              <span class="text-[1.1rem]">{newer.data.title ?? newer.id}</span>
             </a>
           ) : (
             <span />
           )}
           {older ? (
             <a
-              class="porto-blog-paginator__link porto-blog-paginator__link--next"
+              class="flex flex-col gap-1 rounded-lg border border-border p-4 text-right text-foreground no-underline hover:border-primary"
               href={postUrl(older)}
               rel="next"
             >
-              <span class="porto-blog-paginator__sublabel">Older post</span>
-              <span class="porto-blog-paginator__label">
-                {older.data.title ?? older.id}
-              </span>
+              <span class="text-[0.85rem] text-muted">Older post</span>
+              <span class="text-[1.1rem]">{older.data.title ?? older.id}</span>
             </a>
           ) : (
             <span />
@@ -265,154 +275,3 @@ function postUrl(other) {
     </article>
   </div>
 </BaseLayout>
-
-<style>
-  .porto-blog-layout {
-    max-width: 80rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-    display: flex;
-    gap: 2rem;
-  }
-
-  .porto-blog-post {
-    flex: 1 1 0;
-    min-width: 0;
-    max-width: 46rem;
-  }
-
-  .porto-blog-post h1 {
-    margin: 0 0 0.5rem;
-    font-size: 3rem;
-    line-height: 1.2;
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-post__date {
-    display: block;
-    color: var(--porto-text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .porto-blog-authors-block {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .porto-blog-author {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .porto-blog-author__avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .porto-blog-author__details {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-  }
-
-  .porto-blog-author__name {
-    font-weight: bold;
-  }
-
-  .porto-blog-author__name a {
-    color: var(--porto-primary);
-    text-decoration: none;
-  }
-
-  .porto-blog-author__name a:hover {
-    text-decoration: underline;
-  }
-
-  .porto-blog-author__title {
-    color: var(--porto-text-muted);
-    font-size: 0.85rem;
-  }
-
-  .porto-blog-post__tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--porto-border);
-    color: var(--porto-text-muted);
-  }
-
-  .porto-blog-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .porto-blog-tags a {
-    display: inline-block;
-    padding: 0.15rem 0.6rem;
-    color: var(--porto-text-muted);
-    text-decoration: none;
-    border: 1px solid var(--porto-border);
-    border-radius: 999px;
-    font-size: 0.8rem;
-  }
-
-  .porto-blog-tags a:hover {
-    color: var(--porto-primary);
-    border-color: var(--porto-primary);
-  }
-
-  .porto-blog-paginator {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  .porto-blog-paginator__link {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 1rem;
-    color: var(--porto-text);
-    text-decoration: none;
-    border: 1px solid var(--porto-border);
-    border-radius: 0.5rem;
-  }
-
-  .porto-blog-paginator__link:hover {
-    border-color: var(--porto-primary);
-  }
-
-  .porto-blog-paginator__link--next {
-    text-align: right;
-  }
-
-  .porto-blog-paginator__sublabel {
-    color: var(--porto-text-muted);
-    font-size: 0.85rem;
-  }
-
-  .porto-blog-paginator__label {
-    font-size: 1.1rem;
-  }
-
-  @media (max-width: 996px) {
-    .porto-blog-post {
-      max-width: none;
-    }
-  }
-</style>

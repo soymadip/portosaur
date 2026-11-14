@@ -15,16 +15,18 @@ interface Props {
 const { headings, spy = true } = Astro.props;
 ---
 
-<nav class="porto-toc" data-toc={spy || undefined} aria-label="On this page">
-  <ul class="porto-toc__list">
+<nav
+  class="max-h-full overflow-y-auto border-l border-l-border"
+  data-toc={spy || undefined}
+  aria-label="On this page"
+>
+  <ul class="m-0 list-none py-1 pl-4">
     {headings.map((heading) => (
-      <li
-        class:list={[
-          "porto-toc__item",
-          `porto-toc__item--depth-${heading.depth}`,
-        ]}
-      >
-        <a class="porto-toc__link" href={`#${heading.slug}`}>
+      <li class:list={[{ "pl-4": heading.depth === 3 }]}>
+        <a
+          class="block py-1 text-[0.85rem] text-muted no-underline hover:text-foreground"
+          href={`#${heading.slug}`}
+        >
           {heading.text}
         </a>
       </li>
@@ -97,36 +99,12 @@ const { headings, spy = true } = Astro.props;
 </script>
 
 <style>
-  .porto-toc {
-    max-height: 100%;
-    overflow-y: auto;
-    border-left: 1px solid var(--porto-border);
-  }
-
-  .porto-toc__list {
-    margin: 0;
-    padding: 0.25rem 0 0.25rem 1rem;
-    list-style: none;
-  }
-
-  .porto-toc__item--depth-3 {
-    padding-left: 1rem;
-  }
-
-  .porto-toc__link {
-    display: block;
-    padding: 0.25rem 0;
-    color: var(--porto-text-muted);
-    text-decoration: none;
-    font-size: 0.85rem;
-  }
-
-  .porto-toc__link:hover {
-    color: var(--porto-text);
-  }
-
+  /* Scroll-spy active state: the script above toggles
+     `.porto-toc__link--active` on the link via `classList`, so the
+     rule stays plain CSS (utilities can't express a JS-toggled
+     class). */
   .porto-toc__link--active {
-    color: var(--porto-primary);
+    color: var(--color-primary);
     font-weight: 600;
   }
 </style>

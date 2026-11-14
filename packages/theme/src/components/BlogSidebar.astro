@@ -40,16 +40,22 @@ if (undated.length > 0) {
 }
 ---
 
-<aside class="porto-blog-sidebar">
+<aside class="min-w-0 flex-[0_0_16rem] [@media(max-width:996px)]:hidden">
   <nav aria-label="Recent posts">
-    <h3 class="porto-blog-sidebar__title">Recent posts</h3>
+    <h3 class="mb-4 text-[1.25rem]">Recent posts</h3>
     {groups.map((group) => (
-      <div class="porto-blog-sidebar__year-group">
-        <h4 class="porto-blog-sidebar__year">{group.label}</h4>
-        <ul class="porto-blog-sidebar__list">
+      <div class="mb-4">
+        <h4 class="mb-2 text-[1.15rem]">{group.label}</h4>
+        <ul class="m-0 list-none p-0">
           {group.posts.map((post) => (
-            <li>
+            <li class="mb-[0.35rem]">
               <a
+                class:list={[
+                  "no-underline hover:text-primary",
+                  currentUrl === post.url
+                    ? "font-bold text-primary"
+                    : "text-foreground",
+                ]}
                 href={post.url}
                 aria-current={currentUrl === post.url ? "page" : undefined}
               >
@@ -62,55 +68,3 @@ if (undated.length > 0) {
     ))}
   </nav>
 </aside>
-
-<style>
-  .porto-blog-sidebar {
-    flex: 0 0 16rem;
-    min-width: 0;
-  }
-
-  .porto-blog-sidebar__title {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-  }
-
-  .porto-blog-sidebar__year-group {
-    margin-bottom: 1rem;
-  }
-
-  .porto-blog-sidebar__year {
-    margin: 0 0 0.5rem;
-    font-size: 1.15rem;
-  }
-
-  .porto-blog-sidebar__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .porto-blog-sidebar__list li {
-    margin-bottom: 0.35rem;
-  }
-
-  .porto-blog-sidebar__list a {
-    color: var(--porto-text);
-    text-decoration: none;
-  }
-
-  .porto-blog-sidebar__list a:hover {
-    color: var(--porto-primary);
-  }
-
-  .porto-blog-sidebar__list a[aria-current="page"] {
-    color: var(--porto-primary);
-    font-weight: bold;
-  }
-
-  /* Docusaurus hides the blog sidebar below its 996px breakpoint. */
-  @media (max-width: 996px) {
-    .porto-blog-sidebar {
-      display: none;
-    }
-  }
-</style>
