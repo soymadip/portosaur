@@ -25,6 +25,14 @@ This will delete your `build/` directory.
 :::success
 The build finished and all 110 pages are live.
 :::
+
+:::note
+Notes are for side remarks that don't fit the main flow.
+:::
+
+:::info
+Info boxes highlight background a reader might need.
+:::
 ```
 
 :::tip[Pro tip]
@@ -37,6 +45,14 @@ This will delete your `build/` directory.
 
 :::success
 The build finished and all 110 pages are live.
+:::
+
+:::note
+Notes are for side remarks that don't fit the main flow.
+:::
+
+:::info
+Info boxes highlight background a reader might need.
 :::
 
 Available types: `note`, `tip`, `info`, `success`, `warning`, `caution`, and `danger`.
@@ -91,4 +107,4 @@ Text placed right after the marker on the same line becomes the alert's title. T
 
 ### GitHub vs Docusaurus Colors
 
-Both syntaxes share the same callout colors, so the same word looks the same either way: `[!NOTE]` and `:::note` are both blue, `[!TIP]` and `:::tip` are both purple, and `[!WARNING]` and `:::warning` are both amber. The one deliberate difference is caution — GitHub's `[!CAUTION]` is red, while Docusaurus's `:::caution` is amber. Docusaurus has one extra type GitHub doesn't: `:::success`, which is green.
+Both syntaxes share the same callout colors, so the same word looks the same either way: `[!TIP]` and `:::tip` are both purple, and `[!WARNING]` and `:::warning` are both amber. Two words differ deliberately: `[!NOTE]` is blue (it maps to `info`), while `:::note` is gray — and GitHub's `[!CAUTION]` is red, while Docusaurus's `:::caution` is amber. Docusaurus has one extra type GitHub doesn't: `:::success`, which is green.
