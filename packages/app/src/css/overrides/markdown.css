@@ -62,10 +62,16 @@ mark {
 /* === Callouts / Admonitions ===
  * Emitted by the admonitions plugin as `.admonition.admonition-<type>`
  * with `.admonition-heading` + `.admonition-content` children
- * (types: note, tip, info, success, warning, caution, danger). */
+ * (types: note, tip, info, success, warning, caution, danger).
+ * OG's construction (Docusaurus): 25% semantic hue over surface-0
+ * (gray-6 here), border in the hue, text and heading in the text
+ * color. The note type mixes 25% text-muted (gray-3) over gray-6. */
 
 .porto-markdown-content .admonition {
-  color: var(--porto-color-text);
+  /* Text is --porto-color-white (OG's admonition text color):
+     gray-2 on the mid-tone bg was 1.4–2.7:1 in every scheme.
+     The heading inherits this — OG does not color it separately. */
+  color: var(--porto-color-white);
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
@@ -86,10 +92,6 @@ mark {
   );
 }
 
-.porto-markdown-content .admonition-note .admonition-heading {
-  color: var(--porto-color-gray-3);
-}
-
 .porto-markdown-content .admonition-tip,
 .porto-markdown-content .admonition-success {
   border-color: var(--porto-color-green);
@@ -100,11 +102,6 @@ mark {
   );
 }
 
-.porto-markdown-content .admonition-tip .admonition-heading,
-.porto-markdown-content .admonition-success .admonition-heading {
-  color: var(--porto-color-green);
-}
-
 .porto-markdown-content .admonition-info {
   border-color: var(--porto-color-blue);
   background-color: color-mix(
@@ -112,10 +109,6 @@ mark {
     var(--porto-color-blue) 25%,
     var(--porto-color-gray-6)
   );
-}
-
-.porto-markdown-content .admonition-info .admonition-heading {
-  color: var(--porto-color-blue);
 }
 
 .porto-markdown-content .admonition-warning,
@@ -128,11 +121,6 @@ mark {
   );
 }
 
-.porto-markdown-content .admonition-warning .admonition-heading,
-.porto-markdown-content .admonition-caution .admonition-heading {
-  color: var(--porto-color-orange);
-}
-
 .porto-markdown-content .admonition-danger {
   border-color: var(--porto-color-red);
   background-color: color-mix(
@@ -140,8 +128,4 @@ mark {
     var(--porto-color-red) 25%,
     var(--porto-color-gray-6)
   );
-}
-
-.porto-markdown-content .admonition-danger .admonition-heading {
-  color: var(--porto-color-red);
 }

@@ -23,9 +23,23 @@
       display: block;
       padding: 0.5rem 1rem;
       text-decoration: none;
-      color: var(--porto-color-text-invert);
-      background-color: var(--porto-color-text-accent);
+      /* OG-style: accent text on a subtle 10% accent tint (same as the
+         active sidebar item). The solid-accent box was under 4.5:1 in
+         three schemes' dark mode and four schemes' light mode. The
+         tint uses text-accent, the per-mode visible primary. */
+      color: var(--porto-color-accent-high);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-text-accent) 10%,
+        transparent
+      );
       box-shadow: var(--porto-shadow-lg);
+    }
+    /* Dark mode only: lighten the text one step, as in the sidebar —
+       the pill sits over the navbar (gray-6), so the same dracula /
+       gruvbox primaries fall short at full strength. */
+    :global([data-theme="dark"]) a:focus {
+      color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
     }
   }
 </style>

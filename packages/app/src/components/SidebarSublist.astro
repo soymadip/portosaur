@@ -76,7 +76,7 @@ function hasActiveDescendant(item: any): boolean {
                 )}
               </span>
               <span class="caret">
-                <Icon name="right-caret" size="1.25rem" />
+                <Icon name="right-caret" size="1.5rem" />
               </span>
             </summary>
             <SidebarRestorePoint />
@@ -152,10 +152,13 @@ function hasActiveDescendant(item: any): boolean {
     summary {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      /* The caret sits right after the label (a 0.25rem gap), not
+         pinned to the row's right edge — the gap between the text
+         end and the caret stays small whatever the row width. */
+      gap: 0.25rem;
       /* Same vertical padding as a leaf link, so category rows and
          leaf rows are the same height. */
-      padding: 0.3em var(--porto-sidebar-item-padding-inline);
+      padding: 0.25em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
       cursor: pointer;
       user-select: none;
@@ -191,7 +194,7 @@ function hasActiveDescendant(item: any): boolean {
       border-radius: 0.25rem;
       text-decoration: none;
       color: var(--porto-color-gray-2);
-      padding: 0.3em var(--porto-sidebar-item-padding-inline);
+      padding: 0.25em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
     }
 
@@ -200,23 +203,49 @@ function hasActiveDescendant(item: any): boolean {
       color: var(--porto-color-white);
     }
 
+    /* OG-style active item: accent text on a subtle 10% accent tint.
+       The solid-accent box (accent-high bg, accent-low text) fails in
+       light mode, where the mid accent vs white is under 4.5:1 in four
+       schemes — the tint + accent text reads in every scheme × mode.
+       The tint uses text-accent (the per-mode visible primary), so
+       dark mode tints with the dark primary like OG. */
     [aria-current="page"],
     [aria-current="page"]:hover,
     [aria-current="page"]:focus {
       font-weight: 600;
-      color: var(--porto-color-text-invert);
-      background-color: var(--porto-color-text-accent);
+      color: var(--porto-color-accent-high);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-text-accent) 10%,
+        transparent
+      );
     }
 
     /* The active category row highlights as one uniform box: the
        background sits on the <summary>, not the inner link, so the
        box spans the full row at leaf-row height with the caret
-       inside it (Docusaurus-style). The link keeps only the invert
+       inside it (Docusaurus-style). The link keeps only the accent
        text color — its own background is cleared. */
     summary:has(> .group-label > a[aria-current="page"]) {
-      background-color: var(--porto-color-text-accent);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-text-accent) 10%,
+        transparent
+      );
       border-radius: 0.25rem;
-      color: var(--porto-color-text-invert);
+      color: var(--porto-color-accent-high);
+    }
+
+    /* Dark mode only: lighten the active text one step — the same 65%
+       white tint the hue `-high` colors use. The OG primaries are mid
+       lightness, so dracula purple and gruvbox orange don't reach
+       4.5:1 on the gray-6 sidebar bg at full strength. */
+    :global([data-theme="dark"]) [aria-current="page"],
+    :global([data-theme="dark"]) [aria-current="page"]:hover,
+    :global([data-theme="dark"]) [aria-current="page"]:focus,
+    :global([data-theme="dark"])
+      summary:has(> .group-label > a[aria-current="page"]) {
+      color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
     }
 
     /* A hovered category row gets the same full-width box, in a
@@ -248,13 +277,6 @@ function hasActiveDescendant(item: any): boolean {
     a > *:not(:last-child),
     .group-label > *:not(:last-child) {
       margin-inline-end: 0.25em;
-    }
-
-    /* The group label grows to fill the summary row, pinning the
-       caret to the right edge — inside the active highlight box
-       when the category is the current page. */
-    .group-label {
-      flex: 1;
     }
 
     /* A category link inside a <summary> is the group label, not a

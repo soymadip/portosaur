@@ -7,28 +7,46 @@
 @layer porto.components.aside {
   .porto-aside {
     padding: 1rem;
+    border: 1px solid
+      color-mix(in srgb, var(--porto-color-asides-border) 45%, transparent);
     border-inline-start: 0.25rem solid var(--porto-color-asides-border);
     color: var(--porto-color-white);
   }
   .porto-aside--note {
     --porto-color-asides-text-accent: var(--porto-color-blue-high);
     --porto-color-asides-border: var(--porto-color-blue);
-    background-color: var(--porto-color-blue-low);
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-blue) 15%,
+      var(--porto-color-blue-low)
+    );
   }
   .porto-aside--tip {
     --porto-color-asides-text-accent: var(--porto-color-purple-high);
     --porto-color-asides-border: var(--porto-color-purple);
-    background-color: var(--porto-color-purple-low);
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-purple) 15%,
+      var(--porto-color-purple-low)
+    );
   }
   .porto-aside--caution {
     --porto-color-asides-text-accent: var(--porto-color-orange-high);
     --porto-color-asides-border: var(--porto-color-orange);
-    background-color: var(--porto-color-orange-low);
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-orange) 15%,
+      var(--porto-color-orange-low)
+    );
   }
   .porto-aside--danger {
     --porto-color-asides-text-accent: var(--porto-color-red-high);
     --porto-color-asides-border: var(--porto-color-red);
-    background-color: var(--porto-color-red-low);
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-red) 15%,
+      var(--porto-color-red-low)
+    );
   }
 
   .porto-aside__title {
