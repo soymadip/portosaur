@@ -10,7 +10,9 @@
 // `.porto-link-button` actions). The feature cards are Starlight's
 // Card + CardGrid user-components (renamed `sl-` → `porto-`),
 // derived in part from Starlight (MIT License) — see
-// packages/app/NOTICE.md.
+// packages/app/NOTICE.md — except the icon chips, which are OG's:
+// a uniform neutral gray background with the icon in the primary
+// color, no per-card accent rotation (main branch `featureIcon`).
 //
 // Portosaur differences from OG's hero:
 // - Feature titles stay <h2> (they are part of the page's heading
@@ -329,29 +331,11 @@ const iconOnError = iconFallback
     }
 
     .card {
-      --porto-card-border: var(--porto-color-purple);
-      --porto-card-bg: var(--porto-color-purple-low);
       border: 1px solid var(--porto-color-gray-5);
       background-color: var(--porto-color-black);
       padding: clamp(1rem, calc(0.125rem + 3vw), 2.5rem);
       flex-direction: column;
       gap: clamp(0.5rem, calc(0.125rem + 1vw), 1rem);
-    }
-    .card:nth-child(4n + 1) {
-      --porto-card-border: var(--porto-color-orange);
-      --porto-card-bg: var(--porto-color-orange-low);
-    }
-    .card:nth-child(4n + 3) {
-      --porto-card-border: var(--porto-color-green);
-      --porto-card-bg: var(--porto-color-green-low);
-    }
-    .card:nth-child(4n + 4) {
-      --porto-card-border: var(--porto-color-red);
-      --porto-card-bg: var(--porto-color-red-low);
-    }
-    .card:nth-child(4n + 5) {
-      --porto-card-border: var(--porto-color-blue);
-      --porto-card-bg: var(--porto-color-blue-low);
     }
 
     .card-link {
@@ -378,14 +362,23 @@ const iconOnError = iconFallback
       line-height: var(--porto-line-height-headings);
     }
 
+    /* OG's icon chip (main branch `featureIcon`): a uniform neutral
+       gray background — OG's `--ifm-color-emphasis-200`, a 15% text
+       tint over the card background — with the icon in the primary
+       color and no border. (Starlight's chips rotate a per-card
+       accent color; OG's are all the same.) */
     .card .icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--porto-card-border);
-      background-color: var(--porto-card-bg);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 15%,
+        var(--porto-color-black)
+      );
+      color: var(--porto-color-text-accent);
       padding: 0.2em;
-      border-radius: 0.25rem;
+      border-radius: 0.5rem;
       flex-shrink: 0;
       font-size: 1.333em;
     }
