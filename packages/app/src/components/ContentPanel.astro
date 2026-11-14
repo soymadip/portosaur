@@ -18,9 +18,18 @@
     .content-panel + .content-panel {
       border-top: 1px solid var(--porto-color-hairline);
     }
-    /* No max-width: the article fills the whole main pane, like
-       Docusaurus (Starlight caps it at --porto-content-width and
-       centers it, leaving empty space at wide viewports). */
+    /* The article is capped at 80rem and centered. Generous on
+       purpose: at 1920px the middle column is ~1390px, so the cap
+       barely binds and the full-width Docusaurus feel stays — but
+       on ultrawide monitors the line length stops running away
+       instead of stretching to 2000px+. (Starlight caps at
+       --porto-content-width, 45rem — too narrow here; and that
+       token still feeds the navbar grid, so the article cap stays
+       independent of it.) */
+    .porto-container {
+      max-width: 80rem;
+      margin-inline: auto;
+    }
     .porto-container > :global(* + *) {
       margin-top: 1.5rem;
     }
