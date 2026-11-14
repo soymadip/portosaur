@@ -144,10 +144,14 @@ function normalizeHref(href: string | null | undefined): string {
 
 /**
  * The breadcrumb path for a sidebar href: the `{ title, href }` items
- * from the root category down to the item matching `href` (trailing
+ * from the top-level item down to the item matching `href` (trailing
  * slashes ignored), or `[]` when no item matches. Categories without a
  * link (no index doc) appear with `href: null` — the layout renders
  * them as plain text, not links.
+ *
+ * The path has no section crumb — the tree carries no root category,
+ * so the "Docs"/"Notes" crumb comes from the mode/route instead (see
+ * `findBreadcrumbs`).
  */
 export function findSidebarPath(
   tree: SidebarItem[] | undefined,
@@ -182,10 +186,32 @@ export function findSidebarPath(
 }
 
 /**
+ * The breadcrumb path for a sidebar href, with the section crumb
+ * ("Docs"/"Notes" → the collection home) prepended: the tree carries
+ * no root category, so the section crumb comes from the mode/route
+ * instead of the tree. On the collection home itself the path is just
+ * the section crumb; `[]` when the href is not in the tree at all.
+ */
+export function findBreadcrumbs(
+  tree: SidebarItem[] | undefined,
+  href: string,
+  section: SidebarLink,
+): { title: string; href: string | null }[] {
+  const path = findSidebarPath(tree, href);
+  if (path.length > 0) {
+    return [section, ...path];
+  }
+  if (normalizeHref(href) === normalizeHref(section.href)) {
+    return [{ title: section.title, href: section.href }];
+  }
+  return [];
+}
+
+/**
  * Flattens the sidebar tree into its doc-link order: every doc item plus
  * every category that has a link (its index doc), depth-first, in
- * sidebar order. The root category's link (the collection home) comes
- * first — it is a real page too.
+ * sidebar order. The collection home is not in the tree — callers
+ * prepend it (see `findPrevNext`).
  */
 function flattenSidebarLinks(tree: SidebarItem[] | undefined): SidebarLink[] {
   const links: SidebarLink[] = [];
@@ -213,16 +239,22 @@ function flattenSidebarLinks(tree: SidebarItem[] | undefined): SidebarLink[] {
 
 /**
  * The previous/next doc links around `href` in flattened sidebar
- * doc-link order (trailing slashes ignored). Returns
- * `{ prev, next }` where each side is `{ title, href }` or `null` at
- * the ends — or when `href` is not in the tree at all.
+ * doc-link order (trailing slashes ignored). The collection home
+ * (`home`) is prepended first — it is a real page too, and the first
+ * doc's "Previous" link points at it. Returns `{ prev, next }` where
+ * each side is `{ title, href }` or `null` at the ends — or when
+ * `href` is not in the tree at all.
  */
 export function findPrevNext(
   tree: SidebarItem[] | undefined,
   href: string,
+  home?: SidebarLink | null,
 ): { prev: SidebarLink | null; next: SidebarLink | null } {
   const normalized = normalizeHref(href);
   const links = flattenSidebarLinks(tree);
+  if (home) {
+    links.unshift(home);
+  }
   const index = links.findIndex(
     (link) => normalizeHref(link.href) === normalized,
   );
@@ -238,13 +270,19 @@ export function findPrevNext(
 /**
  * Finds a category node in the sidebar tree by its link href (trailing
  * slashes ignored). Returns the category's `items` (docs + subcategories,
- * in sidebar order) or an empty array.
+ * in sidebar order) or an empty array. The collection home has no
+ * category in the tree (there is no root category) — when `href`
+ * matches `homeHref`, the top-level items are returned instead.
  */
 export function findCategoryItems(
   tree: SidebarItem[],
   href: string,
+  homeHref?: string,
 ): SidebarItem[] {
   const normalized = href.replace(/\/+$/, "") || "/";
+  if (homeHref && normalized === (homeHref.replace(/\/+$/, "") || "/")) {
+    return tree;
+  }
   const stack = [...tree];
   while (stack.length > 0) {
     const node = stack.pop();

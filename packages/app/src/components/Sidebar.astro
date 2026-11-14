@@ -3,17 +3,20 @@
 // Starlight's Sidebar (persister + sublist + mobile menu footer),
 // renamed (`sl-` → `porto-`) and adapted to Portosaur's sidebar data.
 //
-// The `porto:sidebar` tree is a one-element array holding the root
-// category ("Docs"/"Notes"). The root itself renders as the first
-// top-level link (to the collection home), followed by the root's
-// items — the same flattening the old sidebar did. The old root
-// collapse chevron and the « sidebar-collapse button are gone:
-// Starlight has no sidebar collapse; open/closed groups and scroll
-// position persist across navigations instead (SidebarPersister).
+// The `porto:sidebar` tree is the root's children — the top-level
+// items, with no root wrapper (the old "Docs"/"Notes" root entry is
+// gone). Docs mode renders the tree as-is, categories and all; the
+// notes sidebar lists every note flat, with no category grouping
+// (`flattenSidebar`). The old root collapse chevron and the «
+// sidebar-collapse button are gone: Starlight has no sidebar
+// collapse; open/closed groups and scroll position persist across
+// navigations instead (SidebarPersister).
+import config from "porto:config";
 import sidebarTree from "porto:sidebar";
 import MobileMenuFooter from "./MobileMenuFooter.astro";
 import SidebarPersister from "./SidebarPersister.astro";
 import SidebarSublist from "./SidebarSublist.astro";
+import { flattenSidebar } from "../utils/sidebar.ts";
 
 interface Props {
   currentHref: string;
@@ -21,12 +24,8 @@ interface Props {
 
 const { currentHref } = Astro.props;
 
-const root = sidebarTree[0];
-const rootLink =
-  root?.link?.href != null
-    ? [{ type: "doc", href: root.link.href, label: root.label }]
-    : [];
-const items = [...rootLink, ...(root?.items ?? [])];
+const items =
+  config.siteMode === "docs" ? sidebarTree : flattenSidebar(sidebarTree);
 ---
 
 <SidebarPersister>

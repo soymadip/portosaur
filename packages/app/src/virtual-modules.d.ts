@@ -23,10 +23,16 @@ declare module "porto:config" {
   export default config;
 }
 
-/** The notes/docs sidebar tree (a one-element array holding the root category). */
+/**
+ * The notes/docs sidebar tree — the root's children (top-level items);
+ * the root index doc is hidden from it. The collection home link
+ * (root index title + href, or the section label + home when no root
+ * index exists) is the named `home` export, for pagination.
+ */
 declare module "porto:sidebar" {
-  const tree: import("./utils/sidebar.ts").SidebarCategoryItem[];
+  const tree: import("./utils/sidebar.ts").SidebarItem[];
   export default tree;
+  export const home: import("./utils/sidebar.ts").SidebarHomeLink;
 }
 
 /**

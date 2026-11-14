@@ -37,7 +37,11 @@ if (!items) {
   shouldRender =
     forceRender ||
     (current ? topicListShouldRender(current.entry, config) : false);
-  items = shouldRender ? findCategoryItems(sidebar, href) : [];
+  // The home href matches no category (there is no root category) —
+  // `findCategoryItems` returns the top-level items for it.
+  items = shouldRender
+    ? findCategoryItems(sidebar, href, `/${notesRoute}`)
+    : [];
 }
 
 const cards = (items ?? []).map((item) => ({

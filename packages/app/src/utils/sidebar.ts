@@ -11,8 +11,9 @@ import type { Frontmatter } from "./slug.ts";
  * semantics:
  *
  * - Index-as-category-link: an `index`/`README` doc becomes its category's
- *   link and is removed from the list (the root index becomes the root
- *   category's link, so it never appears as a list item).
+ *   link and is removed from the list. The root index is hidden the same
+ *   way — it never appears as a list item, and there is no root category
+ *   wrapping the tree (the old Docusaurus "Docs"/"Notes" root is gone).
  * - Category labels come from the linked index doc's `sidebar_label` or
  *   `title` when one exists (verified against the Docusaurus build: the
  *   sidebar shows "Configuration Guide", the index doc's title, not
@@ -21,8 +22,6 @@ import type { Frontmatter } from "./slug.ts";
  * - Frontmatter enrichment: `icon`, `color`, `description` from the linked
  *   index doc's frontmatter on categories, and from a doc's own
  *   frontmatter on doc items — only when present.
- * - `Docs` root fallback: when no root index exists, the root category
- *   links to the collection home (`routeBase`, or `/`).
  * - Ordering: siblings sort by `sidebar_position` frontmatter, then by
  *   number prefix (`1 - x` < `4.1 - x` < `10 - x`, compared numerically),
  *   then alphabetically by label. Categories and docs sort together.
@@ -33,23 +32,21 @@ import type { Frontmatter } from "./slug.ts";
  * `id` is the collection entry id (path without extension); the tree
  * follows the `id` directory structure, while hrefs come from `slug`.
  *
- * Return shape: a one-element array holding the root category:
- *   [{
- *     type: "category", label: "Docs",
- *     link: { href: "/notes", title: "Portosaur Docs" }, // root index href,
- *       // plus the index doc's title when it has one (the paginator uses
- *       // the doc title, not the sidebar label); the fallback link has
- *       // no title
- *     icon, color, description,          // from the root index, when present
- *     items: [
- *       { type: "category", label: "Guide",
- *         link: { href: "/notes/guide", title: "Guide" }, // only when an
- *           // index doc exists; title omitted when the doc has none
- *         icon, color, description, items: [...] },
- *       { type: "doc", label: "Intro", href: "/notes/intro", id: "intro",
- *         icon, color, description },
- *     ],
- *   }]
+ * Return shape: the root's children — the top-level items, no wrapper:
+ *   [
+ *     { type: "category", label: "Guide",
+ *       link: { href: "/notes/guide", title: "Guide" }, // only when an
+ *         // index doc exists; title omitted when the doc has none
+ *       icon, color, description, items: [...] },
+ *     { type: "doc", label: "Intro", href: "/notes/intro", id: "intro",
+ *       icon, color, description },
+ *   ]
+ *
+ * The collection home link (root index title + href, for pagination)
+ * lives outside the tree — see `buildSidebarHome`. The notes sidebar
+ * flattens the tree for display only — see `flattenSidebar`; the tree
+ * itself stays hierarchical, so breadcrumbs and pagination keep their
+ * category structure.
  */
 
 /** A collection entry, with its slug resolved by the canonical slug util. */
@@ -84,8 +81,19 @@ export interface SidebarCategoryItem {
 export type SidebarItem = SidebarDocItem | SidebarCategoryItem;
 
 export interface BuildSidebarOptions {
-  rootLabel?: string;
+  /** Label of the collection ("Docs" in docs mode, "Notes" in notes mode)
+   * — the home link's fallback title when no root index doc exists.
+   * Default: "Docs". */
+  sectionLabel?: string;
+  /** The collection's route prefix (e.g. "/notes"); prepended to every
+   * href. Default: "". */
   routeBase?: string;
+}
+
+/** The collection home link, for pagination (see `buildSidebarHome`). */
+export interface SidebarHomeLink {
+  title: string;
+  href: string;
 }
 
 /** One directory node while the entry list is grouped into a tree. */
@@ -218,7 +226,7 @@ function buildItems(
     siblings.push({
       key: sortKey(dir.name, dir.indexEntry?.data),
       label,
-      item: dirToCategory(dir, label, hrefFor, false),
+      item: dirToCategory(dir, label, hrefFor),
     });
   }
 
@@ -244,16 +252,14 @@ function buildItems(
 
 /**
  * Builds one category from a directory node. A category gets a link only
- * from its index doc — except the root, which falls back to the collection
- * home when no root index exists. The link carries the index doc's title
- * (not the sidebar label): the paginator shows the doc title, which only
- * differs from the label at the root ("Portosaur Docs" vs "Docs").
+ * from its index doc — categories without one have no link. The link
+ * carries the index doc's title (not the sidebar label): the paginator
+ * shows the doc title.
  */
 function dirToCategory(
   node: DirNode,
   label: string,
   hrefFor: (slug: string) => string,
-  isRoot: boolean,
 ): SidebarCategoryItem {
   const category: SidebarCategoryItem = { type: "category", label, items: [] };
 
@@ -267,12 +273,18 @@ function dirToCategory(
     }
     category.link = link;
     addEnrichment(category, node.indexEntry.data);
-  } else if (isRoot) {
-    category.link = { href: hrefFor("") };
   }
 
   category.items = buildItems(node, hrefFor);
   return category;
+}
+
+/** An href for a resolved slug under a route base ("" -> the base, or "/"). */
+function hrefForSlug(base: string, slug: string): string {
+  if (slug) {
+    return `${base}/${slug}`;
+  }
+  return base || "/";
 }
 
 /**
@@ -281,25 +293,20 @@ function dirToCategory(
  * @param entries - Collection entries, each with its `id`, its resolved
  *   `slug` (from the canonical slug util, no leading slash), and its
  *   frontmatter `data`.
- * @param options.rootLabel - Label of the root category ("Docs" in docs
- *   mode, "Notes" in notes mode). Default: "Docs".
  * @param options.routeBase - The collection's route prefix (e.g.
  *   "/notes"); prepended to every href. Default: "".
- * @returns A one-element array holding the root category (see the
- *   module doc comment for the full shape).
+ * @returns The root's children — the top-level sidebar items, with no
+ *   root wrapper (see the module doc comment for the full shape). The
+ *   root index doc is hidden: it becomes neither an item nor a
+ *   category — see `buildSidebarHome` for the home link it feeds.
  */
 export function buildSidebar(
   entries: SidebarEntry[],
   options: BuildSidebarOptions = {},
-): SidebarCategoryItem[] {
-  const { rootLabel = "Docs", routeBase = "" } = options;
+): SidebarItem[] {
+  const { routeBase = "" } = options;
   const base = routeBase.replace(/\/+$/, "");
-  const hrefFor = (slug: string): string => {
-    if (slug) {
-      return `${base}/${slug}`;
-    }
-    return base || "/";
-  };
+  const hrefFor = (slug: string): string => hrefForSlug(base, slug);
 
   // Group entries into a directory tree by id segments
   const root = createDirNode("");
@@ -329,5 +336,75 @@ export function buildSidebar(
     }
   }
 
-  return [dirToCategory(root, rootLabel, hrefFor, true)];
+  return buildItems(root, hrefFor);
+}
+
+/**
+ * The collection home link, for pagination: the root index doc's title
+ * and href when a root index exists, else the section label
+ * ("Docs"/"Notes") and the collection home. The paginator shows the
+ * doc title, not the sidebar label ("Portosaur Docs", not "Docs").
+ *
+ * The last root index wins on duplicates, mirroring the tree builder,
+ * which overwrites the root index entry as it groups.
+ */
+export function buildSidebarHome(
+  entries: SidebarEntry[],
+  options: BuildSidebarOptions = {},
+): SidebarHomeLink {
+  const { routeBase = "", sectionLabel = "Docs" } = options;
+  const base = routeBase.replace(/\/+$/, "");
+
+  let rootIndex: SidebarEntry | null = null;
+  for (const entry of entries) {
+    if (!entry.id.includes("/") && isIndexBase(entry.id)) {
+      rootIndex = entry;
+    }
+  }
+
+  return {
+    title: rootIndex?.data?.title ?? sectionLabel,
+    href: hrefForSlug(base, rootIndex?.slug ?? ""),
+  };
+}
+
+/**
+ * Flattens a sidebar tree into a plain doc list, depth-first, in
+ * sidebar order: categories dissolve into their children, and a
+ * category with an index doc keeps its page as a doc link (the
+ * category label + link href, with the category's enrichment) ahead
+ * of its children. Used by the notes sidebar, which lists every note
+ * flat instead of grouping them into categories. Only the sidebar
+ * presentation flattens — the tree itself stays hierarchical, so
+ * breadcrumbs, pagination, and topic lists keep their categories,
+ * and routes stay file-path based.
+ *
+ * A synthesized doc item has no entry id in the tree — its href is
+ * unique per item, so it doubles as the id.
+ */
+export function flattenSidebar(tree: SidebarItem[]): SidebarDocItem[] {
+  const docs: SidebarDocItem[] = [];
+
+  function walk(nodes: SidebarItem[]): void {
+    for (const node of nodes) {
+      if (node.type === "doc") {
+        docs.push(node);
+      } else {
+        if (node.link?.href) {
+          const item: SidebarDocItem = {
+            type: "doc",
+            label: node.label,
+            href: node.link.href,
+            id: node.link.href,
+          };
+          addEnrichment(item, node);
+          docs.push(item);
+        }
+        walk(node.items);
+      }
+    }
+  }
+
+  walk(tree);
+  return docs;
 }

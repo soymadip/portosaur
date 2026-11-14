@@ -57,8 +57,8 @@ import {
   isIndexBase,
 } from "./utils/slug.ts";
 import type { Frontmatter } from "./utils/slug.ts";
-import { buildSidebar } from "./utils/sidebar.ts";
-import type { SidebarCategoryItem } from "./utils/sidebar.ts";
+import { buildSidebar, buildSidebarHome } from "./utils/sidebar.ts";
+import type { SidebarHomeLink, SidebarItem } from "./utils/sidebar.ts";
 import { generateSiteAssets } from "./utils/assets.ts";
 
 /**
@@ -291,7 +291,8 @@ function collectMdxFiles(
  * Builds the sidebar tree for the notes/docs collection by scanning the
  * content dir from disk. Mirrors what the routes do with `getCollection`
  * (same slug algorithm, same builder), so the virtual module and the
- * pages always agree.
+ * pages always agree. Returns the tree (the root's children, no root
+ * wrapper) plus the collection home link for pagination.
  */
 function buildSidebarTree({
   projectDir,
@@ -303,7 +304,7 @@ function buildSidebarTree({
   notesDir: string;
   notesRoute: string;
   siteMode: "docs" | "portfolio";
-}): SidebarCategoryItem[] {
+}): { tree: SidebarItem[]; home: SidebarHomeLink } {
   const contentDir = path.join(projectDir, notesDir);
   const files = collectMdxFiles(contentDir);
 
@@ -328,10 +329,14 @@ function buildSidebarTree({
     return { id, slug, data };
   });
 
-  return buildSidebar(entries, {
-    rootLabel: siteMode === "docs" ? "Docs" : "Notes",
+  const options = {
+    sectionLabel: siteMode === "docs" ? "Docs" : "Notes",
     routeBase: `/${notesRoute}`,
-  });
+  };
+  return {
+    tree: buildSidebar(entries, options),
+    home: buildSidebarHome(entries, options),
+  };
 }
 
 /**
@@ -389,13 +394,13 @@ export default function portosaur(
         return `export default ${JSON.stringify(options)};`;
       }
       if (id === "\0porto:sidebar") {
-        const tree = buildSidebarTree({
+        const { tree, home } = buildSidebarTree({
           projectDir,
           notesDir,
           notesRoute,
           siteMode,
         });
-        return `export default ${JSON.stringify(tree)};`;
+        return `export default ${JSON.stringify(tree)};\nexport const home = ${JSON.stringify(home)};`;
       }
       if (id === "\0porto:icons") {
         // Stub in Phase 2 (see the module doc comment): the real icon

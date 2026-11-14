@@ -23,7 +23,7 @@
 //
 // Version banner/badge: DROPPED — versioning is unused.
 import config from "porto:config";
-import sidebar from "porto:sidebar";
+import sidebar, { home as sidebarHome } from "porto:sidebar";
 import BaseLayout from "./BaseLayout.astro";
 import ContentPanel from "../components/ContentPanel.astro";
 import DocFooter from "../components/DocFooter.astro";
@@ -33,7 +33,7 @@ import PageSidebar from "../components/PageSidebar.astro";
 import PageTitle from "../components/PageTitle.astro";
 import Sidebar from "../components/Sidebar.astro";
 import TwoColumnContent from "../components/TwoColumnContent.astro";
-import { findSidebarPath, findPrevNext } from "../utils/content.ts";
+import { findBreadcrumbs, findPrevNext } from "../utils/content.ts";
 
 interface Props {
   title: string;
@@ -56,10 +56,18 @@ const {
   lastUpdated,
 } = Astro.props;
 
+// The section crumb comes from the mode/route, not the tree — the
+// tree carries no root category. The home link prepends the
+// pagination order, so the first doc's "Previous" still points at
+// the collection home.
+const section = {
+  title: config.siteMode === "docs" ? "Docs" : "Notes",
+  href: `/${config.site.notesRoute}`,
+};
 const breadcrumbs = config.theme.breadcrumbs
-  ? findSidebarPath(sidebar, currentHref)
+  ? findBreadcrumbs(sidebar, currentHref, section)
   : [];
-const { prev, next } = findPrevNext(sidebar, currentHref);
+const { prev, next } = findPrevNext(sidebar, currentHref, sidebarHome);
 const tocHeadings = headings.filter(
   (heading) => heading.depth >= 2 && heading.depth <= 3,
 );

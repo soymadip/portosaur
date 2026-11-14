@@ -36,7 +36,8 @@ const title = pageTitle(heading, siteTitle);
 const description = rootIndex?.data?.description;
 
 const Content = rootIndex ? (await render(rootIndex)).Content : null;
-const items = sidebar[0]?.items ?? [];
+// The tree is the top-level items — the index cards list them directly.
+const items = sidebar;
 
 // Edit URL for the root index doc (same derivation as doc.astro): the
 // project-relative file path minus the notes-dir prefix, appended to

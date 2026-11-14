@@ -10,6 +10,10 @@
 //   one (index-as-category-link).
 // - When `theme.navigation.collapsable_sidebar` is false, categories
 //   render as plain groups (label + list, no <details>).
+// - Category rows highlight as a full-width box (Docusaurus-style):
+//   the active/hover background lives on the <summary> row, not the
+//   inner link, so the caret sits inside the box; the caret has its
+//   own hover background stacking on top of the row hover.
 import config from "porto:config";
 import Icon from "./Icon.astro";
 import SidebarRestorePoint from "./SidebarRestorePoint.astro";
@@ -71,7 +75,9 @@ function hasActiveDescendant(item: any): boolean {
                   <span class="large">{item.label}</span>
                 )}
               </span>
-              <Icon name="right-caret" class="caret" size="1.25rem" />
+              <span class="caret">
+                <Icon name="right-caret" size="1.25rem" />
+              </span>
             </summary>
             <SidebarRestorePoint />
             <Astro.self
@@ -147,7 +153,9 @@ function hasActiveDescendant(item: any): boolean {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.2em var(--porto-sidebar-item-padding-inline);
+      /* Same vertical padding as a leaf link, so category rows and
+         leaf rows are the same height. */
+      padding: 0.3em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
       cursor: pointer;
       user-select: none;
@@ -158,8 +166,18 @@ function hasActiveDescendant(item: any): boolean {
     }
 
     .caret {
-      transition: transform 0.2s ease-in-out;
+      /* A square hit area around the chevron, with its own hover
+         background (Docusaurus's caret button): the negative
+         margins keep the padded box from making the row taller
+         than a leaf row. */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      padding: 0.2rem;
+      margin-block: -0.2rem;
+      border-radius: 0.25rem;
+      transition: transform 0.2s ease-in-out;
     }
     :global([dir="rtl"]) .caret {
       transform: rotateZ(180deg);
@@ -190,14 +208,51 @@ function hasActiveDescendant(item: any): boolean {
       background-color: var(--porto-color-text-accent);
     }
 
+    /* The active category row highlights as one uniform box: the
+       background sits on the <summary>, not the inner link, so the
+       box spans the full row at leaf-row height with the caret
+       inside it (Docusaurus-style). The link keeps only the invert
+       text color — its own background is cleared. */
+    summary:has(> .group-label > a[aria-current="page"]) {
+      background-color: var(--porto-color-text-accent);
+      border-radius: 0.25rem;
+      color: var(--porto-color-text-invert);
+    }
+
+    /* A hovered category row gets the same full-width box, in a
+       translucent foreground tint (lightens dark sidebars, darkens
+       light ones, in every scheme). The caret has its own hover
+       background in the same tint, stacking on top of the row
+       hover so the caret area goes slightly darker. */
+    summary:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 10%,
+        transparent
+      );
+      border-radius: 0.25rem;
+    }
+    .caret:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 10%,
+        transparent
+      );
+    }
+    .group-label a[aria-current="page"],
+    .group-label a[aria-current="page"]:hover,
+    .group-label a[aria-current="page"]:focus {
+      background-color: transparent;
+    }
+
     a > *:not(:last-child),
     .group-label > *:not(:last-child) {
       margin-inline-end: 0.25em;
     }
 
-    /* The group label grows to fill the summary row, so a selected
-       category's active highlight covers the full row width like a
-       selected leaf (otherwise it only covers the text width). */
+    /* The group label grows to fill the summary row, pinning the
+       caret to the right edge — inside the active highlight box
+       when the category is the current page. */
     .group-label {
       flex: 1;
     }
