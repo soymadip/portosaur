@@ -51,27 +51,24 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-10 p-4">
-    <h1 class="mb-[-1rem]">{heading}</h1>
+  <div class="porto-blog-list-page">
+    <h1 class="porto-blog-list-title">{heading}</h1>
     {posts.map((post) => {
       const date = postDate(post);
       return (
         <article>
-          <h2 class="mb-2 text-[1.8rem]">
-            <a
-              class="text-foreground no-underline hover:text-primary"
-              href={`/${blogRoute}/${blogSlug(post)}/`}
-            >
+          <h2 class="porto-blog-post-title porto-blog-post-title--plain porto-blog-post-title--sm">
+            <a href={`/${blogRoute}/${blogSlug(post)}/`}>
               {post.data.title ?? post.id}
             </a>
           </h2>
-          <div class="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.9rem] text-muted">
+          <div class="porto-blog-post-meta-line">
             {date && (
               <time datetime={date.toISOString()}>{formatPostDate(date)}</time>
             )}
           </div>
           {post.data.description && (
-            <p class="mb-2 text-muted">{post.data.description}</p>
+            <p class="porto-blog-post-desc">{post.data.description}</p>
           )}
         </article>
       );

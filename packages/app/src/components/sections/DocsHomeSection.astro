@@ -3,8 +3,9 @@
 // buttons, feature cards (with optional links). Reads config directly
 // from `porto:config`. Derived in part from Starlight (MIT License) —
 // see packages/app/NOTICE.md: the hero layout comes from Starlight's
-// Hero, the buttons from its LinkButton, the feature cards from its
-// Card + CardGrid user-components (renamed `sl-` → `porto-`).
+// Hero, the feature cards from its Card + CardGrid user-components
+// (renamed `sl-` → `porto-`); the buttons use the shared
+// `.porto-link-button` (Starlight's LinkButton, in css/portfolio.css).
 //
 // Portosaur differences from Starlight's splash:
 // - Feature titles stay <h2> (they are part of the page's heading
@@ -12,44 +13,64 @@
 // - Actions take Portosaur's shape ({ label/text, link, icon }) with
 //   devicon/emoji icons via renderDynamicIcon; the first action is
 //   primary, the rest secondary (Starlight's variants are per-action).
-// - The hero image is a plain <img> (Portosaur's configured icon,
-//   with a fallback) rather than astro:assets.
+// - The hero image goes through Astro's `<Image />` when it is a
+//   local file the build can size (remote URLs and unsizable files
+//   keep a plain `<img>`, with the `onerror` fallback either way).
 // - Entrance animations and the image glow are dropped.
+import { Image } from "astro:assets";
 import config from "porto:config";
 import { PAGE_TITLE_ID } from "../../constants.ts";
 import { renderDynamicIcon, withBase } from "../../utils/icons.ts";
+import {
+  localImageDimensions,
+  staticDirsForConfig,
+} from "../../utils/imageSize.ts";
 
 const docsHome = config.docsHome;
 
 const base = config.site.baseUrl;
 const icon = docsHome?.icon;
-const iconSrc = icon
-  ? withBase(typeof icon === "string" ? icon : icon.src, base)
-  : null;
+const iconRawSrc = icon ? (typeof icon === "string" ? icon : icon.src) : null;
+const iconSrc = iconRawSrc ? withBase(iconRawSrc, base) : null;
 const iconFallback =
   icon && typeof icon === "object" && icon.fallback
     ? withBase(icon.fallback, base)
     : null;
+const iconDims = iconRawSrc
+  ? await localImageDimensions(iconRawSrc, staticDirsForConfig(config))
+  : null;
+const iconOnError = iconFallback
+  ? `this.onerror=null;this.src='${iconFallback}'`
+  : undefined;
 ---
 
 {docsHome && (
   <div class="docs-home">
     <div class="hero">
-      {icon && (
-        <img
+      {icon && iconDims ? (
+        <Image
           src={iconSrc}
           alt="Hero"
+          width={iconDims.width}
+          height={iconDims.height}
           loading="eager"
           fetchpriority="high"
           decoding="async"
-          width="400"
-          height="400"
-          onerror={
-            iconFallback
-              ? `this.onerror=null;this.src='${iconFallback}'`
-              : undefined
-          }
+          onerror={iconOnError}
         />
+      ) : (
+        icon && (
+          <img
+            src={iconSrc}
+            alt="Hero"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="400"
+            height="400"
+            onerror={iconOnError}
+          />
+        )
       )}
       <div class="porto-flex stack">
         <div class="porto-flex copy">
@@ -135,7 +156,11 @@ const iconFallback =
       padding-bottom: 1rem;
     }
 
-    .hero > img {
+    /* `:global(img)`: the hero image renders through Astro's
+       `<Image />` (a child component), whose `<img>` carries no
+       scope attribute — a scoped `img` selector would not match it
+       (the plain-`<img>` fallback branch matches either way). */
+    .hero > :global(img) {
       object-fit: contain;
       width: min(70%, 20rem);
       height: auto;
@@ -204,7 +229,7 @@ const iconFallback =
         padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem);
       }
 
-      .hero > img {
+      .hero > :global(img) {
         order: 2;
         width: min(100%, 25rem);
       }
@@ -224,43 +249,8 @@ const iconFallback =
   }
 
   @layer porto.components {
-    /* LinkButton — from Starlight's LinkButton user-component. */
-    .porto-link-button {
-      align-items: center;
-      border: 1px solid transparent;
-      border-radius: 999rem;
-      display: inline-flex;
-      font-size: var(--porto-text-sm);
-      gap: 0.5em;
-      line-height: 1.1875;
-      outline-offset: 0.25rem;
-      padding: 0.4375rem 1.125rem;
-      text-decoration: none;
-    }
-
-    .porto-link-button.primary {
-      background: var(--porto-color-text-accent);
-      border-color: var(--porto-color-text-accent);
-      color: var(--porto-color-black);
-    }
-    .porto-link-button.primary:hover {
-      color: var(--porto-color-black);
-    }
-    .porto-link-button.secondary {
-      border-color: inherit;
-      color: var(--porto-color-white);
-    }
-
-    .porto-link-button :global(svg) {
-      flex-shrink: 0;
-    }
-
-    @media (min-width: 50rem) {
-      .porto-link-button {
-        font-size: var(--porto-text-base);
-        padding: 0.9375rem 1.25rem;
-      }
-    }
+    /* The action buttons use the shared `.porto-link-button`
+       (Starlight's LinkButton, in css/portfolio.css). */
 
     /* CardGrid + Card — from Starlight's CardGrid/Card
        user-components. */

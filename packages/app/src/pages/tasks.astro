@@ -11,14 +11,14 @@
 // Fixes vs the old page: the old `clsx` calls emitted the global class
 // strings `task-row-completed` / `task-row-striped` / `task-tab-active`,
 // which never matched the hashed CSS-module classes — here the
-// completed-row strikethrough and striping are conditional Tailwind
-// utilities and `task-tab-active` is a real class (kept because the
-// filter script toggles it), so all three actually style. The old JSX
-// referenced a nonexistent `tasks-subheading` class; the subheading uses
-// the `tasks-description` styles, now utilities. Unknown statuses (e.g. `done`) sort after
-// the known ones and get a neutral badge with the raw status text
-// instead of the old empty badge; tasks without a priority get no
-// priority badge instead of an empty one.
+// completed-row strikethrough and striping are conditional classes
+// and `task-tab-active` is a real class (kept because the filter
+// script toggles it), so all three actually style. The old JSX
+// referenced a nonexistent `tasks-subheading` class; the subheading
+// uses the `porto-tasks-subtitle` styles. Unknown statuses (e.g.
+// `done`) sort after the known ones and get a neutral badge with the
+// raw status text instead of the old empty badge; tasks without a
+// priority get no priority badge instead of an empty one.
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../utils/content.ts";
@@ -87,111 +87,84 @@ const tabs = [
 
 const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
 
-// Shared Tailwind utility strings, kept as constants so the four badge
-// variants and six badge icons stay in sync. Font weight is NOT in
-// BADGE_BASE: the medium-priority badge is bold, the others semibold,
-// and two conflicting weight utilities on one element would resolve by
-// stylesheet order, not by intent.
-const BADGE_BASE =
-  "inline-flex items-center rounded-2xl px-[0.8rem] py-[0.35rem] text-[0.8rem] leading-[1.2] tracking-[0.02em] whitespace-nowrap capitalize shadow-sm max-[576px]:px-2 max-[576px]:py-1 max-[576px]:text-[0.7rem]";
-const BADGE_ICON =
-  "mr-[0.4rem] inline-flex items-center align-[-0.125em] text-[0.85rem] max-[576px]:mr-[0.2rem] max-[576px]:text-[0.7rem]";
+// Status / priority badge modifiers (css/tasks.css). Font weight is
+// NOT in the base badge: the medium-priority badge is bold, the
+// others semibold — the `--bold` modifier carries it.
+const STATUS_BADGE: Record<string, string> = {
+  completed: "porto-tasks-badge--done",
+  active: "porto-tasks-badge--active",
+  pending: "porto-tasks-badge--planned",
+};
 ---
 
 <BaseLayout title={title} description={description}>
-  <div
-    class="mb-8 flex min-h-[calc(100vh-60px)] flex-col items-center justify-center px-4 max-[768px]:px-2"
-    data-porto-tasks
-  >
+  <div class="porto-tasks" data-porto-tasks>
     {!enabled ? (
-      <div class="flex w-full max-w-[1000px] flex-col justify-center">
-        <div class="flex flex-col items-center justify-center p-8 text-center">
-          <div class="text-[4rem] text-muted">
+      <div class="porto-tasks-inner">
+        <div class="porto-tasks-disabled">
+          <div class="porto-tasks-disabled-icon">
             <span set:html={renderIcon("ml:alert")} />
           </div>
-          <h2 class="mb-3 text-[2rem] text-foreground">
+          <h2 class="porto-tasks-disabled-title">
             Tasks are currently disabled
           </h2>
-          <p class="max-w-[500px] text-[1.1rem] leading-[1.5] text-muted">
-            To enable tasks, set{" "}
-            <code class="rounded-[3px] bg-gray-500 px-1 py-[2px] text-primary">
-              tasks.enable
-            </code>{" "}
-            to{" "}
-            <code class="rounded-[3px] bg-gray-500 px-1 py-[2px] text-primary">
-              true
-            </code>
+          <p class="porto-tasks-disabled-text">
+            To enable tasks, set <code>tasks.enable</code> to <code>true</code>
           </p>
         </div>
       </div>
     ) : (
       <>
-        <div class="mt-6 text-center">
-          <h1 class="mb-[0.1rem] text-primary">{heading}</h1>
-          {subheading && (
-            <p class="mt-1 mb-6 text-[1.1rem] text-primary">{subheading}</p>
-          )}
+        <div class="porto-tasks-heading">
+          <h1 class="porto-tasks-title">{heading}</h1>
+          {subheading && <p class="porto-tasks-subtitle">{subheading}</p>}
         </div>
-        <div class="flex w-full max-w-[1000px] flex-col justify-center">
-          <div class="mb-8 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 max-[480px]:grid-cols-2 max-[480px]:gap-3">
-            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
-              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
-                Total Tasks
-              </div>
-              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-foreground">
-                {total}
-              </div>
+        <div class="porto-tasks-inner">
+          <div class="porto-tasks-stats">
+            <div class="porto-tasks-stat">
+              <div class="porto-tasks-stat-label">Total Tasks</div>
+              <div class="porto-tasks-stat-value">{total}</div>
             </div>
-            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
-              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
-                Completed
-              </div>
-              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-success">
+            <div class="porto-tasks-stat">
+              <div class="porto-tasks-stat-label">Completed</div>
+              <div class="porto-tasks-stat-value porto-tasks-stat-value--success">
                 {completedCount}
               </div>
             </div>
-            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
-              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
-                In Progress
-              </div>
-              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-primary">
+            <div class="porto-tasks-stat">
+              <div class="porto-tasks-stat-label">In Progress</div>
+              <div class="porto-tasks-stat-value porto-tasks-stat-value--accent">
                 {activeCount}
               </div>
             </div>
-            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
-              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
-                Planned
-              </div>
-              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-warning">
+            <div class="porto-tasks-stat">
+              <div class="porto-tasks-stat-label">Planned</div>
+              <div class="porto-tasks-stat-value porto-tasks-stat-value--warning">
                 {pendingCount}
               </div>
             </div>
-            <div class="rounded-card bg-surface px-4 py-5 text-center shadow-sm transition-transform duration-200 ease-[ease] hover:-translate-y-0.5">
-              <div class="mb-3 text-[0.875rem] font-semibold tracking-[0.5px] text-primary uppercase">
-                Progress
-              </div>
-              <div class="flex flex-col items-center text-[2.25rem] leading-none font-bold text-foreground">
-                {percentComplete}%
-              </div>
-              <div class="mt-2 h-2 w-full rounded-[0.25rem] bg-gray-800">
+            <div class="porto-tasks-stat">
+              <div class="porto-tasks-stat-label">Progress</div>
+              <div class="porto-tasks-stat-value">{percentComplete}%</div>
+              <div class="porto-tasks-progress-track">
                 <div
-                  class="h-full rounded-[0.25rem] bg-primary"
+                  class="porto-tasks-progress-bar"
                   style={`width: ${percentComplete}%`}
                 />
               </div>
             </div>
           </div>
 
-          <div class="mb-10 overflow-hidden rounded-card shadow-sm">
+          <div class="porto-tasks-panel">
             <div
-              class="grid grid-cols-4 border-b border-gray-700 bg-surface max-[768px]:grid-cols-2"
+              class="porto-tasks-tabs"
               role="tablist"
               aria-label="Task categories"
             >
               {tabs.map((tab) => (
                 <button
                   type="button"
-                  class={`relative m-0 flex h-full cursor-pointer items-center justify-center border-b-[3px] border-b-transparent bg-transparent p-4 font-body text-base leading-(--line-height) text-foreground transition-all duration-200 ease-[ease] hover:bg-hover-overlay hover:text-primary focus:outline-none max-[768px]:px-2 max-[768px]:py-3 max-[768px]:text-[0.9rem] max-[480px]:justify-start max-[480px]:p-2 max-[480px]:text-left max-[480px]:text-[0.8rem]${tab.id === "all" ? " task-tab-active" : ""}`}
+                  class={`porto-tasks-tab${tab.id === "all" ? " task-tab-active" : ""}`}
                   data-task-tab={tab.id}
                   role="tab"
                   aria-selected={tab.id === "all"}
@@ -199,74 +172,57 @@ const BADGE_ICON =
                   id={`tab-${tab.id}`}
                 >
                   <span
-                    class={`mr-2 flex items-center justify-center text-[1.25rem] max-[768px]:mr-[0.3rem] max-[768px]:text-base max-[768px]:leading-(--line-height)${tab.spin ? " spin" : ""}`}
+                    class={`porto-tasks-tab-icon${tab.spin ? " spin" : ""}`}
                     aria-hidden="true"
                     set:html={renderIcon(tab.icon)}
                   />
-                  <span class="mr-2 whitespace-nowrap max-[480px]:mr-[0.3rem] max-[480px]:flex-1">
-                    {tab.label}
-                  </span>
-                  <span class="task-tab-count ml-[0.2rem] inline-flex size-[1.1rem] min-h-[1.1rem] min-w-[1.1rem] items-center justify-center rounded-full bg-gray-800 p-0 text-center text-[0.65rem] leading-none font-semibold text-gray-300 max-[768px]:size-4 max-[768px]:min-h-4 max-[768px]:min-w-4 max-[768px]:text-[0.6rem] max-[480px]:text-[0.55rem]">
-                    {tab.count}
-                  </span>
+                  <span class="porto-tasks-tab-label">{tab.label}</span>
+                  <span class="task-tab-count">{tab.count}</span>
                 </button>
               ))}
             </div>
 
             <div
-              class="task-tab-content min-h-[300px] bg-transparent max-[768px]:p-4"
+              class="porto-tasks-content"
               role="tabpanel"
               data-task-panel
               id="tab-content-all"
               aria-labelledby="tab-all"
             >
               {list.length === 0 ? (
-                <div class="flex flex-col items-center justify-center px-4 py-12 text-center text-foreground max-[768px]:py-8">
+                <div class="porto-tasks-empty">
                   <span
-                    class="mb-4 text-[3rem] opacity-30"
+                    class="porto-tasks-empty-icon"
                     set:html={renderIcon("md:format-list-checks")}
                   />
                   <p>No tasks available</p>
                 </div>
               ) : (
                 <>
-                  <div
-                    class="mt-[-1px] w-full overflow-hidden rounded-b-porto bg-surface shadow-sm"
-                    data-task-table
-                  >
-                    <div class="relative z-[1] grid grid-cols-[120px_1fr_120px] border-b-2 border-primary bg-gray-300 text-[0.9rem] font-bold tracking-[0.5px] text-primary uppercase shadow-sm max-[768px]:grid-cols-[100px_1fr_100px] max-[576px]:grid-cols-[80px_1fr_80px] max-[576px]:text-[0.7rem]">
-                      <div class="flex items-center justify-center border-r border-gray-800 px-2 py-3 text-center text-primary max-[576px]:px-1 max-[576px]:py-2">
-                        Status
-                      </div>
-                      <div class="flex flex-col items-center justify-start border-x border-gray-800 py-3 pr-2 pl-4 text-left">
+                  <div class="porto-tasks-table" data-task-table>
+                    <div class="porto-tasks-table-head">
+                      <div class="porto-tasks-table-head-cell">Status</div>
+                      <div class="porto-tasks-table-head-cell porto-tasks-table-head-cell--details">
                         Task Details
                       </div>
-                      <div class="flex items-center justify-center border-l border-gray-800 px-2 py-3 text-center text-primary max-[576px]:px-1 max-[576px]:py-2">
+                      <div class="porto-tasks-table-head-cell porto-tasks-table-head-cell--priority">
                         Priority
                       </div>
                     </div>
                     <div>
                       {sorted.map((task, index) => (
                         <div
-                          class={`grid grid-cols-[120px_1fr_120px] border-b border-gray-800 transition-all duration-150 ease-[ease] last:border-b-0 hover:bg-hover-overlay max-[768px]:grid-cols-[100px_1fr_100px] max-[576px]:grid-cols-[80px_1fr_80px] ${index % 2 === 1 ? "bg-surface-1" : "bg-surface"}`}
+                          class={`porto-tasks-row${index % 2 === 1 ? " porto-tasks-row--striped" : ""}`}
                           data-task-status={task.status}
                         >
-                          <div class="flex items-center justify-center px-2 py-3 max-[576px]:px-1 max-[576px]:py-2">
+                          <div class="porto-tasks-cell">
                             <span
-                              class={`${BADGE_BASE} font-semibold ${
-                                task.status === "completed"
-                                  ? "bg-success text-gray-300"
-                                  : task.status === "active"
-                                    ? "bg-primary-darker text-gray-300"
-                                    : task.status === "pending"
-                                      ? "bg-gray-800 text-background"
-                                      : ""
-                              }`}
+                              class={`porto-tasks-badge ${STATUS_BADGE[task.status] ?? ""}`}
                             >
                               {task.status === "completed" && (
                                 <>
                                   <span
-                                    class={BADGE_ICON}
+                                    class="porto-tasks-badge-icon"
                                     set:html={renderIcon("md:check-circle")}
                                   />{" "}
                                   Done
@@ -275,7 +231,7 @@ const BADGE_ICON =
                               {task.status === "active" && (
                                 <>
                                   <span
-                                    class={`${BADGE_ICON} spin`}
+                                    class="porto-tasks-badge-icon spin"
                                     set:html={renderIcon("md:loading")}
                                   />{" "}
                                   In Progress
@@ -284,7 +240,7 @@ const BADGE_ICON =
                               {task.status === "pending" && (
                                 <>
                                   <span
-                                    class={BADGE_ICON}
+                                    class="porto-tasks-badge-icon"
                                     set:html={renderIcon("md:clock-outline")}
                                   />{" "}
                                   Planned
@@ -293,59 +249,53 @@ const BADGE_ICON =
                               {!KNOWN_STATUSES.has(task.status) && task.status}
                             </span>
                           </div>
-                          <div class="flex flex-col items-start justify-center border-x border-gray-800 py-3 pr-2 pl-4">
+                          <div class="porto-tasks-cell porto-tasks-cell--details">
                             <div
-                              class={`mb-1 text-[1.1rem] font-semibold max-[576px]:text-base max-[576px]:leading-(--line-height) ${
+                              class={`porto-tasks-title-text ${
                                 task.status === "completed"
-                                  ? "text-success opacity-80 line-through"
+                                  ? "porto-tasks-title-text--completed"
                                   : task.status === "active"
-                                    ? "text-primary"
-                                    : "text-foreground"
+                                    ? "porto-tasks-title-text--active"
+                                    : ""
                               }`}
                             >
                               {task.title}
                             </div>
                             {task.desc && (
                               <div
-                                class={`mt-[0.35rem] text-[0.8rem] leading-[1.4] text-foreground max-[576px]:text-[0.75rem] ${
+                                class={`porto-tasks-desc ${
                                   task.status === "completed"
-                                    ? "opacity-70 line-through"
-                                    : "opacity-85"
+                                    ? "porto-tasks-desc--completed"
+                                    : ""
                                 }`}
                               >
                                 {task.desc}
                               </div>
                             )}
                           </div>
-                          <div class="flex items-center justify-center px-2 py-3 max-[576px]:px-1 max-[576px]:py-2">
+                          <div class="porto-tasks-cell">
                             {task.priority === "high" && (
-                              <span
-                                class={`${BADGE_BASE} bg-danger font-semibold text-background`}
-                              >
+                              <span class="porto-tasks-badge porto-tasks-badge--high">
                                 <span
-                                  class={BADGE_ICON}
+                                  class="porto-tasks-badge-icon"
                                   set:html={renderIcon("md:fire")}
                                 />{" "}
                                 High
                               </span>
                             )}
                             {task.priority === "medium" && (
-                              <span
-                                class={`${BADGE_BASE} bg-danger font-bold text-background`}
-                              >
+                              <span class="porto-tasks-badge porto-tasks-badge--high porto-tasks-badge--bold">
                                 <span
-                                  class={BADGE_ICON}
+                                  class="porto-tasks-badge-icon"
                                   set:html={renderIcon("md:thermometer")}
                                 />{" "}
                                 Medium
                               </span>
                             )}
                             {task.priority === "low" && (
-                              <span
-                                class={`${BADGE_BASE} bg-success font-semibold text-gray-300`}
-                              >
+                              <span class="porto-tasks-badge porto-tasks-badge--low">
                                 <span
-                                  class={BADGE_ICON}
+                                  class="porto-tasks-badge-icon"
                                   set:html={renderIcon("md:snowflake")}
                                 />{" "}
                                 Low
@@ -357,12 +307,12 @@ const BADGE_ICON =
                     </div>
                   </div>
                   <div
-                    class="flex flex-col items-center justify-center px-4 py-12 text-center text-foreground max-[768px]:py-8"
+                    class="porto-tasks-empty"
                     data-task-empty
                     style="display: none"
                   >
                     <span
-                      class="mb-4 text-[3rem] opacity-30"
+                      class="porto-tasks-empty-icon"
                       set:html={renderIcon("md:format-list-checks")}
                     />
                     <p>No tasks in this category</p>
@@ -381,78 +331,3 @@ const BADGE_ICON =
     initTasksFilter();
   </script>
 </BaseLayout>
-
-<style>
-  /*
-                      __     ___ _                ____          _
-                      \ \   / (_) |__   ___      / ___|___   __| | ___
-                       \ \ / /| | '_ \ / _ \    | |   / _ \ / _` |/ _ \
-                        \ V / | | |_) |  __/    | |__| (_) | (_| |  __/
-                         \_/  |_|_.__/ \___|     \____\___/ \__,_|\___|
-
-        This Page is completely Vibe coded. No code except small tweaks is written by me.
-  */
-
-  /* What remains as plain CSS, and why:
-   * - `.task-tab-active` (+ `:hover`, + the count descendant): toggled by
-   *   `scripts/tasks-filter.ts` via `classList`, so it must stay a real
-   *   class. The `:hover` rule exists because unlayered component styles
-   *   beat Tailwind's layered utilities: without it the active tab would
-   *   keep its gray background on hover, where the old CSS let `:hover`
-   *   win on specificity.
-   * - `.task-tab-content` animation + the local `fadeIn` keyframes: the
-   *   local keyframes (opacity 0.7, translateY 5px) differ from the
-   *   global `fadeIn` in animations.css, and Astro scopes keyframe names
-   *   to this style block, so the animation must be declared here.
-   * - `.spin` + `spin` keyframes: keyframes don't fit utilities.
-   * Everything else moved to Tailwind utilities on the markup,
-   * including the dead rules (`.task-card*`, `.task-table-container`,
-   * `.tasks-intro`, `.tasks-footer`, `.disabled-message`, `.tasks-note`,
-   * `.centered-text`, `.task-section`, `.task-completed`), which had no
-   * matching markup and were dropped. `.badge-icon svg` was dropped too:
-   * `renderIcon` already emits 1em x 1em SVGs. */
-
-  .task-tab-active {
-    border-bottom: 3px solid var(--color-primary);
-    font-weight: 600;
-    color: var(--color-primary);
-    background-color: var(--color-gray-300);
-  }
-
-  .task-tab-active:hover {
-    background-color: var(--color-hover-overlay);
-  }
-
-  .task-tab-active .task-tab-count {
-    background-color: var(--color-primary);
-    color: var(--color-background);
-  }
-
-  .task-tab-content {
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0.7;
-      transform: translateY(5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .spin {
-    animation: spin 2s linear infinite;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>

@@ -1,0 +1,2124 @@
+/* === Portfolio styles (original Portosaur code) ===
+ *
+ * The portfolio home sections (hero, about, projects, experience,
+ * contact), the notes cards + notes page, the nav arrow, and the
+ * shared bits portfolio pages reuse (LinkButton, empty state).
+ *
+ * Original Portosaur code in Starlight's design language: the renamed
+ * `--porto-*` variables, Starlight's type scale and spacing, hairline
+ * borders, square cards, and pill buttons. The one exception is the
+ * LinkButton below, which is Starlight's LinkButton user-component
+ * (see packages/app/NOTICE.md) — moved here from the per-page copies
+ * so the docs home, the 404 page, and the portfolio buttons share one
+ * definition. Everything else in this file is written for Portosaur,
+ * not copied from Starlight.
+ *
+ * Class names are `porto-` prefixed (global stylesheet — unprefixed
+ * names would leak into user MDX content). The few unprefixed classes
+ * left are JS hooks (`.carousel`, `.dot`, `.noteCard`, `.navArrow`,
+ * `.socialLink`, `.notesContainer`, `.bioText`); their rules are
+ * scoped under a `porto-` parent so they only match inside the
+ * component that owns them.
+ */
+
+@layer porto.components {
+  /* ----- LinkButton (Starlight's LinkButton user-component) ----- */
+  .porto-link-button {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 999rem;
+    display: inline-flex;
+    font-size: var(--porto-text-sm);
+    gap: 0.5em;
+    line-height: 1.1875;
+    outline-offset: 0.25rem;
+    padding: 0.4375rem 1.125rem;
+    text-decoration: none;
+  }
+
+  .porto-link-button.primary {
+    background: var(--porto-color-text-accent);
+    border-color: var(--porto-color-text-accent);
+    color: var(--porto-color-black);
+  }
+  .porto-link-button.primary:hover {
+    color: var(--porto-color-black);
+  }
+  .porto-link-button.secondary {
+    border-color: inherit;
+    color: var(--porto-color-white);
+  }
+
+  .porto-link-button svg {
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 50rem) {
+    .porto-link-button {
+      font-size: var(--porto-text-base);
+      padding: 0.9375rem 1.25rem;
+    }
+  }
+
+  /* ----- Empty state (offline, redirect, blog with no posts) ----- */
+  .porto-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - var(--porto-nav-height) - 100px);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .porto-empty-state-icon {
+    font-size: 4.5rem;
+    color: var(--porto-color-gray-3);
+    opacity: 0.6;
+  }
+
+  .porto-empty-state-title {
+    margin: -0.8rem 0 1rem;
+    font-size: 2.2rem;
+    line-height: var(--porto-line-height-headings);
+    font-weight: 600;
+    color: var(--porto-color-white);
+  }
+
+  .porto-empty-state-text {
+    max-width: 500px;
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--porto-color-gray-3);
+  }
+
+  .porto-empty-state .porto-link-button {
+    margin-top: 1.5rem;
+  }
+
+  /* ----- Hero ----- */
+  .porto-hero {
+    position: relative;
+    display: flex;
+    min-height: calc(100vh - 60px);
+    align-items: center;
+    justify-content: center;
+    padding-block: 2rem;
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  /* `height: auto` restores the old geometry: in the old block layout
+     the container's percentage height resolved to auto (the hero's
+     height is indefinite), so the container hugged its content and
+     the hero centered it. In this Astro layout the hero is a flex
+     item, so Chrome resolves the percentage to the full hero height —
+     and with `flex: 1` on both sections they each stretch to half of
+     it, pushing the image up behind the navbar. */
+  .porto-hero-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 90%;
+    max-width: 1300px;
+    margin-inline: auto;
+    margin-bottom: 2rem;
+    padding-inline: 2rem;
+  }
+
+  /* `flex: 1` shares width in the desktop row; in the mobile column
+     it would share height and stretch the section, so it becomes
+     `flex: none` there (same for the picture section). */
+  .porto-hero-text {
+    flex: 1;
+    padding-left: 1rem;
+    padding-right: 3rem;
+    text-align: left;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+  }
+
+  .porto-hero-intro {
+    margin-bottom: 0.2rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--porto-color-gray-3);
+    animation: slideUp 0.8s ease-out 0.4s both;
+  }
+
+  .porto-hero-title {
+    position: relative;
+    display: inline-block;
+    margin-block: 0.2rem;
+    font-size: 4.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--porto-color-white);
+    transition: all 0.3s ease;
+    animation: slideUp 0.8s ease-out 0.6s both;
+  }
+  .porto-hero-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--porto-color-text-accent);
+    transition: width 0.3s ease;
+  }
+  .porto-hero-title:hover {
+    transform: translateY(-2px);
+  }
+  .porto-hero-title:hover::after {
+    width: 100%;
+  }
+
+  .porto-hero-comma {
+    margin-left: 0.1rem;
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--porto-color-gray-3);
+    animation: slideUp 0.8s ease-out 0.6s both;
+  }
+
+  .porto-hero-profession-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    animation: slideUp 0.8s ease-out 0.8s both;
+  }
+
+  .porto-hero-subtitle {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--porto-color-gray-3);
+  }
+
+  .porto-hero-profession {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    font-size: 2.9rem;
+    font-weight: 550;
+    color: var(--porto-color-text-accent);
+    transition: all 0.3s ease;
+  }
+  .porto-hero-profession::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--porto-color-text-accent);
+    transition: width 0.3s ease;
+  }
+  .porto-hero-profession:hover {
+    transform: translateY(-2px);
+  }
+  .porto-hero-profession:hover::after {
+    width: 100%;
+  }
+
+  .porto-hero-dot {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--porto-color-gray-3);
+  }
+
+  .porto-hero-desc {
+    max-width: 600px;
+    margin-top: 1.5rem;
+    text-align: left;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--porto-color-gray-3);
+    animation: slideUp 0.8s ease-out 1s both;
+  }
+
+  .porto-hero-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 2.5rem;
+    animation: slideUp 0.8s ease-out 1.2s both;
+  }
+
+  .porto-hero-learn-more {
+    display: flex;
+    align-items: center;
+    margin-right: 1.8rem;
+  }
+
+  /* The Learn More button is the shared LinkButton, with the old
+     lift-on-hover kept. */
+  .porto-hero-learn-more .porto-link-button {
+    transition:
+      all 0.3s ease,
+      transform 0.2s ease;
+  }
+  .porto-hero-learn-more .porto-link-button:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--porto-shadow-md);
+  }
+  .porto-hero-learn-more .porto-link-button:active {
+    transform: translateY(-2px);
+  }
+
+  .porto-hero-picture-wrap {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    padding-right: 2rem;
+    animation: slideInRight 0.8s ease-out 0.3s both;
+  }
+
+  .porto-hero-picture {
+    position: relative;
+    height: 270px;
+    width: auto;
+    margin-top: -30px;
+    margin-right: 2rem;
+    border-radius: 20%;
+    object-fit: cover;
+    box-shadow: none;
+    transition:
+      transform 0.5s ease,
+      box-shadow 0.5s ease;
+    will-change: transform;
+    animation: scaleIn 0.8s ease-out both;
+  }
+  .porto-hero-picture:hover {
+    transform: scale(1.04) translateY(-8px);
+    box-shadow: 0 20px 40px var(--porto-color-gray-6);
+  }
+
+  @keyframes porto-gentle-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .porto-hero {
+      min-height: 100vh;
+      padding-top: 1rem;
+      padding-bottom: 3rem;
+    }
+
+    .porto-hero-inner {
+      height: auto;
+      max-width: 500px;
+      flex-direction: column-reverse;
+      padding: 0;
+      text-align: center;
+    }
+
+    .porto-hero-text {
+      flex: none;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+      padding-inline: 0;
+      animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+
+    .porto-hero-intro {
+      animation: slideUp 0.6s ease-out 0.4s both;
+    }
+
+    .porto-hero-title {
+      font-size: 3rem;
+      animation: slideUp 0.6s ease-out 0.5s both;
+    }
+
+    .porto-hero-comma {
+      font-size: 0.9rem;
+      animation: slideUp 0.6s ease-out 0.5s both;
+    }
+
+    .porto-hero-profession-row {
+      margin-block: 0.2rem;
+      justify-content: center;
+      animation: slideUp 0.6s ease-out 0.6s both;
+    }
+
+    .porto-hero-subtitle,
+    .porto-hero-dot {
+      margin-right: 0.4rem;
+    }
+
+    .porto-hero-profession {
+      font-size: 2rem;
+    }
+
+    .porto-hero-desc {
+      max-width: 95%;
+      margin-inline: auto;
+      margin-top: 1.2rem;
+      text-align: center;
+      font-size: 1rem;
+      line-height: 1.5;
+      animation: slideUp 0.6s ease-out 0.7s both;
+    }
+
+    .porto-hero-actions {
+      width: 100%;
+      flex-direction: column;
+      margin-top: 1.5rem;
+      animation: slideUp 0.6s ease-out 0.8s both;
+    }
+
+    .porto-hero-learn-more {
+      width: 100%;
+      justify-content: center;
+      margin-right: 0;
+      margin-bottom: 1.2rem;
+    }
+
+    .porto-hero-picture-wrap {
+      flex: none;
+      width: 100%;
+      justify-content: center;
+      margin-top: -0.5rem;
+      padding-right: 0;
+      animation: fadeIn 0.8s ease-out both;
+    }
+
+    .porto-hero-picture {
+      height: 180px;
+      margin-top: -1.25rem;
+      margin-right: 0;
+      margin-bottom: 1.2rem;
+      animation: porto-gentle-appear 0.7s ease-out both;
+    }
+    .porto-hero-picture:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 15px var(--porto-color-gray-6);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .porto-hero {
+      padding-top: 0.5rem;
+      padding-bottom: 2rem;
+    }
+
+    .porto-hero-title {
+      font-size: 2.3rem;
+      animation: slideUp 0.5s ease-out 0.3s both;
+    }
+
+    .porto-hero-comma {
+      font-size: 0.8rem;
+      animation: slideUp 0.5s ease-out 0.3s both;
+    }
+
+    .porto-hero-subtitle,
+    .porto-hero-dot {
+      margin-right: 0.3rem;
+      font-size: 1rem;
+      line-height: var(--porto-line-height);
+    }
+
+    .porto-hero-profession {
+      font-size: 1.5rem;
+    }
+
+    .porto-hero-desc {
+      max-width: 92%;
+      margin-inline: auto;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      animation: slideUp 0.5s ease-out 0.5s both;
+    }
+
+    .porto-hero-actions {
+      animation: slideUp 0.5s ease-out 0.6s both;
+    }
+
+    .porto-hero-picture-wrap {
+      margin-top: -2rem;
+    }
+
+    .porto-hero-picture {
+      height: 160px;
+      margin-top: -25px;
+      margin-bottom: 1.5rem;
+      animation: porto-gentle-appear 0.6s ease-out both;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-hero,
+    .porto-hero-text,
+    .porto-hero-intro,
+    .porto-hero-title,
+    .porto-hero-comma,
+    .porto-hero-profession-row,
+    .porto-hero-desc,
+    .porto-hero-actions,
+    .porto-hero-picture-wrap,
+    .porto-hero-picture {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* ----- Social links row (hero) ----- */
+  .porto-social-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    height: 38px;
+  }
+
+  .porto-social-links .socialLink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--porto-color-text-accent);
+    transition:
+      color 0.3s,
+      translate 0.2s,
+      scale 0.2s;
+    /* The inline script sets each link's animation-delay by viewport. */
+    animation: fadeIn 0.3s ease-out forwards;
+    opacity: 0;
+  }
+  .porto-social-links .socialLink:hover {
+    translate: 0 -0.25rem;
+    scale: 1.15;
+    color: var(--hover-color, var(--porto-color-accent));
+    opacity: 0.9;
+    text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    .porto-social-links {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .porto-social-links .socialLink {
+      margin-inline: 9px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-social-links .socialLink {
+      animation: none !important;
+      opacity: 1;
+      transition: none !important;
+    }
+  }
+
+  /* ----- About ----- */
+  .porto-about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    scroll-margin-top: calc(var(--porto-nav-height) + 0.5rem);
+    background: var(--porto-color-bg);
+  }
+
+  .porto-about-inner {
+    max-width: 1100px;
+    margin-inline: auto;
+    padding-inline: 2rem;
+    padding-top: 3rem;
+  }
+
+  .porto-about-heading-wrap {
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .porto-about-heading {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-color-white);
+    opacity: 0;
+  }
+  .porto-about-heading::after {
+    content: "";
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    height: 3px;
+    width: 2.5rem;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    background: var(--porto-color-text-accent);
+  }
+  .porto-about.is-visible .porto-about-heading {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .porto-about-card {
+    display: flex;
+    min-height: 461px;
+    overflow: hidden;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    box-shadow: var(--porto-shadow-md);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  .porto-about.is-visible .porto-about-card {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+
+  .porto-about-side {
+    display: flex;
+    flex: 0.8;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3.5rem;
+    border-right: 1px solid var(--porto-color-hairline-light);
+    background: color-mix(in srgb, var(--porto-color-accent) 3%, transparent);
+    padding: 3rem 2rem;
+  }
+
+  .porto-about-avatar-ring {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      var(--porto-color-accent),
+      var(--porto-color-accent-high)
+    );
+    padding: 6px;
+    box-shadow: 0 10px 30px
+      color-mix(in srgb, var(--porto-color-accent) 20%, transparent);
+    transition: transform 0.3s ease;
+  }
+  .porto-about-avatar-ring:hover {
+    transform: scale(1.05);
+  }
+
+  .porto-about-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid var(--porto-color-black);
+    object-fit: cover;
+  }
+
+  .porto-about-resume {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .porto-about-bio {
+    display: flex;
+    flex: 1.2;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 3rem;
+  }
+
+  /* Custom scrollbar for the bio column. `bioText` is the hook class
+     the markup keeps; the rules live here with the rest of the
+     section. */
+  .porto-about-bio .bioText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 1rem;
+  }
+
+  .porto-about-bio .bioText::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .porto-about-bio .bioText::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--porto-color-accent) 5%, transparent);
+    border-radius: 10px;
+  }
+
+  .porto-about-bio .bioText::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--porto-color-accent) 20%, transparent);
+    border-radius: 10px;
+  }
+
+  .porto-about-bio .bioText::-webkit-scrollbar-thumb:hover {
+    background: var(--porto-color-accent);
+  }
+
+  .porto-about-bio-para {
+    position: relative;
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: var(--porto-color-text);
+  }
+  .porto-about-bio-para::before {
+    content: "";
+    position: absolute;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    left: 0;
+    width: 1.5px;
+    border-radius: 2px;
+    background: var(--porto-color-gray-1);
+    opacity: 0.6;
+  }
+
+  .porto-about-skills {
+    margin-top: 1.7rem;
+  }
+
+  .porto-about-skills-heading {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--porto-color-text-accent);
+  }
+  .porto-about-skills-heading::after {
+    content: "";
+    position: absolute;
+    bottom: -0.4rem;
+    left: 0;
+    height: 2px;
+    width: 30px;
+    border-radius: 1px;
+    background: var(--porto-color-text-accent);
+    opacity: 0.6;
+  }
+
+  .porto-about-skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .porto-about-skill {
+    cursor: default;
+    border: 1px solid var(--porto-color-hairline-light);
+    border-radius: 0.5rem;
+    background: var(--porto-color-black);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--porto-color-gray-3);
+    transition: all 0.2s ease;
+  }
+  .porto-about-skill:hover {
+    transform: translateY(-2px);
+    border-color: var(--porto-color-text-accent);
+    background: color-mix(in srgb, var(--porto-color-accent) 5%, transparent);
+    color: var(--porto-color-text-accent);
+  }
+
+  @media (max-width: 992px) {
+    .porto-about-card {
+      flex-direction: column;
+    }
+
+    .porto-about-side {
+      border-right: 0;
+      border-bottom: 1px solid var(--porto-color-hairline-light);
+      padding: 2.5rem;
+    }
+
+    .porto-about-bio {
+      padding: 2rem;
+    }
+
+    .porto-about-skills {
+      text-align: center;
+    }
+
+    .porto-about-skills-heading::after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .porto-about-skill-list {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .porto-about {
+      padding-block: 4rem;
+    }
+
+    .porto-about-heading {
+      font-size: 2rem;
+    }
+
+    .porto-about-avatar-ring {
+      width: 160px;
+      height: 160px;
+    }
+
+    .porto-about-bio-para {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-about-card,
+    .porto-about-avatar-ring,
+    .porto-about-skill {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .porto-about-card {
+      opacity: 1;
+      transform: none;
+    }
+
+    .porto-about-avatar-ring:hover {
+      transform: none;
+    }
+
+    .porto-about-skill:hover {
+      transform: none;
+    }
+  }
+
+  /* ----- Projects carousel ----- */
+  .porto-projects {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-top: 3rem;
+    padding-bottom: 7rem;
+    scroll-margin-top: calc(var(--porto-nav-height) + 0.5rem);
+    background: var(--porto-color-bg);
+  }
+
+  .porto-projects-inner {
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .porto-projects-heading-wrap {
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+
+  .porto-projects-heading {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-color-white);
+    opacity: 0;
+  }
+  .porto-projects.is-visible .porto-projects-heading {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .porto-projects-subheading {
+    max-width: 600px;
+    margin-inline: auto;
+    margin-top: 0.4rem;
+    font-size: 0.95rem;
+    color: var(--porto-color-gray-3);
+    opacity: 0;
+  }
+  .porto-projects.is-visible .porto-projects-subheading {
+    animation: slideUp 0.4s ease-out 0.1s forwards;
+  }
+
+  .porto-projects-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  /* `.prevButton` / `.nextButton` / `.carousel` / `.dot` are the
+     carousel script's query hooks — their rules stay scoped under
+     `.porto-projects` so the unprefixed names can't leak. */
+  .porto-projects .prevButton,
+  .porto-projects .nextButton {
+    z-index: 10;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    cursor: pointer;
+    border: 0;
+    border-radius: 50%;
+    background: var(--porto-color-text-accent);
+    color: var(--porto-color-black);
+    box-shadow: var(--porto-shadow-md);
+    transition: all 0.2s ease;
+  }
+  .porto-projects .prevButton:hover:enabled,
+  .porto-projects .nextButton:hover:enabled {
+    transform: scale(1.1);
+    background: var(--porto-color-accent);
+  }
+  .porto-projects .prevButton:disabled,
+  .porto-projects .nextButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+
+  .porto-projects .carousel {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-block: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .porto-projects .carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .porto-project-slide {
+    box-sizing: border-box;
+    min-width: 0;
+    flex: 0 0 calc(100% / var(--slides-to-show, 3));
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding-inline: 10px;
+  }
+
+  .porto-project-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      border-color 0.3s ease;
+  }
+  .porto-project-card:hover {
+    z-index: 10;
+    transform: scale(1.02);
+    border-color: var(--porto-color-text-accent);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .porto-project-media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid var(--porto-color-hairline-light);
+    padding-top: 62%;
+  }
+
+  .porto-project-icon {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 80%;
+    transition: transform 0.4s ease;
+  }
+  .porto-project-card:hover .porto-project-icon {
+    transform: scale(1.08);
+  }
+  .porto-project-icon img,
+  .porto-project-icon svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .porto-project-state {
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+  }
+
+  /* State badges: the Starlight aside pattern — a `-low` background
+     with `-high` text reads in both modes. An unknown state gets no
+     background, as before. */
+  .porto-project-state-badge {
+    border-radius: 0.25rem;
+    padding: 1px 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .porto-project-state-badge[data-state="active"] {
+    background: var(--porto-color-green-low);
+    color: var(--porto-color-green-high);
+  }
+  .porto-project-state-badge[data-state="completed"] {
+    background: var(--porto-color-blue-low);
+    color: var(--porto-color-blue-high);
+  }
+  .porto-project-state-badge[data-state="maintenance"] {
+    background: var(--porto-color-orange-low);
+    color: var(--porto-color-orange-high);
+  }
+  .porto-project-state-badge[data-state="paused"] {
+    background: var(--porto-color-red-low);
+    color: var(--porto-color-red-high);
+  }
+  .porto-project-state-badge[data-state="archived"] {
+    background: var(--porto-color-gray-5);
+    color: var(--porto-color-gray-2);
+  }
+  .porto-project-state-badge[data-state="planned"] {
+    background: var(--porto-color-purple-low);
+    color: var(--porto-color-purple-high);
+  }
+
+  .porto-project-featured {
+    position: absolute;
+    right: 0.625rem;
+    bottom: 0.625rem;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--porto-color-text-accent);
+    color: var(--porto-color-black);
+    font-size: 0.75rem;
+    box-shadow: var(--porto-shadow-sm);
+  }
+  .porto-project-featured svg {
+    font-size: 10px;
+  }
+
+  .porto-project-tags {
+    position: absolute;
+    right: 2rem;
+    bottom: 5px;
+    left: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .porto-project-tag {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    border: 1px solid var(--porto-color-gray-5);
+    border-radius: 3px;
+    background: var(--porto-color-black);
+    padding: 0 3px 3px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    color: var(--porto-color-text);
+    box-shadow: var(--porto-shadow-sm);
+    backdrop-filter: blur(12px);
+  }
+
+  .porto-project-tag-more {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    cursor: help;
+    border: 1px solid var(--porto-color-gray-5);
+    border-radius: 3px;
+    background: var(--porto-color-text-accent);
+    padding: 0 3px 3px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    color: var(--porto-color-black);
+    box-shadow: var(--porto-shadow-sm);
+    backdrop-filter: blur(12px);
+  }
+
+  .porto-project-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.2rem 1.5rem 0.5rem;
+    text-align: center;
+  }
+
+  .porto-project-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.4rem;
+  }
+
+  .porto-project-title {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--porto-color-white);
+  }
+
+  .porto-project-desc {
+    flex: 1;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--porto-color-gray-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .porto-project-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: auto;
+    padding: 1.2rem 1.5rem 1.8rem;
+  }
+
+  .porto-project-link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    border: 1px solid var(--porto-color-gray-4);
+    background: var(--porto-color-gray-6);
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--porto-color-gray-3);
+    text-decoration: none;
+    box-shadow: var(--porto-shadow-sm);
+    transition: all 0.2s ease;
+  }
+  .porto-project-link svg {
+    font-size: 0.95rem;
+    color: var(--porto-color-gray-3);
+    transition: transform 0.2s ease;
+  }
+  .porto-project-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--porto-color-text-accent);
+    background: var(--porto-color-black);
+    color: var(--porto-color-text-accent);
+    box-shadow: var(--porto-shadow-md);
+  }
+  .porto-project-link:hover svg {
+    transform: scale(1.08);
+    color: var(--porto-color-text-accent);
+  }
+  .porto-project-link:active {
+    transform: translateY(-1px);
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-projects .dotsContainer {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .porto-projects .dot {
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    border: 0;
+    border-radius: 50%;
+    background: var(--porto-color-gray-4);
+    padding: 0;
+    transition: all 0.3s ease;
+  }
+  .porto-projects .dot:hover {
+    transform: scale(1.2);
+    background: var(--porto-color-accent-high);
+  }
+
+  /* `.activeDot` is toggled by the carousel script
+     (`classList.toggle`). It uses the `transform` property (not the
+     `scale` property) deliberately: the dot's hover scale is a
+     `transform` too, so an active hovered dot scales 1.5x, not
+     1.5x * 1.2x. */
+  .porto-projects .activeDot {
+    background-color: var(--porto-color-accent);
+    transform: scale(1.4);
+  }
+
+  .porto-projects .activeDot:hover {
+    transform: scale(1.5);
+  }
+
+  @media (max-width: 768px) {
+    .porto-projects .prevButton,
+    .porto-projects .nextButton {
+      display: none;
+    }
+  }
+
+  /* ----- Experience ----- */
+  /* The local keyframes differ from the global ones (20px rise here
+     vs 30px for the global `slideUp`), so they stay local to this
+     file. */
+  @keyframes porto-rise-sm {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .porto-experience {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: calc(100vh - 45px);
+    padding-top: 0.02rem;
+    padding-bottom: 4.5rem;
+    scroll-margin-top: 38px;
+    background: var(--porto-color-bg);
+  }
+
+  .porto-experience-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1300px;
+    margin-inline: auto;
+  }
+
+  .porto-experience-heading-wrap {
+    margin-top: -14rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .porto-experience-title {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-color-white);
+    animation: porto-rise-sm 0.5s ease-out forwards;
+  }
+
+  .porto-experience-subtitle {
+    max-width: 600px;
+    margin-inline: auto;
+    font-size: 0.95rem;
+    color: var(--porto-color-gray-3);
+    animation: porto-rise-sm 0.5s ease-out 0.2s forwards;
+  }
+
+  .porto-experience-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 9rem;
+  }
+
+  .porto-experience-notice {
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-gray-6);
+    padding: 2rem;
+    text-align: center;
+    transition:
+      translate 0.3s ease,
+      background-color 0.3s ease;
+    animation: porto-rise-sm 0.5s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+  .porto-experience-notice:hover {
+    translate: 0 -3px;
+    background: var(--porto-color-black);
+  }
+
+  .porto-experience-notice-title {
+    margin-bottom: 0.8rem;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--porto-color-accent);
+  }
+
+  .porto-experience-notice-text {
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--porto-color-gray-3);
+  }
+
+  @media (max-width: 768px) {
+    .porto-experience {
+      padding-top: 0.5rem;
+      padding-bottom: 4rem;
+      scroll-margin-top: 70px;
+    }
+
+    .porto-experience-inner {
+      padding-inline: 1.5rem;
+    }
+
+    .porto-experience-heading-wrap {
+      margin-top: -2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .porto-experience-title {
+      font-size: 2.2rem;
+    }
+
+    .porto-experience-subtitle {
+      font-size: 0.9rem;
+    }
+
+    .porto-experience-notice-title {
+      font-size: 1.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .porto-experience {
+      padding-top: 0;
+      padding-bottom: 3rem;
+      scroll-margin-top: 32px;
+    }
+
+    .porto-experience-inner {
+      padding-inline: 1rem;
+    }
+
+    .porto-experience-heading-wrap {
+      margin-top: -2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .porto-experience-title {
+      font-size: 1.9rem;
+    }
+
+    .porto-experience-subtitle {
+      max-width: 90%;
+      font-size: 0.9rem;
+    }
+
+    .porto-experience-notice-title {
+      font-size: 1.5rem;
+    }
+
+    .porto-experience-notice-text {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-experience-title,
+    .porto-experience-subtitle,
+    .porto-experience-notice {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .porto-experience-notice {
+      opacity: 1;
+    }
+  }
+
+  /* ----- Contact ----- */
+  .porto-contact {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: calc(100vh - 60px);
+    padding-bottom: 5rem;
+    scroll-margin-top: 90px;
+    background: var(--porto-color-bg);
+  }
+
+  .porto-contact-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1300px;
+    margin-inline: auto;
+  }
+
+  .porto-contact-heading-wrap {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .porto-contact-title {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-color-white);
+    opacity: 0;
+  }
+
+  .porto-contact-subtitle {
+    max-width: 600px;
+    margin-inline: auto;
+    margin-top: 0.05rem;
+    font-size: 0.95rem;
+    color: var(--porto-color-gray-3);
+    opacity: 0;
+  }
+
+  .porto-contact-grid-wrap {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1.2rem;
+  }
+
+  .porto-contact-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 1300px;
+    margin-inline: auto;
+    margin-top: 0.9rem;
+    padding-inline: 0.5rem;
+  }
+
+  .porto-contact-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 150px;
+    min-height: 160px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    padding: 1.3rem 1.2rem;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: var(--porto-shadow-sm);
+    transition:
+      translate 0.3s ease,
+      box-shadow 0.3s ease,
+      background-color 0.3s ease;
+    opacity: 0;
+  }
+  .porto-contact-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--porto-color-text-accent);
+    transition: width 0.3s ease;
+  }
+  .porto-contact-card:hover {
+    translate: 0 -5px;
+    background: var(--porto-color-gray-6);
+    text-decoration: none;
+    box-shadow: var(--porto-shadow-md);
+  }
+  .porto-contact-card:hover::after {
+    width: 100%;
+  }
+
+  .porto-contact-card-icon {
+    margin-bottom: 0.3rem;
+    font-size: 3.5rem;
+    color: var(--porto-color-text-accent);
+    transition:
+      color 0.3s ease,
+      scale 0.3s ease;
+  }
+  .porto-contact-card:hover .porto-contact-card-icon {
+    scale: 1.1;
+    color: var(--icon-hover-color);
+  }
+
+  .porto-contact-card-name {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding-bottom: 3px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--porto-color-white);
+  }
+  .porto-contact-card-name::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    height: 1px;
+    width: 70px;
+    transform: translateX(-50%);
+    background: var(--porto-color-gray-5);
+    opacity: 0.15;
+  }
+  .porto-contact-card-name:hover {
+    text-decoration: none;
+  }
+
+  .porto-contact-card-desc {
+    width: 100%;
+    margin-top: 0.3rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--porto-color-gray-3);
+    opacity: 0.8;
+  }
+  .porto-contact-card-desc:hover {
+    text-decoration: none;
+  }
+
+  /* Scroll-reveal state: hidden until `.is-visible` triggers the
+     animation. The reveal animations use the global `slideUp`
+     (opacity + 30px rise), which matches the old local keyframes. */
+  .porto-contact.is-visible .porto-contact-title {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .porto-contact.is-visible .porto-contact-subtitle {
+    animation: slideUp 0.4s ease-out 0.1s forwards;
+  }
+
+  .porto-contact.is-visible .porto-contact-card {
+    animation: slideUp 0.8s ease-out forwards;
+    animation-delay: calc(0.3s + (var(--card-index, 0) * 0.1s));
+  }
+
+  @media (max-width: 1200px) {
+    .porto-contact-grid {
+      gap: 1.1rem;
+    }
+
+    .porto-contact-card {
+      width: 140px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .porto-contact-grid {
+      max-width: 100%;
+      gap: 1rem;
+    }
+
+    .porto-contact-card {
+      width: 150px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .porto-contact {
+      padding-top: 0.5rem;
+      padding-bottom: 4rem;
+      scroll-margin-top: 70px;
+    }
+
+    .porto-contact-heading-wrap {
+      margin-bottom: 1.2rem;
+    }
+
+    .porto-contact-title {
+      font-size: 2.2rem;
+    }
+
+    .porto-contact-subtitle {
+      font-size: 0.9rem;
+    }
+
+    .porto-contact-grid-wrap {
+      margin-top: 1rem;
+    }
+
+    .porto-contact-grid {
+      padding-inline: 1rem;
+    }
+
+    .porto-contact-card {
+      min-height: 150px;
+      width: 150px;
+      padding-block: 1.2rem;
+    }
+
+    .porto-contact-card-icon {
+      margin-bottom: 0.25rem;
+      font-size: 3rem;
+    }
+
+    .porto-contact-card-name {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .porto-contact {
+      padding-top: 0;
+      padding-bottom: 3rem;
+      scroll-margin-top: 32px;
+    }
+
+    .porto-contact-heading-wrap {
+      margin-bottom: 1rem;
+    }
+
+    .porto-contact-title {
+      font-size: 1.9rem;
+    }
+
+    .porto-contact-subtitle {
+      max-width: 90%;
+      font-size: 0.9rem;
+    }
+
+    .porto-contact-grid-wrap {
+      margin-top: 0.8rem;
+    }
+
+    .porto-contact-grid {
+      gap: 1rem;
+      padding-inline: 0.5rem;
+    }
+
+    /* Icon-only squares on small phones. */
+    .porto-contact-card {
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      min-height: auto;
+      padding: 0;
+    }
+    .porto-contact-card::after {
+      display: none;
+    }
+    .porto-contact-card:hover {
+      translate: 0 -3px;
+      scale: 1.05;
+    }
+
+    .porto-contact-card-icon {
+      position: relative;
+      top: 1.5px;
+      margin-top: 3px;
+      margin-bottom: 0;
+      font-size: 2.5rem;
+    }
+
+    .porto-contact-card-name,
+    .porto-contact-card-desc {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-contact-title,
+    .porto-contact-subtitle,
+    .porto-contact-card {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .porto-contact-card {
+      opacity: 1;
+    }
+  }
+
+  /* ----- Notes page + note cards ----- */
+  .porto-notes-page {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 8vh;
+  }
+
+  /* The old page wrapped the grid in Docusaurus' `.container`
+     (max-width 1280px, 1rem padding → 1248px of content), which fits
+     exactly 6 cards per row (6×165px + 5×1rem = 1070px; a 7th needs
+     1251px). This theme has no global `.container`, so the width cap
+     lives on the grid itself and this wrapper only centers it. */
+  .porto-notes-inner {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  .porto-notes-header {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .porto-notes-title {
+    margin-top: 1.3rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--porto-color-white);
+    animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .porto-notes-subtitle {
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--porto-color-gray-3);
+    animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s forwards;
+  }
+
+  .porto-note-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    max-width: calc(6 * 165px + 5 * 1rem);
+    margin-inline: auto;
+    margin-block: 4rem;
+  }
+
+  /* `.noteCard` is the hash-navigation selector
+     (pages/notecards.astro), so the class name stays; its rules are
+     scoped under the grid. */
+  .porto-note-grid .noteCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 165px;
+    min-height: 225px;
+    overflow: hidden;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    padding: 1.5rem 1rem;
+    color: var(--porto-color-text);
+    text-decoration: none;
+    box-shadow: var(--porto-shadow-sm);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: porto-note-fade-in 0.5s ease-out forwards;
+    animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
+    opacity: 0;
+  }
+  .porto-note-grid .noteCard:hover {
+    z-index: 2;
+    transform: translateY(-4px);
+    border-color: var(--note-color);
+    background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+    box-shadow: var(--porto-shadow-lg);
+  }
+
+  @keyframes porto-note-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .porto-note-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--note-color) 15%, transparent);
+  }
+
+  /* The icon renders via set:html inside this wrapper span; the
+     inner svg/img fills it. */
+  .porto-note-grid .noteIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0.2rem;
+    font-size: 3.5rem;
+    color: var(--note-color);
+    transition: scale 0.3s ease;
+  }
+  .porto-note-grid .noteCard:hover .noteIcon {
+    scale: 1.2;
+  }
+  .porto-note-grid .noteIcon svg,
+  .porto-note-grid .noteIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .porto-note-grid .noteIcon svg {
+    fill: currentColor;
+  }
+
+  .porto-note-title {
+    margin: 0;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Chevron under the card title. The old component rendered the
+     same `md:chevron-right` icon with a `display: none` desktop rule
+     — but the old Icon applied its own `display: inline-block` class
+     to the same <svg>, and in the built OG bundle that won the
+     cascade, so the golden screenshots show the chevron on desktop
+     too (small, centered, in the card's text color). Shown here
+     deliberately. */
+  .porto-note-grid .mobileChevron {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.5rem;
+  }
+  .porto-note-grid .mobileChevron svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Hash navigation (ported from the old utils/HashNavigation.jsx
+     style injection). The classes are added by the script to
+     NoteCards' cards and to a JS-created overlay, so the rules are
+     global. `notesContainer` keeps its class in the markup as the
+     script's container selector. */
+  .porto-notes-page.hash-nav-active {
+    position: relative;
+  }
+
+  .porto-notes-page.hash-nav-active::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--porto-color-backdrop-overlay);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hash-nav-highlight {
+    position: relative;
+    z-index: 20;
+    transform: scale(1.05);
+    box-shadow: 0 0 30px 10px var(--porto-color-accent);
+    transition: all 0.3s ease;
+  }
+
+  .hash-nav-blur {
+    filter: blur(4px) grayscale(70%) brightness(0.8);
+    opacity: 0.3;
+    transition: all 0.3s ease;
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-bg) 15%,
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .hash-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 15;
+    cursor: pointer;
+  }
+
+  @media (max-width: 480px) {
+    .porto-note-grid {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0.65rem;
+      margin-top: 0.2rem;
+      padding-inline: 0.2rem;
+    }
+
+    .porto-note-grid .noteCard {
+      flex-direction: row;
+      width: 100%;
+      min-height: auto;
+      gap: 0.9rem;
+      padding-block: 0.6rem;
+    }
+    .porto-note-grid .noteCard:hover {
+      transform: none;
+    }
+    .porto-note-grid .noteCard:active {
+      scale: 0.98;
+      background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+    }
+
+    .porto-note-icon-wrap {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      margin: 0;
+      border-radius: 18px;
+    }
+
+    .porto-note-grid .noteIcon {
+      width: 2.8rem;
+      height: 2.8rem;
+      font-size: 2.8rem;
+    }
+
+    .porto-note-text {
+      min-width: 0;
+      flex: 1;
+      text-align: left;
+    }
+
+    .porto-note-title {
+      text-align: left;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--porto-color-text);
+      -webkit-line-clamp: 2;
+    }
+
+    .porto-note-grid .mobileChevron {
+      width: 1.4rem;
+      height: 1.4rem;
+      margin-top: 0;
+      margin-left: auto;
+      color: var(--porto-color-text-accent);
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .porto-note-grid .noteCard {
+      animation: none;
+      opacity: 1;
+      transition: none !important;
+    }
+
+    .hash-nav-highlight,
+    .hash-nav-blur {
+      transition: none !important;
+    }
+
+    .hash-nav-highlight {
+      transform: none !important;
+    }
+
+    .hash-nav-blur {
+      filter: opacity(0.3);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-bg) 15%,
+        transparent
+      );
+    }
+  }
+
+  /* ----- Nav arrow (scroll to next section / back to top) ----- */
+  /* The script toggles `.visible` / `.scrolling` and
+     `data-direction`, and the base / visible / hover / active
+     transforms must all compose on the same `transform` property. */
+  .navArrow {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 50%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    border: 0;
+    border-radius: 50%;
+    background: var(--porto-color-text-accent);
+    color: var(--porto-color-black);
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: var(--porto-shadow-sm);
+    transform: translateX(-50%) translateY(100px);
+    transition:
+      transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+      opacity 400ms ease,
+      background-color 200ms ease;
+  }
+
+  .navArrow.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .navArrow:hover {
+    transform: translateX(-50%) translateY(-5px) scale(1.1);
+    background: var(--porto-color-accent);
+    box-shadow: var(--porto-shadow-md);
+  }
+
+  .navArrow:active {
+    transform: translateX(-50%) translateY(-2px) scale(0.95);
+  }
+
+  .navArrow .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+  .navArrow .iconWrapper svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* Only the chevron for the current direction shows. */
+  .navArrow[data-direction="down"] .iconWrapper.up {
+    display: none;
+  }
+
+  .navArrow[data-direction="up"] .iconWrapper.down {
+    display: none;
+  }
+
+  .navArrow[data-direction="down"] .iconWrapper.down {
+    animation: porto-nav-arrow-bounce 2s infinite;
+  }
+
+  @keyframes porto-nav-arrow-bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-8px);
+    }
+    60% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Subtly fade during manual scroll */
+  .navArrow.scrolling {
+    opacity: 0.7;
+  }
+
+  @media (max-width: 768px) {
+    .navArrow {
+      bottom: 1.5rem;
+      width: 46px;
+      height: 46px;
+    }
+
+    .navArrow .iconWrapper {
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navArrow {
+      transition: opacity 200ms ease;
+      animation: none !important;
+    }
+
+    .navArrow.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  /* ----- Notify button (blog list "Notify me of new posts") ----- */
+  .porto-notify-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border: 1px solid var(--porto-color-hairline-light);
+    border-radius: 1.25rem;
+    background: var(--porto-color-black);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--porto-color-text);
+  }
+  .porto-notify-button:hover:not(:disabled) {
+    border-color: var(--porto-color-text-accent);
+  }
+  .porto-notify-button:disabled {
+    cursor: default;
+    opacity: 0.8;
+  }
+}

@@ -65,29 +65,11 @@ const title = pageTitle("Page Not Found", config.site.title);
   }
 
   @layer porto.components {
-    /* LinkButton primary — from Starlight's LinkButton
-       user-component (same rules as DocsHomeSection's buttons). */
-    .porto-link-button {
-      align-items: center;
-      border: 1px solid transparent;
-      border-radius: 999rem;
-      display: inline-flex;
-      font-size: var(--porto-text-base);
-      gap: 0.5em;
-      line-height: 1.1875;
-      outline-offset: 0.25rem;
-      padding: 0.9375rem 1.25rem;
+    /* The button is the shared `.porto-link-button` (Starlight's
+       LinkButton, in css/portfolio.css) — only its top margin is
+       page-specific. */
+    .not-found .porto-link-button {
       margin-top: 1.5rem;
-      text-decoration: none;
-    }
-
-    .porto-link-button.primary {
-      background: var(--porto-color-text-accent);
-      border-color: var(--porto-color-text-accent);
-      color: var(--porto-color-black);
-    }
-    .porto-link-button.primary:hover {
-      color: var(--porto-color-black);
     }
   }
 </style>

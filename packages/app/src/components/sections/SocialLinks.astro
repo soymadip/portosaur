@@ -35,16 +35,13 @@ const base = config.site.baseUrl;
 ---
 
 {socialLinks.length > 0 && (
-  <div
-    class="flex h-[38px] items-center gap-[18px] max-[768px]:w-full max-[768px]:justify-center"
-    data-porto-social
-  >
+  <div class="porto-social-links" data-porto-social>
     {socialLinks.map((social) => {
       const href = social.url || "#";
       const slugLower = (social.name || "").toLowerCase();
       const mappedColor = techMap[slugLower]?.color;
       const displayColor =
-        social.color || mappedColor || "var(--color-primary)";
+        social.color || mappedColor || "var(--porto-color-accent)";
       const iconHtml = renderDynamicIcon(social.icon, {
         slug: social.name,
         fallbackIcon: "md:help-circle",
@@ -56,7 +53,7 @@ const base = config.site.baseUrl;
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          class="socialLink relative flex items-center justify-center text-primary [transition:color_0.3s,translate_0.2s,scale_0.2s] hover:-translate-y-1 hover:scale-115 hover:text-[var(--hover-color,var(--color-primary-dark))] hover:opacity-90 hover:no-underline max-[768px]:mx-[9px]"
+          class="socialLink"
           style={`--hover-color: ${displayColor}`}
           title={social.desc || social.name || social.icon || "Link"}
           aria-label={social.name || social.icon || "social link"}
@@ -83,33 +80,3 @@ const base = config.site.baseUrl;
   applySocialDelays();
   window.addEventListener("resize", applySocialDelays);
 </script>
-
-<style>
-  /* Load-in keyframes + animation. The inline script sets each link's
-     animation-delay by viewport, so the animation stays plain CSS next
-     to its keyframes; `.socialLink` is also the script's selector, so
-     the class name stays. */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .socialLink {
-    animation: fadeIn 0.3s ease-out forwards;
-    opacity: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .socialLink {
-      animation: none !important;
-      opacity: 1;
-      /* `transition` is a Tailwind utility now, so this needs
-         `!important` to beat it (same stylesheet no longer applies). */
-      transition: none !important;
-    }
-  }
-</style>

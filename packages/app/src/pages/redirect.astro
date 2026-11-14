@@ -8,8 +8,8 @@
 // there is no history), on block the tap-to-open fallback appears. The
 // old code has no URL validation and neither does the port. The React
 // `blocked` / `targetUrl` state becomes DOM updates (the heading text
-// swap + unhiding the fallback block). The empty-state layout is
-// Tailwind utilities (the old shared empty-state styles are inlined).
+// swap + unhiding the fallback block). The empty-state layout is the
+// shared `.porto-empty-state` (css/portfolio.css).
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../utils/content.ts";
@@ -19,23 +19,20 @@ const title = pageTitle("Opening in browser…", config.site.title);
 ---
 
 <BaseLayout title={title} description="Opening in browser…">
-  <div class="flex min-h-[calc(100vh-var(--porto-nav-height)-100px)] flex-col items-center justify-center p-8 text-center">
-    <div class="text-[4.5rem] text-muted opacity-60">
+  <div class="porto-empty-state">
+    <div class="porto-empty-state-icon">
       <span set:html={renderIcon("md:open-in-new", { size: "3rem" })} />
     </div>
-    <h2
-      class="mt-[-0.8rem] mb-4 text-[2.2rem] text-foreground"
-      id="redirect-title"
-    >
+    <h2 class="porto-empty-state-title" id="redirect-title">
       Opening in browser…
     </h2>
     <div id="redirect-blocked" hidden>
-      <p class="max-w-[500px] text-[1.1rem] text-muted">
+      <p class="porto-empty-state-text">
         This link lives outside the portfolio app. Tap the button below to open
         it in your browser.
       </p>
       <a
-        class="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-primary px-[1.4rem] py-[0.6rem] text-base leading-(--line-height) font-semibold text-[#09090b] no-underline transition-[background-color_0.2s_ease,transform_0.2s_ease] hover:-translate-y-0.5 hover:bg-primary-light hover:shadow-md"
+        class="porto-link-button primary"
         id="redirect-link"
         target="_blank"
         rel="noopener noreferrer"

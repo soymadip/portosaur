@@ -8,16 +8,25 @@
 // Post slugs follow the Docusaurus blog rule (frontmatter `slug` wins,
 // else the file base with a `YYYY-MM-DD-` date prefix stripped).
 //
+// Author avatars go through Astro's `<Image />` when they are local
+// files the build can size; remote URLs and unsizable files keep a
+// plain `<img>` (same rule as the hero profile picture).
+//
 // Dates resolve in `getStaticPaths` (frontmatter `date` → git date →
 // mtime, the same chain as the list pages) so newer/older ordering
 // follows resolved dates; the post's date and the sidebar data ride
 // along as props.
+import { Image } from "astro:assets";
 import { getCollection, render } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogSidebar from "../components/BlogSidebar.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import { pageTitle, blogSlug, postDate } from "../utils/content.ts";
+import {
+  localImageDimensions,
+  staticDirsForConfig,
+} from "../utils/imageSize.ts";
 
 export async function getStaticPaths() {
   const datedPosts = (await getCollection("blog"))
@@ -146,8 +155,16 @@ function resolveAuthorImage(image) {
 }
 
 const authors = await loadAuthors();
-const postAuthors = (post.data.authors ?? []).map((ref) =>
-  resolveAuthor(ref, authors),
+// Avatar dimensions for <Image /> (public images need width/height).
+// Null for remote or unsizable avatars, which keep a plain <img>.
+const postAuthors = await Promise.all(
+  (post.data.authors ?? []).map(async (ref) => {
+    const author = resolveAuthor(ref, authors);
+    const dims = author.image
+      ? await localImageDimensions(author.image, staticDirsForConfig(config))
+      : null;
+    return { ...author, dims };
+  }),
 );
 
 function formatPostDate(value) {
@@ -164,42 +181,48 @@ function postUrl(other) {
 ---
 
 <BaseLayout title={title} description={post.data.description}>
-  <div class="mx-auto flex w-full max-w-7xl gap-8 p-4">
+  <div class="porto-blog-layout">
     <BlogSidebar posts={sidebarPosts} currentUrl={currentUrl} />
-    <article class="min-w-0 max-w-[46rem] flex-1 max-[996px]:max-w-none">
+    <article class="porto-blog-article">
       <header>
-        <h1 class="mb-2 text-[3rem] leading-[1.2] text-primary">{heading}</h1>
+        <h1 class="porto-blog-article-title">{heading}</h1>
         {date && (
-          <time
-            class="mb-3 block text-[0.9rem] text-muted"
-            datetime={date.toISOString()}
-          >
+          <time class="porto-blog-article-date" datetime={date.toISOString()}>
             {formatPostDate(date)}
           </time>
         )}
         {postAuthors.length > 0 && (
-          <div class="mb-6 flex flex-wrap gap-4">
+          <div class="porto-blog-article-authors">
             {postAuthors.map((author) => (
-              <div class="flex items-center gap-3">
-                {author.image && (
-                  <img
-                    class="h-10 w-10 rounded-full object-cover"
-                    src={resolveAuthorImage(author.image)}
-                    alt=""
-                  />
-                )}
-                <div class="flex flex-col leading-[1.3]">
-                  <span class="font-bold">
+              <div class="porto-blog-article-author">
+                {author.image &&
+                  (author.dims ? (
+                    <Image
+                      class="porto-blog-article-avatar"
+                      src={resolveAuthorImage(author.image)}
+                      alt=""
+                      width={author.dims.width}
+                      height={author.dims.height}
+                    />
+                  ) : (
+                    <img
+                      class="porto-blog-article-avatar"
+                      src={resolveAuthorImage(author.image)}
+                      alt=""
+                    />
+                  ))}
+                <div class="porto-blog-article-author-info">
+                  <span class="porto-blog-article-author-name">
                     {author.hasPage ? (
                       <a
-                        class="text-primary no-underline hover:underline"
+                        class="porto-blog-article-author-name"
                         href={`/${blogRoute}/authors/${author.key}/`}
                       >
                         {author.name}
                       </a>
                     ) : author.url ? (
                       <a
-                        class="text-primary no-underline hover:underline"
+                        class="porto-blog-article-author-name"
                         href={author.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -211,7 +234,7 @@ function postUrl(other) {
                     )}
                   </span>
                   {author.title && (
-                    <span class="text-[0.85rem] text-muted">
+                    <span class="porto-blog-article-author-title">
                       {author.title}
                     </span>
                   )}
@@ -222,20 +245,17 @@ function postUrl(other) {
         )}
       </header>
 
-      <div class="porto-markdown">
+      <div class="porto-markdown-content">
         <Content components={mdxComponents} />
       </div>
 
       {tags.length > 0 && (
-        <footer class="mt-8 flex flex-wrap items-center gap-[0.6rem] border-t border-border pt-4 text-muted">
+        <footer class="porto-blog-article-tags">
           <span>Tags:</span>
-          <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
+          <ul class="porto-blog-tag-list">
             {tags.map((tag) => (
               <li>
-                <a
-                  class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.8rem] text-muted no-underline hover:border-primary hover:text-primary"
-                  href={`/${blogRoute}/tags/${tag}/`}
-                >
+                <a class="porto-blog-tag" href={`/${blogRoute}/tags/${tag}/`}>
                   {tag}
                 </a>
               </li>
@@ -245,27 +265,31 @@ function postUrl(other) {
       )}
 
       {(newer || older) && (
-        <nav class="mt-8 grid grid-cols-2 gap-4" aria-label="Blog posts">
+        <nav class="porto-blog-article-nav" aria-label="Blog posts">
           {newer ? (
             <a
-              class="flex flex-col gap-1 rounded-lg border border-border p-4 text-foreground no-underline hover:border-primary"
+              class="porto-blog-article-nav-link"
               href={postUrl(newer)}
               rel="prev"
             >
-              <span class="text-[0.85rem] text-muted">Newer post</span>
-              <span class="text-[1.1rem]">{newer.data.title ?? newer.id}</span>
+              <span class="porto-blog-article-nav-label">Newer post</span>
+              <span class="porto-blog-article-nav-title">
+                {newer.data.title ?? newer.id}
+              </span>
             </a>
           ) : (
             <span />
           )}
           {older ? (
             <a
-              class="flex flex-col gap-1 rounded-lg border border-border p-4 text-right text-foreground no-underline hover:border-primary"
+              class="porto-blog-article-nav-link porto-blog-article-nav-link--next"
               href={postUrl(older)}
               rel="next"
             >
-              <span class="text-[0.85rem] text-muted">Older post</span>
-              <span class="text-[1.1rem]">{older.data.title ?? older.id}</span>
+              <span class="porto-blog-article-nav-label">Older post</span>
+              <span class="porto-blog-article-nav-title">
+                {older.data.title ?? older.id}
+              </span>
             </a>
           ) : (
             <span />

@@ -56,39 +56,33 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-10 p-4">
-    <header class="mb-[-1rem]">
-      <h1 class="mb-1">{name}</h1>
-      {author.data.title && <p class="m-0 text-muted">{author.data.title}</p>}
+  <div class="porto-blog-list-page">
+    <header class="porto-blog-author-header">
+      <h1 class="porto-blog-author-name">{name}</h1>
+      {author.data.title && (
+        <p class="porto-blog-author-title">{author.data.title}</p>
+      )}
       {author.data.url && (
-        <p class="mt-1">
-          <a
-            class="text-primary no-underline hover:underline"
-            href={author.data.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+        <p class="porto-blog-author-url">
+          <a href={author.data.url} target="_blank" rel="noopener noreferrer">
             {author.data.url}
           </a>
         </p>
       )}
     </header>
     {posts.length === 0 ? (
-      <p class="text-muted">No posts by this author yet.</p>
+      <p class="porto-blog-empty-text">No posts by this author yet.</p>
     ) : (
       posts.map((post) => {
         const date = postDate(post);
         return (
           <article>
-            <h2 class="mb-2 text-[1.8rem]">
-              <a
-                class="text-foreground no-underline hover:text-primary"
-                href={`/${blogRoute}/${blogSlug(post)}/`}
-              >
+            <h2 class="porto-blog-post-title porto-blog-post-title--plain porto-blog-post-title--sm">
+              <a href={`/${blogRoute}/${blogSlug(post)}/`}>
                 {post.data.title ?? post.id}
               </a>
             </h2>
-            <div class="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.9rem] text-muted">
+            <div class="porto-blog-post-meta-line">
               {date && (
                 <time datetime={date.toISOString()}>
                   {formatPostDate(date)}
@@ -96,7 +90,7 @@ function formatPostDate(date) {
               )}
             </div>
             {post.data.description && (
-              <p class="mb-2 text-muted">{post.data.description}</p>
+              <p class="porto-blog-post-desc">{post.data.description}</p>
             )}
           </article>
         );

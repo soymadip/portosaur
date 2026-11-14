@@ -1,0 +1,562 @@
+/* === Tasks page styles (original Portosaur code) ===
+ *
+ * The /tasks page: stats cards, status tabs, and the task table.
+ * Original Portosaur code in Starlight's design language: the
+ * renamed `--porto-*` variables, Starlight's type scale and spacing,
+ * hairline borders, square cards, and `-low` / `-high` status badges
+ * (the Starlight aside pattern). Nothing here is copied from
+ * Starlight (it has no tasks UI).
+ *
+ *                      __     ___ _                ____          _
+ *                      \ \   / (_) |__   ___      / ___|___   __| | ___
+ *                       \ \ / /| | '_ \ / _ \    | |   / _ \ / _` |/ _ \
+ *                        \ V / | | |_) |  __/    | |__| (_) | (_| |  __/
+ *                         \_/  |_|_.__/ \___|     \____\___/ \__,_|\___|
+ *
+ *        This Page is completely Vibe coded. No code except small tweaks is written by me.
+ */
+
+@layer porto.components {
+  .porto-tasks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px);
+    margin-bottom: 2rem;
+    padding-inline: 1rem;
+  }
+
+  .porto-tasks-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  /* ----- Disabled state ----- */
+  .porto-tasks-disabled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .porto-tasks-disabled-icon {
+    font-size: 4rem;
+    color: var(--porto-color-gray-3);
+  }
+
+  .porto-tasks-disabled-title {
+    margin-bottom: 0.75rem;
+    font-size: 2rem;
+    color: var(--porto-color-text);
+  }
+
+  .porto-tasks-disabled-text {
+    max-width: 500px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--porto-color-gray-3);
+  }
+
+  .porto-tasks-disabled-text code {
+    border-radius: 3px;
+    background: var(--porto-color-gray-5);
+    padding: 2px 0.25rem;
+    color: var(--porto-color-text-accent);
+  }
+
+  /* ----- Heading ----- */
+  .porto-tasks-heading {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .porto-tasks-title {
+    margin-bottom: 0.1rem;
+    font-size: var(--porto-text-h1);
+    line-height: var(--porto-line-height-headings);
+    font-weight: 600;
+    color: var(--porto-color-white);
+  }
+
+  .porto-tasks-subtitle {
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--porto-color-text-accent);
+  }
+
+  /* ----- Stats ----- */
+  .porto-tasks-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .porto-tasks-stat {
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    box-shadow: var(--porto-shadow-sm);
+    transition: transform 0.2s ease;
+  }
+  .porto-tasks-stat:hover {
+    transform: translateY(-2px);
+  }
+
+  .porto-tasks-stat-label {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--porto-color-text-accent);
+  }
+
+  .porto-tasks-stat-value {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--porto-color-text);
+  }
+
+  .porto-tasks-stat-value--success {
+    color: var(--porto-color-green-high);
+  }
+
+  .porto-tasks-stat-value--accent {
+    color: var(--porto-color-text-accent);
+  }
+
+  .porto-tasks-stat-value--warning {
+    color: var(--porto-color-orange-high);
+  }
+
+  .porto-tasks-progress-track {
+    width: 100%;
+    height: 0.5rem;
+    margin-top: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--porto-color-gray-5);
+  }
+
+  .porto-tasks-progress-bar {
+    height: 100%;
+    border-radius: 0.25rem;
+    background: var(--porto-color-text-accent);
+  }
+
+  /* ----- Tabs + table shell ----- */
+  .porto-tasks-panel {
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-tasks-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-bg-nav);
+  }
+
+  .porto-tasks-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: var(--porto-line-height);
+    color: var(--porto-color-text);
+    transition: all 0.2s ease;
+  }
+  .porto-tasks-tab:hover {
+    background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+    color: var(--porto-color-text-accent);
+  }
+  .porto-tasks-tab:focus {
+    outline: none;
+  }
+
+  /* `.task-tab-active` is toggled by `scripts/tasks-filter.ts` via
+     `classList`, so it stays a real class. */
+  .porto-tasks-tab.task-tab-active {
+    border-bottom: 3px solid var(--porto-color-text-accent);
+    font-weight: 600;
+    color: var(--porto-color-text-accent);
+    background-color: var(--porto-color-gray-6);
+  }
+
+  .porto-tasks-tab.task-tab-active:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-gray-2) 8%,
+      transparent
+    );
+  }
+
+  .porto-tasks-tab.task-tab-active .task-tab-count {
+    background-color: var(--porto-color-text-accent);
+    color: var(--porto-color-black);
+  }
+
+  .porto-tasks-tab-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .porto-tasks-tab-label {
+    margin-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .porto-tasks-tab .task-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    min-height: 1.1rem;
+    margin-left: 0.2rem;
+    border-radius: 50%;
+    background: var(--porto-color-gray-5);
+    padding: 0;
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--porto-color-gray-2);
+  }
+
+  .porto-tasks-content {
+    min-height: 300px;
+    background: transparent;
+    animation: porto-tasks-fade-in 0.3s ease;
+  }
+
+  @keyframes porto-tasks-fade-in {
+    from {
+      opacity: 0.7;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .porto-tasks-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--porto-color-text);
+  }
+
+  .porto-tasks-empty-icon {
+    margin-bottom: 1rem;
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  /* ----- Table ----- */
+  .porto-tasks-table {
+    width: 100%;
+    overflow: hidden;
+    margin-top: -1px;
+    background: var(--porto-color-black);
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-tasks-table-head {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 120px 1fr 120px;
+    border-bottom: 2px solid var(--porto-color-text-accent);
+    background: var(--porto-color-bg-nav);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--porto-color-text-accent);
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-tasks-table-head-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--porto-color-hairline-light);
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    color: var(--porto-color-text-accent);
+  }
+
+  .porto-tasks-table-head-cell--details {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    border-inline: 1px solid var(--porto-color-hairline-light);
+    padding: 0.75rem 0.5rem 0.75rem 1rem;
+    text-align: left;
+  }
+
+  .porto-tasks-table-head-cell--priority {
+    border-right: 0;
+    border-left: 1px solid var(--porto-color-hairline-light);
+  }
+
+  .porto-tasks-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 120px;
+    border-bottom: 1px solid var(--porto-color-hairline-light);
+    background: var(--porto-color-black);
+    transition: all 0.15s ease;
+  }
+  .porto-tasks-row:last-child {
+    border-bottom: 0;
+  }
+  .porto-tasks-row:hover {
+    background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+  }
+
+  .porto-tasks-row--striped {
+    background: var(--porto-color-gray-6);
+  }
+
+  .porto-tasks-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .porto-tasks-cell--details {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    border-inline: 1px solid var(--porto-color-hairline-light);
+    padding: 0.75rem 0.5rem 0.75rem 1rem;
+  }
+
+  .porto-tasks-title-text {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--porto-color-text);
+  }
+
+  .porto-tasks-title-text--completed {
+    color: var(--porto-color-green-high);
+    opacity: 0.8;
+    text-decoration: line-through;
+  }
+
+  .porto-tasks-title-text--active {
+    color: var(--porto-color-text-accent);
+  }
+
+  .porto-tasks-desc {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--porto-color-text);
+    opacity: 0.85;
+  }
+
+  .porto-tasks-desc--completed {
+    opacity: 0.7;
+    text-decoration: line-through;
+  }
+
+  /* ----- Badges ----- */
+  .porto-tasks-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 1rem;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-transform: capitalize;
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-tasks-badge--bold {
+    font-weight: 700;
+  }
+
+  .porto-tasks-badge--done {
+    background: var(--porto-color-green-low);
+    color: var(--porto-color-green-high);
+  }
+
+  .porto-tasks-badge--active {
+    background: var(--porto-color-accent-low);
+    color: var(--porto-color-text-accent);
+  }
+
+  .porto-tasks-badge--planned {
+    background: var(--porto-color-gray-5);
+    color: var(--porto-color-gray-2);
+  }
+
+  .porto-tasks-badge--high {
+    background: var(--porto-color-red-low);
+    color: var(--porto-color-red-high);
+  }
+
+  .porto-tasks-badge--low {
+    background: var(--porto-color-green-low);
+    color: var(--porto-color-green-high);
+  }
+
+  .porto-tasks-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.4rem;
+    font-size: 0.85rem;
+    vertical-align: -0.125em;
+  }
+
+  .porto-tasks .spin {
+    animation: porto-spin 2s linear infinite;
+  }
+
+  @keyframes porto-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .porto-tasks {
+      padding-inline: 0.5rem;
+    }
+
+    .porto-tasks-tabs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .porto-tasks-tab {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .porto-tasks-tab-icon {
+      margin-right: 0.3rem;
+      font-size: 1rem;
+      line-height: var(--porto-line-height);
+    }
+
+    .porto-tasks-tab .task-tab-count {
+      width: 1rem;
+      min-width: 1rem;
+      height: 1rem;
+      min-height: 1rem;
+      font-size: 0.6rem;
+    }
+
+    .porto-tasks-content {
+      padding: 1rem;
+    }
+
+    .porto-tasks-empty {
+      padding-block: 2rem;
+    }
+
+    .porto-tasks-table-head,
+    .porto-tasks-row {
+      grid-template-columns: 100px 1fr 100px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .porto-tasks-badge {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.7rem;
+    }
+
+    .porto-tasks-badge-icon {
+      margin-right: 0.2rem;
+      font-size: 0.7rem;
+    }
+
+    .porto-tasks-table-head,
+    .porto-tasks-row {
+      grid-template-columns: 80px 1fr 80px;
+    }
+
+    .porto-tasks-table-head {
+      font-size: 0.7rem;
+    }
+
+    .porto-tasks-table-head-cell,
+    .porto-tasks-cell {
+      padding: 0.5rem 0.25rem;
+    }
+
+    .porto-tasks-title-text {
+      font-size: 1rem;
+      line-height: var(--porto-line-height);
+    }
+
+    .porto-tasks-desc {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .porto-tasks-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .porto-tasks-tab {
+      justify-content: flex-start;
+      padding: 0.5rem;
+      text-align: left;
+      font-size: 0.8rem;
+    }
+
+    .porto-tasks-tab-label {
+      flex: 1;
+      margin-right: 0.3rem;
+    }
+
+    .porto-tasks-tab .task-tab-count {
+      font-size: 0.55rem;
+    }
+  }
+}

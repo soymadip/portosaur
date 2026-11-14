@@ -220,43 +220,38 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
 ---
 
 <BaseLayout title={title}>
-  <div class="mx-auto flex w-full max-w-7xl gap-8 p-4">
+  <div class="porto-blog-layout">
     <BlogSidebar posts={sidebarPosts} />
-    <div class="flex min-w-0 max-w-[46rem] flex-1 flex-col gap-10 max-[996px]:max-w-none">
+    <div class="porto-blog-main">
       {showNotify && <NotifyButton />}
       {viewPosts.map((post) => (
         <article>
-          <h2 class="mb-2 text-[2rem]">
-            <a
-              class="text-primary no-underline hover:underline"
-              href={post.url}
-            >
-              {post.title}
-            </a>
+          <h2 class="porto-blog-post-title">
+            <a href={post.url}>{post.title}</a>
           </h2>
-          <div class="mb-3">
+          <div class="porto-blog-post-meta">
             {post.date && (
               <time
-                class="text-[0.9rem] text-foreground"
+                class="porto-blog-post-date"
                 datetime={post.date.toISOString()}
               >
                 {formatPostDate(post.date)}
               </time>
             )}
             {post.authors.length > 0 && (
-              <div class="mt-3">
+              <div class="porto-blog-post-authors">
                 {post.authors.map((author) => (
-                  <div class="mb-1">
+                  <div class="porto-blog-post-author">
                     {author.hasPage ? (
                       <a
-                        class="text-[0.95rem] font-semibold text-primary no-underline hover:underline"
+                        class="porto-blog-post-author-name"
                         href={`/${blogRoute}/authors/${author.key}/`}
                       >
                         {author.name}
                       </a>
                     ) : author.url ? (
                       <a
-                        class="text-[0.95rem] font-semibold text-primary no-underline hover:underline"
+                        class="porto-blog-post-author-name"
                         href={author.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -264,12 +259,12 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
                         {author.name}
                       </a>
                     ) : (
-                      <span class="text-[0.95rem] font-semibold text-primary">
+                      <span class="porto-blog-post-author-name">
                         {author.name}
                       </span>
                     )}
                     {author.title && (
-                      <div class="text-[0.85rem] text-muted">
+                      <div class="porto-blog-post-author-title">
                         {author.title}
                       </div>
                     )}
@@ -279,18 +274,18 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
             )}
           </div>
           {post.excerptHtml ? (
-            <div class="porto-blog-excerpt mb-2" set:html={post.excerptHtml} />
+            <div class="porto-blog-excerpt" set:html={post.excerptHtml} />
           ) : post.description ? (
-            <p class="mb-2 text-muted">{post.description}</p>
+            <p class="porto-blog-post-desc">{post.description}</p>
           ) : null}
           {(post.tags.length > 0 || post.truncated) && (
-            <div class="flex items-center justify-between gap-4">
+            <div class="porto-blog-post-foot">
               {post.tags.length > 0 && (
-                <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
+                <ul class="porto-blog-tag-list">
                   {post.tags.map((tag) => (
                     <li>
                       <a
-                        class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.8rem] text-muted no-underline hover:border-primary hover:text-primary"
+                        class="porto-blog-tag"
                         href={`/${blogRoute}/tags/${tag}/`}
                       >
                         {tag}
@@ -300,10 +295,7 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
                 </ul>
               )}
               {post.truncated && (
-                <a
-                  class="ml-auto font-bold whitespace-nowrap text-primary no-underline hover:underline"
-                  href={post.url}
-                >
+                <a class="porto-blog-read-more" href={post.url}>
                   Read more
                 </a>
               )}
@@ -311,20 +303,12 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
           )}
         </article>
       ))}
-      <nav class="mt-4 flex justify-between gap-4" aria-label="Blog pages">
-        <a
-          class="rounded-lg border border-border px-[1.2rem] py-[0.6rem] text-foreground no-underline hover:border-primary hover:text-primary"
-          href={prevUrl}
-          rel="prev"
-        >
+      <nav class="porto-blog-pagination" aria-label="Blog pages">
+        <a class="porto-blog-page-link" href={prevUrl} rel="prev">
           Newer
         </a>
         {nextUrl ? (
-          <a
-            class="rounded-lg border border-border px-[1.2rem] py-[0.6rem] text-foreground no-underline hover:border-primary hover:text-primary"
-            href={nextUrl}
-            rel="next"
-          >
+          <a class="porto-blog-page-link" href={nextUrl} rel="next">
             Older
           </a>
         ) : (
@@ -334,18 +318,3 @@ const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
     </div>
   </div>
 </BaseLayout>
-
-<style>
-  /* The excerpt is injected HTML (`set:html`), so its inner elements
-   * can't carry utilities — these rules stay as plain CSS. */
-  .porto-blog-excerpt p,
-  .porto-blog-excerpt ul,
-  .porto-blog-excerpt ol,
-  .porto-blog-excerpt pre {
-    margin: 0 0 1rem;
-  }
-
-  .porto-blog-excerpt > *:last-child {
-    margin-bottom: 0;
-  }
-</style>

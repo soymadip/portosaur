@@ -10,8 +10,18 @@
 // Scroll reveal: the old useScrollReveal hook added `is-visible` to the
 // section; the port marks the section `data-reveal` and the page's reveal
 // script adds the class.
+//
+// The portrait goes through Astro's `<Image />` when it is a local
+// file the build can size; remote URLs and unsizable files keep a
+// plain `<img>` (same rule as the hero profile picture, including
+// the `onerror` fallback).
+import { Image } from "astro:assets";
 import config from "porto:config";
 import { renderIcon, withBase } from "../../utils/icons.ts";
+import {
+  localImageDimensions,
+  staticDirsForConfig,
+} from "../../utils/imageSize.ts";
 
 interface Props {
   id?: string;
@@ -24,13 +34,22 @@ const aboutMe = config.homePage?.aboutSection || {};
 
 const base = config.site.baseUrl;
 const image = aboutMe.image;
-const imageSrc = image
-  ? withBase(typeof image === "string" ? image : image.src, base)
+const imageRawSrc = image
+  ? typeof image === "string"
+    ? image
+    : image.src
   : null;
+const imageSrc = imageRawSrc ? withBase(imageRawSrc, base) : null;
 const imageFallback =
   image && typeof image === "object" && image.fallback
     ? withBase(image.fallback, base)
     : null;
+const imageDims = imageRawSrc
+  ? await localImageDimensions(imageRawSrc, staticDirsForConfig(config))
+  : null;
+const imageOnError = imageFallback
+  ? `this.onerror=null;this.src='${imageFallback}'`
+  : undefined;
 
 // The resume button renders only for a real resume path: a non-empty
 // string that is not "none" (the engine default).
@@ -45,44 +64,49 @@ const resumeUrl = hasResume ? withBase(aboutMe.resume, base) : null;
   <div
     id={id}
     data-reveal
-    class={`flex min-h-screen w-full flex-col items-center justify-start bg-background pb-16 pt-8 scroll-mt-(--scroll-margin-top) max-[768px]:py-16 ${className || ""}`}
+    class={`porto-about ${className || ""}`}
     role="region"
     aria-label="About me section"
   >
-    <div class="mx-auto max-w-[1100px] px-8 pt-12">
+    <div class="porto-about-inner">
       {/* Heading */}
-      <div class="mb-10 text-center">
-        <h2 class="relative mb-[0.6rem] inline-block text-[2.5rem] font-semibold text-primary opacity-0 after:absolute after:bottom-[-0.5rem] after:left-1/2 after:h-[3px] after:w-10 after:-translate-x-1/2 after:rounded-[2px] after:bg-primary [.is-visible_&]:animate-[slideUp_0.6s_ease-out_forwards] max-[768px]:text-[2rem]">
-          {aboutMe.heading || "About Me"}
-        </h2>
+      <div class="porto-about-heading-wrap">
+        <h2 class="porto-about-heading">{aboutMe.heading || "About Me"}</h2>
       </div>
 
       {/* Content */}
       <div>
-        <div class="flex min-h-[461px] overflow-hidden rounded-[24px] border border-gray-800 bg-surface opacity-0 shadow-md transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform-[translateY(20px)] [.is-visible_&]:animate-[slideUp_0.8s_ease-out_forwards] motion-reduce:animate-none! motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:transform-none max-[992px]:flex-col">
+        <div class="porto-about-card">
           {/* Image + Resume */}
-          <div class="flex flex-[0.8] flex-col items-center justify-center gap-14 border-r border-gray-800 bg-[color-mix(in_srgb,var(--color-primary)_3%,transparent)] px-8 py-12 max-[992px]:border-b max-[992px]:border-r-0 max-[992px]:p-10">
+          <div class="porto-about-side">
             {image && (
-              <div class="size-[200px] rounded-full bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-light))] p-[6px] shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_20%,transparent)] transition-transform duration-300 ease-[ease] hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100 max-[768px]:size-[160px]">
-                <img
-                  src={imageSrc}
-                  alt={aboutMe.name || "About Me"}
-                  class="size-full rounded-full border-4 border-surface object-cover"
-                  onerror={
-                    imageFallback
-                      ? `this.onerror=null;this.src='${imageFallback}'`
-                      : undefined
-                  }
-                />
+              <div class="porto-about-avatar-ring">
+                {imageDims ? (
+                  <Image
+                    src={imageSrc}
+                    alt={aboutMe.name || "About Me"}
+                    width={imageDims.width}
+                    height={imageDims.height}
+                    class="porto-about-avatar"
+                    onerror={imageOnError}
+                  />
+                ) : (
+                  <img
+                    src={imageSrc}
+                    alt={aboutMe.name || "About Me"}
+                    class="porto-about-avatar"
+                    onerror={imageOnError}
+                  />
+                )}
               </div>
             )}
             {hasResume && (
-              <div class="flex w-full justify-center">
+              <div class="porto-about-resume">
                 <a
                   href={resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-flex items-center gap-[0.6rem] rounded-xl border border-primary bg-primary px-[1.4rem] py-[0.7rem] text-[0.9rem] font-semibold text-background no-underline! transition-all duration-200 ease-[ease] hover:-translate-y-0.5 hover:bg-surface hover:text-primary hover:shadow-[0_5px_15px_color-mix(in_srgb,var(--color-primary)_20%,transparent)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  class="porto-link-button primary"
                 >
                   <span set:html={renderIcon("md:download")} /> View Resume
                 </a>
@@ -91,30 +115,26 @@ const resumeUrl = hasResume ? withBase(aboutMe.resume, base) : null;
           </div>
 
           {/* Bio + Skills */}
-          <div class="flex flex-[1.2] flex-col gap-[0.4rem] p-12 max-[992px]:p-8">
-            <div class="bioText flex max-h-[320px] flex-col gap-[0.8rem] overflow-y-auto pr-4">
+          <div class="porto-about-bio">
+            <div class="bioText">
               {Array.isArray(aboutMe.bio) ? (
                 aboutMe.bio.map((paragraph) => (
-                  <p class="relative m-0 pl-4 text-[1.1rem] leading-[1.4] text-foreground before:absolute before:bottom-[0.2rem] before:left-0 before:top-[0.2rem] before:w-[1.5px] before:rounded-[2px] before:bg-gray-100 before:opacity-60 max-[768px]:text-base max-[768px]:leading-[1.4]">
-                    {paragraph}
-                  </p>
+                  <p class="porto-about-bio-para">{paragraph}</p>
                 ))
               ) : (
-                <p class="relative m-0 pl-4 text-[1.1rem] leading-[1.4] text-foreground before:absolute before:bottom-[0.2rem] before:left-0 before:top-[0.2rem] before:w-[1.5px] before:rounded-[2px] before:bg-gray-100 before:opacity-60 max-[768px]:text-base max-[768px]:leading-[1.4]">
-                  {aboutMe.bio}
-                </p>
+                <p class="porto-about-bio-para">{aboutMe.bio}</p>
               )}
             </div>
 
             {aboutMe.skills && aboutMe.skills.length > 0 && (
-              <div class="mt-[1.7rem] max-[992px]:text-center">
-                <h3 class="relative mb-[1.4rem] inline-block text-[1.4rem] font-semibold text-primary after:absolute after:bottom-[-0.4rem] after:left-0 after:h-[2px] after:w-[30px] after:rounded-[1px] after:bg-primary after:opacity-60 max-[992px]:after:left-1/2 max-[992px]:after:-translate-x-1/2">
+              <div class="porto-about-skills">
+                <h3 class="porto-about-skills-heading">
                   {aboutMe.skillsHeading || "My Skills"}
                 </h3>
-                <div class="flex flex-wrap gap-[0.6rem] max-[992px]:justify-center">
+                <div class="porto-about-skill-list">
                   {aboutMe.skills.map((skill, index) => (
                     <span
-                      class="cursor-default rounded-lg border border-gray-800 bg-surface px-[0.8rem] py-[0.4rem] text-[0.8rem] font-semibold text-muted transition-all duration-200 ease-[ease] hover:-translate-y-0.5 hover:border-primary hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)] hover:text-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                      class="porto-about-skill"
                       style={`animation-delay: ${index * 0.05}s`}
                     >
                       {skill}
@@ -129,26 +149,3 @@ const resumeUrl = hasResume ? withBase(aboutMe.resume, base) : null;
     </div>
   </div>
 )}
-
-<style>
-  /* Custom scrollbar for the bio column: no Tailwind utility expresses
-     `::-webkit-scrollbar` pseudo-elements, so these rules stay plain
-     CSS and the `bioText` class stays on the element as their hook. */
-  .bioText::-webkit-scrollbar {
-    width: 5px;
-  }
-
-  .bioText::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--color-primary) 5%, transparent);
-    border-radius: 10px;
-  }
-
-  .bioText::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
-    border-radius: 10px;
-  }
-
-  .bioText::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary);
-  }
-</style>

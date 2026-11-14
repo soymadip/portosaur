@@ -19,32 +19,22 @@ const experience = config.homePage?.experienceSection || {};
 {experience.enable !== false && (
   <div
     id={id}
-    class={`flex min-h-[calc(100vh-45px)] w-full scroll-mt-[38px] items-center justify-center bg-background pt-[0.02rem] pb-[4.5rem] max-[768px]:scroll-mt-[70px] max-[768px]:pt-2 max-[768px]:pb-16 max-[480px]:scroll-mt-[32px] max-[480px]:pt-0 max-[480px]:pb-12 ${className || ""}`}
+    class={`porto-experience ${className || ""}`}
     role="region"
     aria-label="Experience section"
   >
-    <div class="relative z-1 mx-auto w-full max-w-[1300px] max-[768px]:px-6 max-[480px]:px-4">
+    <div class="porto-experience-inner">
       {/* Heading */}
-      <div class="-mt-56 mb-8 text-center max-[768px]:-mt-10 max-[768px]:mb-6 max-[480px]:-mt-8 max-[480px]:mb-[1.2rem]">
-        <h2 class="experienceTitle relative mb-[0.3rem] inline-block text-[2.5rem] font-semibold text-primary max-[768px]:text-[2.2rem] max-[480px]:text-[1.9rem]">
-          {experience.heading}
-        </h2>
-        <p class="experienceSubtitle mx-auto max-w-[600px] text-[0.95rem] text-muted max-[768px]:text-[0.9rem] max-[480px]:max-w-[90%] max-[480px]:text-[0.9rem]">
-          {experience.subheading}
-        </p>
+      <div class="porto-experience-heading-wrap">
+        <h2 class="porto-experience-title">{experience.heading}</h2>
+        <p class="porto-experience-subtitle">{experience.subheading}</p>
       </div>
 
       {/* Placeholder */}
-      <div class="mt-36 flex items-center justify-center">
-        <div
-          class="noticeBox w-full max-w-[600px] rounded-card border border-gray-700 bg-surface-1 p-8 text-center transition-[translate,background-color] duration-300 ease-[ease] hover:-translate-y-[3px] hover:bg-surface"
-          role="status"
-          aria-live="polite"
-        >
-          <p class="mb-[0.8rem] text-[2rem] font-semibold text-primary-dark max-[768px]:text-[1.8rem] max-[480px]:text-[1.5rem]">
-            Coming Soon!
-          </p>
-          <p class="text-base leading-[1.4] text-muted max-[480px]:text-[0.9rem]">
+      <div class="porto-experience-placeholder">
+        <div class="porto-experience-notice" role="status" aria-live="polite">
+          <p class="porto-experience-notice-title">Coming Soon!</p>
+          <p class="porto-experience-notice-text">
             This section is under construction.
           </p>
         </div>
@@ -52,57 +42,3 @@ const experience = config.homePage?.experienceSection || {};
     </div>
   </div>
 )}
-
-<style>
-  /* Load-in keyframes + animations. The local keyframes differ from
-     the global ones (20px rise here vs 30px for the global `slideUp`,
-     and this `fadeIn` has a rise while the global one is opacity-only),
-     so they stay local; everything else is Tailwind utilities. */
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .experienceTitle {
-    animation: slideUp 0.5s ease-out forwards;
-  }
-
-  .experienceSubtitle {
-    animation: slideUp 0.5s ease-out 0.2s forwards;
-  }
-
-  .noticeBox {
-    animation: fadeIn 0.5s ease-out 0.3s forwards;
-    opacity: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .experienceTitle,
-    .experienceSubtitle,
-    .noticeBox {
-      animation: none !important;
-      transition: none !important;
-    }
-
-    .noticeBox {
-      opacity: 1;
-    }
-  }
-</style>

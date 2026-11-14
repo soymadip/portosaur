@@ -4,22 +4,26 @@ import path from "node:path";
 import { getDefaultColorScheme } from "../packages/cli/src/engine/utils/css.ts";
 
 /**
- * Theming contract (Starlight UI, commit 1): styling is plain CSS in
- * Starlight's variable system, copied and integrated into Portosaur's
- * own CSS files in `css/` with every identifier renamed `sl-` → `porto-`
- * (see `packages/app/NOTICE.md`). Base values live in
- * `css/variables.css` (dark on `:root`, light under
+ * Theming contract (Starlight UI, commits 1–2): styling is plain CSS
+ * in Starlight's variable system, copied and integrated into
+ * Portosaur's own CSS files in `css/` with every identifier renamed
+ * `sl-` → `porto-` (see `packages/app/NOTICE.md`). Base values live
+ * in `css/variables.css` (dark on `:root`, light under
  * `:root[data-theme='light']`); seven color schemes override the
  * `--porto-color-*` set in light and dark mode, scoped to
  * `[data-scheme][data-theme]`; no Tailwind anywhere in the theme CSS
- * or the docs components; no `sl-` / `starlight` identifiers in the
- * copied code (comments may cite Starlight as the source, and the
+ * or any component; no `sl-` / `starlight` identifiers in the copied
+ * code (comments may cite Starlight as the source, and the
  * `starlight` *scheme name* is an intentional palette name — see the
- * exclusions documented in the rename test below).
+ * exclusions documented in the rename test below). The portfolio,
+ * blog, and tasks styles (`portfolio.css`, `blog.css`, `tasks.css`)
+ * are original Portosaur code in the same design language — Starlight
+ * has no UI for those, so they carry no attribution header.
  *
- * Source-level checks always run. Built-output checks need a docs build
- * (`bun run --cwd docs build`) and skip with a note when `docs/build`
- * is absent, so `bun test` stays runnable without building first.
+ * Source-level checks always run. Built-output checks need a docs
+ * build (`bun run --cwd docs build`) and/or a playground build
+ * (`bun run build`) and skip with a note when the build dir is
+ * absent, so `bun test` stays runnable without building first.
  */
 
 const REPO_ROOT = path.resolve(import.meta.dir, "..");
@@ -27,6 +31,7 @@ const APP_SRC = path.join(REPO_ROOT, "packages/app/src");
 const THEME_CSS_DIR = path.join(APP_SRC, "css");
 const THEMES_DIR = path.join(THEME_CSS_DIR, "themes");
 const DOCS_BUILD_DIR = path.join(REPO_ROOT, "docs/build");
+const PLAYGROUND_BUILD_DIR = path.join(REPO_ROOT, ".playground/build");
 
 // The Starlight-derived stylesheets, integrated into Portosaur's own
 // CSS files at the `css/` root — there is no vendored `starlight/`
@@ -45,6 +50,11 @@ const INTEGRATED_CSS_FILES = [
   "page.css",
   "print.css",
 ];
+
+// Original Portosaur stylesheets in Starlight's design language
+// (portfolio home sections + notes, blog pages, tasks page) — NOT
+// copied from Starlight, so they carry no attribution header.
+const PORTFOLIO_CSS_FILES = ["portfolio.css", "blog.css", "tasks.css"];
 
 const SCHEMES = [
   "catppuccin",
@@ -144,22 +154,9 @@ function stripComments(text: string): string {
     .join("\n");
 }
 
-// Docs components/layouts/pages — the files this commit converted from
-// Tailwind utilities to the Starlight classes. (Portfolio sections and
-// the tasks/blog pages keep their utilities until commit 2.)
-const DOCS_ASTRO_FILES = [
-  ...collectFiles(path.join(APP_SRC, "components"), ".astro").filter(
-    (file) =>
-      !file.includes(`${path.sep}sections${path.sep}`) &&
-      !file.includes(`${path.sep}mdx${path.sep}`),
-  ),
-  path.join(APP_SRC, "components/sections/DocsHomeSection.astro"),
-  ...collectFiles(path.join(APP_SRC, "layouts"), ".astro"),
-  path.join(APP_SRC, "pages/doc.astro"),
-  path.join(APP_SRC, "pages/notes-index.astro"),
-  path.join(APP_SRC, "pages/search.astro"),
-  path.join(APP_SRC, "pages/404.astro"),
-];
+// Every .astro file in the app — the no-Tailwind rule covers all of
+// them since commit 2 (docs and portfolio alike).
+const ALL_ASTRO_FILES = collectFiles(APP_SRC, ".astro");
 
 describe("theming", () => {
   test("all seven scheme files exist", () => {
@@ -180,6 +177,29 @@ describe("theming", () => {
     }
     for (const scheme of SCHEMES) {
       expect(entry).toContain(`@import "./themes/${scheme}.css"`);
+    }
+  });
+
+  test("custom.css imports the portfolio, blog, and tasks stylesheets", () => {
+    const entry = fs.readFileSync(
+      path.join(THEME_CSS_DIR, "custom.css"),
+      "utf8",
+    );
+    for (const file of PORTFOLIO_CSS_FILES) {
+      expect(fs.existsSync(path.join(THEME_CSS_DIR, file))).toBe(true);
+      expect(entry).toContain(`@import "./${file}"`);
+    }
+  });
+
+  test("portfolio stylesheets are original Portosaur code, not copies", () => {
+    // No attribution header (they are not derived from Starlight),
+    // no `sl-` identifiers, and they use the renamed var system.
+    for (const file of PORTFOLIO_CSS_FILES) {
+      const css = fs.readFileSync(path.join(THEME_CSS_DIR, file), "utf8");
+      expect(css).not.toContain("Derived from Starlight (MIT License)");
+      expect(stripComments(css)).not.toContain("sl-");
+      expect(css).toContain("--porto-color-");
+      expect(css).toContain("@layer porto.components");
     }
   });
 
@@ -375,17 +395,52 @@ describe("theming", () => {
     expect(integration).not.toContain("tailwindcss()");
   });
 
-  test("no tailwind references in docs components, layouts, or pages", () => {
-    for (const file of DOCS_ASTRO_FILES) {
+  test("no tailwind references in any .astro file", () => {
+    for (const file of ALL_ASTRO_FILES) {
       const text = stripComments(fs.readFileSync(file, "utf8"));
       expect(text.toLowerCase()).not.toContain("tailwind");
+    }
+  });
+
+  test("no Tailwind utilities in any .astro class attribute", () => {
+    // Token-level check: a bare utility class (flex, text-muted,
+    // bg-surface, …) in a class attribute means the file still
+    // expects Tailwind. The renamed Starlight utilities (`porto-*`,
+    // `md:porto-*`, …) and the `print:` / `sr-only` utilities are
+    // real classes in css/ and don't count; plain CSS inside
+    // <style> blocks is out of scope here (covered by the CSS
+    // tests). `class:list` object keys (`{ active: … }`) are not
+    // class strings — strip them before tokenizing.
+    // (`truncate` is DocCardList's own scoped class, not a utility,
+    // so it stays out of the list.)
+    const UTILITY_RE =
+      /^(?:flex|grid|block|hidden|inline-flex|inline-block|relative|absolute|fixed|sticky|items-\w+|justify-\w+|gap-\d|gap-\[|p-\d|px-\d|py-\d|pt-\d|pb-\d|pl-\d|pr-\d|m-\d|mx-\d|my-\d|mt-\d|mb-\d|ml-\d|mr-\d|w-\[|w-\d|h-\[|h-\d|min-h-\[|max-w-\[|max-w-\d|size-\[|size-\d|text-\[|text-\w+|font-\w+|leading-\[|rounded|rounded-\w+|shadow|shadow-\w+|border|border-\w+|bg-\w+|transition|duration-\d|ease-\[|opacity-\d|overflow-\w+|cursor-\w+|object-\w+|whitespace-\w+|capitalize|uppercase|line-clamp-\d|inset-\d|top-\d|bottom-\d|left-\d|right-\d|z-\d|grid-cols-\[|grid-cols-\d|snap-\w+|animate-\[|motion-reduce:|hover:|focus:|active:|disabled:|max-\[|after:|before:|group-hover:|\[)/;
+    for (const file of ALL_ASTRO_FILES) {
+      const text = stripComments(fs.readFileSync(file, "utf8"));
+      const attrRe =
+        /class(?:\:list)?=(?:"([^"]*)"|\{`([^`]*)`\}|\{\[([^\]]*)\]\})/g;
+      for (const match of text.matchAll(attrRe)) {
+        const raw = match[1] ?? match[2] ?? match[3] ?? "";
+        const cleaned = raw
+          .replace(/\$\{[^}]*\}/g, " ")
+          .replace(/\{[^}]*\}/g, " ")
+          .replace(/["',]/g, " ");
+        for (const token of cleaned.split(/\s+/).filter(Boolean)) {
+          if (token.includes("porto-")) {
+            continue;
+          }
+          expect(token).not.toMatch(UTILITY_RE);
+        }
+      }
     }
   });
 
   test("no sl- or starlight identifiers in copied code", () => {
     // Scope: the copied Starlight stylesheets (integrated into
     // Portosaur's own CSS files at the `css/` root), the copied/adapted
-    // components, layouts, scripts, and utils. Comments are stripped
+    // components, layouts, scripts, utils, and all pages — plus the
+    // original portfolio/blog/tasks stylesheets, which must not
+    // introduce Starlight identifiers either. Comments are stripped
     // (they may cite Starlight as the source).
     //
     // Intentional exclusions (scheme-name references, not copied
@@ -402,17 +457,16 @@ describe("theming", () => {
       ...INTEGRATED_CSS_FILES.map((file) =>
         path.join(THEME_CSS_DIR, file),
       ),
+      ...PORTFOLIO_CSS_FILES.map((file) => path.join(THEME_CSS_DIR, file)),
       ...collectFiles(path.join(APP_SRC, "components"), ".astro"),
       ...collectFiles(path.join(APP_SRC, "layouts"), ".astro"),
       ...collectFiles(path.join(APP_SRC, "scripts"), ".ts"),
       path.join(APP_SRC, "utils/porto-icons.ts"),
       path.join(APP_SRC, "utils/navbar.ts"),
+      path.join(APP_SRC, "utils/imageSize.ts"),
       path.join(APP_SRC, "constants.ts"),
       path.join(APP_SRC, "integration.ts"),
-      path.join(APP_SRC, "pages/doc.astro"),
-      path.join(APP_SRC, "pages/notes-index.astro"),
-      path.join(APP_SRC, "pages/search.astro"),
-      path.join(APP_SRC, "pages/404.astro"),
+      ...collectFiles(path.join(APP_SRC, "pages"), ".astro"),
     ];
     for (const file of files) {
       const text = stripComments(fs.readFileSync(file, "utf8"));
@@ -541,6 +595,79 @@ describe("theming", () => {
       expect(html).toContain('id="porto__sidebar"');
       expect(html).toContain("<porto-toc");
       expect(html).toContain('id="_top"');
+    });
+
+    builtTest("docs home hero image is an <Image /> with dimensions", () => {
+      // The docs home icon (img/icon.png, 418x512) goes through
+      // Astro's <Image />, so the built <img> carries width/height.
+      const html = fs.readFileSync(
+        path.join(DOCS_BUILD_DIR, "index.html"),
+        "utf8",
+      );
+      const img = html.match(/<img[^>]*alt="Hero"[^>]*>/)?.[0] ?? "";
+      expect(img).toContain('width="418"');
+      expect(img).toContain('height="512"');
+    });
+  });
+
+  describe("built output (playground)", () => {
+    const hasPlaygroundBuild = fs.existsSync(
+      path.join(PLAYGROUND_BUILD_DIR, "index.html"),
+    );
+    if (!hasPlaygroundBuild) {
+      console.warn(
+        "theming: .playground/build missing — run `bun run build` to enable playground built-output checks",
+      );
+    }
+    const playgroundTest = hasPlaygroundBuild ? test : test.skip;
+
+    playgroundTest("hero profile picture is an <Image /> with dimensions", () => {
+      // The playground profile picture (img/icon.png, 418x512) goes
+      // through Astro's <Image />, so the built <img> carries
+      // width/height (and the dev-toolbar Audit warning is gone for
+      // it). The playground config sets no fallback, so no onerror
+      // is expected here — the fallback path is covered by the
+      // HeroSection source (onerror passes through <Image />).
+      const html = fs.readFileSync(
+        path.join(PLAYGROUND_BUILD_DIR, "index.html"),
+        "utf8",
+      );
+      const img = html.match(/<img[^>]*alt="profile"[^>]*>/)?.[0] ?? "";
+      expect(img).toContain('width="418"');
+      expect(img).toContain('height="512"');
+      expect(img).toContain('class="porto-hero-picture"');
+    });
+
+    playgroundTest("about portrait is an <Image /> with dimensions", () => {
+      const html = fs.readFileSync(
+        path.join(PLAYGROUND_BUILD_DIR, "index.html"),
+        "utf8",
+      );
+      const img =
+        html.match(/<img[^>]*class="porto-about-avatar"[^>]*>/)?.[0] ?? "";
+      expect(img).toContain('width="418"');
+      expect(img).toContain('height="512"');
+    });
+
+    playgroundTest("built CSS contains the portfolio styles", () => {
+      const css = collectFiles(PLAYGROUND_BUILD_DIR, ".css")
+        .map((file) => fs.readFileSync(file, "utf8"))
+        .join("\n");
+      for (const selector of [
+        ".porto-hero",
+        ".porto-about-card",
+        ".porto-project-card",
+        ".porto-contact-card",
+        ".porto-note-grid",
+        ".porto-tasks-table",
+        ".porto-blog-layout",
+        ".porto-link-button",
+      ]) {
+        expect(css).toContain(selector);
+      }
+      // No Tailwind utilities leak into the built CSS.
+      expect(css).not.toContain(".text-muted");
+      expect(css).not.toContain(".bg-surface");
     });
   });
 });

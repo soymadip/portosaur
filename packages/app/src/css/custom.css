@@ -10,7 +10,10 @@
  * integrated into Portosaur's own stylesheets: `variables.css` holds
  * the renamed variable system, the remaining files in this directory
  * the reset, content, and component styles, `themes/` the color
- * schemes as overrides of the renamed vars. There is no Tailwind —
+ * schemes as overrides of the renamed vars. The portfolio, blog, and
+ * tasks styles (`portfolio.css`, `blog.css`, `tasks.css`) are
+ * original Portosaur code in that same design language — Starlight
+ * has no portfolio/blog/tasks UI to copy. There is no Tailwind —
  * components are styled with plain CSS in the renamed var system.
  */
 
@@ -44,6 +47,12 @@
 @import "./tabs.css";
 @import "./code.css";
 @import "./page.css";
+
+/* ----- Portosaur portfolio / blog / tasks (original code in the
+ * same design language; Starlight has no UI for these) ----- */
+@import "./portfolio.css";
+@import "./blog.css";
+@import "./tasks.css";
 
 /* ----- Color schemes ----- */
 @import "./themes/catppuccin.css";

@@ -40,22 +40,17 @@ if (undated.length > 0) {
 }
 ---
 
-<aside class="min-w-0 flex-[0_0_16rem] [@media(max-width:996px)]:hidden">
+<aside class="porto-blog-sidebar">
   <nav aria-label="Recent posts">
-    <h3 class="mb-4 text-[1.25rem]">Recent posts</h3>
+    <h3 class="porto-blog-sidebar-title">Recent posts</h3>
     {groups.map((group) => (
-      <div class="mb-4">
-        <h4 class="mb-2 text-[1.15rem]">{group.label}</h4>
-        <ul class="m-0 list-none p-0">
+      <div class="porto-blog-sidebar-group">
+        <h4 class="porto-blog-sidebar-year">{group.label}</h4>
+        <ul class="porto-blog-sidebar-list">
           {group.posts.map((post) => (
-            <li class="mb-[0.35rem]">
+            <li>
               <a
-                class:list={[
-                  "no-underline hover:text-primary",
-                  currentUrl === post.url
-                    ? "font-bold text-primary"
-                    : "text-foreground",
-                ]}
+                class="porto-blog-sidebar-link"
                 href={post.url}
                 aria-current={currentUrl === post.url ? "page" : undefined}
               >

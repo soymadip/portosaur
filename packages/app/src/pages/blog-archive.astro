@@ -50,27 +50,27 @@ function formatPostDate(date) {
 ---
 
 <BaseLayout title={title}>
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
-    <h1 class="mb-[-0.5rem]">Archive</h1>
+  <div class="porto-blog-list-page porto-blog-list-page--tight">
+    <h1 class="porto-blog-list-title porto-blog-list-title--tight">Archive</h1>
     {sortedGroups.length === 0 ? (
-      <p class="text-muted">No posts yet.</p>
+      <p class="porto-blog-empty-text">No posts yet.</p>
     ) : (
       sortedGroups.map(([year, yearPosts]) => (
         <section>
-          <h3 class="mb-3">{year}</h3>
-          <ul class="m-0 flex list-none flex-col gap-[0.4rem] p-0">
+          <h3 class="porto-blog-group-title">{year}</h3>
+          <ul class="porto-blog-archive-list">
             {yearPosts.map((post) => {
               const date = postDate(post);
               return (
                 <li>
                   <a
-                    class="text-foreground no-underline hover:text-primary"
+                    class="porto-blog-archive-link"
                     href={`/${blogRoute}/${blogSlug(post)}/`}
                   >
                     {post.data.title ?? post.id}
                   </a>
                   {date && (
-                    <span class="text-[0.9rem] text-muted">
+                    <span class="porto-blog-archive-date">
                       {" — "}
                       <time datetime={date.toISOString()}>
                         {formatPostDate(date)}
