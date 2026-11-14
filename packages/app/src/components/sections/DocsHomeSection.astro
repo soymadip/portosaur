@@ -48,6 +48,8 @@
 // - The action icons are 1.25rem (OG inherits the button's 1rem)
 //   and centered on the text line with an inline-flex wrapper —
 //   a bare inline SVG/emoji sits on the baseline and reads high.
+// - The description is 1rem where the hero stacks (OG: 1.1rem) —
+//   a touch smaller on phones and tablets; desktop keeps 1.17rem.
 // - A `prefers-reduced-motion` guard is added: OG's entrance
 //   animations start at `opacity: 0`, which would hide content for
 //   users who disable animation.
@@ -446,7 +448,7 @@ const iconOnError = iconFallback
       }
 
       .description {
-        font-size: 1.1rem;
+        font-size: 1rem;
       }
 
       .actions {
