@@ -18,18 +18,11 @@
     .content-panel + .content-panel {
       border-top: 1px solid var(--porto-color-hairline);
     }
-    .porto-container {
-      max-width: var(--porto-content-width);
-    }
-
+    /* No max-width: the article fills the whole main pane, like
+       Docusaurus (Starlight caps it at --porto-content-width and
+       centers it, leaving empty space at wide viewports). */
     .porto-container > :global(* + *) {
       margin-top: 1.5rem;
-    }
-
-    @media (min-width: 72rem) {
-      .porto-container {
-        margin-inline: var(--porto-content-margin-inline, auto);
-      }
     }
   }
 </style>

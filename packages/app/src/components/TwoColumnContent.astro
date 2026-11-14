@@ -31,19 +31,17 @@ const { hasToc } = Astro.props;
     }
 
     @media (min-width: 72rem) {
+      /* Docusaurus-style three-column row: the main pane fills
+         everything except the TOC width, and the TOC container is
+         exactly sidebar-width, pinned to the right edge. (Starlight
+         instead centers a capped content column and lets the TOC
+         container absorb half the leftover space.) */
       .right-sidebar-container {
         order: 2;
         position: relative;
         /* Keep the sidebar at the end of the row if it paints before the main pane is parsed. */
         margin-inline-start: auto;
-        width: max(
-          var(--porto-sidebar-width),
-          calc(
-            var(--porto-sidebar-width) +
-              (100% - var(--porto-content-width) - var(--porto-sidebar-width)) /
-              2
-          )
-        );
+        width: var(--porto-sidebar-width);
       }
 
       .right-sidebar {
@@ -51,7 +49,10 @@ const { hasToc } = Astro.props;
         top: 0;
         border-inline-start: 1px solid var(--porto-color-hairline);
         padding-top: var(--porto-nav-height);
-        width: 100%;
+        /* Exactly the container width: `width: 100%` on a fixed
+           element resolves against the viewport, not the container,
+           and overflowed a full viewport wide. */
+        width: var(--porto-sidebar-width);
         height: 100vh;
         overflow-y: auto;
         scrollbar-width: none;
@@ -62,17 +63,8 @@ const { hasToc } = Astro.props;
       }
 
       :global([data-has-sidebar][data-has-toc]) .main-pane {
-        --porto-content-margin-inline: auto 0;
-
         order: 1;
-        width: min(
-          calc(100% - var(--porto-sidebar-width)),
-          calc(
-            var(--porto-content-width) +
-              (100% - var(--porto-content-width) - var(--porto-sidebar-width)) /
-              2
-          )
-        );
+        width: calc(100% - var(--porto-sidebar-width));
       }
     }
   }

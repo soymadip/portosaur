@@ -197,7 +197,9 @@
 
   @media (min-width: 50em) {
     :root {
-      --porto-nav-height: 4rem;
+      /* 60px, matching the OG Portosaur/Docusaurus navbar height
+         (Starlight's 4rem was taller than the original). */
+      --porto-nav-height: 3.75rem;
       --porto-nav-pad-x: 1.5rem;
       --porto-text-h1: var(--porto-text-5xl);
       --porto-text-h2: var(--porto-text-4xl);

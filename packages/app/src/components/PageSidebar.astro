@@ -56,18 +56,9 @@ const { headings } = Astro.props;
     .right-sidebar-panel :global(:where(a):hover) {
       color: var(--porto-color-white);
     }
-    @media (min-width: 72rem) {
-      .porto-container {
-        max-width: calc(
-          (
-            (
-                100vw - var(--porto-sidebar-width) - 2 *
-                  var(--porto-content-pad-x) - 2 * var(--porto-sidebar-pad-x)
-              ) *
-              0.25 /* MAGIC NUMBER 🥲 */
-          )
-        );
-      }
-    }
+    /* No wide-viewport max-width: the TOC container is exactly
+       sidebar-width now, so the 268px content width above is the
+       only constraint (Starlight's 0.25-of-leftover formula sized
+       the TOC for its absorb-the-leftover container). */
   }
 </style>

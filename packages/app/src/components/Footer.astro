@@ -21,7 +21,11 @@ const footer = config.theme.footer;
   @layer porto.core {
     footer {
       border-top: 1px solid var(--porto-color-hairline);
-      padding: 1rem;
+      /* Slim, matching the OG Portosaur footer: Docusaurus set
+         --ifm-footer-padding-vertical to 0.1rem. Horizontal padding
+         stays 1rem so a wrapped line never touches the edges (OG's
+         Docusaurus container provided that implicitly). */
+      padding: 0.1rem 1rem;
       text-align: center;
     }
 
