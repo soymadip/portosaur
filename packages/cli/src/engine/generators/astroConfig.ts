@@ -176,6 +176,12 @@ const notes = defineCollection({
   loader: glob({
     pattern: "**/*.mdx",
     base: ${JSON.stringify(`../${notesDir}`)},
+    // Astro's default entry ID is the frontmatter "slug" when one is
+    // set, so two files with the same slug in different directories
+    // collide and one is dropped from the collection. Portosaur
+    // resolves its own slugs from file paths (utils/slug.ts) and
+    // requires entry IDs to be paths, so force path-based IDs here.
+    generateId: ({ entry }) => entry.replace(/\\.mdx$/, ""),
   }),
   schema: docSchema,
 });
@@ -184,6 +190,8 @@ const blog = defineCollection({
   loader: glob({
     pattern: "**/*.mdx",
     base: ${JSON.stringify(`../${blogDir}`)},
+    // Same as notes: frontmatter slugs must not become entry IDs.
+    generateId: ({ entry }) => entry.replace(/\\.mdx$/, ""),
   }),
   schema: docSchema,
 });
