@@ -2,8 +2,11 @@
  * data-scheme + data-theme. Only the active scheme's block applies.
  * Colors are byte-identical to the old scheme file where the var system
  * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
- * the accent trio maps onto the primary scale (flipped per mode, matching
- * Starlight's low/high semantics), and the five hue colors take the
+ * the accent trio is a single-hue ramp anchored on the OG primary: the
+ * visible primary is `accent` in light mode and `accent-high` in dark
+ * mode (text-accent flips per mode), so both are the OG primary; dark
+ * `accent` is the darker same-hue light primary and `accent-low` a
+ * tint of the primary. The five hue colors take the
  * palette values with low/high tints derived via color-mix().
  * Dropped with the old token set: --color-secondary, --color-teal,
  * --color-yellow, --color-pink, and the semantic success/warning/danger/
@@ -18,7 +21,7 @@
   --porto-color-gray-4: #71717a;
   --porto-color-gray-5: #a1a1aa;
   --porto-color-gray-6: #d4d4d8;
-  --porto-color-gray-7: #e4e4e7;
+  --porto-color-gray-7: #f4f4f5;
   --porto-color-black: #ffffff;
 
   --porto-color-orange-low: color-mix(in srgb, #f97316 12%, white);
@@ -37,9 +40,9 @@
   --porto-color-red: #ef4444;
   --porto-color-red-high: color-mix(in srgb, #ef4444 70%, black);
 
-  --porto-color-accent-low: #48bb01;
+  --porto-color-accent-low: color-mix(in srgb, #40a701 12%, white);
   --porto-color-accent: #40a701;
-  --porto-color-accent-high: #2f7a01;
+  --porto-color-accent-high: color-mix(in srgb, #40a701 60%, black);
 
   --porto-color-bg: #ffffff;
 }
@@ -86,9 +89,13 @@
   --porto-color-red: #f87171;
   --porto-color-red-high: color-mix(in srgb, #f87171 65%, white);
 
-  --porto-color-accent-low: #40a701;
-  --porto-color-accent: #60fc02;
-  --porto-color-accent-high: #80fd35;
+  --porto-color-accent-low: color-mix(
+    in srgb,
+    #60fc02 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-accent: #40a701;
+  --porto-color-accent-high: #60fc02;
 
   --porto-color-bg: #18191a;
 }

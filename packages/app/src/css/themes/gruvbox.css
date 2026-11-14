@@ -2,8 +2,11 @@
  * data-scheme + data-theme. Only the active scheme's block applies.
  * Colors are byte-identical to the old scheme file where the var system
  * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
- * the accent trio maps onto the primary scale (flipped per mode, matching
- * Starlight's low/high semantics), and the five hue colors take the
+ * the accent trio is a single-hue ramp anchored on the OG primary: the
+ * visible primary is `accent` in light mode and `accent-high` in dark
+ * mode (text-accent flips per mode), so both are the OG primary; dark
+ * `accent` is the darker same-hue light primary and `accent-low` a
+ * tint of the primary. The five hue colors take the
  * palette values with low/high tints derived via color-mix().
  * Dropped with the old token set: --color-secondary, --color-teal,
  * --color-yellow, --color-pink, and the semantic success/warning/danger/
@@ -12,13 +15,13 @@
 
 [data-scheme="gruvbox"][data-theme="light"] {
   --porto-color-white: #3c3836;
-  --porto-color-gray-1: #665c54;
-  --porto-color-gray-2: #7c6f64;
-  --porto-color-gray-3: #a89984;
+  --porto-color-gray-1: #504945;
+  --porto-color-gray-2: #665c54;
+  --porto-color-gray-3: #7c6f64;
   --porto-color-gray-4: #928374;
-  --porto-color-gray-5: #bdae93;
-  --porto-color-gray-6: #d5c4a1;
-  --porto-color-gray-7: #ebdbb2;
+  --porto-color-gray-5: #a89984;
+  --porto-color-gray-6: #bdae93;
+  --porto-color-gray-7: #f2e5bc;
   --porto-color-black: #fbf1c7;
 
   --porto-color-orange-low: color-mix(in srgb, #af3a03 12%, white);
@@ -37,7 +40,7 @@
   --porto-color-red: #9d0006;
   --porto-color-red-high: color-mix(in srgb, #9d0006 70%, black);
 
-  --porto-color-accent-low: #d14504;
+  --porto-color-accent-low: color-mix(in srgb, #af3a03 12%, white);
   --porto-color-accent: #af3a03;
   --porto-color-accent-high: #7a2802;
 
@@ -46,11 +49,11 @@
 
 [data-scheme="gruvbox"][data-theme="dark"] {
   --porto-color-white: #ebdbb2;
-  --porto-color-gray-1: #a89984;
-  --porto-color-gray-2: #928374;
-  --porto-color-gray-3: #7c6f64;
-  --porto-color-gray-4: #665c54;
-  --porto-color-gray-5: #504945;
+  --porto-color-gray-1: #d5c4a1;
+  --porto-color-gray-2: #bdae93;
+  --porto-color-gray-3: #a89984;
+  --porto-color-gray-4: #928374;
+  --porto-color-gray-5: #7c6f64;
   --porto-color-gray-6: #3c3836;
   --porto-color-black: #32302f;
 
@@ -86,9 +89,13 @@
   --porto-color-red: #fb4934;
   --porto-color-red-high: color-mix(in srgb, #fb4934 65%, white);
 
-  --porto-color-accent-low: #d16101;
-  --porto-color-accent: #fe8019;
-  --porto-color-accent-high: #fe953e;
+  --porto-color-accent-low: color-mix(
+    in srgb,
+    #fe8019 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-accent: #af3a03;
+  --porto-color-accent-high: #fe8019;
 
   --porto-color-bg: #282828;
 }
