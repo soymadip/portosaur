@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@portosaur/cli": "{{porto_version}}",
-    "@portosaur/theme": "{{porto_version}}"
+    "@portosaur/app": "{{porto_version}}"
   }
 }

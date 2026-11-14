@@ -24,8 +24,8 @@ export interface LevelFn {
 
 // ================= Astro-style Formatting ====================
 
-// The label shown in brackets on every log line, matching the theme
-// integration's `[@portosaur/theme]` label.
+// The label shown in brackets on every log line, matching the app
+// integration's `[@portosaur/app]` label.
 export const LABEL = "@portosaur/cli";
 
 // Same timestamp format as Astro's logger: 24-hour HH:MM:SS in the

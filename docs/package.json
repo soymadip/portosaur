@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@portosaur/cli": "workspace:*",
-    "@portosaur/theme": "workspace:*"
+    "@portosaur/app": "workspace:*"
   },
   "engines": {
     "node": ">=24.15.0"

@@ -34,7 +34,7 @@ packages/
    - `theme` depends on no other `@portosaur/*` package
    - No circular dependencies are allowed.
 2. **Lightweight CLI**:
-   - `@portosaur/cli` MUST NOT depend on `@portosaur/theme` or heavy frontend frameworks (Astro).
+   - `@portosaur/cli` MUST NOT depend on `@portosaur/app` or heavy frontend frameworks (Astro).
    - The theme is injected into the user project's local `package.json` to keep global CLI installations instantaneous.
 3. **Internal Workspace Imports**:
    - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../logger`.

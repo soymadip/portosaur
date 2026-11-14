@@ -23,7 +23,7 @@ VERSION_FILES=(
     ["packages/cli/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
     ["packages/core/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
     ["packages/logger/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
-    ["packages/theme/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
+    ["packages/app/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
     ["packages/wizard/package.json"]='^  "version": "[^"]+" >   "version": "{{new_version}}"'
 )
 

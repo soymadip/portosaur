@@ -18,7 +18,7 @@ packages/
 ## Architecture Rules
 
 - **Dependency Flow**: Flow MUST be unidirectional: `cli` -> `core` -> `logger`. (Theme depends on Core). No circular dependencies.
-- **Lightweight CLI**: The `@portosaur/cli` package MUST NOT depend on `@portosaur/theme` or heavy frontend frameworks (Docusaurus/React). The theme should be injected into the user's local project `package.json` to keep global CLI installs fast.
+- **Lightweight CLI**: The `@portosaur/cli` package MUST NOT depend on `@portosaur/app` or heavy frontend frameworks (Docusaurus/React). The theme should be injected into the user's local project `package.json` to keep global CLI installs fast.
 - **Workspace Imports**: Always use `@portosaur/<package>` for cross-package imports. No relative paths like `../../logger`.
 - **TypeScript**: Write TypeScript (`.ts`) and run it via type stripping — no emit/build step. Erasable syntax only: no enums, namespaces, or parameter properties. Relative imports use explicit `.ts` extensions. Verify with `bun run typecheck`.
 - **Types & Docs**: Types live in the `.ts` source files — no separate `index.d.ts`. Update the exported TypeScript types in source whenever you create or modify public APIs.

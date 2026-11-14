@@ -1,0 +1,77 @@
+{
+  "name": "@portosaur/app",
+  "version": "0.26.0",
+  "description": "The Portosaur Astro app — integration, pages, layouts, components and assets for portfolio and docs sites.",
+  "license": "GPL-3.0-only",
+  "author": "soymadip",
+  "homepage": "https://soymadip.github.io/portosaur",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soymadip/portosaur"
+  },
+  "files": [
+    "src",
+    "assets",
+    "static"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./assets/*": "./assets/*",
+    "./integration": {
+      "types": "./src/integration.ts",
+      "import": "./src/integration.ts",
+      "default": "./src/integration.ts"
+    }
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.9",
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/preact": "^6.1.6",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.5",
+    "@embedpdf/viewer": "^3.2.0",
+    "@fontsource-variable/geologica": "^5.3.0",
+    "@fontsource-variable/lexend": "^5.3.0",
+    "@fontsource/alata": "^5.3.0",
+    "@iconify-json/devicon": "^1.2.62",
+    "@iconify-json/fa7-solid": "^1.2.5",
+    "@iconify-json/line-md": "^1.2.16",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.120",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/octicon": "^1.2.30",
+    "@iconify-json/simple-icons": "^1.2.92",
+    "@iconify-json/streamline-sharp": "^1.2.0",
+    "@iconify/utils": "^3.1.4",
+    "@pagefind/default-ui": "^1.6.0",
+    "@preact/signals": "^2",
+    "@tailwindcss/vite": "^4.3.5",
+    "@vite-pwa/astro": "^2.0.2",
+    "astro": "^7",
+    "chalk": "^6.0.0",
+    "clsx": "^2.1.1",
+    "js-yaml": "^5.2.2",
+    "katex": "^0.18.1",
+    "mermaid": "^12.3.0",
+    "pagefind": "^1.6.0",
+    "preact": "^10",
+    "rehype-katex": "^7.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-emoji": "^5.0.2",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.35.5",
+    "shiki": "^4.6.0",
+    "tailwindcss": "^4"
+  },
+  "keywords": [
+    "astro-integration"
+  ]
+}

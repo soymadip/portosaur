@@ -1,0 +1,238 @@
+---
+// BaseLayout — the document shell (port of the old swizzled `Layout`).
+//
+// Renders <head> (title, meta description, social-card meta, favicon /
+// manifest links, user head tags, user custom CSS), the theme-mode
+// inline script (resolves the initial mode from localStorage /
+// defaultMode before paint — no flash), skip-link, Navbar, <main>,
+// Footer, the theme-mode module, and the PWA scripts.
+//
+// Pages must NOT render their own <main>: this layout owns it (the old
+// `pages/index.jsx` rendered a nested <main> inside Layout's div —
+// that nesting is dropped in the port).
+import config from "porto:config";
+import { getAssetHeadTags } from "../utils/assets.ts";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+
+// The theme CSS entry (Tailwind + tokens + schemes), owned by the CSS
+// worker. User custom CSS (`theme.custom_css`, via the `porto:user-css`
+// virtual module) is imported AFTER it, so Vite bundles the user rules
+// last and they win the cascade — a `<link>` can't do that, because
+// Astro appends its bundled stylesheet links at the end of `<head>`.
+import "../css/custom.css";
+import "porto:user-css";
+
+interface Props {
+  title: string;
+  description?: string;
+  noFooter?: boolean;
+  wrapperClassName?: string;
+}
+
+const { title, description, noFooter, wrapperClassName } = Astro.props;
+
+const site = config.site;
+const theme = config.theme;
+
+const base = site.baseUrl ?? "/";
+const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
+const withBase = (urlPath: string) =>
+  `${basePrefix}${urlPath.startsWith("/") ? urlPath : `/${urlPath}`}`;
+
+// Head-tag objects come in two shapes: `{ tagName, attributes,
+// innerHTML? }` (generated asset tags) and the `{ tag: attrs }`
+// shorthand users write in `site.head_tags`. Normalize both (the old
+// `buildHeadTags` did the same).
+interface HeadTag {
+  tagName: string;
+  attributes: Record<string, string>;
+  innerHTML?: string;
+}
+
+function normalizeHeadTag(tag: any): HeadTag | null {
+  if (!tag || typeof tag !== "object") {
+    return null;
+  }
+  if (tag.tagName && tag.attributes) {
+    return {
+      tagName: tag.tagName,
+      attributes: tag.attributes,
+      innerHTML: tag.innerHTML,
+    };
+  }
+  const entries = Object.entries(tag);
+  if (entries.length === 0) {
+    return null;
+  }
+  const [tagName, attributes] = entries[0];
+  return {
+    tagName,
+    attributes: (attributes ?? {}) as Record<string, string>,
+  };
+}
+
+// Favicon / manifest / theme-color links, computed from the resolved
+// config (the assets hook generates the files they point to). The
+// engine's `extraHeadTags` are merged in too (empty in the current
+// flow — nothing feeds them — but the contract stands), deduped by
+// tag, then the user's own `site.head_tags`.
+const assetTags = getAssetHeadTags(config)
+  .map(normalizeHeadTag)
+  .filter((tag): tag is HeadTag => tag !== null);
+const extraTags = (config.extraHeadTags ?? [])
+  .map(normalizeHeadTag)
+  .filter((tag): tag is HeadTag => tag !== null);
+const userTags = (site.headTags ?? [])
+  .map(normalizeHeadTag)
+  .filter((tag): tag is HeadTag => tag !== null);
+const seenTags = new Set<string>();
+const headTags: HeadTag[] = [];
+for (const tag of [...assetTags, ...extraTags]) {
+  const key = JSON.stringify(tag);
+  if (!seenTags.has(key)) {
+    seenTags.add(key);
+    headTags.push(tag);
+  }
+}
+headTags.push(...userTags);
+
+// Social card: absolute URL for og:image / twitter:image.
+function absoluteUrl(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  if (/^https?:\/\//.test(value)) {
+    return value;
+  }
+  const siteUrl = (site.url ?? "").replace(/\/$/, "");
+  return `${siteUrl}${withBase(value)}`;
+}
+const socialCardUrl = absoluteUrl(site.socialCard);
+
+// Home-page detection for the ported index.jsx inline style (navbar
+// shadow removal + brand hiding in landscape), which only applied to
+// the portfolio home — the docs home never had it.
+const pathname = Astro.url.pathname;
+const isHome =
+  pathname === "/" ||
+  (basePrefix !== "" &&
+    (pathname === basePrefix || pathname === `${basePrefix}/`));
+const isPortfolioHome = isHome && config.siteMode === "portfolio";
+
+const pwaEnabled = site.pwa?.enable ?? false;
+const pwaNotifications = site.pwa?.notifications ?? false;
+const swUrl = withBase("sw.js");
+---
+
+<!doctype html>
+<html
+  lang="en"
+  class="h-full"
+  data-scheme={theme.colorScheme}
+  data-theme={theme.defaultMode}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="generator" content={`Portosaur v${config.portoVersion}`} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content="website" />
+    {socialCardUrl && <meta property="og:image" content={socialCardUrl} />}
+    <meta
+      name="twitter:card"
+      content={socialCardUrl ? "summary_large_image" : "summary"}
+    />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    {socialCardUrl && <meta name="twitter:image" content={socialCardUrl} />}
+    {headTags.map((tag) => {
+      const Tag = tag.tagName as any;
+      if (tag.innerHTML) {
+        return <Tag {...tag.attributes} set:html={tag.innerHTML} />;
+      }
+      return <Tag {...tag.attributes} />;
+    })}
+    {/*
+      Blocking theme-mode script: applies the stored choice (or the
+      configured defaultMode) before first paint, so there is no flash.
+      The full theme-mode module loads at the end of <body>.
+    */}
+    <script is:inline define:vars={{ defaultMode: theme.defaultMode }}>
+      (function () {
+        var mode = defaultMode;
+        try {
+          var stored = window.localStorage.getItem("theme");
+          if (stored === "light" || stored === "dark") {
+            mode = stored;
+          }
+        } catch (error) {
+          // Storage unavailable — fall back to the configured default.
+        }
+        document.documentElement.setAttribute("data-theme", mode);
+      })();
+    </script>
+  </head>
+  <body class="flex h-full min-h-screen flex-col">
+    <a
+      class="absolute -left-[9999px] top-0 z-200 bg-background px-4 py-2 text-foreground focus:left-2 focus:top-2"
+      href="#main-content"
+    >
+      Skip to main content
+    </a>
+
+    <Navbar isHome={isPortfolioHome} />
+
+    <div class="flex flex-[1_0_auto] flex-row">
+      <main
+        id="main-content"
+        class:list={["flex min-w-0 flex-auto flex-col", wrapperClassName]}
+      >
+        <slot />
+      </main>
+      {/*
+        Phase 4: the Preact Preview island mounts here — the dock as a
+        sticky flex sibling of <main>, popup / PiP / mobile dock via a
+        portal (see plan §4.4.5). Nothing Preview-related is mounted
+        until then.
+      */}
+    </div>
+
+    {!noFooter && <Footer />}
+
+    {/* Theme toggle wiring + theme-color sync (every page). */}
+    <script>
+      import "../scripts/theme-mode.ts";
+    </script>
+
+    {/*
+      PWA: register the service worker in production builds only (the
+      old @docusaurus/plugin-pwa behaved the same). The worker itself
+      (`sw.js`, from `sw-custom.ts` via @vite-pwa/astro injectManifest)
+      is wired in Phase 5 — until then registration rejects and is
+      ignored.
+    */}
+    {pwaEnabled && import.meta.env.PROD && <script
+      is:inline
+      define:vars={{ swUrl }}
+    >
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register(swUrl).catch(function () {});
+        });
+      }
+    </script>}
+
+    {/*
+      Periodic Background Sync registration (12h new-post checks).
+      Only when notifications are enabled — permission itself is
+      requested by the NotifyButton's user gesture, never here.
+    */}
+    {pwaEnabled && pwaNotifications && <script>
+      import "../clientModules/periodicSync.ts";
+    </script>}
+  </body>
+</html>

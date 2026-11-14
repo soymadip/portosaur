@@ -1,0 +1,88 @@
+---
+// Blog archive (`/${blogRoute}/archive`).
+//
+// Posts grouped by year, newest year first, newest post first within a
+// year. Years are h3 (the golden snapshot for this page has only the
+// h1 — year headings must not be h2).
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  pageTitle,
+  blogSlug,
+  postDate,
+  sortPostsByDateDesc,
+} from "../utils/content.ts";
+
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Archive", siteTitle);
+
+const posts = sortPostsByDateDesc(await getCollection("blog"));
+
+// Group by year (undated posts land under "Undated"), newest first.
+const groups = new Map();
+for (const post of posts) {
+  const date = postDate(post);
+  const year = date ? String(date.getFullYear()) : "Undated";
+  if (!groups.has(year)) {
+    groups.set(year, []);
+  }
+  groups.get(year).push(post);
+}
+const sortedGroups = [...groups.entries()].sort(([a], [b]) => {
+  if (a === "Undated") {
+    return 1;
+  }
+  if (b === "Undated") {
+    return -1;
+  }
+  return Number(b) - Number(a);
+});
+
+function formatPostDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+---
+
+<BaseLayout title={title}>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
+    <h1 class="mb-[-0.5rem]">Archive</h1>
+    {sortedGroups.length === 0 ? (
+      <p class="text-muted">No posts yet.</p>
+    ) : (
+      sortedGroups.map(([year, yearPosts]) => (
+        <section>
+          <h3 class="mb-3">{year}</h3>
+          <ul class="m-0 flex list-none flex-col gap-[0.4rem] p-0">
+            {yearPosts.map((post) => {
+              const date = postDate(post);
+              return (
+                <li>
+                  <a
+                    class="text-foreground no-underline hover:text-primary"
+                    href={`/${blogRoute}/${blogSlug(post)}/`}
+                  >
+                    {post.data.title ?? post.id}
+                  </a>
+                  {date && (
+                    <span class="text-[0.9rem] text-muted">
+                      {" — "}
+                      <time datetime={date.toISOString()}>
+                        {formatPostDate(date)}
+                      </time>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
+</BaseLayout>

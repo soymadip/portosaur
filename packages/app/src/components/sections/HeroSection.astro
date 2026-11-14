@@ -1,0 +1,137 @@
+---
+// HeroSection — ported from the old components/HeroSection/index.jsx.
+//
+// Profile pic (with remote-URL fallback), intro/title/subtitle/
+// profession/desc, Learn More button, hero social links. Reads config
+// directly from `porto:config`.
+import config from "porto:config";
+import { withBase } from "../../utils/icons.ts";
+import SocialLinks from "./SocialLinks.astro";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const heroSection = config.homePage.heroSection;
+
+const intro = heroSection.intro;
+const title = heroSection.title;
+const subtitle = heroSection.subtitle;
+const profession = heroSection.profession;
+const desc = heroSection.desc;
+const profilePic = heroSection.profilePic;
+const learnMoreButtonText = heroSection.learnMoreButtonTxt;
+
+const base = config.site.baseUrl;
+const profileSrc = withBase(
+  typeof profilePic === "string" ? profilePic : profilePic.src,
+  base,
+);
+const profileFallback =
+  typeof profilePic === "object" && profilePic.fallback
+    ? withBase(profilePic.fallback, base)
+    : null;
+---
+
+<div
+  id={id}
+  class={`relative flex min-h-[calc(100vh-60px)] items-center justify-center py-8 font-body animate-[fadeIn_0.8s_ease-in-out] max-[768px]:min-h-screen max-[768px]:pt-4 max-[768px]:pb-12 max-[480px]:pt-2 max-[480px]:pb-8 motion-reduce:animate-none! motion-reduce:transition-none! ${className || ""}`}
+  role="region"
+  aria-label="Hero section"
+>
+  {/*
+    `h-auto` on the container restores the old geometry: in the old block
+    layout the container's percentage height resolved to auto (the hero's
+    height is indefinite), so the container hugged its content and the
+    hero centered it. In this Astro layout the hero is a flex item, so
+    Chrome resolves the percentage to the full hero height — and with
+    `flex: 1` on both sections they each stretch to half of it, pushing
+    the image up behind the navbar.
+  */}
+  <div class="mx-auto mb-8 flex w-[90%] max-w-[1300px] flex-row items-center px-8 max-[768px]:h-auto max-[768px]:max-w-[500px] max-[768px]:flex-col-reverse max-[768px]:p-0 max-[768px]:text-center">
+    {/* Left: text content */}
+    {/*
+      `flex: 1` shares width in the desktop row; in the mobile column it
+      would share height and stretch the section, so it becomes
+      `flex-none` there (same for the right section).
+    */}
+    <div class="flex-1 pl-4 pr-12 text-left animate-[slideInLeft_0.8s_ease-out_0.2s_both] max-[768px]:mt-4 max-[768px]:flex max-[768px]:w-full max-[768px]:flex-none max-[768px]:flex-col max-[768px]:items-center max-[768px]:px-0 max-[768px]:animate-[fadeIn_0.8s_ease-out_0.3s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+      <p class="mb-[0.2rem] text-[1.1rem] font-medium text-muted animate-[slideUp_0.8s_ease-out_0.4s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.4s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        {intro}
+      </p>
+
+      <h1 class="relative my-[0.2rem] inline-block text-[4.5rem] font-semibold leading-[1.2] text-primary transition-all duration-300 ease-[ease] after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:bg-primary after:transition-[width] after:duration-300 after:ease-[ease] hover:transform-[translateY(-2px)] hover:after:w-full animate-[slideUp_0.8s_ease-out_0.6s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.5s_both] max-[768px]:text-[3rem] max-[480px]:animate-[slideUp_0.5s_ease-out_0.3s_both] max-[480px]:text-[2.3rem] motion-reduce:animate-none! motion-reduce:transition-none!">
+        {title}
+        <span class="ml-[0.1rem] mr-2 text-[1.1rem] font-medium text-muted animate-[slideUp_0.8s_ease-out_0.6s_both] max-[768px]:animate-[slideUp_0.6s_ease-out_0.5s_both] max-[768px]:text-[0.9rem] max-[480px]:animate-[slideUp_0.5s_ease-out_0.3s_both] max-[480px]:text-[0.8rem] motion-reduce:animate-none! motion-reduce:transition-none!">
+          ,
+        </span>
+      </h1>
+
+      <div class="flex flex-wrap items-baseline animate-[slideUp_0.8s_ease-out_0.8s_both] max-[768px]:my-[0.2rem] max-[768px]:justify-center max-[768px]:animate-[slideUp_0.6s_ease-out_0.6s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        <span class="mr-2 text-[1.2rem] font-normal text-muted max-[768px]:mr-[0.4rem] max-[480px]:mr-[0.3rem] max-[480px]:text-base max-[480px]:leading-(--line-height)">
+          {subtitle}
+        </span>
+        <h2 class="relative m-0 inline-block text-[2.9rem] font-[550] text-secondary transition-all duration-300 ease-[ease] after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:bg-secondary after:transition-[width] after:duration-300 after:ease-[ease] hover:transform-[translateY(-2px)] hover:after:w-full max-[768px]:text-[2rem] max-[480px]:text-[1.5rem]">
+          {profession}
+        </h2>
+        <span class="mr-2 text-[1.2rem] font-normal text-muted max-[768px]:mr-[0.4rem] max-[480px]:mr-[0.3rem] max-[480px]:text-base max-[480px]:leading-(--line-height)">
+          .
+        </span>
+      </div>
+
+      <p class="mt-6 max-w-[600px] text-left text-[1.1rem] leading-[1.7] text-muted animate-[slideUp_0.8s_ease-out_1s_both] max-[768px]:mx-auto max-[768px]:mt-[1.2rem] max-[768px]:max-w-[95%] max-[768px]:text-center max-[768px]:text-base max-[768px]:leading-[1.5] max-[768px]:animate-[slideUp_0.6s_ease-out_0.7s_both] max-[480px]:mx-auto max-[480px]:mt-2 max-[480px]:max-w-[92%] max-[480px]:text-[0.9rem] max-[480px]:leading-[1.4] max-[480px]:animate-[slideUp_0.5s_ease-out_0.5s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        {desc}
+      </p>
+
+      <div class="mt-10 flex items-center animate-[slideUp_0.8s_ease-out_1.2s_both] max-[768px]:mt-6 max-[768px]:w-full max-[768px]:flex-col max-[768px]:animate-[slideUp_0.6s_ease-out_0.8s_both] max-[480px]:animate-[slideUp_0.5s_ease-out_0.6s_both] motion-reduce:animate-none! motion-reduce:transition-none!">
+        <div class="mr-[1.8rem] flex items-center max-[768px]:mb-[1.2rem] max-[768px]:mr-0 max-[768px]:w-full max-[768px]:justify-center">
+          <a
+            href="#about"
+            class="inline-block cursor-pointer rounded-card border-2 border-primary bg-primary px-[1.2rem] py-2 text-[0.95rem] font-medium text-background no-underline shadow-sm outline-none [transition:all_0.3s_ease,transform_0.2s_ease] hover:transform-[translateY(-3px)_scale(1.02)] hover:bg-transparent hover:text-primary hover:shadow-md focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] active:transform-[translateY(-2px)] max-[480px]:px-4 max-[480px]:py-[0.4rem] max-[480px]:text-[0.85rem]"
+            aria-label="Learn more about me"
+          >
+            {learnMoreButtonText}
+          </a>
+        </div>
+        <SocialLinks links={heroSection.social} />
+      </div>
+    </div>
+
+    {/* Right: profile picture */}
+    <div class="flex flex-1 justify-end pr-8 animate-[slideInRight_0.8s_ease-out_0.3s_both] max-[768px]:-mt-2 max-[768px]:w-full max-[768px]:flex-none max-[768px]:justify-center max-[768px]:pr-0 max-[768px]:animate-[fadeIn_0.8s_ease-out_both] max-[480px]:-mt-8 motion-reduce:animate-none! motion-reduce:transition-none!">
+      <img
+        src={profileSrc}
+        alt="profile"
+        class="relative -mt-[30px] mr-8 h-[270px] w-auto rounded-[20%] object-cover shadow-none transition-[transform,box-shadow] duration-500 ease-[ease] will-change-transform animate-[scaleIn_0.8s_ease-out_both] hover:transform-[scale(1.04)_translateY(-8px)] hover:shadow-[0_20px_40px_var(--color-surface-1)] max-[768px]:-mt-5 max-[768px]:mb-[1.2rem] max-[768px]:mr-0 max-[768px]:h-[180px] max-[768px]:animate-[gentleAppear_0.7s_ease-out_both] max-[768px]:hover:transform-[scale(1.03)] max-[768px]:hover:shadow-[0_6px_15px_var(--color-surface-1)] max-[480px]:-mt-[25px] max-[480px]:mb-6 max-[480px]:h-[160px] max-[480px]:animate-[gentleAppear_0.6s_ease-out_both] motion-reduce:animate-none! motion-reduce:transition-none!"
+        loading="eager"
+        fetchpriority="high"
+        onerror={
+          profileFallback
+            ? `this.onerror=null;this.src='${profileFallback}'`
+            : undefined
+        }
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  /* `gentleAppear` is the only keyframe here that isn't already global:
+     `fadeIn`, `slideUp`, `slideInLeft`, `slideInRight` and `scaleIn`
+     live in `css/animations.css` with identical definitions. Astro does
+     not rename `@keyframes`, so the `animate-[gentleAppear_...]`
+     utilities above resolve to this definition. */
+  @keyframes gentleAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

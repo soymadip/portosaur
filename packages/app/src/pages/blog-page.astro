@@ -1,0 +1,351 @@
+---
+// Blog pagination (`/${blogRoute}/page/[page]`, pages 2+).
+//
+// Same rendering as the blog index, for the page's slice of posts.
+// Docusaurus URLs are `/blog/page/N` (not Astro `paginate`'s `/blog/N`),
+// so pagination is manual.
+//
+// Dates resolve here in `getStaticPaths` (frontmatter `date` → git
+// date → mtime, the same chain as the index) so page slicing follows
+// resolved dates; the resolved dates ride along as props, since
+// `getStaticPaths` runs in its own module scope and cannot see the
+// frontmatter helpers.
+import { getCollection } from "astro:content";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogSidebar from "../components/BlogSidebar.astro";
+import NotifyButton from "../components/NotifyButton.astro";
+import { pageTitle, blogSlug, postDate } from "../utils/content.ts";
+import { portosaurMdxOptions } from "../mdx.ts";
+
+const PAGE_SIZE = 10;
+
+export async function getStaticPaths() {
+  // NOTE: `getStaticPaths` runs in its own module scope — frontmatter
+  // constants are not visible here, so the page size is local.
+  const LOCAL_PAGE_SIZE = 10;
+
+  const datedPosts = (await getCollection("blog"))
+    .map((post) => ({ post, date: postDate(post) }))
+    .sort((a, b) => {
+      if (a.date && b.date) {
+        return b.date.getTime() - a.date.getTime();
+      }
+      if (a.date) {
+        return -1;
+      }
+      if (b.date) {
+        return 1;
+      }
+      return a.post.id.localeCompare(b.post.id);
+    });
+
+  const pageCount = Math.ceil(datedPosts.length / LOCAL_PAGE_SIZE);
+  const blogRoute = config.site.blogRoute;
+
+  // Sidebar data is the same on every page — resolved once here.
+  const sidebarPosts = datedPosts.map(({ post, date }) => ({
+    url: `/${blogRoute}/${blogSlug(post)}/`,
+    title: post.data.title ?? post.id,
+    date: date ? date.toISOString() : null,
+  }));
+
+  const paths = [];
+  for (let page = 2; page <= pageCount; page++) {
+    const slice = datedPosts.slice(
+      (page - 1) * LOCAL_PAGE_SIZE,
+      page * LOCAL_PAGE_SIZE,
+    );
+    paths.push({
+      params: { page: String(page) },
+      props: {
+        posts: slice.map(({ post }) => post),
+        dates: slice.map(({ date }) => (date ? date.toISOString() : null)),
+        sidebarPosts,
+        page,
+        pageCount,
+      },
+    });
+  }
+  return paths;
+}
+
+const {
+  posts,
+  dates,
+  sidebarPosts: sidebarPostProps,
+  page,
+  pageCount,
+} = Astro.props;
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Blog", siteTitle);
+
+const showNotify = config.site.pwa?.enable && config.site.pwa?.notifications;
+
+async function loadAuthors() {
+  try {
+    return await getCollection("authors");
+  } catch {
+    return [];
+  }
+}
+
+function resolveAuthor(ref, authors) {
+  if (typeof ref === "string") {
+    const found = authors.find((author) => author.id === ref);
+    if (found) {
+      return {
+        key: found.id,
+        name: found.data.name ?? found.id,
+        title: found.data.title,
+        url: found.data.url,
+        hasPage: found.data.page === true,
+      };
+    }
+    return {
+      key: ref,
+      name: ref,
+      title: undefined,
+      url: undefined,
+      hasPage: false,
+    };
+  }
+  const key = ref?.key;
+  const found = key ? authors.find((author) => author.id === key) : undefined;
+  if (found) {
+    return {
+      key: found.id,
+      name: ref.name ?? found.data.name ?? found.id,
+      title: ref.title ?? found.data.title,
+      url: ref.url ?? found.data.url,
+      hasPage: found.data.page === true,
+    };
+  }
+  return {
+    key: key ?? ref?.name ?? "",
+    name: ref?.name ?? key ?? "",
+    title: ref?.title,
+    url: ref?.url,
+    hasPage: false,
+  };
+}
+
+function formatPostDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+// The Docusaurus truncate marker, either form (`{/* truncate */}` in
+// MDX, `<!-- truncate -->` in Markdown), tolerating inner whitespace.
+const TRUNCATE_PATTERN = /\{\/\*\s*truncate\s*\*\/\}|<!--\s*truncate\s*-->/;
+
+function splitExcerpt(body) {
+  const match = TRUNCATE_PATTERN.exec(body ?? "");
+  if (!match) {
+    return { excerpt: null, truncated: false };
+  }
+  return { excerpt: body.slice(0, match.index), truncated: true };
+}
+
+const authors = await loadAuthors();
+const sidebarPosts = sidebarPostProps.map((post) => ({
+  ...post,
+  date: post.date ? new Date(post.date) : null,
+}));
+
+// Excerpts render through the site's own remark/rehype plugin list
+// (same options as the integration's markdown processor, Shiki themes
+// included) — but the processor is only built when some post on this
+// page actually has a truncate marker. No `fileURL` is passed to
+// `render`: without one, Astro's image collection stays off and
+// excerpt images keep their original `src` instead of being rewritten
+// into unprocessed `__ASTRO_IMAGE_` blobs. A render failure falls back
+// to the description, never failing the page.
+const splits = posts.map((post) => splitExcerpt(post.body));
+let excerptRenderer = null;
+if (splits.some((split) => split.truncated)) {
+  const mdxOptions = portosaurMdxOptions({
+    userVars: config.userVars ?? {},
+    colorScheme: config.theme?.colorScheme,
+  });
+  excerptRenderer = await createMarkdownProcessor({
+    remarkPlugins: mdxOptions.remarkPlugins,
+    rehypePlugins: mdxOptions.rehypePlugins,
+    shikiConfig: mdxOptions.shikiConfig,
+  });
+}
+
+async function renderExcerpt(excerpt) {
+  if (!excerptRenderer) {
+    return null;
+  }
+  try {
+    const { code } = await excerptRenderer.render(excerpt);
+    return code;
+  } catch {
+    return null;
+  }
+}
+
+const viewPosts = await Promise.all(
+  posts.map(async (post, index) => {
+    const split = splits[index];
+    const excerptHtml = split.truncated
+      ? await renderExcerpt(split.excerpt)
+      : null;
+    return {
+      url: `/${blogRoute}/${blogSlug(post)}/`,
+      title: post.data.title ?? post.id,
+      date: dates[index] ? new Date(dates[index]) : null,
+      description: post.data.description,
+      excerptHtml,
+      truncated: split.truncated,
+      authors: (post.data.authors ?? []).map((ref) =>
+        resolveAuthor(ref, authors),
+      ),
+      tags: post.data.tags ?? [],
+    };
+  }),
+);
+
+// The previous page of page 2 is the blog index itself.
+const prevUrl =
+  page === 2 ? `/${blogRoute}/` : `/${blogRoute}/page/${page - 1}/`;
+const nextUrl = page < pageCount ? `/${blogRoute}/page/${page + 1}/` : null;
+---
+
+<BaseLayout title={title}>
+  <div class="mx-auto flex w-full max-w-7xl gap-8 p-4">
+    <BlogSidebar posts={sidebarPosts} />
+    <div class="flex min-w-0 max-w-[46rem] flex-1 flex-col gap-10 max-[996px]:max-w-none">
+      {showNotify && <NotifyButton />}
+      {viewPosts.map((post) => (
+        <article>
+          <h2 class="mb-2 text-[2rem]">
+            <a
+              class="text-primary no-underline hover:underline"
+              href={post.url}
+            >
+              {post.title}
+            </a>
+          </h2>
+          <div class="mb-3">
+            {post.date && (
+              <time
+                class="text-[0.9rem] text-foreground"
+                datetime={post.date.toISOString()}
+              >
+                {formatPostDate(post.date)}
+              </time>
+            )}
+            {post.authors.length > 0 && (
+              <div class="mt-3">
+                {post.authors.map((author) => (
+                  <div class="mb-1">
+                    {author.hasPage ? (
+                      <a
+                        class="text-[0.95rem] font-semibold text-primary no-underline hover:underline"
+                        href={`/${blogRoute}/authors/${author.key}/`}
+                      >
+                        {author.name}
+                      </a>
+                    ) : author.url ? (
+                      <a
+                        class="text-[0.95rem] font-semibold text-primary no-underline hover:underline"
+                        href={author.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {author.name}
+                      </a>
+                    ) : (
+                      <span class="text-[0.95rem] font-semibold text-primary">
+                        {author.name}
+                      </span>
+                    )}
+                    {author.title && (
+                      <div class="text-[0.85rem] text-muted">
+                        {author.title}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {post.excerptHtml ? (
+            <div class="porto-blog-excerpt mb-2" set:html={post.excerptHtml} />
+          ) : post.description ? (
+            <p class="mb-2 text-muted">{post.description}</p>
+          ) : null}
+          {(post.tags.length > 0 || post.truncated) && (
+            <div class="flex items-center justify-between gap-4">
+              {post.tags.length > 0 && (
+                <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
+                  {post.tags.map((tag) => (
+                    <li>
+                      <a
+                        class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.8rem] text-muted no-underline hover:border-primary hover:text-primary"
+                        href={`/${blogRoute}/tags/${tag}/`}
+                      >
+                        {tag}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {post.truncated && (
+                <a
+                  class="ml-auto font-bold whitespace-nowrap text-primary no-underline hover:underline"
+                  href={post.url}
+                >
+                  Read more
+                </a>
+              )}
+            </div>
+          )}
+        </article>
+      ))}
+      <nav class="mt-4 flex justify-between gap-4" aria-label="Blog pages">
+        <a
+          class="rounded-lg border border-border px-[1.2rem] py-[0.6rem] text-foreground no-underline hover:border-primary hover:text-primary"
+          href={prevUrl}
+          rel="prev"
+        >
+          Newer
+        </a>
+        {nextUrl ? (
+          <a
+            class="rounded-lg border border-border px-[1.2rem] py-[0.6rem] text-foreground no-underline hover:border-primary hover:text-primary"
+            href={nextUrl}
+            rel="next"
+          >
+            Older
+          </a>
+        ) : (
+          <span />
+        )}
+      </nav>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* The excerpt is injected HTML (`set:html`), so its inner elements
+   * can't carry utilities — these rules stay as plain CSS. */
+  .porto-blog-excerpt p,
+  .porto-blog-excerpt ul,
+  .porto-blog-excerpt ol,
+  .porto-blog-excerpt pre {
+    margin: 0 0 1rem;
+  }
+
+  .porto-blog-excerpt > *:last-child {
+    margin-bottom: 0;
+  }
+</style>

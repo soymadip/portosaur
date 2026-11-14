@@ -1,0 +1,171 @@
+---
+// ContactSection — ported from the old components/ContactSection/index.jsx.
+//
+// Social links grid (email links sorted first). Hover color per card
+// comes from the link's own color, the techMap brand color, or the
+// primary token. Scroll reveal via `data-reveal` (old useScrollReveal).
+import config from "porto:config";
+import { renderDynamicIcon, techMap } from "../../utils/icons.ts";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const socialLinksConfig = config.homePage?.socialSection || {};
+const base = config.site.baseUrl;
+
+// Sort so email links appear first in the contact grid.
+const socialLinks = [...(socialLinksConfig.links || [])].sort((a, b) => {
+  const isEmailA =
+    a.url?.startsWith("mailto:") ||
+    a.icon?.toLowerCase().includes("email") ||
+    a.name?.toLowerCase().includes("email");
+  const isEmailB =
+    b.url?.startsWith("mailto:") ||
+    b.icon?.toLowerCase().includes("email") ||
+    b.name?.toLowerCase().includes("email");
+  if (isEmailA && !isEmailB) {
+    return -1;
+  }
+  if (!isEmailA && isEmailB) {
+    return 1;
+  }
+  return 0;
+});
+---
+
+{socialLinksConfig.enable !== false && (
+  <div
+    id={id}
+    data-reveal
+    class={`contactSection relative flex min-h-[calc(100vh-60px)] w-full scroll-mt-[90px] items-center justify-center bg-background pb-20 max-[768px]:scroll-mt-[70px] max-[768px]:pt-2 max-[768px]:pb-16 max-[480px]:scroll-mt-[32px] max-[480px]:pt-0 max-[480px]:pb-12 ${className || ""}`}
+    role="region"
+    aria-label="Contact section"
+  >
+    <div class="relative z-1 mx-auto w-full max-w-[1300px]">
+      {/* Heading */}
+      <div class="mb-6 text-center max-[768px]:mb-[1.2rem] max-[480px]:mb-4">
+        <h2 class="contactTitle relative mb-[0.6rem] inline-block text-[2.5rem] font-semibold text-primary max-[768px]:text-[2.2rem] max-[480px]:text-[1.9rem]">
+          {socialLinksConfig.heading}
+        </h2>
+        <p class="contactSubtitle mx-auto mt-[0.05rem] max-w-[600px] text-[0.95rem] text-muted max-[768px]:text-[0.9rem] max-[480px]:max-w-[90%] max-[480px]:text-[0.9rem]">
+          {socialLinksConfig.subheading}
+        </p>
+      </div>
+
+      {/* Social cards grid */}
+      <div class="mt-[1.2rem] flex w-full justify-center max-[768px]:mt-4 max-[480px]:mt-[0.8rem]">
+        <div
+          class="mx-auto mt-[0.9rem] flex w-full max-w-[1300px] flex-wrap justify-center gap-[1.2rem] px-2 max-[1200px]:gap-[1.1rem] max-[1024px]:max-w-full max-[1024px]:gap-4 max-[768px]:px-4 max-[480px]:gap-4 max-[480px]:px-2"
+          role="list"
+          aria-label="Social media and contact links"
+        >
+          {socialLinks.map((social, index) => {
+            const name = social.name;
+            const slugLower = (name || "").toLowerCase();
+            const mappedColor = techMap[slugLower]?.color;
+            const iconColor =
+              social.color || mappedColor || "var(--color-primary)";
+            const desc = social.desc || `Connect with me on ${name}`;
+            const url = social.url;
+            return (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="socialCard group relative flex min-h-[160px] w-[150px] cursor-pointer flex-col items-center justify-start overflow-hidden rounded-card border border-gray-400 bg-surface px-[1.2rem] py-[1.3rem] text-center no-underline shadow-sm transition-[translate,box-shadow,background-color] duration-300 ease-[ease] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-primary after:transition-[width] after:duration-300 after:ease-[ease] after:content-[''] hover:-translate-y-[5px] hover:bg-surface-1 hover:no-underline hover:shadow-md hover:after:w-full max-[1200px]:w-[140px] max-[1024px]:w-[150px] max-[768px]:min-h-[150px] max-[768px]:w-[150px] max-[768px]:py-[1.2rem] max-[480px]:h-[60px] max-[480px]:min-h-auto max-[480px]:w-[60px] max-[480px]:justify-center max-[480px]:p-0 max-[480px]:after:hidden max-[480px]:hover:-translate-y-[3px] max-[480px]:hover:scale-105"
+                style={`--card-index: ${index}; --icon-hover-color: ${iconColor};`}
+                aria-label={`Connect with me on ${name}: ${desc}`}
+                role="listitem"
+              >
+                <div class="mb-[0.3rem] text-[3.5rem] text-primary transition-[color,scale] duration-300 ease-[ease] group-hover:scale-110 group-hover:text-(--icon-hover-color) max-[768px]:mb-[0.25rem] max-[768px]:text-[3rem] max-[480px]:relative max-[480px]:top-[1.5px] max-[480px]:mt-[3px] max-[480px]:mb-0 max-[480px]:text-[2.5rem]">
+                  <span
+                    set:html={renderDynamicIcon(social.icon, {
+                      slug: name,
+                      fallbackIcon: "md:help-circle",
+                      base,
+                    })}
+                  />
+                </div>
+                <h3 class="relative mb-2 inline-block pb-[3px] text-[1.6rem] font-bold tracking-[0.5px] text-primary after:absolute after:bottom-0 after:left-1/2 after:h-px after:w-[70px] after:-translate-x-1/2 after:bg-gray-800 after:opacity-15 after:content-[''] hover:no-underline max-[768px]:text-[1.5rem] max-[480px]:hidden">
+                  {name}
+                </h3>
+                <p class="mt-[0.3rem] w-full text-center text-[0.9rem] text-muted opacity-80 hover:no-underline max-[480px]:hidden">
+                  {desc}
+                </p>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Keyframes + scroll-reveal state. The reveal animations are
+     triggered by the `is-visible` class the scroll-reveal script adds
+     to `[data-reveal]` sections, so they stay plain CSS; everything
+     else is Tailwind utilities. The local `fadeIn` (opacity + 30px
+     rise) differs from the global `fadeIn` (opacity only), so it
+     stays local; the local `slideUp` matches the global one but is
+     kept here so the component is self-contained. */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pre-reveal state: hidden until `.is-visible` triggers the
+     animation. */
+  .contactTitle,
+  .contactSubtitle,
+  .socialCard {
+    opacity: 0;
+  }
+
+  .contactSection.is-visible .contactTitle {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .contactSection.is-visible .contactSubtitle {
+    animation: slideUp 0.4s ease-out 0.1s forwards;
+  }
+
+  .contactSection.is-visible .socialCard {
+    animation: fadeIn 0.8s ease-out forwards;
+    animation-delay: calc(0.3s + (var(--card-index, 0) * 0.1s));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contactTitle,
+    .contactSubtitle,
+    .socialCard {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .socialCard {
+      opacity: 1;
+    }
+  }
+</style>

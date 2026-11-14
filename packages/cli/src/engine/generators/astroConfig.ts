@@ -76,7 +76,7 @@ import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import preact from "@astrojs/preact";
 import sitemap from "@astrojs/sitemap";
-import portosaur from "@portosaur/theme";
+import portosaur from "@portosaur/app";
 
 const options = ${JSON.stringify(options, null, 2)};
 

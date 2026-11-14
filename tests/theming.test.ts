@@ -17,7 +17,7 @@ import path from "node:path";
  */
 
 const REPO_ROOT = path.resolve(import.meta.dir, "..");
-const THEME_CSS_DIR = path.join(REPO_ROOT, "packages/theme/src/css");
+const THEME_CSS_DIR = path.join(REPO_ROOT, "packages/app/src/css");
 const THEMES_DIR = path.join(THEME_CSS_DIR, "themes");
 const DOCS_BUILD_DIR = path.join(REPO_ROOT, "docs/build");
 
@@ -262,7 +262,7 @@ describe("theming", () => {
     const search = fs.readFileSync(
       path.join(
         REPO_ROOT,
-        "packages/theme/src/components/Search.astro",
+        "packages/app/src/components/Search.astro",
       ),
       "utf8",
     );

@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./packages/theme/static/img/icon.png" width=110>
+    <img src="./packages/app/static/img/icon.png" width=110>
     <h1>Portosaur</h1>
     <p>Complete portfolio and personal website solution for your digital personality.</p>
     <br />
@@ -38,8 +38,7 @@ For user guides and CLI reference, visit the **[Documentation Site](https://soym
 This repository is a monorepo structured for performance and extensibility:
 
 - **[`@portosaur/cli`](./packages/cli)** — The CLI for project lifecycle & builds.
-- **[`@portosaur/core`](./packages/core)** — The logic engine for configuration & variable resolution.
-- **[`@portosaur/theme`](./packages/theme)** — The UI core containing components, assets, & plugins.
+- **[`@portosaur/app`](./packages/app)** — The Astro app: integration, pages, layouts, components, assets & plugins.
 - **[`@portosaur/wizard`](./packages/wizard)** — The interaction engine for CLI prompt workflows.
 
 ## Credits

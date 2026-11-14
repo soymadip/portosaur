@@ -21,13 +21,13 @@ export function getDefaultColorScheme(userConfig: any): string {
  *
  * @param {string} projectDir - The user's project directory.
  * @param {Object} userConfig - The parsed Portosaur user config.
- * @param {string} themeRoot - Absolute path to the theme package root.
+ * @param {string} appRoot - Absolute path to the app package root.
  * @returns {string[]} Resolved paths to CSS files.
  */
 export function resolveSiteCssFiles(
   projectDir: string,
   userConfig: any,
-  themeRoot: string,
+  appRoot: string,
 ): string[] {
   const colorScheme =
     userConfig?.theme?.color_scheme || getDefaultColorScheme(userConfig);
@@ -36,9 +36,9 @@ export function resolveSiteCssFiles(
     colorScheme.includes("/") ||
     colorScheme.includes("\\")
       ? path.resolve(projectDir, colorScheme)
-      : path.resolve(themeRoot, `src/css/themes/${colorScheme}.css`);
+      : path.resolve(appRoot, `src/css/themes/${colorScheme}.css`);
 
-  const files = [presetCss, path.resolve(themeRoot, "src/css/custom.css")];
+  const files = [presetCss, path.resolve(appRoot, "src/css/custom.css")];
 
   const customCss = userConfig?.theme?.custom_css;
 

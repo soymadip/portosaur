@@ -1,0 +1,188 @@
+---
+// NoteCards — ported from the old components/NoteCards/index.jsx.
+//
+// Renders the top-level notes as cards. The page passes the filtered
+// collection entries (`notes` prop — top-level files + top-level dirs
+// with an index); this component parses frontmatter, resolves slugs with
+// the shared slug util, filters drafts in production, and sorts by
+// `sidebar_position` (same rules as the old `getAllNotesData`).
+//
+// Two deliberate changes from the old component:
+// - Cards get `id="note-<slug>"` so the /notes HashNavigation can
+//   scroll to them — the old cards had no id, so hash navigation never
+//   found a target.
+// - The old <Hint> description tooltip is a plain `title` attribute
+//   until the real Hint lands in Phase 4 (the Phase 2 Hint stub renders
+//   its message visibly).
+// - `unlisted` frontmatter is not in the content schema, so it cannot
+//   be filtered here (the old component hid unlisted notes).
+import config from "porto:config";
+import { guessDocPermalink } from "../../utils/slug.ts";
+import {
+  renderDynamicIcon,
+  renderIcon,
+  techMap,
+  withBase,
+} from "../../utils/icons.ts";
+
+interface Props {
+  notes: Array<{
+    id: string;
+    data?: Record<string, any>;
+  }>;
+}
+
+const { notes: entries } = Astro.props;
+
+const base = config.site.baseUrl;
+const notesRoute = config.site.notesRoute;
+
+// Same parsing as the old getAllNotesData: title from frontmatter or the
+// file slug (first letter capitalized), description, position (default
+// 999), icon/color overrides, draft flag.
+const notes = entries
+  .map((entry) => {
+    const frontMatter = entry.data ?? {};
+    const { slug, fileSlug } = guessDocPermalink(
+      `${entry.id}.mdx`,
+      frontMatter,
+    );
+    const rawTitle = frontMatter.title || fileSlug;
+    return {
+      title: rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1),
+      slug,
+      description: frontMatter.description || "",
+      position: frontMatter.sidebar_position || 999,
+      iconStr: frontMatter.icon || null,
+      colorStr: frontMatter.color || null,
+      draft: frontMatter.draft === true,
+    };
+  })
+  .filter((note) => {
+    // Hide drafts in production
+    if (note.draft && import.meta.env.PROD) {
+      return false;
+    }
+    return true;
+  })
+  .sort((a, b) => a.position - b.position);
+---
+
+{notes.length > 0 && (
+  <>
+    {/* The old page wrapped the grid in Docusaurus' `.container`
+        (max-width 1280px, 1rem padding → 1248px of content), which fits
+        exactly 6 cards per row (6×165px + 5×1rem = 1070px; a 7th needs
+        1251px). This theme has no global `.container`, so the grid
+        stretched full-width and fit 7 — cap it at the 6-card row width
+        instead, centered. */}
+    <div
+      class="mx-auto my-16 flex max-w-[calc(6*165px+5*1rem)] flex-wrap justify-center gap-4 max-[480px]:mt-[0.2rem] max-[480px]:flex-col max-[480px]:items-stretch max-[480px]:justify-start max-[480px]:gap-[0.65rem] max-[480px]:px-[0.2rem]"
+      role="list"
+    >
+      {notes.map((note, index) => {
+        const noteUrl = withBase(`/${notesRoute}/${note.slug}`, base);
+        // Resolve color: explicit frontmatter first, then techMap
+        // guessing, then default.
+        const slugLower = note.slug.toLowerCase();
+        const iconStrLower = (note.iconStr || "").toLowerCase();
+        const mappedColor =
+          techMap[iconStrLower]?.color || techMap[slugLower]?.color;
+        const color = note.colorStr || mappedColor || "var(--color-primary)";
+        return (
+          <a
+            id={`note-${note.slug}`}
+            href={noteUrl}
+            class="noteCard group relative flex min-h-[225px] w-[165px] flex-col items-center justify-start overflow-hidden rounded-card border border-gray-400 bg-surface px-4 py-6 text-foreground! no-underline! shadow-sm transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:z-2 hover:-translate-y-1 hover:border-(--note-color) hover:bg-hover-overlay hover:shadow-lg max-[480px]:min-h-auto max-[480px]:w-full max-[480px]:flex-row max-[480px]:gap-[0.9rem] max-[480px]:py-[0.6rem] max-[480px]:hover:translate-none max-[480px]:active:scale-[0.98] max-[480px]:active:bg-hover-overlay"
+            style={`--card-index: ${index}; --note-color: ${color};`}
+            aria-label={`Read note: ${note.title}`}
+            title={note.description || undefined}
+          >
+            <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-[22px] bg-[color-mix(in_srgb,var(--note-color)_15%,transparent)] max-[480px]:m-0 max-[480px]:h-[60px] max-[480px]:w-[60px] max-[480px]:shrink-0 max-[480px]:rounded-[18px]">
+              <span
+                class="noteIcon flex h-14 w-14 items-center justify-center p-[0.2rem] text-[3.5rem] text-(--note-color) transition-[scale] duration-300 ease-[ease] group-hover:scale-120 max-[480px]:h-[2.8rem] max-[480px]:w-[2.8rem] max-[480px]:text-[2.8rem]"
+                set:html={renderDynamicIcon(note.iconStr, {
+                  slug: note.slug,
+                  fallbackIcon: "md:book",
+                  base,
+                })}
+              />
+            </div>
+            <div class="max-[480px]:min-w-0 max-[480px]:flex-1 max-[480px]:text-left">
+              <h3
+                class="m-0 line-clamp-3 text-center text-[1.5rem] leading-[1.3] font-bold text-ellipsis [overflow-wrap:anywhere] max-[480px]:text-left max-[480px]:text-[1.2rem] max-[480px]:font-semibold max-[480px]:text-foreground max-[480px]:line-clamp-2"
+                title={note.title}
+              >
+                {note.title}
+              </h3>
+            </div>
+            <span
+              class="mobileChevron mt-2 block h-4 w-4 max-[480px]:mt-0 max-[480px]:ml-auto max-[480px]:h-[1.4rem] max-[480px]:w-[1.4rem] max-[480px]:text-primary max-[480px]:opacity-60"
+              set:html={renderIcon("md:chevron-right")}
+            />
+          </a>
+        );
+      })}
+    </div>
+  </>
+)}
+
+<style>
+  /* Load-in keyframes + animation, and the injected-icon sizing
+     rules. The animation stays plain CSS (its keyframes live here);
+     the svg/img rules style set:html-injected content utilities
+     can't reach. `.noteCard` is also the hash-navigation selector
+     (pages/notecards.astro), so the class name stays. */
+  @keyframes noteFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .noteCard {
+    animation: noteFadeIn 0.5s ease-out forwards;
+    animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
+    opacity: 0;
+  }
+
+  /* The icon renders via set:html inside this wrapper span; the inner
+     svg/img fills it. (The old .imgIcon/.textIcon/.svgIcon classes were
+     never applied by the old component — every variant got .noteIcon.) */
+  .noteIcon svg,
+  .noteIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .noteIcon svg {
+    fill: currentColor;
+  }
+
+  /* Chevron under the card title. The old component rendered the same
+     `md:chevron-right` icon with a `display: none` desktop rule — but
+     the old Icon applied its own `display: inline-block` class to the
+     same <svg>, and in the built OG bundle that won the cascade, so
+     the golden screenshots show the chevron on desktop too (small,
+     centered, in the card's text color). Shown here deliberately. */
+  .mobileChevron svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .noteCard {
+      animation: none;
+      opacity: 1;
+      /* `transition` is a Tailwind utility now, so this needs
+         `!important` to beat it (same stylesheet no longer applies). */
+      transition: none !important;
+    }
+  }
+</style>

@@ -15,7 +15,7 @@ Two attributes on `<html>` select the look:
 - `data-scheme` — the color scheme (`portosaur`, `dracula`, …), from `theme.color_scheme`.
 - `data-theme` — `light` or `dark`, from `theme.default_mode` (or the visitor's toggle choice, which is remembered).
 
-Tokens are defined directly in Tailwind `@theme` in `tokens.css`, with the portosaur scheme's values as the defaults. Each bundled scheme file (`packages/theme/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the ~34 color tokens as literal hex. All six scheme files ship in the theme CSS; only the active scheme's block applies.
+Tokens are defined directly in Tailwind `@theme` in `tokens.css`, with the portosaur scheme's values as the defaults. Each bundled scheme file (`packages/app/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the ~34 color tokens as literal hex. All six scheme files ship in the theme CSS; only the active scheme's block applies.
 
 The `dark:` Tailwind variant follows the toggle (`data-theme`), not the OS preference, so `dark:bg-surface-1` switches with the theme. Your `theme.custom_css` file(s) load after the theme CSS, so your values win.
 
@@ -179,7 +179,7 @@ The file loads after the theme CSS. Define a raw palette in `:root`, then map it
 }
 ```
 
-Start from the template shipped with the theme — `packages/theme/src/css/themes/custom-scheme.template.css` — which has the full shape above with a few more tokens filled in.
+Start from the template shipped with the theme — `packages/app/src/css/themes/custom-scheme.template.css` — which has the full shape above with a few more tokens filled in.
 
 Make sure your scheme defines `--color-background` and `--color-primary` in each block: the asset generator reads those two from this file for the theme-color meta tag and the PWA manifest.
 

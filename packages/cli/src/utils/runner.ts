@@ -70,7 +70,7 @@ export function writeAstroShim(
   const rawConf = loadUserConfig(UserRoot);
   const options = buildSiteConfig(rawConf, UserRoot, {
     portoPaths,
-    portoRoot: portoPaths.themeRoot,
+    portoRoot: portoPaths.appRoot,
     ...context,
   });
 
@@ -114,7 +114,7 @@ export function logResolvedSiteLocation(
   const rawConf = loadUserConfig(UserRoot);
   const options = buildSiteConfig(rawConf, UserRoot, {
     portoPaths,
-    portoRoot: portoPaths.themeRoot,
+    portoRoot: portoPaths.appRoot,
     ...context,
   });
 
@@ -267,7 +267,7 @@ export async function runAstro(
     // `bin/astro.mjs` (the package's `bin` field). Resolve the package
     // root via its exported `./package.json`, then join the bin path.
     const astroPkgJson = require.resolve("astro/package.json", {
-      paths: [portoPaths.themeRoot, UserRoot],
+      paths: [portoPaths.appRoot, UserRoot],
     });
     astroBin = path.join(path.dirname(astroPkgJson), "bin", "astro.mjs");
     if (!fs.existsSync(astroBin)) {
@@ -275,7 +275,7 @@ export async function runAstro(
     }
   } catch (error) {
     throw new Error(
-      `Unable to resolve astro from @portosaur/theme at ${portoPaths.themeRoot}`,
+      `Unable to resolve astro from @portosaur/app at ${portoPaths.appRoot}`,
       { cause: error },
     );
   }

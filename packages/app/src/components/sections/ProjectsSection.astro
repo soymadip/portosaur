@@ -1,0 +1,328 @@
+---
+// ProjectsSection — ported from the old components/ProjectsSection/index.jsx.
+//
+// Carousel with nav buttons + dots. The carousel itself is pure CSS
+// (scroll-snap); the buttons, dots, and slides-to-show are client state,
+// ported to the small inline script below (same breakpoints and scroll
+// math as the old hooks: 1 slide ≤600px, 2 ≤1024px, 3 above).
+//
+// Note: neither the old component nor this port implements autoplay or a
+// featured filter — the config key `projectShelf.autoplay` exists but the
+// old component never read it, and `featured` is only a badge. The old
+// <Hint> for the "+N" overflow tags is a plain `title` attribute until
+// the real Hint lands in Phase 4.
+import config from "porto:config";
+import { renderDynamicIcon, renderIcon } from "../../utils/icons.ts";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const projectShelf = config.homePage?.projectShelf || {};
+const projects = projectShelf?.projects || [];
+const base = config.site.baseUrl;
+
+// State badge colors — the old `.active`/`.completed`/… classes,
+// expressed as utilities. An unknown state gets no background, as before.
+const stateBadgeStyles: Record<string, string> = {
+  active: "bg-green text-background",
+  completed: "bg-blue text-background",
+  maintenance: "bg-yellow text-background",
+  paused: "bg-red text-background",
+  archived: "bg-gray-500 text-background",
+  planned: "bg-purple text-background",
+};
+---
+
+{projectShelf?.enable !== false && projects.length > 0 && (
+  <div
+    id={id}
+    data-reveal
+    data-porto-carousel
+    data-projects={projects.length}
+    class={`relative w-full overflow-hidden bg-background! pb-28 pt-12 scroll-mt-(--scroll-margin-top) ${className || ""}`}
+  >
+    <div class="mx-auto max-w-[1200px] px-6">
+      <div class="mb-14 text-center">
+        <h2 class="relative mb-[0.6rem] inline-block text-[2.5rem] font-semibold text-primary opacity-0 [.is-visible_&]:animate-[slideUp_0.4s_ease-out_forwards]">
+          {projectShelf?.heading || "Projects"}
+        </h2>
+        {projectShelf?.subheading && (
+          <p class="mx-auto mt-[0.4rem] max-w-[600px] text-[0.95rem] text-muted opacity-0 [.is-visible_&]:animate-[slideUp_0.4s_ease-out_0.1s_forwards]">
+            {projectShelf.subheading}
+          </p>
+        )}
+      </div>
+
+      <div class="relative flex items-center gap-6">
+        {projects.length > 1 && (
+          <button
+            class="prevButton z-10 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-primary text-gray-100 shadow-md transition-all duration-200 ease-[ease] hover:enabled:scale-110 hover:enabled:bg-primary-darker disabled:cursor-not-allowed disabled:opacity-30 max-[768px]:hidden"
+            disabled
+            aria-label="Previous project"
+          >
+            <span
+              set:html={renderIcon("md:chevron-left", { size: "1.8rem" })}
+            />
+          </button>
+        )}
+
+        <div
+          class="carousel flex flex-1 snap-x snap-mandatory scroll-smooth overflow-x-auto py-4 [scrollbar-width:none] [-ms-overflow-style:none]"
+          style="--slides-to-show: 3"
+        >
+          {projects.map((project) => {
+            const tags = project.tags || [];
+            const extraTags = tags.length - 3;
+            return (
+              <div class="box-border min-w-0 snap-start px-[10px] flex-[0_0_calc(100%/var(--slides-to-show,3))] [scroll-snap-stop:always]">
+                <div class="group/card relative flex h-full flex-col overflow-hidden rounded-card border border-surface-1 bg-surface transition-[transform,box-shadow,border-color] duration-300 ease-[ease] hover:z-10 hover:scale-[1.02] hover:border-primary hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)]">
+                  <div
+                    class="relative w-full overflow-hidden border-b border-border pt-[62%]"
+                    style={`background-color: ${project.bg || "rgba(255,255,255,0.05)"}`}
+                  >
+                    <span
+                      class="absolute left-[10%] top-[10%] flex h-[80%] w-[80%] items-center justify-center transition-transform duration-400 ease-[ease] group-hover/card:scale-[1.08] [&_img]:size-full [&_img]:object-contain [&_svg]:size-full [&_svg]:object-contain"
+                      set:html={renderDynamicIcon(project.icon, {
+                        slug: project.slug,
+                        base,
+                      })}
+                    />
+
+                    {project.state && (
+                      <div class="absolute right-2.5 top-2.5 z-[5] flex items-center">
+                        <span
+                          class={`rounded-card px-1 py-[1px] text-[0.65rem] font-medium uppercase tracking-[0.5px] ${stateBadgeStyles[project.state.toLowerCase()] ?? ""}`}
+                        >
+                          {project.state}
+                        </span>
+                      </div>
+                    )}
+
+                    {project.featured && (
+                      <div
+                        class="absolute bottom-2.5 right-2.5 z-[5] flex size-6 items-center justify-center rounded-full bg-primary text-[0.75rem] text-background shadow-sm [&_svg]:text-[10px]"
+                        title="Featured"
+                      >
+                        <span set:html={renderIcon("md:star")} />
+                      </div>
+                    )}
+
+                    {tags.length > 0 && (
+                      <div class="absolute bottom-[5px] left-[5px] right-8 flex flex-wrap gap-[6px]">
+                        {tags.slice(0, 3).map((tag) => (
+                          <span class="inline-flex items-center whitespace-nowrap rounded-[3px] border border-gray-200 bg-surface px-[3px] pb-[3px] pt-0 text-[0.55rem] font-semibold leading-none tracking-[0.5px] text-foreground shadow-sm backdrop-blur-md">
+                            {tag}
+                          </span>
+                        ))}
+                        {extraTags > 0 && (
+                          <span
+                            class="inline-flex cursor-help items-center whitespace-nowrap rounded-[3px] border border-gray-200 bg-primary px-[3px] pb-[3px] pt-0 text-[0.55rem] font-semibold leading-none tracking-[0.5px] text-background shadow-sm backdrop-blur-md"
+                            title={tags.slice(3).join(", ")}
+                          >
+                            +{extraTags}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div class="flex flex-1 flex-col items-center px-6 pb-2 pt-[1.2rem] text-center">
+                    <div class="mb-[0.4rem] flex items-center justify-center">
+                      <h3 class="m-0 text-[1.7rem] font-semibold leading-[1.2] text-primary">
+                        {project.title}
+                      </h3>
+                    </div>
+                    <p class="mb-[0.4rem] flex-1 text-[0.9rem] leading-[1.5] text-muted line-clamp-3">
+                      {project.desc}
+                    </p>
+                  </div>
+
+                  <div class="mt-auto flex flex-wrap justify-center gap-4 px-6 pb-[1.8rem] pt-[1.2rem]">
+                    {project.website && (
+                      <a
+                        href={project.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="flex items-center gap-[0.35rem] whitespace-nowrap rounded-card border border-gray-500 bg-surface-1 px-[0.7rem] py-[0.35rem] text-[0.8rem] font-medium text-muted no-underline! shadow-sm transition-all duration-200 ease-[ease] hover:-translate-y-0.5 hover:border-primary hover:bg-surface hover:text-primary hover:shadow-md hover:[&_svg]:scale-[1.08] hover:[&_svg]:text-primary active:-translate-y-px active:shadow-sm [&_svg]:text-[0.95rem] [&_svg]:text-muted [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[ease]"
+                      >
+                        <span set:html={renderIcon("md:web")} /> Website
+                      </a>
+                    )}
+                    {project.repo && (
+                      <a
+                        href={project.repo}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="flex items-center gap-[0.35rem] whitespace-nowrap rounded-card border border-gray-500 bg-surface-1 px-[0.7rem] py-[0.35rem] text-[0.8rem] font-medium text-muted no-underline! shadow-sm transition-all duration-200 ease-[ease] hover:-translate-y-0.5 hover:border-primary hover:bg-surface hover:text-primary hover:shadow-md hover:[&_svg]:scale-[1.08] hover:[&_svg]:text-primary active:-translate-y-px active:shadow-sm [&_svg]:text-[0.95rem] [&_svg]:text-muted [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[ease]"
+                      >
+                        <span set:html={renderIcon("md:xml")} /> Source
+                      </a>
+                    )}
+                    {project.demo && (
+                      <a
+                        href={project.demo}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="flex items-center gap-[0.35rem] whitespace-nowrap rounded-card border border-gray-500 bg-surface-1 px-[0.7rem] py-[0.35rem] text-[0.8rem] font-medium text-muted no-underline! shadow-sm transition-all duration-200 ease-[ease] hover:-translate-y-0.5 hover:border-primary hover:bg-surface hover:text-primary hover:shadow-md hover:[&_svg]:scale-[1.08] hover:[&_svg]:text-primary active:-translate-y-px active:shadow-sm [&_svg]:text-[0.95rem] [&_svg]:text-muted [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[ease]"
+                      >
+                        <span set:html={renderIcon("md:play")} /> Demo
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {projects.length > 1 && (
+          <button
+            class="nextButton z-10 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-primary text-gray-100 shadow-md transition-all duration-200 ease-[ease] hover:enabled:scale-110 hover:enabled:bg-primary-darker disabled:cursor-not-allowed disabled:opacity-30 max-[768px]:hidden"
+            aria-label="Next project"
+          >
+            <span
+              set:html={renderIcon("md:chevron-right", { size: "1.8rem" })}
+            />
+          </button>
+        )}
+      </div>
+
+      {/*
+          Dots are server-rendered (max count = one per project, the
+          slidesToShow=1 case) so they carry the Astro scope attribute —
+          buttons created by the script would not match the scoped
+          `.activeDot` rule below. The script hides the extras per
+          breakpoint.
+        */}
+      <div class="dotsContainer mt-8 flex w-full justify-center gap-2">
+        {projects.map((_, index) => (
+          <button
+            class="dot size-[10px] cursor-pointer rounded-full border-0 bg-gray-300 p-0 transition-all duration-300 ease-[ease] hover:transform-[scale(1.2)] hover:bg-primary-light"
+            data-dot={index}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+<script>
+  // Carousel state, ported from the old React hooks (same breakpoints and
+  // scroll math). Runs once per page; scoped to [data-porto-carousel].
+  function initCarousel(root) {
+    const carousel = root.querySelector(".carousel");
+    const prevBtn = root.querySelector(".prevButton");
+    const nextBtn = root.querySelector(".nextButton");
+    const dotsContainer = root.querySelector(".dotsContainer");
+    const total = Number(root.dataset.projects || "0");
+    if (!carousel) {
+      return;
+    }
+
+    let slidesToShow = 3;
+    let currentSlide = 0;
+
+    function computeSlidesToShow() {
+      const width = window.innerWidth;
+      if (width <= 600) {
+        return 1;
+      }
+      if (width <= 1024) {
+        return 2;
+      }
+      return 3;
+    }
+
+    function totalPages() {
+      return Math.max(1, Math.ceil(total - slidesToShow + 1));
+    }
+
+    function updateDots() {
+      const pages = totalPages();
+      dotsContainer.style.display = pages <= 1 ? "none" : "";
+      dotsContainer.querySelectorAll(".dot").forEach((dot, index) => {
+        dot.style.display = index < pages ? "" : "none";
+        dot.classList.toggle("activeDot", index === currentSlide);
+      });
+    }
+
+    function update() {
+      const showNav = total > slidesToShow;
+      if (prevBtn) {
+        prevBtn.style.display = showNav ? "" : "none";
+      }
+      if (nextBtn) {
+        nextBtn.style.display = showNav ? "" : "none";
+      }
+      const { scrollLeft, scrollWidth, clientWidth } = carousel;
+      if (prevBtn) {
+        prevBtn.disabled = !(scrollLeft > 5);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = !(scrollLeft + clientWidth < scrollWidth - 5);
+      }
+      const slideWidth = clientWidth / slidesToShow;
+      currentSlide = Math.round(scrollLeft / slideWidth);
+      updateDots();
+    }
+
+    function goToSlide(index) {
+      const max = totalPages() - 1;
+      const clamped = Math.max(0, Math.min(max, index));
+      const scrollAmount = carousel.clientWidth / slidesToShow;
+      carousel.scrollTo({ left: clamped * scrollAmount, behavior: "smooth" });
+    }
+
+    function onResize() {
+      slidesToShow = computeSlidesToShow();
+      carousel.style.setProperty("--slides-to-show", String(slidesToShow));
+      update();
+    }
+
+    carousel.addEventListener("scroll", update, { passive: true });
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => goToSlide(currentSlide - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => goToSlide(currentSlide + 1));
+    }
+    dotsContainer.querySelectorAll(".dot").forEach((dot, index) => {
+      dot.addEventListener("click", () => goToSlide(index));
+    });
+    window.addEventListener("resize", onResize);
+    onResize();
+  }
+
+  document.querySelectorAll("[data-porto-carousel]").forEach(initCarousel);
+</script>
+
+<style>
+  /* `.activeDot` is toggled by the carousel script (`classList.toggle`),
+     so it stays a plain-CSS rule — no utility can express a JS-added
+     class. It uses the `transform` property (not the `scale` utility)
+     deliberately: the dot's hover scale is `transform-[scale(1.2)]` for
+     the same reason, so an active hovered dot scales 1.5x, not 1.5x *
+     1.2x. The local `slideUpFade` keyframe (30px rise) is gone — the
+     title/subtitle now use the identical global `slideUp` — and the
+     unused `titleUnderline` keyframe is deleted. */
+  .activeDot {
+    background-color: var(--color-primary);
+    transform: scale(1.4);
+  }
+
+  .activeDot:hover {
+    transform: scale(1.5);
+  }
+
+  /* Hide the carousel scrollbar: no Tailwind utility for
+     `::-webkit-scrollbar`. `.carousel` is the script's query hook, so
+     the class stays on the element. */
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+</style>

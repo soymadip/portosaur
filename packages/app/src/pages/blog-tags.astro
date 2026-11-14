@@ -1,0 +1,62 @@
+---
+// Blog tags index (`/${blogRoute}/tags`).
+//
+// Tags grouped by first letter, each letter an h2 (the golden headings
+// for this page are the letters), with a count per tag.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../utils/content.ts";
+
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Tags", siteTitle);
+
+const posts = await getCollection("blog");
+const counts = new Map();
+for (const post of posts) {
+  for (const tag of post.data.tags ?? []) {
+    counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+}
+
+// Group alphabetically by first letter (uppercase), tags sorted within.
+const groups = new Map();
+for (const tag of [...counts.keys()].sort((a, b) => a.localeCompare(b))) {
+  const letter = tag.charAt(0).toUpperCase();
+  if (!groups.has(letter)) {
+    groups.set(letter, []);
+  }
+  groups.get(letter).push(tag);
+}
+---
+
+<BaseLayout title={title}>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
+    <h1 class="mb-[-0.5rem]">Tags</h1>
+    {groups.size === 0 ? (
+      <p class="text-muted">No tags yet.</p>
+    ) : (
+      [...groups.entries()].map(([letter, tags]) => (
+        <section>
+          <h2 class="mb-3">{letter}</h2>
+          <ul class="m-0 flex list-none flex-wrap gap-[0.4rem] p-0">
+            {tags.map((tag) => (
+              <li>
+                <a
+                  class="inline-block rounded-full border border-border px-[0.6rem] py-[0.15rem] text-[0.9rem] text-muted no-underline hover:border-primary hover:text-primary"
+                  href={`/${blogRoute}/tags/${tag}/`}
+                >
+                  {tag}{" "}
+                  <span class="text-[0.8em] text-muted">
+                    ({counts.get(tag)})
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
+</BaseLayout>
