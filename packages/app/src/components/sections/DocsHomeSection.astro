@@ -39,8 +39,10 @@
 //   after tapping.
 // - On small phones (≤480px) the hero section's side padding drops
 //   from OG's 2rem to 1rem so the tagline and description get more
-//   room; OG's `-0.8rem` negative margin on the description is gone
-//   (against 1rem it would push the text to the viewport edge).
+//   room. The description gets a further `-0.5rem` inline margin
+//   where the hero stacks, so it sits wider than the tagline
+//   (0.5rem from the edge on small phones vs the tagline's 1rem);
+//   OG's `-0.8rem` would push it to the viewport edge at 1rem.
 // - Where the hero stacks (≤996px) the section's top padding drops
 //   from OG's 3.5rem to 2rem so the icon sits closer to the navbar;
 //   the glow still has room to fade above the image (it extends
@@ -449,6 +451,10 @@ const iconOnError = iconFallback
 
       .description {
         font-size: 1rem;
+        /* Wider than the tagline: the section padding is 1rem on
+           small phones, so this leaves the description 0.5rem from
+           the edge while the tagline stays at 1rem. */
+        margin-inline: -0.5rem;
       }
 
       .actions {
