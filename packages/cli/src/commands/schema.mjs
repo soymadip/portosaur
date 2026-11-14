@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { logger } from "@portosaur/logger";
+import { logger } from "../logger/index.mjs";
 import { Paths } from "../utils/index.mjs";
 
 /**
@@ -366,7 +366,7 @@ export async function schemaCommand(options = {}) {
   const SOURCE_FILE =
     typeof options.config === "string"
       ? path.resolve(process.cwd(), options.config)
-      : path.resolve(Paths.core, "src/generators/docusaurusConfig.mjs");
+      : path.resolve(Paths.engine, "generators/siteConfig.mjs");
 
   const OUTPUT_FILE =
     typeof options.output === "string"

@@ -2,39 +2,22 @@ import fs from "fs";
 import path from "path";
 import {
   resolvePortoPaths,
-  writeConfigShim,
+  writeAstroShim,
   logResolvedSiteLocation,
-  runDocusaurus,
+  runAstro,
   validateProject,
   ensureContentDirs,
 } from "../utils/index.mjs";
-import { logger } from "@portosaur/logger";
-import {
-  loadUserConfig,
-  generateRobotsTxt,
-  resolveSiteUrl,
-  resolveBasePath,
-  generateSiteAssets,
-} from "@portosaur/core";
+import { logger } from "../logger/index.mjs";
 
 /**
  * Builds the static Portosaur site.
  *
- * This involves:
- * 1. Validating the project structure.
- * 2. Generating dynamic assets (favicons, robots.txt).
- * 3. Compiling the site via Docusaurus.
+ * Thin launcher (D13): validate → write the Astro shim + content config →
+ * run `astro build`. Site assets, robots.txt, and the search index all run
+ * inside the theme integration — no CLI pre-generation.
  */
 export async function buildCommand(siteDir, options = {}) {
-  const extraArgs = [];
-
-  if (options.bundleAnalyzer) {
-    extraArgs.push("--bundle-analyzer");
-  }
-  if (options.minify === false) {
-    extraArgs.push("--no-minify");
-  }
-
   const UserRoot = siteDir
     ? path.resolve(process.cwd(), siteDir)
     : process.cwd();
@@ -51,62 +34,32 @@ export async function buildCommand(siteDir, options = {}) {
   const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
-    const userConfig = loadUserConfig(UserRoot, {
-      portoRoot: portoPaths.themeRoot,
-    });
+    const { astroRoot, outDir } = writeAstroShim(
+      UserRoot,
+      portoPaths,
+      {},
+      false,
+      {
+        outDir: options.outDir,
+        minify: options.minify,
+      },
+    );
 
-    // ------- Asset Generation -------
+    logResolvedSiteLocation(UserRoot, portoPaths);
 
-    // Integration tests exercise config generation without image processing or network access.
-    let configContext = {};
-    if (process.env.PORTO_TEST_MODE !== "true") {
-      configContext = await generateSiteAssets({
-        UserRoot,
-        userConfig,
-        portoPaths,
-      });
-    }
-    const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
-
-    logResolvedSiteLocation(UserRoot, portoPaths, configContext);
-
-    // ------- Docusaurus Build -------
+    // ------- Astro Build -------
 
     logger.info("Building static site...");
 
-    // Docusaurus only accepts outDir via the CLI flag, not the config file,
-    // so the configured directory is passed through here.
-    const outDirName =
-      options.outDir || userConfig.site?.build?.output_dir || "build";
-    if (outDirName !== "build") {
-      extraArgs.push("--out-dir", outDirName);
-    }
-
-    const finalOutDir = path.resolve(UserRoot, outDirName);
-
-    await runDocusaurus("build", UserRoot, configPath, extraArgs, portoPaths);
+    await runAstro("build", UserRoot, astroRoot, [], portoPaths);
 
     // ------- Post Build -------
 
     try {
-      fs.writeFileSync(path.join(finalOutDir, ".nojekyll"), "");
+      fs.writeFileSync(path.join(outDir, ".nojekyll"), "");
     } catch (e) {
       logger.warn(`Failed to create .nojekyll in build dir: ${e.message}`);
     }
-
-    const resolvedSiteUrl = resolveSiteUrl(userConfig.site?.url || "auto");
-    const resolvedBaseUrl = resolveBasePath(
-      userConfig.site?.base_url || "auto",
-    );
-
-    await generateRobotsTxt(UserRoot, {
-      enable: userConfig.site?.robots_txt?.enable,
-      rules: userConfig.site?.robots_txt?.rules,
-      customLines: userConfig.site?.robots_txt?.custom_lines,
-      siteUrl: resolvedSiteUrl,
-      baseUrl: resolvedBaseUrl,
-      outDir: finalOutDir,
-    });
 
     logger.success("Build completed successfully!");
   } catch (error) {

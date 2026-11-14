@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { load } from "js-yaml";
-import { colors } from "@portosaur/logger";
+import { colors } from "../logger/index.mjs";
 import { Paths } from "../utils/index.mjs";
 
 /**

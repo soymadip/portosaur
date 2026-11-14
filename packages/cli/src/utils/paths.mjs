@@ -2,6 +2,8 @@ import path from "node:path";
 
 import { createRequire } from "node:module";
 
+import { getPortoDotDir } from "../engine/utils/fs.mjs";
+
 const require = createRequire(import.meta.url);
 
 const srcDir = path.resolve(import.meta.dirname, "../");
@@ -29,13 +31,9 @@ export const Paths = {
   /** CLI's package.json file. */
   packageJson: path.join(pkgDir, "package.json"),
 
-  /** Absolute path to the core package. */
-  get core() {
-    try {
-      return path.dirname(require.resolve("@portosaur/core/package.json"));
-    } catch {
-      return path.resolve(pkgDir, "../core");
-    }
+  /** Absolute path to the engine directory (the former @portosaur/core, now inside cli). */
+  get engine() {
+    return path.join(srcDir, "engine");
   },
 
   /** Absolute path to the theme package. */
@@ -55,10 +53,20 @@ export const Paths = {
       static: path.join(this.theme, "static"),
       assets: path.join(this.theme, "assets"),
       theme: path.join(this.theme, "theme"),
-      plugins: path.join(this.theme, "src/plugins"),
+      integration: path.join(this.theme, "src/integration.mjs"),
     };
   },
 };
+
+/**
+ * The generated Astro project root (`.portosaur/`) for a user project.
+ *
+ * @param {string} UserRoot - The user's project directory.
+ * @returns {string} The absolute path to the `.portosaur/` directory.
+ */
+export function astroRoot(UserRoot) {
+  return getPortoDotDir(UserRoot);
+}
 
 /**
  * Resolve the Portosaur theme paths from a user's installed theme package.
@@ -84,6 +92,6 @@ export function resolvePortoPaths(UserRoot) {
     static: path.join(themeRoot, "static"),
     assets: path.join(themeRoot, "assets"),
     theme: path.join(themeRoot, "theme"),
-    plugins: path.join(themeRoot, "src/plugins"),
+    integration: path.join(themeRoot, "src/integration.mjs"),
   };
 }

@@ -12,12 +12,13 @@
   "packageManager": "bun@1.3.12",
   "workspaces": [
     "packages/*",
-    "docs"
+    "docs",
+    ".*"
   ],
   "scripts": {
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "schema": "bun packages/cli/bin/porto.mjs schema -o packages/core/config-schema.json",
+    "schema": "bun packages/cli/bin/porto.mjs schema -o packages/cli/config-schema.json",
     "playground": "bun src/playground.mjs",
     "build": "bun run playground build",
     "dev": "bun run playground dev",

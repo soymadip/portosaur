@@ -1,0 +1,48 @@
+---
+// Blog pagination (`/${blogRoute}/page/[page]`, pages 2+) — Phase 2 stub.
+//
+// Same rendering as the blog index, for the page's slice of posts.
+// Docusaurus URLs are `/blog/page/N` (not Astro `paginate`'s `/blog/N`),
+// so pagination is manual.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  pageTitle,
+  blogSlug,
+  sortPostsByDateDesc,
+} from "../lib/content.mjs";
+
+export async function getStaticPaths() {
+  // NOTE: `getStaticPaths` runs in its own module scope — frontmatter
+  // constants are not visible here, so the page size is local.
+  const PAGE_SIZE = 10;
+  const posts = sortPostsByDateDesc(await getCollection("blog"));
+  const pageCount = Math.ceil(posts.length / PAGE_SIZE);
+  const paths = [];
+  for (let page = 2; page <= pageCount; page++) {
+    paths.push({
+      params: { page: String(page) },
+      props: { posts: posts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) },
+    });
+  }
+  return paths;
+}
+
+const { posts } = Astro.props;
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Blog", siteTitle);
+---
+
+<BaseLayout title={title}>
+  {
+    posts.map((post) => (
+      <h2>
+        <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+          {post.data.title ?? post.id}
+        </a>
+      </h2>
+    ))
+  }
+</BaseLayout>

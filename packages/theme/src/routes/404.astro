@@ -1,0 +1,16 @@
+---
+// 404 page (`/404`) — Phase 2 stub. Astro emits this as `404.html`.
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const title = pageTitle("Page Not Found", config.site.title);
+---
+
+<BaseLayout title={title}>
+  <h1>Page Not Found</h1>
+  <p>We could not find what you were looking for.</p>
+  <p>
+    <a href="/">Go to the homepage</a>
+  </p>
+</BaseLayout>

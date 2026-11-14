@@ -1,0 +1,20 @@
+---
+// Search page (`/search`) — Phase 2 stub.
+//
+// The title is the bare "Search the documentation" (no `| Site` suffix —
+// the Docusaurus search plugin's own title). The Pagefind UI lands in
+// Phase 5; the stub renders the input so the page exists and the index
+// is built over real HTML from Phase 2 on.
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Search the documentation">
+  <h1>Search the documentation</h1>
+  <input
+    type="search"
+    id="porto-search-input"
+    placeholder="Search the documentation"
+    aria-label="Search the documentation"
+  />
+  <div id="porto-search-results"></div>
+</BaseLayout>

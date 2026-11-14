@@ -1,0 +1,388 @@
+{
+  "generated_from": "Docusaurus build of docs/build",
+  "routes": [
+    {
+      "url": "/",
+      "title": "Home | Portosaur",
+      "headings": [
+        "Portosaur",
+        "Fully Featured Portfolio",
+        "Knowledge Base",
+        "Blogging Platform",
+        "Task Tracking",
+        "Mobile Optimized",
+        "Highly Configurable"
+      ]
+    },
+    {
+      "url": "/404.html",
+      "title": "Page Not Found | Portosaur",
+      "headings": [
+        "Page Not Found"
+      ]
+    },
+    {
+      "url": "/blog/",
+      "title": "Blog | Portosaur",
+      "headings": [
+        "No posts yet"
+      ]
+    },
+    {
+      "url": "/blog/authors/",
+      "title": "Authors | Portosaur",
+      "headings": [
+        "Authors",
+        "soymadip"
+      ]
+    },
+    {
+      "url": "/docs/",
+      "title": "Portosaur Docs | Portosaur",
+      "headings": [
+        "Portosaur Docs",
+        "Getting Started",
+        "CLI Reference",
+        "Configuration Guide",
+        "Markdown Features",
+        "Progressive Web App (PWA)",
+        "Deployment Guide",
+        "Theme Customization",
+        "Developer Overview"
+      ]
+    },
+    {
+      "url": "/docs/cli-reference/",
+      "title": "CLI Reference | Portosaur",
+      "headings": [
+        "CLI Reference",
+        "Global Options",
+        "porto init",
+        "porto providers",
+        "porto dev (alias: porto start)",
+        "porto build",
+        "porto serve"
+      ]
+    },
+    {
+      "url": "/docs/config/",
+      "title": "Configuration Guide | Portosaur",
+      "headings": [
+        "Configuration Guide",
+        "Dynamic Variables",
+        "Icons & Emoji",
+        "Configuration Reference"
+      ]
+    },
+    {
+      "url": "/docs/config/dynamic-variables/",
+      "title": "Dynamic Variables | Portosaur",
+      "headings": [
+        "Dynamic Variables",
+        "Syntax Overview",
+        "Variable Sources",
+        "Escaping Variables"
+      ]
+    },
+    {
+      "url": "/docs/config/icons/",
+      "title": "Icons & Emoji | Portosaur",
+      "headings": [
+        "Icons & Emoji",
+        "Ways to Use Icons/Emojis"
+      ]
+    },
+    {
+      "url": "/docs/config/reference/",
+      "title": "Configuration Reference | Portosaur",
+      "headings": [
+        "Configuration Reference",
+        "site",
+        "theme",
+        "docs_home",
+        "home_page",
+        "tasks",
+        "tools.link_shortener",
+        "vars",
+        "Custom Head Tags",
+        "Icon Values"
+      ]
+    },
+    {
+      "url": "/docs/deployment/",
+      "title": "Deployment Guide | Portosaur",
+      "headings": [
+        "Deployment Guide",
+        "GitHub Pages",
+        "GitLab Pages",
+        "Codeberg Pages",
+        "Surge.sh",
+        "Netlify",
+        "Other Providers (Vercel, Cloudflare)"
+      ]
+    },
+    {
+      "url": "/docs/deployment/codeberg-pages/",
+      "title": "Codeberg Pages | Portosaur",
+      "headings": [
+        "Codeberg Pages",
+        "1. Choose a Repository and URL",
+        "2. Generate a Forgejo Actions Workflow",
+        "3. Enable Actions and Deploy",
+        "4. Use Woodpecker CI (Legacy)",
+        "5. Use a Custom Domain"
+      ]
+    },
+    {
+      "url": "/docs/deployment/github-pages/",
+      "title": "GitHub Pages | Portosaur",
+      "headings": [
+        "GitHub Pages",
+        "1. Repository Setup",
+        "2. Generating the Workflow Files",
+        "3. Enable GitHub Actions in Repository Settings",
+        "4. Using Custom Domains"
+      ]
+    },
+    {
+      "url": "/docs/deployment/gitlab-pages/",
+      "title": "GitLab Pages | Portosaur",
+      "headings": [
+        "GitLab Pages",
+        "1. Repository and Site URL",
+        "2. Generate the CI Configuration",
+        "3. Enable and Run the Pipeline",
+        "4. Use a Custom Domain"
+      ]
+    },
+    {
+      "url": "/docs/deployment/netlify/",
+      "title": "Netlify | Portosaur",
+      "headings": [
+        "Netlify"
+      ]
+    },
+    {
+      "url": "/docs/deployment/other-providers/",
+      "title": "Other Providers (Vercel, Cloudflare) | Portosaur",
+      "headings": [
+        "Other Providers (Vercel, Cloudflare)",
+        "1. Vercel",
+        "2. Cloudflare Pages"
+      ]
+    },
+    {
+      "url": "/docs/deployment/surge/",
+      "title": "Surge.sh | Portosaur",
+      "headings": [
+        "Surge.sh",
+        "1. Create Surge Credentials",
+        "2. Generate a Deployment Workflow",
+        "3. Add Repository Secrets",
+        "4. Deploy and Verify"
+      ]
+    },
+    {
+      "url": "/docs/developer-guide/",
+      "title": "Developer Overview | Portosaur",
+      "headings": [
+        "Developer Overview",
+        "In This Section",
+        "📐Scaffolding & Templates",
+        "🧙@portosaur/wizard",
+        "🪵@portosaur/logger",
+        "Monorepo Architecture",
+        "Architectural Principles",
+        "Development Setup",
+        "📐Scaffolding & Templates",
+        "🧙@portosaur/wizard",
+        "🪵@portosaur/logger"
+      ]
+    },
+    {
+      "url": "/docs/developer-guide/logger/",
+      "title": "@portosaur/logger | Portosaur",
+      "headings": [
+        "@portosaur/logger",
+        "Installation",
+        "Log Levels",
+        "Box Headings",
+        "ANSI Colors API"
+      ]
+    },
+    {
+      "url": "/docs/developer-guide/templates/",
+      "title": "Scaffolding & Templates | Portosaur",
+      "headings": [
+        "Scaffolding & Templates",
+        "Registry (registry.yml)",
+        "Template Variables",
+        "Template Hooks (hooks.mjs)",
+        "Adding a New Hosting Platform"
+      ]
+    },
+    {
+      "url": "/docs/developer-guide/wizard/",
+      "title": "@portosaur/wizard | Portosaur",
+      "headings": [
+        "@portosaur/wizard",
+        "Installation",
+        "Basic Example",
+        "Step Configuration Options",
+        "Keyboard Controls"
+      ]
+    },
+    {
+      "url": "/docs/getting-started/",
+      "title": "Getting Started | Portosaur",
+      "headings": [
+        "Getting Started",
+        "Quick Overview"
+      ]
+    },
+    {
+      "url": "/docs/getting-started/installation/",
+      "title": "Installation & Setup | Portosaur",
+      "headings": [
+        "Installation & Setup",
+        "Prerequisites",
+        "Installation",
+        "Initializing a Site"
+      ]
+    },
+    {
+      "url": "/docs/getting-started/project-structure/",
+      "title": "Project Structure | Portosaur",
+      "headings": [
+        "Project Structure",
+        "Directory Layout",
+        "Key Files & Directories",
+        "Running Your Site"
+      ]
+    },
+    {
+      "url": "/docs/markdown/",
+      "title": "Markdown Features | Portosaur",
+      "headings": [
+        "Markdown Features",
+        "Frontmatter",
+        "Code Blocks",
+        "Preview Window",
+        "🧩UI Components",
+        "Built-in MDX Components"
+      ]
+    },
+    {
+      "url": "/docs/markdown/built-in-components/",
+      "title": "Built-in MDX Components | Portosaur",
+      "headings": [
+        "Built-in MDX Components",
+        "<Tabs> & <TabItem>",
+        "<Details>",
+        "<Hint>",
+        "<Indent>",
+        "<TopicList>"
+      ]
+    },
+    {
+      "url": "/docs/markdown/code-blocks/",
+      "title": "Code Blocks | Portosaur",
+      "headings": [
+        "Code Blocks",
+        "Basic Code Blocks",
+        "File Titles",
+        "Line Numbers",
+        "Magic Comments",
+        "Dynamic Variables in Code Blocks"
+      ]
+    },
+    {
+      "url": "/docs/markdown/frontmatter/",
+      "title": "Frontmatter | Portosaur",
+      "headings": [
+        "Frontmatter",
+        "Frontmatter Reference",
+        "Blog Frontmatter"
+      ]
+    },
+    {
+      "url": "/docs/markdown/interactive-previews/",
+      "title": "Preview Window | Portosaur",
+      "headings": [
+        "Preview Window",
+        "Basic Usage",
+        "Supported Formats & Automatic Detection",
+        "Layout Modes",
+        "<Pv /> Props Reference"
+      ]
+    },
+    {
+      "url": "/docs/markdown/ui-components/",
+      "title": "UI Components | Portosaur",
+      "headings": [
+        "UI Components",
+        "<Btn>",
+        "<Dropdown>",
+        "<Icon> & <DynamicIcon>",
+        "<IconSearch>"
+      ]
+    },
+    {
+      "url": "/docs/progressive-web-app/",
+      "title": "Progressive Web App (PWA) | Portosaur",
+      "headings": [
+        "Progressive Web App (PWA)",
+        "Configuration",
+        "App Shortcuts",
+        "Automated Screenshots (Zero-Config)",
+        "Offline Support & Caching",
+        "Testing Your PWA"
+      ]
+    },
+    {
+      "url": "/docs/theme-customization/",
+      "title": "Theme Customization | Portosaur",
+      "headings": [
+        "Theme Customization",
+        "Bundled Schemes",
+        "Creating a Custom Theme",
+        "Full Theming Boilerplate"
+      ]
+    },
+    {
+      "url": "/notes/",
+      "title": "Docs | Portosaur",
+      "headings": [
+        "My Notes"
+      ]
+    },
+    {
+      "url": "/offline/",
+      "title": "You're Offline | Portosaur",
+      "headings": [
+        "You're Offline"
+      ]
+    },
+    {
+      "url": "/redirect/",
+      "title": "Opening in browser… | Portosaur",
+      "headings": [
+        "Opening in browser…"
+      ]
+    },
+    {
+      "url": "/search/",
+      "title": "Search the documentation",
+      "headings": [
+        "Search the documentation"
+      ]
+    },
+    {
+      "url": "/tasks/",
+      "title": "Tasks are Disabled | Portosaur",
+      "headings": [
+        "Tasks are currently disabled"
+      ]
+    }
+  ]
+}

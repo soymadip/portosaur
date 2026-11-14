@@ -1,0 +1,7 @@
+---
+// Link — Phase 2 stub. Plain anchor; the Docusaurus <Link to="…"> shape
+// maps `to` to `href`.
+const { to, href } = Astro.props;
+---
+
+<a href={to ?? href ?? "#"}><slot /></a>

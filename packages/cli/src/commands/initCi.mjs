@@ -4,8 +4,8 @@ import { load } from "js-yaml";
 
 import { runWizard, cancel } from "@portosaur/wizard";
 
-import { logger, colors } from "@portosaur/logger";
-import { mirrorSync, porto } from "@portosaur/core";
+import { logger, colors } from "../logger/index.mjs";
+import { mirrorSync, porto } from "../engine/index.mjs";
 import {
   Paths,
   detectVcsProvider,

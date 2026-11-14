@@ -1,0 +1,50 @@
+---
+// Blog tags index (`/${blogRoute}/tags`) — Phase 2 stub.
+//
+// Tags grouped by first letter (uppercase, alphabetical), each letter a
+// h2 — the Docusaurus tags page groups the same way.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Tags", siteTitle);
+
+const posts = await getCollection("blog");
+const tags = new Set();
+for (const post of posts) {
+  for (const tag of post.data.tags ?? []) {
+    tags.add(tag);
+  }
+}
+
+const groups = new Map();
+for (const tag of [...tags].sort((a, b) => a.localeCompare(b))) {
+  const letter = tag.charAt(0).toUpperCase();
+  if (!groups.has(letter)) {
+    groups.set(letter, []);
+  }
+  groups.get(letter).push(tag);
+}
+const letters = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+---
+
+<BaseLayout title={title}>
+  <h1>Tags</h1>
+  {
+    letters.map((letter) => (
+      <>
+        <h2>{letter}</h2>
+        <ul>
+          {groups.get(letter).map((tag) => (
+            <li>
+              <a href={`/${blogRoute}/tags/${tag}/`}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    ))
+  }
+</BaseLayout>

@@ -1,9 +1,7 @@
 import {
   rmSync,
   existsSync,
-  readdirSync,
   readFileSync,
-  symlinkSync,
   writeFileSync,
 } from "fs";
 import path from "path";
@@ -71,10 +69,22 @@ export function runPlayground({
   const pkgJsonPath = path.join(SITE_DIR, "package.json");
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
 
+  // The scaffold names the project after its directory (".playground"),
+  // which is not a valid package name — bun rejects workspace members
+  // with leading dots. Strip them: the site is a workspace member (the
+  // root `.*` glob), so it must have a valid name.
+  pkgJson.name = siteName.replace(/^\.+/, "");
+
+  // Point the Portosaur deps at this checkout via the workspace. The old
+  // install-from-registry-then-symlink dance broke with the Astro
+  // migration: the published 0.26.0 tree (Docusaurus) and the local tree
+  // (Astro) install conflicting versions of shared transitive deps
+  // (e.g. `cookie`), and the stale registry copy shadowed the correct
+  // one. Workspace links install the local packages' own dep trees.
   if (pkgJson.dependencies) {
     for (const dep of Object.keys(pkgJson.dependencies)) {
       if (dep.startsWith("@portosaur/")) {
-        pkgJson.dependencies[dep] = "*";
+        pkgJson.dependencies[dep] = "workspace:*";
       }
     }
   }
@@ -91,24 +101,10 @@ export function runPlayground({
 
   console.log(colors.info("\n>>> Installing local packages..."));
 
-  // Install the published dependency graph, including Docusaurus and theme dependencies.
-  run("bun install", { cwd: SITE_DIR, quiet: isExisting });
-
-  // Replace only the temporary project's Portosaur packages with this checkout.
-  // This avoids Bun's inconsistent workspace-link handling across supported versions.
-  const packagesDir = path.join(REPO_ROOT, "packages");
-  const smokePackagesDir = path.join(SITE_DIR, "node_modules", "@portosaur");
-  const packages = readdirSync(packagesDir).filter((packageName) =>
-    existsSync(path.join(packagesDir, packageName, "package.json")),
-  );
-
-  for (const packageName of packages) {
-    const target = path.join(smokePackagesDir, packageName);
-    const source = path.join(packagesDir, packageName);
-
-    rmSync(target, { recursive: true, force: true });
-    symlinkSync(source, target, "dir");
-  }
+  // The site is a workspace member, so this installs the whole workspace
+  // (linked local packages + their real dep trees) with the hoisted
+  // linker the docs build already requires.
+  run("bun install --linker=hoisted", { cwd: SITE_DIR, quiet: isExisting });
 
   const extraArgsStr = extraArgs.length > 0 ? " " + extraArgs.join(" ") : "";
 

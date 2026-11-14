@@ -1,0 +1,55 @@
+---
+// Blog tag page (`/${blogRoute}/tags/[tag]`) — Phase 2 stub.
+//
+// Heading follows the Docusaurus wording: "One post tagged with" for a
+// single post, "{n} posts tagged with" otherwise. Post titles render as
+// h2s, newest first.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  pageTitle,
+  blogSlug,
+  sortPostsByDateDesc,
+} from "../lib/content.mjs";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  const byTag = new Map();
+  for (const post of posts) {
+    for (const tag of post.data.tags ?? []) {
+      if (!byTag.has(tag)) {
+        byTag.set(tag, []);
+      }
+      byTag.get(tag).push(post);
+    }
+  }
+  return [...byTag.entries()].map(([tag, tagged]) => ({
+    params: { tag },
+    props: { tag, posts: sortPostsByDateDesc(tagged) },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+
+const heading =
+  posts.length === 1
+    ? `One post tagged with "${tag}"`
+    : `${posts.length} posts tagged with "${tag}"`;
+const title = pageTitle(heading, siteTitle);
+---
+
+<BaseLayout title={title}>
+  <h1>{heading}</h1>
+  {
+    posts.map((post) => (
+      <h2>
+        <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+          {post.data.title ?? post.id}
+        </a>
+      </h2>
+    ))
+  }
+</BaseLayout>

@@ -1,0 +1,51 @@
+---
+// Blog archive (`/${blogRoute}/archive`) — Phase 2 stub.
+//
+// Posts grouped by year (year labels are h3s — the golden archive page
+// has only the "Archive" heading). Undated posts group under "Undated".
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  pageTitle,
+  blogSlug,
+  postDate,
+  sortPostsByDateDesc,
+} from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Archive", siteTitle);
+
+const posts = sortPostsByDateDesc(await getCollection("blog"));
+const groups = new Map();
+for (const post of posts) {
+  const date = postDate(post);
+  const year = date ? String(date.getFullYear()) : "Undated";
+  if (!groups.has(year)) {
+    groups.set(year, []);
+  }
+  groups.get(year).push(post);
+}
+const years = [...groups.keys()].sort((a, b) => b.localeCompare(a));
+---
+
+<BaseLayout title={title}>
+  <h1>Archive</h1>
+  {
+    years.map((year) => (
+      <>
+        <h3>{year}</h3>
+        <ul>
+          {groups.get(year).map((post) => (
+            <li>
+              <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+                {post.data.title ?? post.id}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    ))
+  }
+</BaseLayout>

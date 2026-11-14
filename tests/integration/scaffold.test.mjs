@@ -26,7 +26,7 @@ describe("Integration: Scaffold & Build", () => {
     const projectName = "my-test-portfolio";
     const projectPath = path.join(testRoot, projectName);
 
-    // 1. Run init (non-interactive)
+    // Scaffold a project (non-interactive)
     // We skip install to save time and because we are in a test env
     execSync(
       `bun ${portoBin} init -n "Test User" -u "testuser" -p none -h none --no-install -P ${projectName}`,
@@ -36,19 +36,29 @@ describe("Integration: Scaffold & Build", () => {
     expect(fs.existsSync(projectPath)).toBe(true);
     expect(fs.existsSync(path.join(projectPath, "config.yml"))).toBe(true);
 
-    // 2. Run build in TEST_MODE
-    // This verifies the shim is generated and the runDocusaurus call is triggered
+    // Build in TEST_MODE
+    // This verifies the Astro shims are generated; the runner skips actual
+    // astro execution in PORTO_TEST_MODE, so this asserts shim generation
+    // only, not a real build.
     execSync(`bun ${portoBin} build`, {
       cwd: projectPath,
       stdio: "pipe",
       env: { ...process.env, PORTO_TEST_MODE: "true" },
     });
 
-    const shimPath = path.join(
+    const astroConfigPath = path.join(
       projectPath,
       ".portosaur",
-      "docusaurus.config.js",
+      "astro.config.mjs",
     );
-    expect(fs.existsSync(shimPath)).toBe(true);
+    expect(fs.existsSync(astroConfigPath)).toBe(true);
+
+    const contentConfigPath = path.join(
+      projectPath,
+      ".portosaur",
+      "src",
+      "content.config.ts",
+    );
+    expect(fs.existsSync(contentConfigPath)).toBe(true);
   }, 60_000);
 });

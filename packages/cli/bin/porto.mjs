@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { Command, Option } from "commander";
-import { porto } from "@portosaur/core";
+import { porto } from "../src/engine/index.mjs";
 import { initCommand } from "../src/commands/init.mjs";
 import { initCiCommand } from "../src/commands/initCi.mjs";
 import { initIgnoreCommand } from "../src/commands/initIgnore.mjs";
@@ -72,7 +72,6 @@ program
   .command("build [siteDir]")
   .description("Build the static site")
   .option("-o, --out-dir <dir>", "Custom output directory")
-  .option("--bundle-analyzer", "Analyze webpack bundle")
   .option("--no-minify", "Do not minify the output")
   .action((siteDir, options) => buildCommand(siteDir, options));
 

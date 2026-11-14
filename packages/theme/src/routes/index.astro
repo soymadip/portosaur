@@ -1,0 +1,54 @@
+---
+// Home page (`/`) — Phase 2 stub.
+//
+// Portfolio mode renders the hero (title + comma, profession) and the
+// enabled sections' headings; docs mode renders the docs landing (title
+// + feature titles). The golden headings pin the exact texts and order.
+// The real home layouts land in Phase 3.
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const isDocs = config.siteMode === "docs";
+
+const title = pageTitle(isDocs ? "Home" : "Me", siteTitle);
+
+const hero = config.homePage.heroSection;
+const about = config.homePage.aboutSection;
+const shelf = config.homePage.projectShelf;
+const experience = config.homePage.experienceSection;
+const social = config.homePage.socialSection;
+
+const docsHome = config.docsHome;
+---
+
+<BaseLayout title={title} description={config.site.tagline}>
+  {
+    isDocs ? (
+      <>
+        <h1>{docsHome.title}</h1>
+        <p>{docsHome.tagline}</p>
+        <p>{docsHome.desc}</p>
+        {(docsHome.features ?? []).map((feature) => (
+          <h2>{feature.title}</h2>
+        ))}
+      </>
+    ) : (
+      <>
+        <p>{hero.intro}</p>
+        <h1>
+          {hero.title}
+          <span>,</span>
+        </h1>
+        <p>{hero.subtitle}</p>
+        <h2>{hero.profession}</h2>
+        <p>{hero.desc}</p>
+        {about.enable && <h2>{about.heading}</h2>}
+        {shelf.enable && <h2>{shelf.heading}</h2>}
+        {experience.enable && <h2>{experience.heading}</h2>}
+        {social.enable && <h2>{social.heading}</h2>}
+      </>
+    )
+  }
+</BaseLayout>

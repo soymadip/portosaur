@@ -1,0 +1,16 @@
+/
+/404.html
+/blog/
+/blog/archive/
+/blog/authors/
+/blog/tags/
+/blog/tags/welcome/
+/blog/welcome/
+/notes/
+/notes/personal-notes/
+/notes/programming-tricks/
+/notes/random/
+/offline/
+/redirect/
+/search/
+/tasks/

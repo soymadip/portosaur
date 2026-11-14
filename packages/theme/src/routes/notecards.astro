@@ -1,0 +1,48 @@
+---
+// NoteCards page (`/notes`) — Phase 2 stub.
+//
+// Exists in both modes. The page title is the capitalized notes route
+// ("Docs" in docs mode, "Notes" in portfolio mode — the Docusaurus
+// `pages/notes.jsx` rule); the h1 is always "My Notes". Cards render
+// with h3 titles so the URL snapshot sees only the h1.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  pageTitle,
+  docTitle,
+  withSlugs,
+  isIndexEntry,
+} from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const notesRoute = config.site.notesRoute;
+
+const pageName =
+  notesRoute.charAt(0).toUpperCase() + notesRoute.slice(1);
+const title = pageTitle(pageName, siteTitle);
+
+const notes = await getCollection("notes");
+const resolved = withSlugs(notes)
+  .filter((item) => item.slug !== "")
+  .sort((a, b) => a.id.localeCompare(b.id));
+---
+
+<BaseLayout title={title} description={`My ${pageName}`}>
+  <h1>My Notes</h1>
+  <p>A collection of my self written notes &amp; reference guides</p>
+  <section class="note-cards">
+    {
+      resolved.map((item) => (
+        <article class="note-card">
+          <h3>
+            <a href={`/${notesRoute}/${item.slug}/`}>
+              {item.data.title ?? docTitle(item.entry)}
+            </a>
+          </h3>
+          {item.data.description && <p>{item.data.description}</p>}
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>

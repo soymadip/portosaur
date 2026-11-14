@@ -1,0 +1,10 @@
+---
+// Details — Phase 2 stub. Native <details> element; the Docusaurus
+// <Details summary="…"> shape maps directly onto it.
+const { summary } = Astro.props;
+---
+
+<details class="porto-details">
+  {summary && <summary>{summary}</summary>}
+  <slot />
+</details>

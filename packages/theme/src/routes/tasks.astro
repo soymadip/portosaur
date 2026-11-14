@@ -1,0 +1,33 @@
+---
+// Tasks page (`/tasks`) — Phase 2 stub.
+//
+// When tasks are disabled the page reports that (both golden sites have
+// tasks disabled); when enabled it lists the tasks. Task titles render
+// as h3s — the enabled layout is a Phase 3 concern.
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const tasks = config.tasks;
+
+const title = tasks.enable
+  ? pageTitle(tasks.title, siteTitle)
+  : pageTitle("Tasks are Disabled", siteTitle);
+---
+
+<BaseLayout title={title} description={tasks.subtitle}>
+  {
+    tasks.enable ? (
+      <>
+        <h1>{tasks.title}</h1>
+        <p>{tasks.subtitle}</p>
+        {(tasks.list ?? []).map((task) => (
+          <h3>{task.title}</h3>
+        ))}
+      </>
+    ) : (
+      <h1>Tasks are currently disabled</h1>
+    )
+  }
+</BaseLayout>

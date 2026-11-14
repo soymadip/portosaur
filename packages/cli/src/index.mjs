@@ -6,3 +6,4 @@ export * from "./commands/serve.mjs";
 export * from "./commands/schema.mjs";
 export * from "./commands/providers.mjs";
 export * from "./utils/index.mjs";
+export { logger, colors } from "./logger/index.mjs";

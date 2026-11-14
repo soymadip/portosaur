@@ -1,7 +1,7 @@
 {
   "name": "@portosaur/cli",
   "version": "0.26.0",
-  "description": "CLI for Portosaur - The static Personal portfolio site generator.",
+  "description": "CLI for Portosaur - The static Personal portfolio site generator, including the config engine.",
   "license": "GPL-3.0-only",
   "author": "soymadip",
   "homepage": "https://soymadip.github.io/portosaur",
@@ -12,8 +12,12 @@
   "files": [
     "src",
     "bin",
-    "templates"
+    "templates",
+    "config-schema.json"
   ],
+  "scripts": {
+    "prepack": "bun bin/porto.mjs schema && bun x prettier --write config-schema.json"
+  },
   "type": "module",
   "bin": {
     "porto": "bin/porto.mjs"
@@ -26,10 +30,10 @@
   },
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@portosaur/core": "workspace:*",
-    "@portosaur/logger": "workspace:*",
     "@portosaur/wizard": "workspace:*",
+    "chalk": "^6.0.0",
     "commander": "^15.0.0",
+    "consola": "^3.4.2",
     "js-yaml": "^5.2.2"
   }
 }

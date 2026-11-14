@@ -13,8 +13,7 @@
     "src",
     "assets",
     "static",
-    "theme",
-    "plugins"
+    "theme"
   ],
   "type": "module",
   "exports": {
@@ -24,18 +23,21 @@
       "default": "./src/index.mjs"
     },
     "./assets/*": "./assets/*",
-    "./plugins/*": "./plugins/*",
     "./theme/*": "./theme/*",
-    "./components/*": "./components/*"
+    "./components/*": "./components/*",
+    "./integration": {
+      "types": "./src/integration.d.ts",
+      "import": "./src/integration.mjs",
+      "default": "./src/integration.mjs"
+    }
   },
   "dependencies": {
-    "@docusaurus/core": "^3.10.2",
-    "@docusaurus/plugin-pwa": "^3.10.2",
-    "@docusaurus/preset-classic": "^3.10.2",
-    "@docusaurus/theme-classic": "^3.10.2",
-    "@mdx-js/react": "^3.0.0",
-    "@easyops-cn/docusaurus-search-local": "^0.55.2",
-    "@embedpdf/react-pdf-viewer": "^2.14.4",
+    "@astrojs/markdown-remark": "^7.3.9",
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/preact": "^6.1.6",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.5",
+    "@embedpdf/viewer": "^3.2.0",
     "@fontsource-variable/geologica": "^5.3.0",
     "@fontsource-variable/lexend": "^5.3.0",
     "@fontsource/alata": "^5.3.0",
@@ -48,23 +50,27 @@
     "@iconify-json/octicon": "^1.2.30",
     "@iconify-json/simple-icons": "^1.2.92",
     "@iconify-json/streamline-sharp": "^1.2.0",
-    "@iconify/react": "^6.0.2",
     "@iconify/utils": "^3.1.4",
-    "@portosaur/core": "workspace:*",
+    "@preact/signals": "^2",
+    "@tailwindcss/vite": "^4.3.5",
+    "@vite-pwa/astro": "^2.0.2",
+    "astro": "^7",
     "chalk": "^6.0.0",
     "clsx": "^2.1.1",
+    "js-yaml": "^5.2.2",
     "katex": "^0.18.1",
-    "prism-react-renderer": "^2.4.1",
-    "react-rnd": "^10.5.3"
+    "mermaid": "^12.3.0",
+    "pagefind": "^1.6.0",
+    "preact": "^10",
+    "rehype-katex": "^7.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-emoji": "^5.0.2",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.35.5",
+    "shiki": "^4.6.0",
+    "tailwindcss": "^4"
   },
-  "devDependencies": {
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
-  },
-  "peerDependencies": {
-    "@docusaurus/plugin-content-docs": "^3.10.2",
-    "@docusaurus/theme-common": "^3.10.2",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  }
+  "keywords": [
+    "astro-integration"
+  ]
 }

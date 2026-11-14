@@ -54,32 +54,27 @@ export function getPackageManager(dir) {
 }
 
 /**
- * Resolves the command to run Docusaurus based on the package manager and project state.
+ * Resolves the command to run Astro based on the package manager and project state.
  * @param {string} UserRoot - The project root directory.
- * @returns {{ command: string, args: string[], packageManager: string }} Docusaurus command info.
+ * @returns {{ command: string, args: string[], packageManager: string }} Astro command info.
  */
-export function getDocuCmd(UserRoot) {
+export function getAstroCommand(UserRoot) {
   const pm = getPackageManager(UserRoot);
 
-  // Check for node_modules/.bin/docusaurus
-  const localDocusaurus = path.join(
-    UserRoot,
-    "node_modules",
-    ".bin",
-    "docusaurus",
-  );
+  // Check for node_modules/.bin/astro
+  const localAstro = path.join(UserRoot, "node_modules", ".bin", "astro");
 
-  if (fs.existsSync(localDocusaurus)) {
+  if (fs.existsSync(localAstro)) {
     const local = {
-      bun: { command: "bun", args: ["docusaurus"] },
-      npm: { command: "npm", args: ["run", "docusaurus", "--"] },
-      pnpm: { command: "pnpm", args: ["docusaurus"] },
-      yarn: { command: "yarn", args: ["docusaurus"] },
+      bun: { command: "bun", args: ["astro"] },
+      npm: { command: "npm", args: ["run", "astro", "--"] },
+      pnpm: { command: "pnpm", args: ["astro"] },
+      yarn: { command: "yarn", args: ["astro"] },
     }[pm.name];
 
     return { ...local, packageManager: pm.name };
   }
 
   // Fallback to npx/bunx if not found locally
-  return { command: pm.exec, args: ["docusaurus"], packageManager: pm.name };
+  return { command: pm.exec, args: ["astro"], packageManager: pm.name };
 }

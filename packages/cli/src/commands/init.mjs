@@ -5,8 +5,13 @@ import { execSync, execFileSync } from "child_process";
 import { load } from "js-yaml";
 
 import { runWizard, cancel } from "@portosaur/wizard";
-import { logger, colors } from "@portosaur/logger";
-import { mirrorSync, openInBrowser, hasCommand, porto } from "@portosaur/core";
+import { logger, colors } from "../logger/index.mjs";
+import {
+  mirrorSync,
+  openInBrowser,
+  hasCommand,
+  porto,
+} from "../engine/index.mjs";
 
 import {
   Paths,

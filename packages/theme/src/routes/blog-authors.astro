@@ -1,0 +1,46 @@
+---
+// Blog authors index (`/${blogRoute}/authors`) — Phase 2 stub.
+//
+// Lists every author from `<blogDir>/authors.yml` (the data collection
+// exists only when that file exists — `getCollection` throws otherwise,
+// so the read is guarded). Names sort alphabetically; the golden pages
+// list the `name` field, not the key.
+import { getCollection } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
+const title = pageTitle("Authors", siteTitle);
+
+let authors = [];
+try {
+  authors = await getCollection("authors");
+} catch {
+  authors = [];
+}
+
+const names = authors
+  .map((author) => ({
+    key: author.id,
+    name: author.data.name ?? author.id,
+    hasPage: author.data.page === true,
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<BaseLayout title={title}>
+  <h1>Authors</h1>
+  {
+    names.map((author) => (
+      <h2>
+        {author.hasPage ? (
+          <a href={`/${blogRoute}/authors/${author.key}/`}>{author.name}</a>
+        ) : (
+          author.name
+        )}
+      </h2>
+    ))
+  }
+</BaseLayout>

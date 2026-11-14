@@ -1,0 +1,7 @@
+---
+// Icon — Phase 2 stub. Renders a marker span; the real component renders
+// the SVG from the `porto:icons` virtual module in Phase 4.
+const { id } = Astro.props;
+---
+
+<span class="porto-icon" data-icon={id ?? ""}></span>

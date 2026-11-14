@@ -1,0 +1,29 @@
+---
+// BaseLayout — Phase 2 stub shell.
+//
+// Renders the document skeleton (title, meta description) and the page
+// content. The real layout (navbar, sidebar, footer, theme tokens,
+// styles) lands in Phase 3; this stub exists so the Phase 2 URL snapshot
+// can verify titles and headings.
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

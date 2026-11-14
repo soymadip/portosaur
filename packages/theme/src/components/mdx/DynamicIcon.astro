@@ -1,0 +1,14 @@
+---
+// DynamicIcon — Phase 2 stub. Renders the literal icon string when one
+// is given, else a marker span; the real icon resolution lands in Phase 4.
+const { iconStr, slug, fallbackIcon } = Astro.props;
+---
+
+<span
+  class="porto-dynamic-icon"
+  data-slug={slug ?? ""}
+  data-fallback-icon={fallbackIcon ?? ""}
+>
+  {iconStr ?? ""}
+  <slot />
+</span>

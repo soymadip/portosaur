@@ -1,0 +1,49 @@
+---
+// Notes/docs index (`/${notesRoute}`, docs mode only) — Phase 2 stub.
+//
+// The root index doc's page: its title is the h1, its content renders
+// first, then the automatic topic list (the sidebar's top-level items).
+// When no root index exists the h1 falls back to "Docs" and only the
+// topic list renders.
+import { getCollection, render } from "astro:content";
+import config from "porto:config";
+import sidebar from "porto:sidebar";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { mdxComponents } from "../components/mdx/index.mjs";
+import {
+  pageTitle,
+  topicCardTitle,
+  isIndexEntry,
+} from "../lib/content.mjs";
+
+const siteTitle = config.site.title;
+
+const notes = await getCollection("notes");
+const rootIndex = notes.find(
+  (entry) => isIndexEntry(entry) && !entry.id.includes("/"),
+);
+
+const heading = rootIndex?.data?.title ?? "Docs";
+const title = pageTitle(heading, siteTitle);
+
+const Content = rootIndex ? (await render(rootIndex)).Content : null;
+const items = sidebar[0]?.items ?? [];
+---
+
+<BaseLayout title={title} description={rootIndex?.data?.description}>
+  <h1>{heading}</h1>
+  {Content && <Content components={mdxComponents} />}
+  {
+    items.length > 0 && (
+      <section class="topic-list">
+        {items.map((item) => (
+          <h2>
+            <a href={item.href ?? item.link?.href ?? "#"}>
+              {topicCardTitle(item)}
+            </a>
+          </h2>
+        ))}
+      </section>
+    )
+  }
+</BaseLayout>

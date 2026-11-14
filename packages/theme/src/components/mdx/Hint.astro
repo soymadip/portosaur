@@ -1,0 +1,11 @@
+---
+// Hint — Phase 2 stub. Renders the `msg` prop (the hint's content lives
+// in the prop, not in children) plus any children; the real styled callout
+// lands in Phase 4.
+const { msg } = Astro.props;
+---
+
+<div class="porto-hint">
+  {msg}
+  <slot />
+</div>

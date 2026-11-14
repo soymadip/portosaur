@@ -1,15 +1,15 @@
 import path from "path";
 import {
-  runDocusaurus,
+  runAstro,
   validateProject,
   resolvePortoPaths,
-  writeConfigShim,
+  writeAstroShim,
 } from "../utils/index.mjs";
-import { logger } from "@portosaur/logger";
-import { loadUserConfig } from "@portosaur/core";
+import { logger } from "../logger/index.mjs";
 
 /**
- * Serves the built Portosaur site locally.
+ * Serves the built Portosaur site locally via `astro preview`, which honors
+ * the generated config's `outDir` (verified in Phase 2).
  */
 export async function serveCommand(siteDir, options = {}) {
   const extraArgs = [];
@@ -20,8 +20,8 @@ export async function serveCommand(siteDir, options = {}) {
   if (options.host) {
     extraArgs.push("--host", options.host);
   }
-  if (options.browser === false) {
-    extraArgs.push("--no-open");
+  if (options.browser !== false) {
+    extraArgs.push("--open");
   }
 
   const UserRoot = siteDir
@@ -37,19 +37,13 @@ export async function serveCommand(siteDir, options = {}) {
   try {
     logger.info("Serving built site...");
 
-    // Generate config shim so Docusaurus can locate site configuration
-    const configPath = writeConfigShim(UserRoot, portoPaths);
+    // Regenerate the shim so preview reads the current config (including
+    // a --out-dir override) for the output directory to serve.
+    const { astroRoot } = writeAstroShim(UserRoot, portoPaths, {}, false, {
+      outDir: options.outDir,
+    });
 
-    // Load user config to check for custom build dir
-    const userConfig = loadUserConfig(UserRoot, portoPaths);
-    const customBuildDir = options.outDir || userConfig.site?.build?.output_dir;
-
-    if (customBuildDir && customBuildDir !== "build") {
-      extraArgs.push("--dir", customBuildDir);
-    }
-
-    // Docusaurus serve looks for the 'build' directory by default.
-    await runDocusaurus("serve", UserRoot, configPath, extraArgs, portoPaths);
+    await runAstro("preview", UserRoot, astroRoot, extraArgs, portoPaths);
   } catch (error) {
     logger.error(`Failed to serve site: ${error.message}`);
     process.exit(1);

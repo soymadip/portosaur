@@ -6,10 +6,8 @@ export const ThemePaths = {
   root: pkgDir,
   assets: path.resolve(pkgDir, "assets"),
   theme: path.resolve(pkgDir, "theme"),
-  plugins: path.resolve(pkgDir, "src/plugins"),
+  integration: path.resolve(pkgDir, "src/integration.mjs"),
 };
 
-export { default as ThemePlugin } from "./plugins/theme.mjs";
-export { guessDocPermalink } from "../theme/utils/docsUtils.js";
-
-export default ThemePaths;
+export { default as portosaurIntegration } from "./integration.mjs";
+export { default } from "./integration.mjs";

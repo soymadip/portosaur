@@ -1,0 +1,18 @@
+---
+// Offline page (`/offline`) — Phase 2 stub. The service worker falls
+// back to this page when the user is offline; the real styled page lands
+// in Phase 3.
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const title = pageTitle("You're Offline", config.site.title);
+---
+
+<BaseLayout title={title}>
+  <h1>You're Offline</h1>
+  <p>
+    You appear to be offline. Check your connection and try again, or
+    browse the pages already saved on this device.
+  </p>
+</BaseLayout>

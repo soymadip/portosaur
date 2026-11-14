@@ -1,3 +1,5 @@
+export { logger, colors } from "./logger/index.mjs";
+
 export interface InitOptions {
   /** VCS Provider ID (e.g., "github", "gitlab") */
   vcsProvider?: string;

@@ -1,0 +1,125 @@
+{
+  "generated_from": "Docusaurus build of .playground/build",
+  "routes": [
+    {
+      "url": "/",
+      "title": "Me | Soumadip Das",
+      "headings": [
+        "Soumadip Das,",
+        "Your Profession",
+        "About Me",
+        "My Projects",
+        "Get In Touch"
+      ]
+    },
+    {
+      "url": "/404.html",
+      "title": "Page Not Found | Soumadip Das",
+      "headings": [
+        "Page Not Found"
+      ]
+    },
+    {
+      "url": "/blog/",
+      "title": "Blog | Soumadip Das",
+      "headings": [
+        "Welcome to the Blog"
+      ]
+    },
+    {
+      "url": "/blog/archive/",
+      "title": "Archive | Soumadip Das",
+      "headings": [
+        "Archive"
+      ]
+    },
+    {
+      "url": "/blog/authors/",
+      "title": "Authors | Soumadip Das",
+      "headings": [
+        "Authors",
+        "Your Name"
+      ]
+    },
+    {
+      "url": "/blog/tags/",
+      "title": "Tags | Soumadip Das",
+      "headings": [
+        "Tags",
+        "W"
+      ]
+    },
+    {
+      "url": "/blog/tags/welcome/",
+      "title": "One post tagged with \"welcome\" | Soumadip Das",
+      "headings": [
+        "One post tagged with \"welcome\"",
+        "Welcome to the Blog"
+      ]
+    },
+    {
+      "url": "/blog/welcome/",
+      "title": "Welcome to the Blog | Soumadip Das",
+      "headings": [
+        "Welcome to the Blog"
+      ]
+    },
+    {
+      "url": "/notes/",
+      "title": "Notes | Soumadip Das",
+      "headings": [
+        "My Notes"
+      ]
+    },
+    {
+      "url": "/notes/personal-notes/",
+      "title": "Personal Notes | Soumadip Das",
+      "headings": [
+        "Personal Notes",
+        "💭Random Thoughts"
+      ]
+    },
+    {
+      "url": "/notes/programming-tricks/",
+      "title": "Programming Tricks | Soumadip Das",
+      "headings": [
+        "Programming Tricks"
+      ]
+    },
+    {
+      "url": "/notes/random/",
+      "title": "Random Thoughts | Soumadip Das",
+      "headings": [
+        "Random Thoughts"
+      ]
+    },
+    {
+      "url": "/offline/",
+      "title": "You're Offline | Soumadip Das",
+      "headings": [
+        "You're Offline"
+      ]
+    },
+    {
+      "url": "/redirect/",
+      "title": "Opening in browser… | Soumadip Das",
+      "headings": [
+        "Opening in browser…"
+      ]
+    },
+    {
+      "url": "/search/",
+      "title": "Search the documentation",
+      "headings": [
+        "Search the documentation"
+      ]
+    },
+    {
+      "url": "/tasks/",
+      "title": "Tasks | Soumadip Das",
+      "headings": [
+        "Tasks"
+      ]
+    }
+  ]
+}

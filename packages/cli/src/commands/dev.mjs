@@ -3,14 +3,13 @@ import fs from "fs";
 import {
   Paths,
   resolvePortoPaths,
-  writeConfigShim,
+  writeAstroShim,
   logResolvedSiteLocation,
-  runDocusaurus,
+  runAstro,
   validateProject,
   ensureContentDirs,
 } from "../utils/index.mjs";
-import { logger } from "@portosaur/logger";
-import { loadUserConfig, generateSiteAssets } from "@portosaur/core";
+import { logger } from "../logger/index.mjs";
 
 export async function devCommand(siteDir, options = {}) {
   const extraArgs = [];
@@ -21,15 +20,10 @@ export async function devCommand(siteDir, options = {}) {
   if (options.host) {
     extraArgs.push("--host", options.host);
   }
-  if (options.browser === false) {
-    extraArgs.push("--no-open");
-  }
-  if (options.poll) {
-    if (options.poll === true) {
-      extraArgs.push("--poll");
-    } else {
-      extraArgs.push("--poll", options.poll);
-    }
+  // Astro does not open a browser by default; Docusaurus did, so `porto dev`
+  // keeps opening one unless --no-browser is passed.
+  if (options.browser !== false) {
+    extraArgs.push("--open");
   }
 
   const UserRoot = siteDir
@@ -49,45 +43,32 @@ export async function devCommand(siteDir, options = {}) {
 
   const portoPaths = resolvePortoPaths(UserRoot);
 
-  let configContext = { extraHeadTags: [] };
+  // --poll maps to the generated config's Vite watcher (Astro has no --poll flag).
+  const cliOptions = { poll: options.poll || false };
 
   try {
-    const userConfig = loadUserConfig(UserRoot, {
-      portoRoot: portoPaths.themeRoot,
-    });
-    configContext = await generateSiteAssets({
+    const { astroRoot } = writeAstroShim(
       UserRoot,
-      userConfig,
       portoPaths,
-    });
-    const configPath = writeConfigShim(UserRoot, portoPaths, configContext);
+      {},
+      false,
+      cliOptions,
+    );
 
-    logResolvedSiteLocation(UserRoot, portoPaths, configContext);
+    logResolvedSiteLocation(UserRoot, portoPaths);
 
-    // Watch for config.yml changes to trigger Docusaurus reload
+    // Watch for config.yml changes to trigger an Astro reload
     if (configYaml) {
       const configYamlPath = path.join(UserRoot, configYaml);
       const watcher = fs.watch(configYamlPath, (eventType) => {
         if (eventType === "change") {
           logger.info(`Detected change in ${configYaml}, reloading...`);
 
-          // Regenerate the static config shim with the updated values,
-          // which triggers Docusaurus' own file watcher to hot-reload.
+          // Regenerate the Astro shim with the updated values; Astro
+          // restarts the dev server when astro.config.mjs changes.
           try {
-            const userConfig = loadUserConfig(UserRoot, {
-              portoRoot: portoPaths.themeRoot,
-            });
-
-            generateSiteAssets({ UserRoot, userConfig, portoPaths })
-              .then((res) => {
-                configContext = res;
-
-                writeConfigShim(UserRoot, portoPaths, configContext);
-                logResolvedSiteLocation(UserRoot, portoPaths, configContext);
-              })
-              .catch((err) => {
-                logger.warn(`Failed to regenerate assets: ${err.message}`);
-              });
+            writeAstroShim(UserRoot, portoPaths, {}, false, cliOptions);
+            logResolvedSiteLocation(UserRoot, portoPaths);
           } catch (err) {
             logger.warn(`Failed to regenerate config: ${err.message}`);
           }
@@ -123,13 +104,13 @@ export async function devCommand(siteDir, options = {}) {
         { recursive: true },
         (_eventType, filename) => {
           // Only trigger on .mjs changes.
-          // This naturally ignores .jsx and .css changes in the theme,
-          // preserving Docusaurus's instant Webpack HMR for components/styles!
+          // This naturally ignores .astro and .css changes in the theme,
+          // preserving Astro's instant Vite HMR for components/styles!
           if (filename && filename.endsWith(".mjs")) {
             logger.info(`Detected backend change (${filename}), reloading...`);
             try {
-              writeConfigShim(UserRoot, portoPaths, configContext, true); // forceRefresh = true
-              logResolvedSiteLocation(UserRoot, portoPaths, configContext);
+              writeAstroShim(UserRoot, portoPaths, {}, true, cliOptions); // forceRefresh = true
+              logResolvedSiteLocation(UserRoot, portoPaths);
             } catch (err) {
               logger.warn(`Failed to regenerate config: ${err.message}`);
             }
@@ -142,7 +123,7 @@ export async function devCommand(siteDir, options = {}) {
       });
     }
 
-    await runDocusaurus("start", UserRoot, configPath, extraArgs, portoPaths);
+    await runAstro("dev", UserRoot, astroRoot, extraArgs, portoPaths);
   } catch (error) {
     logger.error(
       `Failed to start dev server:\n${error.stack || error.message}`,

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { logger } from "@portosaur/logger";
+import { logger } from "../logger/index.mjs";
 import { Paths, validateProject } from "../utils/index.mjs";
 
 /**

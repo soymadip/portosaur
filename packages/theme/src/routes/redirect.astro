@@ -1,0 +1,32 @@
+---
+// Redirect interstitial (`/redirect?url=…`) — Phase 2 stub.
+//
+// Reads the `url` query param and navigates to it (only `http(s)` URLs,
+// to avoid open-redirect abuse). The real interstitial (countdown,
+// preview card) lands in Phase 3.
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../lib/content.mjs";
+
+const title = pageTitle("Opening in browser…", config.site.title);
+---
+
+<BaseLayout title={title}>
+  <h1>Opening in browser…</h1>
+  <p id="redirect-target">
+    You are being redirected. If nothing happens, the link may be missing
+    or invalid.
+  </p>
+  <script>
+    const target = new URLSearchParams(window.location.search).get("url");
+    if (target && /^https?:\/\//i.test(target)) {
+      const el = document.getElementById("redirect-target");
+      if (el) {
+        el.textContent = `Opening ${target} …`;
+      }
+      window.setTimeout(() => {
+        window.location.replace(target);
+      }, 800);
+    }
+  </script>
+</BaseLayout>

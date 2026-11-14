@@ -1,0 +1,32 @@
+---
+// Blog post (`/${blogRoute}/[...slug]`) — Phase 2 stub.
+//
+// Frontmatter title as h1, then the full MDX content. Post slugs follow
+// the Docusaurus blog rule (frontmatter `slug` wins, else the file base
+// with a `YYYY-MM-DD-` date prefix stripped).
+import { getCollection, render } from "astro:content";
+import config from "porto:config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { mdxComponents } from "../components/mdx/index.mjs";
+import { pageTitle, blogSlug } from "../lib/content.mjs";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: blogSlug(post) },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const siteTitle = config.site.title;
+const heading = post.data.title ?? post.id;
+const title = pageTitle(heading, siteTitle);
+---
+
+<BaseLayout title={title} description={post.data.description}>
+  <h1>{heading}</h1>
+  <Content components={mdxComponents} />
+</BaseLayout>

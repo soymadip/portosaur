@@ -1,0 +1,7 @@
+---
+// Btn — Phase 2 stub. Renders as a plain link; the real button (variants,
+// icons, styles) lands in Phase 4.
+const { href, to } = Astro.props;
+---
+
+<a href={href ?? to ?? "#"} class="porto-btn"><slot /></a>

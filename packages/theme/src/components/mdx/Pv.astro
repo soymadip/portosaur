@@ -1,0 +1,9 @@
+---
+// Pv (Preview) — Phase 2 stub. Renders a placeholder box naming the
+// previewed file; the real Preact preview window lands in Phase 4.
+const { href } = Astro.props;
+---
+
+<div class="porto-pv" data-href={href ?? ""}>
+  <slot />
+</div>
