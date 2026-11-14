@@ -2,7 +2,7 @@
  *
  * Rules content.css does not provide, scoped to the
  * `.porto-markdown-content` wrapper that layouts put around rendered
- * content: the Lexend prose font, `<big>`, `<mark>`, the Docusaurus
+ * content: the Geist prose font, `<big>`, `<mark>`, the Docusaurus
  * admonitions the remark plugin emits (`.admonition`), and the
  * magic-comment line highlights for code blocks (Phase 4).
  * Headings, lists, tables, and code-block framing live in

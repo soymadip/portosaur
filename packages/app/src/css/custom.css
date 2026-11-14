@@ -32,9 +32,8 @@
   porto.components.icon, porto.components.aside, porto.utils;
 
 /* ----- Global Fonts ----- */
-@import "@fontsource/alata";
-@import "@fontsource-variable/lexend";
-@import "@fontsource-variable/geologica";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "katex/dist/katex.min.css";
 
 /* ----- Portosaur CSS system (derived from Starlight, renamed) ----- */
