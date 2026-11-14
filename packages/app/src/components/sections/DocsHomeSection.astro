@@ -32,6 +32,12 @@
 //   hover keeps the lift only.
 // - OG's `.heroIcon:hover::before { opacity: 1.3 }` is dead code (the
 //   `floatIn` fill overrides it), so it is not ported.
+// - The hero image hover lift is removed entirely: on touch it sticks
+//   after tapping.
+// - On small phones (≤480px) the hero section's side padding drops
+//   from OG's 2rem to 1rem so the tagline and description get more
+//   room; OG's `-0.8rem` negative margin on the description is gone
+//   (against 1rem it would push the text to the viewport edge).
 // - A `prefers-reduced-motion` guard is added: OG's entrance
 //   animations start at `opacity: 0`, which would hide content for
 //   users who disable animation.
@@ -382,15 +388,10 @@ const iconOnError = iconFallback
       border-radius: 20%;
       opacity: 0;
       animation: float-in 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s forwards;
-      transition:
-        transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
-        box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
-    .hero-icon > :global(img):hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: var(--porto-shadow-md);
-    }
+    /* No hover effect on the hero image: OG lifts it on hover, but
+       on touch that state sticks after tapping. */
 
     @media (max-width: 996px) {
       .hero-container {
