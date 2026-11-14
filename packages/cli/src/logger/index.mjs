@@ -3,10 +3,11 @@ import { createLevel, createCustomLevel } from "./lib/helpers.mjs";
 
 /*
  * Portosaur Logger
- * Wraps @docusaurus/logger and consola with additional helpers.
+ * Astro-style log lines (timestamp + [@portosaur/cli] label) with
+ * consola boxes and additional helpers.
  */
 export const logger = {
-  // Standard levels — routed through @docusaurus/logger
+  // Standard levels — Astro-style `HH:MM:SS [@portosaur/cli] message` lines
   info: createLevel("info"),
   success: createLevel("success"),
   warn: createLevel("warn"),
@@ -15,7 +16,7 @@ export const logger = {
   // Gated — only logs when DEBUG or VERBOSE env var is set
   debug: createLevel("debug", { gated: true }),
 
-  // Custom levels — console.log with aligned colored label
+  // Custom levels — Astro-style lines with a colored `Tip:`/`Note:` lead-in
   tip: createCustomLevel("tip", colors.tip),
   note: createCustomLevel("note", colors.muted),
 

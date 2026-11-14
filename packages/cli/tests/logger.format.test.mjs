@@ -1,43 +1,30 @@
 import { expect, test, describe } from "bun:test";
-import { _formatMsg, TARGET_WIDTH } from "../src/logger/lib/helpers.mjs";
+import { getEventPrefix, LABEL } from "../src/logger/lib/helpers.mjs";
 
 const stripAnsi = (s) => (s || "").replace(/\x1b\[[0-9;]*m/g, "");
 
 describe("logger formatting", () => {
-  test("single-line message aligns", () => {
-    const levelLabel = "success";
-    const labelText = `[${levelLabel.toUpperCase()}]`;
-    const currentLabelLength = labelText.length + 1;
-    const paddingCount = TARGET_WIDTH - currentLabelLength;
-    const out = _formatMsg("Installation complete", levelLabel);
-    const raw = stripAnsi(out);
-    expect(raw).toBe(" ".repeat(paddingCount) + "Installation complete");
+  test("info prefix is a timestamp plus the CLI label", () => {
+    const raw = stripAnsi(getEventPrefix("info"));
+    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[@portosaur\/cli\]$/);
   });
 
-  test("leading newline preserved", () => {
-    const levelLabel = "error";
-    const labelText = `[${levelLabel.toUpperCase()}]`;
-    const currentLabelLength = labelText.length + 1;
-    const paddingCount = TARGET_WIDTH - currentLabelLength;
-    const out = _formatMsg("\nSetup aborted.", levelLabel);
-    const raw = stripAnsi(out);
-    expect(raw).toBe("\n" + " ".repeat(paddingCount) + "Setup aborted.");
+  test("success renders like info (Astro has no success level)", () => {
+    const raw = stripAnsi(getEventPrefix("success"));
+    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[@portosaur\/cli\]$/);
   });
 
-  test("multi-line message indents subsequent lines", () => {
-    const levelLabel = "info";
-    const labelText = `[${levelLabel.toUpperCase()}]`;
-    const currentLabelLength = labelText.length + 1;
-    const paddingCount = TARGET_WIDTH - currentLabelLength;
-    const out = _formatMsg("Line1\nLine2\nLine3", levelLabel);
-    const raw = stripAnsi(out);
-    const expected =
-      " ".repeat(paddingCount) +
-      "Line1\n" +
-      " ".repeat(TARGET_WIDTH) +
-      "Line2\n" +
-      " ".repeat(TARGET_WIDTH) +
-      "Line3";
-    expect(raw).toBe(expected);
+  test("warn prefix carries a [WARN] tag", () => {
+    const raw = stripAnsi(getEventPrefix("warn"));
+    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[WARN\] \[@portosaur\/cli\]$/);
+  });
+
+  test("error prefix carries an [ERROR] tag", () => {
+    const raw = stripAnsi(getEventPrefix("error"));
+    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[ERROR\] \[@portosaur\/cli\]$/);
+  });
+
+  test("label matches the theme integration's package naming", () => {
+    expect(LABEL).toBe("@portosaur/cli");
   });
 });

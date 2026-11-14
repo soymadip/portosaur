@@ -74,7 +74,7 @@ const options = ${JSON.stringify(options, null, 2)};
 export default defineConfig({
   site: ${JSON.stringify(options.site.url)},
   base: ${JSON.stringify(options.site.baseUrl)},
-  trailingSlash: "always",
+  trailingSlash: "ignore",
   outDir: ${JSON.stringify(outDir)},
   publicDir: ${JSON.stringify(publicDir)},
   build: {

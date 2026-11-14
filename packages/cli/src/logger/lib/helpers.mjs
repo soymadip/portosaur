@@ -2,54 +2,51 @@ import chalk from "chalk";
 import { consola } from "consola";
 import { colors } from "./colors.mjs";
 
-// ================= Message Formatting ====================
+// ================= Astro-style Formatting ====================
 
-export const TARGET_WIDTH = 10;
+// The label shown in brackets on every log line, matching the theme
+// integration's `[@portosaur/theme]` label.
+export const LABEL = "@portosaur/cli";
+
+// Same timestamp format as Astro's logger: 24-hour HH:MM:SS in the
+// system locale (astro/dist/core/logger/core.js).
+const dateTimeFormat = new Intl.DateTimeFormat([], {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
 
 /**
- * Format messages for the logger with a fixed label column.
+ * Build the prefix for a log line, mirroring Astro's `getEventPrefix`:
+ * a dim timestamp and blue label for info-style levels, and a bold
+ * timestamp plus level tag, all yellow or red, for warn and error.
  *
- * @param {string} rawMsg     - The message to log.
- * @param {string} levelLabel - The level (info, success, etc).
- * @returns {string} The formatted message.
+ * @param {string} level - The level (info, success, warn, error, debug, tip, note).
+ * @returns {string} The colored prefix, without trailing space.
  */
-export function _formatMsg(rawMsg, levelLabel) {
-  // Parse input message
-  const s = rawMsg === undefined || rawMsg === null ? "" : String(rawMsg);
-  const leading = s.match(/^\n+/)?.[0] || "";
-  const body = s.replace(/^\n+/, "");
+export function getEventPrefix(level) {
+  const timestamp = dateTimeFormat.format(new Date());
+  const prefix = [];
 
-  // Return early if empty
-  if (body === "") {
-    return leading;
+  if (level === "error" || level === "warn") {
+    prefix.push(chalk.bold(timestamp));
+    prefix.push(`[${level.toUpperCase()}]`);
+  } else {
+    prefix.push(timestamp);
   }
+  prefix.push(`[${LABEL}]`);
 
-  // Prepare label and calculate padding
-  const LABEL_MAP = {
-    warn: "WARNING",
-  };
-
-  const labelText = `[${(LABEL_MAP[levelLabel] || levelLabel).toUpperCase()}]`;
-  const lines = body.split(/\r?\n/);
-
-  // Format each line with proper indentation
-  const formatted = lines.map((ln, idx) => {
-    if (idx === 0) {
-      const padding = TARGET_WIDTH - (labelText.length + 1);
-      return " ".repeat(Math.max(0, padding)) + ln;
-    }
-    return " ".repeat(TARGET_WIDTH) + ln;
-  });
-
-  // Return formatted output
-  return leading + formatted.join("\n");
+  if (level === "error") {
+    return chalk.red(prefix.join(" "));
+  }
+  if (level === "warn") {
+    return chalk.yellow(prefix.join(" "));
+  }
+  return chalk.dim(prefix[0]) + " " + chalk.blue(prefix.slice(1).join(" "));
 }
 
 // ================= Routing & Logging ====================
-
-// The four levels Portosaur routes through the logger, vendored from
-// @docusaurus/logger (dropped in the Astro migration) with identical output.
-const VENDORED_LEVELS = new Set(["info", "success", "warn", "error"]);
 
 function stringify(msg) {
   if (Object.prototype.toString.call(msg) === "[object Object]") {
@@ -61,20 +58,19 @@ function stringify(msg) {
   return String(msg);
 }
 
-const dLogger = {
-  info: (msg) => console.info(`${chalk.cyan.bold("[INFO]")} ${stringify(msg)}`),
-  success: (msg) =>
-    console.log(`${chalk.green.bold("[SUCCESS]")} ${stringify(msg)}`),
-  warn: (msg) =>
-    console.warn(chalk.yellow(`${chalk.bold("[WARNING]")} ${stringify(msg)}`)),
-  error: (msg) =>
-    console.error(chalk.red(`${chalk.bold("[ERROR]")} ${stringify(msg)}`)),
-};
-
 export const IS_CI = !!process.env.CI;
 
-function dlog(msg, level) {
-  const s = msg === undefined || msg === null ? "" : String(msg);
+/**
+ * Write a message at the given level in Astro's format:
+ * `HH:MM:SS [@portosaur/cli] message`. Errors go to stderr, everything
+ * else to stdout — matching Astro's console destination.
+ *
+ * @param {unknown} msg - The message to log.
+ * @param {string} level - The level (info, success, warn, error, debug).
+ * @param {string} [messagePrefix=""] - Text inserted after the prefix, before the message.
+ */
+function log(msg, level, messagePrefix = "") {
+  const s = stringify(msg ?? "");
   const leading = s.match(/^\n+/)?.[0] || "";
   const body = s.replace(/^\n+/, "");
 
@@ -83,10 +79,17 @@ function dlog(msg, level) {
     process.stdout.write(leading);
   }
 
-  // Format and route the message
-  const formatted = _formatMsg(body, level);
-  const method = VENDORED_LEVELS.has(level) ? level : "info";
-  return dLogger[method](formatted);
+  // Return early if empty
+  if (body === "") {
+    return;
+  }
+
+  const formatted = `${getEventPrefix(level)} ${messagePrefix}${body}`;
+  if (level === "error") {
+    console.error(formatted);
+  } else {
+    console.info(formatted);
+  }
 }
 
 // ================= Box Helper ====================
@@ -131,7 +134,7 @@ function makeBox(level, inlineFn) {
 // ================= Level Factories ====================
 
 /**
- * Standard level — routed through the vendored Docusaurus-style logger.
+ * Standard level — an Astro-style log line.
  * @param {string} level
  * @param {{ gated?: boolean }} options - gated: only log when DEBUG/VERBOSE is set
  */
@@ -140,33 +143,23 @@ export function createLevel(level, { gated = false } = {}) {
     if (gated && !process.env.DEBUG && !process.env.VERBOSE) {
       return;
     }
-    dlog(msg, level);
+    log(msg, level);
   };
   fn.box = makeBox(level, fn);
   return fn;
 }
 
 /**
- * Custom level — uses console.log + _formatMsg with its own colored label.
- * Does NOT route through the vendored logger.
+ * Custom level — an Astro-style log line with a colored `Tip:`/`Note:`
+ * lead-in before the message.
  * @param {string} level
- * @param {Function} colorFn - chalk color function for the label
+ * @param {Function} colorFn - chalk color function for the lead-in
  */
 export function createCustomLevel(level, colorFn) {
-  const label = `[${level.toUpperCase()}]`;
+  const leadIn =
+    colorFn(`${level.charAt(0).toUpperCase()}${level.slice(1)}:`) + " ";
   const fn = (msg) => {
-    // Parse input message
-    const s = msg === undefined || msg === null ? "" : String(msg);
-    const leading = s.match(/^\n+/)?.[0] || "";
-    const body = s.replace(/^\n+/, "");
-
-    // Write leading newlines
-    if (leading) {
-      process.stdout.write(leading);
-    }
-
-    // Format and output
-    console.log(`${colorFn(label)} ${_formatMsg(body, level)}`);
+    log(msg, "info", leadIn);
   };
   fn.box = makeBox(level, fn);
   return fn;

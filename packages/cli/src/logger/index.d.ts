@@ -78,7 +78,7 @@ export interface LevelFn {
 }
 
 export interface Logger {
-  // Standard levels — vendored Docusaurus-style output (chalk + console)
+  // Standard levels — Astro-style output (timestamp + [@portosaur/cli] label)
   info: LevelFn;
   success: LevelFn;
   warn: LevelFn;
@@ -87,7 +87,7 @@ export interface Logger {
   // Gated — only logs when DEBUG or VERBOSE env var is set
   debug: LevelFn;
 
-  // Custom levels — console.log with aligned colored label
+  // Custom levels — Astro-style lines with a colored `Tip:`/`Note:` lead-in
   tip: LevelFn;
   note: LevelFn;
 
@@ -107,7 +107,7 @@ export interface Logger {
 
 /**
  * Portosaur Logger
- * Vendored Docusaurus-style levels (chalk + console) and consola boxes,
+ * Astro-style levels (chalk + console) and consola boxes,
  * with additional helpers.
  */
 export const logger: Logger;
