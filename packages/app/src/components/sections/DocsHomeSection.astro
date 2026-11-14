@@ -52,6 +52,8 @@
 //   a bare inline SVG/emoji sits on the baseline and reads high.
 // - The description is 1rem where the hero stacks (OG: 1.1rem) —
 //   a touch smaller on phones and tablets; desktop keeps 1.17rem.
+// - The tagline's top margin is 0.25rem (OG: 0.5rem) — the gap
+//   between the title and the subtitle is a touch tighter.
 // - A `prefers-reduced-motion` guard is added: OG's entrance
 //   animations start at `opacity: 0`, which would hide content for
 //   users who disable animation.
@@ -270,7 +272,7 @@ const iconOnError = iconFallback
       font-weight: 600;
       line-height: 1.2;
       color: var(--porto-color-white);
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
       margin-bottom: 1rem;
       transition: all 0.3s ease;
       position: relative;
