@@ -196,7 +196,7 @@ const viewPosts = await Promise.all(
 
 <BaseLayout title={title}>
   {viewPosts.length === 0 ? (
-    <div class="flex min-h-[calc(100vh_-_var(--navbar-height)_-_100px)] flex-col items-center justify-center p-8 text-center">
+    <div class="flex min-h-[calc(100vh_-_var(--porto-nav-height)_-_100px)] flex-col items-center justify-center p-8 text-center">
       <div class="text-[4.5rem] text-muted opacity-60">
         <span set:html={renderIcon("md:fountain-pen-tip", { size: "3rem" })} />
       </div>

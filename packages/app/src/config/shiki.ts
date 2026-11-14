@@ -43,11 +43,15 @@ export const shikiThemeMap: Record<string, ShikiThemePair> = {
     light: "github-light",
     dark: "night-owl",
   },
+  starlight: {
+    light: "github-light",
+    dark: "github-dark",
+  },
 };
 
 /**
  * Returns the Shiki light/dark theme pair for a Portosaur color scheme.
- * Falls back to `nord` (the default scheme) for unknown names.
+ * Falls back to `nord` for unknown names (e.g. custom scheme paths).
  *
  * @param colorScheme - The `theme.color_scheme` value.
  * @returns The Shiki theme names.

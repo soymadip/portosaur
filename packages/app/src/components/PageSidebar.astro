@@ -1,0 +1,73 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's PageSidebar, renamed (`sl-` → `porto-`) and adapted to
+// Portosaur's data (headings prop). Renders the mobile TOC below the
+// `lg` breakpoint and the desktop right sidebar above it.
+//
+// DELIBERATE DEVIATION: the TOC title selector targets
+// `.porto-toc-title` (a <p>) instead of Starlight's <h2> — see
+// TableOfContents.astro for why the title is not an <h2>.
+import type { TocHeading } from "../utils/content.ts";
+import MobileTableOfContents from "./MobileTableOfContents.astro";
+import TableOfContents from "./TableOfContents.astro";
+
+interface Props {
+  headings: TocHeading[];
+}
+
+const { headings } = Astro.props;
+---
+
+{headings.length > 0 && (
+  <>
+    <div class="lg:porto-hidden">
+      <MobileTableOfContents headings={headings} />
+    </div>
+    <div class="right-sidebar-panel porto-hidden lg:porto-block">
+      <div class="porto-container">
+        <TableOfContents headings={headings} />
+      </div>
+    </div>
+  </>
+)}
+
+<style>
+  @layer porto.core {
+    .right-sidebar-panel {
+      padding: 1rem var(--porto-sidebar-pad-x);
+    }
+    .porto-container {
+      width: calc(var(--porto-sidebar-width) - 2 * var(--porto-sidebar-pad-x));
+    }
+    .right-sidebar-panel :global(.porto-toc-title) {
+      color: var(--porto-color-white);
+      font-size: var(--porto-text-h5);
+      font-weight: 600;
+      line-height: var(--porto-line-height-headings);
+      margin-bottom: 0.5rem;
+    }
+    .right-sidebar-panel :global(:where(a)) {
+      display: block;
+      font-size: var(--porto-text-xs);
+      text-decoration: none;
+      color: var(--porto-color-gray-3);
+      overflow-wrap: anywhere;
+    }
+    .right-sidebar-panel :global(:where(a):hover) {
+      color: var(--porto-color-white);
+    }
+    @media (min-width: 72rem) {
+      .porto-container {
+        max-width: calc(
+          (
+            (
+                100vw - var(--porto-sidebar-width) - 2 *
+                  var(--porto-content-pad-x) - 2 * var(--porto-sidebar-pad-x)
+              ) *
+              0.25 /* MAGIC NUMBER 🥲 */
+          )
+        );
+      }
+    }
+  }
+</style>

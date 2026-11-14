@@ -1,0 +1,6 @@
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+
+// N.B. THIS FILE IS IMPORTED IN BOTH SERVER- AND CLIENT-SIDE CODE.
+// THINK TWICE BEFORE ADDING STUFF AS IT WILL GET SHIPPED TO THE CLIENT.
+
+export const PAGE_TITLE_ID = "_top";

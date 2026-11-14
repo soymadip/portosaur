@@ -33,10 +33,12 @@
  * build hooks, so `astro:server:setup` generates the staged assets once
  * and serves them (plus theme `static/`) through Vite middleware.
  *
- * Styling is Tailwind v4 (CSS-first config, `@tailwindcss/vite`) + the
- * token system (`src/css/tokens.css`). The Tailwind Vite plugin is
- * registered here so the theme CSS entry (`src/css/custom.css`) is
- * processed whenever a layout imports it.
+ * Styling is plain CSS: Starlight's CSS system (copied into
+ * `src/css/` and integrated into Portosaur's own stylesheets,
+ * identifiers renamed to `porto-`) + Portosaur's scheme files
+ * (`src/css/themes/`) + overrides. No CSS preprocessor
+ * plugin is registered here — the theme CSS entry (`src/css/custom.css`)
+ * is a plain CSS import from the layouts.
  */
 
 import fs from "node:fs";
@@ -46,7 +48,6 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import * as pagefind from "pagefind";
 import { unified } from "@astrojs/markdown-remark";
-import tailwindcss from "@tailwindcss/vite";
 import type { AstroIntegration } from "astro";
 
 import { portosaurMdxOptions } from "./mdx.ts";
@@ -425,12 +426,11 @@ export default function portosaur(
       }) {
         setupLogger = logger;
 
-        // Virtual modules + content-dir aliases, plus the Tailwind v4 Vite
-        // plugin (CSS-first config; the theme CSS entry is
+        // Virtual modules + content-dir aliases (the theme CSS entry is
         // `src/css/custom.css`, imported by BaseLayout).
         updateConfig({
           vite: {
-            plugins: [tailwindcss(), portoVirtualModules],
+            plugins: [portoVirtualModules],
             resolve: {
               alias: {
                 "@portosaur-notes": path.resolve(projectDir, notesDir),

@@ -1,0 +1,37 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's TableOfContents, renamed (`sl-` → `porto-`,
+// `starlight-toc` → `porto-toc`) and adapted to Portosaur's data:
+// headings arrive as a prop (flat h2/h3 list) and are nested by
+// `nestHeadings` from utils/content.ts.
+//
+// DELIBERATE DEVIATION: the "On this page" title renders as a <p>
+// (class `porto-toc-title`, styled identically to Starlight's <h2>),
+// not an <h2> — an <h2> here would enter every doc page's heading
+// list and break Portosaur's frozen URL snapshots.
+import type { TocHeading } from "../utils/content.ts";
+import { nestHeadings } from "../utils/content.ts";
+import TableOfContentsList from "./TableOfContentsList.astro";
+
+interface Props {
+  headings: TocHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = nestHeadings(headings);
+---
+
+{toc.length > 0 && (
+  <porto-toc data-min-h={2} data-max-h={3}>
+    <nav aria-labelledby="porto__on-this-page">
+      <p id="porto__on-this-page" class="porto-toc-title">
+        On this page
+      </p>
+      <TableOfContentsList toc={toc} />
+    </nav>
+  </porto-toc>
+)}
+
+<script>
+  import "../scripts/porto-toc.ts";
+</script>

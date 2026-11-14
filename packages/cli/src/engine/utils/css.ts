@@ -3,9 +3,13 @@ import path from "node:path";
 
 /**
  * The default color scheme to use when no color scheme is specified.
+ * Starlight's own palette is the default for now, so a default site
+ * renders with Starlight's colors and can be compared against real
+ * Starlight; the portosaur scheme stays available as an explicit
+ * choice (`theme.color_scheme: portosaur`).
  */
-export function getDefaultColorScheme(userConfig: any): string {
-  return userConfig?.docs_home ? "dracula" : "nord";
+export function getDefaultColorScheme(_userConfig: any): string {
+  return "starlight";
 }
 
 /**
@@ -14,10 +18,8 @@ export function getDefaultColorScheme(userConfig: any): string {
  *
  * The theme's own files are bundled via BaseLayout's `src/css/custom.css`
  * import — they are listed here so the asset generator can read the
- * `--color-*` tokens out of the active scheme file (theme-color,
+ * `--porto-*` tokens out of the active scheme file (theme-color,
  * manifest colors) and so the layout can link the user's custom files.
- * There is no `infima.css` anymore: `--ifm-*` is gone, the scheme files
- * define `--color-*` directly.
  *
  * @param {string} projectDir - The user's project directory.
  * @param {Object} userConfig - The parsed Portosaur user config.

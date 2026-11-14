@@ -1,200 +1,38 @@
 ---
-// Sidebar — renders the `porto:sidebar` tree.
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's Sidebar (persister + sublist + mobile menu footer),
+// renamed (`sl-` → `porto-`) and adapted to Portosaur's sidebar data.
 //
-// Recursive via self-import: nested categories render this same
-// component with their `items`. Categories are <details>, open only when
-// they contain the active page, when
-// `theme.navigation.collapsable_sidebar` is set, plain groups otherwise.
-// The active item is highlighted from the current URL; a category is
-// marked active when its own link matches or one of its descendants is
-// the current page. Category labels link to their index page when the
-// category has one (index-as-category-link).
-//
-// The sidebar shows NO icons (like the old Docusaurus sidebar — icons
-// live on the topic-list cards, not here). At depth 0 the tree gets a
-// root header row (the tree root's label — "Docs" in docs mode, "Notes"
-// in portfolio mode — linking to the collection home, with a chevron
-// that collapses the whole tree) and a « collapse button at the bottom
-// that hides the sidebar (the expand button + toggle wiring live in
-// DocLayout, which owns the layout around the sidebar).
-import config from "porto:config";
+// The `porto:sidebar` tree is a one-element array holding the root
+// category ("Docs"/"Notes"). The root itself renders as the first
+// top-level link (to the collection home), followed by the root's
+// items — the same flattening the old sidebar did. The old root
+// collapse chevron and the « sidebar-collapse button are gone:
+// Starlight has no sidebar collapse; open/closed groups and scroll
+// position persist across navigations instead (SidebarPersister).
 import sidebarTree from "porto:sidebar";
-import Sidebar from "./Sidebar.astro";
+import MobileMenuFooter from "./MobileMenuFooter.astro";
+import SidebarPersister from "./SidebarPersister.astro";
+import SidebarSublist from "./SidebarSublist.astro";
 
 interface Props {
   currentHref: string;
-  items?: any[];
-  depth?: number;
 }
 
-const { currentHref, items, depth = 0 } = Astro.props;
+const { currentHref } = Astro.props;
 
-const nodes = items ?? sidebarTree[0]?.items ?? [];
-const collapsable = config.theme.collapsableSidebar !== false;
 const root = sidebarTree[0];
-const rootHref = root?.link?.href;
-
-function normalize(href: string): string {
-  return href.replace(/\/+$/, "") || "/";
-}
-
-const current = normalize(currentHref);
-
-function isActiveItem(item: any): boolean {
-  const href = item.href ?? item.link?.href;
-  if (!href) {
-    return false;
-  }
-  return normalize(href) === current;
-}
-
-function hasActiveDescendant(item: any): boolean {
-  if (isActiveItem(item)) {
-    return true;
-  }
-  for (const child of item.items ?? []) {
-    if (hasActiveDescendant(child)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-const isRootActive = rootHref ? normalize(rootHref) === current : false;
-
-// Shared Tailwind class sets — the link/label styles repeat across the
-// root row, categories, and doc links. The color is a per-link ternary
-// (never a base color plus an overriding active color) so the two
-// never fight in the generated stylesheet.
-const sidebarLink =
-  "flex items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] no-underline hover:bg-surface";
-const sidebarSummaryLink =
-  "inline-flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] no-underline hover:bg-surface";
-const sidebarLabel =
-  "flex items-center gap-2 rounded-md px-3 py-1.5 text-[0.95rem] font-semibold text-foreground";
-const sidebarLinkColor = (active: boolean) =>
-  active ? "bg-surface font-semibold text-primary" : "text-foreground";
+const rootLink =
+  root?.link?.href != null
+    ? [{ type: "doc", href: root.link.href, label: root.label }]
+    : [];
+const items = [...rootLink, ...(root?.items ?? [])];
 ---
 
-<ul
-  class={
-    depth === 0
-      ? "porto-sidebar m-0 flex-auto min-h-0 list-none overflow-y-auto p-0"
-      : "m-0 list-none p-0 pl-3"
-  }
->
-  {depth === 0 && root && (
-    <li class="porto-sidebar__item--root my-0.5 mr-1.5 flex items-center gap-1">
-      {rootHref ? (
-        <a
-          class:list={[
-            sidebarLink,
-            "flex-auto font-semibold",
-            sidebarLinkColor(isRootActive),
-          ]}
-          href={rootHref}
-          aria-current={isRootActive ? "page" : undefined}
-        >
-          {root.label}
-        </a>
-      ) : (
-        <span class:list={[sidebarLabel, "flex-auto"]}>{root.label}</span>
-      )}
-      <button
-        type="button"
-        class="shrink-0 cursor-pointer rounded-md border-0 bg-transparent px-2 py-1.5 text-[0.9rem] leading-[1.5] text-muted hover:bg-surface hover:text-foreground"
-        data-sidebar-root-toggle
-        aria-expanded="true"
-        aria-label="Collapse sidebar tree"
-      >
-        ⌄
-      </button>
-    </li>
-  )}
-  {nodes.map((item) =>
-    item.type === "category" ? (
-      <li class="my-0.5 mr-1.5" data-color={item.color ?? undefined}>
-        {collapsable ? (
-          <details class="group" open={hasActiveDescendant(item)}>
-            <summary class="cursor-pointer list-none before:float-right before:text-[0.9em] before:leading-[1.75] before:text-muted before:content-['›'] group-open:before:content-['⌄'] [&::-webkit-details-marker]:hidden">
-              {item.link?.href ? (
-                <a
-                  class:list={[
-                    sidebarSummaryLink,
-                    sidebarLinkColor(isActiveItem(item)),
-                  ]}
-                  href={item.link.href}
-                  aria-current={isActiveItem(item) ? "page" : undefined}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <span class={sidebarLabel}>{item.label}</span>
-              )}
-            </summary>
-            <Sidebar
-              currentHref={currentHref}
-              items={item.items ?? []}
-              depth={depth + 1}
-            />
-          </details>
-        ) : (
-          <>
-            {item.link?.href ? (
-              <a
-                class:list={[
-                  sidebarLink,
-                  "font-semibold",
-                  sidebarLinkColor(isActiveItem(item)),
-                ]}
-                href={item.link.href}
-                aria-current={isActiveItem(item) ? "page" : undefined}
-              >
-                {item.label}
-              </a>
-            ) : (
-              <span class={sidebarLabel}>{item.label}</span>
-            )}
-            <Sidebar
-              currentHref={currentHref}
-              items={item.items ?? []}
-              depth={depth + 1}
-            />
-          </>
-        )}
-      </li>
-    ) : (
-      <li class="my-0.5 mr-1.5" data-color={item.color ?? undefined}>
-        <a
-          class:list={[sidebarLink, sidebarLinkColor(isActiveItem(item))]}
-          href={item.href}
-          aria-current={isActiveItem(item) ? "page" : undefined}
-        >
-          {item.label}
-        </a>
-      </li>
-    ),
-  )}
-</ul>
+<SidebarPersister>
+  <SidebarSublist items={items} currentHref={currentHref} />
+</SidebarPersister>
 
-{depth === 0 && (
-  <button
-    type="button"
-    class="block w-full shrink-0 cursor-pointer border-0 border-t border-t-border bg-background py-2 text-[1.1rem] leading-[1.5] text-muted hover:text-primary"
-    data-sidebar-collapse
-    aria-label="Collapse sidebar"
-  >
-    «
-  </button>
-)}
-
-<style>
-  /* Root header row collapse: the script in DocLayout sets
-     `data-root-collapsed` on the root list (queried there as
-     `.porto-sidebar`); while collapsed, every item but the header row
-     hides. A `:not()` child selector — plain CSS, not a utility. */
-  .porto-sidebar[data-root-collapsed="true"]
-    > li:not(.porto-sidebar__item--root) {
-    display: none;
-  }
-</style>
+<div class="md:porto-hidden">
+  <MobileMenuFooter />
+</div>

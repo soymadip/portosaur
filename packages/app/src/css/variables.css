@@ -1,0 +1,215 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ */
+
+@layer porto.base {
+  :root,
+  ::backdrop {
+    /* Colors (dark mode) */
+    --porto-color-white: hsl(0, 0%, 100%); /* “white” */
+    --porto-color-gray-1: hsl(224, 20%, 94%);
+    --porto-color-gray-2: hsl(224, 6%, 77%);
+    --porto-color-gray-3: hsl(224, 6%, 56%);
+    --porto-color-gray-4: hsl(224, 7%, 36%);
+    --porto-color-gray-5: hsl(224, 10%, 23%);
+    --porto-color-gray-6: hsl(224, 14%, 16%);
+    --porto-color-black: hsl(224, 10%, 10%);
+
+    --porto-hue-orange: 41;
+    --porto-color-orange-low: hsl(var(--porto-hue-orange), 39%, 22%);
+    --porto-color-orange: hsl(var(--porto-hue-orange), 82%, 63%);
+    --porto-color-orange-high: hsl(var(--porto-hue-orange), 82%, 87%);
+    --porto-hue-green: 101;
+    --porto-color-green-low: hsl(var(--porto-hue-green), 39%, 22%);
+    --porto-color-green: hsl(var(--porto-hue-green), 82%, 63%);
+    --porto-color-green-high: hsl(var(--porto-hue-green), 82%, 80%);
+    --porto-hue-blue: 234;
+    --porto-color-blue-low: hsl(var(--porto-hue-blue), 54%, 20%);
+    --porto-color-blue: hsl(var(--porto-hue-blue), 100%, 60%);
+    --porto-color-blue-high: hsl(var(--porto-hue-blue), 100%, 87%);
+    --porto-hue-purple: 281;
+    --porto-color-purple-low: hsl(var(--porto-hue-purple), 39%, 22%);
+    --porto-color-purple: hsl(var(--porto-hue-purple), 82%, 63%);
+    --porto-color-purple-high: hsl(var(--porto-hue-purple), 82%, 89%);
+    --porto-hue-red: 339;
+    --porto-color-red-low: hsl(var(--porto-hue-red), 39%, 22%);
+    --porto-color-red: hsl(var(--porto-hue-red), 82%, 63%);
+    --porto-color-red-high: hsl(var(--porto-hue-red), 82%, 87%);
+
+    --porto-color-accent-low: hsl(224, 54%, 20%);
+    --porto-color-accent: hsl(224, 100%, 60%);
+    --porto-color-accent-high: hsl(224, 100%, 85%);
+
+    --porto-color-text: var(--porto-color-gray-2);
+    --porto-color-text-accent: var(--porto-color-accent-high);
+    --porto-color-text-invert: var(--porto-color-accent-low);
+    --porto-color-bg: var(--porto-color-black);
+    --porto-color-bg-nav: var(--porto-color-gray-6);
+    --porto-color-bg-sidebar: var(--porto-color-gray-6);
+    --porto-color-bg-inline-code: var(--porto-color-gray-5);
+    --porto-color-bg-accent: var(--porto-color-accent-high);
+    --porto-color-hairline-light: var(--porto-color-gray-5);
+    --porto-color-hairline: var(--porto-color-gray-6);
+    --porto-color-hairline-shade: var(--porto-color-black);
+
+    --porto-color-backdrop-overlay: hsla(223, 13%, 10%, 0.66);
+
+    /* Shadows (dark mode) */
+    --porto-shadow-sm:
+      0px 1px 1px hsla(0, 0%, 0%, 0.12), 0px 2px 1px hsla(0, 0%, 0%, 0.24);
+    --porto-shadow-md:
+      0px 8px 4px hsla(0, 0%, 0%, 0.08), 0px 5px 2px hsla(0, 0%, 0%, 0.08),
+      0px 3px 2px hsla(0, 0%, 0%, 0.12), 0px 1px 1px hsla(0, 0%, 0%, 0.15);
+    --porto-shadow-lg:
+      0px 25px 7px hsla(0, 0%, 0%, 0.03), 0px 16px 6px hsla(0, 0%, 0%, 0.1),
+      0px 9px 5px hsla(223, 13%, 10%, 0.33), 0px 4px 4px hsla(0, 0%, 0%, 0.75),
+      0px 4px 2px hsla(0, 0%, 0%, 0.25);
+
+    /* Text size and line height */
+    --porto-text-2xs: 0.75rem; /* 12px */
+    --porto-text-xs: 0.8125rem; /* 13px */
+    --porto-text-sm: 0.875rem; /* 14px */
+    --porto-text-base: 1rem; /* 16px */
+    --porto-text-lg: 1.125rem; /* 18px */
+    --porto-text-xl: 1.25rem; /* 20px */
+    --porto-text-2xl: 1.5rem; /* 24px */
+    --porto-text-3xl: 1.8125rem; /* 29px */
+    --porto-text-4xl: 2.1875rem; /* 35px */
+    --porto-text-5xl: 2.625rem; /* 42px */
+    --porto-text-6xl: 4rem; /* 64px */
+
+    --porto-text-body: var(--porto-text-base);
+    --porto-text-body-sm: var(--porto-text-xs);
+    --porto-text-code: var(--porto-text-sm);
+    --porto-text-code-sm: var(--porto-text-xs);
+    --porto-text-h1: var(--porto-text-4xl);
+    --porto-text-h2: var(--porto-text-3xl);
+    --porto-text-h3: var(--porto-text-2xl);
+    --porto-text-h4: var(--porto-text-xl);
+    --porto-text-h5: var(--porto-text-lg);
+
+    --porto-line-height: 1.75;
+    --porto-line-height-headings: 1.2;
+
+    /*
+			Although technically superseded by the `system-ui` font-family, we use `-apple-system` and
+			`BlinkMacSystemFont` because `system-ui` causes issues on Windows computers in some languages.
+		*/
+    /* Portosaur typefaces (fontsource, loaded in custom.css): Alata for
+		   UI/body text, Lexend Variable (Geologica fallback) for MDX prose. */
+    --porto-font-system:
+      "Alata", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --porto-font-markdown:
+      "Lexend Variable", "Geologica", "Alata", "Inter", ui-sans-serif,
+      system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      sans-serif;
+    --porto-font-system-mono:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --__porto-font:
+      var(--porto-font, var(--porto-font-system)), var(--porto-font-system);
+    --__porto-font-mono:
+      var(--porto-font-mono, var(--porto-font-system-mono)),
+      var(--porto-font-system-mono);
+
+    /** Key layout values */
+    --porto-nav-height: 3.5rem;
+    --porto-nav-pad-x: 1rem;
+    --porto-nav-pad-y: 0.75rem;
+    --porto-mobile-toc-height: 3rem;
+    --porto-sidebar-width: 18.75rem;
+    --porto-sidebar-pad-x: 1rem;
+    --porto-content-width: 45rem;
+    --porto-content-pad-x: 1rem;
+    --porto-content-gap-y: 1rem;
+    --porto-main-pad: 0 0 3vh 0;
+    --porto-menu-button-size: 2rem;
+    --porto-nav-gap: var(--porto-content-pad-x);
+    /* Offset required to show outline inside an element instead of round the outside */
+    --porto-outline-offset-inside: -0.1875rem;
+
+    /* Global z-index values */
+    --porto-z-index-toc: 4;
+    --porto-z-index-menu: 5;
+    --porto-z-index-navbar: 10;
+    --porto-z-index-skiplink: 20;
+  }
+
+  :root[data-theme="light"],
+  [data-theme="light"] ::backdrop {
+    /* Colours (light mode) */
+    --porto-color-white: hsl(224, 10%, 10%);
+    --porto-color-gray-1: hsl(224, 14%, 16%);
+    --porto-color-gray-2: hsl(224, 10%, 23%);
+    --porto-color-gray-3: hsl(224, 7%, 36%);
+    --porto-color-gray-4: hsl(224, 6%, 56%);
+    --porto-color-gray-5: hsl(224, 6%, 77%);
+    --porto-color-gray-6: hsl(224, 20%, 94%);
+    --porto-color-gray-7: hsl(224, 19%, 97%);
+    --porto-color-black: hsl(0, 0%, 100%);
+
+    --porto-color-orange-high: hsl(var(--porto-hue-orange), 80%, 25%);
+    --porto-color-orange: hsl(var(--porto-hue-orange), 90%, 60%);
+    --porto-color-orange-low: hsl(var(--porto-hue-orange), 90%, 88%);
+    --porto-color-green-high: hsl(var(--porto-hue-green), 80%, 22%);
+    --porto-color-green: hsl(var(--porto-hue-green), 90%, 46%);
+    --porto-color-green-low: hsl(var(--porto-hue-green), 85%, 90%);
+    --porto-color-blue-high: hsl(var(--porto-hue-blue), 80%, 30%);
+    --porto-color-blue: hsl(var(--porto-hue-blue), 90%, 60%);
+    --porto-color-blue-low: hsl(var(--porto-hue-blue), 88%, 90%);
+    --porto-color-purple-high: hsl(var(--porto-hue-purple), 90%, 30%);
+    --porto-color-purple: hsl(var(--porto-hue-purple), 90%, 60%);
+    --porto-color-purple-low: hsl(var(--porto-hue-purple), 80%, 90%);
+    --porto-color-red-high: hsl(var(--porto-hue-red), 80%, 30%);
+    --porto-color-red: hsl(var(--porto-hue-red), 90%, 60%);
+    --porto-color-red-low: hsl(var(--porto-hue-red), 80%, 90%);
+
+    --porto-color-accent-high: hsl(234, 80%, 30%);
+    --porto-color-accent: hsl(234, 90%, 60%);
+    --porto-color-accent-low: hsl(234, 88%, 90%);
+
+    --porto-color-text-accent: var(--porto-color-accent);
+    --porto-color-text-invert: var(--porto-color-black);
+    --porto-color-bg-nav: var(--porto-color-gray-7);
+    --porto-color-bg-sidebar: var(--porto-color-bg);
+    --porto-color-bg-inline-code: var(--porto-color-gray-6);
+    --porto-color-bg-accent: var(--porto-color-accent);
+    --porto-color-hairline-light: var(--porto-color-gray-6);
+    --porto-color-hairline-shade: var(--porto-color-gray-6);
+
+    --porto-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
+
+    /* Shadows (light mode) */
+    --porto-shadow-sm:
+      0px 1px 1px hsla(0, 0%, 0%, 0.06), 0px 2px 1px hsla(0, 0%, 0%, 0.06);
+    --porto-shadow-md:
+      0px 8px 4px hsla(0, 0%, 0%, 0.03), 0px 5px 2px hsla(0, 0%, 0%, 0.03),
+      0px 3px 2px hsla(0, 0%, 0%, 0.06), 0px 1px 1px hsla(0, 0%, 0%, 0.06);
+    --porto-shadow-lg:
+      0px 25px 7px rgba(0, 0, 0, 0.01), 0px 16px 6px hsla(0, 0%, 0%, 0.03),
+      0px 9px 5px hsla(223, 13%, 10%, 0.08), 0px 4px 4px hsla(0, 0%, 0%, 0.16),
+      0px 4px 2px hsla(0, 0%, 0%, 0.04);
+  }
+
+  @media (min-width: 50em) {
+    :root {
+      --porto-nav-height: 4rem;
+      --porto-nav-pad-x: 1.5rem;
+      --porto-text-h1: var(--porto-text-5xl);
+      --porto-text-h2: var(--porto-text-4xl);
+      --porto-text-h3: var(--porto-text-3xl);
+      --porto-text-h4: var(--porto-text-2xl);
+    }
+  }
+
+  @media (min-width: 72rem) {
+    :root {
+      --porto-content-pad-x: 1.5rem;
+      --porto-mobile-toc-height: 0rem;
+    }
+  }
+}

@@ -10,27 +10,47 @@
 // Pages must NOT render their own <main>: this layout owns it (the old
 // `pages/index.jsx` rendered a nested <main> inside Layout's div —
 // that nesting is dropped in the port).
+//
+// The navbar is fixed, so <main> reserves its height (padding-top:
+// nav-height). DocLayout adds the mobile-TOC height on top for docs
+// pages. `hasSidebar`/`hasToc` land as data attributes on <html> —
+// the Starlight CSS system keys its two-column layout off them.
+// The theme CSS entry (Starlight's CSS system, renamed to `porto-`,
+// + Portosaur's schemes and overrides). IMPORTANT: these two imports
+// MUST stay first — the CSS bundle follows import order, and
+// custom.css carries the cascade-layer order declaration, which has
+// to precede every component's scoped `@layer` block (see the comment
+// at the top of custom.css). User custom CSS (`theme.custom_css`, via
+// the `porto:user-css` virtual module) is imported AFTER it, so Vite
+// bundles the user rules last and they win the cascade — a `<link>`
+// can't do that, because Astro appends its bundled stylesheet links
+// at the end of `<head>`.
+import "../css/custom.css";
+import "porto:user-css";
+
 import config from "porto:config";
 import { getAssetHeadTags } from "../utils/assets.ts";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-
-// The theme CSS entry (Tailwind + tokens + schemes), owned by the CSS
-// worker. User custom CSS (`theme.custom_css`, via the `porto:user-css`
-// virtual module) is imported AFTER it, so Vite bundles the user rules
-// last and they win the cascade — a `<link>` can't do that, because
-// Astro appends its bundled stylesheet links at the end of `<head>`.
-import "../css/custom.css";
-import "porto:user-css";
+import SkipLink from "../components/SkipLink.astro";
 
 interface Props {
   title: string;
   description?: string;
   noFooter?: boolean;
   wrapperClassName?: string;
+  hasSidebar?: boolean;
+  hasToc?: boolean;
 }
 
-const { title, description, noFooter, wrapperClassName } = Astro.props;
+const {
+  title,
+  description,
+  noFooter,
+  wrapperClassName,
+  hasSidebar = false,
+  hasToc = false,
+} = Astro.props;
 
 const site = config.site;
 const theme = config.theme;
@@ -128,9 +148,10 @@ const swUrl = withBase("sw.js");
 <!doctype html>
 <html
   lang="en"
-  class="h-full"
   data-scheme={theme.colorScheme}
   data-theme={theme.defaultMode}
+  data-has-sidebar={hasSidebar || undefined}
+  data-has-toc={hasToc || undefined}
 >
   <head>
     <meta charset="utf-8" />
@@ -176,21 +197,13 @@ const swUrl = withBase("sw.js");
       })();
     </script>
   </head>
-  <body class="flex h-full min-h-screen flex-col">
-    <a
-      class="absolute -left-[9999px] top-0 z-200 bg-background px-4 py-2 text-foreground focus:left-2 focus:top-2"
-      href="#main-content"
-    >
-      Skip to main content
-    </a>
+  <body>
+    <SkipLink />
 
-    <Navbar isHome={isPortfolioHome} />
+    <Navbar isHome={isPortfolioHome} hasSidebar={hasSidebar} />
 
-    <div class="flex flex-[1_0_auto] flex-row">
-      <main
-        id="main-content"
-        class:list={["flex min-w-0 flex-auto flex-col", wrapperClassName]}
-      >
+    <div class="porto-content-wrapper">
+      <main id="main-content" class:list={[wrapperClassName]}>
         <slot />
       </main>
       {/*
@@ -206,6 +219,11 @@ const swUrl = withBase("sw.js");
     {/* Theme toggle wiring + theme-color sync (every page). */}
     <script>
       import "../scripts/theme-mode.ts";
+    </script>
+
+    {/* Code-block framing (copy button, language label) on every page. */}
+    <script>
+      import "../scripts/code-blocks.ts";
     </script>
 
     {/*
@@ -236,3 +254,31 @@ const swUrl = withBase("sw.js");
     </script>}
   </body>
 </html>
+
+<style>
+  /* Document shell layout (plain CSS — the navbar is fixed, so
+     <main> reserves its height). The body is the flex column (there
+     is no `.page` wrapper — Starlight's PageFrame wraps header +
+     sidebar + main in one; Portosaur's header lives in the Navbar
+     component and the sidebar in DocLayout, so the body plays that
+     role). */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .porto-content-wrapper {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row;
+  }
+
+  main {
+    display: flex;
+    flex: auto;
+    flex-direction: column;
+    min-width: 0;
+    padding-top: var(--porto-nav-height);
+  }
+</style>

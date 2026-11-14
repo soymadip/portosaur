@@ -1,27 +1,45 @@
 ---
-// DocLayout — docs/notes page shell on top of BaseLayout (port of the
-// old swizzled `DocItem/Layout`).
+// DocLayout — docs/notes page shell on top of BaseLayout, in
+// Starlight's page-frame language. Derived in part from Starlight
+// (MIT License) — see packages/app/NOTICE.md: the sidebar popover +
+// main-frame structure comes from Starlight's PageFrame, the panel
+// layout from its Page.
 //
-// Left sidebar (from `porto:sidebar`), main column with breadcrumbs,
-// the page content (<slot /> — the <h1> title is rendered by the page
-// itself), a minimal mobile TOC disclosure (<details>; the full
-// MobileTOC component is Phase 4), desktop TOC aside, prev/next
-// paginator, and the doc footer (Edit link + last updated).
+// Structure: a fixed sidebar popover (the mobile menu on small
+// screens, a persistent sidebar from 50em up) + `.main-frame`
+// holding TwoColumnContent — the right TOC aside and the main pane
+// with two content panels: breadcrumbs + the <h1> title, then the
+// markdown content + the doc footer (edit link, last updated,
+// pagination).
 //
-// PageActions (edit ✎ + copy-link ⧉ buttons, top-right) are inline
-// here; the old copy-markdown dropdown is Phase 4.
+// The <h1> renders here (from the `heading` prop), not in the page
+// slot — pages pass `heading` and put only the body in the slot.
+//
+// Dropped from the old layout: the PageActions edit/copy-link
+// buttons, the mobile toolbar + its rAF positioning script, the «
+// sidebar-collapse button and the root collapse chevron (Starlight
+// has no sidebar collapse; group open state + scroll position
+// persist across navigations instead).
 //
 // Version banner/badge: DROPPED — versioning is unused.
 import config from "porto:config";
 import sidebar from "porto:sidebar";
 import BaseLayout from "./BaseLayout.astro";
+import ContentPanel from "../components/ContentPanel.astro";
+import DocFooter from "../components/DocFooter.astro";
+import MarkdownContent from "../components/MarkdownContent.astro";
+import MobileMenuToggle from "../components/MobileMenuToggle.astro";
+import PageSidebar from "../components/PageSidebar.astro";
+import PageTitle from "../components/PageTitle.astro";
 import Sidebar from "../components/Sidebar.astro";
-import TOC from "../components/TOC.astro";
+import TwoColumnContent from "../components/TwoColumnContent.astro";
 import { findSidebarPath, findPrevNext } from "../utils/content.ts";
 
 interface Props {
   title: string;
   description?: string;
+  /** The page <h1> (rendered here by PageTitle, not in the slot). */
+  heading: string;
   currentHref: string;
   headings?: { depth: number; slug: string; text: string }[];
   editUrl?: string;
@@ -31,6 +49,7 @@ interface Props {
 const {
   title,
   description,
+  heading,
   currentHref,
   headings = [],
   editUrl,
@@ -44,77 +63,62 @@ const { prev, next } = findPrevNext(sidebar, currentHref);
 const tocHeadings = headings.filter(
   (heading) => heading.depth >= 2 && heading.depth <= 3,
 );
+const hasToc = tocHeadings.length > 0;
 ---
 
-<BaseLayout title={title} description={description}>
-  <div class="porto-doc-layout flex w-full items-start gap-8 p-4">
-    {/*
-      Expand button (»): only visible while the sidebar is collapsed
-      (see the toggle script below); re-opens the sidebar.
-    */}
-    <button
-      type="button"
-      class="porto-doc-sidebar__expand sticky top-[calc(var(--navbar-height,60px)+1rem)] hidden size-8 shrink-0 items-center justify-center self-start rounded-md border border-border bg-background-alt p-0 text-[1.1rem] leading-none text-muted hover:border-primary hover:text-primary"
-      data-sidebar-expand
-      aria-label="Expand sidebar"
-    >
-      »
-    </button>
-    <aside class="porto-doc-sidebar sticky top-[calc(var(--navbar-height,60px)+1rem)] h-[calc(100vh-var(--navbar-height,60px)-2rem)] w-[300px] shrink-0 [@media(max-width:996px)]:hidden">
-      <nav class="flex h-full flex-col" aria-label="Docs sidebar">
+<BaseLayout title={title} description={description} hasSidebar hasToc={hasToc}>
+  <nav class="sidebar print:hidden" aria-label="Docs sidebar">
+    <MobileMenuToggle />
+    <script>
+      // The mobile menu uses the popover API to open and close without JavaScript. We enhance this
+      // behaviour with focus trapping while the menu is open.
+      class PortoSidebarPane extends HTMLElement {
+        constructor() {
+          super();
+
+          const desktopMediaQuery = matchMedia("(min-width: 50em)");
+
+          // Remove the popover attribute on desktop viewports. It's only needed for the mobile menu.
+          const resetPopoverAttribute = () => {
+            this.popover = desktopMediaQuery.matches ? null : "auto";
+          };
+          resetPopoverAttribute();
+          desktopMediaQuery.addEventListener("change", () =>
+            resetPopoverAttribute(),
+          );
+
+          // Update the menu state when the sidebar popover is toggled.
+          this.addEventListener("toggle", ({ newState }) =>
+            this.trapFocus(newState === "open"),
+          );
+        }
+        /** Trap keyboard focus inside the header and menu when the menu is expanded. */
+        trapFocus(shouldTrap: boolean) {
+          document
+            .querySelectorAll<HTMLElement>(".main-frame, .porto-skip-link")
+            .forEach((el) => {
+              el.toggleAttribute("inert", shouldTrap);
+            });
+        }
+      }
+      customElements.define("porto-sidebar-pane", PortoSidebarPane);
+    </script>
+    <porto-sidebar-pane popover="" id="porto__sidebar" class="sidebar-pane">
+      <div class="sidebar-content porto-flex">
         <Sidebar currentHref={currentHref} />
-      </nav>
-    </aside>
-
-    {/*
-      `@container/docContainer`: container-query context for the
-      pagination below (port of the old pagination.css `docContainer`):
-      the content column is ~660px wide at desktop widths, so the
-      container query — not a viewport media query — is what stacks
-      the prev/next cards.
-    */}
-    <div class="relative @container/docContainer flex min-w-0 flex-auto flex-col">
-      {/*
-        PageActions: edit + copy-link icon buttons at the top-right of
-        the doc page (above the TOC area on desktop).
-      */}
-      <div class="absolute top-0 right-0 z-1 flex gap-2">
-        {editUrl && (
-          <a
-            class="inline-flex size-8 items-center justify-center rounded-md border border-border bg-background-alt p-0 text-base leading-none text-foreground no-underline hover:border-primary hover:text-primary"
-            href={editUrl}
-            title="Edit this page"
-            aria-label="Edit this page"
-          >
-            ✎
-          </a>
-        )}
-        <button
-          type="button"
-          class="inline-flex size-8 items-center justify-center rounded-md border border-border bg-background-alt p-0 text-base leading-none text-foreground no-underline hover:border-primary hover:text-primary data-[copied=true]:border-primary data-[copied=true]:text-primary"
-          data-copy-page-url
-          title="Copy link"
-          aria-label="Copy link"
-        >
-          ⧉
-        </button>
       </div>
+    </porto-sidebar-pane>
+  </nav>
 
-      {/*
-        The article column is capped for readability (~60rem) while the
-        layout itself is full-width: sidebar flush left, TOC flush right,
-        leftover space between the article and the TOC.
-      */}
-      <article class="flex w-full max-w-[60rem] flex-[1_0_auto] flex-col">
+  <div class="main-frame">
+    <TwoColumnContent hasToc={hasToc}>
+      <PageSidebar slot="right-sidebar" headings={tocHeadings} />
+      <ContentPanel>
         {breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumbs">
-            <ol class="m-0 mb-4 flex list-none flex-wrap items-center gap-1 p-0 pr-20 text-[0.85rem]">
-              <li class="[li+&]:before:mr-1 [li+&]:before:text-muted [li+&]:before:content-['›']">
-                <a
-                  class="text-primary no-underline hover:underline"
-                  href="/"
-                  aria-label="Home"
-                >
+          <nav class="breadcrumbs" aria-label="Breadcrumbs">
+            <ol>
+              <li>
+                <a href="/" aria-label="Home">
                   ⌂
                 </a>
               </li>
@@ -123,21 +127,16 @@ const tocHeadings = headings.filter(
                 // Categories without an index doc have href: null
                 // (see findSidebarPath) — plain text, not a link.
                 return (
-                  <li class="[li+&]:before:mr-1 [li+&]:before:text-muted [li+&]:before:content-['›']">
+                  <li>
                     {isLast || !crumb.href ? (
                       <span
-                        class:list={[{ "text-primary": isLast }]}
+                        class:list={[{ current: isLast }]}
                         aria-current={isLast ? "page" : undefined}
                       >
                         {crumb.title}
                       </span>
                     ) : (
-                      <a
-                        class="text-primary no-underline hover:underline"
-                        href={crumb.href}
-                      >
-                        {crumb.title}
-                      </a>
+                      <a href={crumb.href}>{crumb.title}</a>
                     )}
                   </li>
                 );
@@ -145,232 +144,114 @@ const tocHeadings = headings.filter(
             </ol>
           </nav>
         )}
-
-        {/*
-          Mobile toolbar: sticky under the navbar on small screens; the
-          client script below keeps it glued to the navbar bottom while
-          the navbar hides/shows (port of the old MobileToolbar
-          requestAnimationFrame positioning).
-        */}
-        {tocHeadings.length > 0 && (
-          <div
-            class="hidden [@media(max-width:996px)]:sticky [@media(max-width:996px)]:top-[var(--mobile-toolbar-top,0px)] [@media(max-width:996px)]:z-100 [@media(max-width:996px)]:flex [@media(max-width:996px)]:items-center [@media(max-width:996px)]:bg-background [@media(max-width:996px)]:pt-[0.35rem] [@media(max-width:996px)]:pb-4"
-            data-mobile-toolbar
-            style="--mobile-toolbar-top: 0px"
-          >
-            <details>
-              <summary class="cursor-pointer font-semibold">
-                On this page
-              </summary>
-              <TOC headings={tocHeadings} spy={false} />
-            </details>
-          </div>
-        )}
-
-        <div class="porto-markdown">
+        <PageTitle title={heading} />
+      </ContentPanel>
+      <ContentPanel>
+        <MarkdownContent>
           <slot />
-        </div>
-
-        {(editUrl || lastUpdated) && (
-          <footer class="mt-auto flex flex-wrap justify-between gap-4 pt-8 text-[0.9rem] text-muted">
-            <span>
-              {editUrl && (
-                <a class="text-primary no-underline" href={editUrl}>
-                  Edit this page
-                </a>
-              )}
-            </span>
-            <span>
-              {lastUpdated && <span>Last updated on {lastUpdated}</span>}
-            </span>
-          </footer>
-        )}
-      </article>
-
-      {(prev || next) && (
-        <nav
-          class:list={[
-            "mt-auto grid w-full max-w-[60rem] grid-cols-2 gap-4 [@container(max-width:768px)]:grid-cols-1 [@container(max-width:768px)]:gap-[0.15rem] [@media(max-width:996px)]:grid-cols-1 [@media(max-width:996px)]:gap-[0.15rem]",
-            editUrl || lastUpdated ? "pt-6" : "pt-[2.9rem]",
-          ]}
-          aria-label="Docs pages"
-        >
-          {prev && (
-            <a
-              class="flex flex-col gap-1 rounded-lg border border-border bg-background-alt p-4 text-foreground no-underline hover:border-primary"
-              href={prev.href}
-            >
-              <span class="text-[0.85rem] text-muted">Previous</span>
-              <span class="flex items-center justify-start text-left text-[1.1rem] text-primary">
-                {prev.title}
-              </span>
-            </a>
-          )}
-          {next && (
-            <a
-              class="col-start-2 flex flex-col gap-1 rounded-lg border border-border bg-background-alt p-4 text-right text-foreground no-underline hover:border-primary [@container(max-width:768px)]:col-start-1 [@media(max-width:996px)]:col-start-1"
-              href={next.href}
-            >
-              <span class="text-[0.85rem] text-muted">Next</span>
-              <span class="flex items-center justify-end text-right text-[1.1rem] text-primary">
-                {next.title}
-              </span>
-            </a>
-          )}
-        </nav>
-      )}
-    </div>
-
-    {tocHeadings.length > 0 && (
-      <aside class="sticky top-[calc(var(--navbar-height,60px)+1rem)] max-h-[calc(100vh-var(--navbar-height,60px)-2rem)] w-[220px] shrink-0 overflow-y-auto [@media(max-width:996px)]:hidden">
-        <TOC headings={tocHeadings} />
-      </aside>
-    )}
+        </MarkdownContent>
+        <DocFooter
+          editUrl={editUrl}
+          lastUpdated={lastUpdated}
+          prev={prev}
+          next={next}
+        />
+      </ContentPanel>
+    </TwoColumnContent>
   </div>
 
   <script>
-    // Port of the old MobileToolbar effect: keep the sticky mobile
-    // toolbar glued to the navbar's bottom edge while the navbar
-    // hides/shows on scroll, and publish the scroll offset headings
-    // need so anchor jumps don't land under the toolbar.
-    const toolbar = document.querySelector("[data-mobile-toolbar]");
-    const navbar = document.querySelector("[data-navbar]");
-    if (toolbar instanceof HTMLElement && navbar instanceof HTMLElement) {
-      let animationFrame = 0;
-      const updateTop = () => {
-        const navbarBottom = Math.max(0, navbar.getBoundingClientRect().bottom);
-        const navbarReservedHeight = Math.max(
-          navbarBottom,
-          navbar.offsetHeight,
-        );
-        toolbar.style.setProperty("--mobile-toolbar-top", `${navbarBottom}px`);
-        document.documentElement.style.setProperty(
-          "--mobile-doc-scroll-offset",
-          `${navbarReservedHeight + toolbar.offsetHeight + 8}px`,
-        );
-      };
-
-      const stopFollowingNavbar = () => {
-        if (animationFrame) {
-          window.cancelAnimationFrame(animationFrame);
-          animationFrame = 0;
-        }
-        updateTop();
-      };
-
-      const followNavbar = (event) => {
-        if (event.propertyName !== "transform") {
-          return;
-        }
-        if (animationFrame) {
-          window.cancelAnimationFrame(animationFrame);
-        }
-        const follow = () => {
-          updateTop();
-          animationFrame = window.requestAnimationFrame(follow);
-        };
-        follow();
-      };
-
-      const observer = new MutationObserver(() => {
-        window.requestAnimationFrame(updateTop);
-      });
-      observer.observe(navbar, {
-        attributes: true,
-        attributeFilter: ["class"],
-      });
-      navbar.addEventListener("transitionrun", followNavbar);
-      navbar.addEventListener("transitionend", stopFollowingNavbar);
-      navbar.addEventListener("transitioncancel", stopFollowingNavbar);
-      window.addEventListener("resize", updateTop);
-      updateTop();
-    }
-  </script>
-
-  <script>
-    // PageActions copy button: copies the page URL and shows a brief
-    // "Copied" state (title/aria-label + data-copied styling).
-    const copyButton = document.querySelector("[data-copy-page-url]");
-    if (copyButton instanceof HTMLButtonElement) {
-      copyButton.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-        } catch {
-          // Clipboard API unavailable (non-secure context) — fall back
-          // to a hidden textarea + execCommand.
-          const textarea = document.createElement("textarea");
-          textarea.value = window.location.href;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          textarea.remove();
-        }
-        copyButton.setAttribute("data-copied", "true");
-        copyButton.setAttribute("title", "Copied!");
-        copyButton.setAttribute("aria-label", "Copied!");
-        window.setTimeout(() => {
-          copyButton.removeAttribute("data-copied");
-          copyButton.setAttribute("title", "Copy link");
-          copyButton.setAttribute("aria-label", "Copy link");
-        }, 1500);
-      });
-    }
-
-    // Sidebar collapse (« at the sidebar bottom) / expand (» at the
-    // layout's left edge): toggling a class on the layout hides the
-    // sidebar and lets the content column expand.
-    const layout = document.querySelector(".porto-doc-layout");
-    const collapseButton = document.querySelector("[data-sidebar-collapse]");
-    const expandButton = document.querySelector("[data-sidebar-expand]");
-    if (layout && collapseButton && expandButton) {
-      collapseButton.addEventListener("click", () => {
-        layout.classList.add("porto-doc-layout--sidebar-collapsed");
-      });
-      expandButton.addEventListener("click", () => {
-        layout.classList.remove("porto-doc-layout--sidebar-collapsed");
-      });
-    }
-
-    // Sidebar root header chevron: collapses/expands the whole tree
-    // (the CSS hides every root-list item but the header row).
-    const rootToggle = document.querySelector("[data-sidebar-root-toggle]");
-    const sidebarList = document.querySelector(".porto-sidebar");
-    if (rootToggle instanceof HTMLButtonElement && sidebarList) {
-      rootToggle.addEventListener("click", () => {
-        const collapsed =
-          sidebarList.getAttribute("data-root-collapsed") === "true";
-        sidebarList.setAttribute("data-root-collapsed", String(!collapsed));
-        rootToggle.setAttribute("aria-expanded", String(collapsed));
-        rootToggle.textContent = collapsed ? "⌄" : "›";
-        rootToggle.setAttribute(
-          "aria-label",
-          collapsed ? "Collapse sidebar tree" : "Expand sidebar tree",
-        );
-      });
-    }
+    import "../scripts/sidebar-persist.ts";
   </script>
 </BaseLayout>
 
 <style>
-  /* Sidebar collapse (« at the sidebar bottom / » at the layout's
-     left edge): the script toggles
-     `.porto-doc-layout--sidebar-collapsed` on the layout, hiding the
-     sidebar and showing the expand button. A JS-toggled ancestor
-     class — plain CSS, not a utility (the unlayered rules beat the
-     layered `hidden` utility on the expand button). Below the 996px
-     breakpoint the sidebar is gone anyway, so the expand button
-     stays hidden even while collapsed. */
-  .porto-doc-layout--sidebar-collapsed .porto-doc-sidebar {
-    display: none;
-  }
+  /* Sidebar popover + main frame — from Starlight's PageFrame. */
+  @layer porto.core {
+    .sidebar-pane {
+      /* By default, user agents apply some opinionated styles to popovers, which we don’t want. */
+      border: unset;
+      padding: unset;
+      height: unset;
+      color: unset;
 
-  .porto-doc-layout--sidebar-collapsed .porto-doc-sidebar__expand {
-    display: flex;
-  }
+      position: fixed;
+      z-index: var(--porto-z-index-menu);
+      inset-block: var(--porto-nav-height) 0;
+      inset-inline-start: 0;
+      width: 100%;
+      background-color: var(--porto-color-black);
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      transition: inset-block-start 0.2s ease-in-out;
+    }
 
-  @media (max-width: 996px) {
-    .porto-doc-layout--sidebar-collapsed .porto-doc-sidebar__expand {
-      display: none;
+    /* The navbar hides on scroll down (hideNavbarOnScroll) — the
+       sidebar follows it to the top of the viewport. */
+    :global(html.porto-navbar-hidden) .sidebar-pane {
+      inset-block-start: 0;
+    }
+
+    .sidebar-content {
+      height: 100%;
+      min-height: max-content;
+      padding: 1rem var(--porto-sidebar-pad-x) 0;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 50rem) {
+      .sidebar-content::after {
+        content: "";
+        padding-bottom: 1px;
+      }
+    }
+
+    /* BaseLayout's <main> already reserves the nav height; the frame
+       adds only the mobile-TOC height. */
+    .main-frame {
+      padding-top: var(--porto-mobile-toc-height);
+      padding-inline-start: var(--porto-content-inline-start);
+    }
+
+    @media (min-width: 50rem) {
+      .sidebar-pane {
+        /* Make the sidebar visible on larger screens instead of deferring to popover state. */
+        display: block;
+        width: var(--porto-sidebar-width);
+        background-color: var(--porto-color-bg-sidebar);
+        border-inline-end: 1px solid var(--porto-color-hairline-shade);
+      }
+    }
+
+    /* Breadcrumbs (Portosaur's own, config-gated). */
+    .breadcrumbs ol {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem;
+      margin: 0 0 1rem;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+    }
+
+    .breadcrumbs li + li::before {
+      content: "›";
+      margin-inline-end: 0.25rem;
+      color: var(--porto-color-gray-3);
+    }
+
+    .breadcrumbs a {
+      color: var(--porto-color-text-accent);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumbs .current {
+      color: var(--porto-color-text-accent);
     }
   }
 </style>

@@ -1,0 +1,69 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ */
+
+@layer porto.utils {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .porto-hidden {
+    display: none;
+  }
+  .porto-flex {
+    display: flex;
+  }
+  .porto-block {
+    display: block;
+  }
+  @media (min-width: 50rem) {
+    .md\:porto-hidden {
+      display: none;
+    }
+    .md\:porto-flex {
+      display: flex;
+    }
+    .md\:porto-block {
+      display: block;
+    }
+  }
+  @media (min-width: 72rem) {
+    .lg\:porto-hidden {
+      display: none;
+    }
+    .lg\:porto-flex {
+      display: flex;
+    }
+    .lg\:porto-block {
+      display: block;
+    }
+  }
+  [data-theme="light"] .light\:porto-hidden {
+    display: none;
+  }
+  [data-theme="dark"] .dark\:porto-hidden {
+    display: none;
+  }
+
+  /**
+	 * Flip an element around the y-axis when in an RTL context.
+	 * Primarily useful for things where we can’t rely on writing direction like icons.
+	 *
+	 * <Icon name="right-arrow" class="rtl:flip" />
+	 *
+	 * In a LTR context: →					In a RTL context: ←
+	 */
+  [dir="rtl"] .rtl\:flip:not(:where([dir="rtl"] [dir="ltr"] *)) {
+    transform: matrix(-1, 0, 0, 1, 0, 0);
+  }
+}

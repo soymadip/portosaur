@@ -1,0 +1,79 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's TwoColumnContent, renamed (`sl-` → `porto-`). Splits
+// the doc area into the fixed right sidebar (TOC) and the main pane.
+// The aside renders only when the page has a TOC (`hasToc` prop;
+// Starlight gates it on its route data instead).
+interface Props {
+  hasToc: boolean;
+}
+
+const { hasToc } = Astro.props;
+---
+
+<div class="lg:porto-flex">
+  {hasToc && (
+    <aside class="right-sidebar-container print:hidden">
+      <div class="right-sidebar">
+        <slot name="right-sidebar" />
+      </div>
+    </aside>
+  )}
+  <div class="main-pane">
+    <slot />
+  </div>
+</div>
+
+<style>
+  @layer porto.core {
+    .main-pane {
+      isolation: isolate;
+    }
+
+    @media (min-width: 72rem) {
+      .right-sidebar-container {
+        order: 2;
+        position: relative;
+        /* Keep the sidebar at the end of the row if it paints before the main pane is parsed. */
+        margin-inline-start: auto;
+        width: max(
+          var(--porto-sidebar-width),
+          calc(
+            var(--porto-sidebar-width) +
+              (100% - var(--porto-content-width) - var(--porto-sidebar-width)) /
+              2
+          )
+        );
+      }
+
+      .right-sidebar {
+        position: fixed;
+        top: 0;
+        border-inline-start: 1px solid var(--porto-color-hairline);
+        padding-top: var(--porto-nav-height);
+        width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+
+      .main-pane {
+        width: 100%;
+      }
+
+      :global([data-has-sidebar][data-has-toc]) .main-pane {
+        --porto-content-margin-inline: auto 0;
+
+        order: 1;
+        width: min(
+          calc(100% - var(--porto-sidebar-width)),
+          calc(
+            var(--porto-content-width) +
+              (100% - var(--porto-content-width) - var(--porto-sidebar-width)) /
+              2
+          )
+        );
+      }
+    }
+  }
+</style>

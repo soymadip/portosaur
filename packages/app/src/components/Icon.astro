@@ -1,0 +1,40 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's Icon user-component, renamed (`sl-` → `porto-`).
+import { Icons, type PortoIcon } from "../utils/porto-icons.ts";
+
+interface Props {
+  name: PortoIcon;
+  label?: string;
+  color?: string;
+  size?: string;
+  class?: string;
+}
+
+const { name, label, size = "1em", color, ...attrs } = Astro.props;
+const a11yAttrs = label
+  ? ({ "aria-label": label } as const)
+  : ({ "aria-hidden": "true" } as const);
+---
+
+<svg
+  {...{ ...attrs, ...a11yAttrs }}
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  set:html={Icons[name]}
+/>
+
+<style define:vars={{ "porto-icon-color": color, "porto-icon-size": size }}>
+  @layer porto.components.icon {
+    svg {
+      color: var(--porto-icon-color);
+      font-size: var(--porto-icon-size, 1em);
+      width: 1em;
+      height: 1em;
+      /* Prevent Firefox from cutting off edges of icons when pinch-zooming. */
+      overflow: visible;
+    }
+  }
+</style>

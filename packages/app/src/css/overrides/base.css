@@ -1,35 +1,13 @@
-/* === Base HTML and Utility Overrides === */
-
-html {
-  scroll-behavior: smooth;
-  color: var(--color-foreground);
-  /* Overscroll / bounce area shows the alt background; the page body
-     itself is --background (see below). */
-  background-color: var(--color-background-alt) !important;
-}
-
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-body);
-  line-height: var(--line-height);
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
+/* === Base HTML and Utility Overrides ===
+ *
+ * Small user-facing helper classes carried over from the old theme
+ * (usable in MDX content). Element styling (html/body) lives in
+ * `css/reset.css` now; table/prose rules in `css/content.css`. */
 
 .center {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-th {
-  text-align: center !important;
 }
 
 .hide-this {

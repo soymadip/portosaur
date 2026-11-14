@@ -1,79 +1,94 @@
-/* Catppuccin scheme — Latte (light) / Mocha (dark). Token values, scoped by
-   data-scheme + data-theme. Only the active scheme's block
-   applies. Colors are byte-identical to the old scheme file;
-   the palette indirection and -rgb triplets are gone —
-   translucency uses color-mix() at the use site. */
+/* Catppuccin scheme — Latte (light) / Mocha (dark). Starlight-var overrides, scoped by
+ * data-scheme + data-theme. Only the active scheme's block applies.
+ * Colors are byte-identical to the old scheme file where the var system
+ * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * the accent trio maps onto the primary scale (flipped per mode, matching
+ * Starlight's low/high semantics), and the five hue colors take the
+ * palette values with low/high tints derived via color-mix().
+ * Dropped with the old token set: --color-secondary, --color-teal,
+ * --color-yellow, --color-pink, and the semantic success/warning/danger/
+ * info tokens (their values live on only where they coincide with the
+ * palette). */
 
 [data-scheme="catppuccin"][data-theme="light"] {
-  --color-primary: #fe640b;
-  --color-primary-dark: #d20f39;
-  --color-primary-darker: #e64553;
-  --color-primary-light: #df8e1d;
-  --color-success: #40a02b;
-  --color-warning: #df8e1d;
-  --color-danger: #d20f39;
-  --color-info: #1e66f5;
-  --color-secondary: #7287fd;
-  --color-red: #d20f39;
-  --color-orange: #fe640b;
-  --color-yellow: #df8e1d;
-  --color-green: #40a02b;
-  --color-teal: #179299;
-  --color-blue: #1e66f5;
-  --color-purple: #8839ef;
-  --color-pink: #ea76cb;
-  --color-background: #eff1f5;
-  --color-background-alt: #e6e9ef;
-  --color-surface: #ccd0da;
-  --color-surface-1: #bcc0cc;
-  --color-surface-2: #acb0be;
-  --color-hover-overlay: rgba(172, 176, 190, 0.5);
-  --color-foreground: #4c4f69;
-  --color-muted: #8c8fa1;
-  --color-border: #dce0e8;
-  --color-gray-100: #e6e9ef;
-  --color-gray-200: #dce0e8;
-  --color-gray-300: #ccd0da;
-  --color-gray-400: #bcc0cc;
-  --color-gray-500: #acb0be;
-  --color-gray-600: #9ca0b0;
-  --color-gray-700: #8c8fa1;
-  --color-gray-800: #7c7f93;
+  --porto-color-white: #4c4f69;
+  --porto-color-gray-1: #7c7f93;
+  --porto-color-gray-2: #8c8fa1;
+  --porto-color-gray-3: #9ca0b0;
+  --porto-color-gray-4: #acb0be;
+  --porto-color-gray-5: #bcc0cc;
+  --porto-color-gray-6: #ccd0da;
+  --porto-color-gray-7: #dce0e8;
+  --porto-color-black: #eff1f5;
+
+  --porto-color-orange-low: color-mix(in srgb, #fe640b 12%, white);
+  --porto-color-orange: #fe640b;
+  --porto-color-orange-high: color-mix(in srgb, #fe640b 70%, black);
+  --porto-color-green-low: color-mix(in srgb, #40a02b 12%, white);
+  --porto-color-green: #40a02b;
+  --porto-color-green-high: color-mix(in srgb, #40a02b 70%, black);
+  --porto-color-blue-low: color-mix(in srgb, #1e66f5 12%, white);
+  --porto-color-blue: #1e66f5;
+  --porto-color-blue-high: color-mix(in srgb, #1e66f5 70%, black);
+  --porto-color-purple-low: color-mix(in srgb, #8839ef 12%, white);
+  --porto-color-purple: #8839ef;
+  --porto-color-purple-high: color-mix(in srgb, #8839ef 70%, black);
+  --porto-color-red-low: color-mix(in srgb, #d20f39 12%, white);
+  --porto-color-red: #d20f39;
+  --porto-color-red-high: color-mix(in srgb, #d20f39 70%, black);
+
+  --porto-color-accent-low: #df8e1d;
+  --porto-color-accent: #fe640b;
+  --porto-color-accent-high: #e64553;
+
+  --porto-color-bg: #eff1f5;
 }
 
 [data-scheme="catppuccin"][data-theme="dark"] {
-  --color-primary: #fab387;
-  --color-primary-dark: #eba0ac;
-  --color-primary-darker: #f2cdcd;
-  --color-primary-light: #f9e2af;
-  --color-success: #a6e3a1;
-  --color-warning: #f9e2af;
-  --color-danger: #f38ba8;
-  --color-info: #89b4fa;
-  --color-secondary: #b4befe;
-  --color-red: #f38ba8;
-  --color-orange: #fab387;
-  --color-yellow: #f9e2af;
-  --color-green: #a6e3a1;
-  --color-teal: #94e2d5;
-  --color-blue: #89b4fa;
-  --color-purple: #cba6f7;
-  --color-pink: #f5c2e7;
-  --color-background: #1e1e2e;
-  --color-background-alt: #181825;
-  --color-surface: #313244;
-  --color-surface-1: #45475a;
-  --color-surface-2: #585b70;
-  --color-hover-overlay: rgba(88, 91, 112, 0.5);
-  --color-foreground: #cdd6f4;
-  --color-muted: #7f849c;
-  --color-border: #11111b;
-  --color-gray-100: #181825;
-  --color-gray-200: #1e1e2e;
-  --color-gray-300: #313244;
-  --color-gray-400: #45475a;
-  --color-gray-500: #585b70;
-  --color-gray-600: #6c7086;
-  --color-gray-700: #7f849c;
-  --color-gray-800: #9399b2;
+  --porto-color-white: #cdd6f4;
+  --porto-color-gray-1: #9399b2;
+  --porto-color-gray-2: #7f849c;
+  --porto-color-gray-3: #6c7086;
+  --porto-color-gray-4: #585b70;
+  --porto-color-gray-5: #45475a;
+  --porto-color-gray-6: #313244;
+  --porto-color-black: #181825;
+
+  --porto-color-orange-low: color-mix(
+    in srgb,
+    #fab387 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-orange: #fab387;
+  --porto-color-orange-high: color-mix(in srgb, #fab387 65%, white);
+  --porto-color-green-low: color-mix(
+    in srgb,
+    #a6e3a1 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-green: #a6e3a1;
+  --porto-color-green-high: color-mix(in srgb, #a6e3a1 65%, white);
+  --porto-color-blue-low: color-mix(
+    in srgb,
+    #89b4fa 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-blue: #89b4fa;
+  --porto-color-blue-high: color-mix(in srgb, #89b4fa 65%, white);
+  --porto-color-purple-low: color-mix(
+    in srgb,
+    #cba6f7 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-purple: #cba6f7;
+  --porto-color-purple-high: color-mix(in srgb, #cba6f7 65%, white);
+  --porto-color-red-low: color-mix(in srgb, #f38ba8 25%, var(--porto-color-bg));
+  --porto-color-red: #f38ba8;
+  --porto-color-red-high: color-mix(in srgb, #f38ba8 65%, white);
+
+  --porto-color-accent-low: #f2cdcd;
+  --porto-color-accent: #fab387;
+  --porto-color-accent-high: #f9e2af;
+
+  --porto-color-bg: #1e1e2e;
 }

@@ -4,7 +4,7 @@ description: "Build custom color palettes and configure appearance."
 icon: "md:palette"
 ---
 
-Portosaur styles sites with **Tailwind CSS v4** plus a **token theming system**. Layout and spacing use Tailwind utilities; every color, font, radius, and shadow comes from a short token variable defined in Tailwind `@theme` (`--color-surface`, `--font-body`, `--radius-card`, …), so recoloring a site means overriding variables — never rewriting component CSS. Each token is also a utility (`bg-surface`, `text-muted`, `border-border`), so components and MDX use the same names.
+Portosaur styles sites with **plain CSS** in a variable system derived from [Starlight](https://starlight.astro.build/)'s design system (MIT-licensed; see `packages/app/NOTICE.md`). Starlight's stylesheets are integrated into Portosaur's own CSS files in `packages/app/src/css/` (`variables.css`, `reset.css`, `content.css`, and the rest), with every identifier renamed from `sl-` to `porto-` — classes, IDs, cascade layers, and CSS custom properties (`--sl-color-*` → `--porto-color-*`). There is no Tailwind: components are styled with plain CSS in the renamed variable system, and recoloring a site means overriding variables — never rewriting component CSS.
 
 ---
 
@@ -12,16 +12,16 @@ Portosaur styles sites with **Tailwind CSS v4** plus a **token theming system**.
 
 Two attributes on `<html>` select the look:
 
-- `data-scheme` — the color scheme (`portosaur`, `dracula`, …), from `theme.color_scheme`.
+- `data-scheme` — the color scheme (`starlight`, `portosaur`, `dracula`, …), from `theme.color_scheme`.
 - `data-theme` — `light` or `dark`, from `theme.default_mode` (or the visitor's toggle choice, which is remembered).
 
-Tokens are defined directly in Tailwind `@theme` in `tokens.css`, with the portosaur scheme's values as the defaults. Each bundled scheme file (`packages/app/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the ~34 color tokens as literal hex. All six scheme files ship in the theme CSS; only the active scheme's block applies.
+Base values live in `css/variables.css`: dark-mode values on `:root`, light-mode overrides under `:root[data-theme="light"]`. Each bundled scheme file (`packages/app/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the color variables as literals. Scheme files are unlayered, so they beat the layered base values; all seven ship in the theme CSS and only the active scheme's block applies.
 
-The `dark:` Tailwind variant follows the toggle (`data-theme`), not the OS preference, so `dark:bg-surface-1` switches with the theme. Your `theme.custom_css` file(s) load after the theme CSS, so your values win.
+Your `theme.custom_css` file(s) load after the theme CSS, so your values win.
 
 Load order (later files win):
 
-1. Theme CSS (`custom.css`: Tailwind, tokens, all six schemes, overrides).
+1. Theme CSS (`custom.css`: fonts, the Starlight system, all seven schemes, overrides, print).
 2. Your custom scheme file, if `theme.color_scheme` points at a path.
 3. Your `theme.custom_css` file(s).
 
@@ -38,6 +38,7 @@ theme:
 
 | Scheme       | Look                                                                          |
 | ------------ | ----------------------------------------------------------------------------- |
+| `starlight`  | Starlight's default palette — blue accent, the default when no scheme is set. |
 | `portosaur`  | Default brand palette — dark green primary in light mode, neon green in dark. |
 | `catppuccin` | Latte (light) / Mocha (dark) from the Catppuccin palette.                     |
 | `dracula`    | Dracula palette, with a light Alucard-inspired mode.                          |
@@ -45,14 +46,14 @@ theme:
 | `gruvbox`    | Gruvbox light / dark.                                                         |
 | `nord`       | Nord arctic palette.                                                          |
 
-The six schemes keep the same colors as before — only the file format changed (short override blocks of literal hex instead of palette indirection).
+The six Portosaur schemes keep the same colors as before — only the file format changed (overrides of the renamed `--porto-*` variables instead of the old short `--color-*` tokens).
 
 ```yaml
 theme:
   color_scheme: "dracula"
 ```
 
-If `color_scheme` is omitted, docs sites default to `dracula` and portfolio sites to `nord`.
+If `color_scheme` is omitted, sites default to `starlight` (both docs and portfolio).
 
 ---
 
@@ -62,81 +63,71 @@ If `color_scheme` is omitted, docs sites default to `dracula` and portfolio site
 
 Every scheme defines all of these. The names are stable — override them, don't rename them.
 
-| Token                                                                                                                                | Meaning                                                |
-| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| `--color-primary`, `--color-primary-dark`, `--color-primary-darker`, `--color-primary-light`                                         | Brand / link color and its used steps                  |
-| `--color-success`, `--color-warning`, `--color-danger`, `--color-info`                                                               | Semantic colors                                        |
-| `--color-secondary`                                                                                                                  | Muted accent (lavender / gray, per scheme)             |
-| `--color-red`, `--color-orange`, `--color-yellow`, `--color-green`, `--color-teal`, `--color-blue`, `--color-purple`, `--color-pink` | Accent palette                                         |
-| `--color-background`                                                                                                                 | Page background                                        |
-| `--color-background-alt`                                                                                                             | Alternate background (footer, code blocks, overscroll) |
-| `--color-surface`, `--color-surface-1`, `--color-surface-2`                                                                          | Raised surfaces (cards, table stripes, hover states)   |
-| `--color-hover-overlay`                                                                                                              | Hover overlay (a per-scheme literal `rgba()`)          |
-| `--color-foreground`                                                                                                                 | Body text                                              |
-| `--color-muted`                                                                                                                      | Secondary / muted text                                 |
-| `--color-border`                                                                                                                     | Borders and dividers                                   |
-| `--color-gray-100` … `--color-gray-800`                                                                                              | Grayscale, lightest to darkest in each mode            |
+The grayscale and black/white are **semantic roles, not literal colors**: they flip between modes. `--porto-color-white` is the strongest foreground (white in dark mode, near-black in light mode); `--porto-color-black` is the page-background base (near-black in dark mode, white in light mode). `--porto-color-gray-1` is the most foreground gray, `--porto-color-gray-6` the most background; light mode adds `--porto-color-gray-7` (used for the navbar background).
 
-There are no `-rgb` triplet tokens anymore. Build translucent colors with `color-mix()` instead: `color-mix(in srgb, var(--color-primary) 10%, transparent)`.
+| Variable                                                                                                                                        | Meaning                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `--porto-color-white`, `--porto-color-gray-1` … `--porto-color-gray-7`, `--porto-color-black`                                                   | Grayscale, most foreground to most background                 |
+| `--porto-color-accent-low`, `--porto-color-accent`, `--porto-color-accent-high`                                                                 | Brand / link color (low = subtle background, high = text)     |
+| `--porto-color-orange`, `--porto-color-green`, `--porto-color-blue`, `--porto-color-purple`, `--porto-color-red` (each `-low` / base / `-high`) | Hue colors for asides, cards, and accents                     |
+| `--porto-hue-orange`, `--porto-hue-green`, `--porto-hue-blue`, `--porto-hue-purple`, `--porto-hue-red`                                          | Hue angles the hue colors are built from (override to retint) |
+| `--porto-color-bg`                                                                                                                              | Page background                                               |
+| `--porto-color-text`, `--porto-color-text-accent`, `--porto-color-text-invert`                                                                  | Body text, accent text (links), text on accent backgrounds    |
+| `--porto-color-bg-nav`, `--porto-color-bg-sidebar`, `--porto-color-bg-inline-code`, `--porto-color-bg-accent`                                   | Navbar, sidebar, inline-code, and accent backgrounds          |
+| `--porto-color-hairline`, `--porto-color-hairline-light`, `--porto-color-hairline-shade`                                                        | Borders and dividers                                          |
 
-### Structural tokens (defined once, in `tokens.css`)
+The derived variables (`--porto-color-text`, `--porto-color-bg-nav`, `--porto-color-bg-sidebar`, `--porto-color-bg-inline-code`, `--porto-color-bg-accent`, the hairlines) are computed from the base palette in `variables.css` — schemes don't override them, and neither should you unless you need to break the derivation.
 
-These are scheme-independent defaults. Fonts, radius, and shadows are also Tailwind theme keys, so they double as utilities (`font-body`, `rounded-card`, `shadow-md`); the structural values have no utilities — reference them with `var()` (e.g. `h-(--navbar-height)`).
+There are no `-rgb` triplet tokens. Build translucent colors with `color-mix()` instead: `color-mix(in srgb, var(--porto-color-accent) 10%, transparent)`.
 
-| Token                 | Default                            | Meaning                        |
-| --------------------- | ---------------------------------- | ------------------------------ |
-| `--font-body`         | Alata                              | Body text                      |
-| `--font-markdown`     | Lexend Variable                    | MDX prose                      |
-| `--radius-card`       | `0.4rem`                           | Card corner radius             |
-| `--shadow-sm`         | `0 1px 2px 0 rgba(0, 0, 0, 0.12)`  | Small elevation                |
-| `--shadow-md`         | `0 5px 40px rgba(0, 0, 0, 0.15)`   | Medium elevation               |
-| `--shadow-lg`         | `0 12px 28px 0 rgba(0, 0, 0, 0.2)` | Large elevation                |
-| `--navbar-height`     | `3.75rem`                          | Navbar height                  |
-| `--navbar-shadow`     | `0 1px 2px 0 rgba(0, 0, 0, 0.1)`   | Navbar shadow                  |
-| `--scroll-margin-top` | `38px`                             | Anchor offset below the navbar |
-| `--pre-padding`       | `1rem`                             | Code block padding             |
-| `--line-height`       | `1.65`                             | Base line height               |
+### Type scale
 
-**Dropped tokens:** the primary scale is trimmed to the steps components actually use, so there is no `--color-primary-darkest`, `--color-primary-lighter`, or `--color-primary-lightest`; the grayscale is `gray-100`…`gray-800` only; there is no `--font-heading` or `--font-mono`; and there are no `-rgb` triplet tokens — build translucent colors with `color-mix()` instead. The old shadow tokens are replaced by `--shadow-sm` / `--shadow-md` / `--shadow-lg`.
+| Variable                                                                        | Meaning                                                 |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `--porto-text-2xs` … `--porto-text-6xl`                                         | Type scale, 12px to 64px                                |
+| `--porto-text-h1` … `--porto-text-h5`, `--porto-text-body`, `--porto-text-code` | Heading / body / code sizes                             |
+| `--porto-line-height`, `--porto-line-height-headings`                           | Base (1.75) and heading (1.2) line heights              |
+| `--porto-font-system`, `--porto-font-markdown`, `--porto-font-system-mono`      | UI/body (Alata), MDX prose (Lexend Variable), monospace |
 
-### Tailwind utilities
+To change the typefaces, set `--porto-font` / `--porto-font-mono` — the system falls back to them before its own stacks.
 
-The tokens are defined in `@theme`, so components and MDX can use either form:
+### Layout & shadows
 
-```html
-<!-- Utility form -->
-<div class="bg-surface text-foreground border-border">…</div>
+| Variable                                                                                   | Default                              | Meaning               |
+| ------------------------------------------------------------------------------------------ | ------------------------------------ | --------------------- |
+| `--porto-nav-height`                                                                       | `3.5rem` (`4rem` ≥ 50em)             | Navbar height         |
+| `--porto-sidebar-width`                                                                    | `18.75rem`                           | Sidebar width         |
+| `--porto-content-width`                                                                    | `45rem`                              | Content column width  |
+| `--porto-mobile-toc-height`                                                                | `3rem` (`0` ≥ 72em)                  | Mobile TOC bar height |
+| `--porto-nav-pad-x`, `--porto-nav-pad-y`, `--porto-sidebar-pad-x`, `--porto-content-pad-x` | `1rem` / `0.75rem` / `1rem` / `1rem` | Layout padding        |
+| `--porto-shadow-sm`, `--porto-shadow-md`, `--porto-shadow-lg`                              | —                                    | Elevation shadows     |
 
-<!-- Arbitrary-value form (works for any token, no mapping needed) -->
-<div class="bg-(--color-surface)">…</div>
-```
-
-Available utilities include `bg-*`, `text-*`, `border-*` for every color token, `font-body` / `font-markdown`, `rounded-card`, and `shadow-sm` / `shadow-md` / `shadow-lg`. The `dark:` variant follows the theme toggle, not the OS preference.
+**Dropped tokens:** the old short tokens (`--color-primary`, `--color-background`, `--color-surface`, `--color-foreground`, `--color-muted`, `--color-border`, `--color-gray-100`…`--color-gray-800`, `--color-secondary`, `--color-teal`, `--color-yellow`, `--color-pink`, and the semantic `--color-success` / `--color-warning` / `--color-danger` / `--color-info`) no longer exist — use the `--porto-*` names above. The old structural tokens (`--navbar-height`, `--radius-card`, `--font-body`, `--font-markdown`, `--scroll-margin-top`, `--pre-padding`, `--line-height`) are gone too; the layout values are the `--porto-*` names in the table above.
 
 ---
 
 ## Overriding tokens in `custom_css`
 
-Point `theme.custom_css` at your file(s) — they load after the theme CSS, so your values win. Scope overrides by mode when they differ, and override the new short names:
+Point `theme.custom_css` at your file(s) — they load after the theme CSS, so your values win. Scope overrides by mode when they differ, and override the new `--porto-*` names:
 
 ```css title="src/css/custom.css"
 /* Both modes */
 :root {
-  --radius-card: 0.75rem;
+  --porto-content-width: 50rem;
 }
 
 /* Light mode only */
 [data-theme="light"] {
-  --color-primary: #0284c7;
+  --porto-color-accent: #0284c7;
 }
 
 /* Dark mode only */
 [data-theme="dark"] {
-  --color-primary: #38bdf8;
+  --porto-color-accent: #38bdf8;
 }
 ```
 
-For translucent variants, use `color-mix()` at the use site — `color-mix(in srgb, var(--color-primary) 10%, transparent)` — rather than a triplet.
+For translucent variants, use `color-mix()` at the use site — `color-mix(in srgb, var(--porto-color-accent) 10%, transparent)` — rather than a triplet.
 
 ---
 
@@ -149,7 +140,7 @@ theme:
   color_scheme: "./src/css/my-theme.css"
 ```
 
-The file loads after the theme CSS. Define a raw palette in `:root`, then map it to the `--color-*` tokens inside plain `[data-theme="light"]` and `[data-theme="dark"]` blocks — no `data-scheme` selector, because while a custom scheme is active `data-scheme` holds the path, so no bundled scheme block matches and the plain blocks win. Any token you omit falls back to the portosaur defaults in `tokens.css`, so a scheme only needs the tokens it changes:
+The file loads after the theme CSS. Define a raw palette in `:root`, then map it to the `--porto-color-*` variables inside plain `[data-theme="light"]` and `[data-theme="dark"]` blocks — no `data-scheme` selector, because while a custom scheme is active `data-scheme` holds the path, so no bundled scheme block matches and the plain blocks win. Any variable you omit falls back to the Starlight defaults in `css/variables.css`, so a scheme only needs the variables it changes:
 
 ```css title="src/css/my-theme.css"
 /* Optional palette — name your raw colors once, reference them below. */
@@ -160,52 +151,69 @@ The file loads after the theme CSS. Define a raw palette in `:root`, then map it
 }
 
 [data-theme="light"] {
-  --color-primary: var(--my-blue);
-  --color-primary-dark: var(--my-blue-dark);
-  --color-primary-light: var(--my-blue-light);
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
-  /* …any other tokens you want to change… */
+  --porto-color-white: #0f172a;
+  --porto-color-gray-1: #1e293b;
+  --porto-color-gray-2: #334155;
+  --porto-color-gray-3: #64748b;
+  --porto-color-gray-6: #e2e8f0;
+  --porto-color-gray-7: #f1f5f9;
+  --porto-color-black: #ffffff;
+  --porto-color-accent-low: var(--my-blue-light);
+  --porto-color-accent: var(--my-blue);
+  --porto-color-accent-high: var(--my-blue-dark);
+  --porto-color-bg: #ffffff;
 }
 
 [data-theme="dark"] {
-  --color-primary: var(--my-blue-light);
-  --color-background: #0f172a;
-  --color-foreground: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-border: #334155;
+  --porto-color-white: #f8fafc;
+  --porto-color-gray-1: #e2e8f0;
+  --porto-color-gray-2: #cbd5e1;
+  --porto-color-gray-3: #94a3b8;
+  --porto-color-gray-6: #1e293b;
+  --porto-color-black: #020617;
+  --porto-color-accent-low: var(--my-blue-dark);
+  --porto-color-accent: var(--my-blue-light);
+  --porto-color-accent-high: #93c5fd;
+  --porto-color-bg: #0f172a;
 }
 ```
 
-Start from the template shipped with the theme — `packages/app/src/css/themes/custom-scheme.template.css` — which has the full shape above with a few more tokens filled in.
+Start from the template shipped with the theme — `packages/app/src/css/themes/custom-scheme.template.css` — which has the full shape above.
 
-Make sure your scheme defines `--color-background` and `--color-primary` in each block: the asset generator reads those two from this file for the theme-color meta tag and the PWA manifest.
+Make sure your scheme defines `--porto-color-bg` and `--porto-color-accent` in each block: the asset generator reads those two from this file for the theme-color meta tag and the PWA manifest.
 
 ---
 
 ## Stable selectors
 
-These classes are part of the theme's styling contract — custom CSS can target them safely. Docusaurus classes (`.navbar*`, `.theme-doc-*`, `.markdown`, `.footer*`, `.pagination-nav*`) no longer exist, and neither do the old `.porto-navbar*`, `.porto-sidebar__*`, `.porto-footer*`, `.porto-search*`, `.porto-pagination*`, `.porto-breadcrumbs*`, `.porto-empty-state*`, `.porto-doc-card`, or `.porto-doc-footer` classes — those components are styled with Tailwind utilities now.
+These classes are part of the theme's styling contract — custom CSS can target them safely. The old Docusaurus classes (`.navbar*`, `.theme-doc-*`, `.markdown`, `.footer*`, `.pagination-nav*`) no longer exist, and neither do the previous Portosaur layout classes (`.porto-doc-layout`, `.porto-doc-sidebar`, `.porto-markdown`, `.porto-toc__link--active`, `.portosaur-generated-index`, `.porto-navbar*`, `.porto-sidebar__*`, `.porto-footer*`, `.porto-search*`, `.porto-pagination*`, `.porto-breadcrumbs*`, `.porto-empty-state*`, `.porto-doc-card`, `.porto-doc-footer`) — those components now use Starlight's renamed classes.
 
-| Selector                                                                          | Element                                                                                                                                                  |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.porto-doc-layout`, `.porto-doc-sidebar`, `.porto-doc-sidebar__expand`           | Doc page layout row, sidebar column, collapse-expand button (the layout also gets `.porto-doc-layout--sidebar-collapsed` while the sidebar is collapsed) |
-| `.porto-markdown`                                                                 | Wrapper around rendered MDX content                                                                                                                      |
-| `.porto-toc__link--active`                                                        | Active table-of-contents link                                                                                                                            |
-| `.portosaur-generated-index`                                                      | Generated index pages                                                                                                                                    |
-| `.admonition`, `.admonition-<type>`, `.admonition-heading`, `.admonition-content` | Callouts (`note`, `tip`, `info`, `success`, `warning`, `caution`, `danger`)                                                                              |
-| `.code-block-error-line`, `.code-block-success-line`                              | Magic-comment code line highlights                                                                                                                       |
-| `.porto-btn`                                                                      | `<Btn>` component (unstyled hook — style it in `custom_css`)                                                                                             |
-| `.porto-details`                                                                  | `<Details>` component (unstyled hook — style it in `custom_css`)                                                                                         |
-| `.sidebar-item-hidden`                                                            | Hidden sidebar item (root index)                                                                                                                         |
-| `.center`, `.hide-this`                                                           | Utility classes                                                                                                                                          |
+| Selector                                                                                                   | Element                                                                     |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `.porto-markdown-content`                                                                                  | Wrapper around rendered MDX content                                         |
+| `.card-grid`, `.porto-link-card`                                                                           | Generated-index card grid and cards                                         |
+| `.porto-code-frame`, `.porto-code-header`, `.porto-code-dots`, `.porto-code-lang`, `.porto-code-copy`      | Code-block frame, header, dots, language label, copy button                 |
+| `.porto-aside`, `.porto-aside--note`, `.porto-aside--tip`, `.porto-aside--caution`, `.porto-aside--danger` | Asides (callouts)                                                           |
+| `.admonition`, `.admonition-<type>`, `.admonition-heading`, `.admonition-content`                          | Callouts (`note`, `tip`, `info`, `success`, `warning`, `caution`, `danger`) |
+| `.code-block-error-line`, `.code-block-success-line`                                                       | Magic-comment code line highlights                                          |
+| `.porto-btn`                                                                                               | `<Btn>` component (unstyled hook — style it in `custom_css`)                |
+| `.porto-details`                                                                                           | `<Details>` component (unstyled hook — style it in `custom_css`)            |
+| `.sidebar-item-hidden`                                                                                     | Hidden sidebar item (root index)                                            |
+| `.center`, `.hide-this`                                                                                    | Utility classes                                                             |
 
 ---
 
 ## `--ifm-*` → `--porto-*` mapping
 
-The `--ifm-*` (Docusaurus) and `--porto-*` (Portosaur 0.x) token names no
-longer exist in this theme. The current token names are listed in the
-[Tokens](#tokens) section above.
+The `--ifm-*` (Docusaurus) token names no longer exist in this theme. Their replacements are the `--porto-*` variables listed in the [Tokens](#tokens) section above — the main ones map like this:
+
+| Old `--ifm-*` name               | Current `--porto-*` name                      |
+| -------------------------------- | --------------------------------------------- |
+| `--ifm-color-primary`            | `--porto-color-accent`                        |
+| `--ifm-background-color`         | `--porto-color-bg`                            |
+| `--ifm-font-color-base`          | `--porto-color-text`                          |
+| `--ifm-font-family-base`         | `--porto-font-system`                         |
+| `--ifm-font-family-monospace`    | `--porto-font-system-mono`                    |
+| `--ifm-navbar-height`            | `--porto-nav-height`                          |
+| `--ifm-color-emphasis-100`…`900` | `--porto-color-gray-1`…`--porto-color-gray-6` |
+| `--ifm-heading-font-weight`      | (headings are `600` in the theme CSS)         |

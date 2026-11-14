@@ -16,16 +16,16 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
 ---
 
 <BaseLayout title="Search the documentation">
-  <div class="mx-auto w-full max-w-[80rem] p-4">
+  <div class="search-page">
     <h1>Search the documentation</h1>
-    <div class="my-6">
+    <div class="search-input-wrap">
       <input
         id="porto-search-input"
         type="search"
         placeholder="Search the documentation…"
         aria-label="Search the documentation"
         autocomplete="off"
-        class="w-full rounded-lg border border-border bg-surface px-4 py-3 text-[1.1rem] text-foreground focus:border-primary focus:outline-none"
+        class="search-input"
       />
     </div>
     <div id="porto-search-results" class="porto-search__results" role="status">
@@ -141,36 +141,71 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
 </BaseLayout>
 
 <style>
-  /* Kept as plain CSS: both classes are set by the client script
-     (`porto-search__hint` via innerHTML when the query clears,
-     `porto-search-results__list` on the JS-created results list), so
-     they cannot be utilities on static markup. */
-  .porto-search__hint {
-    color: var(--color-muted);
-  }
+  @layer porto.core {
+    .search-page {
+      width: 100%;
+      max-width: 80rem;
+      margin-inline: auto;
+      padding: 1rem;
+    }
 
-  .porto-search-results__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
+    .search-page h1 {
+      margin: 0;
+      font-size: var(--porto-text-h1);
+      line-height: var(--porto-line-height-headings);
+      font-weight: 600;
+      color: var(--porto-color-white);
+    }
 
-  .porto-search-results__list a {
-    color: var(--color-primary);
-    font-size: 1.1rem;
-    font-weight: 600;
-    text-decoration: none;
-  }
+    .search-input-wrap {
+      margin-block: 1.5rem;
+    }
 
-  .porto-search-results__list a:hover {
-    text-decoration: underline;
-  }
+    .search-input {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid var(--porto-color-gray-5);
+      background-color: var(--porto-color-black);
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      color: var(--porto-color-text);
+    }
+    .search-input:focus {
+      border-color: var(--porto-color-accent);
+      outline: none;
+    }
 
-  .porto-search-results__list p {
-    color: var(--color-muted);
-    margin: 0.25rem 0 0;
+    /* Kept as plain CSS: both classes are set by the client script
+       (`porto-search__hint` via innerHTML when the query clears,
+       `porto-search-results__list` on the JS-created results list), so
+       they cannot be utilities on static markup. */
+    .porto-search__hint {
+      color: var(--porto-color-gray-3);
+    }
+
+    .porto-search-results__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .porto-search-results__list a {
+      color: var(--porto-color-text-accent);
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .porto-search-results__list a:hover {
+      text-decoration: underline;
+    }
+
+    .porto-search-results__list p {
+      color: var(--porto-color-gray-3);
+      margin: 0.25rem 0 0;
+    }
   }
 </style>

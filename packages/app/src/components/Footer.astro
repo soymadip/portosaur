@@ -12,18 +12,30 @@ const footer = config.theme.footer;
 ---
 
 {footer.enable && (
-  <footer class="border-t border-t-border bg-background-alt p-[0.1rem] text-center">
-    <div class="mt-0 pt-0 text-[0.8rem] text-muted" set:html={footer.message} />
+  <footer>
+    <div class="footer-message" set:html={footer.message} />
   </footer>
 )}
 
 <style>
-  /* The "Built with Portosaur" link is primary-colored (golden renders
-     it green). `:global(a)`: the link arrives via `set:html`, so it
-     never carries this component's scope attribute — a plain scoped
-     `a` selector compiles to `a[data-astro-cid-...]` and never
-     matches. */
+  @layer porto.core {
+    footer {
+      border-top: 1px solid var(--porto-color-hairline);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .footer-message {
+      font-size: 0.8rem;
+      color: var(--porto-color-gray-3);
+    }
+  }
+
+  /* The "Built with Portosaur" link is accent-colored. `:global(a)`:
+     the link arrives via `set:html`, so it never carries this
+     component's scope attribute — a plain scoped `a` selector
+     compiles to `a.astro-<hash>` and never matches. */
   footer :global(a) {
-    color: var(--color-primary);
+    color: var(--porto-color-text-accent);
   }
 </style>

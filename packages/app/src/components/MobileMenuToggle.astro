@@ -1,0 +1,73 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's MobileMenuToggle, renamed (`sl-` → `porto-`,
+// `starlight__sidebar` → `porto__sidebar`). Opens the sidebar popover
+// (the docs mobile menu) via the popover API — no JavaScript needed
+// to open/close; DocLayout enhances it with focus trapping.
+import Icon from "./Icon.astro";
+---
+
+<button
+  popovertarget="porto__sidebar"
+  class="porto-menu-button porto-flex md:porto-hidden print:hidden"
+>
+  <Icon name="bars" class="open-menu" />
+  <Icon name="close" class="close-menu" />
+  <span class="sr-only">Toggle navigation menu</span>
+</button>
+
+<style>
+  @layer porto.core {
+    button {
+      position: fixed;
+      top: calc((var(--porto-nav-height) - var(--porto-menu-button-size)) / 2);
+      inset-inline-end: var(--porto-nav-pad-x);
+      z-index: var(--porto-z-index-navbar);
+      border: 0;
+      border-radius: 50%;
+      width: var(--porto-menu-button-size);
+      height: var(--porto-menu-button-size);
+      padding: 0.5rem;
+      background-color: var(--porto-color-white);
+      color: var(--porto-color-black);
+      box-shadow: var(--porto-shadow-md);
+      cursor: pointer;
+    }
+
+    button:has(~ :popover-open) {
+      background-color: var(--porto-color-gray-2);
+      box-shadow: none;
+    }
+
+    button:has(~ :popover-open) .open-menu {
+      display: none;
+    }
+
+    button:not(:has(~ :popover-open)) .close-menu {
+      display: none;
+    }
+
+    :global([data-theme="light"]) button {
+      background-color: var(--porto-color-black);
+      color: var(--porto-color-white);
+    }
+
+    :global([data-theme="light"]) button:has(~ :popover-open) {
+      background-color: var(--porto-color-gray-5);
+    }
+  }
+</style>
+
+<style is:global>
+  @layer porto.core {
+    body:has(#porto__sidebar:popover-open) {
+      overflow: hidden;
+    }
+
+    @media (min-width: 50rem) {
+      body:has(#porto__sidebar:popover-open) {
+        overflow: auto;
+      }
+    }
+  }
+</style>

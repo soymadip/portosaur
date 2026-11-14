@@ -1,79 +1,94 @@
-/* Portosaur scheme — light / dark. Token values, scoped by
-   data-scheme + data-theme. Only the active scheme's block
-   applies. Colors are byte-identical to the old scheme file;
-   the palette indirection and -rgb triplets are gone —
-   translucency uses color-mix() at the use site. */
+/* Portosaur scheme — light / dark. Starlight-var overrides, scoped by
+ * data-scheme + data-theme. Only the active scheme's block applies.
+ * Colors are byte-identical to the old scheme file where the var system
+ * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * the accent trio maps onto the primary scale (flipped per mode, matching
+ * Starlight's low/high semantics), and the five hue colors take the
+ * palette values with low/high tints derived via color-mix().
+ * Dropped with the old token set: --color-secondary, --color-teal,
+ * --color-yellow, --color-pink, and the semantic success/warning/danger/
+ * info tokens (their values live on only where they coincide with the
+ * palette). */
 
 [data-scheme="portosaur"][data-theme="light"] {
-  --color-primary: #40a701;
-  --color-primary-dark: #378e01;
-  --color-primary-darker: #2f7a01;
-  --color-primary-light: #48bb01;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-  --color-secondary: #52525b;
-  --color-red: #ef4444;
-  --color-orange: #f97316;
-  --color-yellow: #eab308;
-  --color-green: #22c55e;
-  --color-teal: #14b8a6;
-  --color-blue: #3b82f6;
-  --color-purple: #8b5cf6;
-  --color-pink: #ec4899;
-  --color-background: #ffffff;
-  --color-background-alt: #f4f4f5;
-  --color-surface: #e4e4e7;
-  --color-surface-1: #d4d4d8;
-  --color-surface-2: #a1a1aa;
-  --color-hover-overlay: rgba(228, 228, 231, 0.5);
-  --color-foreground: #09090b;
-  --color-muted: #52525b;
-  --color-border: #e4e4e7;
-  --color-gray-100: #f4f4f5;
-  --color-gray-200: #e4e4e7;
-  --color-gray-300: #d4d4d8;
-  --color-gray-400: #a1a1aa;
-  --color-gray-500: #71717a;
-  --color-gray-600: #52525b;
-  --color-gray-700: #3f3f46;
-  --color-gray-800: #27272a;
+  --porto-color-white: #09090b;
+  --porto-color-gray-1: #27272a;
+  --porto-color-gray-2: #3f3f46;
+  --porto-color-gray-3: #52525b;
+  --porto-color-gray-4: #71717a;
+  --porto-color-gray-5: #a1a1aa;
+  --porto-color-gray-6: #d4d4d8;
+  --porto-color-gray-7: #e4e4e7;
+  --porto-color-black: #ffffff;
+
+  --porto-color-orange-low: color-mix(in srgb, #f97316 12%, white);
+  --porto-color-orange: #f97316;
+  --porto-color-orange-high: color-mix(in srgb, #f97316 70%, black);
+  --porto-color-green-low: color-mix(in srgb, #22c55e 12%, white);
+  --porto-color-green: #22c55e;
+  --porto-color-green-high: color-mix(in srgb, #22c55e 70%, black);
+  --porto-color-blue-low: color-mix(in srgb, #3b82f6 12%, white);
+  --porto-color-blue: #3b82f6;
+  --porto-color-blue-high: color-mix(in srgb, #3b82f6 70%, black);
+  --porto-color-purple-low: color-mix(in srgb, #8b5cf6 12%, white);
+  --porto-color-purple: #8b5cf6;
+  --porto-color-purple-high: color-mix(in srgb, #8b5cf6 70%, black);
+  --porto-color-red-low: color-mix(in srgb, #ef4444 12%, white);
+  --porto-color-red: #ef4444;
+  --porto-color-red-high: color-mix(in srgb, #ef4444 70%, black);
+
+  --porto-color-accent-low: #48bb01;
+  --porto-color-accent: #40a701;
+  --porto-color-accent-high: #2f7a01;
+
+  --porto-color-bg: #ffffff;
 }
 
 [data-scheme="portosaur"][data-theme="dark"] {
-  --color-primary: #60fc02;
-  --color-primary-dark: #48bb01;
-  --color-primary-darker: #40a701;
-  --color-primary-light: #80fd35;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-  --color-secondary: #a1a1aa;
-  --color-red: #f87171;
-  --color-orange: #fb923c;
-  --color-yellow: #facc15;
-  --color-green: #4ade80;
-  --color-teal: #2dd4bf;
-  --color-blue: #60a5fa;
-  --color-purple: #a78bfa;
-  --color-pink: #f472b6;
-  --color-background: #18191a;
-  --color-background-alt: #121314;
-  --color-surface: #242526;
-  --color-surface-1: #2f3032;
-  --color-surface-2: #3e4042;
-  --color-hover-overlay: rgba(82, 82, 85, 0.5);
-  --color-foreground: #f5f6f7;
-  --color-muted: #a1a1aa;
-  --color-border: #121314;
-  --color-gray-100: #242526;
-  --color-gray-200: #2f3032;
-  --color-gray-300: #3e4042;
-  --color-gray-400: #525457;
-  --color-gray-500: #727477;
-  --color-gray-600: #a1a1aa;
-  --color-gray-700: #d4d4d8;
-  --color-gray-800: #e4e4e7;
+  --porto-color-white: #f5f6f7;
+  --porto-color-gray-1: #e4e4e7;
+  --porto-color-gray-2: #d4d4d8;
+  --porto-color-gray-3: #a1a1aa;
+  --porto-color-gray-4: #727477;
+  --porto-color-gray-5: #525457;
+  --porto-color-gray-6: #3e4042;
+  --porto-color-black: #121314;
+
+  --porto-color-orange-low: color-mix(
+    in srgb,
+    #fb923c 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-orange: #fb923c;
+  --porto-color-orange-high: color-mix(in srgb, #fb923c 65%, white);
+  --porto-color-green-low: color-mix(
+    in srgb,
+    #4ade80 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-green: #4ade80;
+  --porto-color-green-high: color-mix(in srgb, #4ade80 65%, white);
+  --porto-color-blue-low: color-mix(
+    in srgb,
+    #60a5fa 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-blue: #60a5fa;
+  --porto-color-blue-high: color-mix(in srgb, #60a5fa 65%, white);
+  --porto-color-purple-low: color-mix(
+    in srgb,
+    #a78bfa 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-purple: #a78bfa;
+  --porto-color-purple-high: color-mix(in srgb, #a78bfa 65%, white);
+  --porto-color-red-low: color-mix(in srgb, #f87171 25%, var(--porto-color-bg));
+  --porto-color-red: #f87171;
+  --porto-color-red-high: color-mix(in srgb, #f87171 65%, white);
+
+  --porto-color-accent-low: #40a701;
+  --porto-color-accent: #60fc02;
+  --porto-color-accent-high: #80fd35;
+
+  --porto-color-bg: #18191a;
 }

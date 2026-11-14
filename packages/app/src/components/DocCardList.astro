@@ -1,6 +1,9 @@
 ---
 // DocCardList — generated-index cards from sidebar category items
-// (port of the old wrapper around TopicList).
+// (port of the old wrapper around TopicList), restyled in Starlight's
+// LinkCard + CardGrid language. Derived in part from Starlight (MIT
+// License) — see packages/app/NOTICE.md: the card + grid styles come
+// from Starlight's LinkCard/CardGrid user-components.
 //
 // Items are sidebar nodes: `title`/`label`, `href` (docs) or
 // `link.href` (categories), `description`, `icon` (from the index doc's
@@ -10,6 +13,15 @@
 // and `md:notebook` for docs — rendered as inline SVG via
 // `renderDynamicIcon` (emoji icons render as text). The SVG is `1em`,
 // sized by the h2's font-size.
+//
+// Portosaur differences from Starlight's LinkCard:
+// - Card titles stay <h2> (they are part of the page's heading list
+//   and the frozen URL snapshots) instead of Starlight's <span>.
+// - The description stays one-line truncated (Portosaur descriptions
+//   come from frontmatter and can be long); Starlight's wraps.
+// - The frontmatter icon renders before the title, next to
+//   Starlight's right-arrow.
+import Icon from "./Icon.astro";
 import { renderDynamicIcon } from "../utils/icons.ts";
 
 interface Props {
@@ -19,14 +31,7 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-{/*
-  Old Docusaurus DocCardList uses `col col--6` — two columns, full
-  width on small screens. `minmax(0, 1fr)`: the one-line truncated
-  description is `white-space: nowrap`, so its min-content width is
-  the full text — without the 0 minimum the tracks refuse to shrink
-  and the grid overflows the content column at desktop widths.
-*/}
-<div class="my-6 grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 [@media(max-width:768px)]:grid-cols-[minmax(0,1fr)]">
+<div class="card-grid">
   {items.map((item) => {
     const href = item.href ?? item.link?.href ?? "#";
     const title = item.title ?? item.label ?? "";
@@ -44,41 +49,146 @@ const { items } = Astro.props;
       fallbackIcon: isCategory ? "md:folder" : "md:notebook",
     });
     return (
-      <a
-        class="flex min-w-0 flex-col gap-1 rounded-lg border border-border bg-background-alt p-6 text-foreground no-underline hover:border-primary"
-        href={href}
-      >
-        {/*
-          The `!` utilities below beat the unlayered
-          `overrides/markdown.css` rules (`.porto-markdown h2` /
-          `.porto-markdown p`) — this list renders inside the
-          `.porto-markdown` slot wrapper, and unlayered CSS beats
-          layered utilities. The old scoped rules won on specificity;
-          the important flag is what keeps that win.
-        */}
-        <h2
-          class="mt-0! mb-[1.05rem]! inline-flex w-full min-w-0 items-center gap-2 text-[1.4rem]! font-[750]! text-primary"
-          title={title}
-        >
-          <span
-            class="inline-flex shrink-0 items-center justify-center empty:hidden"
-            set:html={iconHtml}
-          />
-          <span class="truncate">{title}</span>
-        </h2>
-        {(itemsCount || description) && (
-          <p class="m-0! truncate text-[0.8rem] text-foreground opacity-60">
-            {itemsCount && <strong>{itemsCount}</strong>}
-            {itemsCount && description && (
-              <>
-                {" "}
-                <span style="opacity: 0.5">•</span> {description}
-              </>
-            )}
-            {!itemsCount && description}
-          </p>
-        )}
-      </a>
+      <div class="porto-link-card">
+        <span class="porto-flex stack">
+          <a href={href} class="card-title-link">
+            <span class="card-icon" set:html={iconHtml} />
+            <h2 class="title" title={title}>
+              <span class="truncate">{title}</span>
+            </h2>
+          </a>
+          {(itemsCount || description) && (
+            <span class="description truncate">
+              {itemsCount && <strong>{itemsCount}</strong>}
+              {itemsCount && description && (
+                <>
+                  {" "}
+                  <span class="separator">•</span> {description}
+                </>
+              )}
+              {!itemsCount && description}
+            </span>
+          )}
+        </span>
+        <Icon name="right-arrow" size="1.333em" class="icon" />
+      </div>
     );
   })}
 </div>
+
+<style>
+  /* `porto.components` sits after `porto.content` in the layer
+     order, so these rules beat the content.css h2/p rules — this
+     list renders inside the `.porto-markdown-content` slot wrapper.
+     No `!important` needed except CardGrid's own `> *` rule, as in
+     Starlight. */
+  @layer porto.components {
+    .card-grid {
+      display: grid;
+      grid-template-columns: 100%;
+      gap: 1rem;
+    }
+
+    .card-grid > :global(*) {
+      margin-top: 0 !important;
+    }
+
+    .porto-link-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      border: 1px solid var(--porto-color-gray-5);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: var(--porto-shadow-sm);
+      position: relative;
+    }
+
+    a {
+      text-decoration: none;
+      line-height: var(--porto-line-height-headings);
+    }
+
+    /* The stretched link makes the whole card clickable while
+       keeping the title as the link's accessible name. */
+    a::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    .stack {
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    /* The icon chip sits BESIDE the <h2>, not inside it — an emoji
+       icon inside the heading would enter the page's heading text
+       (the frozen URL snapshots capture h2 text). */
+    .card-title-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .title {
+      display: inline-flex;
+      flex: 1;
+      min-width: 0;
+      align-items: center;
+      margin: 0;
+      color: var(--porto-color-white);
+      font-weight: 600;
+      font-size: var(--porto-text-lg);
+    }
+
+    .card-icon {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-icon:empty {
+      display: none;
+    }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .description {
+      color: var(--porto-color-gray-3);
+      line-height: 1.5;
+      font-size: var(--porto-text-sm);
+    }
+
+    .separator {
+      opacity: 0.5;
+    }
+
+    .icon {
+      color: var(--porto-color-gray-3);
+    }
+
+    /* Hover state */
+    .porto-link-card:hover {
+      background: var(--porto-color-gray-7, var(--porto-color-gray-6));
+      border-color: var(--porto-color-gray-2);
+    }
+
+    .porto-link-card:hover .icon {
+      color: var(--porto-color-white);
+    }
+
+    @media (min-width: 50rem) {
+      .card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+    }
+  }
+</style>

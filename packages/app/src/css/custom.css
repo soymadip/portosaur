@@ -5,18 +5,28 @@
  * Custom scheme files (`theme.color_scheme` pointing at a path) load
  * after this file too, alongside the user CSS.
  *
- * Tailwind v4 (CSS-first config) + the token system in `tokens.css`
- * (short utilities like `bg-surface` / `text-muted`). No
- * `@tailwindcss/typography` — markdown prose is hand-written CSS in
- * `overrides/markdown.css`.
+ * The docs UI is Starlight's design system, copied with identifiers
+ * renamed to the `porto-` prefix (see packages/app/NOTICE.md) and
+ * integrated into Portosaur's own stylesheets: `variables.css` holds
+ * the renamed variable system, the remaining files in this directory
+ * the reset, content, and component styles, `themes/` the color
+ * schemes as overrides of the renamed vars. There is no Tailwind —
+ * components are styled with plain CSS in the renamed var system.
  */
 
-@import "tailwindcss";
-
-/* Dark variant follows Portosaur's `data-theme` attribute (set by the
- * theme toggle), NOT the OS `prefers-color-scheme` — Tailwind v4's
- * default `dark:` variant would follow the OS setting instead. */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Cascade layer order — MUST stay the first statement in this file
+ * (a `@layer` declaration may precede `@import`s) and this file MUST
+ * stay the first import in BaseLayout: without an explicit order,
+ * layers sort by first appearance, and the first layer block in the
+ * bundle would be a component's `@layer porto.components.icon` —
+ * which implicitly declares `porto.components` before `porto.content`,
+ * flipping the intended order (markdown prose would beat card styles).
+ * Do NOT move this into a separate file: the build pipeline drops a
+ * file whose only content is this statement (verified 2026-11-14 — a
+ * standalone layers.css used to hold it and vanished from the
+ * bundle). */
+@layer porto.base, porto.reset, porto.core, porto.content, porto.components,
+  porto.components.icon, porto.components.aside, porto.utils;
 
 /* ----- Global Fonts ----- */
 @import "@fontsource/alata";
@@ -24,27 +34,33 @@
 @import "@fontsource-variable/geologica";
 @import "katex/dist/katex.min.css";
 
-/* ----- Tokens + Schemes ----- */
-@import "./tokens.css";
+/* ----- Portosaur CSS system (derived from Starlight, renamed) ----- */
+@import "./variables.css";
+@import "./reset.css";
+@import "./content.css";
+@import "./anchor-links.css";
+@import "./asides.css";
+@import "./utilities.css";
+@import "./tabs.css";
+@import "./code.css";
+@import "./page.css";
+
+/* ----- Color schemes ----- */
 @import "./themes/catppuccin.css";
 @import "./themes/dracula.css";
 @import "./themes/github.css";
 @import "./themes/gruvbox.css";
 @import "./themes/nord.css";
 @import "./themes/portosaur.css";
+@import "./themes/starlight.css";
 
 /* ----- Global Styles ----- */
 @import "./animations.css";
 
-/* ----- Component Overrides ----- */
+/* ----- Portosaur overrides ----- */
 @import "./overrides/base.css";
 @import "./overrides/markdown.css";
-@import "./shiki.css";
 
-/* Tailwind content sources: the theme ships as a package, so automatic
- * content detection (which skips node_modules) never sees the theme's
- * own components. Point Tailwind at them explicitly, relative to this
- * file. User content (notes/blog MDX) is auto-detected in the project. */
-@source "../layouts";
-@source "../components";
-@source "../routes";
+/* ----- Print (last: its :root overrides tie the scheme blocks on
+ * specificity and win by import order) ----- */
+@import "./print.css";

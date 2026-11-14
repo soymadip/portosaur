@@ -1,0 +1,79 @@
+/* Starlight scheme — light / dark. Starlight's own default palette,
+ * expressed as overrides of the renamed vars, scoped by data-scheme +
+ * data-theme. The values are identical to the base values in
+ * `css/variables.css` — this file exists so the palette is a real,
+ * selectable scheme: it is the default (`getDefaultColorScheme`
+ * returns "starlight"), and `theme.color_scheme: starlight` selects
+ * it explicitly. The asset generator also reads --porto-color-bg /
+ * --porto-color-accent from this file when it is the active scheme.
+ *
+ * NOTE: the "starlight" name here is a palette name (like dracula or
+ * nord), not copied Starlight code — the rename rule for copied code
+ * does not apply to scheme names. */
+
+[data-scheme="starlight"][data-theme="light"] {
+  --porto-color-white: hsl(224, 10%, 10%);
+  --porto-color-gray-1: hsl(224, 14%, 16%);
+  --porto-color-gray-2: hsl(224, 10%, 23%);
+  --porto-color-gray-3: hsl(224, 7%, 36%);
+  --porto-color-gray-4: hsl(224, 6%, 56%);
+  --porto-color-gray-5: hsl(224, 6%, 77%);
+  --porto-color-gray-6: hsl(224, 20%, 94%);
+  --porto-color-gray-7: hsl(224, 19%, 97%);
+  --porto-color-black: hsl(0, 0%, 100%);
+
+  --porto-color-orange-low: hsl(41, 90%, 88%);
+  --porto-color-orange: hsl(41, 90%, 60%);
+  --porto-color-orange-high: hsl(41, 80%, 25%);
+  --porto-color-green-low: hsl(101, 85%, 90%);
+  --porto-color-green: hsl(101, 90%, 46%);
+  --porto-color-green-high: hsl(101, 80%, 22%);
+  --porto-color-blue-low: hsl(234, 88%, 90%);
+  --porto-color-blue: hsl(234, 90%, 60%);
+  --porto-color-blue-high: hsl(234, 80%, 30%);
+  --porto-color-purple-low: hsl(281, 80%, 90%);
+  --porto-color-purple: hsl(281, 90%, 60%);
+  --porto-color-purple-high: hsl(281, 90%, 30%);
+  --porto-color-red-low: hsl(339, 80%, 90%);
+  --porto-color-red: hsl(339, 90%, 60%);
+  --porto-color-red-high: hsl(339, 80%, 30%);
+
+  --porto-color-accent-low: hsl(234, 88%, 90%);
+  --porto-color-accent: hsl(234, 90%, 60%);
+  --porto-color-accent-high: hsl(234, 80%, 30%);
+
+  --porto-color-bg: hsl(0, 0%, 100%);
+}
+
+[data-scheme="starlight"][data-theme="dark"] {
+  --porto-color-white: hsl(0, 0%, 100%);
+  --porto-color-gray-1: hsl(224, 20%, 94%);
+  --porto-color-gray-2: hsl(224, 6%, 77%);
+  --porto-color-gray-3: hsl(224, 6%, 56%);
+  --porto-color-gray-4: hsl(224, 7%, 36%);
+  --porto-color-gray-5: hsl(224, 10%, 23%);
+  --porto-color-gray-6: hsl(224, 14%, 16%);
+  --porto-color-black: hsl(224, 10%, 10%);
+
+  --porto-color-orange-low: hsl(41, 39%, 22%);
+  --porto-color-orange: hsl(41, 82%, 63%);
+  --porto-color-orange-high: hsl(41, 82%, 87%);
+  --porto-color-green-low: hsl(101, 39%, 22%);
+  --porto-color-green: hsl(101, 82%, 63%);
+  --porto-color-green-high: hsl(101, 82%, 80%);
+  --porto-color-blue-low: hsl(234, 54%, 20%);
+  --porto-color-blue: hsl(234, 100%, 60%);
+  --porto-color-blue-high: hsl(234, 100%, 87%);
+  --porto-color-purple-low: hsl(281, 39%, 22%);
+  --porto-color-purple: hsl(281, 82%, 63%);
+  --porto-color-purple-high: hsl(281, 82%, 89%);
+  --porto-color-red-low: hsl(339, 39%, 22%);
+  --porto-color-red: hsl(339, 82%, 63%);
+  --porto-color-red-high: hsl(339, 82%, 87%);
+
+  --porto-color-accent-low: hsl(224, 54%, 20%);
+  --porto-color-accent: hsl(224, 100%, 60%);
+  --porto-color-accent-high: hsl(224, 100%, 85%);
+
+  --porto-color-bg: hsl(224, 10%, 10%);
+}

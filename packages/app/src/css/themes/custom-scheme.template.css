@@ -7,12 +7,12 @@
  * The file loads after the theme CSS. Use plain `[data-theme]` blocks
  * (no `data-scheme` selector): while a custom scheme is active,
  * `data-scheme` holds the path, so no bundled scheme block matches and
- * these blocks win. Any token you omit falls back to the portosaur
- * defaults in tokens.css, so a scheme only needs the tokens it changes.
+ * these blocks win. Any token you omit falls back to the defaults in
+ * `css/variables.css`, so a scheme only needs the tokens it changes.
  *
- * The asset generator reads --color-background / --color-primary from
- * this file (for the theme-color meta tag and the PWA manifest), so keep
- * both tokens defined in both blocks.
+ * The asset generator reads --porto-color-bg / --porto-color-accent
+ * from this file (for the theme-color meta tag and the PWA manifest),
+ * so keep both tokens defined in both blocks.
  */
 
 /* Optional palette — name your raw colors once, reference them below. */
@@ -23,37 +23,28 @@
 }
 
 [data-theme="light"] {
-  --color-primary: var(--my-blue);
-  --color-primary-dark: var(--my-blue-dark);
-  --color-primary-light: var(--my-blue-light);
-  --color-background: #ffffff;
-  --color-background-alt: #f8fafc;
-  --color-surface: #f1f5f9;
-  --color-surface-1: #e2e8f0;
-  --color-foreground: #0f172a;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-hover-overlay: color-mix(
-    in srgb,
-    var(--color-surface) 50%,
-    transparent
-  );
+  --porto-color-white: #0f172a;
+  --porto-color-gray-1: #1e293b;
+  --porto-color-gray-2: #334155;
+  --porto-color-gray-3: #64748b;
+  --porto-color-gray-6: #e2e8f0;
+  --porto-color-gray-7: #f1f5f9;
+  --porto-color-black: #ffffff;
+  --porto-color-accent-low: var(--my-blue-light);
+  --porto-color-accent: var(--my-blue);
+  --porto-color-accent-high: var(--my-blue-dark);
+  --porto-color-bg: #ffffff;
 }
 
 [data-theme="dark"] {
-  --color-primary: var(--my-blue-light);
-  --color-primary-dark: var(--my-blue);
-  --color-primary-light: #93c5fd;
-  --color-background: #0f172a;
-  --color-background-alt: #1e293b;
-  --color-surface: #334155;
-  --color-surface-1: #475569;
-  --color-foreground: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-border: #334155;
-  --color-hover-overlay: color-mix(
-    in srgb,
-    var(--color-surface) 50%,
-    transparent
-  );
+  --porto-color-white: #f8fafc;
+  --porto-color-gray-1: #e2e8f0;
+  --porto-color-gray-2: #cbd5e1;
+  --porto-color-gray-3: #94a3b8;
+  --porto-color-gray-6: #1e293b;
+  --porto-color-black: #020617;
+  --porto-color-accent-low: var(--my-blue-dark);
+  --porto-color-accent: var(--my-blue-light);
+  --porto-color-accent-high: #93c5fd;
+  --porto-color-bg: #0f172a;
 }

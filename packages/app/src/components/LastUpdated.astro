@@ -1,0 +1,14 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's LastUpdated, adapted to Portosaur's data: Portosaur
+// passes a preformatted date string (e.g. "November 14, 2026"), not
+// a Date, so there is no <time datetime> or locale formatting here —
+// the string renders as given.
+interface Props {
+  lastUpdated?: string;
+}
+
+const { lastUpdated } = Astro.props;
+---
+
+{lastUpdated && <p>Last updated {lastUpdated}</p>}

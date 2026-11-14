@@ -1,0 +1,176 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ */
+
+@media print {
+  /* Portosaur adaptation: the selector carries [data-theme] so this
+	   block ties the scheme blocks ([data-scheme][data-theme], 0,2,0)
+	   and wins by import order — print.css loads last. Without it the
+	   active scheme's dark palette would print. */
+  :root[data-theme="light"],
+  :root[data-theme="dark"] {
+    /* Colours — force light mode when printing */
+    --porto-color-white: hsl(224, 10%, 10%);
+    --porto-color-gray-1: hsl(224, 14%, 16%);
+    --porto-color-gray-2: hsl(224, 10%, 23%);
+    --porto-color-gray-3: hsl(224, 7%, 36%);
+    --porto-color-gray-4: hsl(224, 6%, 56%);
+    --porto-color-gray-5: hsl(224, 6%, 77%);
+    --porto-color-gray-6: hsl(224, 20%, 94%);
+    --porto-color-gray-7: hsl(224, 19%, 97%);
+    --porto-color-black: hsl(0, 0%, 100%);
+
+    --porto-color-orange-high: hsl(var(--porto-hue-orange), 80%, 25%);
+    --porto-color-orange: hsl(var(--porto-hue-orange), 90%, 60%);
+    --porto-color-orange-low: hsl(var(--porto-hue-orange), 90%, 88%);
+    --porto-color-green-high: hsl(var(--porto-hue-green), 80%, 22%);
+    --porto-color-green: hsl(var(--porto-hue-green), 90%, 46%);
+    --porto-color-green-low: hsl(var(--porto-hue-green), 85%, 90%);
+    --porto-color-blue-high: hsl(var(--porto-hue-blue), 80%, 30%);
+    --porto-color-blue: hsl(var(--porto-hue-blue), 90%, 60%);
+    --porto-color-blue-low: hsl(var(--porto-hue-blue), 88%, 90%);
+    --porto-color-purple-high: hsl(var(--porto-hue-purple), 90%, 30%);
+    --porto-color-purple: hsl(var(--porto-hue-purple), 90%, 60%);
+    --porto-color-purple-low: hsl(var(--porto-hue-purple), 80%, 90%);
+    --porto-color-red-high: hsl(var(--porto-hue-red), 80%, 30%);
+    --porto-color-red: hsl(var(--porto-hue-red), 90%, 60%);
+    --porto-color-red-low: hsl(var(--porto-hue-red), 80%, 90%);
+
+    --porto-color-accent-high: hsl(234, 80%, 30%);
+    --porto-color-accent: hsl(234, 90%, 60%);
+    --porto-color-accent-low: hsl(234, 88%, 90%);
+
+    --porto-color-text-accent: var(--porto-color-accent);
+    --porto-color-text-invert: var(--porto-color-black);
+    --porto-color-bg-nav: var(--porto-color-gray-7);
+    --porto-color-bg-sidebar: var(--porto-color-bg);
+    --porto-color-bg-inline-code: var(--porto-color-gray-6);
+    --porto-color-bg-accent: var(--porto-color-accent);
+    --porto-color-hairline-light: var(--porto-color-gray-6);
+    --porto-color-hairline-shade: var(--porto-color-gray-6);
+
+    --porto-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
+
+    /* Disable shadows when printing. */
+    --porto-shadow-sm: none;
+    --porto-shadow-md: none;
+    --porto-shadow-lg: none;
+  }
+
+  /* Utility classes for controlling element visibility when printing. */
+  .print\:hidden {
+    display: none;
+  }
+  .print\:flex {
+    display: flex;
+  }
+  .print\:block {
+    display: block;
+  }
+
+  /* Page layout tweaks. */
+  main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  /* Portosaur adaptation: BaseLayout owns <main> and the content
+	   panels sit inside .main-pane, so the selectors drop Starlight's
+	   `.page >` / `main >` ancestry (there is no `.page` wrapper). */
+  .main-pane > .content-panel:first-child {
+    padding-block-start: 0;
+  }
+  .content-panel + .content-panel {
+    border: 0;
+  }
+  header.header {
+    position: relative;
+  }
+  .main-frame {
+    padding-top: 0;
+    padding-inline-start: 0;
+  }
+  /* components/TwoColumnContent.astro */
+  .main-pane {
+    --porto-sidebar-width: 0px;
+    --porto-content-width: 100%;
+  }
+
+  /* components/MarkdownContent.astro */
+  .porto-markdown-content :is(h1, h2, h3, h4, h5, h6) {
+    break-after: avoid;
+  }
+  .porto-markdown-content :is(p, li) {
+    orphans: 2;
+    widows: 2;
+  }
+  .porto-markdown-content pre {
+    overflow-x: hidden;
+    white-space: pre-wrap;
+  }
+  .porto-markdown-content .porto-code-frame,
+  .porto-markdown-content figure,
+  .porto-markdown-content pre {
+    break-inside: avoid;
+  }
+  .porto-code-copy {
+    /* Hide the Shiki copy button when printing. (Starlight's
+       equivalent rule targets Expressive Code's copy button;
+       Portosaur uses Shiki — see css/code.css.) */
+    display: none;
+  }
+  /* Inline code */
+  .porto-markdown-content code:not(:where(.not-content *)) {
+    background-color: transparent;
+    padding: 0;
+    margin-block: unset;
+    font-size: 0.9375em;
+  }
+  /* Tables. */
+  .porto-markdown-content :is(th, td):not(:where(.not-content *)),
+	/* We set some elements to `break-word` in `reset.css`, so we also apply `anywhere` to child elements to override that. */
+	.porto-markdown-content :is(th, td) *:not(:where(.not-content *)) {
+    /* Wrap table contents to prevent it overflowing outside the page width. */
+    overflow-wrap: anywhere;
+  }
+
+  /* user-components/Badge.astro */
+  .porto-badge {
+    background: transparent;
+    color: var(--porto-color-white);
+  }
+
+  /* user-components/FileTree.astro */
+  porto-file-tree {
+    break-inside: avoid;
+  }
+  porto-file-tree .highlight {
+    outline: 3px solid var(--porto-color-accent-low);
+    color: var(--porto-color-text);
+    background-color: transparent;
+  }
+
+  /* user-components/Aside.astro */
+  .porto-aside {
+    break-inside: avoid;
+  }
+
+  /* user-components/LinkButton.astro */
+  .porto-link-button.primary {
+    background: transparent;
+    border-color: var(--porto-color-white);
+    color: var(--porto-color-white);
+  }
+
+  /* user-components/Tabs.astro */
+  porto-tabs {
+    break-inside: avoid;
+  }
+
+  /* user-components/Steps.astro */
+  .porto-steps > li::after {
+    /* Ensure steps guidelines are visible when background colors are disabled. */
+    box-shadow: inset 99rem 99rem var(--porto-color-hairline-light);
+  }
+}

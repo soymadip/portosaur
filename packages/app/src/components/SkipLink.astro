@@ -1,0 +1,31 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's SkipLink, renamed (`sl-` → `porto-`). Portosaur
+// difference: the link targets `#main-content` (BaseLayout's <main>),
+// not the page title — non-docs pages have no `#_top` heading.
+---
+
+<a class="porto-skip-link" href="#main-content">
+  Skip to main content
+</a>
+
+<style>
+  @layer porto.core {
+    a {
+      clip: rect(0, 0, 0, 0);
+      position: fixed;
+      top: 0.75rem;
+      inset-inline-start: 0.75rem;
+    }
+    a:focus {
+      clip: unset;
+      z-index: var(--porto-z-index-skiplink);
+      display: block;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      color: var(--porto-color-text-invert);
+      background-color: var(--porto-color-text-accent);
+      box-shadow: var(--porto-shadow-lg);
+    }
+  }
+</style>

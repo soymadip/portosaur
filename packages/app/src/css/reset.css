@@ -1,0 +1,74 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ */
+
+@layer porto.reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  html {
+    color-scheme: dark;
+    accent-color: var(--porto-color-accent);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  body {
+    font-family: var(--__porto-font);
+    line-height: var(--porto-line-height);
+    -webkit-font-smoothing: antialiased;
+    color: var(--porto-color-text);
+    background-color: var(--porto-color-bg);
+  }
+
+  /* :lang(zh, ja) has not been supported by Chromium-based browsers at the time of writing (2026-05) */
+  [lang]:where(:lang(zh), :lang(ja)) {
+    text-autospace: normal;
+  }
+
+  [lang]:where(:not(:lang(zh), :lang(ja))) {
+    text-autospace: initial;
+  }
+
+  pre,
+  code,
+  samp,
+  kbd {
+    text-autospace: no-autospace;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  code {
+    overflow-wrap: break-word;
+  }
+
+  code {
+    font-family: var(--__porto-font-mono);
+  }
+}

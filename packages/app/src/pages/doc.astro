@@ -1,11 +1,13 @@
 ---
 // Note/doc detail page (`/${notesRoute}/[...slug]`).
 //
-// Renders inside DocLayout: the frontmatter title as h1, the full MDX
-// content, then the automatic topic list (after the content, like the
-// Docusaurus `DocItem/Content` wrapper) on index pages where the topic
-// list is enabled. The root index (empty slug) has no `[...slug]` page
-// — its content renders at the notes index route.
+// Renders inside DocLayout: the frontmatter title is the h1 (passed
+// as DocLayout's `heading` prop — rendered there, not in the slot),
+// the full MDX content, then the automatic topic list (after the
+// content, like the Docusaurus `DocItem/Content` wrapper) on index
+// pages where the topic list is enabled. The root index (empty slug)
+// has no `[...slug]` page — its content renders at the notes index
+// route.
 //
 // The edit URL needs the entry's REAL file path: `entry.id` mangles
 // spaces to dashes (`1 - getting-started` becomes
@@ -125,12 +127,12 @@ const items = showTopicList ? findCategoryItems(sidebar, currentHref) : [];
 <DocLayout
   title={title}
   description={entry.data.description}
+  heading={heading}
   currentHref={currentHref}
   headings={headings}
   editUrl={editUrl}
   lastUpdated={lastUpdated}
 >
-  <h1>{heading}</h1>
   <Content components={mdxComponents} />
   {items.length > 0 && (
     <section class="topic-list">

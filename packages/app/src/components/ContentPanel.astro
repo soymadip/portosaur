@@ -1,0 +1,35 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's ContentPanel, renamed (`sl-` → `porto-`). One padded
+// content block; consecutive panels are separated by a hairline.
+---
+
+<div class="content-panel">
+  <div class="porto-container">
+    <slot />
+  </div>
+</div>
+
+<style>
+  @layer porto.core {
+    .content-panel {
+      padding: 1.5rem var(--porto-content-pad-x);
+    }
+    .content-panel + .content-panel {
+      border-top: 1px solid var(--porto-color-hairline);
+    }
+    .porto-container {
+      max-width: var(--porto-content-width);
+    }
+
+    .porto-container > :global(* + *) {
+      margin-top: 1.5rem;
+    }
+
+    @media (min-width: 72rem) {
+      .porto-container {
+        margin-inline: var(--porto-content-margin-inline, auto);
+      }
+    }
+  }
+</style>

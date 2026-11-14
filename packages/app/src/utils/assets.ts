@@ -122,7 +122,7 @@ function cleanBaseUrlOf(baseUrl: string): string {
 export function getAssetHeadTags(options: PortosaurOptions): HeadTag[] {
   const cleanBaseUrl = cleanBaseUrlOf(options.site.baseUrl);
   const outputPath = "favicon";
-  const themeColor = getCssVar("--color-background", options.cssFiles ?? []);
+  const themeColor = getCssVar("--porto-color-bg", options.cssFiles ?? []);
 
   const headTags: HeadTag[] = [
     {
@@ -206,21 +206,21 @@ export async function generateSiteAssets({
   const cssFilesToParse = options.cssFiles ?? [];
 
   const primaryColor = getCssVar(
-    "--color-primary",
+    "--porto-color-accent",
     cssFilesToParse,
     undefined,
     undefined,
     log,
   );
   const backgroundColor = getCssVar(
-    "--color-background",
+    "--porto-color-bg",
     cssFilesToParse,
     undefined,
     undefined,
     log,
   );
   const themeColor = getCssVar(
-    "--color-background",
+    "--porto-color-bg",
     cssFilesToParse,
     undefined,
     undefined,
@@ -229,12 +229,12 @@ export async function generateSiteAssets({
 
   if (!themeColor) {
     throw new Error(
-      "Failed to resolve PWA theme color from CSS variables (--color-background).",
+      "Failed to resolve PWA theme color from CSS variables (--porto-color-bg).",
     );
   }
   if (!backgroundColor) {
     throw new Error(
-      "Failed to resolve PWA background color from CSS variables (--color-background).",
+      "Failed to resolve PWA background color from CSS variables (--porto-color-bg).",
     );
   }
 

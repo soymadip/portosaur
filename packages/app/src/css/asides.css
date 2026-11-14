@@ -1,0 +1,63 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ */
+
+@layer porto.components.aside {
+  .porto-aside {
+    padding: 1rem;
+    border-inline-start: 0.25rem solid var(--porto-color-asides-border);
+    color: var(--porto-color-white);
+  }
+  .porto-aside--note {
+    --porto-color-asides-text-accent: var(--porto-color-blue-high);
+    --porto-color-asides-border: var(--porto-color-blue);
+    background-color: var(--porto-color-blue-low);
+  }
+  .porto-aside--tip {
+    --porto-color-asides-text-accent: var(--porto-color-purple-high);
+    --porto-color-asides-border: var(--porto-color-purple);
+    background-color: var(--porto-color-purple-low);
+  }
+  .porto-aside--caution {
+    --porto-color-asides-text-accent: var(--porto-color-orange-high);
+    --porto-color-asides-border: var(--porto-color-orange);
+    background-color: var(--porto-color-orange-low);
+  }
+  .porto-aside--danger {
+    --porto-color-asides-text-accent: var(--porto-color-red-high);
+    --porto-color-asides-border: var(--porto-color-red);
+    background-color: var(--porto-color-red-low);
+  }
+
+  .porto-aside__title {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: var(--porto-text-h5);
+    font-weight: 600;
+    line-height: var(--porto-line-height-headings);
+    color: var(--porto-color-asides-text-accent);
+  }
+
+  .porto-aside__icon {
+    font-size: 1.333em;
+    width: 1em;
+    height: 1em;
+    /* Prevent Firefox from cutting off edges of icons when pinch-zooming. */
+    overflow: visible;
+  }
+
+  .porto-aside__title + .porto-aside__content {
+    margin-top: 0.5rem;
+  }
+
+  .porto-aside__content:empty {
+    display: none;
+  }
+
+  .porto-aside__content a {
+    color: var(--porto-color-asides-text-accent);
+  }
+}

@@ -1,94 +1,81 @@
 ---
-// Search — Starlight-style search button + modal (Pagefind).
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's Search, renamed (`sl-` → `porto-`, `site-search` →
+// `porto-search`, `starlight__search` → `porto__search`) and adapted
+// to Portosaur: i18n calls replaced with plain strings, Starlight's
+// virtual modules replaced with `porto:config` (bundlePath from the
+// site base URL), no pagefind user config, no trailing-slash
+// stripping (Portosaur sets `trailingSlash: "ignore"`).
 //
 // A navbar button opens a native <dialog> modal; `@pagefind/default-ui`
 // lazy-loads on idle and renders results inside. A vanilla custom
-// element (<porto-search>), zero framework — the same shape as
-// Starlight's <site-search>, adapted to Portosaur's tokens and
-// baseUrl handling.
+// element (<porto-search>), zero framework.
 //
 // The Pagefind index is built at `astro:build:done`, so in dev the
 // dialog shows a message instead of the UI (same tone as /search).
 import config from "porto:config";
+import Icon from "./Icon.astro";
 
 const base = config.site.baseUrl ?? "/";
 const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
 // PagefindUI loads pagefind.js from here and derives result URLs from
 // it, so subpath deploys work without extra config.
 const bundlePath = `${basePrefix}/pagefind/`;
+const baseUrl = `${basePrefix}/`;
 const isDev = import.meta.env.DEV;
 ---
 
-<porto-search data-bundle-path={bundlePath}>
+<porto-search data-bundle-path={bundlePath} data-base-url={baseUrl}>
   <button
     data-open-modal
     disabled
-    type="button"
-    class="flex cursor-pointer items-center gap-2 rounded-[1.25rem] border border-border bg-surface px-3 py-1.5 text-[0.85rem] text-muted hover:text-foreground"
     aria-label="Search"
     aria-keyshortcuts="Control+K"
   >
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-    <span class="[@media(max-width:996px)]:hidden" aria-hidden="true">
+    <Icon name="magnifier" />
+    <span class="porto-hidden md:porto-block" aria-hidden="true">
       Search
     </span>
-    <kbd
-      class="flex items-center gap-0.5 rounded border border-border bg-background-alt px-1.5 py-0.5 text-[0.7rem] text-muted [@media(max-width:996px)]:hidden"
-      style="display: none"
-    >
+    <kbd class="porto-hidden md:porto-flex" style="display: none">
       <kbd>Ctrl</kbd>
       <kbd>K</kbd>
     </kbd>
   </button>
 
-  <dialog aria-label="Search">
-    <div class="dialog-frame">
-      <button
-        data-close-modal
-        type="button"
-        class="absolute top-4 right-4 z-10 flex h-[calc(64px*var(--pagefind-ui-scale))] cursor-pointer items-center self-end border-0 bg-transparent p-1 text-[0.85rem] text-primary [@media(min-width:50rem)]:hidden"
-      >
+  <dialog style="padding: 0" aria-label="Search">
+    <div class="dialog-frame porto-flex">
+      {/* TODO: Make the layout of this button flexible to accommodate different word lengths. Currently hard-coded for English: “Cancel” */}
+      <button data-close-modal class="porto-flex md:porto-hidden">
         Cancel
       </button>
       {isDev ? (
-        <div class="m-auto text-center text-muted">
-          <p>Search isn't available in dev mode.</p>
-          <p>Build the site to enable search.</p>
+        <div
+          style="margin: auto; text-align: center; white-space: pre-line"
+          dir="ltr"
+        >
+          <p>
+            Search isn't available in dev mode. Build the site to enable search.
+          </p>
         </div>
       ) : (
         <div class="search-container">
-          <div id="porto-search-ui" />
+          <div id="porto__search" />
         </div>
       )}
     </div>
   </dialog>
 </porto-search>
 
-{/*
-  Inlined to avoid briefly showing an invalid shortcut. Purposely using
-  the deprecated `navigator.platform` property to detect Apple devices,
-  as the user agent is spoofed by some browsers when opening devtools.
-*/}
+{/**
+ * This is intentionally inlined to avoid briefly showing an invalid shortcut.
+ * Purposely using the deprecated `navigator.platform` property to detect Apple devices, as the
+ * user agent is spoofed by some browsers when opening the devtools.
+ */}
 <script is:inline>
   (() => {
     const openBtn = document.querySelector("button[data-open-modal]");
     const shortcut = openBtn?.querySelector("kbd");
-    if (!openBtn || !(shortcut instanceof HTMLElement)) {
-      return;
-    }
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return;
     const platformKey = shortcut.querySelector("kbd");
     if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
       platformKey.textContent = "⌘";
@@ -131,9 +118,7 @@ const isDev = import.meta.env.DEV;
         window.addEventListener("click", onClick);
       };
 
-      const closeModal = () => {
-        dialog.close();
-      };
+      const closeModal = () => dialog.close();
 
       openBtn.addEventListener("click", openModal);
       openBtn.disabled = false;
@@ -165,7 +150,8 @@ const isDev = import.meta.env.DEV;
         // @ts-expect-error — Missing types for @pagefind/default-ui package.
         const { PagefindUI } = await import("@pagefind/default-ui");
         new PagefindUI({
-          element: "#porto-search-ui",
+          element: "#porto__search",
+          baseUrl: this.dataset.baseUrl,
           bundlePath: this.dataset.bundlePath,
           showImages: false,
           showSubResults: true,
@@ -182,107 +168,363 @@ const isDev = import.meta.env.DEV;
 </script>
 
 <style>
-  /* The dialog is fullscreen on small screens, a centered card on
-     desktop — the Starlight shape, in Portosaur tokens. */
-  dialog {
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-background);
-    border: 1px solid var(--color-border);
-    color: var(--color-foreground);
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    max-height: 100%;
-    box-shadow: var(--shadow-lg);
-  }
-  dialog[open] {
-    display: flex;
-  }
-  dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(0.25rem);
-  }
-  .dialog-frame {
-    position: relative;
-    overflow: auto;
-    flex-direction: column;
-    flex-grow: 1;
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-  }
-  @media (min-width: 50rem) {
-    dialog {
-      margin: 4rem auto auto;
-      border-radius: 0.5rem;
-      width: 90%;
-      max-width: 40rem;
-      height: max-content;
-      min-height: 15rem;
-      max-height: calc(100% - 8rem);
+  @layer porto.core {
+    porto-search {
+      display: contents;
     }
+    button[data-open-modal] {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 0;
+      background-color: transparent;
+      color: var(--porto-color-gray-1);
+      cursor: pointer;
+      height: 2.5rem;
+      font-size: var(--porto-text-xl);
+    }
+
+    @media (min-width: 50rem) {
+      button[data-open-modal] {
+        border: 1px solid var(--porto-color-gray-5);
+        border-radius: 0.5rem;
+        padding-inline-start: 0.75rem;
+        padding-inline-end: 0.5rem;
+        background-color: var(--porto-color-black);
+        color: var(--porto-color-gray-2);
+        font-size: var(--porto-text-sm);
+        width: 100%;
+        max-width: 22rem;
+      }
+      button[data-open-modal]:hover {
+        border-color: var(--porto-color-gray-2);
+        color: var(--porto-color-white);
+      }
+
+      button[data-open-modal] > :last-child {
+        margin-inline-start: auto;
+      }
+    }
+
+    button > kbd {
+      border-radius: 0.25rem;
+      font-size: var(--porto-text-2xs);
+      gap: 0.25em;
+      padding-inline: 0.375rem;
+      background-color: var(--porto-color-gray-6);
+    }
+
+    kbd {
+      font-family: var(--__porto-font);
+    }
+
+    dialog {
+      margin: 0;
+      background-color: var(--porto-color-gray-6);
+      border: 1px solid var(--porto-color-gray-5);
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      max-height: 100%;
+      box-shadow: var(--porto-shadow-lg);
+    }
+    dialog[open] {
+      display: flex;
+    }
+
+    dialog::backdrop {
+      background-color: var(--porto-color-backdrop-overlay);
+      -webkit-backdrop-filter: blur(0.25rem);
+      backdrop-filter: blur(0.25rem);
+    }
+
     .dialog-frame {
-      padding: 1.5rem;
+      position: relative;
+      overflow: auto;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    button[data-close-modal] {
+      position: absolute;
+      z-index: 1;
+      align-items: center;
+      align-self: flex-end;
+      height: calc(64px * var(--pagefind-ui-scale));
+      padding: 0.25rem;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--porto-color-text-accent);
+    }
+
+    #porto__search {
+      --pagefind-ui-primary: var(--porto-color-text);
+      --pagefind-ui-text: var(--porto-color-gray-2);
+      --pagefind-ui-font: var(--__porto-font);
+      --pagefind-ui-background: var(--porto-color-black);
+      --pagefind-ui-border: var(--porto-color-gray-5);
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-tag: var(--porto-color-gray-5);
+      --porto-search-cancel-space: 5rem;
+    }
+
+    @media (min-width: 50rem) {
+      #porto__search {
+        --porto-search-cancel-space: 0px;
+      }
+
+      dialog {
+        margin: 4rem auto auto;
+        border-radius: 0.5rem;
+        width: 90%;
+        max-width: 40rem;
+        height: max-content;
+        min-height: 15rem;
+        max-height: calc(100% - 8rem);
+      }
+
+      .dialog-frame {
+        padding: 1.5rem;
+      }
     }
   }
 </style>
 
 <style is:global>
-  @import url("@pagefind/default-ui/css/ui.css");
+  @import url("@pagefind/default-ui/css/ui.css") layer(porto.core);
 
-  [data-search-modal-open] {
-    overflow: hidden;
-  }
-
-  /* Pagefind UI variables, mapped to Portosaur tokens so every scheme
-     and mode picks them up. The input and titles use the foreground;
-     excerpts are muted via the override below. */
-  #porto-search-ui {
-    --pagefind-ui-primary: var(--color-primary);
-    --pagefind-ui-text: var(--color-foreground);
-    --pagefind-ui-font: var(--font-body);
-    --pagefind-ui-background: var(--color-background);
-    --pagefind-ui-border: var(--color-border);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: var(--radius-card);
-    --pagefind-ui-tag: var(--color-surface);
-    /* Room for the Cancel button beside the input on mobile; the
-       button is hidden on desktop, so the space goes to zero there. */
-    --search-cancel-space: 5rem;
-  }
-
-  @media (min-width: 50rem) {
-    #porto-search-ui {
-      --search-cancel-space: 0px;
+  @layer porto.core {
+    [data-search-modal-open] {
+      overflow: hidden;
     }
-  }
 
-  #porto-search-ui .pagefind-ui__search-input {
-    font-weight: 400;
-    width: calc(100% - var(--search-cancel-space));
-  }
+    :root[data-theme="light"] #porto__search {
+      --pagefind-ui-tag: var(--porto-color-gray-6);
+    }
 
-  #porto-search-ui .pagefind-ui__search-clear {
-    inset-inline-end: var(--search-cancel-space);
-  }
+    #porto__search {
+      --porto-search-result-spacing: calc(1.25rem * var(--pagefind-ui-scale));
+      --porto-search-result-pad-inline-start: calc(
+        3.75rem * var(--pagefind-ui-scale)
+      );
+      --porto-search-result-pad-inline-end: calc(
+        1.25rem * var(--pagefind-ui-scale)
+      );
+      --porto-search-result-pad-block: calc(
+        0.9375rem * var(--pagefind-ui-scale)
+      );
+      --porto-search-result-nested-pad-block: calc(
+        0.625rem * var(--pagefind-ui-scale)
+      );
+      --porto-search-corners: calc(0.3125rem * var(--pagefind-ui-scale));
+      --porto-search-page-icon-size: calc(1.875rem * var(--pagefind-ui-scale));
+      --porto-search-page-icon-inline-start: calc(
+        (
+            var(--porto-search-result-pad-inline-start) -
+              var(--porto-search-page-icon-size)
+          ) /
+          2
+      );
+      --porto-search-tree-diagram-size: calc(2.5rem * var(--pagefind-ui-scale));
+      --porto-search-tree-diagram-inline-start: calc(
+        (
+            var(--porto-search-result-pad-inline-start) -
+              var(--porto-search-tree-diagram-size)
+          ) /
+          2
+      );
+    }
 
-  #porto-search-ui .pagefind-ui__search-input::placeholder {
-    color: var(--color-muted);
-    opacity: 1;
-  }
+    #porto__search .pagefind-ui__form::before {
+      --pagefind-ui-text: var(--porto-color-gray-1);
+      opacity: 1;
+    }
 
-  #porto-search-ui input:focus {
-    --pagefind-ui-border: var(--color-primary);
-  }
+    #porto__search .pagefind-ui__search-input {
+      color: var(--porto-color-white);
+      font-weight: 400;
+      width: calc(100% - var(--porto-search-cancel-space));
+    }
 
-  #porto-search-ui .pagefind-ui__result-excerpt {
-    color: var(--color-muted);
-  }
+    #porto__search .pagefind-ui__search-input::placeholder {
+      color: var(--porto-color-gray-3);
+      opacity: 1;
+    }
 
-  #porto-search-ui mark {
-    color: var(--color-foreground);
-    background-color: transparent;
-    font-weight: 600;
+    #porto__search input:focus {
+      --pagefind-ui-border: var(--porto-color-accent);
+    }
+
+    #porto__search .pagefind-ui__search-clear {
+      inset-inline-end: var(--porto-search-cancel-space);
+      width: calc(60px * var(--pagefind-ui-scale));
+      padding: 0;
+      background-color: transparent;
+      overflow: hidden;
+    }
+    #porto__search .pagefind-ui__search-clear:focus {
+      outline: 1px solid var(--porto-color-accent);
+    }
+    #porto__search .pagefind-ui__search-clear::before {
+      content: "";
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m13.41 12 6.3-6.29a1 1 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1 1 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 .33 1.64 1 1 0 0 0 1.09-.22l6.29-6.3 6.29 6.3a1 1 0 0 0 1.64-.33 1 1 0 0 0-.22-1.09L13.41 12Z'/%3E%3C/svg%3E")
+        center / 50% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m13.41 12 6.3-6.29a1 1 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1 1 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 .33 1.64 1 1 0 0 0 1.09-.22l6.29-6.3 6.29 6.3a1 1 0 0 0 1.64-.33 1 1 0 0 0-.22-1.09L13.41 12Z'/%3E%3C/svg%3E")
+        center / 50% no-repeat;
+      background-color: var(--porto-color-text-accent);
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #porto__search .pagefind-ui__results > * + * {
+      margin-top: var(--porto-search-result-spacing);
+    }
+    #porto__search .pagefind-ui__result {
+      border: 0;
+      padding: 0;
+    }
+
+    #porto__search .pagefind-ui__result-nested {
+      position: relative;
+      padding: var(--porto-search-result-nested-pad-block)
+        var(--porto-search-result-pad-inline-end);
+      padding-inline-start: var(--porto-search-result-pad-inline-start);
+    }
+
+    #porto__search
+      .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)),
+    #porto__search .pagefind-ui__result-nested {
+      position: relative;
+      background-color: var(--porto-color-black);
+    }
+
+    #porto__search
+      .pagefind-ui__result-title:not(
+        :where(.pagefind-ui__result-nested *)
+      ):hover,
+    #porto__search
+      .pagefind-ui__result-title:not(
+        :where(.pagefind-ui__result-nested *)
+      ):focus-within,
+    #porto__search .pagefind-ui__result-nested:hover,
+    #porto__search .pagefind-ui__result-nested:focus-within {
+      outline: 1px solid var(--porto-color-accent-high);
+    }
+
+    #porto__search
+      .pagefind-ui__result-title:not(
+        :where(.pagefind-ui__result-nested *)
+      ):focus-within,
+    #porto__search .pagefind-ui__result-nested:focus-within {
+      background-color: var(--porto-color-accent-low);
+    }
+
+    #porto__search .pagefind-ui__result-thumb,
+    #porto__search .pagefind-ui__result-inner {
+      margin-top: 0;
+    }
+
+    #porto__search .pagefind-ui__result-inner > :first-child {
+      border-radius: var(--porto-search-corners) var(--porto-search-corners) 0 0;
+    }
+    #porto__search .pagefind-ui__result-inner > :last-child {
+      border-radius: 0 0 var(--porto-search-corners) var(--porto-search-corners);
+    }
+
+    #porto__search .pagefind-ui__result-inner > .pagefind-ui__result-title {
+      padding: var(--porto-search-result-pad-block)
+        var(--porto-search-result-pad-inline-end);
+      padding-inline-start: var(--porto-search-result-pad-inline-start);
+    }
+    #porto__search
+      .pagefind-ui__result-inner
+      > .pagefind-ui__result-title::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: var(--porto-search-page-icon-inline-start);
+      width: var(--porto-search-page-icon-size);
+      background: var(--porto-color-gray-3);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 24 24'%3E%3Cpath d='M9 10h1a1 1 0 1 0 0-2H9a1 1 0 0 0 0 2Zm0 2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H9Zm11-3V8l-6-6a1 1 0 0 0-1 0H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9Zm-6-4 3 3h-2a1 1 0 0 1-1-1V5Zm4 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5v3a3 3 0 0 0 3 3h3v9Zm-3-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z'/%3E%3C/svg%3E")
+        center no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 24 24'%3E%3Cpath d='M9 10h1a1 1 0 1 0 0-2H9a1 1 0 0 0 0 2Zm0 2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H9Zm11-3V8l-6-6a1 1 0 0 0-1 0H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9Zm-6-4 3 3h-2a1 1 0 0 1-1-1V5Zm4 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5v3a3 3 0 0 0 3 3h3v9Zm-3-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z'/%3E%3C/svg%3E")
+        center no-repeat;
+    }
+
+    #porto__search .pagefind-ui__result-inner {
+      align-items: stretch;
+      gap: 1px;
+    }
+
+    #porto__search .pagefind-ui__result-link {
+      position: unset;
+      --pagefind-ui-text: var(--porto-color-white);
+      font-weight: 600;
+    }
+
+    #porto__search .pagefind-ui__result-link:hover {
+      text-decoration: none;
+    }
+
+    #porto__search
+      .pagefind-ui__result-nested
+      .pagefind-ui__result-link::before {
+      content: unset;
+    }
+
+    #porto__search .pagefind-ui__result-nested::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: var(--porto-search-tree-diagram-inline-start);
+      width: var(--porto-search-tree-diagram-size);
+      background: var(--porto-color-gray-4);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' viewBox='0 0 16 1000' preserveAspectRatio='xMinYMin slice'%3E%3Cpath d='M8 0v1000m6-988H8'/%3E%3C/svg%3E")
+        0% 0% / 100% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' viewBox='0 0 16 1000' preserveAspectRatio='xMinYMin slice'%3E%3Cpath d='M8 0v1000m6-988H8'/%3E%3C/svg%3E")
+        0% 0% / 100% no-repeat;
+    }
+    #porto__search .pagefind-ui__result-nested:last-of-type::before {
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 16 16'%3E%3Cpath d='M8 0v12m6 0H8'/%3E%3C/svg%3E");
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 16 16'%3E%3Cpath d='M8 0v12m6 0H8'/%3E%3C/svg%3E");
+    }
+
+    /* Flip page and tree icons around the vertical axis when in an RTL layout. */
+    [dir="rtl"] .pagefind-ui__result-title::before,
+    [dir="rtl"] .pagefind-ui__result-nested::before {
+      transform: matrix(-1, 0, 0, 1, 0, 0);
+    }
+
+    #porto__search .pagefind-ui__result-link::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    #porto__search .pagefind-ui__result-excerpt {
+      font-size: calc(1rem * var(--pagefind-ui-scale));
+      overflow-wrap: anywhere;
+    }
+
+    #porto__search mark {
+      color: var(--porto-color-gray-2);
+      background-color: transparent;
+      font-weight: 600;
+    }
+
+    #porto__search .pagefind-ui__filter-value::before {
+      border-color: var(--porto-color-text-invert);
+    }
+
+    #porto__search .pagefind-ui__result-tags {
+      background-color: var(--porto-color-black);
+      margin-top: 0;
+      padding: var(--porto-search-result-nested-pad-block)
+        var(--porto-search-result-pad-inline-end);
+    }
   }
 </style>

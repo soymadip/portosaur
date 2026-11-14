@@ -1,0 +1,52 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's Footer (the doc-page footer: edit link, last updated,
+// pagination), renamed (`sl-` → `porto-`). The "Built with Starlight"
+// kudos is dropped — Portosaur's credit lives in the site footer.
+// Props replace Starlight's route-data reads.
+import EditLink from "./EditLink.astro";
+import LastUpdated from "./LastUpdated.astro";
+import Pagination from "./Pagination.astro";
+
+interface PageLink {
+  title: string;
+  href: string;
+}
+
+interface Props {
+  editUrl?: string;
+  lastUpdated?: string;
+  prev?: PageLink;
+  next?: PageLink;
+}
+
+const { editUrl, lastUpdated, prev, next } = Astro.props;
+---
+
+<footer class="porto-flex">
+  <div class="meta porto-flex">
+    <EditLink editUrl={editUrl} />
+    <LastUpdated lastUpdated={lastUpdated} />
+  </div>
+  <Pagination prev={prev} next={next} />
+</footer>
+
+<style>
+  @layer porto.core {
+    footer {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .meta {
+      gap: 0.75rem 3rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+      font-size: var(--porto-text-sm);
+      color: var(--porto-color-gray-3);
+    }
+    .meta > :global(p:only-child) {
+      margin-inline-start: auto;
+    }
+  }
+</style>

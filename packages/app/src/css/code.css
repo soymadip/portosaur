@@ -1,0 +1,118 @@
+/* Shiki code blocks, styled like Starlight's (Expressive Code) frames.
+ *
+ * Portosaur uses Shiki everywhere — Expressive Code is deliberately not
+ * adopted — so the frame is recreated here in plain CSS with the renamed
+ * vars. The frame markup is added at runtime by `scripts/code-blocks.ts`,
+ * which wraps each `pre.astro-code` in `.porto-code-frame` with a header
+ * (terminal dots, language label, copy button). Without JS the bare `pre`
+ * keeps the content.css styling.
+ *
+ * Also carries the dual-theme flip: Astro emits dual-theme Shiki as inline
+ * light-theme colors plus `--shiki-dark*` custom properties, and its
+ * built-in dark switching follows `prefers-color-scheme`, not Portosaur's
+ * `data-theme` attribute — so these rules do the flip, keyed to
+ * `html[data-theme="dark"]`. `!important` is required: the light colors
+ * are inline styles, which no selector specificity can override. The
+ * `.astro-code-themes` class (present only on dual-theme blocks) scopes
+ * the rules so single-theme blocks are untouched.
+ */
+
+@layer porto.components {
+  .porto-markdown-content pre {
+    overflow-x: auto;
+  }
+
+  .porto-code-frame {
+    border: 1px solid var(--porto-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: var(--porto-shadow-sm);
+  }
+
+  .porto-code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--porto-color-gray-6);
+    border-bottom: 1px solid var(--porto-color-gray-5);
+  }
+
+  .porto-code-dots {
+    display: flex;
+    gap: 0.375rem;
+    flex-shrink: 0;
+  }
+
+  .porto-code-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--porto-color-gray-4);
+  }
+  .porto-code-dot:nth-child(1) {
+    background-color: var(--porto-color-red);
+  }
+  .porto-code-dot:nth-child(2) {
+    background-color: var(--porto-color-orange);
+  }
+  .porto-code-dot:nth-child(3) {
+    background-color: var(--porto-color-green);
+  }
+
+  .porto-code-lang {
+    font-family: var(--__porto-font-mono);
+    font-size: var(--porto-text-code-sm);
+    color: var(--porto-color-gray-3);
+    text-transform: lowercase;
+    overflow-wrap: anywhere;
+  }
+
+  .porto-code-copy {
+    margin-inline-start: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--porto-color-gray-5);
+    border-radius: 0.375rem;
+    background-color: transparent;
+    color: var(--porto-color-gray-2);
+    font-size: var(--porto-text-xs);
+    line-height: 1.25;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .porto-code-copy:hover {
+    color: var(--porto-color-white);
+    border-color: var(--porto-color-gray-2);
+  }
+  .porto-code-copy svg {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+  .porto-code-copy[data-copied="true"] {
+    color: var(--porto-color-text-accent);
+    border-color: var(--porto-color-text-accent);
+  }
+
+  /* The frame owns the border — the `pre` inside drops its own. */
+  .porto-code-frame pre {
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+html[data-theme="dark"] .astro-code-themes {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
+html[data-theme="dark"] .astro-code-themes span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}

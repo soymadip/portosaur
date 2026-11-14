@@ -1,0 +1,54 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ *
+ * The tab styles from Starlight's Tabs user-component, as shared CSS: the
+ * MDX Tabs/TabItem components are Phase 2 stubs (no tab switching yet), so
+ * these rules are inactive until the real `<porto-tabs>` element lands in
+ * Phase 4. They live here — not in a component — so both the stub markup
+ * and the future component share one stylesheet.
+ */
+
+@layer porto.components {
+  porto-tabs {
+    display: block;
+  }
+
+  .tablist-wrapper {
+    overflow-x: auto;
+  }
+
+  [role="tablist"] {
+    display: flex;
+    list-style: none;
+    border-bottom: 2px solid var(--porto-color-gray-5);
+    padding: 0;
+  }
+
+  .tab {
+    display: flex;
+  }
+  .tab > [role="tab"] {
+    --porto-tab-color-border: var(--porto-color-gray-5);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: var(--porto-line-height-headings);
+    padding: 0.275rem 1.25rem;
+    text-decoration: none;
+    box-shadow: 0 2px 0 var(--porto-tab-color-border);
+    color: var(--porto-color-gray-3);
+    outline-offset: var(--porto-outline-offset-inside);
+    overflow-wrap: initial;
+  }
+  .tab [role="tab"][aria-selected="true"] {
+    --porto-tab-color-border: var(--porto-color-text-accent);
+    color: var(--porto-color-white);
+    font-weight: 600;
+  }
+
+  .tablist-wrapper ~ [role="tabpanel"] {
+    margin-top: 1rem;
+  }
+}

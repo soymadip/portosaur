@@ -1,142 +1,62 @@
-/* === Markdown Content Styling ===
- * Hand-written prose CSS for MDX content, scoped to the
- * `.porto-markdown` wrapper that layouts put around rendered content.
- * Deliberately not `@tailwindcss/typography` — these rules are
- * custom-tuned to the design. */
+/* === Portosaur Markdown Extras ===
+ *
+ * Rules content.css does not provide, scoped to the
+ * `.porto-markdown-content` wrapper that layouts put around rendered
+ * content: the Lexend prose font, `<big>`, `<mark>`, the Docusaurus
+ * admonitions the remark plugin emits (`.admonition`), and the
+ * magic-comment line highlights for code blocks (Phase 4).
+ * Headings, lists, tables, and code-block framing live in
+ * `css/content.css` and `css/code.css`. */
 
-.porto-markdown {
-  font-family: var(--font-markdown);
+.porto-markdown-content {
+  font-family: var(--porto-font-markdown);
 }
 
-/* === Headings ===
- * Tailwind preflight resets heading sizes/weights/margins, so the
- * Infima scale is restored here, scoped to rendered markdown. */
-
-.porto-markdown h1,
-.porto-markdown h2,
-.porto-markdown h3,
-.porto-markdown h4,
-.porto-markdown h5,
-.porto-markdown h6 {
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.porto-markdown h1 {
-  font-size: 3rem;
-  margin: 0.5rem 0 1.5rem;
-}
-
-.porto-markdown h2 {
-  font-size: 2rem;
-  margin: 2rem 0 1rem;
-}
-
-.porto-markdown h3 {
-  font-size: 1.5rem;
-  margin: 1.5rem 0 0.75rem;
-}
-
-.porto-markdown h4 {
-  font-size: 1.25rem;
-  margin: 1.25rem 0 0.5rem;
-}
-
-.porto-markdown h5 {
-  font-size: 1rem;
-  margin: 1rem 0 0.5rem;
-}
-
-.porto-markdown h6 {
-  font-size: 0.875rem;
-  margin: 1rem 0 0.5rem;
-}
-
-/* === Lists ===
- * Preflight also strips list markers; Infima uses decimal/disc markers
- * with a 2rem left indent and a 1rem bottom margin. */
-
-.porto-markdown ol {
-  list-style: decimal;
-}
-
-.porto-markdown ul {
-  list-style: disc;
-}
-
-.porto-markdown ol,
-.porto-markdown ul {
-  padding-left: 2rem;
-  margin: 0 0 1rem;
-}
-
-.porto-markdown li > ol,
-.porto-markdown li > ul {
-  margin-bottom: 0;
-}
-
-.porto-markdown p {
-  margin: 0 0 1rem;
-}
-
-.porto-markdown h1,
-.portosaur-generated-index h1 {
-  text-align: center;
-  color: var(--color-primary);
-}
-
-.porto-markdown h2 {
-  color: var(--color-primary);
-}
-
-.porto-markdown big {
+.porto-markdown-content big {
   display: inline-block;
   font-size: 1.5rem;
   margin-bottom: 0.65rem;
   margin-top: 0.6rem;
 }
 
-.porto-markdown li big,
-.porto-markdown p big {
+.porto-markdown-content li big,
+.porto-markdown-content p big {
   margin-top: inherit;
   margin-bottom: inherit;
 }
 
-.porto-markdown img {
-  display: block;
-  margin: 0 auto;
-  padding: 1px;
-  border: 2px solid var(--color-surface);
-  border-radius: 14px;
-}
-
 mark {
-  background-color: color-mix(in srgb, var(--color-warning) 20%, transparent);
-  color: var(--color-foreground);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-orange) 20%,
+    transparent
+  );
+  color: var(--porto-color-text);
   padding: 0.17rem 0.27rem;
   border-radius: 0.2rem;
-  border-bottom: 1px solid var(--color-primary);
+  border-bottom: 1px solid var(--porto-color-accent);
 }
 
-.porto-toc__link--active {
-  font-weight: bold;
-}
-
-/* Custom Magic Comments for Code Blocks */
+/* Custom Magic Comments for Code Blocks. The 1rem offsets match the
+ * horizontal padding content.css gives `pre`. */
 .code-block-error-line {
-  background-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
+  background-color: color-mix(in srgb, var(--porto-color-red) 20%, transparent);
   display: block;
-  margin: 0 calc(-1 * var(--pre-padding));
-  padding: 0 var(--pre-padding);
-  border-left: 3px solid var(--color-danger);
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  border-left: 3px solid var(--porto-color-red);
 }
 
 .code-block-success-line {
-  background-color: color-mix(in srgb, var(--color-success) 20%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-green) 20%,
+    transparent
+  );
   display: block;
-  margin: 0 calc(-1 * var(--pre-padding));
-  padding: 0 var(--pre-padding);
-  border-left: 3px solid var(--color-success);
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  border-left: 3px solid var(--porto-color-green);
 }
 
 /* === Callouts / Admonitions ===
@@ -144,84 +64,84 @@ mark {
  * with `.admonition-heading` + `.admonition-content` children
  * (types: note, tip, info, success, warning, caution, danger). */
 
-.porto-markdown .admonition {
-  color: var(--color-foreground);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
+.porto-markdown-content .admonition {
+  color: var(--porto-color-text);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
 
-.porto-markdown .admonition-heading {
+.porto-markdown-content .admonition-heading {
   font-weight: bold;
   margin-bottom: 0.25rem;
 }
 
-.porto-markdown .admonition-note {
-  border-color: var(--color-muted);
+.porto-markdown-content .admonition-note {
+  border-color: var(--porto-color-gray-3);
   background-color: color-mix(
     in srgb,
-    var(--color-muted) 25%,
-    var(--color-surface)
+    var(--porto-color-gray-3) 25%,
+    var(--porto-color-gray-6)
   );
 }
 
-.porto-markdown .admonition-note .admonition-heading {
-  color: var(--color-muted);
+.porto-markdown-content .admonition-note .admonition-heading {
+  color: var(--porto-color-gray-3);
 }
 
-.porto-markdown .admonition-tip,
-.porto-markdown .admonition-success {
-  border-color: var(--color-success);
+.porto-markdown-content .admonition-tip,
+.porto-markdown-content .admonition-success {
+  border-color: var(--porto-color-green);
   background-color: color-mix(
     in srgb,
-    var(--color-success) 25%,
-    var(--color-surface)
+    var(--porto-color-green) 25%,
+    var(--porto-color-gray-6)
   );
 }
 
-.porto-markdown .admonition-tip .admonition-heading,
-.porto-markdown .admonition-success .admonition-heading {
-  color: var(--color-success);
+.porto-markdown-content .admonition-tip .admonition-heading,
+.porto-markdown-content .admonition-success .admonition-heading {
+  color: var(--porto-color-green);
 }
 
-.porto-markdown .admonition-info {
-  border-color: var(--color-info);
+.porto-markdown-content .admonition-info {
+  border-color: var(--porto-color-blue);
   background-color: color-mix(
     in srgb,
-    var(--color-info) 25%,
-    var(--color-surface)
+    var(--porto-color-blue) 25%,
+    var(--porto-color-gray-6)
   );
 }
 
-.porto-markdown .admonition-info .admonition-heading {
-  color: var(--color-info);
+.porto-markdown-content .admonition-info .admonition-heading {
+  color: var(--porto-color-blue);
 }
 
-.porto-markdown .admonition-warning,
-.porto-markdown .admonition-caution {
-  border-color: var(--color-warning);
+.porto-markdown-content .admonition-warning,
+.porto-markdown-content .admonition-caution {
+  border-color: var(--porto-color-orange);
   background-color: color-mix(
     in srgb,
-    var(--color-warning) 25%,
-    var(--color-surface)
+    var(--porto-color-orange) 25%,
+    var(--porto-color-gray-6)
   );
 }
 
-.porto-markdown .admonition-warning .admonition-heading,
-.porto-markdown .admonition-caution .admonition-heading {
-  color: var(--color-warning);
+.porto-markdown-content .admonition-warning .admonition-heading,
+.porto-markdown-content .admonition-caution .admonition-heading {
+  color: var(--porto-color-orange);
 }
 
-.porto-markdown .admonition-danger {
-  border-color: var(--color-danger);
+.porto-markdown-content .admonition-danger {
+  border-color: var(--porto-color-red);
   background-color: color-mix(
     in srgb,
-    var(--color-danger) 25%,
-    var(--color-surface)
+    var(--porto-color-red) 25%,
+    var(--porto-color-gray-6)
   );
 }
 
-.porto-markdown .admonition-danger .admonition-heading {
-  color: var(--color-danger);
+.porto-markdown-content .admonition-danger .admonition-heading {
+  color: var(--porto-color-red);
 }

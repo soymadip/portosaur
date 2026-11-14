@@ -1,8 +1,10 @@
 ---
 // 404 page (`/404`) — port of the old swizzled NotFound component.
-// Astro emits this as `404.html`. Empty-state layout in Tailwind
-// utilities (the old shared empty-state styles are inlined), crying
-// emoji icon, "Go back home" link.
+// Astro emits this as `404.html`. Empty-state layout in plain CSS
+// (the old shared empty-state styles are inlined), crying emoji icon,
+// "Go back home" link in Starlight's LinkButton primary style.
+// (Starlight has no 404 component in this checkout, so this is a
+// Portosaur page restyled in the new var system, not a copy.)
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../utils/content.ts";
@@ -12,22 +14,80 @@ const title = pageTitle("Page Not Found", config.site.title);
 ---
 
 <BaseLayout title={title} description="Page not found">
-  <div class="flex min-h-[calc(100vh-var(--navbar-height)-100px)] flex-col items-center justify-center p-8 text-center">
-    <div class="text-[4.5rem] text-muted opacity-60">
+  <div class="not-found">
+    <div class="not-found-icon">
       <span set:html={renderIcon("line-md:emoji-cry", { size: "5rem" })} />
     </div>
-    <h2 class="mt-[-0.8rem] mb-4 text-[2.2rem] text-foreground">
-      Page Not Found
-    </h2>
-    <p class="max-w-[500px] text-[1.1rem] text-muted">
+    <h2 class="not-found-title">Page Not Found</h2>
+    <p class="not-found-text">
       The page you're looking for doesn't exist, has been moved, or is currently
       unavailable.
     </p>
-    <a
-      class="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-primary px-[1.4rem] py-[0.6rem] text-base leading-(--line-height) font-semibold text-[#09090b] no-underline transition-[background-color_0.2s_ease,transform_0.2s_ease] hover:-translate-y-0.5 hover:bg-primary-light hover:shadow-md"
-      href="/"
-    >
+    <a class="porto-link-button primary" href="/">
       Go back home
     </a>
   </div>
 </BaseLayout>
+
+<style>
+  @layer porto.core {
+    .not-found {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--porto-nav-height) - 100px);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .not-found-icon {
+      font-size: 4.5rem;
+      color: var(--porto-color-gray-3);
+      opacity: 0.6;
+    }
+
+    .not-found-title {
+      margin: -0.8rem 0 1rem;
+      font-size: 2.2rem;
+      line-height: var(--porto-line-height-headings);
+      font-weight: 600;
+      color: var(--porto-color-white);
+    }
+
+    .not-found-text {
+      max-width: 500px;
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: var(--porto-color-gray-3);
+    }
+  }
+
+  @layer porto.components {
+    /* LinkButton primary — from Starlight's LinkButton
+       user-component (same rules as DocsHomeSection's buttons). */
+    .porto-link-button {
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 999rem;
+      display: inline-flex;
+      font-size: var(--porto-text-base);
+      gap: 0.5em;
+      line-height: 1.1875;
+      outline-offset: 0.25rem;
+      padding: 0.9375rem 1.25rem;
+      margin-top: 1.5rem;
+      text-decoration: none;
+    }
+
+    .porto-link-button.primary {
+      background: var(--porto-color-text-accent);
+      border-color: var(--porto-color-text-accent);
+      color: var(--porto-color-black);
+    }
+    .porto-link-button.primary:hover {
+      color: var(--porto-color-black);
+    }
+  }
+</style>

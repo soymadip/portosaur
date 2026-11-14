@@ -18,7 +18,7 @@
 const STORAGE_KEY = "theme";
 
 /** Tokens consulted for the theme-color meta, in order. */
-const THEME_COLOR_VARS = ["--color-background"];
+const THEME_COLOR_VARS = ["--porto-color-bg"];
 
 export type ThemeMode = "light" | "dark";
 
@@ -55,7 +55,7 @@ export function toggleTheme(): void {
 /**
  * Syncs the `theme-color` meta tag with the background token, so the
  * browser chrome matches the active mode. Port of the old
- * `getThemeColorSyncScript`, reading the `--color-background` token
+ * `getThemeColorSyncScript`, reading the `--porto-color-bg` token
  * instead of the old Infima navbar variable.
  */
 export function updateThemeColor(): void {

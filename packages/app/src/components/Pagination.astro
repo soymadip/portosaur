@@ -1,0 +1,92 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's Pagination, renamed (`sl-` → `porto-`) and adapted to
+// Portosaur's data: prev/next arrive as props (from `findPrevNext`),
+// labels are plain strings ("Previous"/"Next" — Starlight's i18n
+// defaults). No RTL handling (Portosaur has no `dir` support).
+//
+// The arrow-icon rule targets `:global(svg)` inside the component's
+// own container — the <svg> is rendered by the child Icon component,
+// so a plain scoped `svg` selector would not reach it.
+import Icon from "./Icon.astro";
+
+interface PageLink {
+  title: string;
+  href: string;
+}
+
+interface Props {
+  prev?: PageLink;
+  next?: PageLink;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<div class="pagination-links print:hidden">
+  {prev && (
+    <a href={prev.href} rel="prev">
+      <Icon name="left-arrow" size="1.5rem" />
+      <span>
+        Previous
+        <br />
+        <span class="link-title">{prev.title}</span>
+      </span>
+    </a>
+  )}
+  {next && (
+    <a href={next.href} rel="next">
+      <Icon name="right-arrow" size="1.5rem" />
+      <span>
+        Next
+        <br />
+        <span class="link-title">{next.title}</span>
+      </span>
+    </a>
+  )}
+</div>
+
+<style>
+  @layer porto.core {
+    .pagination-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+      gap: 1rem;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      width: 100%;
+      flex-basis: calc(50% - 0.5rem);
+      flex-grow: 1;
+      border: 1px solid var(--porto-color-gray-5);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-decoration: none;
+      color: var(--porto-color-gray-2);
+      box-shadow: var(--porto-shadow-md);
+      overflow-wrap: anywhere;
+    }
+    [rel="next"] {
+      justify-content: end;
+      text-align: end;
+      flex-direction: row-reverse;
+    }
+    a:hover {
+      border-color: var(--porto-color-gray-2);
+    }
+
+    .link-title {
+      color: var(--porto-color-white);
+      font-size: var(--porto-text-2xl);
+      line-height: var(--porto-line-height-headings);
+    }
+
+    .pagination-links :global(svg) {
+      flex-shrink: 0;
+    }
+  }
+</style>

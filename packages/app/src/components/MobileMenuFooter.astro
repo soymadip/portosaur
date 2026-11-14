@@ -1,0 +1,182 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's MobileMenuFooter shape (a preferences row at the bottom
+// of the mobile sidebar popover), adapted to Portosaur's content:
+// Portosaur has no language select or social icons here — instead the
+// footer holds the navbar links (which live outside the sidebar tree
+// on desktop) and the theme toggle, so mobile docs readers can reach
+// every nav destination from the popover.
+import config from "porto:config";
+import Icon from "./Icon.astro";
+import {
+  buildNavEntries,
+  isDropdown,
+  PORTO_HOMEPAGE,
+} from "../utils/navbar.ts";
+
+const { leftEntries, rightEntries, moreItems, showProjectLink, versionLabel } =
+  buildNavEntries(config, Astro.url.pathname);
+const entries = [...leftEntries, ...rightEntries];
+---
+
+<div class="mobile-preferences porto-flex">
+  <nav class="mobile-nav" aria-label="Mobile">
+    {entries.map((entry) =>
+      isDropdown(entry) ? (
+        <details class="porto-navbar__dropdown">
+          <summary>{entry.label}</summary>
+          <ul>
+            {entry.items.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                  class:list={[{ active: item.active }]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : (
+        <a
+          href={entry.href}
+          target={entry.external ? "_blank" : undefined}
+          rel={entry.external ? "noopener noreferrer" : undefined}
+          class:list={[{ active: entry.active }]}
+        >
+          {entry.label}
+        </a>
+      ),
+    )}
+    <details class="porto-navbar__dropdown">
+      <summary>More</summary>
+      <ul>
+        {moreItems.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+              class:list={[{ active: item.active }]}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  </nav>
+  {config.theme.showThemeSwitch && (
+    <button
+      type="button"
+      class="theme-toggle"
+      data-theme-toggle
+      aria-label="Toggle dark mode"
+      title="Toggle dark mode"
+    >
+      <Icon name="moon" class="light:porto-hidden" />
+      <Icon name="sun" class="dark:porto-hidden" />
+      <span>Theme</span>
+    </button>
+  )}
+  {showProjectLink && (
+    <a
+      class="version-link"
+      href={PORTO_HOMEPAGE}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {versionLabel}
+    </a>
+  )}
+</div>
+
+<style>
+  @layer porto.core {
+    .mobile-preferences {
+      flex-direction: column;
+      gap: 0.5rem;
+      border-top: 1px solid var(--porto-color-gray-6);
+      padding: 0.5rem 0;
+    }
+
+    .mobile-nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-nav a,
+    .mobile-nav summary {
+      display: block;
+      border-radius: 0.25rem;
+      padding: 0.3em 0.5rem;
+      line-height: 1.4;
+      text-decoration: none;
+      color: var(--porto-color-gray-2);
+      cursor: pointer;
+    }
+    .mobile-nav a:hover,
+    .mobile-nav a:focus,
+    .mobile-nav summary:hover {
+      color: var(--porto-color-white);
+    }
+    .mobile-nav a.active {
+      font-weight: 600;
+      color: var(--porto-color-text-accent);
+    }
+    .mobile-nav summary::marker,
+    .mobile-nav summary::-webkit-details-marker {
+      display: none;
+    }
+    .mobile-nav summary::after {
+      content: "▾";
+      float: inline-end;
+      font-size: 0.75em;
+      line-height: 1.75;
+      color: var(--porto-color-gray-3);
+    }
+    .mobile-nav details[open] > summary::after {
+      content: "▴";
+    }
+    .mobile-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0 1rem;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.3em 0.5rem;
+      border: 0;
+      border-radius: 0.25rem;
+      background-color: transparent;
+      color: var(--porto-color-gray-2);
+      font-size: var(--porto-text-sm);
+      cursor: pointer;
+      text-align: start;
+    }
+    .theme-toggle:hover {
+      color: var(--porto-color-white);
+    }
+
+    .version-link {
+      display: block;
+      border-top: 1px solid var(--porto-color-gray-6);
+      padding-top: 0.75rem;
+      text-align: center;
+      font-size: var(--porto-text-sm);
+      text-decoration: none;
+      color: var(--porto-color-gray-3);
+      opacity: 0.64;
+    }
+    .version-link:hover {
+      color: var(--porto-color-white);
+    }
+  }
+</style>

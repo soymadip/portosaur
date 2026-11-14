@@ -1,0 +1,34 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's EditLink, renamed (`sl-` → `porto-`). The edit URL
+// arrives as a prop (Starlight reads it from its route data);
+// "Edit page" is Starlight's i18n default, inlined.
+import Icon from "./Icon.astro";
+
+interface Props {
+  editUrl?: string;
+}
+
+const { editUrl } = Astro.props;
+---
+
+{editUrl && (
+  <a href={editUrl} class="porto-flex print:hidden">
+    <Icon name="pencil" size="1.2em" />
+    Edit page
+  </a>
+)}
+
+<style>
+  @layer porto.core {
+    a {
+      gap: 0.5rem;
+      align-items: center;
+      text-decoration: none;
+      color: var(--porto-color-gray-3);
+    }
+    a:hover {
+      color: var(--porto-color-white);
+    }
+  }
+</style>

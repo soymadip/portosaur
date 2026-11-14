@@ -291,6 +291,42 @@ export function docTitle(entry: ContentEntry): string {
   return humanizeName(segments[segments.length - 1]);
 }
 
+/** A flat heading from Astro's `render()` (depth 2–3 after filtering). */
+export interface TocHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+/** A heading nested for the table of contents (h3s under their h2). */
+export interface TocItem {
+  depth: number;
+  slug: string;
+  text: string;
+  children: TocItem[];
+}
+
+/**
+ * Nests a flat heading list into a TOC tree: depth-2 headings are
+ * top-level, depth-3 headings become children of the preceding depth-2
+ * heading (an orphan h3 — no preceding h2 — promotes to top-level).
+ * The tree shape is what `TableOfContentsList` renders.
+ */
+export function nestHeadings(headings: TocHeading[]): TocItem[] {
+  const tree: TocItem[] = [];
+  let currentParent: TocItem | null = null;
+  for (const heading of headings) {
+    const item: TocItem = { ...heading, children: [] };
+    if (heading.depth === 2 || !currentParent) {
+      tree.push(item);
+      currentParent = item;
+    } else {
+      currentParent.children.push(item);
+    }
+  }
+  return tree;
+}
+
 /**
  * A blog post's slug: the frontmatter `slug` wins (leading slash
  * stripped); otherwise the file base name with a leading `YYYY-MM-DD-`

@@ -1,0 +1,44 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's SiteTitle, renamed (`sl-` → `porto-`) and adapted to
+// Portosaur's data: the brand is the site title plus the generated
+// favicon logo, linked to the site root (with base URL).
+import config from "porto:config";
+
+const site = config.site;
+
+const base = site.baseUrl ?? "/";
+const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
+const withBase = (path: string) =>
+  `${basePrefix}${path.startsWith("/") ? path : `/${path}`}`;
+---
+
+<a href={withBase("/")} class="site-title porto-flex">
+  <img src={withBase("/favicon/favicon.ico")} alt={`${site.title} logo`} />
+  <span translate="no">{site.title}</span>
+</a>
+
+<style>
+  @layer porto.core {
+    .site-title {
+      align-items: center;
+      gap: var(--porto-nav-gap);
+      font-size: var(--porto-text-h4);
+      font-weight: 600;
+      color: var(--porto-color-text-accent);
+      text-decoration: none;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    span {
+      overflow: hidden;
+    }
+    img {
+      height: calc(var(--porto-nav-height) - 2 * var(--porto-nav-pad-y));
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      object-position: 0 50%;
+    }
+  }
+</style>

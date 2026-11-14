@@ -1,0 +1,40 @@
+/*
+ * Derived from Starlight (MIT License). Copyright (c) 2023 Astro contributors.
+ * See packages/app/NOTICE.md for the full license notice.
+ * Identifiers renamed to Portosaur's `porto-` prefix throughout.
+ *
+ * Page-level rules adapted from Starlight's Page.astro inline `<style>`:
+ * the `data-has-toc` / `data-has-sidebar` attributes BaseLayout sets on
+ * `<html>` drive the mobile-TOC height, the content width, and the
+ * sidebar offset; `scroll-padding-top` keeps anchor headings clear of
+ * the fixed header (and the mobile TOC below it).
+ *
+ * Portosaur difference: Starlight pads its `.main-frame` by the nav
+ * height; here BaseLayout's `<main>` carries the nav-height padding
+ * (the fixed header is its child) and DocLayout's `.main-frame` adds
+ * only the mobile-TOC height, so there is no `main` padding rule here.
+ */
+
+html:not([data-has-toc]) {
+  --porto-mobile-toc-height: 0rem;
+}
+html:not([data-has-sidebar]) {
+  --porto-content-width: 67.5rem;
+}
+/* Add scroll padding to ensure anchor headings aren't obscured by nav */
+html {
+  /* Additional padding is needed to account for the mobile TOC */
+  scroll-padding-top: calc(
+    1.5rem + var(--porto-nav-height) + var(--porto-mobile-toc-height)
+  );
+}
+@media (min-width: 50em) {
+  [data-has-sidebar] {
+    --porto-content-inline-start: var(--porto-sidebar-width);
+  }
+}
+@media (min-width: 72em) {
+  html {
+    scroll-padding-top: calc(1.5rem + var(--porto-nav-height));
+  }
+}

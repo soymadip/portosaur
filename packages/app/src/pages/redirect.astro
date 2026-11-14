@@ -19,7 +19,7 @@ const title = pageTitle("Opening in browser…", config.site.title);
 ---
 
 <BaseLayout title={title} description="Opening in browser…">
-  <div class="flex min-h-[calc(100vh-var(--navbar-height)-100px)] flex-col items-center justify-center p-8 text-center">
+  <div class="flex min-h-[calc(100vh-var(--porto-nav-height)-100px)] flex-col items-center justify-center p-8 text-center">
     <div class="text-[4.5rem] text-muted opacity-60">
       <span set:html={renderIcon("md:open-in-new", { size: "3rem" })} />
     </div>

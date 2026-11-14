@@ -1,79 +1,94 @@
-/* Nord scheme — light / dark. Token values, scoped by
-   data-scheme + data-theme. Only the active scheme's block
-   applies. Colors are byte-identical to the old scheme file;
-   the palette indirection and -rgb triplets are gone —
-   translucency uses color-mix() at the use site. */
+/* Nord scheme — light / dark. Starlight-var overrides, scoped by
+ * data-scheme + data-theme. Only the active scheme's block applies.
+ * Colors are byte-identical to the old scheme file where the var system
+ * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * the accent trio maps onto the primary scale (flipped per mode, matching
+ * Starlight's low/high semantics), and the five hue colors take the
+ * palette values with low/high tints derived via color-mix().
+ * Dropped with the old token set: --color-secondary, --color-teal,
+ * --color-yellow, --color-pink, and the semantic success/warning/danger/
+ * info tokens (their values live on only where they coincide with the
+ * palette). */
 
 [data-scheme="nord"][data-theme="light"] {
-  --color-primary: #5e81ac;
-  --color-primary-dark: #54749a;
-  --color-primary-darker: #4f6d91;
-  --color-primary-light: #6e8eba;
-  --color-success: #a3be8c;
-  --color-warning: #ebcb8b;
-  --color-danger: #bf616a;
-  --color-info: #81a1c1;
-  --color-secondary: #81a1c1;
-  --color-red: #bf616a;
-  --color-orange: #d08770;
-  --color-yellow: #ebcb8b;
-  --color-green: #a3be8c;
-  --color-teal: #8fbcbb;
-  --color-blue: #81a1c1;
-  --color-purple: #b48ead;
-  --color-pink: #b48ead;
-  --color-background: #eceff4;
-  --color-background-alt: #e0e5ed;
-  --color-surface: #e5e9f0;
-  --color-surface-1: #d8dee9;
-  --color-surface-2: #d5dce8;
-  --color-hover-overlay: rgba(213, 220, 232, 0.5);
-  --color-foreground: #2e3440;
-  --color-muted: #6f788a;
-  --color-border: #d5dce8;
-  --color-gray-100: #e5e9f0;
-  --color-gray-200: #d8dee9;
-  --color-gray-300: #b5bcc9;
-  --color-gray-400: #929aaa;
-  --color-gray-500: #6f788a;
-  --color-gray-600: #4c566a;
-  --color-gray-700: #434c5e;
-  --color-gray-800: #3b4252;
+  --porto-color-white: #2e3440;
+  --porto-color-gray-1: #3b4252;
+  --porto-color-gray-2: #434c5e;
+  --porto-color-gray-3: #4c566a;
+  --porto-color-gray-4: #6f788a;
+  --porto-color-gray-5: #929aaa;
+  --porto-color-gray-6: #b5bcc9;
+  --porto-color-gray-7: #d8dee9;
+  --porto-color-black: #eceff4;
+
+  --porto-color-orange-low: color-mix(in srgb, #d08770 12%, white);
+  --porto-color-orange: #d08770;
+  --porto-color-orange-high: color-mix(in srgb, #d08770 70%, black);
+  --porto-color-green-low: color-mix(in srgb, #a3be8c 12%, white);
+  --porto-color-green: #a3be8c;
+  --porto-color-green-high: color-mix(in srgb, #a3be8c 70%, black);
+  --porto-color-blue-low: color-mix(in srgb, #81a1c1 12%, white);
+  --porto-color-blue: #81a1c1;
+  --porto-color-blue-high: color-mix(in srgb, #81a1c1 70%, black);
+  --porto-color-purple-low: color-mix(in srgb, #b48ead 12%, white);
+  --porto-color-purple: #b48ead;
+  --porto-color-purple-high: color-mix(in srgb, #b48ead 70%, black);
+  --porto-color-red-low: color-mix(in srgb, #bf616a 12%, white);
+  --porto-color-red: #bf616a;
+  --porto-color-red-high: color-mix(in srgb, #bf616a 70%, black);
+
+  --porto-color-accent-low: #6e8eba;
+  --porto-color-accent: #5e81ac;
+  --porto-color-accent-high: #4f6d91;
+
+  --porto-color-bg: #eceff4;
 }
 
 [data-scheme="nord"][data-theme="dark"] {
-  --color-primary: #88c0d0;
-  --color-primary-dark: #7aaccb;
-  --color-primary-darker: #73a3c0;
-  --color-primary-light: #94cbe6;
-  --color-success: #a3be8c;
-  --color-warning: #ebcb8b;
-  --color-danger: #bf616a;
-  --color-info: #81a1c1;
-  --color-secondary: #81a1c1;
-  --color-red: #bf616a;
-  --color-orange: #d08770;
-  --color-yellow: #ebcb8b;
-  --color-green: #a3be8c;
-  --color-teal: #8fbcbb;
-  --color-blue: #81a1c1;
-  --color-purple: #b48ead;
-  --color-pink: #b48ead;
-  --color-background: #2e3440;
-  --color-background-alt: #262b36;
-  --color-surface: #3b4252;
-  --color-surface-1: #434c5e;
-  --color-surface-2: #4c566a;
-  --color-hover-overlay: rgba(76, 86, 106, 0.5);
-  --color-foreground: #e5e9f0;
-  --color-muted: #929aaa;
-  --color-border: #1e232c;
-  --color-gray-100: #262b36;
-  --color-gray-200: #2e3440;
-  --color-gray-300: #3b4252;
-  --color-gray-400: #434c5e;
-  --color-gray-500: #4c566a;
-  --color-gray-600: #6f788a;
-  --color-gray-700: #929aaa;
-  --color-gray-800: #b5bcc9;
+  --porto-color-white: #e5e9f0;
+  --porto-color-gray-1: #b5bcc9;
+  --porto-color-gray-2: #929aaa;
+  --porto-color-gray-3: #6f788a;
+  --porto-color-gray-4: #4c566a;
+  --porto-color-gray-5: #434c5e;
+  --porto-color-gray-6: #3b4252;
+  --porto-color-black: #262b36;
+
+  --porto-color-orange-low: color-mix(
+    in srgb,
+    #d08770 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-orange: #d08770;
+  --porto-color-orange-high: color-mix(in srgb, #d08770 65%, white);
+  --porto-color-green-low: color-mix(
+    in srgb,
+    #a3be8c 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-green: #a3be8c;
+  --porto-color-green-high: color-mix(in srgb, #a3be8c 65%, white);
+  --porto-color-blue-low: color-mix(
+    in srgb,
+    #81a1c1 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-blue: #81a1c1;
+  --porto-color-blue-high: color-mix(in srgb, #81a1c1 65%, white);
+  --porto-color-purple-low: color-mix(
+    in srgb,
+    #b48ead 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-purple: #b48ead;
+  --porto-color-purple-high: color-mix(in srgb, #b48ead 65%, white);
+  --porto-color-red-low: color-mix(in srgb, #bf616a 25%, var(--porto-color-bg));
+  --porto-color-red: #bf616a;
+  --porto-color-red-high: color-mix(in srgb, #bf616a 65%, white);
+
+  --porto-color-accent-low: #73a3c0;
+  --porto-color-accent: #88c0d0;
+  --porto-color-accent-high: #94cbe6;
+
+  --porto-color-bg: #2e3440;
 }

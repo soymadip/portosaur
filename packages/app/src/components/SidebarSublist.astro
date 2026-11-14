@@ -1,0 +1,216 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's SidebarSublist, renamed (`sl-` → `porto-`) and adapted
+// to Portosaur's sidebar data (`porto:sidebar` nodes: doc items with
+// `href`, categories with `link?.href` + `items`).
+//
+// Portosaur differences from Starlight's sublist:
+// - No badges (Portosaur's sidebar has none).
+// - Category labels link to their index page when the category has
+//   one (index-as-category-link).
+// - When `theme.navigation.collapsable_sidebar` is false, categories
+//   render as plain groups (label + list, no <details>).
+import config from "porto:config";
+import Icon from "./Icon.astro";
+import SidebarRestorePoint from "./SidebarRestorePoint.astro";
+
+interface Props {
+  items: any[];
+  currentHref: string;
+  nested?: boolean;
+}
+
+const { items, currentHref, nested } = Astro.props;
+
+const collapsable = config.theme.collapsableSidebar !== false;
+
+function normalize(href: string): string {
+  return href.replace(/\/+$/, "") || "/";
+}
+
+const current = normalize(currentHref);
+
+function isActiveItem(item: any): boolean {
+  const href = item.href ?? item.link?.href;
+  if (!href) {
+    return false;
+  }
+  return normalize(href) === current;
+}
+
+function hasActiveDescendant(item: any): boolean {
+  if (isActiveItem(item)) {
+    return true;
+  }
+  for (const child of item.items ?? []) {
+    if (hasActiveDescendant(child)) {
+      return true;
+    }
+  }
+  return false;
+}
+---
+
+<ul class:list={{ "top-level": !nested }}>
+  {items.map((item) => (
+    <li>
+      {item.type === "category" ? (
+        collapsable ? (
+          <details open={hasActiveDescendant(item)}>
+            <summary>
+              <span class="group-label">
+                {item.link?.href ? (
+                  <a
+                    class="large"
+                    href={item.link.href}
+                    aria-current={isActiveItem(item) ? "page" : undefined}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <span class="large">{item.label}</span>
+                )}
+              </span>
+              <Icon name="right-caret" class="caret" size="1.25rem" />
+            </summary>
+            <SidebarRestorePoint />
+            <Astro.self
+              items={item.items ?? []}
+              currentHref={currentHref}
+              nested
+            />
+          </details>
+        ) : (
+          <>
+            {item.link?.href ? (
+              <a
+                class="large"
+                href={item.link.href}
+                aria-current={isActiveItem(item) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <span class="group-label">
+                <span class="large">{item.label}</span>
+              </span>
+            )}
+            <Astro.self
+              items={item.items ?? []}
+              currentHref={currentHref}
+              nested
+            />
+          </>
+        )
+      ) : (
+        <a
+          href={item.href}
+          aria-current={isActiveItem(item) ? "page" : undefined}
+          class:list={[{ large: !nested }]}
+        >
+          <span>{item.label}</span>
+        </a>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  @layer porto.core {
+    ul {
+      --porto-sidebar-item-padding-inline: 0.5rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      overflow-wrap: anywhere;
+    }
+
+    ul ul li {
+      margin-inline-start: var(--porto-sidebar-item-padding-inline);
+      border-inline-start: 1px solid var(--porto-color-hairline-light);
+      padding-inline-start: var(--porto-sidebar-item-padding-inline);
+    }
+
+    .large {
+      font-size: var(--porto-text-lg);
+      font-weight: 600;
+      color: var(--porto-color-white);
+    }
+
+    .top-level > li + li {
+      margin-top: 0.75rem;
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.2em var(--porto-sidebar-item-padding-inline);
+      line-height: 1.4;
+      cursor: pointer;
+      user-select: none;
+    }
+    summary::marker,
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .caret {
+      transition: transform 0.2s ease-in-out;
+      flex-shrink: 0;
+    }
+    :global([dir="rtl"]) .caret {
+      transform: rotateZ(180deg);
+    }
+    [open] > summary .caret {
+      transform: rotateZ(90deg);
+    }
+
+    a {
+      display: block;
+      border-radius: 0.25rem;
+      text-decoration: none;
+      color: var(--porto-color-gray-2);
+      padding: 0.3em var(--porto-sidebar-item-padding-inline);
+      line-height: 1.4;
+    }
+
+    a:hover,
+    a:focus {
+      color: var(--porto-color-white);
+    }
+
+    [aria-current="page"],
+    [aria-current="page"]:hover,
+    [aria-current="page"]:focus {
+      font-weight: 600;
+      color: var(--porto-color-text-invert);
+      background-color: var(--porto-color-text-accent);
+    }
+
+    a > *:not(:last-child),
+    .group-label > *:not(:last-child) {
+      margin-inline-end: 0.25em;
+    }
+
+    /* A category link inside a <summary> is the group label, not a
+       list link — no list-link padding (the summary provides it). */
+    .group-label a {
+      padding: 0;
+    }
+
+    @media (min-width: 50rem) {
+      .top-level > li + li {
+        margin-top: 0.5rem;
+      }
+      .large {
+        font-size: var(--porto-text-base);
+      }
+      a {
+        font-size: var(--porto-text-sm);
+      }
+    }
+  }
+</style>
