@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bun run packages/cli/bin/porto.mjs schema -o packages/cli/config-schema.json && bun run --cwd docs build && bun run packages/cli/bin/porto.mjs schema -o docs/build/config-schema.json",
+  "framework": null,
+  "installCommand": "bun install --frozen-lockfile",
+  "outputDirectory": "docs/build"
+}
