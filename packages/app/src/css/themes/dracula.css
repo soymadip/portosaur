@@ -2,6 +2,8 @@
  * data-scheme + data-theme. Only the active scheme's block applies.
  * Colors are byte-identical to the old scheme file where the var system
  * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * with gray-1 = gray-2 = the OG text color, gray-3 = text-muted, gray-5 =
+ * surface-1 and gray-6 = surface-0 (the admonition base); gray-7 is bg-alt.
  * the accent trio is a single-hue ramp anchored on the OG primary: the
  * visible primary is `accent` in light mode and `accent-high` in dark
  * mode (text-accent flips per mode), so both are the OG primary; dark
@@ -15,13 +17,13 @@
 
 [data-scheme="dracula"][data-theme="light"] {
   --porto-color-white: #282a36;
-  --porto-color-gray-1: #2d3244;
-  --porto-color-gray-2: #3c4256;
-  --porto-color-gray-3: #4f5872;
-  --porto-color-gray-4: #6272a4;
-  --porto-color-gray-5: #cdcdde;
-  --porto-color-gray-6: #efefea;
-  --porto-color-gray-7: #e9e9f4;
+  --porto-color-gray-1: #282a36;
+  --porto-color-gray-2: #282a36;
+  --porto-color-gray-3: #6272a4;
+  --porto-color-gray-4: #cdcdde;
+  --porto-color-gray-5: #dcdcea;
+  --porto-color-gray-6: #e9e9f4;
+  --porto-color-gray-7: #efefea;
   --porto-color-black: #f8f8f2;
 
   --porto-color-orange-low: color-mix(in srgb, #e88c1c 12%, white);
@@ -49,10 +51,10 @@
 
 [data-scheme="dracula"][data-theme="dark"] {
   --porto-color-white: #f8f8f2;
-  --porto-color-gray-1: #d0d0ca;
-  --porto-color-gray-2: #b9b9b2;
-  --porto-color-gray-3: #909194;
-  --porto-color-gray-4: #6272a4;
+  --porto-color-gray-1: #f8f8f2;
+  --porto-color-gray-2: #f8f8f2;
+  --porto-color-gray-3: #6272a4;
+  --porto-color-gray-4: #626781;
   --porto-color-gray-5: #52556b;
   --porto-color-gray-6: #44475a;
   --porto-color-black: #21222c;

@@ -2,6 +2,8 @@
  * data-scheme + data-theme. Only the active scheme's block applies.
  * Colors are byte-identical to the old scheme file where the var system
  * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * with gray-1 = gray-2 = the OG text color, gray-3 = text-muted, gray-5 =
+ * surface-1 and gray-6 = surface-0 (the admonition base); gray-7 is bg-alt.
  * the accent trio is a single-hue ramp anchored on the OG primary: the
  * visible primary is `accent` in light mode and `accent-high` in dark
  * mode (text-accent flips per mode), so both are the OG primary; dark
@@ -16,11 +18,11 @@
 [data-scheme="catppuccin"][data-theme="light"] {
   --porto-color-white: #4c4f69;
   --porto-color-gray-1: #4c4f69;
-  --porto-color-gray-2: #5c5f77;
-  --porto-color-gray-3: #7c7f93;
-  --porto-color-gray-4: #8c8fa1;
-  --porto-color-gray-5: #9ca0b0;
-  --porto-color-gray-6: #acb0be;
+  --porto-color-gray-2: #4c4f69;
+  --porto-color-gray-3: #8c8fa1;
+  --porto-color-gray-4: #9ca0b0;
+  --porto-color-gray-5: #bcc0cc;
+  --porto-color-gray-6: #ccd0da;
   --porto-color-gray-7: #e6e9ef;
   --porto-color-black: #eff1f5;
 
@@ -49,10 +51,10 @@
 
 [data-scheme="catppuccin"][data-theme="dark"] {
   --porto-color-white: #cdd6f4;
-  --porto-color-gray-1: #bac2de;
-  --porto-color-gray-2: #a6adc8;
-  --porto-color-gray-3: #9399b2;
-  --porto-color-gray-4: #7f849c;
+  --porto-color-gray-1: #cdd6f4;
+  --porto-color-gray-2: #cdd6f4;
+  --porto-color-gray-3: #7f849c;
+  --porto-color-gray-4: #6c7086;
   --porto-color-gray-5: #45475a;
   --porto-color-gray-6: #313244;
   --porto-color-black: #181825;

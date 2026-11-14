@@ -2,6 +2,8 @@
  * data-scheme + data-theme. Only the active scheme's block applies.
  * Colors are byte-identical to the old scheme file where the var system
  * allows: the gray scale maps onto gray-1..6 (plus gray-7 in light mode),
+ * with gray-1 = gray-2 = the OG text color, gray-3 = text-muted, gray-5 =
+ * surface-1 and gray-6 = surface-0 (the admonition base); gray-7 is bg-alt.
  * the accent trio is a single-hue ramp anchored on the OG primary: the
  * visible primary is `accent` in light mode and `accent-high` in dark
  * mode (text-accent flips per mode), so both are the OG primary; dark
@@ -15,12 +17,12 @@
 
 [data-scheme="portosaur"][data-theme="light"] {
   --porto-color-white: #09090b;
-  --porto-color-gray-1: #27272a;
-  --porto-color-gray-2: #3f3f46;
+  --porto-color-gray-1: #09090b;
+  --porto-color-gray-2: #09090b;
   --porto-color-gray-3: #52525b;
   --porto-color-gray-4: #71717a;
-  --porto-color-gray-5: #a1a1aa;
-  --porto-color-gray-6: #d4d4d8;
+  --porto-color-gray-5: #d4d4d8;
+  --porto-color-gray-6: #e4e4e7;
   --porto-color-gray-7: #f4f4f5;
   --porto-color-black: #ffffff;
 
@@ -49,12 +51,12 @@
 
 [data-scheme="portosaur"][data-theme="dark"] {
   --porto-color-white: #f5f6f7;
-  --porto-color-gray-1: #e4e4e7;
-  --porto-color-gray-2: #d4d4d8;
+  --porto-color-gray-1: #f5f6f7;
+  --porto-color-gray-2: #f5f6f7;
   --porto-color-gray-3: #a1a1aa;
   --porto-color-gray-4: #727477;
-  --porto-color-gray-5: #525457;
-  --porto-color-gray-6: #3e4042;
+  --porto-color-gray-5: #2f3032;
+  --porto-color-gray-6: #242526;
   --porto-color-black: #121314;
 
   --porto-color-orange-low: color-mix(

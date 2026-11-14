@@ -16,12 +16,13 @@ const { title } = Astro.props;
 
 <style>
   @layer porto.core {
+    /* OG colors the page title with the primary (Docusaurus `.markdown h1`). */
     h1 {
       margin-top: 1rem;
       font-size: var(--porto-text-h1);
       line-height: var(--porto-line-height-headings);
       font-weight: 600;
-      color: var(--porto-color-white);
+      color: var(--porto-color-text-accent);
     }
   }
 </style>

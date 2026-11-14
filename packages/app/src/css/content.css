@@ -89,6 +89,12 @@
     font-weight: 600;
   }
 
+  /* OG colors h1 + h2 with the primary (Docusaurus `.markdown h1/h2`);
+     h3–h6 stay the text color. */
+  .porto-markdown-content :is(h1, h2):not(:where(.not-content *)) {
+    color: var(--porto-color-text-accent);
+  }
+
   .porto-markdown-content
     :is(img, picture, video, canvas, svg, iframe):not(:where(.not-content *)) {
     display: block;
