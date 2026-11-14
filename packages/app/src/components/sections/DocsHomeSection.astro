@@ -432,16 +432,21 @@ const iconOnError = iconFallback
     }
 
     @media (max-width: 480px) {
+      /* Tighter side padding on small phones: OG's 2rem leaves the
+         tagline and description squeezed, so the whole hero gets
+         1rem instead. OG's -0.8rem negative margin on the
+         description is gone — against 1rem it would push the text
+         to the viewport edge. */
+      .hero-section {
+        padding-inline: 1rem;
+      }
+
       .title {
         font-size: 2.6rem;
       }
 
       .tagline {
         font-size: 1.5rem;
-      }
-
-      .description {
-        margin-inline: -0.8rem;
       }
 
       .hero-icon {
