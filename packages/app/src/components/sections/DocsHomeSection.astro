@@ -38,6 +38,13 @@
 //   from OG's 2rem to 1rem so the tagline and description get more
 //   room; OG's `-0.8rem` negative margin on the description is gone
 //   (against 1rem it would push the text to the viewport edge).
+// - Where the hero stacks (≤996px) the section's top padding drops
+//   from OG's 3.5rem to 2rem so the icon sits closer to the navbar;
+//   the glow still has room to fade above the image (it extends
+//   ~10% + blur past the icon box, and fades to transparent).
+// - The action icons are 1.25rem (OG inherits the button's 1rem)
+//   and centered on the text line with an inline-flex wrapper —
+//   a bare inline SVG/emoji sits on the baseline and reads high.
 // - A `prefers-reduced-motion` guard is added: OG's entrance
 //   animations start at `opacity: 0`, which would hide content for
 //   users who disable animation.
@@ -344,6 +351,16 @@ const iconOnError = iconFallback
       color: var(--porto-color-text);
     }
 
+    /* Action icons: bigger than OG's inherited 1rem, and centered
+       on the text line — a bare inline SVG/emoji sits on the
+       baseline and reads high, so the wrapper is inline-flex. */
+    .action-img {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
     .hero-icon {
       flex: 1;
       position: relative;
@@ -394,6 +411,14 @@ const iconOnError = iconFallback
        on touch that state sticks after tapping. */
 
     @media (max-width: 996px) {
+      /* Less space above the icon where the hero stacks (the icon
+         sits on top here). The glow still fades above the image —
+         it extends past the icon box and is transparent at the
+         edge, so nothing looks cut off. */
+      .hero-section {
+        padding-top: 2rem;
+      }
+
       .hero-container {
         flex-direction: column-reverse;
         text-align: center;
