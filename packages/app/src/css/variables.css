@@ -121,7 +121,9 @@
 
     /** Key layout values */
     --porto-nav-height: 3.5rem;
-    --porto-nav-pad-x: 1rem;
+    /* Mobile edge padding for the navbar (12px); desktop raises it
+       to 1.5rem in the media query below. */
+    --porto-nav-pad-x: 0.75rem;
     --porto-nav-pad-y: 0.75rem;
     --porto-mobile-toc-height: 3rem;
     /* 265px: the left sidebar and the right TOC panel share this
