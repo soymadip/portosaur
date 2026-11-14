@@ -516,17 +516,16 @@ describe("theming", () => {
   });
 
   describe("theme select", () => {
-    // Starlight's Light / Dark / Auto select replaces Portosaur's
-    // light/dark toggle button (commit after the portfolio commit).
-    // The preference lives under the existing `"theme"` localStorage
-    // key (stored `light`/`dark` choices stay valid; `auto` is new),
-    // and when nothing is stored the site's `defaultMode` wins.
+    // The Light / Dark / Auto control replaces Portosaur's light/dark
+    // toggle button. It is Portosaur's own <details> dropdown (built
+    // like the navbar's "More" dropdown), NOT a native <select> —
+    // Starlight's select was replaced because its option list is the
+    // browser-native popup. The preference lives under the existing
+    // `"theme"` localStorage key (stored `light`/`dark` choices stay
+    // valid; `auto` is new), and when nothing is stored the site's
+    // `defaultMode` wins.
     const selectSrc = fs.readFileSync(
       path.join(APP_SRC, "components/ThemeSelect.astro"),
-      "utf8",
-    );
-    const selectWidgetSrc = fs.readFileSync(
-      path.join(APP_SRC, "components/Select.astro"),
       "utf8",
     );
     const themeModeSrc = fs.readFileSync(
@@ -538,24 +537,36 @@ describe("theming", () => {
       "utf8",
     );
 
-    test("ThemeSelect and Select exist with attribution headers", () => {
-      expect(selectSrc).toContain("Derived from Starlight (MIT License)");
-      expect(selectWidgetSrc).toContain(
-        "Derived from Starlight (MIT License)",
-      );
-      expect(selectSrc).toContain("<porto-theme-select>");
+    test("ThemeSelect is a custom dropdown, no native select", () => {
+      // The moon/sun/laptop icons are Starlight's (MIT) — the
+      // attribution stays even though the select itself is gone.
+      expect(selectSrc).toContain("(MIT License)");
+      expect(selectSrc).toContain("NOTICE.md");
+      expect(selectSrc).toContain("<porto-theme-select ");
       // (comments may cite the Starlight originals — strip them first)
       expect(stripComments(selectSrc)).not.toContain("starlight-theme-select");
       // Plain strings, not i18n calls (Portosaur has no i18n).
       expect(selectSrc).not.toContain("Astro.locals.t");
+      // Own <details> dropdown, same pattern as the navbar's More
+      // dropdown — and no native <select> anywhere (the Select
+      // component was deleted with the switch).
+      expect(selectSrc).toContain("<details");
+      expect(selectSrc).toContain("theme-menu");
+      expect(stripComments(selectSrc)).not.toContain("<select");
+      expect(selectSrc).not.toContain('from "./Select.astro"');
+      expect(fs.existsSync(path.join(APP_SRC, "components/Select.astro"))).toBe(
+        false,
+      );
       for (const value of ['value: "dark"', 'value: "light"', 'value: "auto"']) {
         expect(selectSrc).toContain(value);
       }
-      // The server-rendered selected option is the configured
+      // The server-rendered current option is the configured
       // defaultMode, not Starlight's `auto`.
       expect(selectSrc).toContain("config.theme.defaultMode");
-      expect(selectSrc).toContain('selected: defaultMode === "dark"');
-      expect(selectSrc).toContain('selected: defaultMode === "light"');
+      expect(selectSrc).toContain("data-current={defaultMode}");
+      expect(selectSrc).toContain(
+        "aria-checked={option.value === defaultMode}",
+      );
     });
 
     test("no toggle button code remains in app source", () => {
@@ -597,10 +608,14 @@ describe("theming", () => {
       expect(themeModeSrc).toContain("getPreferredColorScheme");
       expect(themeModeSrc).toContain("prefers-color-scheme: light");
       expect(themeModeSrc).toContain('addEventListener("change"');
-      // Change wiring targets the selects, and applying a choice
-      // syncs every select on the page.
-      expect(themeModeSrc).toContain("porto-theme-select select");
-      expect(themeModeSrc).toContain("select.value = preference");
+      // Click wiring targets the dropdowns' option buttons, and
+      // applying a choice syncs every dropdown on the page (current
+      // icon/label + checked option) and closes the open menu.
+      expect(themeModeSrc).toContain('querySelectorAll("porto-theme-select")');
+      expect(themeModeSrc).toContain("[data-theme-value]");
+      expect(themeModeSrc).toContain("syncThemeControls(preference)");
+      expect(themeModeSrc).toContain('setAttribute("data-current", preference)');
+      expect(themeModeSrc).toContain('removeAttribute("open")');
       // Theme-color sync survives the rewrite.
       expect(themeModeSrc).toContain("updateThemeColor");
       expect(themeModeSrc).toContain("--porto-color-bg");
@@ -731,9 +746,10 @@ describe("theming", () => {
       );
       // Navbar select + mobile menu footer select.
       expect(html.match(/<porto-theme-select[\s>]/g)?.length).toBe(2);
-      expect(html).toContain('<option value="dark"');
-      expect(html).toContain('<option value="light"');
-      expect(html).toContain('<option value="auto"');
+      expect(html).toContain('data-theme-value="dark"');
+      expect(html).toContain('data-theme-value="light"');
+      expect(html).toContain('data-theme-value="auto"');
+      expect(html).not.toContain("<select");
       expect(html).not.toContain("data-theme-toggle");
     });
   });
@@ -804,9 +820,10 @@ describe("theming", () => {
       );
       // Navbar select + mobile slide-down menu select.
       expect(html.match(/<porto-theme-select[\s>]/g)?.length).toBe(2);
-      expect(html).toContain('<option value="dark"');
-      expect(html).toContain('<option value="light"');
-      expect(html).toContain('<option value="auto"');
+      expect(html).toContain('data-theme-value="dark"');
+      expect(html).toContain('data-theme-value="light"');
+      expect(html).toContain('data-theme-value="auto"');
+      expect(html).not.toContain("<select");
       expect(html).not.toContain("data-theme-toggle");
     });
   });

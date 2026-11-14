@@ -130,12 +130,12 @@ const showThemeSwitch = theme.showThemeSwitch;
 
     <div class="porto-flex print:hidden right-group">
       <div class="porto-flex search-group">
+        {showSearch && <Search />}
         {showThemeSwitch && (
           <div class="porto-hidden md:porto-flex">
             <ThemeSelect />
           </div>
         )}
-        {showSearch && <Search />}
       </div>
       <nav class="primary-nav porto-hidden md:porto-flex" aria-label="Primary">
         {rightEntries.map((entry) =>
@@ -499,8 +499,8 @@ const showThemeSwitch = theme.showThemeSwitch;
       padding: 0.5rem 0;
       list-style: none;
       border-radius: 0.5rem;
-      border: 1px solid var(--porto-color-hairline);
-      background-color: var(--porto-color-bg);
+      border: 1px solid var(--porto-color-hairline-light);
+      background-color: var(--porto-color-bg-nav);
       box-shadow: var(--porto-shadow-md);
     }
 
@@ -512,7 +512,7 @@ const showThemeSwitch = theme.showThemeSwitch;
       color: var(--porto-color-gray-2);
     }
     .dropdown-link:hover {
-      background-color: var(--porto-color-gray-6);
+      background-color: var(--porto-color-hairline-light);
       color: var(--porto-color-white);
     }
     .dropdown-link.active {

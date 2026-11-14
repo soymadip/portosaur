@@ -1,42 +1,65 @@
 ---
-// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
-// Starlight's ThemeSelect, renamed (`starlight-theme-select` →
-// `porto-theme-select`, `sl-` → `porto-`) and with the i18n strings
-// replaced by plain English (Portosaur has no i18n).
+// Portosaur's own theme control — a Light / Dark / Auto dropdown
+// built like the navbar's "More" dropdown (<details> + <summary> +
+// menu), so its option list is our own markup instead of the
+// browser-native <select> popup Starlight's ThemeSelect used. The
+// moon/sun/laptop icons are Starlight's (MIT License) — see
+// packages/app/NOTICE.md.
 //
-// Two Portosaur differences from Starlight:
+// Two Portosaur differences from Starlight's ThemeSelect:
 // - The preference lives under the existing `"theme"` localStorage
 //   key (stored `light`/`dark` choices stay valid; `auto` is the new
 //   third value), not Starlight's `starlight-theme` key.
 // - When nothing is stored, the site's `defaultMode` wins (not
-//   Starlight's `auto`), so the server-rendered selected option is
+//   Starlight's `auto`), so the server-rendered current option is
 //   the configured default; the inline script below corrects it
-//   from localStorage before paint. The change wiring lives in
+//   from localStorage before paint. The click wiring lives in
 //   `../scripts/theme-mode.ts` (shared with the theme-color sync),
 //   not in a custom-element script here.
 import config from "porto:config";
 import Icon from "./Icon.astro";
-import Select from "./Select.astro";
 
 const defaultMode = config.theme.defaultMode;
+
+const OPTIONS = [
+  { label: "Dark", value: "dark", icon: "moon" },
+  { label: "Light", value: "light", icon: "sun" },
+  { label: "Auto", value: "auto", icon: "laptop" },
+] as const;
+
+const currentLabel =
+  OPTIONS.find((option) => option.value === defaultMode)?.label ?? "Dark";
 ---
 
-<porto-theme-select>
-  <Select
-    label="Select theme"
-    options={[
-      { label: "Dark", selected: defaultMode === "dark", value: "dark" },
-      { label: "Light", selected: defaultMode === "light", value: "light" },
-      { label: "Auto", selected: false, value: "auto" },
-    ]}
-    width="6.25em"
-  >
-    <Fragment slot="icon">
-      <Icon name="moon" class="porto-theme-icon-dark" />
-      <Icon name="sun" class="porto-theme-icon-light" />
-      <Icon name="laptop" class="porto-theme-icon-auto" />
-    </Fragment>
-  </Select>
+<porto-theme-select data-current={defaultMode}>
+  <details class="porto-navbar__dropdown porto-theme-dropdown">
+    <summary class="theme-summary" aria-label="Select theme">
+      <span class="theme-current">
+        <Icon name="moon" size="0.875rem" class="porto-theme-icon-dark" />
+        <Icon name="sun" size="0.875rem" class="porto-theme-icon-light" />
+        <Icon name="laptop" size="0.875rem" class="porto-theme-icon-auto" />
+        <span class="theme-current-label" data-theme-current-label>
+          {currentLabel}
+        </span>
+      </span>
+    </summary>
+    <ul class="theme-menu" role="menu">
+      {OPTIONS.map((option) => (
+        <li role="none">
+          <button
+            type="button"
+            role="menuitemradio"
+            aria-checked={option.value === defaultMode}
+            class="theme-option"
+            data-theme-value={option.value}
+          >
+            <Icon name={option.icon} size="0.875rem" />
+            {option.label}
+          </button>
+        </li>
+      ))}
+    </ul>
+  </details>
 </porto-theme-select>
 
 {/* Inlined to avoid FOUC. Uses `set:html` to avoid an incorrect type error. */}
@@ -45,7 +68,16 @@ const defaultMode = config.theme.defaultMode;
   set:html={`(() => {
     try {
       const theme = localStorage.getItem('theme');
-      if (theme) document.querySelectorAll('porto-theme-select select').forEach((s) => { s.value = theme; });
+      if (theme !== 'light' && theme !== 'dark' && theme !== 'auto') return;
+      const labels = { dark: 'Dark', light: 'Light', auto: 'Auto' };
+      document.querySelectorAll('porto-theme-select').forEach((control) => {
+        control.setAttribute('data-current', theme);
+        const label = control.querySelector('[data-theme-current-label]');
+        if (label) label.textContent = labels[theme];
+        control.querySelectorAll('[data-theme-value]').forEach((button) => {
+          button.setAttribute('aria-checked', String(button.getAttribute('data-theme-value') === theme));
+        });
+      });
     } catch (error) {
       // Storage unavailable — keep the server-rendered default.
     }
@@ -53,14 +85,89 @@ const defaultMode = config.theme.defaultMode;
 ></script>
 
 <style>
-  @layer porto.components {
-    porto-theme-select:has([value="dark"]:not(:checked))
+  @layer porto.core {
+    /* The control matches the navbar's "More" dropdown exactly —
+       same summary text + ▾ indicator and spacing, same menu
+       surface — so the two dropdowns look like one component. */
+    .porto-theme-dropdown {
+      position: relative;
+    }
+
+    .theme-summary {
+      cursor: pointer;
+      border-radius: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.95rem;
+      color: var(--porto-color-gray-2);
+      list-style: none;
+      white-space: nowrap;
+    }
+    .theme-summary:hover {
+      color: var(--porto-color-white);
+    }
+    .theme-summary::after {
+      content: "▾";
+      margin-inline-start: 0.25rem;
+      font-size: 0.75em;
+    }
+    .theme-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    /* Icon + label sit tight together. */
+    .theme-current {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Only the current preference's icon shows; `data-current` is
+       set server-side from defaultMode and kept in sync by the
+       pre-paint script above and `theme-mode.ts`. */
+    porto-theme-select:not([data-current="dark"])
       :global(.porto-theme-icon-dark),
-    porto-theme-select:has([value="light"]:not(:checked))
+    porto-theme-select:not([data-current="light"])
       :global(.porto-theme-icon-light),
-    porto-theme-select:has([value="auto"]:not(:checked))
+    porto-theme-select:not([data-current="auto"])
       :global(.porto-theme-icon-auto) {
       display: none;
+    }
+
+    .theme-menu {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      z-index: 101;
+      min-width: 9rem;
+      margin: 0;
+      padding: 0.5rem 0;
+      list-style: none;
+      border-radius: 0.5rem;
+      border: 1px solid var(--porto-color-hairline-light);
+      background-color: var(--porto-color-bg-nav);
+      box-shadow: var(--porto-shadow-md);
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      border: 0;
+      padding: 0.5rem 1rem;
+      background-color: transparent;
+      font-size: 0.95rem;
+      text-align: start;
+      color: var(--porto-color-gray-2);
+      cursor: pointer;
+    }
+    .theme-option:hover {
+      background-color: var(--porto-color-hairline-light);
+      color: var(--porto-color-white);
+    }
+    .theme-option[aria-checked="true"] {
+      font-weight: 600;
+      color: var(--porto-color-text-accent);
     }
   }
 </style>

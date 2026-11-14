@@ -13,7 +13,7 @@
  * so stored `light`/`dark` choices stay valid; `auto` is the new
  * third value. The inline script in `BaseLayout` applies the
  * resolved mode pre-paint (no flash); this module — imported by
- * `BaseLayout` on every page — wires the theme selects
+ * `BaseLayout` on every page — wires the theme dropdowns
  * (`porto-theme-select`, rendered by `Navbar` and
  * `MobileMenuFooter`) and keeps the `theme-color` meta tag in sync
  * with the background token.
@@ -60,15 +60,38 @@ export function loadTheme(): ThemePreference {
   return getTheme();
 }
 
+const THEME_LABELS: Record<ThemePreference, string> = {
+  dark: "Dark",
+  light: "Light",
+  auto: "Auto",
+};
+
+/**
+ * Syncs every theme dropdown on the page with the given preference:
+ * the `data-current` attribute (drives which icon shows), the
+ * summary label, and the checked option.
+ */
+function syncThemeControls(preference: ThemePreference): void {
+  document.querySelectorAll("porto-theme-select").forEach((control) => {
+    control.setAttribute("data-current", preference);
+    const label = control.querySelector("[data-theme-current-label]");
+    if (label) {
+      label.textContent = THEME_LABELS[preference];
+    }
+    control.querySelectorAll("[data-theme-value]").forEach((button) => {
+      button.setAttribute(
+        "aria-checked",
+        String(button.getAttribute("data-theme-value") === preference),
+      );
+    });
+  });
+}
+
 /** Applies a preference, persists it, and re-syncs the theme-color meta. */
 export function setTheme(preference: ThemePreference): void {
   const mode = preference === "auto" ? getPreferredColorScheme() : preference;
   document.documentElement.setAttribute("data-theme", mode);
-  document
-    .querySelectorAll<HTMLSelectElement>("porto-theme-select select")
-    .forEach((select) => {
-      select.value = preference;
-    });
+  syncThemeControls(preference);
   try {
     window.localStorage.setItem(STORAGE_KEY, preference);
   } catch {
@@ -104,20 +127,25 @@ export function updateThemeColor(): void {
 }
 
 function initThemeMode(): void {
-  // Sync every select with the resolved preference, then wire its
-  // change handler (the pre-paint script already applied the mode).
+  // Sync every dropdown with the resolved preference, then wire its
+  // option buttons (the pre-paint script already applied the mode).
   const preference = loadTheme();
-  document
-    .querySelectorAll<HTMLSelectElement>("porto-theme-select select")
-    .forEach((select) => {
-      select.value = preference;
-      select.addEventListener("change", () => {
-        const value = select.value;
-        if (value === "auto" || value === "dark" || value === "light") {
-          setTheme(value);
-        }
+  syncThemeControls(preference);
+  document.querySelectorAll("porto-theme-select").forEach((control) => {
+    control
+      .querySelectorAll<HTMLButtonElement>("[data-theme-value]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          const value = button.getAttribute("data-theme-value");
+          if (value === "auto" || value === "dark" || value === "light") {
+            setTheme(value);
+          }
+          // Close the dropdown after choosing (the navbar script
+          // also closes it on outside click / Escape).
+          control.querySelector("details")?.removeAttribute("open");
+        });
       });
-    });
+  });
 
   // React to changes in system color scheme.
   window
