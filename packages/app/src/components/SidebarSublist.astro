@@ -14,6 +14,9 @@
 //   the active/hover background lives on the <summary> row, not the
 //   inner link, so the caret sits inside the box; the caret has its
 //   own hover background stacking on top of the row hover.
+// - Rows are Fumadocs-style: uniform size across levels, roomy
+//   0.5em vertical padding, and the caret pinned to the row's right
+//   edge (the label grows to fill the row).
 // - Every row shows an icon: the frontmatter `icon` when the entry
 //   declares one, else DocCardList's fallbacks (folder for
 //   categories, notebook for docs) — Fumadocs-style. The frontmatter
@@ -98,7 +101,7 @@ function hasActiveDescendant(item: any): boolean {
                   )}
                 </span>
                 <span class="caret">
-                  <Icon name="right-caret" size="1.5rem" />
+                  <Icon name="right-caret" size="1rem" />
                 </span>
               </summary>
               <SidebarRestorePoint />
@@ -167,9 +170,10 @@ function hasActiveDescendant(item: any): boolean {
       padding-inline-start: var(--porto-sidebar-item-padding-inline);
     }
 
+    /* Top-level rows are the same size and weight as nested rows
+       (Fumadocs-style) — hierarchy comes from indentation and the
+       guide line, not a bigger font. Only the color stays brighter. */
     .large {
-      font-size: var(--porto-text-lg);
-      font-weight: 600;
       color: var(--porto-color-white);
     }
 
@@ -180,13 +184,10 @@ function hasActiveDescendant(item: any): boolean {
     summary {
       display: flex;
       align-items: center;
-      /* The caret sits right after the label (a 0.25rem gap), not
-         pinned to the row's right edge — the gap between the text
-         end and the caret stays small whatever the row width. */
-      gap: 0.25rem;
+      justify-content: space-between;
       /* Same vertical padding as a leaf link, so category rows and
          leaf rows are the same height. */
-      padding: 0.25em var(--porto-sidebar-item-padding-inline);
+      padding: 0.5em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
       cursor: pointer;
       user-select: none;
@@ -218,12 +219,19 @@ function hasActiveDescendant(item: any): boolean {
     }
 
     a {
-      display: block;
+      /* Flex so the icon centers vertically when the label wraps
+         over several lines (Fumadocs-style) instead of sitting on
+         the first line. */
+      display: flex;
+      align-items: center;
       border-radius: 0.25rem;
       text-decoration: none;
       color: var(--porto-color-gray-2);
-      padding: 0.25em var(--porto-sidebar-item-padding-inline);
+      padding: 0.5em var(--porto-sidebar-item-padding-inline);
       line-height: 1.4;
+    }
+    a > * {
+      min-width: 0;
     }
 
     a:hover,
@@ -303,16 +311,16 @@ function hasActiveDescendant(item: any): boolean {
     }
 
     /* Row icons: the injected SVG is 1em, so the icon scales with
-       its row's text (large top-level rows get a larger icon). The
-       icon carries its own trailing gap, so the `a > *` margin rule
-       excludes it — otherwise the gap would double. */
+       its row's text. The icon carries its own trailing gap, so the
+       `a > *` margin rule excludes it — otherwise the gap would
+       double. Vertical centering comes from the row's flex layout,
+       so a wrapped label centers the icon on the whole block. */
     .sidebar-icon {
       display: inline-flex;
       flex-shrink: 0;
       align-items: center;
       justify-content: center;
       margin-inline-end: 0.25em;
-      vertical-align: -0.125em;
     }
     .sidebar-icon:empty {
       display: none;
@@ -323,19 +331,31 @@ function hasActiveDescendant(item: any): boolean {
       margin-inline-end: 0.25em;
     }
 
+    /* The group label grows to fill the summary row, pinning the
+       caret to the right edge — inside the active highlight box
+       when the category is the current page. */
+    .group-label {
+      flex: 1;
+    }
+
     /* A category link inside a <summary> is the group label, not a
        list link — no list-link padding (the summary provides it). */
     .group-label a {
       padding: 0;
     }
 
+    /* A plain (non-link) category label centers its icon the same
+       way a link row does. */
+    .group-label > span {
+      display: flex;
+      align-items: center;
+    }
+
     @media (min-width: 50rem) {
       .top-level > li + li {
         margin-top: 0.5rem;
       }
-      .large {
-        font-size: var(--porto-text-base);
-      }
+      .large,
       a {
         font-size: var(--porto-text-sm);
       }
