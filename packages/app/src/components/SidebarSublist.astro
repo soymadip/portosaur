@@ -247,9 +247,17 @@ function hasActiveDescendant(item: any): boolean {
       min-width: 0;
     }
 
+    /* A hovered leaf row gets the same full-width tint box as a
+       hovered category row (summary:hover below) — without the
+       background the leaf only changed text color. */
     a:hover,
     a:focus {
       color: var(--porto-color-white);
+      background-color: color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 10%,
+        transparent
+      );
     }
 
     /* OG-style active item: accent text on a subtle 10% accent tint.
@@ -320,6 +328,14 @@ function hasActiveDescendant(item: any): boolean {
     .group-label a[aria-current="page"],
     .group-label a[aria-current="page"]:hover,
     .group-label a[aria-current="page"]:focus {
+      background-color: transparent;
+    }
+
+    /* Same for hover: the category label link sits inside the
+       <summary>, whose own hover box already covers the row — the
+       link must not paint a second tint box on top of it. */
+    .group-label a:hover,
+    .group-label a:focus {
       background-color: transparent;
     }
 
