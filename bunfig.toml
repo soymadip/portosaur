@@ -1,0 +1,3 @@
+# Hoisted linker: every `bun add` re-runs install, and the default isolated linker breaks the docs build (Astro must resolve the theme + workspace packages from a shared node_modules).
+[install]
+linker = "hoisted"
