@@ -234,7 +234,8 @@ const hasToc = tocHeadings.length > 0;
         display: block;
         width: var(--porto-sidebar-width);
         background-color: var(--porto-color-bg-sidebar);
-        border-inline-end: 1px solid var(--porto-color-hairline-shade);
+        /* Same separator as the TOC panel's left border. */
+        border-inline-end: 1px solid var(--porto-color-hairline);
       }
     }
 
