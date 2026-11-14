@@ -14,9 +14,14 @@
 //   the active/hover background lives on the <summary> row, not the
 //   inner link, so the caret sits inside the box; the caret has its
 //   own hover background stacking on top of the row hover.
+// - Every row shows an icon: the frontmatter `icon` when the entry
+//   declares one, else DocCardList's fallbacks (folder for
+//   categories, notebook for docs) — Fumadocs-style. The frontmatter
+//   `color`, when declared, colors the icon.
 import config from "porto:config";
 import Icon from "./Icon.astro";
 import SidebarRestorePoint from "./SidebarRestorePoint.astro";
+import { renderDynamicIcon } from "../utils/icons.ts";
 
 interface Props {
   items: any[];
@@ -56,69 +61,92 @@ function hasActiveDescendant(item: any): boolean {
 ---
 
 <ul class:list={{ "top-level": !nested }}>
-  {items.map((item) => (
-    <li>
-      {item.type === "category" ? (
-        collapsable ? (
-          <details open={hasActiveDescendant(item)}>
-            <summary>
-              <span class="group-label">
-                {item.link?.href ? (
-                  <a
-                    class="large"
-                    href={item.link.href}
-                    aria-current={isActiveItem(item) ? "page" : undefined}
-                  >
+  {items.map((item) => {
+    const iconHtml = renderDynamicIcon(item.icon, {
+      slug: item.label,
+      fallbackIcon: item.type === "category" ? "md:folder" : "md:notebook",
+    });
+    const icon = (
+      <span
+        class="sidebar-icon"
+        aria-hidden="true"
+        style={item.color ? `color: ${item.color}` : undefined}
+        set:html={iconHtml}
+      />
+    );
+    return (
+      <li>
+        {item.type === "category" ? (
+          collapsable ? (
+            <details open={hasActiveDescendant(item)}>
+              <summary>
+                <span class="group-label">
+                  {item.link?.href ? (
+                    <a
+                      class="large"
+                      href={item.link.href}
+                      aria-current={isActiveItem(item) ? "page" : undefined}
+                    >
+                      {icon}
+                      {item.label}
+                    </a>
+                  ) : (
+                    <span class="large">
+                      {icon}
+                      {item.label}
+                    </span>
+                  )}
+                </span>
+                <span class="caret">
+                  <Icon name="right-caret" size="1.5rem" />
+                </span>
+              </summary>
+              <SidebarRestorePoint />
+              <Astro.self
+                items={item.items ?? []}
+                currentHref={currentHref}
+                nested
+              />
+            </details>
+          ) : (
+            <>
+              {item.link?.href ? (
+                <a
+                  class="large"
+                  href={item.link.href}
+                  aria-current={isActiveItem(item) ? "page" : undefined}
+                >
+                  {icon}
+                  {item.label}
+                </a>
+              ) : (
+                <span class="group-label">
+                  <span class="large">
+                    {icon}
                     {item.label}
-                  </a>
-                ) : (
-                  <span class="large">{item.label}</span>
-                )}
-              </span>
-              <span class="caret">
-                <Icon name="right-caret" size="1.5rem" />
-              </span>
-            </summary>
-            <SidebarRestorePoint />
-            <Astro.self
-              items={item.items ?? []}
-              currentHref={currentHref}
-              nested
-            />
-          </details>
+                  </span>
+                </span>
+              )}
+              <Astro.self
+                items={item.items ?? []}
+                currentHref={currentHref}
+                nested
+              />
+            </>
+          )
         ) : (
-          <>
-            {item.link?.href ? (
-              <a
-                class="large"
-                href={item.link.href}
-                aria-current={isActiveItem(item) ? "page" : undefined}
-              >
-                {item.label}
-              </a>
-            ) : (
-              <span class="group-label">
-                <span class="large">{item.label}</span>
-              </span>
-            )}
-            <Astro.self
-              items={item.items ?? []}
-              currentHref={currentHref}
-              nested
-            />
-          </>
-        )
-      ) : (
-        <a
-          href={item.href}
-          aria-current={isActiveItem(item) ? "page" : undefined}
-          class:list={[{ large: !nested }]}
-        >
-          <span>{item.label}</span>
-        </a>
-      )}
-    </li>
-  ))}
+          <a
+            href={item.href}
+            aria-current={isActiveItem(item) ? "page" : undefined}
+            class:list={[{ large: !nested }]}
+          >
+            {icon}
+            <span>{item.label}</span>
+          </a>
+        )}
+      </li>
+    );
+  })}
 </ul>
 
 <style>
@@ -274,7 +302,23 @@ function hasActiveDescendant(item: any): boolean {
       background-color: transparent;
     }
 
-    a > *:not(:last-child),
+    /* Row icons: the injected SVG is 1em, so the icon scales with
+       its row's text (large top-level rows get a larger icon). The
+       icon carries its own trailing gap, so the `a > *` margin rule
+       excludes it — otherwise the gap would double. */
+    .sidebar-icon {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      margin-inline-end: 0.25em;
+      vertical-align: -0.125em;
+    }
+    .sidebar-icon:empty {
+      display: none;
+    }
+
+    a > *:not(.sidebar-icon):not(:last-child),
     .group-label > *:not(:last-child) {
       margin-inline-end: 0.25em;
     }
