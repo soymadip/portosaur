@@ -100,8 +100,8 @@ function hasActiveDescendant(item: any): boolean {
                     </span>
                   )}
                 </span>
-                <span class="caret">
-                  <Icon name="right-caret" size="1rem" />
+                <span class="sidebar-caret">
+                  <Icon name="right-caret" size="1.25rem" />
                 </span>
               </summary>
               <SidebarRestorePoint />
@@ -197,11 +197,16 @@ function hasActiveDescendant(item: any): boolean {
       display: none;
     }
 
-    .caret {
+    .sidebar-caret {
       /* A square hit area around the chevron, with its own hover
          background (Docusaurus's caret button): the negative
          margins keep the padded box from making the row taller
-         than a leaf row. */
+         than a leaf row. Only the chevron itself rotates when the
+         group opens — the span and its hover background stay put,
+         so the hover box never spins through a diamond
+         mid-animation. The svg is rendered by the Icon component,
+         so the rotation rules have to be global: scoped styles
+         can't reach it. */
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -209,12 +214,14 @@ function hasActiveDescendant(item: any): boolean {
       padding: 0.2rem;
       margin-block: -0.2rem;
       border-radius: 0.25rem;
+    }
+    :global(.sidebar-caret svg) {
       transition: transform 0.2s ease-in-out;
     }
-    :global([dir="rtl"]) .caret {
+    :global([dir="rtl"] .sidebar-caret svg) {
       transform: rotateZ(180deg);
     }
-    [open] > summary .caret {
+    [open] > summary :global(.sidebar-caret svg) {
       transform: rotateZ(90deg);
     }
 
@@ -297,7 +304,7 @@ function hasActiveDescendant(item: any): boolean {
       );
       border-radius: 0.25rem;
     }
-    .caret:hover {
+    .sidebar-caret:hover {
       background-color: color-mix(
         in srgb,
         var(--porto-color-gray-1) 10%,
