@@ -4,7 +4,8 @@
 // Renders <head> (title, meta description, social-card meta, favicon /
 // manifest links, user head tags, user custom CSS), the theme-mode
 // inline script (resolves the initial mode from localStorage /
-// defaultMode before paint — no flash), skip-link, Navbar, <main>,
+// defaultMode / the OS preference for `auto`, before paint — no
+// flash), skip-link, Navbar, <main>,
 // Footer, the theme-mode module, and the PWA scripts.
 //
 // Pages must NOT render their own <main>: this layout owns it (the old
@@ -179,7 +180,8 @@ const swUrl = withBase("sw.js");
     })}
     {/*
       Blocking theme-mode script: applies the stored choice (or the
-      configured defaultMode) before first paint, so there is no flash.
+      configured defaultMode) before first paint, so there is no
+      flash. A stored `auto` resolves against the OS preference.
       The full theme-mode module loads at the end of <body>.
     */}
     <script is:inline define:vars={{ defaultMode: theme.defaultMode }}>
@@ -189,6 +191,10 @@ const swUrl = withBase("sw.js");
           var stored = window.localStorage.getItem("theme");
           if (stored === "light" || stored === "dark") {
             mode = stored;
+          } else if (stored === "auto") {
+            mode = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
           }
         } catch (error) {
           // Storage unavailable — fall back to the configured default.
@@ -216,7 +222,7 @@ const swUrl = withBase("sw.js");
 
     {!noFooter && <Footer />}
 
-    {/* Theme toggle wiring + theme-color sync (every page). */}
+    {/* Theme select wiring + theme-color sync (every page). */}
     <script>
       import "../scripts/theme-mode.ts";
     </script>

@@ -1,18 +1,22 @@
 /**
- * Theme mode (dark/light) management — vanilla port of Docusaurus
- * `useColorMode`, plus the theme-color meta sync (old
- * `getThemeColorSyncScript`).
+ * Theme mode (light / dark / auto) management — Starlight's
+ * theme-select logic (see `ThemeSelect.astro`) adapted to Portosaur,
+ * plus the theme-color meta sync (old `getThemeColorSyncScript`).
  *
- * Resolution order (matches the old config, which set
- * `respectPrefersColorScheme: false`): a stored `localStorage` choice
- * wins; otherwise the site's `defaultMode` wins. `prefers-color-scheme`
- * is deliberately NOT consulted.
+ * Resolution order: a stored `localStorage` choice wins; otherwise
+ * the site's `defaultMode` wins (the mode the inline script in
+ * `BaseLayout` already applied pre-paint). `auto` follows the OS
+ * `prefers-color-scheme` preference, live — if the OS preference
+ * changes while the page is open, an `auto` choice re-resolves.
  *
- * The inline script in `BaseLayout` applies the resolved mode pre-paint
- * (no flash); this module — imported by `BaseLayout` on every page —
- * wires the toggle buttons (`[data-theme-toggle]`, rendered by
- * `Navbar`) and keeps the `theme-color` meta tag in sync with the
- * background token.
+ * The preference lives under the existing `"theme"` localStorage key,
+ * so stored `light`/`dark` choices stay valid; `auto` is the new
+ * third value. The inline script in `BaseLayout` applies the
+ * resolved mode pre-paint (no flash); this module — imported by
+ * `BaseLayout` on every page — wires the theme selects
+ * (`porto-theme-select`, rendered by `Navbar` and
+ * `MobileMenuFooter`) and keeps the `theme-color` meta tag in sync
+ * with the background token.
  */
 
 const STORAGE_KEY = "theme";
@@ -21,6 +25,7 @@ const STORAGE_KEY = "theme";
 const THEME_COLOR_VARS = ["--porto-color-bg"];
 
 export type ThemeMode = "light" | "dark";
+export type ThemePreference = "light" | "dark" | "auto";
 
 /** The mode currently applied to `<html data-theme>`. */
 export function getTheme(): ThemeMode {
@@ -31,25 +36,46 @@ export function getTheme(): ThemeMode {
   return "dark";
 }
 
-/** Applies a mode, persists it, and re-syncs the theme-color meta. */
-export function setTheme(mode: ThemeMode): void {
-  document.documentElement.setAttribute("data-theme", mode);
-  try {
-    window.localStorage.setItem(STORAGE_KEY, mode);
-  } catch {
-    // Storage unavailable (private mode, disabled cookies) — the mode
-    // still applies for this page load.
-  }
-  updateThemeColor();
+/** Get the preferred system color scheme. */
+export function getPreferredColorScheme(): ThemeMode {
+  return window.matchMedia("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark";
 }
 
-/** Flips between light and dark. */
-export function toggleTheme(): void {
-  if (getTheme() === "dark") {
-    setTheme("light");
-  } else {
-    setTheme("dark");
+/**
+ * Load the stored preference. When nothing valid is stored, fall
+ * back to the mode the pre-paint script applied — the site's
+ * `defaultMode` — so the selects show the effective choice.
+ */
+export function loadTheme(): ThemePreference {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "auto" || stored === "dark" || stored === "light") {
+      return stored;
+    }
+  } catch {
+    // Storage unavailable (private mode, disabled cookies).
   }
+  return getTheme();
+}
+
+/** Applies a preference, persists it, and re-syncs the theme-color meta. */
+export function setTheme(preference: ThemePreference): void {
+  const mode = preference === "auto" ? getPreferredColorScheme() : preference;
+  document.documentElement.setAttribute("data-theme", mode);
+  document
+    .querySelectorAll<HTMLSelectElement>("porto-theme-select select")
+    .forEach((select) => {
+      select.value = preference;
+    });
+  try {
+    window.localStorage.setItem(STORAGE_KEY, preference);
+  } catch {
+    // Storage unavailable (private mode, disabled cookies) — the
+    // mode still applies for this page load.
+  }
+  updateThemeColor();
 }
 
 /**
@@ -78,11 +104,29 @@ export function updateThemeColor(): void {
 }
 
 function initThemeMode(): void {
-  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleTheme();
+  // Sync every select with the resolved preference, then wire its
+  // change handler (the pre-paint script already applied the mode).
+  const preference = loadTheme();
+  document
+    .querySelectorAll<HTMLSelectElement>("porto-theme-select select")
+    .forEach((select) => {
+      select.value = preference;
+      select.addEventListener("change", () => {
+        const value = select.value;
+        if (value === "auto" || value === "dark" || value === "light") {
+          setTheme(value);
+        }
+      });
     });
-  });
+
+  // React to changes in system color scheme.
+  window
+    .matchMedia("(prefers-color-scheme: light)")
+    .addEventListener("change", () => {
+      if (loadTheme() === "auto") {
+        setTheme("auto");
+      }
+    });
 
   // Re-sync the theme color whenever the mode flips.
   const observer = new MutationObserver((mutations) => {

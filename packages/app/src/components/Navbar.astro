@@ -4,7 +4,7 @@
 // Starlight (MIT License) — see packages/app/NOTICE.md: the `.header`
 // frame styles come from Starlight's PageFrame, the `.header-inner`
 // grid from Starlight's Header; the nav entries, search visibility,
-// dropdowns, theme toggle, hide-on-scroll, and mobile menu are
+// dropdowns, theme select, hide-on-scroll, and mobile menu are
 // Portosaur's own (converted from Tailwind utilities to plain CSS).
 //
 // On docs pages (`hasSidebar`), the navbar renders NO hamburger or
@@ -18,6 +18,7 @@ import config from "porto:config";
 import Icon from "./Icon.astro";
 import Search from "./Search.astro";
 import SiteTitle from "./SiteTitle.astro";
+import ThemeSelect from "./ThemeSelect.astro";
 import {
   buildNavEntries,
   isDropdown,
@@ -130,16 +131,9 @@ const showThemeSwitch = theme.showThemeSwitch;
     <div class="porto-flex print:hidden right-group">
       <div class="porto-flex search-group">
         {showThemeSwitch && (
-          <button
-            type="button"
-            class="theme-toggle porto-hidden md:porto-flex"
-            data-theme-toggle
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-          >
-            <Icon name="moon" size="1.25rem" class="light:porto-hidden" />
-            <Icon name="sun" size="1.25rem" class="dark:porto-hidden" />
-          </button>
+          <div class="porto-hidden md:porto-flex">
+            <ThemeSelect />
+          </div>
         )}
         {showSearch && <Search />}
       </div>
@@ -259,17 +253,9 @@ const showThemeSwitch = theme.showThemeSwitch;
           </details>
         </nav>
         {showThemeSwitch && (
-          <button
-            type="button"
-            class="mobile-theme-toggle"
-            data-theme-toggle
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-          >
-            <Icon name="moon" size="1.25rem" class="light:porto-hidden" />
-            <Icon name="sun" size="1.25rem" class="dark:porto-hidden" />
-            <span>Theme</span>
-          </button>
+          <div class="mobile-theme-select">
+            <ThemeSelect />
+          </div>
         )}
         {showProjectLink && (
           <a
@@ -464,20 +450,6 @@ const showThemeSwitch = theme.showThemeSwitch;
       align-items: center;
     }
 
-    .theme-toggle {
-      align-items: center;
-      border: 0;
-      border-radius: 9999px;
-      padding: 0.5rem;
-      background-color: transparent;
-      color: var(--porto-color-gray-2);
-      cursor: pointer;
-    }
-    .theme-toggle:hover {
-      background-color: var(--porto-color-gray-6);
-      color: var(--porto-color-white);
-    }
-
     /* Nav links + dropdowns (Portosaur's own, plain CSS). */
     .primary-nav {
       align-items: center;
@@ -585,23 +557,13 @@ const showThemeSwitch = theme.showThemeSwitch;
       box-shadow: none;
     }
 
-    .mobile-theme-toggle {
+    .mobile-theme-select {
+      /* Flex so the select shrink-wraps (Starlight always places
+        the select in a flex row; in a block context the label
+        stretches full width and the caret drifts to the far edge). */
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
       margin-top: 0.5rem;
       padding: 0.5rem 0.75rem;
-      border: 0;
-      border-radius: 0.25rem;
-      background-color: transparent;
-      color: var(--porto-color-gray-2);
-      font-size: 0.95rem;
-      cursor: pointer;
-      text-align: start;
-    }
-    .mobile-theme-toggle:hover {
-      color: var(--porto-color-white);
     }
 
     .version-link {

@@ -4,10 +4,10 @@
 // of the mobile sidebar popover), adapted to Portosaur's content:
 // Portosaur has no language select or social icons here — instead the
 // footer holds the navbar links (which live outside the sidebar tree
-// on desktop) and the theme toggle, so mobile docs readers can reach
+// on desktop) and the theme select, so mobile docs readers can reach
 // every nav destination from the popover.
 import config from "porto:config";
-import Icon from "./Icon.astro";
+import ThemeSelect from "./ThemeSelect.astro";
 import {
   buildNavEntries,
   isDropdown,
@@ -70,17 +70,9 @@ const entries = [...leftEntries, ...rightEntries];
     </details>
   </nav>
   {config.theme.showThemeSwitch && (
-    <button
-      type="button"
-      class="theme-toggle"
-      data-theme-toggle
-      aria-label="Toggle dark mode"
-      title="Toggle dark mode"
-    >
-      <Icon name="moon" class="light:porto-hidden" />
-      <Icon name="sun" class="dark:porto-hidden" />
-      <span>Theme</span>
-    </button>
+    <div class="theme-select-row">
+      <ThemeSelect />
+    </div>
   )}
   {showProjectLink && (
     <a
@@ -147,22 +139,12 @@ const entries = [...leftEntries, ...rightEntries];
       padding: 0 0 0 1rem;
     }
 
-    .theme-toggle {
+    .theme-select-row {
+      /* Flex so the select shrink-wraps (Starlight always places
+        the select in a flex row; in a block context the label
+        stretches full width and the caret drifts to the far edge). */
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
       padding: 0.3em 0.5rem;
-      border: 0;
-      border-radius: 0.25rem;
-      background-color: transparent;
-      color: var(--porto-color-gray-2);
-      font-size: var(--porto-text-sm);
-      cursor: pointer;
-      text-align: start;
-    }
-    .theme-toggle:hover {
-      color: var(--porto-color-white);
     }
 
     .version-link {

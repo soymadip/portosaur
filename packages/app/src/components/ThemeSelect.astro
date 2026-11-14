@@ -1,0 +1,66 @@
+---
+// Derived from Starlight (MIT License) — see packages/app/NOTICE.md.
+// Starlight's ThemeSelect, renamed (`starlight-theme-select` →
+// `porto-theme-select`, `sl-` → `porto-`) and with the i18n strings
+// replaced by plain English (Portosaur has no i18n).
+//
+// Two Portosaur differences from Starlight:
+// - The preference lives under the existing `"theme"` localStorage
+//   key (stored `light`/`dark` choices stay valid; `auto` is the new
+//   third value), not Starlight's `starlight-theme` key.
+// - When nothing is stored, the site's `defaultMode` wins (not
+//   Starlight's `auto`), so the server-rendered selected option is
+//   the configured default; the inline script below corrects it
+//   from localStorage before paint. The change wiring lives in
+//   `../scripts/theme-mode.ts` (shared with the theme-color sync),
+//   not in a custom-element script here.
+import config from "porto:config";
+import Icon from "./Icon.astro";
+import Select from "./Select.astro";
+
+const defaultMode = config.theme.defaultMode;
+---
+
+<porto-theme-select>
+  <Select
+    label="Select theme"
+    options={[
+      { label: "Dark", selected: defaultMode === "dark", value: "dark" },
+      { label: "Light", selected: defaultMode === "light", value: "light" },
+      { label: "Auto", selected: false, value: "auto" },
+    ]}
+    width="6.25em"
+  >
+    <Fragment slot="icon">
+      <Icon name="moon" class="porto-theme-icon-dark" />
+      <Icon name="sun" class="porto-theme-icon-light" />
+      <Icon name="laptop" class="porto-theme-icon-auto" />
+    </Fragment>
+  </Select>
+</porto-theme-select>
+
+{/* Inlined to avoid FOUC. Uses `set:html` to avoid an incorrect type error. */}
+<script
+  is:inline
+  set:html={`(() => {
+    try {
+      const theme = localStorage.getItem('theme');
+      if (theme) document.querySelectorAll('porto-theme-select select').forEach((s) => { s.value = theme; });
+    } catch (error) {
+      // Storage unavailable — keep the server-rendered default.
+    }
+  })();`}
+></script>
+
+<style>
+  @layer porto.components {
+    porto-theme-select:has([value="dark"]:not(:checked))
+      :global(.porto-theme-icon-dark),
+    porto-theme-select:has([value="light"]:not(:checked))
+      :global(.porto-theme-icon-light),
+    porto-theme-select:has([value="auto"]:not(:checked))
+      :global(.porto-theme-icon-auto) {
+      display: none;
+    }
+  }
+</style>

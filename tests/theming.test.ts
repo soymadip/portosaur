@@ -515,6 +515,121 @@ describe("theming", () => {
     }
   });
 
+  describe("theme select", () => {
+    // Starlight's Light / Dark / Auto select replaces Portosaur's
+    // light/dark toggle button (commit after the portfolio commit).
+    // The preference lives under the existing `"theme"` localStorage
+    // key (stored `light`/`dark` choices stay valid; `auto` is new),
+    // and when nothing is stored the site's `defaultMode` wins.
+    const selectSrc = fs.readFileSync(
+      path.join(APP_SRC, "components/ThemeSelect.astro"),
+      "utf8",
+    );
+    const selectWidgetSrc = fs.readFileSync(
+      path.join(APP_SRC, "components/Select.astro"),
+      "utf8",
+    );
+    const themeModeSrc = fs.readFileSync(
+      path.join(APP_SRC, "scripts/theme-mode.ts"),
+      "utf8",
+    );
+    const baseLayoutSrc = fs.readFileSync(
+      path.join(APP_SRC, "layouts/BaseLayout.astro"),
+      "utf8",
+    );
+
+    test("ThemeSelect and Select exist with attribution headers", () => {
+      expect(selectSrc).toContain("Derived from Starlight (MIT License)");
+      expect(selectWidgetSrc).toContain(
+        "Derived from Starlight (MIT License)",
+      );
+      expect(selectSrc).toContain("<porto-theme-select>");
+      // (comments may cite the Starlight originals — strip them first)
+      expect(stripComments(selectSrc)).not.toContain("starlight-theme-select");
+      // Plain strings, not i18n calls (Portosaur has no i18n).
+      expect(selectSrc).not.toContain("Astro.locals.t");
+      for (const value of ['value: "dark"', 'value: "light"', 'value: "auto"']) {
+        expect(selectSrc).toContain(value);
+      }
+      // The server-rendered selected option is the configured
+      // defaultMode, not Starlight's `auto`.
+      expect(selectSrc).toContain("config.theme.defaultMode");
+      expect(selectSrc).toContain('selected: defaultMode === "dark"');
+      expect(selectSrc).toContain('selected: defaultMode === "light"');
+    });
+
+    test("no toggle button code remains in app source", () => {
+      const files = [
+        ...collectFiles(path.join(APP_SRC, "components"), ".astro"),
+        ...collectFiles(path.join(APP_SRC, "layouts"), ".astro"),
+        ...collectFiles(path.join(APP_SRC, "scripts"), ".ts"),
+      ];
+      for (const file of files) {
+        const text = fs.readFileSync(file, "utf8");
+        expect(text).not.toContain("data-theme-toggle");
+        expect(text).not.toContain("toggleTheme");
+        expect(text).not.toContain("Toggle dark mode");
+      }
+      // The moon/sun Icon entries themselves stay — generic icon
+      // data, used elsewhere (and by the select's icons).
+      const icons = fs.readFileSync(
+        path.join(APP_SRC, "utils/porto-icons.ts"),
+        "utf8",
+      );
+      expect(icons).toContain("moon:");
+      expect(icons).toContain("sun:");
+      expect(icons).toContain("laptop:");
+    });
+
+    test('preference lives under the existing "theme" key', () => {
+      for (const src of [selectSrc, themeModeSrc, baseLayoutSrc]) {
+        expect(src).toContain('"theme"');
+        // (comments may cite Starlight's key — strip them first)
+        expect(stripComments(src)).not.toContain("starlight-theme");
+      }
+      expect(themeModeSrc).toContain('const STORAGE_KEY = "theme"');
+    });
+
+    test("theme-mode handles auto and live OS-preference changes", () => {
+      expect(themeModeSrc).toContain(
+        'export type ThemePreference = "light" | "dark" | "auto"',
+      );
+      expect(themeModeSrc).toContain("getPreferredColorScheme");
+      expect(themeModeSrc).toContain("prefers-color-scheme: light");
+      expect(themeModeSrc).toContain('addEventListener("change"');
+      // Change wiring targets the selects, and applying a choice
+      // syncs every select on the page.
+      expect(themeModeSrc).toContain("porto-theme-select select");
+      expect(themeModeSrc).toContain("select.value = preference");
+      // Theme-color sync survives the rewrite.
+      expect(themeModeSrc).toContain("updateThemeColor");
+      expect(themeModeSrc).toContain("--porto-color-bg");
+    });
+
+    test("pre-paint script resolves auto against the OS preference", () => {
+      expect(baseLayoutSrc).toContain('stored === "auto"');
+      expect(baseLayoutSrc).toContain("prefers-color-scheme: light");
+      expect(baseLayoutSrc).toContain('localStorage.getItem("theme")');
+    });
+
+    test("select renders in navbar and mobile menu footer, gated", () => {
+      const navbar = fs.readFileSync(
+        path.join(APP_SRC, "components/Navbar.astro"),
+        "utf8",
+      );
+      expect(navbar).toContain('import ThemeSelect from "./ThemeSelect.astro"');
+      expect(navbar).toContain("<ThemeSelect />");
+      expect(navbar).toContain("showThemeSwitch");
+      const footer = fs.readFileSync(
+        path.join(APP_SRC, "components/MobileMenuFooter.astro"),
+        "utf8",
+      );
+      expect(footer).toContain('import ThemeSelect from "./ThemeSelect.astro"');
+      expect(footer).toContain("<ThemeSelect />");
+      expect(footer).toContain("config.theme.showThemeSwitch");
+    });
+  });
+
   describe("built output", () => {
     const hasDocsBuild = fs.existsSync(
       path.join(DOCS_BUILD_DIR, "index.html"),
@@ -608,6 +723,19 @@ describe("theming", () => {
       expect(img).toContain('width="418"');
       expect(img).toContain('height="512"');
     });
+
+    builtTest("doc page renders the theme select, no toggle", () => {
+      const html = fs.readFileSync(
+        path.join(DOCS_BUILD_DIR, "docs/getting-started/index.html"),
+        "utf8",
+      );
+      // Navbar select + mobile menu footer select.
+      expect(html.match(/<porto-theme-select[\s>]/g)?.length).toBe(2);
+      expect(html).toContain('<option value="dark"');
+      expect(html).toContain('<option value="light"');
+      expect(html).toContain('<option value="auto"');
+      expect(html).not.toContain("data-theme-toggle");
+    });
   });
 
   describe("built output (playground)", () => {
@@ -668,6 +796,18 @@ describe("theming", () => {
       // No Tailwind utilities leak into the built CSS.
       expect(css).not.toContain(".text-muted");
       expect(css).not.toContain(".bg-surface");
+    });
+    playgroundTest("home renders the theme select, no toggle", () => {
+      const html = fs.readFileSync(
+        path.join(PLAYGROUND_BUILD_DIR, "index.html"),
+        "utf8",
+      );
+      // Navbar select + mobile slide-down menu select.
+      expect(html.match(/<porto-theme-select[\s>]/g)?.length).toBe(2);
+      expect(html).toContain('<option value="dark"');
+      expect(html).toContain('<option value="light"');
+      expect(html).toContain('<option value="auto"');
+      expect(html).not.toContain("data-theme-toggle");
     });
   });
 });
