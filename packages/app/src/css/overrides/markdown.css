@@ -69,11 +69,14 @@ mark {
  * packages/app/NOTICE.md): a saturated variant background, a thick
  * left accent border, and an icon + bold title in the variant's
  * accent color. Portosaur's types map onto Starlight's four
- * variants: note + info -> note (blue), tip + important + success
- * -> tip (purple), warning + caution -> caution (amber), danger
- * -> danger (red). The icons are Starlight's aside icons
- * (information, rocket, warning, error), drawn through a CSS mask
- * on the heading's ::before so no markup change is needed. */
+ * variants: note + info -> note (blue), tip + important -> tip
+ * (purple), warning + caution -> caution (amber), danger -> danger
+ * (red) — plus a fifth, Portosaur-only variant Starlight has no
+ * equivalent of: success -> success (green). The icons are
+ * Starlight's aside icons (information, rocket, warning, error)
+ * plus its approve-check-circle icon for success, drawn through a
+ * CSS mask on the heading's ::before so no markup change is
+ * needed. */
 
 .porto-markdown-content .admonition {
   /* Note (blue) is the default: unknown types render as notes. */
@@ -96,12 +99,18 @@ mark {
 }
 
 .porto-markdown-content .admonition-tip,
-.porto-markdown-content .admonition-important,
-.porto-markdown-content .admonition-success {
+.porto-markdown-content .admonition-important {
   --porto-color-asides-text-accent: var(--porto-color-purple-high);
   --porto-color-asides-border: var(--porto-color-purple);
   --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M1.44%208.855v-.001l3.527-3.516c.34-.344.802-.541%201.285-.548h6.649l.947-.947c3.07-3.07%206.207-3.072%207.62-2.868a1.821%201.821%200%200%201%201.557%201.557c.204%201.413.203%204.55-2.868%207.62l-.946.946v6.649a1.845%201.845%200%200%201-.549%201.286l-3.516%203.528a1.844%201.844%200%200%201-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847%201.847%200%200%201%20.98%2010.693a1.843%201.843%200%200%201%20.46-1.838Zm5.379%202.017-3.873-.776L6.32%206.733h4.638l-4.14%204.14Zm8.403-5.655c2.459-2.46%204.856-2.463%205.89-2.33.134%201.035.13%203.432-2.329%205.891l-6.71%206.71-3.561-3.56%206.71-6.711Zm-1.318%2015.837-.776-3.873%204.14-4.14v4.639l-3.364%203.374Z%22%20clip-rule%3D%22evenodd%22%2F%3E%3Cpath%20d%3D%22M9.318%2018.345a.972.972%200%200%200-1.86-.561c-.482%201.435-1.687%202.204-2.934%202.619a8.22%208.22%200%200%201-1.23.302c.062-.365.157-.79.303-1.229.415-1.247%201.184-2.452%202.62-2.935a.971.971%200%201%200-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012%202.588-3.493%204.033a10.383%2010.383%200%200%200-.51%202.845l-.001.016v.063c0%20.536.434.972.97.972H2.24a7.21%207.21%200%200%200%20.878-.065c.527-.063%201.248-.19%202.02-.447%201.445-.48%203.205-1.472%204.033-3.494a5.828%205.828%200%200%200%20.147-.407Z%22%2F%3E%3C%2Fsvg%3E");
   background-color: var(--porto-color-purple-low);
+}
+
+.porto-markdown-content .admonition-success {
+  --porto-color-asides-text-accent: var(--porto-color-green-high);
+  --porto-color-asides-border: var(--porto-color-green);
+  --porto-admonition-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%3E%3Cpath%20d%3D%22m14.72%208.79-4.29%204.3-1.65-1.65a1%201%200%201%200-1.41%201.41l2.35%202.36a1%201%200%200%200%201.41%200l5-5a1.002%201.002%200%201%200-1.41-1.42ZM12%202a10%2010%200%201%200%200%2020%2010%2010%200%200%200%200-20Zm0%2018a8%208%200%201%201%200-16.001A8%208%200%200%201%2012%2020Z%22%2F%3E%3C%2Fsvg%3E");
+  background-color: var(--porto-color-green-low);
 }
 
 .porto-markdown-content .admonition-warning,
