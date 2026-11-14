@@ -1,37 +1,456 @@
 ---
-// Blog index (`/${blogRoute}`, page 1) — Phase 2 stub.
+// Blog index (`/${blogRoute}`, page 1).
 //
-// No h1: post titles render as h2s, newest first, 10 per page. When the
-// blog has no posts, a single "No posts yet" heading renders instead
-// (the docs site's blog has no posts — only `authors.yml`).
+// Post list, newest first, 10 per page (the Docusaurus default). Each
+// item shows title, date, excerpt, authors, and tags. When the blog
+// has no posts, the empty state renders instead — the h2 "No posts yet"
+// is verbatim (the docs site's blog has no posts — only `authors.yml`).
+//
+// Dates resolve via the shared `postDate` helper in `lib/content.mjs`
+// (frontmatter `date` → the file's last git commit date → the file's
+// mtime — the Docusaurus fallback chain for undated posts).
+//
+// Excerpts come from the `{/* truncate */}` / `<!-- truncate -->`
+// marker: the content above it, rendered through the site's own
+// remark/rehype plugin list, plus a "Read more" link. Posts without a
+// marker fall back to the frontmatter `description`.
 import { getCollection } from "astro:content";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import {
-  pageTitle,
-  blogSlug,
-  sortPostsByDateDesc,
-} from "../lib/content.mjs";
+import BlogSidebar from "../components/BlogSidebar.astro";
+import NotifyButton from "../components/NotifyButton.astro";
+import { pageTitle, blogSlug, postDate } from "../lib/content.mjs";
+import { portosaurMdxOptions } from "../mdx.mjs";
+import { renderIcon } from "../lib/icons.mjs";
+
+const PAGE_SIZE = 10;
 
 const siteTitle = config.site.title;
 const blogRoute = config.site.blogRoute;
 const title = pageTitle("Blog", siteTitle);
 
-const posts = sortPostsByDateDesc(await getCollection("blog")).slice(0, 10);
+const showNotify = config.site.pwa?.enable && config.site.pwa?.notifications;
+
+// The authors collection exists only when `<blogDir>/authors.yml`
+// exists — `getCollection` throws otherwise, so the read is guarded.
+async function loadAuthors() {
+  try {
+    return await getCollection("authors");
+  } catch {
+    return [];
+  }
+}
+
+// Resolves an author ref (a string key into `authors.yml`, or an inline
+// `{ key?, name?, title?, url? }` object) to a display author.
+function resolveAuthor(ref, authors) {
+  if (typeof ref === "string") {
+    const found = authors.find((author) => author.id === ref);
+    if (found) {
+      return {
+        key: found.id,
+        name: found.data.name ?? found.id,
+        title: found.data.title,
+        url: found.data.url,
+        hasPage: found.data.page === true,
+      };
+    }
+    return {
+      key: ref,
+      name: ref,
+      title: undefined,
+      url: undefined,
+      hasPage: false,
+    };
+  }
+  const key = ref?.key;
+  const found = key ? authors.find((author) => author.id === key) : undefined;
+  if (found) {
+    return {
+      key: found.id,
+      name: ref.name ?? found.data.name ?? found.id,
+      title: ref.title ?? found.data.title,
+      url: ref.url ?? found.data.url,
+      hasPage: found.data.page === true,
+    };
+  }
+  return {
+    key: key ?? ref?.name ?? "",
+    name: ref?.name ?? key ?? "",
+    title: ref?.title,
+    url: ref?.url,
+    hasPage: false,
+  };
+}
+
+function formatPostDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+// Posts newest first by resolved date; undated posts sort last, by id
+// (the `sortPostsByDateDesc` rule, applied to resolved dates).
+function sortDatedPostsDesc(datedPosts) {
+  return [...datedPosts].sort((a, b) => {
+    if (a.date && b.date) {
+      return b.date.getTime() - a.date.getTime();
+    }
+    if (a.date) {
+      return -1;
+    }
+    if (b.date) {
+      return 1;
+    }
+    return a.post.id.localeCompare(b.post.id);
+  });
+}
+
+// The Docusaurus truncate marker, either form (`{/* truncate */}` in
+// MDX, `<!-- truncate -->` in Markdown), tolerating inner whitespace.
+const TRUNCATE_PATTERN = /\{\/\*\s*truncate\s*\*\/\}|<!--\s*truncate\s*-->/;
+
+function splitExcerpt(body) {
+  const match = TRUNCATE_PATTERN.exec(body ?? "");
+  if (!match) {
+    return { excerpt: null, truncated: false };
+  }
+  return { excerpt: body.slice(0, match.index), truncated: true };
+}
+
+const allPosts = sortDatedPostsDesc(
+  (await getCollection("blog")).map((post) => ({
+    post,
+    date: postDate(post),
+  })),
+);
+const pageCount = Math.ceil(allPosts.length / PAGE_SIZE);
+const authors = await loadAuthors();
+
+// The sidebar lists every post, grouped by year.
+const sidebarPosts = allPosts.map(({ post, date }) => ({
+  url: `/${blogRoute}/${blogSlug(post)}/`,
+  title: post.data.title ?? post.id,
+  date,
+}));
+
+// Excerpts render through the site's own remark/rehype plugin list
+// (same options as the integration's markdown processor, Shiki themes
+// included) — but the processor is only built when some post on this
+// page actually has a truncate marker. No `fileURL` is passed to
+// `render`: without one, Astro's image collection stays off and
+// excerpt images keep their original `src` instead of being rewritten
+// into unprocessed `__ASTRO_IMAGE_` blobs. A render failure falls back
+// to the description, never failing the page.
+const pagePosts = allPosts.slice(0, PAGE_SIZE);
+const splits = pagePosts.map(({ post }) => splitExcerpt(post.body));
+let excerptRenderer = null;
+if (splits.some((split) => split.truncated)) {
+  const mdxOptions = portosaurMdxOptions({
+    userVars: config.userVars ?? {},
+    colorScheme: config.theme?.colorScheme,
+  });
+  excerptRenderer = await createMarkdownProcessor({
+    remarkPlugins: mdxOptions.remarkPlugins,
+    rehypePlugins: mdxOptions.rehypePlugins,
+    shikiConfig: mdxOptions.shikiConfig,
+  });
+}
+
+async function renderExcerpt(excerpt) {
+  if (!excerptRenderer) {
+    return null;
+  }
+  try {
+    const { code } = await excerptRenderer.render(excerpt);
+    return code;
+  } catch {
+    return null;
+  }
+}
+
+const viewPosts = await Promise.all(
+  pagePosts.map(async ({ post, date }, index) => {
+    const split = splits[index];
+    const excerptHtml = split.truncated
+      ? await renderExcerpt(split.excerpt)
+      : null;
+    return {
+      url: `/${blogRoute}/${blogSlug(post)}/`,
+      title: post.data.title ?? post.id,
+      date,
+      description: post.data.description,
+      excerptHtml,
+      truncated: split.truncated,
+      authors: (post.data.authors ?? []).map((ref) =>
+        resolveAuthor(ref, authors),
+      ),
+      tags: post.data.tags ?? [],
+    };
+  }),
+);
 ---
 
 <BaseLayout title={title}>
-  {
-    posts.length === 0 ? (
-      <h2>No posts yet</h2>
-    ) : (
-      posts.map((post) => (
-        <h2>
-          <a href={`/${blogRoute}/${blogSlug(post)}/`}>
-            {post.data.title ?? post.id}
-          </a>
-        </h2>
-      ))
-    )
-  }
+  {viewPosts.length === 0 ? (
+    <div class="porto-empty-state">
+      <div class="porto-empty-state__icon">
+        <span set:html={renderIcon("md:fountain-pen-tip", { size: "3rem" })} />
+      </div>
+      <h2 class="porto-empty-state__title">No posts yet</h2>
+      <p class="porto-empty-state__desc">
+        Check back later — new posts are on the way!
+      </p>
+    </div>
+  ) : (
+    <div class="porto-blog-layout">
+      <BlogSidebar posts={sidebarPosts} />
+      <div class="porto-blog-list">
+        {showNotify && <NotifyButton />}
+        {viewPosts.map((post) => (
+          <article class="porto-blog-item">
+            <h2>
+              <a href={post.url}>{post.title}</a>
+            </h2>
+            <div class="porto-blog-meta">
+              {post.date && (
+                <time datetime={post.date.toISOString()}>
+                  {formatPostDate(post.date)}
+                </time>
+              )}
+              {post.authors.length > 0 && (
+                <div class="porto-blog-authors">
+                  {post.authors.map((author) => (
+                    <div class="porto-blog-author">
+                      {author.hasPage ? (
+                        <a href={`/${blogRoute}/authors/${author.key}/`}>
+                          {author.name}
+                        </a>
+                      ) : author.url ? (
+                        <a
+                          href={author.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {author.name}
+                        </a>
+                      ) : (
+                        <span class="porto-blog-author__name">
+                          {author.name}
+                        </span>
+                      )}
+                      {author.title && (
+                        <div class="porto-blog-author__title">
+                          {author.title}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {post.excerptHtml ? (
+              <div class="porto-blog-excerpt" set:html={post.excerptHtml} />
+            ) : post.description ? (
+              <p class="porto-blog-desc">{post.description}</p>
+            ) : null}
+            {(post.tags.length > 0 || post.truncated) && (
+              <div class="porto-blog-item__footer">
+                {post.tags.length > 0 && (
+                  <ul class="porto-blog-tags">
+                    {post.tags.map((tag) => (
+                      <li>
+                        <a href={`/${blogRoute}/tags/${tag}/`}>{tag}</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {post.truncated && (
+                  <a class="porto-blog-read-more" href={post.url}>
+                    Read more
+                  </a>
+                )}
+              </div>
+            )}
+          </article>
+        ))}
+        {pageCount > 1 && (
+          <nav class="porto-blog-paginator" aria-label="Blog pages">
+            <span />
+            <a
+              class="porto-blog-paginator__link porto-blog-paginator__link--next"
+              href={`/${blogRoute}/page/2/`}
+              rel="next"
+            >
+              Older
+            </a>
+          </nav>
+        )}
+      </div>
+    </div>
+  )}
 </BaseLayout>
+
+<style>
+  .porto-blog-layout {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .porto-blog-list {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 46rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .porto-blog-item h2 {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+  }
+
+  .porto-blog-item h2 a {
+    color: var(--porto-primary);
+    text-decoration: none;
+  }
+
+  .porto-blog-item h2 a:hover {
+    text-decoration: underline;
+  }
+
+  .porto-blog-meta {
+    margin-bottom: 0.75rem;
+  }
+
+  .porto-blog-meta time {
+    color: var(--porto-text);
+    font-size: 0.9rem;
+  }
+
+  .porto-blog-meta a {
+    color: var(--porto-primary);
+    text-decoration: none;
+  }
+
+  .porto-blog-meta a:hover {
+    text-decoration: underline;
+  }
+
+  .porto-blog-authors {
+    margin-top: 0.75rem;
+  }
+
+  .porto-blog-author {
+    margin-bottom: 0.25rem;
+  }
+
+  .porto-blog-author a,
+  .porto-blog-author__name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-author__title {
+    font-size: 0.85rem;
+    color: var(--porto-text-muted);
+  }
+
+  .porto-blog-desc {
+    color: var(--porto-text-muted);
+    margin: 0 0 0.5rem;
+  }
+
+  .porto-blog-excerpt {
+    margin-bottom: 0.5rem;
+  }
+
+  .porto-blog-excerpt p,
+  .porto-blog-excerpt ul,
+  .porto-blog-excerpt ol,
+  .porto-blog-excerpt pre {
+    margin: 0 0 1rem;
+  }
+
+  .porto-blog-excerpt > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .porto-blog-item__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .porto-blog-read-more {
+    margin-left: auto;
+    color: var(--porto-primary);
+    text-decoration: none;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .porto-blog-read-more:hover {
+    text-decoration: underline;
+  }
+
+  .porto-blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .porto-blog-tags a {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    color: var(--porto-text-muted);
+    text-decoration: none;
+    border: 1px solid var(--porto-border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+
+  .porto-blog-tags a:hover {
+    color: var(--porto-primary);
+    border-color: var(--porto-primary);
+  }
+
+  .porto-blog-paginator {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .porto-blog-paginator__link {
+    padding: 0.6rem 1.2rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    border: 1px solid var(--porto-border);
+    border-radius: 0.5rem;
+  }
+
+  .porto-blog-paginator__link:hover {
+    border-color: var(--porto-primary);
+    color: var(--porto-primary);
+  }
+
+  @media (max-width: 996px) {
+    .porto-blog-list {
+      max-width: none;
+    }
+  }
+</style>

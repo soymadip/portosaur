@@ -45,7 +45,6 @@ export function buildSiteConfig(rawUserConfig, projectDir, context = {}) {
   const { portoPaths = {}, gitDate = null, env = process.env } = context;
 
   const themeRoot = portoPaths.themeRoot ?? context.portoRoot ?? "";
-  const themeDir = portoPaths.theme ?? context.portoRoot ?? "";
 
   const rawGet = (key, ...fallbacks) =>
     getNestedValue(rawUserConfig, key, ...fallbacks);
@@ -338,7 +337,7 @@ export function buildSiteConfig(rawUserConfig, projectDir, context = {}) {
     path.join(getPortoDotDir(projectDir), "static"),
   ].filter((dir) => dir && fs.existsSync(dir));
 
-  const cssFiles = resolveSiteCssFiles(projectDir, userConfig, themeDir);
+  const cssFiles = resolveSiteCssFiles(projectDir, userConfig, themeRoot);
 
   const extraHeadTags = context.extraHeadTags || [];
 

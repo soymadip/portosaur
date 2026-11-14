@@ -1,0 +1,243 @@
+---
+// NavArrow — port of the old components/NavArrow/index.jsx.
+//
+// A fixed circular button at the bottom center of the page. It appears
+// once the page is scrolled past 100px and points down (bouncing) while
+// there is a next section to scroll to, flipping to an up chevron near
+// the bottom of the page, where a click scrolls back to the top. Click
+// behavior is the old one exactly: next direct child of <main> with an
+// id below the current scroll position (scrolling to the very bottom
+// when that section is the last one, or when there is no next section).
+//
+// Two deliberate changes from the old component:
+// - The old <Hint> tooltip is a plain `title` attribute (same call the
+//   NoteCards port made — the real Hint lands in Phase 4); `aria-label`
+//   carries the same text and both update with the direction.
+// - The chevron size follows the Phase 2 inline stub (1.4rem): the old
+//   component passed size="2.5rem" to the Icon but its own `.chevron`
+//   class set 1.4rem, so the intended size was 1.4rem.
+import { renderIcon } from "../lib/icons.mjs";
+---
+
+<button
+  id="nav-arrow"
+  type="button"
+  class="navArrow"
+  data-direction="down"
+  aria-label="Scroll to next section"
+  title="Next Section"
+>
+  <span class="iconWrapper down" set:html={renderIcon("md:chevron-down")} />
+  <span class="iconWrapper up" set:html={renderIcon("md:chevron-up")} />
+</button>
+
+<script>
+  const navArrow = document.getElementById("nav-arrow");
+
+  if (navArrow instanceof HTMLButtonElement) {
+    let scrollTimeout = 0;
+
+    const getSections = () => {
+      const main = document.querySelector("main");
+      if (!main) {
+        return [];
+      }
+      return Array.from(main.querySelectorAll(":scope > [id]"))
+        .map((el) => el.id)
+        .filter((id) => id !== "nav-arrow");
+    };
+
+    const setDirection = (direction) => {
+      navArrow.setAttribute("data-direction", direction);
+      const isDown = direction === "down";
+      navArrow.setAttribute(
+        "aria-label",
+        isDown ? "Scroll to next section" : "Scroll to top",
+      );
+      navArrow.setAttribute("title", isDown ? "Next Section" : "Back to Top");
+    };
+
+    const handleScroll = () => {
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      navArrow.classList.toggle("visible", scrollTop > 100);
+
+      if (scrollTop + windowHeight >= fullHeight - 50) {
+        setDirection("up");
+      } else {
+        setDirection("down");
+      }
+
+      navArrow.classList.add("scrolling");
+      window.clearTimeout(scrollTimeout);
+      scrollTimeout = window.setTimeout(() => {
+        navArrow.classList.remove("scrolling");
+      }, 800);
+    };
+
+    const handleClick = () => {
+      if (navArrow.getAttribute("data-direction") === "up") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const sections = getSections();
+      const windowTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      let nextSectionId = null;
+
+      for (const id of sections) {
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const absoluteTop = rect.top + windowTop;
+          if (absoluteTop > windowTop + 100) {
+            nextSectionId = id;
+            break;
+          }
+        }
+      }
+
+      if (nextSectionId) {
+        const isLastSection = nextSectionId === sections[sections.length - 1];
+
+        if (isLastSection) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: "smooth",
+          });
+        } else {
+          document
+            .getElementById(nextSectionId)
+            .scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    navArrow.addEventListener("click", handleClick);
+  }
+</script>
+
+<style>
+  .navArrow {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--porto-primary);
+    color: #09090b;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    transition:
+      transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+      opacity 400ms ease,
+      background-color 200ms ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .navArrow.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .navArrow:hover {
+    background-color: var(--porto-primary-darker);
+    transform: translateX(-50%) translateY(-5px) scale(1.1);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .navArrow:active {
+    transform: translateX(-50%) translateY(-2px) scale(0.95);
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: inherit;
+  }
+
+  .iconWrapper svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* Only the chevron for the current direction shows. */
+  .navArrow[data-direction="down"] .iconWrapper.up {
+    display: none;
+  }
+
+  .navArrow[data-direction="up"] .iconWrapper.down {
+    display: none;
+  }
+
+  .navArrow[data-direction="down"] .iconWrapper.down {
+    animation: navArrowBounce 2s infinite;
+  }
+
+  @keyframes navArrowBounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-8px);
+    }
+    60% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Subtly fade during manual scroll */
+  .navArrow.scrolling {
+    opacity: 0.7;
+  }
+
+  @media (max-width: 768px) {
+    .navArrow {
+      bottom: 1.5rem;
+      width: 46px;
+      height: 46px;
+    }
+
+    .iconWrapper {
+      font-size: 1.2rem;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .navArrow {
+      transition: opacity 200ms ease;
+      animation: none !important;
+    }
+
+    .navArrow.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+</style>

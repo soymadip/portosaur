@@ -1,8 +1,9 @@
 ---
-// Blog archive (`/${blogRoute}/archive`) — Phase 2 stub.
+// Blog archive (`/${blogRoute}/archive`).
 //
-// Posts grouped by year (year labels are h3s — the golden archive page
-// has only the "Archive" heading). Undated posts group under "Undated".
+// Posts grouped by year, newest year first, newest post first within a
+// year. Years are h3 (the golden snapshot for this page has only the
+// h1 — year headings must not be h2).
 import { getCollection } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -18,6 +19,8 @@ const blogRoute = config.site.blogRoute;
 const title = pageTitle("Archive", siteTitle);
 
 const posts = sortPostsByDateDesc(await getCollection("blog"));
+
+// Group by year (undated posts land under "Undated"), newest first.
 const groups = new Map();
 for (const post of posts) {
   const date = postDate(post);
@@ -27,25 +30,103 @@ for (const post of posts) {
   }
   groups.get(year).push(post);
 }
-const years = [...groups.keys()].sort((a, b) => b.localeCompare(a));
+const sortedGroups = [...groups.entries()].sort(([a], [b]) => {
+  if (a === "Undated") {
+    return 1;
+  }
+  if (b === "Undated") {
+    return -1;
+  }
+  return Number(b) - Number(a);
+});
+
+function formatPostDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 ---
 
 <BaseLayout title={title}>
-  <h1>Archive</h1>
-  {
-    years.map((year) => (
-      <>
-        <h3>{year}</h3>
-        <ul>
-          {groups.get(year).map((post) => (
-            <li>
-              <a href={`/${blogRoute}/${blogSlug(post)}/`}>
-                {post.data.title ?? post.id}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </>
-    ))
-  }
+  <div class="porto-blog-archive">
+    <h1>Archive</h1>
+    {sortedGroups.length === 0 ? (
+      <p class="porto-blog-archive__empty">No posts yet.</p>
+    ) : (
+      sortedGroups.map(([year, yearPosts]) => (
+        <section>
+          <h3>{year}</h3>
+          <ul class="porto-blog-archive__list">
+            {yearPosts.map((post) => {
+              const date = postDate(post);
+              return (
+                <li>
+                  <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+                    {post.data.title ?? post.id}
+                  </a>
+                  {date && (
+                    <span class="porto-blog-archive__date">
+                      {" — "}
+                      <time datetime={date.toISOString()}>
+                        {formatPostDate(date)}
+                      </time>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
 </BaseLayout>
+
+<style>
+  .porto-blog-archive {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .porto-blog-archive h1 {
+    margin-bottom: -0.5rem;
+  }
+
+  .porto-blog-archive__empty {
+    color: var(--porto-text-muted);
+  }
+
+  .porto-blog-archive section h3 {
+    margin: 0 0 0.75rem;
+  }
+
+  .porto-blog-archive__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .porto-blog-archive__list a {
+    color: var(--porto-text);
+    text-decoration: none;
+  }
+
+  .porto-blog-archive__list a:hover {
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-archive__date {
+    color: var(--porto-text-muted);
+    font-size: 0.9rem;
+  }
+</style>

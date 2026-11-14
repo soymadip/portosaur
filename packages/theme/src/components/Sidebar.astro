@@ -1,0 +1,324 @@
+---
+// Sidebar — renders the `porto:sidebar` tree.
+//
+// Recursive via self-import: nested categories render this same
+// component with their `items`. Categories are <details>, open only when
+// they contain the active page, when
+// `theme.navigation.collapsable_sidebar` is set, plain groups otherwise.
+// The active item is highlighted from the current URL; a category is
+// marked active when its own link matches or one of its descendants is
+// the current page. Category labels link to their index page when the
+// category has one (index-as-category-link).
+//
+// The sidebar shows NO icons (like the old Docusaurus sidebar — icons
+// live on the topic-list cards, not here). At depth 0 the tree gets a
+// root header row (the tree root's label — "Docs" in docs mode, "Notes"
+// in portfolio mode — linking to the collection home, with a chevron
+// that collapses the whole tree) and a « collapse button at the bottom
+// that hides the sidebar (the expand button + toggle wiring live in
+// DocLayout, which owns the layout around the sidebar).
+import config from "porto:config";
+import sidebarTree from "porto:sidebar";
+import Sidebar from "./Sidebar.astro";
+
+interface Props {
+  currentHref: string;
+  items?: any[];
+  depth?: number;
+}
+
+const { currentHref, items, depth = 0 } = Astro.props;
+
+const nodes = items ?? sidebarTree[0]?.items ?? [];
+const collapsable = config.theme.collapsableSidebar !== false;
+const root = sidebarTree[0];
+const rootHref = root?.link?.href;
+
+function normalize(href: string): string {
+  return href.replace(/\/+$/, "") || "/";
+}
+
+const current = normalize(currentHref);
+
+function isActiveItem(item: any): boolean {
+  const href = item.href ?? item.link?.href;
+  if (!href) {
+    return false;
+  }
+  return normalize(href) === current;
+}
+
+function hasActiveDescendant(item: any): boolean {
+  if (isActiveItem(item)) {
+    return true;
+  }
+  for (const child of item.items ?? []) {
+    if (hasActiveDescendant(child)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const isRootActive = rootHref ? normalize(rootHref) === current : false;
+---
+
+<ul class={depth === 0 ? "porto-sidebar" : "porto-sidebar__items"}>
+  {depth === 0 && root && (
+    <li class="porto-sidebar__item porto-sidebar__item--root">
+      {rootHref ? (
+        <a
+          class:list={[
+            "porto-sidebar__link",
+            "porto-sidebar__root-link",
+            { "porto-sidebar__link--active": isRootActive },
+          ]}
+          href={rootHref}
+          aria-current={isRootActive ? "page" : undefined}
+        >
+          {root.label}
+        </a>
+      ) : (
+        <span class="porto-sidebar__label porto-sidebar__root-link">
+          {root.label}
+        </span>
+      )}
+      <button
+        type="button"
+        class="porto-sidebar__root-toggle"
+        data-sidebar-root-toggle
+        aria-expanded="true"
+        aria-label="Collapse sidebar tree"
+      >
+        ⌄
+      </button>
+    </li>
+  )}
+  {nodes.map((item) =>
+    item.type === "category" ? (
+      <li
+        class:list={[
+          "porto-sidebar__item",
+          "porto-sidebar__item--category",
+          { "porto-sidebar__item--active": hasActiveDescendant(item) },
+        ]}
+        data-color={item.color ?? undefined}
+      >
+        {collapsable ? (
+          <details
+            class="porto-sidebar__category"
+            open={hasActiveDescendant(item)}
+          >
+            <summary class="porto-sidebar__summary">
+              {item.link?.href ? (
+                <a
+                  class:list={[
+                    "porto-sidebar__link",
+                    {
+                      "porto-sidebar__link--active": isActiveItem(item),
+                    },
+                  ]}
+                  href={item.link.href}
+                  aria-current={isActiveItem(item) ? "page" : undefined}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <span class="porto-sidebar__label">{item.label}</span>
+              )}
+            </summary>
+            <Sidebar
+              currentHref={currentHref}
+              items={item.items ?? []}
+              depth={depth + 1}
+            />
+          </details>
+        ) : (
+          <>
+            {item.link?.href ? (
+              <a
+                class:list={[
+                  "porto-sidebar__link",
+                  "porto-sidebar__label",
+                  {
+                    "porto-sidebar__link--active": isActiveItem(item),
+                  },
+                ]}
+                href={item.link.href}
+                aria-current={isActiveItem(item) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <span class="porto-sidebar__label">{item.label}</span>
+            )}
+            <Sidebar
+              currentHref={currentHref}
+              items={item.items ?? []}
+              depth={depth + 1}
+            />
+          </>
+        )}
+      </li>
+    ) : (
+      <li class="porto-sidebar__item" data-color={item.color ?? undefined}>
+        <a
+          class:list={[
+            "porto-sidebar__link",
+            { "porto-sidebar__link--active": isActiveItem(item) },
+          ]}
+          href={item.href}
+          aria-current={isActiveItem(item) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      </li>
+    ),
+  )}
+</ul>
+
+{depth === 0 && (
+  <button
+    type="button"
+    class="porto-sidebar__collapse"
+    data-sidebar-collapse
+    aria-label="Collapse sidebar"
+  >
+    «
+  </button>
+)}
+
+<style>
+  .porto-sidebar,
+  .porto-sidebar__items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The root list fills the sidebar column and scrolls; the collapse
+     button below it stays pinned to the bottom (the nav is a flex
+     column in DocLayout). */
+  .porto-sidebar {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .porto-sidebar__items {
+    padding-left: 0.75rem;
+  }
+
+  .porto-sidebar__item {
+    margin: 0.125rem 6px 0.125rem 0;
+  }
+
+  .porto-sidebar__link,
+  .porto-sidebar__label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    border-radius: 0.375rem;
+  }
+
+  .porto-sidebar__link:hover {
+    background: var(--porto-surface-0);
+  }
+
+  .porto-sidebar__link--active {
+    color: var(--porto-primary);
+    font-weight: 600;
+    background: var(--porto-surface-0);
+  }
+
+  .porto-sidebar__summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .porto-sidebar__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .porto-sidebar__summary::before {
+    content: "⌄";
+    float: right;
+    color: var(--porto-text-muted);
+    font-size: 0.9em;
+    line-height: 1.75;
+  }
+
+  .porto-sidebar__category:not([open]) > .porto-sidebar__summary::before {
+    content: "›";
+  }
+
+  .porto-sidebar__summary .porto-sidebar__link {
+    display: inline-flex;
+    width: calc(100% - 1.25rem);
+  }
+
+  .porto-sidebar__label {
+    font-weight: 600;
+  }
+
+  /* Root header row: the tree root's label as a link to the collection
+     home, with a chevron button collapsing the whole tree (wired in
+     DocLayout). Collapsed, every item but the header row hides. */
+  .porto-sidebar__item--root {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .porto-sidebar__root-link {
+    flex: 1 1 auto;
+    font-weight: 600;
+  }
+
+  .porto-sidebar__root-toggle {
+    flex-shrink: 0;
+    padding: 0.375rem 0.5rem;
+    color: var(--porto-text-muted);
+    background: none;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  .porto-sidebar__root-toggle:hover {
+    background: var(--porto-surface-0);
+    color: var(--porto-text);
+  }
+
+  .porto-sidebar[data-root-collapsed="true"]
+    > li:not(.porto-sidebar__item--root) {
+    display: none;
+  }
+
+  /* Bottom collapse button («): pinned to the bottom of the sidebar
+     column by the nav's flex layout; hides the whole sidebar (the
+     expand button + toggle wiring live in DocLayout). */
+  .porto-sidebar__collapse {
+    flex-shrink: 0;
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0;
+    color: var(--porto-text-muted);
+    background: var(--porto-bg);
+    border: none;
+    border-top: 1px solid var(--porto-border);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  .porto-sidebar__collapse:hover {
+    color: var(--porto-primary);
+  }
+</style>

@@ -8,6 +8,7 @@ node_modules/
 *favicon/
 dist/
 build/
+build-staging/
 dist/
 cache/
 .docusaurus/

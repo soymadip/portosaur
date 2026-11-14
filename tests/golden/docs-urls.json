@@ -1,5 +1,5 @@
 {
-  "generated_from": "Docusaurus build of docs/build",
+  "generated_from": "Astro build of docs/build (Phase 3 re-baseline: intentional §4.11 content edits — logger retitle, templates Generated Files section, theme-customization rewrite)",
   "routes": [
     {
       "url": "/",
@@ -190,21 +190,20 @@
         "In This Section",
         "📐Scaffolding & Templates",
         "🧙@portosaur/wizard",
-        "🪵@portosaur/logger",
+        "🪵Logger",
         "Monorepo Architecture",
         "Architectural Principles",
         "Development Setup",
         "📐Scaffolding & Templates",
         "🧙@portosaur/wizard",
-        "🪵@portosaur/logger"
+        "🪵Logger"
       ]
     },
     {
       "url": "/docs/developer-guide/logger/",
-      "title": "@portosaur/logger | Portosaur",
+      "title": "Logger | Portosaur",
       "headings": [
-        "@portosaur/logger",
-        "Installation",
+        "Logger",
         "Log Levels",
         "Box Headings",
         "ANSI Colors API"
@@ -218,6 +217,7 @@
         "Registry (registry.yml)",
         "Template Variables",
         "Template Hooks (hooks.mjs)",
+        "Generated Files (.portosaur/)",
         "Adding a New Hosting Platform"
       ]
     },
@@ -344,9 +344,13 @@
       "title": "Theme Customization | Portosaur",
       "headings": [
         "Theme Customization",
-        "Bundled Schemes",
-        "Creating a Custom Theme",
-        "Full Theming Boilerplate"
+        "How theming works",
+        "Bundled schemes",
+        "Tokens",
+        "Overriding tokens in custom_css",
+        "Creating a custom scheme",
+        "Stable selectors",
+        "--ifm-* → --porto-* mapping"
       ]
     },
     {

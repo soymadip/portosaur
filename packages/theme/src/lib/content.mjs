@@ -1,5 +1,5 @@
 /**
- * Shared helpers for the injected routes (Phase 2 stubs).
+ * Shared helpers for the injected routes.
  *
  * Slug resolution mirrors the integration's `porto:sidebar` virtual module
  * (same canonical slug util), so routes and the sidebar always agree.
@@ -8,11 +8,45 @@
  * the golden snapshots).
  */
 
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { statSync } from "node:fs";
 import {
   guessDocPermalink,
   isIndexBase,
   NUMBER_PREFIX_PATTERN,
 } from "../utils/slug.mjs";
+
+/**
+ * The project-relative path of a content file, from an Astro glob-loader
+ * `filePath` — the root-relative form (`../docs/guide/setup.mdx`, relative
+ * to the generated `.portosaur/` project) or an absolute path. Leading
+ * `..` segments are stripped; absolute paths resolve against the build
+ * working directory first, then get the same treatment, so both shapes
+ * come back as e.g. `docs/guide/setup.mdx`. Returns `null` when no path
+ * is given or nothing remains after unwrapping.
+ *
+ * Callers strip their own content-dir prefix (e.g. the notes dir) when
+ * they need a content-relative path for edit URLs.
+ */
+export function contentRelativePath(filePath) {
+  if (!filePath) {
+    return null;
+  }
+  let relative;
+  if (path.isAbsolute(filePath)) {
+    relative = path.relative(process.cwd(), filePath);
+  } else {
+    relative = filePath;
+  }
+  const segments = relative.split(path.sep).join("/").split("/");
+  let index = 0;
+  while (segments[index] === "..") {
+    index += 1;
+  }
+  const rest = segments.slice(index).filter(Boolean);
+  return rest.join("/") || null;
+}
 
 /** Docusaurus-style page title: `{page} | {site}`. */
 export function pageTitle(page, siteTitle) {
@@ -74,6 +108,98 @@ export function topicListShouldRender(entry, options) {
   }
 
   return enableByDefaults && isIndexEntry(entry);
+}
+
+/** Normalizes an href for comparison (trailing slashes ignored). */
+function normalizeHref(href) {
+  return (href ?? "").replace(/\/+$/, "") || "/";
+}
+
+/**
+ * The breadcrumb path for a sidebar href: the `{ title, href }` items
+ * from the root category down to the item matching `href` (trailing
+ * slashes ignored), or `[]` when no item matches. Categories without a
+ * link (no index doc) appear with `href: null` — the layout renders
+ * them as plain text, not links.
+ */
+export function findSidebarPath(tree, href) {
+  const normalized = normalizeHref(href);
+  const path = [];
+
+  function walk(nodes) {
+    for (const node of nodes) {
+      const nodeHref =
+        node.type === "doc" ? node.href : (node.link?.href ?? null);
+      if (nodeHref && normalizeHref(nodeHref) === normalized) {
+        path.push({ title: node.label, href: nodeHref });
+        return true;
+      }
+      if (node.type === "category" && node.items) {
+        path.push({ title: node.label, href: nodeHref });
+        if (walk(node.items)) {
+          return true;
+        }
+        path.pop();
+      }
+    }
+    return false;
+  }
+
+  if (walk(tree ?? [])) {
+    return path;
+  }
+  return [];
+}
+
+/**
+ * Flattens the sidebar tree into its doc-link order: every doc item plus
+ * every category that has a link (its index doc), depth-first, in
+ * sidebar order. The root category's link (the collection home) comes
+ * first — it is a real page too.
+ */
+function flattenSidebarLinks(tree) {
+  const links = [];
+  function walk(nodes) {
+    for (const node of nodes) {
+      if (node.type === "doc") {
+        links.push({ title: node.label, href: node.href });
+      } else if (node.type === "category") {
+        if (node.link?.href) {
+          // A category link carries its index doc's title when one
+          // exists (the paginator uses the doc title, not the sidebar
+          // label — e.g. "Portosaur Docs", not "Docs").
+          links.push({
+            title: node.link.title ?? node.label,
+            href: node.link.href,
+          });
+        }
+        walk(node.items ?? []);
+      }
+    }
+  }
+  walk(tree ?? []);
+  return links;
+}
+
+/**
+ * The previous/next doc links around `href` in flattened sidebar
+ * doc-link order (trailing slashes ignored). Returns
+ * `{ prev, next }` where each side is `{ title, href }` or `null` at
+ * the ends — or when `href` is not in the tree at all.
+ */
+export function findPrevNext(tree, href) {
+  const normalized = normalizeHref(href);
+  const links = flattenSidebarLinks(tree);
+  const index = links.findIndex(
+    (link) => normalizeHref(link.href) === normalized,
+  );
+  if (index === -1) {
+    return { prev: null, next: null };
+  }
+  return {
+    prev: index > 0 ? links[index - 1] : null,
+    next: index < links.length - 1 ? links[index + 1] : null,
+  };
 }
 
 /**
@@ -141,13 +267,67 @@ export function blogSlug(entry) {
   return base.replace(/^\d{4}-\d{2}-\d{2}-/, "");
 }
 
-/** A blog post's date (frontmatter `date`, coerced by the schema) or null. */
+/** Resolved post dates, keyed by file path — `postDate` shells out to
+ * git, so sorting must not re-resolve the same file on every compare. */
+const postDateCache = new Map();
+
+/**
+ * A blog post's date: frontmatter `date` (coerced by the schema) →
+ * the file's last git commit date (`git log -1`, the Docusaurus
+ * fallback) → the file's mtime. Null only when the source file
+ * cannot be found. File-derived dates are memoized per file for
+ * the build.
+ */
 export function postDate(entry) {
   const date = entry.data?.date;
   if (date instanceof Date && !Number.isNaN(date.getTime())) {
     return date;
   }
-  return null;
+  const key = entry.filePath ?? entry.id;
+  if (postDateCache.has(key)) {
+    return postDateCache.get(key);
+  }
+  const resolved = resolveFileDate(entry.filePath);
+  postDateCache.set(key, resolved);
+  return resolved;
+}
+
+/**
+ * Git commit date, else mtime, for a content file — null when the
+ * file cannot be found. `filePath` is an Astro glob-loader path
+ * (see `contentRelativePath`); resolution runs against the build
+ * working directory, which is the site root.
+ */
+function resolveFileDate(filePath) {
+  const relativePath = contentRelativePath(filePath);
+  if (!relativePath) {
+    return null;
+  }
+  const absolutePath = path.join(process.cwd(), relativePath);
+  try {
+    const gitDate = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--", absolutePath],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+    if (gitDate) {
+      const parsed = new Date(gitDate);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Not a repo, untracked file, or git missing — fall to mtime.
+  }
+  try {
+    return statSync(absolutePath).mtime;
+  } catch {
+    return null;
+  }
 }
 
 /** Blog posts newest first; undated posts sort last, by id. */

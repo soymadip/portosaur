@@ -35,11 +35,15 @@ import { NUMBER_PREFIX_PATTERN, isIndexBase } from "./slug.mjs";
  * Return shape: a one-element array holding the root category:
  *   [{
  *     type: "category", label: "Docs",
- *     link: { href: "/notes" },          // root index href, or the fallback
+ *     link: { href: "/notes", title: "Portosaur Docs" }, // root index href,
+ *       // plus the index doc's title when it has one (the paginator uses
+ *       // the doc title, not the sidebar label); the fallback link has
+ *       // no title
  *     icon, color, description,          // from the root index, when present
  *     items: [
  *       { type: "category", label: "Guide",
- *         link: { href: "/notes/guide" }, // only when an index doc exists
+ *         link: { href: "/notes/guide", title: "Guide" }, // only when an
+ *           // index doc exists; title omitted when the doc has none
  *         icon, color, description, items: [...] },
  *       { type: "doc", label: "Intro", href: "/notes/intro", id: "intro",
  *         icon, color, description },
@@ -180,7 +184,9 @@ function buildItems(node, hrefFor) {
 /**
  * Builds one category from a directory node. A category gets a link only
  * from its index doc — except the root, which falls back to the collection
- * home when no root index exists.
+ * home when no root index exists. The link carries the index doc's title
+ * (not the sidebar label): the paginator shows the doc title, which only
+ * differs from the label at the root ("Portosaur Docs" vs "Docs").
  */
 function dirToCategory(node, label, hrefFor, isRoot) {
   const category = { type: "category", label };
@@ -189,6 +195,10 @@ function dirToCategory(node, label, hrefFor, isRoot) {
     category.link = {
       href: hrefFor(node.indexEntry.slug ?? node.indexEntry.id),
     };
+    const indexTitle = node.indexEntry.data?.title;
+    if (indexTitle !== undefined) {
+      category.link.title = indexTitle;
+    }
     addEnrichment(category, node.indexEntry.data);
   } else if (isRoot) {
     category.link = { href: hrefFor("") };

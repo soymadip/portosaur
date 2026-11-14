@@ -1,0 +1,908 @@
+---
+// Navbar — built from the resolved config (replaces theme-classic's
+// Navbar). Port of the navbar items the old Docusaurus config assembled
+// in `themeConfig.navbar.items`:
+//
+//   - brand: site title + generated favicon logo
+//   - search form (GETs to /search?q=), theme toggle, then nav links —
+//     the old navbar.css reordered the right side into exactly this
+//     order (search, toggle, links). The search form only renders on
+//     pages under the notes/docs or blog route (the old search plugin's
+//     `searchContextByPaths` + `hideSearchBarWithNoSearchContext`); on
+//     mobile it collapses to a magnifier icon linking to /search, the
+//     hamburger moves to the left of the brand, and the theme toggle
+//     lives inside the slide-down menu instead of the bar.
+//   - Docs (docs mode) / About Me, Projects, Experience, Contact
+//     anchors (portfolio mode, when each section is enabled)
+//   - custom `theme.navigation.navbar_items` (links + dropdowns)
+//   - "More" dropdown: Notes (portfolio mode), Blog, Tasks (when
+//     enabled), Portosaur version link (unless disabled)
+//   - mobile-only Portosaur version link at the bottom of the menu
+//
+// Dropdowns are vanilla <details> (keyboard accessible via <summary>).
+// Hide-on-scroll and the mobile slide-down menu are vanilla scripts.
+import config from "porto:config";
+
+interface Props {
+  /** True on the portfolio home page — removes the navbar shadow and
+   * hides the brand in landscape (ported from old `pages/index.jsx`). */
+  isHome?: boolean;
+}
+
+const { isHome = false } = Astro.props;
+
+const site = config.site;
+const theme = config.theme;
+const siteMode = config.siteMode;
+const homePage = config.homePage ?? {};
+const tasks = config.tasks ?? {};
+
+// The Portosaur project's own homepage (the old config read it from the
+// cli package's `homepage` field; it isn't part of PortosaurOptions).
+const PORTO_HOMEPAGE = "https://soymadip.github.io/portosaur";
+
+const base = site.baseUrl ?? "/";
+const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
+const withBase = (path: string) =>
+  `${basePrefix}${path.startsWith("/") ? path : `/${path}`}`;
+
+const pathname = Astro.url.pathname;
+const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+
+// Search visibility — port of the old `@easyops-cn/docusaurus-search-local`
+// setup (`searchContextByPaths: [notesRoute, blogRoute]` with
+// `hideSearchBarWithNoSearchContext: true`): the search box only shows on
+// pages under the notes/docs route or the blog route, and is hidden on
+// home, /tasks, /offline, /search, 404, and (in docs mode, where the
+// notes route is "docs") the /notes NoteCards page. The plugin matches
+// `uri === path || uri.startsWith(path + "/")` where uri is the pathname
+// minus the base URL.
+const uri = (
+  pathname.startsWith(basePrefix) ? pathname.slice(basePrefix.length) : pathname
+).replace(/^\/+/, "");
+const inSearchContext = (route: string) =>
+  uri === route || uri.startsWith(`${route}/`);
+const showSearch =
+  inSearchContext(site.notesRoute) || inSearchContext(site.blogRoute);
+
+function isActivePath(href: string): boolean {
+  const normalized = href.replace(/\/+$/, "") || "/";
+  if (normalized === "/") {
+    return normalizedPath === "/";
+  }
+  return (
+    normalizedPath === normalized || normalizedPath.startsWith(`${normalized}/`)
+  );
+}
+
+interface NavLink {
+  label: string;
+  href: string;
+  active?: boolean;
+  external?: boolean;
+}
+
+interface NavDropdown {
+  label: string;
+  items: NavLink[];
+  className?: string;
+}
+
+type NavEntry = NavLink | NavDropdown;
+
+function isDropdown(entry: NavEntry): entry is NavDropdown {
+  return (entry as NavDropdown).items !== undefined;
+}
+
+// Anchor items never show active (the old config gave them
+// `activeBasePath: "/never-match"`).
+const leftEntries: NavEntry[] = [];
+const rightEntries: NavEntry[] = [];
+
+if (siteMode === "docs") {
+  rightEntries.push({
+    label: "Docs",
+    href: withBase(`/${site.notesRoute}`),
+    active: isActivePath(`/${site.notesRoute}`),
+  });
+} else {
+  if (homePage.aboutSection?.enable) {
+    rightEntries.push({ label: "About Me", href: withBase("/#about") });
+  }
+  if (homePage.projectShelf?.enable) {
+    rightEntries.push({ label: "Projects", href: withBase("/#projects") });
+  }
+  if (homePage.experienceSection?.enable) {
+    rightEntries.push({
+      label: "Experience",
+      href: withBase("/#experience"),
+    });
+  }
+  if (homePage.socialSection?.enable) {
+    rightEntries.push({ label: "Contact", href: withBase("/#contact") });
+  }
+}
+
+// Custom navbar items: `{ label, to?, href?, position?, items? }`.
+// `items` (an array of `{ label, to?, href? }`) renders a dropdown.
+for (const item of theme.navbarItems ?? []) {
+  const target = item.position === "left" ? leftEntries : rightEntries;
+  const toLink = (entry: any): NavLink => ({
+    label: entry.label,
+    href: entry.to ? withBase(entry.to) : (entry.href ?? "#"),
+    active: entry.to ? isActivePath(entry.to) : false,
+    external: !entry.to && /^https?:\/\//.test(entry.href ?? ""),
+  });
+  if (Array.isArray(item.items) && item.items.length > 0) {
+    target.push({
+      label: item.label,
+      items: item.items.map(toLink),
+    });
+  } else {
+    target.push(toLink(item));
+  }
+}
+
+const showProjectLink = !theme.disableProjectLink;
+const versionLabel = `Portosaur v${config.portoVersion}`;
+
+const moreItems: NavLink[] = [];
+if (siteMode !== "docs") {
+  moreItems.push({
+    label: "Notes",
+    href: withBase(`/${site.notesRoute}`),
+    active: isActivePath(`/${site.notesRoute}`),
+  });
+}
+moreItems.push({
+  label: "Blog",
+  href: withBase(`/${site.blogRoute}`),
+  active: isActivePath(`/${site.blogRoute}`),
+});
+if (tasks.enable) {
+  moreItems.push({
+    label: "Tasks",
+    href: withBase("/tasks"),
+    active: isActivePath("/tasks"),
+  });
+}
+if (showProjectLink) {
+  moreItems.push({
+    label: versionLabel,
+    href: PORTO_HOMEPAGE,
+    external: true,
+  });
+}
+
+const moreDropdown: NavDropdown = {
+  label: "More",
+  items: moreItems,
+  className: "porto-navbar__more",
+};
+
+const hideOnScroll = theme.hideNavbarOnScroll;
+---
+
+<header
+  class:list={["porto-navbar", { "porto-navbar--home": isHome }]}
+  data-navbar
+  data-hide-on-scroll={hideOnScroll || undefined}
+>
+  <div class="porto-navbar__inner">
+    <button
+      type="button"
+      class="porto-navbar__hamburger"
+      data-navbar-toggle
+      aria-expanded="false"
+      aria-controls="porto-mobile-menu"
+      aria-label="Toggle navigation menu"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="4" x2="20" y1="6" y2="6"></line>
+        <line x1="4" x2="20" y1="12" y2="12"></line>
+        <line x1="4" x2="20" y1="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <a class="porto-navbar__brand" href={withBase("/")}>
+      <img
+        class="porto-navbar__logo"
+        src={withBase("/favicon/favicon.ico")}
+        alt={`${site.title} logo`}
+      />
+      <span class="porto-navbar__title">{site.title}</span>
+    </a>
+
+    {leftEntries.length > 0 && (
+      <nav class="porto-navbar__links" aria-label="Primary">
+        {leftEntries.map((entry) =>
+          isDropdown(entry) ? (
+            <details class="porto-navbar__dropdown">
+              <summary class="porto-navbar__link">{entry.label}</summary>
+              <ul class="porto-navbar__dropdown-menu">
+                {entry.items.map((item) => (
+                  <li>
+                    <a
+                      class:list={[
+                        "porto-navbar__dropdown-link",
+                        { "porto-navbar__link--active": item.active },
+                      ]}
+                      href={item.href}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener noreferrer" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <a
+              class:list={[
+                "porto-navbar__link",
+                { "porto-navbar__link--active": entry.active },
+              ]}
+              href={entry.href}
+              target={entry.external ? "_blank" : undefined}
+              rel={entry.external ? "noopener noreferrer" : undefined}
+            >
+              {entry.label}
+            </a>
+          ),
+        )}
+      </nav>
+    )}
+
+    <div class="porto-navbar__items porto-navbar__items--right">
+      {showSearch && (
+        <form
+          class="porto-search"
+          action={withBase("/search")}
+          method="get"
+          role="search"
+        >
+          <input
+            type="search"
+            name="q"
+            placeholder="Search"
+            aria-label="Search"
+          />
+        </form>
+      )}
+
+      {showSearch && (
+        <a
+          class="porto-search-icon"
+          href={withBase("/search")}
+          aria-label="Search"
+          title="Search"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </a>
+      )}
+
+      {theme.showThemeSwitch && (
+        <button
+          type="button"
+          class="porto-theme-toggle"
+          data-theme-toggle
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode"
+        >
+          <svg
+            class="porto-theme-toggle__moon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+          <svg
+            class="porto-theme-toggle__sun"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+        </button>
+      )}
+
+      <nav class="porto-navbar__links" aria-label="Primary">
+        {rightEntries.map((entry) =>
+          isDropdown(entry) ? (
+            <details class="porto-navbar__dropdown">
+              <summary class="porto-navbar__link">{entry.label}</summary>
+              <ul class="porto-navbar__dropdown-menu">
+                {entry.items.map((item) => (
+                  <li>
+                    <a
+                      class:list={[
+                        "porto-navbar__dropdown-link",
+                        { "porto-navbar__link--active": item.active },
+                      ]}
+                      href={item.href}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener noreferrer" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <a
+              class:list={[
+                "porto-navbar__link",
+                { "porto-navbar__link--active": entry.active },
+              ]}
+              href={entry.href}
+              target={entry.external ? "_blank" : undefined}
+              rel={entry.external ? "noopener noreferrer" : undefined}
+            >
+              {entry.label}
+            </a>
+          ),
+        )}
+        <details
+          class:list={["porto-navbar__dropdown", moreDropdown.className]}
+        >
+          <summary class="porto-navbar__link">{moreDropdown.label}</summary>
+          <ul class="porto-navbar__dropdown-menu">
+            {moreDropdown.items.map((item) => (
+              <li>
+                <a
+                  class:list={[
+                    "porto-navbar__dropdown-link",
+                    { "porto-navbar__link--active": item.active },
+                  ]}
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </nav>
+    </div>
+  </div>
+
+  <div
+    class="porto-navbar__mobile"
+    id="porto-mobile-menu"
+    data-mobile-menu
+    hidden
+  >
+    <nav aria-label="Mobile">
+      {[...leftEntries, ...rightEntries].map((entry) =>
+        isDropdown(entry) ? (
+          <details class="porto-navbar__dropdown">
+            <summary class="porto-navbar__link">{entry.label}</summary>
+            <ul class="porto-navbar__dropdown-menu">
+              {entry.items.map((item) => (
+                <li>
+                  <a
+                    class:list={[
+                      "porto-navbar__dropdown-link",
+                      { "porto-navbar__link--active": item.active },
+                    ]}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : (
+          <a
+            class:list={[
+              "porto-navbar__link",
+              { "porto-navbar__link--active": entry.active },
+            ]}
+            href={entry.href}
+            target={entry.external ? "_blank" : undefined}
+            rel={entry.external ? "noopener noreferrer" : undefined}
+          >
+            {entry.label}
+          </a>
+        ),
+      )}
+      <details class="porto-navbar__dropdown">
+        <summary class="porto-navbar__link">{moreDropdown.label}</summary>
+        <ul class="porto-navbar__dropdown-menu">
+          {moreDropdown.items.map((item) => (
+            <li>
+              <a
+                class:list={[
+                  "porto-navbar__dropdown-link",
+                  { "porto-navbar__link--active": item.active },
+                ]}
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </nav>
+    {theme.showThemeSwitch && (
+      <button
+        type="button"
+        class="porto-theme-toggle porto-navbar__mobile-theme"
+        data-theme-toggle
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode"
+      >
+        <svg
+          class="porto-theme-toggle__moon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </svg>
+        <svg
+          class="porto-theme-toggle__sun"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" />
+          <path d="M12 20v2" />
+          <path d="m4.93 4.93 1.41 1.41" />
+          <path d="m17.66 17.66 1.41 1.41" />
+          <path d="M2 12h2" />
+          <path d="M20 12h2" />
+          <path d="m6.34 17.66-1.41 1.41" />
+          <path d="m19.07 4.93-1.41 1.41" />
+        </svg>
+        <span>Theme</span>
+      </button>
+    )}
+    {showProjectLink && (
+      <a
+        class="porto-navbar__version porto-navbar__version--mobile"
+        href={PORTO_HOMEPAGE}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {versionLabel}
+      </a>
+    )}
+  </div>
+</header>
+
+<script>
+  const navbar = document.querySelector("[data-navbar]");
+  const toggle = document.querySelector("[data-navbar-toggle]");
+  const mobileMenu = document.querySelector("[data-mobile-menu]");
+
+  // Mobile slide-down menu.
+  if (toggle && mobileMenu instanceof HTMLElement) {
+    const closeMenu = () => {
+      mobileMenu.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+    };
+    toggle.addEventListener("click", () => {
+      const willOpen = mobileMenu.hidden;
+      mobileMenu.hidden = !willOpen;
+      toggle.setAttribute("aria-expanded", String(willOpen));
+    });
+    mobileMenu.addEventListener("click", (event) => {
+      if (event.target instanceof HTMLAnchorElement) {
+        closeMenu();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !mobileMenu.hidden) {
+        closeMenu();
+      }
+    });
+  }
+
+  // Close open dropdowns on outside click / Escape (<details> doesn't
+  // close itself). The toggle click itself lands inside the <details>,
+  // so it isn't treated as outside.
+  const closeDropdowns = () => {
+    document
+      .querySelectorAll("details.porto-navbar__dropdown[open]")
+      .forEach((dropdown) => {
+        dropdown.removeAttribute("open");
+      });
+  };
+  document.addEventListener("click", (event) => {
+    if (
+      event.target instanceof Node &&
+      !event.target.parentElement?.closest("details.porto-navbar__dropdown")
+    ) {
+      closeDropdowns();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeDropdowns();
+    }
+  });
+
+  // Hide-on-scroll: slide the navbar away while scrolling down, bring
+  // it back on scroll up (or at the top of the page). The transform
+  // transition is what DocLayout's mobile toolbar follows.
+  if (
+    navbar instanceof HTMLElement &&
+    navbar.hasAttribute("data-hide-on-scroll")
+  ) {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    const update = () => {
+      const y = window.scrollY;
+      if (y > navbar.offsetHeight && y > lastScrollY) {
+        navbar.classList.add("porto-navbar--hidden");
+      } else {
+        navbar.classList.remove("porto-navbar--hidden");
+      }
+      lastScrollY = y;
+      ticking = false;
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          window.requestAnimationFrame(update);
+          ticking = true;
+        }
+      },
+      { passive: true },
+    );
+  }
+</script>
+
+<style>
+  .porto-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--porto-navbar-bg, var(--porto-bg));
+    border-bottom: 1px solid var(--porto-border);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .porto-navbar--hidden {
+    transform: translateY(-100%);
+  }
+
+  /* Home page (portfolio mode): no shadow and no border-bottom, brand
+     hidden in landscape — ported from the old pages/index.jsx inline
+     style (`--ifm-navbar-shadow: none`; the Docusaurus navbar has no
+     border, only a shadow, so removing the shadow removes the divider
+     entirely). */
+  .porto-navbar--home {
+    box-shadow: none;
+    border-bottom: none;
+  }
+
+  @media (orientation: landscape) {
+    .porto-navbar--home .porto-navbar__brand {
+      display: none;
+    }
+  }
+
+  .porto-navbar__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 60px;
+    padding: 0 1rem;
+  }
+
+  .porto-navbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .porto-navbar__logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  .porto-navbar__links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .porto-navbar__link {
+    padding: 0.5rem 0.75rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    border-radius: 0.375rem;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .porto-navbar__link::-webkit-details-marker {
+    display: none;
+  }
+
+  .porto-navbar__link:hover {
+    color: var(--porto-primary);
+  }
+
+  .porto-navbar__link--active {
+    color: var(--porto-primary);
+    font-weight: 600;
+  }
+
+  .porto-navbar__items--right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  .porto-search input {
+    width: 130px;
+    font-size: 0.85rem;
+    padding: 0.375rem 0.5rem 0.375rem 2rem;
+    color: var(--porto-text);
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-border);
+    border-radius: 1.25rem;
+  }
+
+  /* Mobile search: the full input collapses to a magnifier icon button
+     (same pill styling as the input, icon only) linking to /search.
+     Hidden on desktop; shown under the 996px query, and only rendered
+     at all when the page is in a search context (see `showSearch`). */
+  .porto-search-icon {
+    display: none;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    color: var(--porto-text-muted);
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-border);
+    border-radius: 1.25rem;
+    text-decoration: none;
+  }
+
+  .porto-search-icon:hover {
+    color: var(--porto-text);
+  }
+
+  .porto-theme-toggle {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    color: var(--porto-text);
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .porto-theme-toggle:hover {
+    background: var(--porto-surface-0);
+  }
+
+  /* Show the icon of the CURRENT mode (Docusaurus behavior): moon in
+     dark mode, sun in light mode. */
+  .porto-theme-toggle__moon {
+    display: none;
+  }
+
+  .porto-theme-toggle__sun {
+    display: inline;
+  }
+
+  :global(html[data-theme="dark"]) .porto-theme-toggle__moon {
+    display: inline;
+  }
+
+  :global(html[data-theme="dark"]) .porto-theme-toggle__sun {
+    display: none;
+  }
+
+  .porto-navbar__dropdown {
+    position: relative;
+  }
+
+  .porto-navbar__dropdown > summary::after {
+    content: "▾";
+    margin-left: 0.25rem;
+    font-size: 0.75em;
+  }
+
+  .porto-navbar__more {
+    padding-left: 8px;
+    margin-left: -7px;
+    border-left: 1.5px solid var(--porto-border);
+  }
+
+  .porto-navbar__dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 12rem;
+    margin: 0;
+    padding: 0.5rem 0;
+    list-style: none;
+    background: var(--porto-bg);
+    border: 1px solid var(--porto-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 24px 0 rgb(0 0 0 / 0.15);
+    z-index: 101;
+  }
+
+  .porto-navbar__dropdown-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .porto-navbar__dropdown-link:hover {
+    color: var(--porto-primary);
+    background: var(--porto-surface-0);
+  }
+
+  .porto-navbar__hamburger {
+    display: none;
+    padding: 0.5rem;
+    color: var(--porto-text);
+    background: none;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  }
+
+  .porto-navbar__mobile {
+    border-top: 1px solid var(--porto-border);
+    padding: 0.5rem 1rem 1rem;
+    /* The header has a fixed height (the global overrides/navbar.css
+       sets `height: var(--porto-navbar-height)`), so the open menu
+       overflows it and overlays the page — like the old sidebar. It
+       needs its own opaque background or the page shows through
+       between the items. */
+    background: var(--porto-navbar-bg, var(--porto-bg));
+  }
+
+  .porto-navbar__mobile .porto-navbar__link,
+  .porto-navbar__mobile .porto-navbar__dropdown {
+    display: block;
+  }
+
+  .porto-navbar__mobile .porto-navbar__dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    padding: 0 0 0 1rem;
+  }
+
+  .porto-navbar__version--mobile {
+    display: block;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--porto-border);
+    color: var(--porto-text-muted);
+    text-align: center;
+    text-decoration: none;
+    opacity: 0.64;
+  }
+
+  /* Theme toggle inside the mobile menu (Docusaurus puts it in the
+     menu, not the mobile bar). Same `data-theme-toggle` attribute as
+     the bar toggle, so `theme-mode.ts` — which binds every matching
+     button — picks it up with no script change. The moon/sun icon
+     rules above apply here too. */
+  .porto-navbar__mobile-theme {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+  }
+
+  .porto-navbar__mobile-theme:hover {
+    color: var(--porto-primary);
+  }
+
+  @media (max-width: 996px) {
+    .porto-navbar__links {
+      display: none;
+    }
+
+    .porto-navbar__hamburger {
+      display: flex;
+    }
+
+    /* Mobile bar: the search input collapses to the icon button, and
+       the theme toggle moves into the slide-down menu. */
+    .porto-search {
+      display: none;
+    }
+
+    .porto-search-icon {
+      display: flex;
+    }
+
+    .porto-navbar__items--right .porto-theme-toggle {
+      display: none;
+    }
+  }
+</style>

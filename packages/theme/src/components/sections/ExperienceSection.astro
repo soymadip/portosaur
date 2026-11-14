@@ -1,0 +1,228 @@
+---
+// ExperienceSection — ported from the old components/ExperienceSection/index.jsx.
+//
+// Static section: heading + subheading + the "Coming Soon!" notice box.
+// Note the old component never rendered `experience.list` — the notice
+// box is the whole section. Kept faithful (the list stays unused).
+import config from "porto:config";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const experience = config.homePage?.experienceSection || {};
+---
+
+{experience.enable !== false && (
+  <div
+    id={id}
+    class={`experienceSection ${className || ""}`}
+    role="region"
+    aria-label="Experience section"
+  >
+    <div class="experienceContainer">
+      {/* Heading */}
+      <div class="experienceHeader">
+        <h2 class="experienceTitle">{experience.heading}</h2>
+        <p class="experienceSubtitle">{experience.subheading}</p>
+      </div>
+
+      {/* Placeholder */}
+      <div class="noticeWrapper">
+        <div class="noticeBox" role="status" aria-live="polite">
+          <p class="noticeText">Coming Soon!</p>
+          <p class="noticeDesc">This section is under construction.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  .experienceSection {
+    scroll-margin-top: 38px;
+    min-height: calc(100vh - 45px);
+    margin-bottom: 0;
+    width: 100%;
+    padding: 0.02rem 0 4.5rem;
+    background-color: var(--porto-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .experienceContainer {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .experienceHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: -14rem;
+  }
+
+  .experienceTitle {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-primary);
+    margin-bottom: 0.3rem;
+    animation: slideUp 0.5s ease-out forwards;
+    position: relative;
+    display: inline-block;
+  }
+
+  .experienceSubtitle {
+    font-size: 0.95rem;
+    color: var(--porto-text-muted);
+    max-width: 600px;
+    margin: 0rem auto 0;
+    animation: slideUp 0.5s ease-out 0.2s forwards;
+  }
+
+  /* Notice Box Styles */
+  .noticeWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 9rem;
+  }
+
+  .noticeBox {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 0.4rem;
+    background-color: var(--porto-surface-1);
+    border: 1px solid var(--porto-gray-700);
+    animation: fadeIn 0.5s ease-out 0.3s forwards;
+    opacity: 0;
+    transition:
+      transform 0.3s ease,
+      background-color 0.3s ease;
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .noticeBox:hover {
+    transform: translateY(-3px);
+    background-color: var(--porto-surface-0);
+  }
+
+  .noticeText {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--porto-primary-dark);
+    margin-bottom: 0.8rem;
+  }
+
+  .noticeDesc {
+    font-size: 1rem;
+    color: var(--porto-text-muted);
+    line-height: 1.4;
+  }
+
+  /* Animations */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .experienceSection {
+      scroll-margin-top: 70px;
+      padding: 0.5rem 0 4rem;
+    }
+
+    .experienceContainer {
+      padding: 0 1.5rem;
+    }
+
+    .experienceHeader {
+      margin-bottom: 1.5rem;
+      margin-top: -2.5rem;
+    }
+
+    .experienceTitle {
+      font-size: 2.2rem;
+    }
+
+    .experienceSubtitle {
+      font-size: 0.9rem;
+    }
+
+    .noticeText {
+      font-size: 1.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .experienceSection {
+      scroll-margin-top: 32px;
+      padding: 0rem 0 3rem;
+    }
+
+    .experienceContainer {
+      padding: 0 1rem;
+    }
+
+    .experienceHeader {
+      margin-bottom: 1.2rem;
+      margin-top: -2rem;
+    }
+
+    .experienceTitle {
+      font-size: 1.9rem;
+    }
+
+    .experienceSubtitle {
+      font-size: 0.9rem;
+      max-width: 90%;
+    }
+
+    .noticeText {
+      font-size: 1.5rem;
+    }
+
+    .noticeDesc {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .experienceTitle,
+    .experienceSubtitle,
+    .noticeBox {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .noticeBox {
+      opacity: 1;
+    }
+  }
+</style>

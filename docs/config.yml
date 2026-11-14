@@ -20,7 +20,7 @@ vars:
 
   tools:
     bun: "https://bun.sh/"
-    docusaurus: "https://docusaurus.io/"
+    astro: "https://astro.new/"
     vitepress: "https://vitepress.dev/"
     yaml: "https://yaml.org/"
     staticShort: "https://github.com/soymadip/staticshort"

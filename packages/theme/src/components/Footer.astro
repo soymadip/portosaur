@@ -1,0 +1,45 @@
+---
+// Footer — renders only when `theme.footer.enable` is set.
+//
+// The message renders as HTML (theme-classic rendered the footer
+// copyright as HTML too). The Portosaur credit link inside the default
+// message is added — or omitted when
+// `theme.footer.disable_project_link` is set — by the config engine
+// (`buildSiteConfig`), so this component renders the message as-is.
+import config from "porto:config";
+
+const footer = config.theme.footer;
+---
+
+{footer.enable && (
+  <footer class="porto-footer">
+    <div class="porto-footer__copyright" set:html={footer.message} />
+  </footer>
+)}
+
+<style>
+  /* Thin strip, matching the old footer (`--ifm-footer-padding-vertical
+     / -horizontal: 0.1rem` in the old infima.css, and the global
+     overrides/footer.css): the scoped padding must say so explicitly,
+     or it beats the global override on specificity. */
+  .porto-footer {
+    padding: 0.1rem;
+    text-align: center;
+    border-top: 1px solid var(--porto-border);
+    background: var(--porto-bg-alt, var(--porto-bg));
+  }
+
+  .porto-footer__copyright {
+    font-size: 0.8rem;
+    color: var(--porto-text-muted);
+  }
+
+  /* The "Built with Portosaur" link is primary-colored (golden renders
+     it green). `:global(a)`: the link arrives via `set:html`, so it
+     never carries this component's scope attribute — a plain scoped
+     `a` selector compiles to `a[data-astro-cid-...]` and never
+     matches. */
+  .porto-footer__copyright :global(a) {
+    color: var(--porto-primary);
+  }
+</style>

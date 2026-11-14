@@ -49,14 +49,12 @@ const cards = (items ?? []).map((item) => ({
 }));
 ---
 
-{
-  shouldRender && cards.length > 0 && (
-    <section class="topic-list">
-      {cards.map((card) => (
-        <h2>
-          <a href={card.href}>{card.title}</a>
-        </h2>
-      ))}
-    </section>
-  )
-}
+{shouldRender && cards.length > 0 && (
+  <section class="topic-list">
+    {cards.map((card) => (
+      <h2>
+        <a href={card.href}>{card.title}</a>
+      </h2>
+    ))}
+  </section>
+)}

@@ -1,0 +1,465 @@
+---
+// AboutSection — ported from the old components/AboutSection/index.jsx.
+//
+// Bio paragraphs, skills, resume button. The resume button stays hidden
+// unless a resume is configured (non-empty string, not "none") —
+// regression-tested behavior, keep the check exact.
+//
+// The old component opened the resume in the <Pv> preview viewer; Pv is
+// a Phase 4 rebuild, so the button is a plain link (new tab) until then.
+// Scroll reveal: the old useScrollReveal hook added `is-visible` to the
+// section; the port marks the section `data-reveal` and the page's reveal
+// script adds the class.
+import config from "porto:config";
+import { renderIcon, withBase } from "../../lib/icons.mjs";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const aboutMe = config.homePage?.aboutSection || {};
+
+const base = config.site.baseUrl;
+const image = aboutMe.image;
+const imageSrc = image
+  ? withBase(typeof image === "string" ? image : image.src, base)
+  : null;
+const imageFallback =
+  image && typeof image === "object" && image.fallback
+    ? withBase(image.fallback, base)
+    : null;
+
+// The resume button renders only for a real resume path: a non-empty
+// string that is not "none" (the engine default).
+const hasResume =
+  typeof aboutMe.resume === "string" &&
+  aboutMe.resume.trim() !== "" &&
+  aboutMe.resume.trim().toLowerCase() !== "none";
+const resumeUrl = hasResume ? withBase(aboutMe.resume, base) : null;
+---
+
+{aboutMe.enable !== false && (
+  <div
+    id={id}
+    data-reveal
+    class={`aboutSection ${className || ""}`}
+    role="region"
+    aria-label="About me section"
+  >
+    <div class="aboutContainer">
+      {/* Heading */}
+      <div class="aboutHeader">
+        <h2 class="aboutHeading">{aboutMe.heading || "About Me"}</h2>
+      </div>
+
+      {/* Content */}
+      <div class="aboutContent">
+        <div class="aboutCard">
+          {/* Image + Resume */}
+          <div class="bioImageContainer">
+            {image && (
+              <div class="imageWrapper">
+                <img
+                  src={imageSrc}
+                  alt={aboutMe.name || "About Me"}
+                  class="aboutImage"
+                  onerror={
+                    imageFallback
+                      ? `this.onerror=null;this.src='${imageFallback}'`
+                      : undefined
+                  }
+                />
+              </div>
+            )}
+            {hasResume && (
+              <div class="resumeContainer">
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="resumeButton"
+                >
+                  <span set:html={renderIcon("md:download")} /> View Resume
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Bio + Skills */}
+          <div class="bioTextContainer">
+            <div class="bioText">
+              {Array.isArray(aboutMe.bio) ? (
+                aboutMe.bio.map((paragraph) => (
+                  <p class="aboutParagraph">{paragraph}</p>
+                ))
+              ) : (
+                <p class="aboutParagraph">{aboutMe.bio}</p>
+              )}
+            </div>
+
+            {aboutMe.skills && aboutMe.skills.length > 0 && (
+              <div class="skillsContainer">
+                <h3 class="skillsTitle">
+                  {aboutMe.skillsHeading || "My Skills"}
+                </h3>
+                <div class="skillsGrid">
+                  {aboutMe.skills.map((skill, index) => (
+                    <span
+                      class="skillTag"
+                      style={`animation-delay: ${index * 0.05}s`}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Animations */
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Base Section */
+  .aboutSection {
+    scroll-margin-top: 38px;
+    padding: 2rem 0 4rem;
+    background-color: var(--porto-bg);
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .aboutContainer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 0;
+  }
+
+  .aboutHeader {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .aboutHeading {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-primary);
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    position: relative;
+    display: inline-block;
+  }
+
+  .aboutSection.is-visible .aboutHeading {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .aboutHeading::after {
+    content: "";
+    position: absolute;
+    width: 40px;
+    height: 3px;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--porto-primary);
+    border-radius: 2px;
+  }
+
+  /* The Main Card */
+  .aboutCard {
+    display: flex;
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-gray-800);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 461px;
+  }
+
+  .aboutSection.is-visible .aboutCard {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+
+  /* Left Column: Image & Resume */
+  .bioImageContainer {
+    flex: 0.8;
+    background-color: rgba(var(--porto-primary-rgb), 0.03);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3.5rem;
+    border-right: 1px solid var(--porto-gray-800);
+  }
+
+  .imageWrapper {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    padding: 6px;
+    background: linear-gradient(
+      135deg,
+      var(--porto-primary),
+      var(--porto-primary-light)
+    );
+    box-shadow: 0 10px 30px rgba(var(--porto-primary-rgb), 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .imageWrapper:hover {
+    transform: scale(1.05);
+  }
+
+  .aboutImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--porto-surface-0);
+  }
+
+  .resumeContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .resumeButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.4rem;
+    background-color: var(--porto-primary);
+    color: var(--porto-bg);
+    border: 1px solid var(--porto-primary);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+
+  .resumeButton:hover {
+    background-color: var(--porto-surface-0);
+    color: var(--porto-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--porto-primary-rgb), 0.2);
+  }
+
+  /* Right Column: Bio & Skills */
+  .bioTextContainer {
+    flex: 1.2;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .bioText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 1rem;
+  }
+
+  /* Custom Scrollbar for Bio */
+  .bioText::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .bioText::-webkit-scrollbar-track {
+    background: rgba(var(--porto-primary-rgb), 0.05);
+    border-radius: 10px;
+  }
+
+  .bioText::-webkit-scrollbar-thumb {
+    background: rgba(var(--porto-primary-rgb), 0.2);
+    border-radius: 10px;
+  }
+
+  .bioText::-webkit-scrollbar-thumb:hover {
+    background: var(--porto-primary);
+  }
+
+  .aboutParagraph {
+    position: relative;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: var(--porto-text);
+    margin: 0;
+    padding-left: 1rem;
+  }
+
+  .aboutParagraph::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    width: 1.5px;
+    background-color: var(--porto-gray-100);
+    border-radius: 2px;
+    opacity: 0.6;
+  }
+
+  /* Skills Grid */
+  .skillsContainer {
+    margin-top: 1.7rem;
+  }
+
+  .skillsTitle {
+    font-size: 1.4rem;
+    color: var(--porto-primary);
+    margin-bottom: 1.4rem;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+  }
+
+  .skillsTitle::after {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 2px;
+    bottom: -0.4rem;
+    left: 0;
+    background-color: var(--porto-primary);
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  .skillsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .skillTag {
+    background-color: var(--porto-surface-0);
+    color: var(--porto-text-muted);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--porto-gray-800);
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .skillTag:hover {
+    border-color: var(--porto-primary);
+    color: var(--porto-primary);
+    transform: translateY(-2px);
+    background-color: rgba(var(--porto-primary-rgb), 0.05);
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .aboutCard {
+      flex-direction: column;
+    }
+
+    .bioImageContainer {
+      border-right: none;
+      border-bottom: 1px solid var(--porto-gray-800);
+      padding: 2.5rem;
+    }
+
+    .bioTextContainer {
+      padding: 2rem;
+    }
+
+    .skillsContainer {
+      text-align: center;
+    }
+
+    .skillsTitle::after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .skillsGrid {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .aboutSection {
+      padding: 4rem 0;
+    }
+
+    .aboutHeading {
+      font-size: 2rem;
+    }
+
+    .imageWrapper {
+      width: 160px;
+      height: 160px;
+    }
+
+    .aboutParagraph {
+      font-size: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aboutCard,
+    .imageWrapper,
+    .resumeButton,
+    .skillTag {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>

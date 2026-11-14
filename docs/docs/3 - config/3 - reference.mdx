@@ -14,18 +14,18 @@ sidebar_position: 3
 
 Global identity, routing, SEO, and build settings.
 
-| Key                 | Type     | Default                  | Description                                                                                             |
-| :------------------ | :------- | :----------------------- | :------------------------------------------------------------------------------------------------------ |
-| `url`               | `string` | `"auto"`                 | Canonical site URL. Set to `"auto"` for automatic CI/CD platform detection.                             |
-| `base_url`          | `string` | `"auto"`                 | Base path for sub-directory deployments (e.g. `/my-project/`). Set to `"auto"` for automatic detection. |
-| `title`             | `string` | `(mode title)`           | Site title shown in browser tabs and header metadata.                                                   |
-| `tagline`           | `string` | `""`                     | Brief tagline used for SEO meta descriptions.                                                           |
-| `favicon`           | `string` | `"img/icon.png"`         | Path to the site favicon (relative to `static/` or theme defaults).                                     |
-| `social_card`       | `string` | `"img/social-card.jpeg"` | Social sharing preview image (OpenGraph / Twitter card).                                                |
-| `edit_url`          | `string` | `null`                   | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).              |
-| `on_broken_links`   | `string` | `"throw"`                | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`).                                 |
-| `on_broken_anchors` | `string` | `"throw"`                | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`).                     |
-| `head_tags`         | `array`  | `[]`                     | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).           |
+| Key                 | Type     | Default                                                           | Description                                                                                             |
+| :------------------ | :------- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `url`               | `string` | `"auto"`                                                          | Canonical site URL. Set to `"auto"` for automatic CI/CD platform detection.                             |
+| `base_url`          | `string` | `"auto"`                                                          | Base path for sub-directory deployments (e.g. `/my-project/`). Set to `"auto"` for automatic detection. |
+| `title`             | `string` | `(mode title)`                                                    | Site title shown in browser tabs and header metadata.                                                   |
+| `tagline`           | `string` | `"My Digital space, personal knowledge base & blogging platform"` | Brief tagline used for SEO meta descriptions.                                                           |
+| `favicon`           | `string` | `"img/icon.png"`                                                  | Path to the site favicon (relative to `static/` or theme defaults).                                     |
+| `social_card`       | `string` | `"img/social-card.jpeg"`                                          | Social sharing preview image (OpenGraph / Twitter card).                                                |
+| `edit_url`          | `string` | `""`                                                              | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).              |
+| `on_broken_links`   | `string` | `"throw"`                                                         | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`).                                 |
+| `on_broken_anchors` | `string` | `"warn"`                                                          | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`).                     |
+| `head_tags`         | `array`  | `[]`                                                              | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).           |
 
 ### `site.build`
 
@@ -47,11 +47,11 @@ RSS feed generator for the blog.
 
 Robots file generator for search engine crawlers.
 
-| Key            | Type      | Default                             | Description                                                  |
-| :------------- | :-------- | :---------------------------------- | :----------------------------------------------------------- |
-| `enable`       | `boolean` | `true`                              | Toggle automatic `robots.txt` generation in build directory. |
-| `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                          |
-| `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`.          |
+| Key            | Type      | Default | Description                                                  |
+| :------------- | :-------- | :------ | :----------------------------------------------------------- |
+| `enable`       | `boolean` | `true`  | Toggle automatic `robots.txt` generation in build directory. |
+| `rules`        | `array`   | `[]`    | Crawler directives.                                          |
+| `custom_lines` | `array`   | `[]`    | Custom raw lines appended directly to `robots.txt`.          |
 
 ### `site.markdown`
 
@@ -59,7 +59,6 @@ Configure the Markdown renderer behavior.
 
 | Key                       | Type   | Default   | Description                                                            |
 | :------------------------ | :----- | :-------- | :--------------------------------------------------------------------- |
-| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.       |
 | `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. |
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above.                  |
 | `mermaid`                 | `bool` | `true`    | Render Mermaid.js diagrams.                                            |
@@ -92,30 +91,34 @@ Progressive Web App manifest and service worker.
 
 Visual appearance and user interface settings.
 
-| Key            | Type     | Default       | Description                                                     |
-| :------------- | :------- | :------------ | :-------------------------------------------------------------- |
-| `color_scheme` | `string` | `"portosaur"` | Name of a bundled scheme or relative path to a custom CSS file. |
-| `default_mode` | `string` | `"light"`     | Initial color mode (`light`, `dark`, `system`).                 |
+| Key            | Type     | Default                                   | Description                                                     |
+| :------------- | :------- | :---------------------------------------- | :-------------------------------------------------------------- |
+| `color_scheme` | `string` | `"dracula"` (docs) / `"nord"` (portfolio) | Name of a bundled scheme or relative path to a custom CSS file. |
+| `default_mode` | `string` | `"dark"`                                  | Initial color mode (`light`, `dark`, `system`).                 |
 
 ### `theme.appearance`
 
-| Key                 | Type      | Default | Description                                                   |
-| :------------------ | :-------- | :------ | :------------------------------------------------------------ |
-| `show_theme_switch` | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
+| Key                    | Type      | Default | Description                                                   |
+| :--------------------- | :-------- | :------ | :------------------------------------------------------------ |
+| `show_theme_switch`    | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
+| `disable_project_link` | `boolean` | `false` | Hide the Project link in the navigation bar.                  |
 
 ### `theme.navigation`
 
-| Key             | Type      | Default | Description                                                    |
-| :-------------- | :-------- | :------ | :------------------------------------------------------------- |
-| `breadcrumbs`   | `boolean` | `true`  | Show breadcrumb navigation links at the top of doc/note pages. |
-| `auto_collapse` | `boolean` | `true`  | Auto-collapse inactive sidebar categories.                     |
+| Key                     | Type      | Default | Description                                                    |
+| :---------------------- | :-------- | :------ | :------------------------------------------------------------- |
+| `breadcrumbs`           | `boolean` | `true`  | Show breadcrumb navigation links at the top of doc/note pages. |
+| `collapsable_sidebar`   | `boolean` | `true`  | Enable collapsable sidebar navigation.                         |
+| `hide_navbar_on_scroll` | `boolean` | `true`  | Hide the navigation bar when scrolling down.                   |
+| `navbar_items`          | `array`   | `[]`    | Custom navbar items (`label`, `to`/`href`, `position`).        |
 
 ### `theme.footer`
 
-| Key            | Type     | Default     | Description                           |
-| :------------- | :------- | :---------- | :------------------------------------ |
-| `copyright`    | `string` | `(dynamic)` | Custom footer copyright string.       |
-| `social_links` | `array`  | `[]`        | Social icons displayed in the footer. |
+| Key                    | Type      | Default     | Description                          |
+| :--------------------- | :-------- | :---------- | :----------------------------------- |
+| `enable`               | `boolean` | `true`      | Toggle the footer section.           |
+| `message`              | `string`  | `(dynamic)` | Custom footer copyright message.     |
+| `disable_project_link` | `boolean` | `false`     | Hide the Project link in the footer. |
 
 ---
 
@@ -123,14 +126,14 @@ Visual appearance and user interface settings.
 
 Configures the documentation homepage (active when `docs_home` is declared).
 
-| Key        | Type     | Default          | Description                                 |
-| :--------- | :------- | :--------------- | :------------------------------------------ |
-| `title`    | `string` | `""`             | Hero banner title.                          |
-| `tagline`  | `string` | `""`             | Hero banner subtitle.                       |
-| `desc`     | `string` | `""`             | Explanatory description paragraph.          |
-| `icon`     | `string` | `"img/icon.png"` | Project icon displayed on the homepage.     |
-| `actions`  | `array`  | `[]`             | Call-to-action buttons (see schema below).  |
-| `features` | `array`  | `[]`             | Feature highlight cards (see schema below). |
+| Key        | Type     | Default                                                  | Description                                 |
+| :--------- | :------- | :------------------------------------------------------- | :------------------------------------------ |
+| `title`    | `string` | `"Your Name"`                                            | Hero banner title.                          |
+| `tagline`  | `string` | `"this is my awsome project"`                            | Hero banner subtitle.                       |
+| `desc`     | `string` | `"A awsome project for solving this practical projblem"` | Explanatory description paragraph.          |
+| `icon`     | `string` | `"img/icon.png"`                                         | Project icon displayed on the homepage.     |
+| `actions`  | `array`  | `[]`                                                     | Call-to-action buttons (see schema below).  |
+| `features` | `array`  | `[]`                                                     | Feature highlight cards (see schema below). |
 
 ### `docs_home.actions`
 
@@ -272,7 +275,7 @@ site:
   head_tags:
     - meta:
         name: "keywords"
-        content: "portfolio, documentation, static site, docusaurus"
+        content: "portfolio, documentation, static site, astro"
     - script:
         src: "https://analytics.example.com/script.js"
         async: true

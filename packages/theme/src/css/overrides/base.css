@@ -1,0 +1,48 @@
+/* === Base HTML and Utility Overrides === */
+
+html {
+  scroll-behavior: smooth;
+  color: var(--porto-text);
+  /* Overscroll / bounce area shows the alt background; the page body
+     itself is --porto-bg (see below). */
+  background-color: var(--porto-bg-alt) !important;
+}
+
+body {
+  background-color: var(--porto-bg);
+  color: var(--porto-text);
+  font-family: var(--porto-font-body);
+  line-height: var(--porto-line-height);
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+th {
+  text-align: center !important;
+}
+
+.hide-this {
+  display: none !important;
+}
+
+/* Hide root index from sidebar but keep it in DOM/metadata */
+.sidebar-item-hidden {
+  display: none !important;
+}
+
+/* Unify auto-generated DocCard styles with custom TopicList styles */
+.portosaur-generated-index .porto-doc-card h2,
+.portosaur-generated-index .porto-doc-card h2 svg {
+  color: var(--porto-primary) !important;
+}

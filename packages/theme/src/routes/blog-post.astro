@@ -1,32 +1,418 @@
 ---
-// Blog post (`/${blogRoute}/[...slug]`) — Phase 2 stub.
+// Blog post (`/${blogRoute}/[...slug]`).
 //
-// Frontmatter title as h1, then the full MDX content. Post slugs follow
-// the Docusaurus blog rule (frontmatter `slug` wins, else the file base
-// with a `YYYY-MM-DD-` date prefix stripped).
+// Title, date, authors (avatar + name + title, linked to their author
+// page when one exists, else to their URL), the full MDX content, a
+// tags footer, and prev/next post navigation (newest first: "Newer
+// post" is the previous item in date order, "Older post" the next).
+// Post slugs follow the Docusaurus blog rule (frontmatter `slug` wins,
+// else the file base with a `YYYY-MM-DD-` date prefix stripped).
+//
+// Dates resolve in `getStaticPaths` (frontmatter `date` → git date →
+// mtime, the same chain as the list pages) so newer/older ordering
+// follows resolved dates; the post's date and the sidebar data ride
+// along as props.
 import { getCollection, render } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogSidebar from "../components/BlogSidebar.astro";
 import { mdxComponents } from "../components/mdx/index.mjs";
-import { pageTitle, blogSlug } from "../lib/content.mjs";
+import { pageTitle, blogSlug, postDate } from "../lib/content.mjs";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
-  return posts.map((post) => ({
+  const datedPosts = (await getCollection("blog"))
+    .map((post) => ({ post, date: postDate(post) }))
+    .sort((a, b) => {
+      if (a.date && b.date) {
+        return b.date.getTime() - a.date.getTime();
+      }
+      if (a.date) {
+        return -1;
+      }
+      if (b.date) {
+        return 1;
+      }
+      return a.post.id.localeCompare(b.post.id);
+    });
+
+  const blogRoute = config.site.blogRoute;
+  const sidebarPosts = datedPosts.map(({ post, date }) => ({
+    url: `/${blogRoute}/${blogSlug(post)}/`,
+    title: post.data.title ?? post.id,
+    date: date ? date.toISOString() : null,
+  }));
+
+  return datedPosts.map(({ post, date }, index) => ({
     params: { slug: blogSlug(post) },
-    props: { post },
+    props: {
+      post,
+      date: date ? date.toISOString() : null,
+      sidebarPosts,
+      // Newest first: the previous item is the newer post.
+      newer: index > 0 ? datedPosts[index - 1].post : null,
+      older: index < datedPosts.length - 1 ? datedPosts[index + 1].post : null,
+    },
   }));
 }
 
-const { post } = Astro.props;
+const {
+  post,
+  date: dateProp,
+  sidebarPosts: sidebarPostProps,
+  newer,
+  older,
+} = Astro.props;
 const { Content } = await render(post);
 
 const siteTitle = config.site.title;
+const blogRoute = config.site.blogRoute;
 const heading = post.data.title ?? post.id;
 const title = pageTitle(heading, siteTitle);
+const date = dateProp ? new Date(dateProp) : null;
+const tags = post.data.tags ?? [];
+const currentUrl = `/${blogRoute}/${blogSlug(post)}/`;
+const sidebarPosts = sidebarPostProps.map((sidebarPost) => ({
+  ...sidebarPost,
+  date: sidebarPost.date ? new Date(sidebarPost.date) : null,
+}));
+
+async function loadAuthors() {
+  try {
+    return await getCollection("authors");
+  } catch {
+    return [];
+  }
+}
+
+// Resolves an author ref (a string key into `authors.yml`, or an inline
+// `{ key?, name?, title?, url?, image_url? }` object) to a display
+// author, including the title and avatar for the author block.
+function resolveAuthor(ref, authors) {
+  if (typeof ref === "string") {
+    const found = authors.find((author) => author.id === ref);
+    if (found) {
+      return {
+        key: found.id,
+        name: found.data.name ?? found.id,
+        title: found.data.title,
+        url: found.data.url,
+        image: found.data.image_url,
+        hasPage: found.data.page === true,
+      };
+    }
+    return {
+      key: ref,
+      name: ref,
+      title: undefined,
+      url: undefined,
+      image: undefined,
+      hasPage: false,
+    };
+  }
+  const key = ref?.key;
+  const found = key ? authors.find((author) => author.id === key) : undefined;
+  if (found) {
+    return {
+      key: found.id,
+      name: ref.name ?? found.data.name ?? found.id,
+      title: ref.title ?? found.data.title,
+      url: ref.url ?? found.data.url,
+      image: ref.image_url ?? found.data.image_url,
+      hasPage: found.data.page === true,
+    };
+  }
+  return {
+    key: key ?? ref?.name ?? "",
+    name: ref?.name ?? key ?? "",
+    title: ref?.title,
+    url: ref?.url,
+    image: ref?.image_url,
+    hasPage: false,
+  };
+}
+
+// An author avatar URL: absolute and remote URLs pass through, a
+// relative path resolves against the site base URL (the Docusaurus
+// `image_url` rule).
+function resolveAuthorImage(image) {
+  if (!image) {
+    return undefined;
+  }
+  if (/^(https?:)?\/\//.test(image) || image.startsWith("/")) {
+    return image;
+  }
+  const base = (config.site.baseUrl ?? "/").replace(/\/+$/, "");
+  return `${base}/${image}`;
+}
+
+const authors = await loadAuthors();
+const postAuthors = (post.data.authors ?? []).map((ref) =>
+  resolveAuthor(ref, authors),
+);
+
+function formatPostDate(value) {
+  return value.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function postUrl(other) {
+  return `/${blogRoute}/${blogSlug(other)}/`;
+}
 ---
 
 <BaseLayout title={title} description={post.data.description}>
-  <h1>{heading}</h1>
-  <Content components={mdxComponents} />
+  <div class="porto-blog-layout">
+    <BlogSidebar posts={sidebarPosts} currentUrl={currentUrl} />
+    <article class="porto-blog-post">
+      <header class="porto-blog-post__header">
+        <h1>{heading}</h1>
+        {date && (
+          <time class="porto-blog-post__date" datetime={date.toISOString()}>
+            {formatPostDate(date)}
+          </time>
+        )}
+        {postAuthors.length > 0 && (
+          <div class="porto-blog-authors-block">
+            {postAuthors.map((author) => (
+              <div class="porto-blog-author">
+                {author.image && (
+                  <img
+                    class="porto-blog-author__avatar"
+                    src={resolveAuthorImage(author.image)}
+                    alt=""
+                  />
+                )}
+                <div class="porto-blog-author__details">
+                  <span class="porto-blog-author__name">
+                    {author.hasPage ? (
+                      <a href={`/${blogRoute}/authors/${author.key}/`}>
+                        {author.name}
+                      </a>
+                    ) : author.url ? (
+                      <a
+                        href={author.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {author.name}
+                      </a>
+                    ) : (
+                      author.name
+                    )}
+                  </span>
+                  {author.title && (
+                    <span class="porto-blog-author__title">{author.title}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div class="porto-markdown">
+        <Content components={mdxComponents} />
+      </div>
+
+      {tags.length > 0 && (
+        <footer class="porto-blog-post__tags">
+          <span>Tags:</span>
+          <ul class="porto-blog-tags">
+            {tags.map((tag) => (
+              <li>
+                <a href={`/${blogRoute}/tags/${tag}/`}>{tag}</a>
+              </li>
+            ))}
+          </ul>
+        </footer>
+      )}
+
+      {(newer || older) && (
+        <nav class="porto-blog-paginator" aria-label="Blog posts">
+          {newer ? (
+            <a
+              class="porto-blog-paginator__link porto-blog-paginator__link--prev"
+              href={postUrl(newer)}
+              rel="prev"
+            >
+              <span class="porto-blog-paginator__sublabel">Newer post</span>
+              <span class="porto-blog-paginator__label">
+                {newer.data.title ?? newer.id}
+              </span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {older ? (
+            <a
+              class="porto-blog-paginator__link porto-blog-paginator__link--next"
+              href={postUrl(older)}
+              rel="next"
+            >
+              <span class="porto-blog-paginator__sublabel">Older post</span>
+              <span class="porto-blog-paginator__label">
+                {older.data.title ?? older.id}
+              </span>
+            </a>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
+    </article>
+  </div>
 </BaseLayout>
+
+<style>
+  .porto-blog-layout {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .porto-blog-post {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 46rem;
+  }
+
+  .porto-blog-post h1 {
+    margin: 0 0 0.5rem;
+    font-size: 3rem;
+    line-height: 1.2;
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-post__date {
+    display: block;
+    color: var(--porto-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .porto-blog-authors-block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .porto-blog-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .porto-blog-author__avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .porto-blog-author__details {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .porto-blog-author__name {
+    font-weight: bold;
+  }
+
+  .porto-blog-author__name a {
+    color: var(--porto-primary);
+    text-decoration: none;
+  }
+
+  .porto-blog-author__name a:hover {
+    text-decoration: underline;
+  }
+
+  .porto-blog-author__title {
+    color: var(--porto-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .porto-blog-post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--porto-border);
+    color: var(--porto-text-muted);
+  }
+
+  .porto-blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .porto-blog-tags a {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    color: var(--porto-text-muted);
+    text-decoration: none;
+    border: 1px solid var(--porto-border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+
+  .porto-blog-tags a:hover {
+    color: var(--porto-primary);
+    border-color: var(--porto-primary);
+  }
+
+  .porto-blog-paginator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .porto-blog-paginator__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    color: var(--porto-text);
+    text-decoration: none;
+    border: 1px solid var(--porto-border);
+    border-radius: 0.5rem;
+  }
+
+  .porto-blog-paginator__link:hover {
+    border-color: var(--porto-primary);
+  }
+
+  .porto-blog-paginator__link--next {
+    text-align: right;
+  }
+
+  .porto-blog-paginator__sublabel {
+    color: var(--porto-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .porto-blog-paginator__label {
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 996px) {
+    .porto-blog-post {
+      max-width: none;
+    }
+  }
+</style>

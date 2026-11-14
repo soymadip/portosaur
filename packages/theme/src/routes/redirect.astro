@@ -1,32 +1,110 @@
 ---
-// Redirect interstitial (`/redirect?url=…`) — Phase 2 stub.
+// Redirect interstitial (`/redirect?url=…`) — port of the old
+// `pages/redirect.jsx`.
 //
-// Reads the `url` query param and navigates to it (only `http(s)` URLs,
-// to avoid open-redirect abuse). The real interstitial (countdown,
-// preview card) lands in Phase 3.
+// The client script ports the old `useEffect` body verbatim: no `?url=`
+// param → `location.replace("/")`; otherwise `window.open(url, "_blank",
+// "noopener,noreferrer")` — on success `history.back()` (or `/` when
+// there is no history), on block the tap-to-open fallback appears. The
+// old code has no URL validation and neither does the port. The React
+// `blocked` / `targetUrl` state becomes DOM updates (the heading text
+// swap + unhiding the fallback block).
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../lib/content.mjs";
+import { renderIcon } from "../lib/icons.mjs";
 
 const title = pageTitle("Opening in browser…", config.site.title);
 ---
 
-<BaseLayout title={title}>
-  <h1>Opening in browser…</h1>
-  <p id="redirect-target">
-    You are being redirected. If nothing happens, the link may be missing
-    or invalid.
-  </p>
+<BaseLayout title={title} description="Opening in browser…">
+  <div class="porto-empty-state">
+    <div class="porto-empty-state__icon">
+      <span set:html={renderIcon("md:open-in-new", { size: "3rem" })} />
+    </div>
+    <h2 class="porto-empty-state__title" id="redirect-title">
+      Opening in browser…
+    </h2>
+    <div id="redirect-blocked" hidden>
+      <p class="porto-empty-state__desc">
+        This link lives outside the portfolio app. Tap the button below to open
+        it in your browser.
+      </p>
+      <a
+        class="porto-empty-state__btn"
+        id="redirect-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open in browser
+      </a>
+    </div>
+  </div>
+
   <script>
-    const target = new URLSearchParams(window.location.search).get("url");
-    if (target && /^https?:\/\//i.test(target)) {
-      const el = document.getElementById("redirect-target");
-      if (el) {
-        el.textContent = `Opening ${target} …`;
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get("url");
+
+    if (!url) {
+      // No ?url= param — just go home.
+      window.location.replace("/");
+    } else {
+      // Try to open in external browser window.
+      // Works on Android standalone PWA; returns null on iOS standalone.
+      const win = window.open(url, "_blank", "noopener,noreferrer");
+
+      if (win) {
+        // Opened successfully — navigate back inside the PWA.
+        if (history.length > 1) {
+          history.back();
+        } else {
+          window.location.replace("/");
+        }
+      } else {
+        // window.open() was blocked (iOS standalone PWA).
+        // Show a fallback the user can tap manually.
+        const title = document.getElementById("redirect-title");
+        if (title) {
+          title.textContent = "This page is outside the app";
+        }
+        const blocked = document.getElementById("redirect-blocked");
+        if (blocked) {
+          blocked.hidden = false;
+        }
+        const link = document.getElementById("redirect-link");
+        if (link instanceof HTMLAnchorElement) {
+          link.href = url;
+        }
       }
-      window.setTimeout(() => {
-        window.location.replace(target);
-      }, 800);
     }
   </script>
 </BaseLayout>
+
+<style>
+  /* Primary-button treatment (same as the docs-home action buttons);
+     the shared empty-state styles carry no button. */
+  .porto-empty-state__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--porto-primary);
+    color: #09090b;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .porto-empty-state__btn:hover {
+    background-color: var(--porto-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+  }
+</style>

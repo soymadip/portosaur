@@ -1,0 +1,12 @@
+/* === Footer Overrides === */
+
+.porto-footer {
+  background-color: var(--porto-footer-bg);
+  padding: 0.1rem;
+}
+
+.porto-footer__copyright {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  font-size: 0.8rem;
+}

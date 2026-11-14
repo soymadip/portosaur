@@ -6,9 +6,9 @@ sidebar_position: 1
 source: "https://example.com"
 ---
 
-Frontmatter is the YAML block at the very top of your Markdown (`.md` or `.mdx`) files between triple-dashed lines `---`.
+Frontmatter is the YAML block at the very top of your MDX (`.mdx`) files between triple-dashed lines `---`.
 
-It lets you configure document metadata and behavior. Portosaur adds note-specific options on top of the standard Docusaurus fields used by docs and blog posts.
+It lets you configure document metadata and behavior. Portosaur adds note-specific options on top of the standard fields used by docs and blog posts.
 
 ```yaml
 ---
@@ -31,7 +31,7 @@ topic_list:
 
 ## Frontmatter Reference
 
-These options apply to documents in the configured notes/docs directory. Docusaurus also accepts standard metadata fields; see the blog reference below for common blog fields.
+These options apply to documents in the configured notes/docs directory. Portosaur also accepts standard metadata fields; see the blog reference below for common blog fields.
 
 | Field                        | Type        | Default                                | Description                                                                                                                                                                                                                      |
 | :--------------------------- | :---------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -46,7 +46,7 @@ These options apply to documents in the configured notes/docs directory. Docusau
 | **`hide_table_of_contents`** | `bool`      | `false`                                | Hides the desktop and mobile table of contents for this document.                                                                                                                                                                |
 | **`draft`**                  | `bool`      | `false`                                | Draft notes are omitted from Portosaur note-card lists in production. This does not by itself prevent direct access to the document.                                                                                             |
 | **`unlisted`**               | `bool`      | `false`                                | Omits the note from Portosaur note-card lists in all environments. It does not by itself prevent direct access to the document.                                                                                                  |
-| **`image`**                  | `str`       | `null`                                 | Image path or URL used for page/social metadata where supported by Docusaurus.                                                                                                                                                   |
+| **`image`**                  | `str`       | `null`                                 | Image path or URL used for page/social metadata.                                                                                                                                                                                 |
 | **`topic_list`**             | `bool/obj`  | Global setting on category index pages | Shows or hides the child-topic card list.<br/> See the options [below](#topic_list-options).                                                                                                                                     |
 | **`source`**                 | `str/str[]` | `null`                                 | URL or list of URLs for the preview button in the action bar above toc.                                                                                                                                                          |
 
@@ -76,7 +76,7 @@ By default, topic lists are automatically added to category landing pages such a
 
 ## Blog Frontmatter
 
-Blog posts use the Docusaurus blog plugin. Common fields include:
+Blog posts use Portosaur's blog content collection. Common fields include:
 
 ```yaml
 ---
@@ -102,4 +102,4 @@ slug: first-release
 | **`draft`**       | `boolean`            | `false`                                    | Draft posts are available during local development and omitted from production builds. |
 | **`image`**       | `string`             | None                                       | Cover image path or URL used for social sharing and previews.                          |
 
-Other Docusaurus frontmatter fields may also be used. For Portosaur's `{vars.*}` variables in Markdown and MDX, see [Dynamic Variables](../3%20-%20config/1%20-%20dynamic-variables.mdx).
+Other standard frontmatter fields may also be used. For Portosaur's `{vars.*}` variables in Markdown and MDX, see [Dynamic Variables](../3%20-%20config/1%20-%20dynamic-variables.mdx).

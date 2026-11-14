@@ -17,13 +17,26 @@
  * - `porto:icons` — icon id → SVG string map. Stubbed to an empty map in
  *   Phase 2; the real scan (ported from `src/plugins/iconsPlugin.mjs`)
  *   lands with the icon system in Phase 4.
+ * - `porto:user-css` — re-exports the user's `theme.custom_css` files
+ *   (and a custom scheme file, when `theme.color_scheme` points at a
+ *   path) as CSS imports, so Vite bundles them. BaseLayout imports it
+ *   AFTER the theme CSS entry, so user rules win the cascade — the
+ *   `<link>` approach can't do that, because Astro appends its bundled
+ *   stylesheet links at the end of `<head>`, after any manual links.
  *
  * Build hooks: `astro:build:start` generates the site assets (favicons,
  * manifest, screenshots) into a staging dir (`.portosaur/static`) —
  * writing directly to outDir there is unsafe because Astro may wipe it
  * during the build. `astro:build:done` copies the staged assets and the
  * theme's `static/` files into the finished outDir, then builds the
- * Pagefind search index over the emitted HTML.
+ * Pagefind search index over the emitted HTML. Dev mode never runs the
+ * build hooks, so `astro:server:setup` generates the staged assets once
+ * and serves them (plus theme `static/`) through Vite middleware.
+ *
+ * Styling is Tailwind v4 (CSS-first config, `@tailwindcss/vite`) + the
+ * `--porto-*` token system (`src/css/`). The Tailwind Vite plugin is
+ * registered here so the theme CSS entry (`src/css/custom.css`) is
+ * processed whenever a layout imports it.
  */
 
 import fs from "node:fs";
@@ -32,6 +45,7 @@ import { fileURLToPath } from "node:url";
 
 import * as pagefind from "pagefind";
 import { unified } from "@astrojs/markdown-remark";
+import tailwindcss from "@tailwindcss/vite";
 
 import { portosaurMdxOptions } from "./mdx.mjs";
 import {
@@ -68,6 +82,96 @@ function copyDirRecursive(src, dest, overwrite) {
       fs.copyFileSync(from, to);
     }
   }
+}
+
+/**
+ * Minimal extension -> Content-Type map for the dev-assets middleware
+ * (generated assets are favicons, images, the manifest, and PDFs).
+ */
+const DEV_ASSET_MIME_TYPES = {
+  ".ico": "image/x-icon",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".webmanifest": "application/manifest+json",
+  ".pdf": "application/pdf",
+  ".json": "application/json",
+  ".txt": "text/plain",
+  ".xml": "application/xml",
+};
+
+/**
+ * The `options.cssFiles` entries that live inside the user project —
+ * the user's `theme.custom_css` files and a custom scheme file, when
+ * `theme.color_scheme` points at a path. The theme's own files live
+ * outside the project and are excluded (they're already bundled via
+ * BaseLayout's `custom.css` import). Returned as absolute paths for
+ * the `porto:user-css` virtual module to import.
+ */
+function projectLocalCssFiles(projectDir, cssFiles) {
+  const out = [];
+  for (const file of cssFiles ?? []) {
+    const rel = path.relative(projectDir, file).split(path.sep).join("/");
+    if (!rel || rel.startsWith("..")) {
+      continue;
+    }
+    out.push(file);
+  }
+  return out;
+}
+
+/**
+ * Creates Vite dev middleware serving the given dirs at `/`, first match
+ * wins. Only responds when the request path names a file that exists on
+ * disk; otherwise it calls `next()`, so real routes are never shadowed.
+ * Path traversal is rejected by checking the resolved path stays inside
+ * the served dir.
+ */
+function createDevAssetsMiddleware(dirs) {
+  return (req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      next();
+      return;
+    }
+    let pathname;
+    try {
+      pathname = decodeURIComponent(
+        new URL(req.url, "http://localhost").pathname,
+      );
+    } catch {
+      next();
+      return;
+    }
+    const relative = pathname.replace(/^\/+/, "");
+    if (!relative) {
+      next();
+      return;
+    }
+    for (const dir of dirs) {
+      const file = path.resolve(dir, relative);
+      if (!file.startsWith(dir + path.sep)) {
+        continue;
+      }
+      if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+        continue;
+      }
+      const ext = path.extname(file).toLowerCase();
+      res.setHeader(
+        "Content-Type",
+        DEV_ASSET_MIME_TYPES[ext] ?? "application/octet-stream",
+      );
+      res.setHeader("Cache-Control", "no-cache");
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
+      fs.createReadStream(file).pipe(res);
+      return;
+    }
+    next();
+  };
 }
 
 /**
@@ -165,7 +269,8 @@ export default function portosaur(options = {}) {
       if (
         id === "porto:config" ||
         id === "porto:sidebar" ||
-        id === "porto:icons"
+        id === "porto:icons" ||
+        id === "porto:user-css"
       ) {
         return `\0${id}`;
       }
@@ -189,6 +294,15 @@ export default function portosaur(options = {}) {
         // scan lands with the icon system in Phase 4.
         return "export default {};";
       }
+      if (id === "\0porto:user-css") {
+        // The user's custom CSS as side-effect imports — Vite bundles
+        // them in import order, after the theme CSS entry (BaseLayout
+        // imports this module after `custom.css`), so user rules win.
+        // Empty when the user has no custom CSS.
+        return projectLocalCssFiles(projectDir, options.cssFiles)
+          .map((file) => `import ${JSON.stringify(file)};`)
+          .join("\n");
+      }
       return null;
     },
   };
@@ -204,10 +318,12 @@ export default function portosaur(options = {}) {
       }) {
         setupLogger = logger;
 
-        // Virtual modules + content-dir aliases.
+        // Virtual modules + content-dir aliases, plus the Tailwind v4 Vite
+        // plugin (CSS-first config; the theme CSS entry is
+        // `src/css/custom.css`, imported by BaseLayout).
         updateConfig({
           vite: {
-            plugins: [portoVirtualModules],
+            plugins: [tailwindcss(), portoVirtualModules],
             resolve: {
               alias: {
                 "@portosaur-notes": path.resolve(projectDir, notesDir),
@@ -304,6 +420,32 @@ export default function portosaur(options = {}) {
         log(
           "info",
           `portosaur: serving "${site.title ?? "Untitled site"}" (${siteMode} mode)`,
+        );
+      },
+
+      async "astro:server:setup"({ server }) {
+        // Dev mode never runs `astro:build:start`, so without this the
+        // generated assets (favicons, manifest) 404 in dev. Generate
+        // them once into the same staging dir — the hash cache makes
+        // repeat starts fast — then serve the staged files (plus the
+        // theme's `static/` as fallback) through Vite middleware. A
+        // generation failure must not kill the dev server, so it only
+        // warns here (the build hook still treats it as fatal).
+        try {
+          await generateSiteAssets({
+            projectDir,
+            options,
+            stageDir,
+            logger: setupLogger,
+          });
+        } catch (error) {
+          log(
+            "warn",
+            `portosaur: dev asset generation failed (${error.message}) — favicons/manifest may 404`,
+          );
+        }
+        server.middlewares.use(
+          createDevAssetsMiddleware([stageDir, path.join(themeRoot, "static")]),
         );
       },
 

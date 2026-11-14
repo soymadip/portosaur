@@ -4,90 +4,180 @@ description: "Build custom color palettes and configure appearance."
 icon: "md:palette"
 ---
 
-Portosaur uses a two-step CSS variable architecture for theming. This ensures color harmony across light and dark modes while maintaining strict contrast and accessibility standards.
+Portosaur styles sites with **Tailwind CSS v4** plus a **token theming system**. Layout and spacing use Tailwind utilities; every color, font, radius, and shadow comes from a `--porto-*` CSS variable, so recoloring a site means overriding variables — never rewriting component CSS.
 
-Instead of hardcoding colors into components, theming is split into two phases:
-
-1. **The Master Palette**: Defining a raw inventory of your brand colors in `:root`.
-2. **Functional Mapping**: Assigning those raw colors to specific `--porto-*` variables inside `[data-theme="light"]` and `[data-theme="dark"]`.
+The old Infima (`--ifm-*`) variables are gone. If you have custom CSS from Portosaur 0.x, see the [migration table](#ifm--porto-mapping) at the bottom of this page.
 
 ---
 
-## Bundled Schemes
+## How theming works
 
-Portosaur includes several curated color schemes ready out of the box:
+Two attributes on `<html>` select the look:
 
-- `portosaur`: Modern cyan/teal brand palette.
-- `dracula`: High-contrast dark fantasy theme.
-- `nord`: Arctic, north-bluish palette.
+- `data-scheme` — the color scheme (`portosaur`, `dracula`, …), from `theme.color_scheme`.
+- `data-theme` — `light` or `dark`, from `theme.default_mode` (or the visitor's toggle choice, which is remembered).
 
-Activate any scheme in `config.yml`:
+Each bundled scheme assigns values to the same `--porto-*` tokens under `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` blocks. All six scheme files ship in the theme CSS; only the active scheme's block applies.
+
+Load order (later files win):
+
+1. Theme CSS (`custom.css`: Tailwind, tokens, all six schemes, overrides).
+2. Your custom scheme file, if `theme.color_scheme` points at a path.
+3. Your `theme.custom_css` file(s).
 
 ```yaml
 theme:
   color_scheme: "portosaur"
   default_mode: "dark" # "light", "dark", or "system"
+  custom_css: "src/css/custom.css"
 ```
 
 ---
 
-## Creating a Custom Theme
+## Bundled schemes
 
-To build your own custom theme, create a CSS file (e.g. `src/css/custom-theme.css`) and link it in `config.yml`:
+| Scheme       | Look                                                                          |
+| ------------ | ----------------------------------------------------------------------------- |
+| `portosaur`  | Default brand palette — dark green primary in light mode, neon green in dark. |
+| `catppuccin` | Latte (light) / Mocha (dark) from the Catppuccin palette.                     |
+| `dracula`    | Dracula palette, with a light Alucard-inspired mode.                          |
+| `github`     | GitHub light / GitHub dark.                                                   |
+| `gruvbox`    | Gruvbox light / dark.                                                         |
+| `nord`       | Nord arctic palette.                                                          |
 
 ```yaml
 theme:
-  color_scheme: "./src/css/custom-theme.css"
+  color_scheme: "dracula"
 ```
 
-### Step 1: The Master Palette (`:root`)
-
-The `:root` block holds your brand's raw colors as a single source of truth:
-
-```css title="src/css/custom-theme.css"
-:root {
-  /* Core Brand Colors */
-  --brand-blue: #0284c7;
-  --brand-blue-rgb: 2, 132, 199;
-  --brand-blue-bright: #38bdf8;
-
-  /* Surfaces & Backgrounds */
-  --brand-surface-light: #ffffff;
-  --brand-surface-dark: #0f172a;
-}
-```
-
-### Step 2: Functional Mapping
-
-Map your raw colors to functional `--porto-*` variables for light and dark modes:
-
-```css title="src/css/custom-theme.css"
-[data-theme="light"] {
-  --porto-primary: var(--brand-blue);
-  --porto-primary-rgb: var(--brand-blue-rgb);
-  --porto-bg-0: var(--brand-surface-light);
-  --porto-fg-0: #0f172a;
-}
-
-[data-theme="dark"] {
-  --porto-primary: var(--brand-blue-bright);
-  --porto-primary-rgb: 56, 189, 248;
-  --porto-bg-0: var(--brand-surface-dark);
-  --porto-fg-0: #f8fafc;
-}
-```
+If `color_scheme` is omitted, docs sites default to `dracula` and portfolio sites to `nord`.
 
 ---
 
-## Full Theming Boilerplate
+## Tokens
 
-Copy this boilerplate into `src/css/my-theme.css` to build a complete custom scheme:
+### Color tokens (assigned per scheme, per mode)
+
+Every scheme defines all of these. The names are stable — override them, don't rename them.
+
+| Token                                                                                                                                | Meaning                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `--porto-primary`, `--porto-primary-rgb`                                                                                             | Brand / link color, and its `r, g, b` triplet for `rgba()` |
+| `--porto-primary-dark`, `--porto-primary-darker`, `--porto-primary-darkest`                                                          | Darker primary steps                                       |
+| `--porto-primary-light`, `--porto-primary-lighter`, `--porto-primary-lightest`                                                       | Lighter primary steps                                      |
+| `--porto-success`, `--porto-success-rgb`                                                                                             | Success green                                              |
+| `--porto-warning`, `--porto-warning-rgb`                                                                                             | Warning amber                                              |
+| `--porto-danger`, `--porto-danger-rgb`                                                                                               | Danger red                                                 |
+| `--porto-info`, `--porto-info-rgb`                                                                                                   | Info blue                                                  |
+| `--porto-secondary`                                                                                                                  | Muted accent (lavender / gray, per scheme)                 |
+| `--porto-red`, `--porto-orange`, `--porto-yellow`, `--porto-green`, `--porto-teal`, `--porto-blue`, `--porto-purple`, `--porto-pink` | Accent palette                                             |
+| `--porto-bg`                                                                                                                         | Page background                                            |
+| `--porto-bg-alt`                                                                                                                     | Alternate background (footer, code blocks, overscroll)     |
+| `--porto-surface-0`, `--porto-surface-0-rgb`                                                                                         | Raised surface (cards, table stripes)                      |
+| `--porto-surface-1`                                                                                                                  | Higher surface                                             |
+| `--porto-surface-2`, `--porto-surface-2-rgb`                                                                                         | Highest surface (hover overlays)                           |
+| `--porto-text`                                                                                                                       | Body text                                                  |
+| `--porto-text-muted`                                                                                                                 | Secondary / muted text                                     |
+| `--porto-border`                                                                                                                     | Borders and dividers                                       |
+| `--porto-code`                                                                                                                       | Inline code text                                           |
+| `--porto-gray-0` … `--porto-gray-1000`                                                                                               | Grayscale, lightest to darkest in each mode                |
+
+The `-rgb` triplets exist so you can build translucent colors: `rgba(var(--porto-primary-rgb), 0.1)`. For tokens without an `-rgb` variant, use `color-mix(in srgb, var(--porto-secondary) 15%, transparent)` instead.
+
+### Structural tokens (defined once, in `tokens.css`)
+
+| Token                                                                                         | Default                                 | Meaning                        |
+| --------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------ |
+| `--porto-font-heading`                                                                        | Geologica Variable                      | Headings                       |
+| `--porto-font-body`                                                                           | Alata                                   | Body text                      |
+| `--porto-font-markdown`                                                                       | Lexend Variable                         | MDX prose                      |
+| `--porto-font-mono`                                                                           | System monospace stack                  | Code                           |
+| `--porto-line-height`                                                                         | `1.65`                                  | Base line height               |
+| `--porto-radius`                                                                              | `0.4rem`                                | Default corner radius          |
+| `--porto-radius-card`                                                                         | `var(--porto-radius)`                   | Card radius                    |
+| `--porto-shadow-lw`, `--porto-shadow-md`, `--porto-shadow-lg`, `--porto-shadow-tl`            | Tinted shadows                          | Elevation                      |
+| `--porto-navbar-shadow`                                                                       | `0 1px 2px 0 rgba(0, 0, 0, 0.1)`        | Navbar shadow                  |
+| `--porto-transition-fast` / `--porto-transition-slow`                                         | `200ms` / `400ms`                       | Transition durations           |
+| `--porto-transition-timing`                                                                   | `cubic-bezier(0.08, 0.52, 0.52, 1)`     | Transition easing              |
+| `--porto-z-dropdown` / `--porto-z-overlay`                                                    | `100` / `200`                           | Layering                       |
+| `--porto-navbar-height`                                                                       | `3.75rem`                               | Navbar height                  |
+| `--porto-navbar-bg`                                                                           | `var(--porto-bg)`                       | Navbar background              |
+| `--porto-navbar-sidebar-width`                                                                | `83vw`                                  | Mobile sidebar width           |
+| `--porto-footer-bg`                                                                           | `var(--porto-bg-alt)`                   | Footer background              |
+| `--porto-card-bg`                                                                             | `var(--porto-surface-0)`                | Card background                |
+| `--porto-code-bg`                                                                             | `var(--porto-bg-alt)`                   | Code block background          |
+| `--porto-pre-padding`                                                                         | `1rem`                                  | Code block padding             |
+| `--porto-code-line-highlight`                                                                 | `rgba(var(--porto-surface-2-rgb), 0.5)` | Highlighted code line          |
+| `--porto-link-color` / `--porto-link-hover-color`                                             | Primary / primary-dark                  | Link colors                    |
+| `--porto-menu-color`, `--porto-menu-color-active`                                             | Muted text / primary                    | Sidebar links                  |
+| `--porto-menu-bg-active`, `--porto-menu-bg-hover`                                             | Translucent primary / surface           | Sidebar link states            |
+| `--porto-toc-link-color`, `--porto-toc-link-color-active`, `--porto-toc-border-color`         | Muted / primary / border                | Table of contents              |
+| `--porto-hover-overlay`                                                                       | `rgba(var(--porto-surface-2-rgb), 0.5)` | Hover overlay                  |
+| `--porto-spacing-horizontal`, `--porto-spacing-md`                                            | `1rem`                                  | Horizontal spacing             |
+| `--porto-scroll-margin-top` / `--porto-scroll-margin-top-mobile`                              | `38px` / `32px`                         | Anchor offset below the navbar |
+| `--porto-hr-height`, `--porto-hr-margin-vertical`, `--porto-hr-bg`, `--porto-hr-border-color` | `2px`, `2.5rem`, gray-600, gray-500     | Horizontal rules               |
+| `--porto-table-border-color`, `--porto-table-stripe-bg`                                       | Gray-400 / surface-0                    | Tables                         |
+| `--porto-border-width`                                                                        | `1px`                                   | Default border width           |
+| `--porto-button-color`                                                                        | Gray-500                                | Button text                    |
+| `--porto-heading-color`                                                                       | `var(--porto-text)`                     | Heading text                   |
+| `--porto-on-primary`                                                                          | Mode's light color                      | Text on primary backgrounds    |
+| `--porto-text-inverse`                                                                        | Mode's light color                      | Text on inverted backgrounds   |
+
+### Tailwind utilities
+
+The tokens are mapped to Tailwind utilities, so components and MDX can use either form:
+
+```html
+<!-- Utility form -->
+<div class="bg-porto-surface-0 text-porto-text border-porto-border">…</div>
+
+<!-- Arbitrary-value form (works for any token, no mapping needed) -->
+<div class="bg-(--porto-surface-0)">…</div>
+```
+
+Available utilities include `bg-porto-*`, `text-porto-*`, `border-porto-*` for every color token, `font-porto-heading` / `font-porto-body` / `font-porto-markdown` / `font-porto-mono`, `rounded-porto`, and `shadow-porto-lw` / `shadow-porto-md` / `shadow-porto-lg` / `shadow-porto-tl`.
+
+---
+
+## Overriding tokens in `custom_css`
+
+Point `theme.custom_css` at your file(s) — they load after the theme CSS, so your values win. Scope overrides by mode when they differ:
+
+```css title="src/css/custom.css"
+/* Both modes */
+:root {
+  --porto-radius: 0.75rem;
+}
+
+/* Light mode only */
+[data-theme="light"] {
+  --porto-primary: #0284c7;
+  --porto-primary-rgb: 2, 132, 199;
+}
+
+/* Dark mode only */
+[data-theme="dark"] {
+  --porto-primary: #38bdf8;
+  --porto-primary-rgb: 56, 189, 248;
+}
+```
+
+Keep the `-rgb` triplet in sync with its color whenever you override a token that has one — translucent variants (`rgba(var(--porto-primary-rgb), …)`) read the triplet, not the hex.
+
+---
+
+## Creating a custom scheme
+
+To build a full custom scheme, create a CSS file and link it in `config.yml`:
+
+```yaml
+theme:
+  color_scheme: "./src/css/my-theme.css"
+```
+
+The file loads after the theme CSS. Define a raw palette in `:root`, then map it to the `--porto-*` tokens inside plain `[data-theme="light"]` and `[data-theme="dark"]` blocks — no bundled scheme block matches while a custom scheme is active, so the plain blocks win:
 
 ```css title="src/css/my-theme.css"
-/**
- * 🎨 Portosaur Custom Theme Boilerplate
- */
-
 /* STEP 1: RAW PALETTE */
 :root {
   --theme-red: #ef4444;
@@ -99,7 +189,7 @@ Copy this boilerplate into `src/css/my-theme.css` to build a complete custom sch
   --theme-purple: #a855f7;
   --theme-pink: #ec4899;
 
-  /* RGB Triplet Variants for Opacity/Alpha */
+  /* RGB triplet variants for opacity/alpha */
   --theme-blue-rgb: 59, 130, 246;
   --theme-green-rgb: 34, 197, 94;
   --theme-red-rgb: 239, 68, 68;
@@ -109,24 +199,49 @@ Copy this boilerplate into `src/css/my-theme.css` to build a complete custom sch
 [data-theme="light"] {
   --porto-primary: var(--theme-blue);
   --porto-primary-rgb: var(--theme-blue-rgb);
+  --porto-primary-dark: #2563eb;
+  --porto-primary-darker: #1d4ed8;
+  --porto-primary-darkest: #1e40af;
+  --porto-primary-light: #60a5fa;
+  --porto-primary-lighter: #93c5fd;
+  --porto-primary-lightest: #bfdbfe;
+
   --porto-secondary: var(--theme-purple);
   --porto-success: var(--theme-green);
+  --porto-success-rgb: var(--theme-green-rgb);
   --porto-warning: var(--theme-yellow);
+  --porto-warning-rgb: 234, 179, 8;
   --porto-danger: var(--theme-red);
+  --porto-danger-rgb: var(--theme-red-rgb);
   --porto-info: var(--theme-blue);
+  --porto-info-rgb: var(--theme-blue-rgb);
 
-  /* Backgrounds (0 = base canvas, 1 = cards, 2 = popups) */
-  --porto-bg-0: #ffffff;
-  --porto-bg-1: #f8fafc;
-  --porto-bg-2: #f1f5f9;
-  --porto-bg-3: #e2e8f0;
+  /* Palette */
+  --porto-red: var(--theme-red);
+  --porto-orange: var(--theme-orange);
+  --porto-yellow: var(--theme-yellow);
+  --porto-green: var(--theme-green);
+  --porto-teal: var(--theme-teal);
+  --porto-blue: var(--theme-blue);
+  --porto-purple: var(--theme-purple);
+  --porto-pink: var(--theme-pink);
 
-  /* Text & Foreground */
-  --porto-fg-0: #0f172a;
-  --porto-fg-1: #334155;
-  --porto-fg-2: #64748b;
+  /* Backgrounds & text */
+  --porto-bg: #ffffff;
+  --porto-bg-alt: #f8fafc;
+  --porto-surface-0: #f1f5f9;
+  --porto-surface-0-rgb: 241, 245, 249;
+  --porto-surface-1: #e2e8f0;
+  --porto-surface-2: #cbd5e1;
+  --porto-surface-2-rgb: 203, 213, 225;
+  --porto-text: #0f172a;
+  --porto-text-muted: #64748b;
 
-  /* Grayscale Continuum */
+  /* Borders & code */
+  --porto-border: #e2e8f0;
+  --porto-code: #0f172a;
+
+  /* Grayscale continuum */
   --porto-gray-0: #ffffff;
   --porto-gray-100: #f8fafc;
   --porto-gray-200: #f1f5f9;
@@ -144,24 +259,49 @@ Copy this boilerplate into `src/css/my-theme.css` to build a complete custom sch
 [data-theme="dark"] {
   --porto-primary: #60a5fa;
   --porto-primary-rgb: 96, 165, 250;
+  --porto-primary-dark: #3b82f6;
+  --porto-primary-darker: #2563eb;
+  --porto-primary-darkest: #1d4ed8;
+  --porto-primary-light: #93c5fd;
+  --porto-primary-lighter: #bfdbfe;
+  --porto-primary-lightest: #dbeafe;
+
   --porto-secondary: #c084fc;
   --porto-success: #4ade80;
+  --porto-success-rgb: 74, 222, 128;
   --porto-warning: #fde047;
+  --porto-warning-rgb: 253, 224, 71;
   --porto-danger: #f87171;
+  --porto-danger-rgb: 248, 113, 113;
   --porto-info: #60a5fa;
+  --porto-info-rgb: 96, 165, 250;
 
-  /* Inverted Backgrounds */
-  --porto-bg-0: #0f172a;
-  --porto-bg-1: #1e293b;
-  --porto-bg-2: #334155;
-  --porto-bg-3: #475569;
+  /* Palette */
+  --porto-red: #f87171;
+  --porto-orange: #fb923c;
+  --porto-yellow: #fde047;
+  --porto-green: #4ade80;
+  --porto-teal: #2dd4bf;
+  --porto-blue: #60a5fa;
+  --porto-purple: #c084fc;
+  --porto-pink: #f472b6;
 
-  /* Inverted Text & Foreground */
-  --porto-fg-0: #f8fafc;
-  --porto-fg-1: #e2e8f0;
-  --porto-fg-2: #94a3b8;
+  /* Inverted backgrounds & text */
+  --porto-bg: #0f172a;
+  --porto-bg-alt: #1e293b;
+  --porto-surface-0: #334155;
+  --porto-surface-0-rgb: 51, 65, 85;
+  --porto-surface-1: #475569;
+  --porto-surface-2: #64748b;
+  --porto-surface-2-rgb: 100, 116, 139;
+  --porto-text: #f8fafc;
+  --porto-text-muted: #94a3b8;
 
-  /* Inverted Grayscale Continuum */
+  /* Borders & code */
+  --porto-border: #334155;
+  --porto-code: #f8fafc;
+
+  /* Inverted grayscale continuum */
   --porto-gray-0: #0f172a;
   --porto-gray-100: #1e293b;
   --porto-gray-200: #334155;
@@ -175,3 +315,145 @@ Copy this boilerplate into `src/css/my-theme.css` to build a complete custom sch
   --porto-gray-1000: #ffffff;
 }
 ```
+
+---
+
+## Stable selectors
+
+These classes are part of the theme's styling contract — custom CSS can target them safely. Docusaurus classes (`.navbar*`, `.theme-doc-*`, `.markdown`, `.footer*`, `.pagination-nav*`) no longer exist.
+
+| Selector                                                                                                                                                                    | Element                                                                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `.porto-navbar`                                                                                                                                                             | Navbar bar                                                                  |
+| `.porto-navbar__logo`, `.porto-navbar__link`, `.porto-navbar__item`                                                                                                         | Navbar logo, links, items                                                   |
+| `.porto-navbar__items--right`                                                                                                                                               | Navbar right cluster (search, toggle, items)                                |
+| `.porto-navbar__more-items`                                                                                                                                                 | "More" dropdown trigger                                                     |
+| `.porto-navbar__version`                                                                                                                                                    | Portosaur version string in the nav                                         |
+| `.porto-navbar-sidebar__brand`, `.porto-navbar-sidebar__items`                                                                                                              | Mobile sidebar brand / scroll area                                          |
+| `.porto-sidebar`, `.porto-sidebar__menu`, `.porto-sidebar__link`, `.porto-sidebar__item-collapsible`, `.porto-sidebar__brand`                                               | Docs sidebar                                                                |
+| `.porto-footer`, `.porto-footer__copyright`                                                                                                                                 | Footer                                                                      |
+| `.porto-search`, `.porto-search__input`                                                                                                                                     | Navbar search                                                               |
+| `.porto-pagination`, `.porto-pagination__link`, `.porto-pagination__link--prev`, `.porto-pagination__link--next`, `.porto-pagination__label`, `.porto-pagination__sublabel` | Prev/next paginator                                                         |
+| `.porto-doc`, `.porto-doc__content`, `.porto-doc-footer`                                                                                                                    | Doc page wrapper, article column, "Edit this page" footer                   |
+| `.porto-markdown`                                                                                                                                                           | Wrapper around rendered MDX content                                         |
+| `.porto-breadcrumbs__link`, `.porto-breadcrumbs__item--active`                                                                                                              | Breadcrumbs                                                                 |
+| `.porto-toc__link--active`                                                                                                                                                  | Active table-of-contents link                                               |
+| `.porto-empty-state`, `.porto-empty-state__icon`, `.porto-empty-state__title`, `.porto-empty-state__desc`                                                                   | Shared empty state (404, redirect, empty lists)                             |
+| `.portosaur-generated-index`, `.porto-doc-card`                                                                                                                             | Generated index pages and their cards                                       |
+| `.admonition`, `.admonition-<type>`, `.admonition-heading`, `.admonition-content`                                                                                           | Callouts (`note`, `tip`, `info`, `success`, `warning`, `caution`, `danger`) |
+| `.code-block-error-line`, `.code-block-success-line`                                                                                                                        | Magic-comment code line highlights                                          |
+| `.porto-btn`                                                                                                                                                                | `<Btn>` component                                                           |
+| `.sidebar-item-hidden`                                                                                                                                                      | Hidden sidebar item (root index)                                            |
+| `.center`, `.hide-this`                                                                                                                                                     | Utility classes                                                             |
+
+---
+
+## `--ifm-*` → `--porto-*` mapping
+
+Portosaur 1.0 drops Infima. Every `--ifm-*` variable used by the old theme maps to a `--porto-*` token (or a literal value) as follows. Search your custom CSS for `--ifm-` and replace each occurrence.
+
+### Colors
+
+| Old `--ifm-*`                                                                                    | New equivalent                                                                                                |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `--ifm-color-primary`, `-rgb`, `-light`, `-lighter`, `-lightest`, `-dark`, `-darker`, `-darkest` | `--porto-primary` + same suffix                                                                               |
+| `--ifm-color-primary-contrast-foreground`                                                        | `--porto-on-primary`                                                                                          |
+| `--ifm-color-success`, `-rgb`                                                                    | `--porto-success`, `--porto-success-rgb`                                                                      |
+| `--ifm-color-warning`, `-rgb`                                                                    | `--porto-warning`, `--porto-warning-rgb`                                                                      |
+| `--ifm-color-danger`, `-rgb`                                                                     | `--porto-danger`, `--porto-danger-rgb`                                                                        |
+| `--ifm-color-info`, `-rgb`                                                                       | `--porto-info`, `--porto-info-rgb`                                                                            |
+| `--ifm-color-secondary`                                                                          | `--porto-secondary`                                                                                           |
+| `--ifm-color-secondary-rgb`                                                                      | No triplet token — use `color-mix(in srgb, var(--porto-secondary) N%, transparent)`                           |
+| `--ifm-color-success-darker`                                                                     | `color-mix(in srgb, var(--porto-success) 75%, black)`                                                         |
+| `--ifm-color-warning-darkest`                                                                    | `color-mix(in srgb, var(--porto-warning) 60%, black)`                                                         |
+| `--ifm-color-danger-darker`                                                                      | `color-mix(in srgb, var(--porto-danger) 75%, black)`                                                          |
+| `--ifm-color-gray-0` … `--ifm-color-gray-1000`                                                   | `--porto-gray-0` … `--porto-gray-1000`                                                                        |
+| `--ifm-color-emphasis-0` … `--ifm-color-emphasis-1000`                                           | `--porto-gray-0` … `--porto-gray-1000`                                                                        |
+| `--ifm-color-emphasis-950`                                                                       | `--porto-gray-900` (nearest step)                                                                             |
+| `--ifm-color-emphasis-200-rgb`, `--ifm-color-emphasis-900-rgb`                                   | No triplet tokens — use `color-mix(in srgb, var(--porto-gray-200) N%, transparent)` / `var(--porto-gray-900)` |
+| `--ifm-color-white`                                                                              | Light mode: `var(--porto-bg)`; dark mode: `var(--porto-text)`                                                 |
+| `--ifm-color-black`                                                                              | Light mode: `var(--porto-text)`; dark mode: `var(--porto-bg)`                                                 |
+| `--ifm-color-scheme`                                                                             | No token — set by the `color-scheme` property per mode in `tokens.css`                                        |
+
+> The `-darker` / `-darkest` semantic variants above were static Infima defaults in 0.x, not scheme-aware — the `color-mix` forms keep them in sync with the active scheme.
+
+### Backgrounds & text
+
+| Old `--ifm-*`                                             | New equivalent          |
+| --------------------------------------------------------- | ----------------------- |
+| `--ifm-background-color`                                  | `--porto-bg`            |
+| `--ifm-background-surface-color`                          | `--porto-surface-0`     |
+| `--ifm-font-color-base`                                   | `--porto-text`          |
+| `--ifm-font-color-base-inverse`                           | `--porto-text-inverse`  |
+| `--ifm-font-color-secondary`, `--ifm-font-color-tertiary` | `--porto-text-muted`    |
+| `--ifm-color-content`                                     | `--porto-text`          |
+| `--ifm-color-content-secondary`                           | `--porto-text-muted`    |
+| `--ifm-hero-background-color`                             | `--porto-bg-alt`        |
+| `--ifm-heading-color`                                     | `--porto-heading-color` |
+
+### Navbar, footer, cards
+
+| Old `--ifm-*`                                                      | New equivalent                 |
+| ------------------------------------------------------------------ | ------------------------------ |
+| `--ifm-navbar-background-color`                                    | `--porto-navbar-bg`            |
+| `--ifm-navbar-height`                                              | `--porto-navbar-height`        |
+| `--ifm-navbar-shadow`                                              | `--porto-navbar-shadow`        |
+| `--ifm-navbar-sidebar-width`                                       | `--porto-navbar-sidebar-width` |
+| `--ifm-navbar-item-padding-horizontal`                             | `0.5rem` (literal, no token)   |
+| `--ifm-navbar-search-input-color`                                  | `--porto-text`                 |
+| `--ifm-navbar-search-input-background-color`                       | `--porto-surface-0`            |
+| `--ifm-navbar-search-input-placeholder-color`                      | `--porto-text-muted`           |
+| `--ifm-footer-background-color`                                    | `--porto-footer-bg`            |
+| `--ifm-footer-padding-horizontal`, `--ifm-footer-padding-vertical` | `0.1rem` (literal, no token)   |
+| `--ifm-card-background-color`                                      | `--porto-card-bg`              |
+| `--ifm-card-border-radius`                                         | `--porto-radius-card`          |
+
+### Menu, TOC, tables, code
+
+| Old `--ifm-*`                                                                              | New equivalent                                                                                                       |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `--ifm-menu-color`                                                                         | `--porto-menu-color`                                                                                                 |
+| `--ifm-menu-color-active`                                                                  | `--porto-menu-color-active`                                                                                          |
+| `--ifm-menu-color-background-active`                                                       | `--porto-menu-bg-active`                                                                                             |
+| `--ifm-menu-color-background-hover`                                                        | `--porto-menu-bg-hover`                                                                                              |
+| `--ifm-toc-link-color`                                                                     | `--porto-toc-link-color`                                                                                             |
+| `--ifm-toc-link-color-active`                                                              | `--porto-toc-link-color-active`                                                                                      |
+| `--ifm-toc-border-color`                                                                   | `--porto-toc-border-color`                                                                                           |
+| `--ifm-table-border-color`                                                                 | `--porto-table-border-color`                                                                                         |
+| `--ifm-table-stripe-background`                                                            | `--porto-table-stripe-bg`                                                                                            |
+| `--ifm-code-color`                                                                         | `--porto-code`                                                                                                       |
+| `--ifm-code-background`, `--ifm-pre-background`                                            | `--porto-code-bg`                                                                                                    |
+| `--ifm-pre-padding`                                                                        | `--porto-pre-padding`                                                                                                |
+| `--ifm-alert-border-color`, `--ifm-alert-background-color`, `--ifm-alert-foreground-color` | No tokens — callouts are `.admonition` elements now; tint with the semantic token directly, e.g. `var(--porto-info)` |
+| `--docusaurus-highlighted-code-line-bg`                                                    | `--porto-code-line-highlight`                                                                                        |
+
+### Typography, spacing, effects
+
+| Old `--ifm-*`                                               | New equivalent                                                  |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| `--ifm-heading-font-family`                                 | `--porto-font-heading`                                          |
+| `--ifm-font-family-base`                                    | `--porto-font-body`                                             |
+| `--ifm-font-family-monospace`                               | `--porto-font-mono`                                             |
+| `--ifm-line-height`                                         | `--porto-line-height`                                           |
+| `--ifm-link-color`                                          | `--porto-link-color`                                            |
+| `--ifm-link-hover-color`                                    | `--porto-link-hover-color`                                      |
+| `--ifm-link-hover-decoration`                               | `underline` (literal, no token)                                 |
+| `--ifm-global-radius`                                       | `--porto-radius`                                                |
+| `--ifm-global-shadow-lw`, `-md`, `-lg`, `-tl`               | `--porto-shadow-lw`, `-md`, `-lg`, `-tl`                        |
+| `--ifm-shadow-color`                                        | `--porto-surface-1`                                             |
+| `--ifm-hover-overlay`                                       | `--porto-hover-overlay`                                         |
+| `--ifm-button-color`                                        | `--porto-button-color`                                          |
+| `--ifm-button-border-width`                                 | `--porto-border-width`                                          |
+| `--ifm-dropdown-background-color`                           | `--porto-card-bg`                                               |
+| `--ifm-dropdown-hover-background-color`                     | `--porto-menu-bg-hover`                                         |
+| `--ifm-dropdown-link-color`                                 | `--porto-text`                                                  |
+| `--ifm-z-index-dropdown`, `--ifm-z-index-overlay`           | `--porto-z-dropdown`, `--porto-z-overlay`                       |
+| `--ifm-transition-fast`, `--ifm-transition-slow`            | `--porto-transition-fast`, `--porto-transition-slow`            |
+| `--ifm-transition-timing-default`                           | `--porto-transition-timing`                                     |
+| `--ifm-spacing-horizontal`, `--ifm-spacing-md`              | `--porto-spacing-horizontal`, `--porto-spacing-md`              |
+| `--ifm-scroll-margin-top`, `--ifm-scroll-margin-top-mobile` | `--porto-scroll-margin-top`, `--porto-scroll-margin-top-mobile` |
+| `--ifm-hr-height`, `--ifm-hr-margin-vertical`               | `--porto-hr-height`, `--porto-hr-margin-vertical`               |
+| `--ifm-hr-background-color`                                 | `--porto-hr-bg`                                                 |
+| `--ifm-hr-border-color`                                     | `--porto-hr-border-color`                                       |
+| `--ifm-breadcrumb-separator-size`                           | `0.4rem` (literal, no token)                                    |
+| `--ifm-breadcrumb-spacing`                                  | `0.03rem` (literal, no token)                                   |

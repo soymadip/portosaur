@@ -1,20 +1,197 @@
 ---
-// Search page (`/search`) — Phase 2 stub.
+// Search page (`/search`) — minimal working search (the full search UI
+// is Phase 5).
 //
-// The title is the bare "Search the documentation" (no `| Site` suffix —
-// the Docusaurus search plugin's own title). The Pagefind UI lands in
-// Phase 5; the stub renders the input so the page exists and the index
-// is built over real HTML from Phase 2 on.
+// Reads `?q=`, loads the Pagefind index client-side, runs the query,
+// and renders result links. The Pagefind index is built at `build:done`,
+// so search works in built output; in dev the index is absent and the
+// page says so instead of failing. The title is the bare string
+// "Search the documentation" (no `| Site` suffix — the golden title).
+import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const base = config.site.baseUrl ?? "/";
+const basePrefix = base === "/" ? "" : base.replace(/\/+$/, "");
+const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
 ---
 
 <BaseLayout title="Search the documentation">
-  <h1>Search the documentation</h1>
-  <input
-    type="search"
-    id="porto-search-input"
-    placeholder="Search the documentation"
-    aria-label="Search the documentation"
-  />
-  <div id="porto-search-results"></div>
+  <div class="porto-search">
+    <h1>Search the documentation</h1>
+    <div class="porto-search__box">
+      <input
+        id="porto-search-input"
+        type="search"
+        placeholder="Search the documentation…"
+        aria-label="Search the documentation"
+        autocomplete="off"
+      />
+    </div>
+    <div id="porto-search-results" class="porto-search__results" role="status">
+      <p class="porto-search__hint">Type to search the documentation.</p>
+    </div>
+  </div>
+
+  <script define:vars={{ pagefindUrl, basePrefix }}>
+    const input = document.getElementById("porto-search-input");
+    const resultsEl = document.getElementById("porto-search-results");
+
+    // Pagefind is loaded lazily (the index only exists in built output).
+    let pagefind = null;
+    let loadFailed = false;
+
+    async function loadPagefind() {
+      if (pagefind || loadFailed) {
+        return pagefind;
+      }
+      try {
+        pagefind = await import(pagefindUrl);
+        if (basePrefix) {
+          pagefind.options({ baseUrl: `${basePrefix}/` });
+        }
+      } catch {
+        loadFailed = true;
+        pagefind = null;
+      }
+      return pagefind;
+    }
+
+    function renderResults(results, query) {
+      if (!resultsEl) {
+        return;
+      }
+      if (results.length === 0) {
+        resultsEl.textContent = `No results found for "${query}".`;
+        return;
+      }
+      const list = document.createElement("ul");
+      list.className = "porto-search-results__list";
+      results.forEach((result) => {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = result.url;
+        link.textContent = result.title || result.url;
+        item.appendChild(link);
+        if (result.excerpt) {
+          const excerpt = document.createElement("p");
+          // The excerpt is Pagefind-generated from the site's own
+          // content (with <mark> highlights) — safe to inject.
+          excerpt.innerHTML = result.excerpt;
+          item.appendChild(excerpt);
+        }
+        list.appendChild(item);
+      });
+      resultsEl.replaceChildren(list);
+    }
+
+    async function runSearch(query) {
+      if (!resultsEl) {
+        return;
+      }
+      if (!query) {
+        resultsEl.innerHTML =
+          '<p class="porto-search__hint">Type to search the documentation.</p>';
+        return;
+      }
+      const index = await loadPagefind();
+      if (!index) {
+        resultsEl.textContent =
+          "Search index is not available yet. Build the site to enable search.";
+        return;
+      }
+      const response = await index.search(query);
+      const results = [];
+      for (const result of response.results) {
+        const data = await result.data();
+        results.push({
+          url: data.url,
+          title: data.meta?.title,
+          excerpt: data.excerpt,
+        });
+      }
+      renderResults(results, query);
+    }
+
+    let debounce = 0;
+    if (input instanceof HTMLInputElement) {
+      // Prefill from ?q= and search on load.
+      const params = new URLSearchParams(window.location.search);
+      const initialQuery = params.get("q") ?? "";
+      if (initialQuery) {
+        input.value = initialQuery;
+        runSearch(initialQuery);
+      }
+      input.addEventListener("input", () => {
+        const query = input.value.trim();
+        const url = new URL(window.location.href);
+        if (query) {
+          url.searchParams.set("q", query);
+        } else {
+          url.searchParams.delete("q");
+        }
+        window.history.replaceState(null, "", url);
+        window.clearTimeout(debounce);
+        debounce = window.setTimeout(() => {
+          runSearch(query);
+        }, 200);
+      });
+    }
+  </script>
 </BaseLayout>
+
+<style>
+  .porto-search {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .porto-search__box {
+    margin: 1.5rem 0;
+  }
+
+  .porto-search__box input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    color: var(--porto-text);
+    background: var(--porto-surface-0);
+    border: 1px solid var(--porto-border);
+    border-radius: 0.5rem;
+  }
+
+  .porto-search__box input:focus {
+    outline: none;
+    border-color: var(--porto-primary);
+  }
+
+  .porto-search__hint {
+    color: var(--porto-text-muted);
+  }
+
+  .porto-search-results__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .porto-search-results__list a {
+    color: var(--porto-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .porto-search-results__list a:hover {
+    text-decoration: underline;
+  }
+
+  .porto-search-results__list p {
+    color: var(--porto-text-muted);
+    margin: 0.25rem 0 0;
+  }
+</style>

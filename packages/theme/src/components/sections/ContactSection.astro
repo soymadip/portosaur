@@ -1,0 +1,445 @@
+---
+// ContactSection — ported from the old components/ContactSection/index.jsx.
+//
+// Social links grid (email links sorted first). Hover color per card
+// comes from the link's own color, the techMap brand color, or the
+// primary token. Scroll reveal via `data-reveal` (old useScrollReveal).
+import config from "porto:config";
+import { renderDynamicIcon, techMap } from "../../lib/icons.mjs";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const socialLinksConfig = config.homePage?.socialSection || {};
+const base = config.site.baseUrl;
+
+// Sort so email links appear first in the contact grid.
+const socialLinks = [...(socialLinksConfig.links || [])].sort((a, b) => {
+  const isEmailA =
+    a.url?.startsWith("mailto:") ||
+    a.icon?.toLowerCase().includes("email") ||
+    a.name?.toLowerCase().includes("email");
+  const isEmailB =
+    b.url?.startsWith("mailto:") ||
+    b.icon?.toLowerCase().includes("email") ||
+    b.name?.toLowerCase().includes("email");
+  if (isEmailA && !isEmailB) {
+    return -1;
+  }
+  if (!isEmailA && isEmailB) {
+    return 1;
+  }
+  return 0;
+});
+---
+
+{socialLinksConfig.enable !== false && (
+  <div
+    id={id}
+    data-reveal
+    class={`contactSection ${className || ""}`}
+    role="region"
+    aria-label="Contact section"
+  >
+    <div class="contactContainer">
+      {/* Heading */}
+      <div class="contactHeader">
+        <h2 class="contactTitle">{socialLinksConfig.heading}</h2>
+        <p class="contactSubtitle">{socialLinksConfig.subheading}</p>
+      </div>
+
+      {/* Social cards grid */}
+      <div class="gridWrapper">
+        <div
+          class="socialGrid"
+          role="list"
+          aria-label="Social media and contact links"
+        >
+          {socialLinks.map((social, index) => {
+            const name = social.name;
+            const slugLower = (name || "").toLowerCase();
+            const mappedColor = techMap[slugLower]?.color;
+            const iconColor =
+              social.color || mappedColor || "var(--porto-primary)";
+            const desc = social.desc || `Connect with me on ${name}`;
+            const url = social.url;
+            return (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="socialCard"
+                style={`--card-index: ${index}; --icon-hover-color: ${iconColor};`}
+                aria-label={`Connect with me on ${name}: ${desc}`}
+                role="listitem"
+              >
+                <div class="socialIcon">
+                  <span
+                    set:html={renderDynamicIcon(social.icon, {
+                      slug: name,
+                      fallbackIcon: "md:help-circle",
+                      base,
+                    })}
+                  />
+                </div>
+                <h3 class="socialTitle">{name}</h3>
+                <p class="socialDesc">{desc}</p>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Contact Section styles */
+  .contactSection {
+    scroll-margin-top: 38px;
+    scroll-margin-top: 90px;
+    min-height: calc(100vh - 60px);
+    margin-bottom: 0;
+    width: 100%;
+    padding: 0rem 0 5rem;
+    background-color: var(--porto-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .contactContainer {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .contactHeader {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    margin-top: 0rem;
+  }
+
+  .contactTitle {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-primary);
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    position: relative;
+    display: inline-block;
+  }
+
+  .contactSection.is-visible .contactTitle {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .contactSubtitle {
+    font-size: 0.95rem;
+    color: var(--porto-text-muted);
+    max-width: 600px;
+    margin: 0.05rem auto 0;
+    opacity: 0;
+  }
+
+  .contactSection.is-visible .contactSubtitle {
+    animation: slideUp 0.4s ease-out 0.1s forwards;
+  }
+
+  /* SocialCard */
+  .gridWrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1.2rem;
+  }
+
+  .socialGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+    margin: 0 auto;
+    margin-top: 0.9rem;
+    max-width: 1300px;
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .socialCard {
+    width: 150px;
+    min-height: 160px;
+    border-radius: 0.4rem;
+    padding: 1.3rem 1.2rem;
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-gray-400);
+    opacity: 0;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      background-color 0.3s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    position: relative;
+    --icon-hover-color: var(--porto-primary);
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .contactSection.is-visible .socialCard {
+    animation: fadeIn 0.8s ease-out forwards;
+    animation-delay: calc(0.3s + (var(--card-index, 0) * 0.1s));
+  }
+
+  .socialCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+    background-color: var(--porto-surface-1);
+    text-decoration: none;
+  }
+
+  .socialCard::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--porto-primary);
+    transition: width 0.3s ease;
+  }
+
+  .socialCard:hover::after {
+    width: 100%;
+  }
+
+  .socialIcon {
+    font-size: 3.5rem;
+    margin-bottom: 0.3rem;
+    color: var(--porto-primary);
+    transition:
+      color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .socialCard:hover .socialIcon {
+    transform: scale(1.1);
+    color: var(--icon-hover-color);
+  }
+
+  .socialTitle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--porto-primary);
+    letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 3px;
+  }
+
+  .socialTitle::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 1px;
+    background-color: var(--porto-gray-800);
+    opacity: 0.15;
+  }
+
+  .socialDesc {
+    color: var(--porto-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    opacity: 0.8;
+    text-align: center;
+    width: 100%;
+  }
+
+  .socialTitle:hover,
+  .socialDesc:hover {
+    text-decoration: none;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 1200px) {
+    .socialCard {
+      width: 140px;
+    }
+
+    .socialGrid {
+      gap: 1.1rem;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .socialCard {
+      width: 150px;
+    }
+
+    .socialGrid {
+      gap: 1rem;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .contactSection {
+      scroll-margin-top: 70px;
+      padding: 0.5rem 0 4rem;
+    }
+
+    .contactContainer {
+      padding: 0;
+    }
+
+    .contactHeader {
+      margin-bottom: 1.2rem;
+      margin-top: 0rem;
+    }
+
+    .contactTitle {
+      font-size: 2.2rem;
+    }
+
+    .contactSubtitle {
+      font-size: 0.9rem;
+    }
+
+    .socialCard {
+      width: 150px;
+      min-height: 150px;
+      padding: 1.2rem 1.2rem;
+    }
+
+    .socialIcon {
+      font-size: 3rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .socialTitle {
+      font-size: 1.5rem;
+    }
+
+    .socialGrid {
+      padding: 0 1rem;
+    }
+
+    .gridWrapper {
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .contactSection {
+      scroll-margin-top: 32px;
+      padding: 0rem 0 3rem;
+    }
+
+    .contactContainer {
+      padding: 0;
+    }
+
+    .contactHeader {
+      margin-bottom: 1rem;
+      margin-top: 0rem;
+    }
+
+    .contactTitle {
+      font-size: 1.9rem;
+    }
+
+    .contactSubtitle {
+      font-size: 0.9rem;
+      max-width: 90%;
+    }
+
+    .socialGrid {
+      gap: 1rem;
+      padding: 0 0.5rem;
+    }
+
+    .socialCard {
+      width: 60px;
+      height: 60px;
+      min-height: unset;
+      padding: 0;
+      border-radius: 0.4rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .socialIcon {
+      font-size: 2.5rem;
+      margin: 3px 0 0;
+      position: relative;
+      top: 1.5px;
+    }
+
+    .socialTitle,
+    .socialDesc,
+    .socialCard::after {
+      display: none;
+    }
+
+    .socialCard:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .gridWrapper {
+      margin-top: 0.8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contactTitle,
+    .contactSubtitle,
+    .socialCard {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .socialCard {
+      opacity: 1;
+    }
+  }
+</style>

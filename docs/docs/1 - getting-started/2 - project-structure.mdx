@@ -16,6 +16,7 @@ my-site/
 ├── notes/                     # Portfolio sites only: Markdown/MDX digital notebook
 ├── docs/                      # Documentation sites only: Markdown/MDX technical documentation
 ├── static/                    # Static assets served at the root (images, icons, PDFs)
+├── .portosaur/                # Generated Astro config (astro.config.mjs + src/content.config.ts) — regenerated on every dev/build, do not edit
 ├── config.yml                 # Primary configuration file (single source of truth)
 ├── package.json               # Local project dependencies and build scripts
 └── README.md                  # Project overview and instructions
@@ -56,11 +57,20 @@ Your Markdown and MDX documents live here.
 
 ### `blog/`
 
-Contains your articles. Supports standard Docusaurus blog conventions, author attribution, and tag organization.
+Contains your articles. Supports standard blog conventions, author attribution, and tag organization.
 
 ### `static/`
 
 Files placed here are copied verbatim to the root of the production build (e.g. `static/favicon.ico` is served at `/favicon.ico`).
+
+### `.portosaur/`
+
+Generated files that wire your project to the Astro engine. `porto dev` and `porto build` regenerate them on every run from your `config.yml`:
+
+- `astro.config.mjs` — the Astro configuration (site URL, base path, output directory, Portosaur integration).
+- `src/content.config.ts` — the content collections for your docs/notes and blog.
+
+Do not edit these files by hand — change `config.yml` instead and they are regenerated.
 
 ---
 

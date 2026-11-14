@@ -1,0 +1,100 @@
+---
+// NotifyButton — "Notify me of new posts" button for the blog list
+// page (port of the old BlogListPage/NotifyButton.jsx).
+//
+// The button requests Notification permission on click — the user
+// gesture the periodic-sync script deliberately avoids. It stays
+// hidden when the browser doesn't support Periodic Background Sync or
+// when permission was denied; once granted it becomes a disabled
+// "Subscribed" button. Rendered `hidden` until the client script
+// confirms support (SSR can't know).
+---
+
+<button
+  type="button"
+  class="porto-notify-btn"
+  data-notify-btn
+  hidden
+  title="Get notified when new posts arrive"
+  aria-label="Enable post notifications"
+>
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+  </svg>
+  <span data-notify-label>Notify me of new posts</span>
+</button>
+
+<script>
+  const button = document.querySelector("[data-notify-btn]");
+  if (button instanceof HTMLButtonElement) {
+    const label = button.querySelector("[data-notify-label]");
+
+    const setSubscribed = () => {
+      button.disabled = true;
+      button.title = "You'll be notified of new posts";
+      button.setAttribute("aria-label", "Notifications enabled");
+      if (label) {
+        label.textContent = "Subscribed";
+      }
+    };
+
+    const supported =
+      typeof Notification !== "undefined" &&
+      typeof ServiceWorkerRegistration !== "undefined" &&
+      "periodicSync" in ServiceWorkerRegistration.prototype;
+
+    if (supported && Notification.permission !== "denied") {
+      button.hidden = false;
+      if (Notification.permission === "granted") {
+        setSubscribed();
+      } else {
+        button.addEventListener("click", async () => {
+          if (button.disabled) {
+            return;
+          }
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            setSubscribed();
+          } else if (permission === "denied") {
+            button.hidden = true;
+          }
+        });
+      }
+    }
+  }
+</script>
+
+<style>
+  .porto-notify-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--porto-text);
+    background: var(--porto-surface-0);
+    border: 1px solid var(--porto-border);
+    border-radius: 1.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .porto-notify-btn:hover:not(:disabled) {
+    border-color: var(--porto-primary);
+  }
+
+  .porto-notify-btn:disabled {
+    cursor: default;
+    opacity: 0.8;
+  }
+</style>

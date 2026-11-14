@@ -12,12 +12,19 @@ export function getDefaultColorScheme(userConfig) {
  * Resolves the absolute paths of all CSS files required for the site
  * (color schemes, global overrides, and custom user stylesheets).
  *
+ * The theme's own files are bundled via BaseLayout's `src/css/custom.css`
+ * import — they are listed here so the asset generator can read the
+ * `--porto-*` tokens out of the active scheme file (theme-color,
+ * manifest colors) and so the layout can link the user's custom files.
+ * There is no `infima.css` anymore: `--ifm-*` is gone, the scheme files
+ * define `--porto-*` directly.
+ *
  * @param {string} projectDir - The user's project directory.
  * @param {Object} userConfig - The parsed Portosaur user config.
- * @param {string} themeDir - Absolute path to the theme directory.
+ * @param {string} themeRoot - Absolute path to the theme package root.
  * @returns {string[]} Resolved paths to CSS files.
  */
-export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
+export function resolveSiteCssFiles(projectDir, userConfig, themeRoot) {
   const colorScheme =
     userConfig?.theme?.color_scheme || getDefaultColorScheme(userConfig);
   const presetCss =
@@ -25,13 +32,9 @@ export function resolveSiteCssFiles(projectDir, userConfig, themeDir) {
     colorScheme.includes("/") ||
     colorScheme.includes("\\")
       ? path.resolve(projectDir, colorScheme)
-      : path.resolve(themeDir, `css/colors/${colorScheme}.css`);
+      : path.resolve(themeRoot, `src/css/themes/${colorScheme}.css`);
 
-  const files = [
-    presetCss,
-    path.resolve(themeDir, "css/infima.css"),
-    path.resolve(themeDir, "css/custom.css"),
-  ];
+  const files = [presetCss, path.resolve(themeRoot, "src/css/custom.css")];
 
   const customCss = userConfig?.theme?.custom_css;
 

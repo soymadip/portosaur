@@ -1,19 +1,11 @@
 ---
-title: "@portosaur/logger"
-description: "Docusaurus-compatible terminal logging library with custom boxes and colors."
+title: "Logger"
+description: "Terminal logging with colored levels, boxes, and ANSI colors — built into @portosaur/cli."
 icon: "🪵"
 sidebar_position: 3
 ---
 
-`@portosaur/logger` is a standalone, lightweight logging library designed to bring familiar Docusaurus-style terminal logging to any project.
-
----
-
-## Installation
-
-```bash
-bun add @portosaur/logger
-```
+The logger lives in `@portosaur/cli` — there is no separate package to install. It provides terminal logging with colored status prefixes, banner boxes, and a zero-dependency ANSI color utility.
 
 ---
 
@@ -34,7 +26,7 @@ Every log method formats messages with colored status prefixes:
 ### Basic Usage
 
 ```javascript
-import { logger } from "@portosaur/logger";
+import { logger } from "@portosaur/cli";
 
 logger.info("Initializing project...");
 logger.success("Project scaffolded successfully!");
@@ -75,10 +67,10 @@ When running inside a continuous integration environment (`process.env.CI` is se
 
 ## ANSI Colors API
 
-`@portosaur/logger` also exports a zero-dependency terminal color utility:
+`@portosaur/cli` also exports a zero-dependency terminal color utility:
 
 ```javascript
-import { colors } from "@portosaur/logger";
+import { colors } from "@portosaur/cli";
 
 console.log(colors.cyan.bold("Portosaur"));
 console.log(colors.green("Ready in 500ms"));

@@ -1,33 +1,1135 @@
 ---
-// Tasks page (`/tasks`) — Phase 2 stub.
+// Tasks page (`/tasks`).
 //
-// When tasks are disabled the page reports that (both golden sites have
-// tasks disabled); when enabled it lists the tasks. Task titles render
-// as h3s — the enabled layout is a Phase 3 concern.
+// Full task table from `config.tasks` (title/subtitle/list — the
+// resolved engine shape; the old Docusaurus page read a `tasksPage`
+// shape the engine never built, so it always rendered "disabled").
+// Stats, status tabs with counts, and one table sorted by status order
+// then priority; tab filtering is the shared `tasks-filter` module
+// (rows carry `data-task-status`, tabs `data-task-tab`).
+//
+// Fixes vs the old page: the old `clsx` calls emitted the global class
+// strings `task-row-completed` / `task-row-striped` / `task-tab-active`,
+// which never matched the hashed CSS-module classes — here they are
+// real classes, so completed-row strikethrough, striping, and the
+// active tab actually style. The old JSX referenced a nonexistent
+// `tasks-subheading` class; the subheading uses the existing
+// `tasks-description` class. Unknown statuses (e.g. `done`) sort after
+// the known ones and get a neutral badge with the raw status text
+// instead of the old empty badge; tasks without a priority get no
+// priority badge instead of an empty one.
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../lib/content.mjs";
+import { renderIcon } from "../lib/icons.mjs";
 
 const siteTitle = config.site.title;
-const tasks = config.tasks;
+const tasks = config.tasks ?? {};
+const enabled = tasks.enable === true;
 
-const title = tasks.enable
-  ? pageTitle(tasks.title, siteTitle)
+const heading = tasks.title || "Tasks";
+const subheading = tasks.subtitle || "Roadmap & Goals";
+const list = Array.isArray(tasks.list) ? tasks.list : [];
+
+const title = enabled
+  ? pageTitle(heading, siteTitle)
   : pageTitle("Tasks are Disabled", siteTitle);
+const description = enabled ? subheading : "Tasks are currently disabled";
+
+// Stats (unknown statuses count toward the total only, as before).
+const total = list.length;
+const completedCount = list.filter(
+  (task) => task.status === "completed",
+).length;
+const activeCount = list.filter((task) => task.status === "active").length;
+const pendingCount = list.filter((task) => task.status === "pending").length;
+const percentComplete =
+  total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+// Sort: status order (active, pending, completed; unknown last), then
+// priority (high, medium, low; missing last — degrades to "as listed").
+const STATUS_ORDER = { active: 1, pending: 2, completed: 3 };
+const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };
+const sorted = [...list].sort((a, b) => {
+  const statusDiff =
+    (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+  if (statusDiff !== 0) {
+    return statusDiff;
+  }
+  return (
+    (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99)
+  );
+});
+
+const tabs = [
+  { id: "all", label: "All Tasks", icon: "md:clipboard-text", count: total },
+  {
+    id: "active",
+    label: "In Progress",
+    icon: "md:loading",
+    spin: true,
+    count: activeCount,
+  },
+  {
+    id: "pending",
+    label: "Planned",
+    icon: "md:clock-outline",
+    count: pendingCount,
+  },
+  {
+    id: "completed",
+    label: "Completed",
+    icon: "md:check-circle",
+    count: completedCount,
+  },
+];
+
+const KNOWN_STATUSES = new Set(["active", "pending", "completed"]);
 ---
 
-<BaseLayout title={title} description={tasks.subtitle}>
-  {
-    tasks.enable ? (
-      <>
-        <h1>{tasks.title}</h1>
-        <p>{tasks.subtitle}</p>
-        {(tasks.list ?? []).map((task) => (
-          <h3>{task.title}</h3>
-        ))}
-      </>
+<BaseLayout title={title} description={description}>
+  <div class="tasks-container" data-porto-tasks>
+    {!enabled ? (
+      <div class="tasks-content">
+        <div class="tasks-disabled-notice">
+          <div class="disabled-icon">
+            <span set:html={renderIcon("ml:alert")} />
+          </div>
+          <h2 class="disabled-title">Tasks are currently disabled</h2>
+          <p class="disabled-help">
+            To enable tasks, set <code>tasks.enable</code> to <code>true</code>
+          </p>
+        </div>
+      </div>
     ) : (
-      <h1>Tasks are currently disabled</h1>
-    )
-  }
+      <>
+        <div class="tasks-header">
+          <h1 class="tasks-heading">{heading}</h1>
+          {subheading && <p class="tasks-description">{subheading}</p>}
+        </div>
+        <div class="tasks-content">
+          <div class="stats-container">
+            <div class="stat-box">
+              <div class="stat-label">Total Tasks</div>
+              <div class="stat-value">{total}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Completed</div>
+              <div class="stat-value stat-value-completed">
+                {completedCount}
+              </div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">In Progress</div>
+              <div class="stat-value stat-value-active">{activeCount}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Planned</div>
+              <div class="stat-value stat-value-pending">{pendingCount}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Progress</div>
+              <div class="stat-value">{percentComplete}%</div>
+              <div class="progress-bar-container">
+                <div
+                  class="progress-bar"
+                  style={`width: ${percentComplete}%`}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="task-tabs-container">
+            <div class="task-tabs" role="tablist" aria-label="Task categories">
+              {tabs.map((tab) => (
+                <button
+                  type="button"
+                  class={`task-tab${tab.id === "all" ? " task-tab-active" : ""}`}
+                  data-task-tab={tab.id}
+                  role="tab"
+                  aria-selected={tab.id === "all"}
+                  aria-controls={`tab-content-${tab.id}`}
+                  id={`tab-${tab.id}`}
+                >
+                  <span
+                    class={`task-tab-icon${tab.spin ? " spin" : ""}`}
+                    aria-hidden="true"
+                    set:html={renderIcon(tab.icon)}
+                  />
+                  <span class="task-tab-label">{tab.label}</span>
+                  <span class="task-tab-count">{tab.count}</span>
+                </button>
+              ))}
+            </div>
+
+            <div
+              class="task-tab-content"
+              role="tabpanel"
+              data-task-panel
+              id="tab-content-all"
+              aria-labelledby="tab-all"
+            >
+              {list.length === 0 ? (
+                <div class="task-empty-state">
+                  <span
+                    class="task-empty-icon"
+                    set:html={renderIcon("md:format-list-checks")}
+                  />
+                  <p>No tasks available</p>
+                </div>
+              ) : (
+                <>
+                  <div class="task-list-table" data-task-table>
+                    <div class="task-list-header">
+                      <div class="task-cell task-cell-status">Status</div>
+                      <div class="task-cell task-cell-title">Task Details</div>
+                      <div class="task-cell task-cell-priority">Priority</div>
+                    </div>
+                    <div>
+                      {sorted.map((task, index) => (
+                        <div
+                          class={`task-row${task.status === "completed" ? " task-row-completed" : ""}${index % 2 === 1 ? " task-row-striped" : ""}`}
+                          data-task-status={task.status}
+                        >
+                          <div class="task-cell task-cell-status">
+                            <span
+                              class={`badge${KNOWN_STATUSES.has(task.status) ? ` badge-status-${task.status}` : ""}`}
+                            >
+                              {task.status === "completed" && (
+                                <>
+                                  <span
+                                    class="badge-icon"
+                                    set:html={renderIcon("md:check-circle")}
+                                  />{" "}
+                                  Done
+                                </>
+                              )}
+                              {task.status === "active" && (
+                                <>
+                                  <span
+                                    class="badge-icon spin"
+                                    set:html={renderIcon("md:loading")}
+                                  />{" "}
+                                  In Progress
+                                </>
+                              )}
+                              {task.status === "pending" && (
+                                <>
+                                  <span
+                                    class="badge-icon"
+                                    set:html={renderIcon("md:clock-outline")}
+                                  />{" "}
+                                  Planned
+                                </>
+                              )}
+                              {!KNOWN_STATUSES.has(task.status) && task.status}
+                            </span>
+                          </div>
+                          <div class="task-cell task-cell-title">
+                            <div class="task-title">{task.title}</div>
+                            {task.desc && (
+                              <div class="task-description">{task.desc}</div>
+                            )}
+                          </div>
+                          <div class="task-cell task-cell-priority">
+                            {task.priority === "high" && (
+                              <span class="badge badge-priority-high">
+                                <span
+                                  class="badge-icon"
+                                  set:html={renderIcon("md:fire")}
+                                />{" "}
+                                High
+                              </span>
+                            )}
+                            {task.priority === "medium" && (
+                              <span class="badge badge-priority-medium">
+                                <span
+                                  class="badge-icon"
+                                  set:html={renderIcon("md:thermometer")}
+                                />{" "}
+                                Medium
+                              </span>
+                            )}
+                            {task.priority === "low" && (
+                              <span class="badge badge-priority-low">
+                                <span
+                                  class="badge-icon"
+                                  set:html={renderIcon("md:snowflake")}
+                                />{" "}
+                                Low
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div
+                    class="task-empty-state"
+                    data-task-empty
+                    style="display: none"
+                  >
+                    <span
+                      class="task-empty-icon"
+                      set:html={renderIcon("md:format-list-checks")}
+                    />
+                    <p>No tasks in this category</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+
+  <script>
+    import { initTasksFilter } from "../scripts/tasks-filter.ts";
+    initTasksFilter();
+  </script>
 </BaseLayout>
+
+<style>
+  /*
+                      __     ___ _                ____          _
+                      \ \   / (_) |__   ___      / ___|___   __| | ___
+                       \ \ / /| | '_ \ / _ \    | |   / _ \ / _` |/ _ \
+                        \ V / | | |_) |  __/    | |__| (_) | (_| |  __/
+                         \_/  |_|_.__/ \___|     \____\___/ \__,_|\___|
+
+        This Page is completely Vibe coded. No code except small tweaks is written by me.
+  */
+
+  /* Tasks page container */
+  .tasks-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+    min-height: calc(100vh - 60px);
+    justify-content: center;
+  }
+
+  .tasks-content {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Header section with title and description */
+  .tasks-header {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .tasks-heading {
+    margin-bottom: 0.1rem;
+    color: var(--porto-primary);
+  }
+
+  /* Tasks disabled notice */
+  .tasks-disabled-notice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .disabled-icon {
+    font-size: 4rem;
+    color: var(--porto-text-muted);
+    opacity: 1.6;
+  }
+
+  .disabled-title {
+    font-size: 2rem;
+    color: var(--porto-text);
+    margin-bottom: 0.75rem;
+  }
+
+  .disabled-message {
+    font-size: 1.1rem;
+    color: var(--porto-text-muted);
+    max-width: 400px;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .disabled-help {
+    font-size: 1.1rem;
+    color: var(--porto-text-muted);
+    max-width: 500px;
+    line-height: 1.5;
+  }
+
+  .disabled-help code {
+    background-color: var(--porto-gray-500);
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--porto-primary);
+  }
+
+  /* Tasks intro and footer sections */
+  .tasks-intro,
+  .tasks-footer {
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0.4rem;
+    background-color: var(--porto-surface-0);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .tasks-intro {
+    border-left: 4px solid var(--porto-info);
+  }
+
+  .tasks-footer {
+    border-left: 4px solid var(--porto-warning);
+  }
+
+  .tasks-icon {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+  }
+
+  /* Tasks text elements */
+  .tasks-description {
+    color: var(--porto-primary);
+    margin: 0.25rem 0 1.5rem;
+    font-size: 1.1rem;
+  }
+
+  .tasks-note {
+    font-style: italic;
+    color: var(--porto-warning);
+    margin: 1.5rem 0;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Add centered text class */
+  .centered-text {
+    text-align: center;
+  }
+
+  /* Tab System - Improved Styling */
+  .task-tabs-container {
+    margin-bottom: 2.5rem;
+    border-radius: 0.4rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  .task-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background-color: var(--porto-surface-0);
+    border-bottom: 1px solid var(--porto-gray-700);
+  }
+
+  .task-tab {
+    padding: 1rem;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--porto-text);
+    border-bottom: 3px solid transparent;
+    margin: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family:
+      "Alata",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 1rem;
+    position: relative;
+    height: 100%;
+  }
+
+  .task-tab:focus {
+    outline: none;
+  }
+
+  .task-tab:hover {
+    background-color: rgba(var(--porto-surface-2-rgb), 0.5);
+    color: var(--porto-primary);
+  }
+
+  .task-tab-active {
+    border-bottom: 3px solid var(--porto-primary);
+    font-weight: 600;
+    color: var(--porto-primary);
+    background-color: var(--porto-gray-300);
+  }
+
+  .task-tab-icon {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .task-tab-label {
+    margin-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Update task count badges to be smaller */
+  .task-tab-count {
+    background-color: var(--porto-gray-800);
+    color: var(--porto-gray-300);
+    border-radius: 50%;
+    padding: 0;
+    font-size: 0.65rem;
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+    line-height: 1;
+    margin-left: 0.2rem;
+  }
+
+  .task-tab-active .task-tab-count {
+    background-color: var(--porto-primary);
+    color: var(--porto-bg);
+  }
+
+  .task-tab-content {
+    padding: 0;
+    background-color: transparent;
+    animation: fadeIn 0.3s ease;
+    min-height: 300px;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0.7;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Media queries for responsive tabs */
+  @media (max-width: 768px) {
+    .task-tabs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .task-tab {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .task-tab-icon {
+      font-size: 1rem;
+      margin-right: 0.3rem;
+    }
+
+    .task-tab-count {
+      min-width: 1rem;
+      min-height: 1rem;
+      width: 1rem;
+      height: 1rem;
+      font-size: 0.6rem;
+    }
+
+    .task-tab-content {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .task-tabs {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
+    .task-tab {
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+      padding: 0.75rem 1rem;
+    }
+
+    .task-tab-icon {
+      margin-right: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    .task-tab-label {
+      margin-right: 0.5rem;
+      margin-bottom: 0;
+      flex: 1;
+    }
+  }
+
+  /* Stats section */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-box {
+    background-color: var(--porto-surface-0);
+    border-radius: 0.4rem;
+    padding: 1.25rem 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+
+  .stat-box:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--porto-primary);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-size: 2.25rem;
+    font-weight: bold;
+    color: var(--porto-text);
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value-completed {
+    color: var(--porto-success);
+  }
+
+  .stat-value-active {
+    color: var(--porto-primary);
+  }
+
+  .stat-value-pending {
+    color: var(--porto-warning);
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    background-color: var(--porto-gray-800);
+    border-radius: 0.25rem;
+    height: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 0.25rem;
+    background-color: var(--porto-primary);
+  }
+
+  /* Task tables */
+  .task-section {
+    margin-bottom: 2rem;
+  }
+
+  .task-table-container {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .task-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .task-table-container th {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 2px solid var(--porto-gray-700);
+    white-space: nowrap;
+  }
+
+  .task-table-container td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--porto-gray-800);
+  }
+
+  .task-table-container tr:last-child td {
+    border-bottom: none;
+  }
+
+  .task-table-container tr:nth-child(even) {
+    background-color: var(--porto-gray-900);
+  }
+
+  /* Responsive table adjustments */
+  @media (max-width: 768px) {
+    .task-table-container th,
+    .task-table-container td {
+      padding: 0.5rem;
+    }
+
+    .task-table-container table {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Task tables */
+  .task-completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .task-description {
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 1rem;
+    text-transform: capitalize;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    line-height: 1.2;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-status-completed {
+    background-color: var(--porto-success);
+    color: var(--porto-gray-300);
+  }
+
+  .badge-status-active {
+    background-color: var(--porto-primary-darker);
+    color: var(--porto-gray-300);
+  }
+
+  .badge-status-pending {
+    background-color: var(--porto-gray-800);
+    color: var(--porto-bg);
+  }
+
+  /* Priority badges - improved contrast */
+  .badge-priority-high {
+    background-color: var(--porto-danger);
+    color: var(--porto-bg);
+  }
+
+  .badge-priority-medium {
+    background-color: var(--porto-danger);
+    color: var(--porto-bg);
+    font-weight: 700;
+  }
+
+  .badge-priority-low {
+    background-color: var(--porto-success);
+    color: var(--porto-gray-300);
+  }
+
+  /* Icon styling */
+  .badge-icon {
+    margin-right: 0.4rem;
+    font-size: 0.85rem;
+    vertical-align: -0.125em;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .badge-icon svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  .spin {
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Task List Cards */
+  .task-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .task-card {
+    background-color: var(--porto-surface-0);
+    border-radius: 0.4rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    border-left: 4px solid var(--porto-primary);
+  }
+
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .task-card-completed {
+    opacity: 0.8;
+    border-left-color: var(--porto-success);
+  }
+
+  .task-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: var(--porto-surface-0);
+    border-bottom: 1px solid var(--porto-gray-800);
+  }
+
+  .task-card-content {
+    padding: 1rem;
+  }
+
+  .task-card-title {
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--porto-text);
+  }
+
+  .task-card-completed .task-card-title {
+    text-decoration: line-through;
+  }
+
+  .task-card-description {
+    font-size: 0.875rem;
+    margin: 0;
+    color: var(--porto-gray-300);
+  }
+
+  .task-card-completed .task-card-description {
+    opacity: 0.7;
+  }
+
+  .task-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--porto-text);
+  }
+
+  .task-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  /* Make badges more compact for the header */
+  .task-card-header .badge {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .task-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Task List - Table Style with unified appearance */
+  .task-list-table {
+    background-color: var(--porto-surface-0);
+    border-radius: 0.4rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    width: 100%;
+    margin-top: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  /* Redesigned task list header - matching width with rows, darker background */
+  .task-list-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 120px;
+    background-color: var(--porto-gray-300);
+    border-bottom: 2px solid var(--porto-primary);
+    font-weight: 700;
+    color: var(--porto-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* More consistent header cells */
+  .task-list-header .task-cell {
+    padding: 0.75rem 0.5rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .task-list-header .task-cell-status {
+    color: var(--porto-primary);
+    border-right: 1px solid var(--porto-gray-800);
+  }
+
+  .task-list-header .task-cell-title {
+    text-align: left;
+    justify-content: flex-start;
+    padding-left: 1rem;
+  }
+
+  .task-list-header .task-cell-priority {
+    color: var(--porto-primary);
+    border-left: 1px solid var(--porto-gray-800);
+  }
+
+  /* More consistent header cells */
+  .task-list-header .task-cell {
+    padding: 0.75rem 0.5rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .task-list-header .task-cell-status {
+    color: var(--porto-primary);
+    border-right: 1px solid var(--porto-gray-800);
+  }
+
+  .task-list-header .task-cell-title {
+    text-align: left;
+    justify-content: flex-start;
+    padding-left: 1rem;
+  }
+
+  .task-list-header .task-cell-priority {
+    color: var(--porto-primary);
+    border-left: 1px solid var(--porto-gray-800);
+  }
+
+  /* Consistent row styling */
+  .task-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 120px;
+    border-bottom: 1px solid var(--porto-gray-800);
+    transition: all 0.15s ease;
+    background-color: var(--porto-surface-0);
+  }
+
+  .task-row-striped {
+    background-color: var(--porto-surface-1);
+  }
+
+  .task-row:last-child {
+    border-bottom: none;
+  }
+
+  .task-row:hover {
+    background-color: rgba(var(--porto-surface-2-rgb), 0.5);
+  }
+
+  /* Title styling based on task status */
+  /* NOTE: the old file used an Infima emphasis variable here, which mapped
+     to near-white in light mode / near-black in dark mode — invisible text
+     on the row in both modes. Fixed to the base text color. */
+  .task-row .task-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--porto-text);
+    font-size: 1.1rem;
+  }
+
+  .task-row:has(.badge-status-active) .task-title {
+    color: var(--porto-primary);
+  }
+
+  .task-row-completed .task-title {
+    text-decoration: line-through;
+    color: var(--porto-success);
+    opacity: 0.8;
+  }
+
+  .task-row:has(.badge-status-pending) .task-title {
+    color: var(--porto-text);
+  }
+
+  /* Description styling with improved visibility */
+  .task-description {
+    font-size: 0.8rem;
+    color: var(--porto-text);
+    margin-top: 0.35rem;
+    line-height: 1.4;
+    opacity: 0.85;
+  }
+
+  .task-row-completed .task-description {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  /* Consistent cell styling */
+  .task-cell {
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .task-cell-title {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+    border-left: 1px solid var(--porto-gray-800);
+    border-right: 1px solid var(--porto-gray-800);
+  }
+
+  .task-cell-status,
+  .task-cell-priority {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Media queries for responsive layout */
+  @media (max-width: 768px) {
+    .task-tabs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .task-tab {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .task-tab-icon {
+      font-size: 1rem;
+      margin-right: 0.3rem;
+    }
+
+    .task-tab-count {
+      min-width: 1rem;
+      min-height: 1rem;
+      width: 1rem;
+      height: 1rem;
+      font-size: 0.6rem;
+    }
+
+    .task-tab-content {
+      padding: 1rem;
+    }
+
+    .task-list-header {
+      grid-template-columns: 100px 1fr 100px;
+    }
+
+    .task-row {
+      grid-template-columns: 100px 1fr 100px;
+    }
+
+    .task-empty-state {
+      padding: 2rem 1rem;
+    }
+
+    .tasks-container {
+      padding: 0 0.5rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .task-list-header {
+      grid-template-columns: 80px 1fr 80px;
+      font-size: 0.7rem;
+    }
+
+    .task-row {
+      grid-template-columns: 80px 1fr 80px;
+    }
+
+    .task-cell-status,
+    .task-cell-priority {
+      padding: 0.5rem 0.25rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.7rem;
+    }
+
+    .badge-icon {
+      margin-right: 0.2rem;
+      font-size: 0.7rem;
+    }
+
+    .task-title {
+      font-size: 1rem;
+    }
+
+    .task-description {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .task-tabs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .task-tab {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .task-tab-icon {
+      margin-right: 0.3rem;
+    }
+
+    .task-tab-label {
+      margin-right: 0.3rem;
+    }
+
+    .task-tab-count {
+      font-size: 0.55rem;
+    }
+
+    .stats-container {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+  }
+</style>

@@ -20,10 +20,8 @@ Portosaur is architected as an ESM-first monorepo using Bun Workspaces.
 
 ```txt
 packages/
-├── cli/       # CLI entry point, command orchestrator, scaffolding engine
-├── core/      # YAML configuration parser, variable resolver, validation, asset generator
-├── logger/    # Unified terminal logging and ANSI styling
-├── theme/     # Docusaurus plugins, React components, CSS themes, and assets
+├── cli/       # CLI entry point, command orchestrator, scaffolding engine, config engine, logging
+├── theme/     # Astro integration, components, CSS themes, and assets
 └── wizard/    # Standalone interactive prompt engine with history replaying
 ```
 
@@ -32,11 +30,11 @@ packages/
 ## Architectural Principles
 
 1. **Unidirectional Dependency Flow**:
-   - `cli` → `core` → `logger`
-   - `theme` depends on `core`
+   - `cli` → `wizard`
+   - `theme` depends on no other `@portosaur/*` package
    - No circular dependencies are allowed.
 2. **Lightweight CLI**:
-   - `@portosaur/cli` MUST NOT depend on `@portosaur/theme`, React, or heavy Docusaurus packages.
+   - `@portosaur/cli` MUST NOT depend on `@portosaur/theme` or heavy frontend frameworks (Astro).
    - The theme is injected into the user project's local `package.json` to keep global CLI installations instantaneous.
 3. **Internal Workspace Imports**:
    - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../logger`.

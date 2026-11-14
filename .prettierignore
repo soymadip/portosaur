@@ -4,6 +4,7 @@ node_modules/
 # Build and Cache
 dist/
 build/
+build-staging/
 cache/
 .bun-cache/
 .docusaurus/

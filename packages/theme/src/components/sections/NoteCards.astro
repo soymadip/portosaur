@@ -1,0 +1,332 @@
+---
+// NoteCards — ported from the old components/NoteCards/index.jsx.
+//
+// Renders the top-level notes as cards. The page passes the filtered
+// collection entries (`notes` prop — top-level files + top-level dirs
+// with an index); this component parses frontmatter, resolves slugs with
+// the shared slug util, filters drafts in production, and sorts by
+// `sidebar_position` (same rules as the old `getAllNotesData`).
+//
+// Two deliberate changes from the old component:
+// - Cards get `id="note-<slug>"` so the /notes HashNavigation can
+//   scroll to them — the old cards had no id, so hash navigation never
+//   found a target.
+// - The old <Hint> description tooltip is a plain `title` attribute
+//   until the real Hint lands in Phase 4 (the Phase 2 Hint stub renders
+//   its message visibly).
+// - `unlisted` frontmatter is not in the content schema, so it cannot
+//   be filtered here (the old component hid unlisted notes).
+import config from "porto:config";
+import { guessDocPermalink } from "../../utils/slug.mjs";
+import {
+  renderDynamicIcon,
+  renderIcon,
+  techMap,
+  withBase,
+} from "../../lib/icons.mjs";
+
+interface Props {
+  notes: Array<{
+    id: string;
+    data?: Record<string, any>;
+  }>;
+}
+
+const { notes: entries } = Astro.props;
+
+const base = config.site.baseUrl;
+const notesRoute = config.site.notesRoute;
+
+// Same parsing as the old getAllNotesData: title from frontmatter or the
+// file slug (first letter capitalized), description, position (default
+// 999), icon/color overrides, draft flag.
+const notes = entries
+  .map((entry) => {
+    const frontMatter = entry.data ?? {};
+    const { slug, fileSlug } = guessDocPermalink(
+      `${entry.id}.mdx`,
+      frontMatter,
+    );
+    const rawTitle = frontMatter.title || fileSlug;
+    return {
+      title: rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1),
+      slug,
+      description: frontMatter.description || "",
+      position: frontMatter.sidebar_position || 999,
+      iconStr: frontMatter.icon || null,
+      colorStr: frontMatter.color || null,
+      draft: frontMatter.draft === true,
+    };
+  })
+  .filter((note) => {
+    // Hide drafts in production
+    if (note.draft && import.meta.env.PROD) {
+      return false;
+    }
+    return true;
+  })
+  .sort((a, b) => a.position - b.position);
+---
+
+{notes.length > 0 && (
+  <div class="notesGrid" role="list">
+    {notes.map((note, index) => {
+      const noteUrl = withBase(`/${notesRoute}/${note.slug}`, base);
+      // Resolve color: explicit frontmatter first, then techMap
+      // guessing, then default.
+      const slugLower = note.slug.toLowerCase();
+      const iconStrLower = (note.iconStr || "").toLowerCase();
+      const mappedColor =
+        techMap[iconStrLower]?.color || techMap[slugLower]?.color;
+      const color = note.colorStr || mappedColor || "var(--porto-primary)";
+      return (
+        <a
+          id={`note-${note.slug}`}
+          href={noteUrl}
+          class="noteCard"
+          style={`--card-index: ${index}; --note-color: ${color};`}
+          aria-label={`Read note: ${note.title}`}
+          title={note.description || undefined}
+        >
+          <div class="iconWrapper">
+            <span
+              class="noteIcon"
+              set:html={renderDynamicIcon(note.iconStr, {
+                slug: note.slug,
+                fallbackIcon: "md:book",
+                base,
+              })}
+            />
+          </div>
+          <div class="cardContent">
+            <h3 class="noteTitle" title={note.title}>
+              {note.title}
+            </h3>
+          </div>
+          <span
+            class="mobileChevron"
+            set:html={renderIcon("md:chevron-right")}
+          />
+        </a>
+      );
+    })}
+  </div>
+)}
+
+<style>
+  @keyframes noteFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .notesGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    /* The old page wrapped the grid in Docusaurus' `.container`
+       (max-width 1280px, 1rem padding → 1248px of content), which fits
+       exactly 6 cards per row (6×165px + 5×1rem = 1070px; a 7th needs
+       1251px). This theme has no global `.container`, so the grid
+       stretched full-width and fit 7 — cap it at the 6-card row width
+       instead, centered. */
+    max-width: calc(6 * 165px + 5 * 1rem);
+    margin: 4rem auto;
+  }
+
+  .noteCard {
+    width: 165px;
+    min-height: 225px;
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-gray-400);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    border-radius: 0.4rem;
+    padding: 1.5rem 1rem;
+    text-decoration: none !important;
+    color: var(--porto-text) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: noteFadeIn 0.5s ease-out forwards;
+    animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
+    opacity: 0;
+  }
+
+  .noteCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2);
+    border-color: var(--note-color);
+    background-color: rgba(var(--porto-surface-2-rgb), 0.5);
+    z-index: 2;
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    width: 80px;
+    height: 80px;
+    border-radius: 22px;
+    background-color: color-mix(in srgb, var(--note-color) 15%, transparent);
+  }
+
+  /* The icon renders via set:html inside this wrapper span; the inner
+     svg/img fills it. (The old .imgIcon/.textIcon/.svgIcon classes were
+     never applied by the old component — every variant got .noteIcon.) */
+  .noteIcon {
+    font-size: 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0.2rem;
+    color: var(--note-color);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .noteIcon svg,
+  .noteIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .noteIcon svg {
+    fill: currentColor;
+  }
+
+  .noteCard:hover .noteIcon {
+    transform: scale(1.2);
+  }
+
+  .noteTitle {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+  }
+
+  /* Chevron under the card title. The old component rendered the same
+     `md:chevron-right` icon with a `display: none` desktop rule — but
+     the old Icon applied its own `display: inline-block` class to the
+     same <svg>, and in the built OG bundle that won the cascade, so
+     the golden screenshots show the chevron on desktop too (small,
+     centered, in the card's text color). Shown here deliberately. */
+  .mobileChevron {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .mobileChevron svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 480px) {
+    .notesGrid {
+      gap: 0.65rem;
+      margin-top: 0.2rem;
+      margin-bottom: 4rem;
+      padding: 0 0.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    .noteCard {
+      width: 100%;
+      min-height: auto;
+      flex-direction: row;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      justify-content: flex-start;
+      gap: 0.9rem;
+    }
+
+    .noteCard:hover {
+      transform: none;
+      background-color: rgba(var(--porto-surface-2-rgb), 0.5);
+    }
+
+    .iconWrapper {
+      margin: 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+    }
+
+    .noteIcon {
+      font-size: 2.8rem;
+      width: 2.8rem;
+      height: 2.8rem;
+      padding: 0.2rem;
+    }
+
+    .cardContent {
+      text-align: left;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .noteTitle {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--porto-text);
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow-wrap: anywhere;
+      text-align: left;
+    }
+
+    .mobileChevron {
+      display: block;
+      margin-top: 0;
+      margin-left: auto;
+      width: 1.4rem;
+      height: 1.4rem;
+      opacity: 0.6;
+      color: var(--porto-primary);
+    }
+
+    .noteCard:active {
+      transform: scale(0.98);
+      background-color: rgba(var(--porto-surface-2-rgb), 0.5);
+    }
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .noteCard {
+      animation: none;
+      opacity: 1;
+      transition: none;
+    }
+  }
+</style>

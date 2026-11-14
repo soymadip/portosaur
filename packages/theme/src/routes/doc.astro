@@ -1,15 +1,29 @@
 ---
-// Note/doc detail page (`/${notesRoute}/[...slug]`) — Phase 2 stub.
+// Note/doc detail page (`/${notesRoute}/[...slug]`).
 //
-// Renders the frontmatter title as h1, the full MDX content, then the
-// automatic topic list (after the content, like the Docusaurus
-// `DocItem/Content` wrapper) on index pages where the topic list is
-// enabled. The root index (empty slug) has no `[...slug]` page — its
-// content renders at the notes index route.
+// Renders inside DocLayout: the frontmatter title as h1, the full MDX
+// content, then the automatic topic list (after the content, like the
+// Docusaurus `DocItem/Content` wrapper) on index pages where the topic
+// list is enabled. The root index (empty slug) has no `[...slug]` page
+// — its content renders at the notes index route.
+//
+// The edit URL needs the entry's REAL file path: `entry.id` mangles
+// spaces to dashes (`1 - getting-started` becomes
+// `1---getting-started`), so it is built from `entry.filePath`
+// instead. `filePath` is relative to the Astro project root (the
+// generated `.portosaur/` dir), so it looks like
+// `../docs/1 - getting-started/index.mdx` — the path relative to the
+// content dir is what follows the leading `..`s and the notes-dir
+// segments. When the shape doesn't match (or no file path is
+// available), the edit link is omitted rather than emitted broken.
+// `lastUpdated` is the file's last git commit date, omitted when git
+// cannot tell (not a repo, untracked file, git missing).
+import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { getCollection, render } from "astro:content";
 import config from "porto:config";
 import sidebar from "porto:sidebar";
-import BaseLayout from "../layouts/BaseLayout.astro";
+import DocLayout from "../layouts/DocLayout.astro";
 import { mdxComponents } from "../components/mdx/index.mjs";
 import {
   pageTitle,
@@ -18,6 +32,7 @@ import {
   topicListShouldRender,
   findCategoryItems,
   topicCardTitle,
+  contentRelativePath,
 } from "../lib/content.mjs";
 
 export async function getStaticPaths() {
@@ -31,33 +46,101 @@ export async function getStaticPaths() {
 }
 
 const { entry, slug } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 
 const siteTitle = config.site.title;
 const notesRoute = config.site.notesRoute;
 const heading = docTitle(entry);
 const title = pageTitle(heading, siteTitle);
+const currentHref = `/${notesRoute}/${slug}`;
+
+// The source file's path relative to the content dir (e.g.
+// `1 - getting-started/index.mdx`): the shared `contentRelativePath`
+// unwraps `entry.filePath` to a project-relative path, and the
+// notes-dir segments are stripped off. When the shape doesn't match (or
+// no file path is available), the edit link is omitted rather than
+// emitted broken.
+function notesRelativePath(filePath, notesDir) {
+  const projectRelative = contentRelativePath(filePath);
+  if (!projectRelative) {
+    return null;
+  }
+  const segments = projectRelative.split("/");
+  const dirSegments = notesDir.split("/").filter(Boolean);
+  const matchesDir = dirSegments.every((segment, i) => segments[i] === segment);
+  if (!matchesDir) {
+    return null;
+  }
+  return segments.slice(dirSegments.length).join("/") || null;
+}
+
+const contentDir = path.join(
+  config.projectDir ?? process.cwd(),
+  config.site.notesDir,
+);
+const relativePath = notesRelativePath(entry.filePath, config.site.notesDir);
+
+// Edit URL: the configured edit base + the real path of the source file
+// relative to the content dir.
+let editUrl;
+const editBase = config.site.editUrl;
+if (editBase && relativePath) {
+  const base = editBase.endsWith("/") ? editBase : `${editBase}/`;
+  editUrl = `${base}${relativePath}`;
+}
+
+// Last updated: the file's last commit date (`git log -1`, same format
+// as the engine's site-wide git date). Omitted when unavailable.
+let lastUpdated;
+if (relativePath) {
+  try {
+    lastUpdated = execFileSync(
+      "git",
+      [
+        "log",
+        "-1",
+        "--format=%cd",
+        "--date=format:%B %d, %Y",
+        "--",
+        path.join(contentDir, relativePath),
+      ],
+      {
+        cwd: config.projectDir ?? process.cwd(),
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+  } catch {
+    lastUpdated = undefined;
+  }
+  if (lastUpdated === "") {
+    lastUpdated = undefined;
+  }
+}
 
 const showTopicList = topicListShouldRender(entry, config);
-const items = showTopicList
-  ? findCategoryItems(sidebar, `/${notesRoute}/${slug}`)
-  : [];
+const items = showTopicList ? findCategoryItems(sidebar, currentHref) : [];
 ---
 
-<BaseLayout title={title} description={entry.data.description}>
+<DocLayout
+  title={title}
+  description={entry.data.description}
+  currentHref={currentHref}
+  headings={headings}
+  editUrl={editUrl}
+  lastUpdated={lastUpdated}
+>
   <h1>{heading}</h1>
   <Content components={mdxComponents} />
-  {
-    items.length > 0 && (
-      <section class="topic-list">
-        {items.map((item) => (
-          <h2>
-            <a href={item.href ?? item.link?.href ?? "#"}>
-              {topicCardTitle(item)}
-            </a>
-          </h2>
-        ))}
-      </section>
-    )
-  }
-</BaseLayout>
+  {items.length > 0 && (
+    <section class="topic-list">
+      {items.map((item) => (
+        <h2>
+          <a href={item.href ?? item.link?.href ?? "#"}>
+            {topicCardTitle(item)}
+          </a>
+        </h2>
+      ))}
+    </section>
+  )}
+</DocLayout>

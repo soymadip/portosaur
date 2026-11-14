@@ -1,10 +1,9 @@
 ---
-// Blog authors index (`/${blogRoute}/authors`) — Phase 2 stub.
+// Blog authors index (`/${blogRoute}/authors`).
 //
-// Lists every author from `<blogDir>/authors.yml` (the data collection
-// exists only when that file exists — `getCollection` throws otherwise,
-// so the read is guarded). Names sort alphabetically; the golden pages
-// list the `name` field, not the key.
+// One h2 per author, linked to the author page when the author has
+// `page: true`, with title and URL beneath (plain text when there is
+// no page). Renders nothing but the h1 when `authors.yml` is absent.
 import { getCollection } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -20,27 +19,94 @@ try {
 } catch {
   authors = [];
 }
-
-const names = authors
-  .map((author) => ({
-    key: author.id,
-    name: author.data.name ?? author.id,
-    hasPage: author.data.page === true,
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <BaseLayout title={title}>
-  <h1>Authors</h1>
-  {
-    names.map((author) => (
-      <h2>
-        {author.hasPage ? (
-          <a href={`/${blogRoute}/authors/${author.key}/`}>{author.name}</a>
-        ) : (
-          author.name
-        )}
-      </h2>
-    ))
-  }
+  <div class="porto-blog-authors-page">
+    <h1>Authors</h1>
+    {authors.length === 0 ? (
+      <p class="porto-blog-authors-page__empty">No authors yet.</p>
+    ) : (
+      authors.map((author) => {
+        const name = author.data.name ?? author.id;
+        const hasPage = author.data.page === true;
+        return (
+          <section class="porto-blog-author">
+            <h2>
+              {hasPage ? (
+                <a href={`/${blogRoute}/authors/${author.id}/`}>{name}</a>
+              ) : (
+                name
+              )}
+            </h2>
+            {author.data.title && (
+              <p class="porto-blog-author__title">{author.data.title}</p>
+            )}
+            {author.data.url && (
+              <p class="porto-blog-author__url">
+                <a
+                  href={author.data.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {author.data.url}
+                </a>
+              </p>
+            )}
+          </section>
+        );
+      })
+    )}
+  </div>
 </BaseLayout>
+
+<style>
+  .porto-blog-authors-page {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .porto-blog-authors-page h1 {
+    margin-bottom: -0.5rem;
+  }
+
+  .porto-blog-authors-page__empty {
+    color: var(--porto-text-muted);
+  }
+
+  .porto-blog-author h2 {
+    margin: 0 0 0.25rem;
+  }
+
+  .porto-blog-author h2 a {
+    color: var(--porto-text);
+    text-decoration: none;
+  }
+
+  .porto-blog-author h2 a:hover {
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-author__title {
+    color: var(--porto-text-muted);
+    margin: 0;
+  }
+
+  .porto-blog-author__url {
+    margin: 0.25rem 0 0;
+  }
+
+  .porto-blog-author__url a {
+    color: var(--porto-primary);
+    text-decoration: none;
+  }
+
+  .porto-blog-author__url a:hover {
+    text-decoration: underline;
+  }
+</style>

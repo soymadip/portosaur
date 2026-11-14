@@ -100,9 +100,9 @@ export default defineConfig({
  *
  * When `<blogDir>/authors.yml` exists, a third `authors` data collection is
  * emitted (file loader over the YAML map; each key becomes an entry id).
- * The blog author pages resolve display names from it — the Docusaurus
- * blog plugin did the same, and the golden `/blog/authors/` pages list
- * names from this file even when the blog has no posts at all.
+ * The blog author pages resolve display names from it — the old
+ * Docusaurus blog plugin did the same, and the golden `/blog/authors/`
+ * pages list names from this file even when the blog has no posts at all.
  *
  * @param {object} options - The resolved `PortosaurOptions` from `buildSiteConfig`.
  * @param {number} mtime - The config.yml mtime (cache-busting comment).

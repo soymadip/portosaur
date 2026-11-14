@@ -4,4 +4,6 @@
 const { href, to } = Astro.props;
 ---
 
-<a href={href ?? to ?? "#"} class="porto-btn"><slot /></a>
+<a href={href ?? to ?? "#"} class="porto-btn">
+  <slot />
+</a>

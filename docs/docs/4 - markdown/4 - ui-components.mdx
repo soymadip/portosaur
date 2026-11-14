@@ -34,7 +34,7 @@ Apply semantic color variants using boolean props:
 
 ### Links & Navigation
 
-Passing `href` transforms the button into a Docusaurus `<Link>`:
+Passing `href` transforms the button into a `<Link>`:
 
 - **Internal Links**: Routes seamlessly via client-side SPA navigation without full page reloads.
 - **External Links**: Automatically opens securely in a new tab with `target="_blank"` and `rel="noopener noreferrer"`.
@@ -52,20 +52,20 @@ Passing `href` transforms the button into a Docusaurus `<Link>`:
 
 ### Props Reference
 
-| Prop                                                                | Type                     | Default                                | Description                                                                                                      |
-| :------------------------------------------------------------------ | :----------------------- | :------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
-| `primary` / `secondary` / `success` / `info` / `warning` / `danger` | `boolean`                | `false`                                | Sets the button's semantic color.                                                                                |
-| `href`                                                              | `string`                 | `null`                                 | Link destination. Internal URLs use Docusaurus routing; external URLs open in a new tab unless `sameTab` is set. |
-| `sameTab`                                                           | `boolean`                | `false`                                | Keep an external `href` in the current tab.                                                                      |
-| `icon`                                                              | `string \| ReactElement` | None                                   | Leading text/emoji, image path/URL, or icon component. Use `<Icon id="..." />` for a bundled vector icon.        |
-| `desc`                                                              | `ReactNode`              | None                                   | Tooltip content.                                                                                                 |
-| `hint` / `hintTop`                                                  | `ReactNode`              | None                                   | Tooltip content positioned above the button.                                                                     |
-| `hintRight` / `hintLeft` / `hintBottom`                             | `ReactNode`              | None                                   | Tooltip content and position.                                                                                    |
-| `disabled`                                                          | `boolean`                | `false`                                | Disables button interaction and applies disabled styling.                                                        |
-| `onClick`                                                           | `function`               | None                                   | Click handler. Receives the click event.                                                                         |
-| `as`                                                                | `ElementType`            | `Link` with `href`, otherwise `button` | Render a different element or component.                                                                         |
-| `title`                                                             | `string`                 | None                                   | Native title attribute on the rendered element.                                                                  |
-| `className`                                                         | `string`                 | None                                   | Additional class on the rendered element.                                                                        |
+| Prop                                                                | Type                     | Default                                | Description                                                                                                       |
+| :------------------------------------------------------------------ | :----------------------- | :------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `primary` / `secondary` / `success` / `info` / `warning` / `danger` | `boolean`                | `false`                                | Sets the button's semantic color.                                                                                 |
+| `href`                                                              | `string`                 | `null`                                 | Link destination. Internal URLs use client-side routing; external URLs open in a new tab unless `sameTab` is set. |
+| `sameTab`                                                           | `boolean`                | `false`                                | Keep an external `href` in the current tab.                                                                       |
+| `icon`                                                              | `string \| ReactElement` | None                                   | Leading text/emoji, image path/URL, or icon component. Use `<Icon id="..." />` for a bundled vector icon.         |
+| `desc`                                                              | `ReactNode`              | None                                   | Tooltip content.                                                                                                  |
+| `hint` / `hintTop`                                                  | `ReactNode`              | None                                   | Tooltip content positioned above the button.                                                                      |
+| `hintRight` / `hintLeft` / `hintBottom`                             | `ReactNode`              | None                                   | Tooltip content and position.                                                                                     |
+| `disabled`                                                          | `boolean`                | `false`                                | Disables button interaction and applies disabled styling.                                                         |
+| `onClick`                                                           | `function`               | None                                   | Click handler. Receives the click event.                                                                          |
+| `as`                                                                | `ElementType`            | `Link` with `href`, otherwise `button` | Render a different element or component.                                                                          |
+| `title`                                                             | `string`                 | None                                   | Native title attribute on the rendered element.                                                                   |
+| `className`                                                         | `string`                 | None                                   | Additional class on the rendered element.                                                                         |
 
 Other standard button/link attributes are forwarded to the rendered element. Pass an `<Icon>` component for a vector icon; a string such as `"lucide:download"` is rendered as text, not resolved as an icon:
 

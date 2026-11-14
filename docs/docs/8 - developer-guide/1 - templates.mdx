@@ -71,13 +71,24 @@ export async function postSetup({ logger, projectDir, projectName }) {
 
 The hook receives an execution context object:
 
-| Property      | Type     | Description                                                                  |
-| :------------ | :------- | :--------------------------------------------------------------------------- |
-| `logger`      | `Logger` | Instance of `@portosaur/logger` (`info`, `success`, `warn`, `error`, `tip`). |
-| `projectDir`  | `string` | Absolute path to the user's project root directory.                          |
-| `projectName` | `string` | Directory name of the project.                                               |
-| `userName`    | `string` | VCS username provided by the user.                                           |
-| `fullName`    | `string` | User's full name.                                                            |
+| Property      | Type     | Description                                                                               |
+| :------------ | :------- | :---------------------------------------------------------------------------------------- |
+| `logger`      | `Logger` | Instance of the logger from `@portosaur/cli` (`info`, `success`, `warn`, `error`, `tip`). |
+| `projectDir`  | `string` | Absolute path to the user's project root directory.                                       |
+| `projectName` | `string` | Directory name of the project.                                                            |
+| `userName`    | `string` | VCS username provided by the user.                                                        |
+| `fullName`    | `string` | User's full name.                                                                         |
+
+---
+
+## Generated Files (`.portosaur/`)
+
+`porto dev` and `porto build` generate the files that wire a project to the Astro engine, inside the project's `.portosaur/` directory:
+
+- `astro.config.mjs` — the Astro configuration, generated from the resolved `config.yml` (site URL, base path, output directory, Portosaur integration).
+- `src/content.config.ts` — the content collections for the docs/notes and blog directories.
+
+Both files are regenerated on every run (and whenever `config.yml` changes during `porto dev`), so they are never hand-edited. They live outside the template tree — the scaffolding engine only creates the user-facing project files.
 
 ---
 

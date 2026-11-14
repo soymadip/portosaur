@@ -4,4 +4,6 @@
 const { to, href } = Astro.props;
 ---
 
-<a href={to ?? href ?? "#"}><slot /></a>
+<a href={to ?? href ?? "#"}>
+  <slot />
+</a>

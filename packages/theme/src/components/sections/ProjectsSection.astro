@@ -1,0 +1,680 @@
+---
+// ProjectsSection — ported from the old components/ProjectsSection/index.jsx.
+//
+// Carousel with nav buttons + dots. The carousel itself is pure CSS
+// (scroll-snap); the buttons, dots, and slides-to-show are client state,
+// ported to the small inline script below (same breakpoints and scroll
+// math as the old hooks: 1 slide ≤600px, 2 ≤1024px, 3 above).
+//
+// Note: neither the old component nor this port implements autoplay or a
+// featured filter — the config key `projectShelf.autoplay` exists but the
+// old component never read it, and `featured` is only a badge. The old
+// <Hint> for the "+N" overflow tags is a plain `title` attribute until
+// the real Hint lands in Phase 4.
+import config from "porto:config";
+import { renderDynamicIcon, renderIcon } from "../../lib/icons.mjs";
+
+interface Props {
+  id?: string;
+  className?: string;
+}
+
+const { id, className } = Astro.props;
+
+const projectShelf = config.homePage?.projectShelf || {};
+const projects = projectShelf?.projects || [];
+const base = config.site.baseUrl;
+---
+
+{projectShelf?.enable !== false && projects.length > 0 && (
+  <div
+    id={id}
+    data-reveal
+    data-porto-carousel
+    data-projects={projects.length}
+    class={`projectsSection ${className || ""}`}
+  >
+    <div class="container">
+      <div class="header">
+        <h2 class="title">{projectShelf?.heading || "Projects"}</h2>
+        {projectShelf?.subheading && (
+          <p class="subtitle">{projectShelf.subheading}</p>
+        )}
+      </div>
+
+      <div class="carouselContainer">
+        {projects.length > 1 && (
+          <button
+            class="navButton prevButton"
+            disabled
+            aria-label="Previous project"
+          >
+            <span
+              set:html={renderIcon("md:chevron-left", { size: "1.8rem" })}
+            />
+          </button>
+        )}
+
+        <div class="carousel" style="--slides-to-show: 3">
+          {projects.map((project) => {
+            const tags = project.tags || [];
+            const extraTags = tags.length - 3;
+            return (
+              <div class="cardWrapper">
+                <div class="card">
+                  <div
+                    class="iconContainer"
+                    style={`background-color: ${project.bg || "rgba(255,255,255,0.05)"}`}
+                  >
+                    <span
+                      class="icon"
+                      set:html={renderDynamicIcon(project.icon, {
+                        slug: project.slug,
+                        base,
+                      })}
+                    />
+
+                    {project.state && (
+                      <div class="stateBadgeWrapper">
+                        <span
+                          class={`stateBadge ${project.state.toLowerCase()}`}
+                        >
+                          {project.state}
+                        </span>
+                      </div>
+                    )}
+
+                    {project.featured && (
+                      <div class="featuredBadge" title="Featured">
+                        <span set:html={renderIcon("md:star")} />
+                      </div>
+                    )}
+
+                    {tags.length > 0 && (
+                      <div class="tags">
+                        {tags.slice(0, 3).map((tag) => (
+                          <span class="tag">{tag}</span>
+                        ))}
+                        {extraTags > 0 && (
+                          <span
+                            class="tag extraTag"
+                            title={tags.slice(3).join(", ")}
+                          >
+                            +{extraTags}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div class="content">
+                    <div class="titleRow">
+                      <h3 class="cardTitle">{project.title}</h3>
+                    </div>
+                    <p class="desc">{project.desc}</p>
+                  </div>
+
+                  <div class="links">
+                    {project.website && (
+                      <a
+                        href={project.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="link"
+                      >
+                        <span set:html={renderIcon("md:web")} /> Website
+                      </a>
+                    )}
+                    {project.repo && (
+                      <a
+                        href={project.repo}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="link"
+                      >
+                        <span set:html={renderIcon("md:xml")} /> Source
+                      </a>
+                    )}
+                    {project.demo && (
+                      <a
+                        href={project.demo}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="link"
+                      >
+                        <span set:html={renderIcon("md:play")} /> Demo
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {projects.length > 1 && (
+          <button class="navButton nextButton" aria-label="Next project">
+            <span
+              set:html={renderIcon("md:chevron-right", { size: "1.8rem" })}
+            />
+          </button>
+        )}
+      </div>
+
+      {/*
+          Dots are server-rendered (max count = one per project, the
+          slidesToShow=1 case) so they carry the Astro scope attribute —
+          buttons created by the script would not match the scoped `.dot`
+          styles. The script hides the extras per breakpoint.
+        */}
+      <div class="dotsContainer">
+        {projects.map((_, index) => (
+          <button
+            class="dot"
+            data-dot={index}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+<script>
+  // Carousel state, ported from the old React hooks (same breakpoints and
+  // scroll math). Runs once per page; scoped to [data-porto-carousel].
+  function initCarousel(root) {
+    const carousel = root.querySelector(".carousel");
+    const prevBtn = root.querySelector(".prevButton");
+    const nextBtn = root.querySelector(".nextButton");
+    const dotsContainer = root.querySelector(".dotsContainer");
+    const total = Number(root.dataset.projects || "0");
+    if (!carousel) {
+      return;
+    }
+
+    let slidesToShow = 3;
+    let currentSlide = 0;
+
+    function computeSlidesToShow() {
+      const width = window.innerWidth;
+      if (width <= 600) {
+        return 1;
+      }
+      if (width <= 1024) {
+        return 2;
+      }
+      return 3;
+    }
+
+    function totalPages() {
+      return Math.max(1, Math.ceil(total - slidesToShow + 1));
+    }
+
+    function updateDots() {
+      const pages = totalPages();
+      dotsContainer.style.display = pages <= 1 ? "none" : "";
+      dotsContainer.querySelectorAll(".dot").forEach((dot, index) => {
+        dot.style.display = index < pages ? "" : "none";
+        dot.classList.toggle("activeDot", index === currentSlide);
+      });
+    }
+
+    function update() {
+      const showNav = total > slidesToShow;
+      if (prevBtn) {
+        prevBtn.style.display = showNav ? "" : "none";
+      }
+      if (nextBtn) {
+        nextBtn.style.display = showNav ? "" : "none";
+      }
+      const { scrollLeft, scrollWidth, clientWidth } = carousel;
+      if (prevBtn) {
+        prevBtn.disabled = !(scrollLeft > 5);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = !(scrollLeft + clientWidth < scrollWidth - 5);
+      }
+      const slideWidth = clientWidth / slidesToShow;
+      currentSlide = Math.round(scrollLeft / slideWidth);
+      updateDots();
+    }
+
+    function goToSlide(index) {
+      const max = totalPages() - 1;
+      const clamped = Math.max(0, Math.min(max, index));
+      const scrollAmount = carousel.clientWidth / slidesToShow;
+      carousel.scrollTo({ left: clamped * scrollAmount, behavior: "smooth" });
+    }
+
+    function onResize() {
+      slidesToShow = computeSlidesToShow();
+      carousel.style.setProperty("--slides-to-show", String(slidesToShow));
+      update();
+    }
+
+    carousel.addEventListener("scroll", update, { passive: true });
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => goToSlide(currentSlide - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => goToSlide(currentSlide + 1));
+    }
+    dotsContainer.querySelectorAll(".dot").forEach((dot, index) => {
+      dot.addEventListener("click", () => goToSlide(index));
+    });
+    window.addEventListener("resize", onResize);
+    onResize();
+  }
+
+  document.querySelectorAll("[data-porto-carousel]").forEach(initCarousel);
+</script>
+
+<style>
+  /* --- Animations --- */
+  @keyframes slideUpFade {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes titleUnderline {
+    from {
+      width: 0;
+    }
+    to {
+      width: 60px;
+    }
+  }
+
+  /* --- Container --- */
+  .projectsSection {
+    scroll-margin-top: 38px;
+    width: 100%;
+    padding: 3rem 0 7rem;
+    background-color: var(--porto-bg) !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* --- Header --- */
+  .header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--porto-primary);
+    margin-bottom: 0.6rem;
+    position: relative;
+    display: inline-block;
+    opacity: 0;
+  }
+
+  .projectsSection.is-visible .title {
+    animation: slideUpFade 0.4s ease-out forwards;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: var(--porto-text-muted);
+    max-width: 600px;
+    margin: 0.4rem auto 0;
+    opacity: 0;
+  }
+
+  .projectsSection.is-visible .subtitle {
+    animation: slideUpFade 0.4s ease-out 0.1s forwards;
+  }
+
+  /* --- Carousel System --- */
+  .carouselContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .carousel {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 1rem 0;
+  }
+
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cardWrapper {
+    flex: 0 0 calc(100% / var(--slides-to-show, 3));
+    min-width: 0;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 0 10px;
+  }
+
+  /* --- Navigation Buttons --- */
+  .navButton {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--porto-primary);
+    color: var(--porto-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+  }
+
+  .navButton:hover:not(:disabled) {
+    transform: scale(1.1);
+    background: var(--porto-primary-darker);
+  }
+
+  .navButton:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* --- Card Styles --- */
+  .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--porto-surface-0);
+    border: 1px solid var(--porto-surface-1);
+    border-radius: 0.4rem;
+    overflow: hidden;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      border-color 0.3s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: scale(1.02) translate3d(0, 0, 0);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: var(--porto-primary);
+    z-index: 10;
+  }
+
+  .iconContainer {
+    position: relative;
+    width: 100%;
+    padding-top: 62%;
+    overflow: hidden;
+    border-bottom: 1px solid var(--porto-border);
+  }
+
+  .icon {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s ease;
+  }
+
+  .icon svg,
+  .icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .card:hover .icon {
+    transform: scale(1.08);
+  }
+
+  .tags {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    right: 32px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background-color: var(--porto-surface-0);
+    backdrop-filter: blur(12px);
+    color: var(--porto-text);
+    padding: 0px 3px 3px;
+    border-radius: 3px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--porto-gray-200);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .extraTag {
+    background-color: var(--porto-primary);
+    color: var(--porto-bg);
+    cursor: help;
+  }
+
+  .featuredBadge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: var(--porto-primary);
+    color: var(--porto-bg);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    z-index: 5;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .featuredBadge svg {
+    font-size: 10px;
+  }
+
+  .stateBadgeWrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+  }
+
+  .stateBadge {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 1px 4px;
+    border-radius: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* State colors */
+  .active {
+    background-color: var(--porto-green);
+    color: var(--porto-bg);
+  }
+  .completed {
+    background-color: var(--porto-blue);
+    color: var(--porto-bg);
+  }
+  .maintenance {
+    background-color: var(--porto-yellow);
+    color: var(--porto-bg);
+  }
+  .paused {
+    background-color: var(--porto-red);
+    color: var(--porto-bg);
+  }
+  .archived {
+    background-color: var(--porto-gray-500);
+    color: var(--porto-bg);
+  }
+  .planned {
+    background-color: var(--porto-purple);
+    color: var(--porto-bg);
+  }
+
+  .content {
+    padding: 1.2rem 1.5rem 0.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .titleRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.4rem;
+  }
+
+  .cardTitle {
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--porto-primary);
+    line-height: 1.2;
+  }
+
+  .desc {
+    font-size: 0.9rem;
+    color: var(--porto-text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 1.2rem 1.5rem 1.8rem;
+    gap: 1rem;
+    margin-top: auto;
+  }
+
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--porto-text-muted);
+    text-decoration: none !important;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    padding: 0.35rem 0.7rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--porto-gray-500);
+    background-color: var(--porto-surface-1);
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .link:hover {
+    color: var(--porto-primary);
+    background-color: var(--porto-surface-0);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--porto-primary);
+  }
+
+  .link:active {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .link svg {
+    font-size: 0.95rem;
+    transition: transform 0.2s ease;
+    color: var(--porto-text-muted);
+  }
+
+  .link:hover svg {
+    transform: scale(1.08);
+    color: var(--porto-primary);
+  }
+
+  /* Dots Navigation */
+  .dotsContainer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--porto-gray-300);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s;
+  }
+
+  .dot:hover {
+    background-color: var(--porto-primary-light);
+    transform: scale(1.2);
+  }
+
+  .activeDot {
+    background-color: var(--porto-primary);
+    transform: scale(1.4);
+  }
+  .activeDot:hover {
+    transform: scale(1.5);
+  }
+
+  /* Responsive adjustments for mobile navigation */
+  @media (max-width: 768px) {
+    .navButton {
+      display: none;
+    }
+  }
+</style>

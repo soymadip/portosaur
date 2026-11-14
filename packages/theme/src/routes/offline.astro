@@ -1,18 +1,67 @@
 ---
-// Offline page (`/offline`) — Phase 2 stub. The service worker falls
-// back to this page when the user is offline; the real styled page lands
-// in Phase 3.
+// Offline page (`/offline`) — the service worker falls back to this
+// page when the user is offline. Port of the old `pages/offline.jsx`:
+// shared empty-state styles, cloud-off icon, "Try again" reload button.
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../lib/content.mjs";
+import { renderIcon } from "../lib/icons.mjs";
 
 const title = pageTitle("You're Offline", config.site.title);
 ---
 
-<BaseLayout title={title}>
-  <h1>You're Offline</h1>
-  <p>
-    You appear to be offline. Check your connection and try again, or
-    browse the pages already saved on this device.
-  </p>
+<BaseLayout title={title} description="You're offline">
+  <div class="porto-empty-state">
+    <div class="porto-empty-state__icon">
+      <span
+        set:html={renderIcon("line-md:cloud-alt-off-loop", { size: "5rem" })}
+      />
+    </div>
+    <h2 class="porto-empty-state__title">You're Offline</h2>
+    <p class="porto-empty-state__desc">
+      It looks like you don't have an internet connection. Previously visited
+      pages are still available from cache.
+    </p>
+    <button type="button" class="porto-empty-state__btn" data-reload>
+      Try again
+    </button>
+  </div>
+
+  <script>
+    const button = document.querySelector("[data-reload]");
+    if (button) {
+      button.addEventListener("click", () => {
+        window.location.reload();
+      });
+    }
+  </script>
 </BaseLayout>
+
+<style>
+  /* Primary-button treatment (same as the docs-home action buttons);
+     the shared empty-state styles carry no button. */
+  .porto-empty-state__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--porto-primary);
+    color: #09090b;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .porto-empty-state__btn:hover {
+    background-color: var(--porto-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+  }
+</style>

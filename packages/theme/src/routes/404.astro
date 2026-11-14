@@ -1,16 +1,56 @@
 ---
-// 404 page (`/404`) — Phase 2 stub. Astro emits this as `404.html`.
+// 404 page (`/404`) — port of the old swizzled NotFound component.
+// Astro emits this as `404.html`. Shared empty-state styles, crying
+// emoji icon, "Go back home" link.
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageTitle } from "../lib/content.mjs";
+import { renderIcon } from "../lib/icons.mjs";
 
 const title = pageTitle("Page Not Found", config.site.title);
 ---
 
-<BaseLayout title={title}>
-  <h1>Page Not Found</h1>
-  <p>We could not find what you were looking for.</p>
-  <p>
-    <a href="/">Go to the homepage</a>
-  </p>
+<BaseLayout title={title} description="Page not found">
+  <div class="porto-empty-state">
+    <div class="porto-empty-state__icon">
+      <span set:html={renderIcon("line-md:emoji-cry", { size: "5rem" })} />
+    </div>
+    <h2 class="porto-empty-state__title">Page Not Found</h2>
+    <p class="porto-empty-state__desc">
+      The page you're looking for doesn't exist, has been moved, or is currently
+      unavailable.
+    </p>
+    <a class="porto-empty-state__btn" href="/">
+      Go back home
+    </a>
+  </div>
 </BaseLayout>
+
+<style>
+  /* Primary-button treatment (same as the docs-home action buttons);
+     the shared empty-state styles carry no button. */
+  .porto-empty-state__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--porto-primary);
+    color: #09090b;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .porto-empty-state__btn:hover {
+    background-color: var(--porto-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.15);
+  }
+</style>

@@ -1,0 +1,32 @@
+/* === Shared empty-state styles ===
+ * Used by the 404 page, the redirect interstitial, and the empty blog /
+ * tasks states. Ported from the old NotFound styles module. */
+
+.porto-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: calc(100vh - var(--porto-navbar-height) - 100px);
+}
+
+.porto-empty-state__icon {
+  font-size: 4.5rem;
+  color: var(--porto-text-muted);
+  opacity: 0.6;
+}
+
+.porto-empty-state__title {
+  font-size: 2.2rem;
+  color: var(--porto-heading-color);
+  margin-top: -0.8rem;
+  margin-bottom: 1rem;
+}
+
+.porto-empty-state__desc {
+  font-size: 1.1rem;
+  color: var(--porto-text-muted);
+  max-width: 500px;
+}

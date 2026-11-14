@@ -1,0 +1,132 @@
+---
+// TOC — headings list (depth 2–3, same as the old `tableOfContents`
+// config) with an IntersectionObserver scroll-spy highlighting the
+// active heading. The active link is scrolled into view inside the TOC
+// container (port of the old TOC wrapper's MutationObserver fix).
+//
+// `spy` is false for the mobile <details> instance in DocLayout — it
+// renders as a plain link list. The script is container-scoped and
+// idempotent, so rendering two TOCs on one page is safe.
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+  spy?: boolean;
+}
+
+const { headings, spy = true } = Astro.props;
+---
+
+<nav class="porto-toc" data-toc={spy || undefined} aria-label="On this page">
+  <ul class="porto-toc__list">
+    {headings.map((heading) => (
+      <li
+        class:list={[
+          "porto-toc__item",
+          `porto-toc__item--depth-${heading.depth}`,
+        ]}
+      >
+        <a class="porto-toc__link" href={`#${heading.slug}`}>
+          {heading.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  document.querySelectorAll("[data-toc]").forEach((toc) => {
+    if (toc instanceof HTMLElement && toc.dataset.spyWired) {
+      return;
+    }
+    if (toc instanceof HTMLElement) {
+      toc.dataset.spyWired = "true";
+    }
+
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>("a[href^='#']")];
+    const headings = links
+      .map((link) => {
+        const id = decodeURIComponent(
+          link.getAttribute("href")?.slice(1) ?? "",
+        );
+        const heading = id ? document.getElementById(id) : null;
+        return heading ? { link, heading } : null;
+      })
+      .filter((entry) => entry !== null);
+    if (headings.length === 0) {
+      return;
+    }
+
+    let activeLink: HTMLAnchorElement | null = null;
+    const setActive = (link: HTMLAnchorElement) => {
+      if (activeLink === link) {
+        return;
+      }
+      if (activeLink) {
+        activeLink.classList.remove("porto-toc__link--active");
+      }
+      activeLink = link;
+      link.classList.add("porto-toc__link--active");
+      // Keep the active link visible inside the (scrollable) TOC.
+      link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    };
+
+    // The heading in the top band of the viewport is active; when
+    // several intersect, the last one in document order wins.
+    const visible = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            visible.add(entry.target);
+          } else {
+            visible.delete(entry.target);
+          }
+        }
+        const current = headings
+          .filter(({ heading }) => visible.has(heading))
+          .at(-1);
+        if (current) {
+          setActive(current.link);
+        }
+      },
+      { rootMargin: "-100px 0px -75% 0px" },
+    );
+    headings.forEach(({ heading }) => {
+      observer.observe(heading);
+    });
+  });
+</script>
+
+<style>
+  .porto-toc {
+    max-height: 100%;
+    overflow-y: auto;
+    border-left: 1px solid var(--porto-border);
+  }
+
+  .porto-toc__list {
+    margin: 0;
+    padding: 0.25rem 0 0.25rem 1rem;
+    list-style: none;
+  }
+
+  .porto-toc__item--depth-3 {
+    padding-left: 1rem;
+  }
+
+  .porto-toc__link {
+    display: block;
+    padding: 0.25rem 0;
+    color: var(--porto-text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  .porto-toc__link:hover {
+    color: var(--porto-text);
+  }
+
+  .porto-toc__link--active {
+    color: var(--porto-primary);
+    font-weight: 600;
+  }
+</style>

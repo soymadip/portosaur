@@ -1,0 +1,116 @@
+---
+// Blog sidebar ("Recent posts") — the Docusaurus `BlogSidebar`: posts
+// grouped by year (newest year first), each post a link under its
+// year. Used on the blog list pages and on post pages (left column).
+// The current post (on post pages) is marked `aria-current`.
+interface SidebarPost {
+  url: string;
+  title: string;
+  date: Date | null;
+}
+
+interface Props {
+  posts: SidebarPost[];
+  currentUrl?: string;
+}
+
+const { posts, currentUrl } = Astro.props;
+
+// Group by year, newest first; undated posts (no frontmatter date, no
+// git date, no mtime — only when the source file cannot be found)
+// gather under "Undated" at the end. Posts keep their input order
+// within a year (routes pass them newest first).
+const byYear = new Map<number, SidebarPost[]>();
+const undated: SidebarPost[] = [];
+for (const post of posts) {
+  if (post.date) {
+    const year = post.date.getFullYear();
+    const group = byYear.get(year) ?? [];
+    group.push(post);
+    byYear.set(year, group);
+  } else {
+    undated.push(post);
+  }
+}
+const groups = [...byYear.keys()]
+  .sort((a, b) => b - a)
+  .map((year) => ({ label: String(year), posts: byYear.get(year) ?? [] }));
+if (undated.length > 0) {
+  groups.push({ label: "Undated", posts: undated });
+}
+---
+
+<aside class="porto-blog-sidebar">
+  <nav aria-label="Recent posts">
+    <h3 class="porto-blog-sidebar__title">Recent posts</h3>
+    {groups.map((group) => (
+      <div class="porto-blog-sidebar__year-group">
+        <h4 class="porto-blog-sidebar__year">{group.label}</h4>
+        <ul class="porto-blog-sidebar__list">
+          {group.posts.map((post) => (
+            <li>
+              <a
+                href={post.url}
+                aria-current={currentUrl === post.url ? "page" : undefined}
+              >
+                {post.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>
+
+<style>
+  .porto-blog-sidebar {
+    flex: 0 0 16rem;
+    min-width: 0;
+  }
+
+  .porto-blog-sidebar__title {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+  }
+
+  .porto-blog-sidebar__year-group {
+    margin-bottom: 1rem;
+  }
+
+  .porto-blog-sidebar__year {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+  }
+
+  .porto-blog-sidebar__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .porto-blog-sidebar__list li {
+    margin-bottom: 0.35rem;
+  }
+
+  .porto-blog-sidebar__list a {
+    color: var(--porto-text);
+    text-decoration: none;
+  }
+
+  .porto-blog-sidebar__list a:hover {
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-sidebar__list a[aria-current="page"] {
+    color: var(--porto-primary);
+    font-weight: bold;
+  }
+
+  /* Docusaurus hides the blog sidebar below its 996px breakpoint. */
+  @media (max-width: 996px) {
+    .porto-blog-sidebar {
+      display: none;
+    }
+  }
+</style>

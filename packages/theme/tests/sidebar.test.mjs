@@ -100,7 +100,22 @@ describe("buildSidebar", () => {
 
     const category = root.items[0];
     expect(category.label).toBe("Configuration Guide");
-    expect(category.link).toEqual({ href: "/docs/config" });
+    expect(category.link).toEqual({
+      href: "/docs/config",
+      title: "Configuration Guide",
+    });
+  });
+
+  test("puts the root index doc title on the root link, not the label", () => {
+    const [root] = buildSidebar(
+      [entry("index", "", { title: "Portosaur Docs" }), entry("intro", "intro")],
+      { routeBase: "/docs" },
+    );
+
+    // The label stays "Docs" (breadcrumbs use it); the link carries the
+    // doc title (the paginator uses it).
+    expect(root.label).toBe("Docs");
+    expect(root.link).toEqual({ href: "/docs", title: "Portosaur Docs" });
   });
 
   test("builds nested categories ordered by number prefix", () => {

@@ -1,20 +1,21 @@
 ---
-// Blog tag page (`/${blogRoute}/tags/[tag]`) — Phase 2 stub.
+// Blog tag page (`/${blogRoute}/tags/[tag]`).
 //
-// Heading follows the Docusaurus wording: "One post tagged with" for a
-// single post, "{n} posts tagged with" otherwise. Post titles render as
-// h2s, newest first.
+// Heading wording is the Docusaurus blog-tag rule verbatim ("One post
+// tagged with ..." / "N posts tagged with ..."), so the golden heading
+// `One post tagged with "welcome"` survives.
 import { getCollection } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   pageTitle,
   blogSlug,
+  postDate,
   sortPostsByDateDesc,
 } from "../lib/content.mjs";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
+  const posts = sortPostsByDateDesc(await getCollection("blog"));
   const byTag = new Map();
   for (const post of posts) {
     for (const tag of post.data.tags ?? []) {
@@ -24,32 +25,97 @@ export async function getStaticPaths() {
       byTag.get(tag).push(post);
     }
   }
-  return [...byTag.entries()].map(([tag, tagged]) => ({
+  return [...byTag.entries()].map(([tag, taggedPosts]) => ({
     params: { tag },
-    props: { tag, posts: sortPostsByDateDesc(tagged) },
+    props: { tag, posts: taggedPosts },
   }));
 }
 
 const { tag, posts } = Astro.props;
 const siteTitle = config.site.title;
 const blogRoute = config.site.blogRoute;
-
 const heading =
   posts.length === 1
     ? `One post tagged with "${tag}"`
     : `${posts.length} posts tagged with "${tag}"`;
+// Docusaurus used the heading text as the page title too.
 const title = pageTitle(heading, siteTitle);
+
+function formatPostDate(date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 ---
 
 <BaseLayout title={title}>
-  <h1>{heading}</h1>
-  {
-    posts.map((post) => (
-      <h2>
-        <a href={`/${blogRoute}/${blogSlug(post)}/`}>
-          {post.data.title ?? post.id}
-        </a>
-      </h2>
-    ))
-  }
+  <div class="porto-blog-list">
+    <h1>{heading}</h1>
+    {posts.map((post) => {
+      const date = postDate(post);
+      return (
+        <article class="porto-blog-item">
+          <h2>
+            <a href={`/${blogRoute}/${blogSlug(post)}/`}>
+              {post.data.title ?? post.id}
+            </a>
+          </h2>
+          <div class="porto-blog-meta">
+            {date && (
+              <time datetime={date.toISOString()}>{formatPostDate(date)}</time>
+            )}
+          </div>
+          {post.data.description && (
+            <p class="porto-blog-desc">{post.data.description}</p>
+          )}
+        </article>
+      );
+    })}
+  </div>
 </BaseLayout>
+
+<style>
+  .porto-blog-list {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .porto-blog-list h1 {
+    margin-bottom: -1rem;
+  }
+
+  .porto-blog-item h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.8rem;
+  }
+
+  .porto-blog-item h2 a {
+    color: var(--porto-text);
+    text-decoration: none;
+  }
+
+  .porto-blog-item h2 a:hover {
+    color: var(--porto-primary);
+  }
+
+  .porto-blog-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    color: var(--porto-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .porto-blog-desc {
+    color: var(--porto-text-muted);
+    margin: 0 0 0.5rem;
+  }
+</style>

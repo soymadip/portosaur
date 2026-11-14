@@ -1,0 +1,49 @@
+/* === Portosaur theme CSS entry ===
+ *
+ * Load order contract: this file loads FIRST (imported by BaseLayout),
+ * user `theme.custom_css` files load after it, so user overrides win.
+ * Custom scheme files (`theme.color_scheme` pointing at a path) load
+ * after this file too, alongside the user CSS.
+ *
+ * Tailwind v4 (CSS-first config) + the `--porto-*` token system. No
+ * `@tailwindcss/typography` — markdown prose is hand-written CSS in
+ * `overrides/markdown.css`.
+ */
+
+@import "tailwindcss";
+
+/* ----- Global Fonts ----- */
+@import "@fontsource/alata";
+@import "@fontsource-variable/lexend";
+@import "@fontsource-variable/geologica";
+@import "katex/dist/katex.min.css";
+
+/* ----- Tokens + Schemes ----- */
+@import "./tokens.css";
+@import "./themes/catppuccin.css";
+@import "./themes/dracula.css";
+@import "./themes/github.css";
+@import "./themes/gruvbox.css";
+@import "./themes/nord.css";
+@import "./themes/portosaur.css";
+
+/* ----- Global Styles ----- */
+@import "./animations.css";
+@import "./empty-state.css";
+
+/* ----- Component Overrides ----- */
+@import "./overrides/base.css";
+@import "./overrides/navbar.css";
+@import "./overrides/footer.css";
+@import "./overrides/search.css";
+@import "./overrides/pagination.css";
+@import "./overrides/markdown.css";
+@import "./shiki.css";
+
+/* Tailwind content sources: the theme ships as a package, so automatic
+ * content detection (which skips node_modules) never sees the theme's
+ * own components. Point Tailwind at them explicitly, relative to this
+ * file. User content (notes/blog MDX) is auto-detected in the project. */
+@source "../layouts";
+@source "../components";
+@source "../routes";

@@ -1,8 +1,8 @@
 ---
-// Blog tags index (`/${blogRoute}/tags`) — Phase 2 stub.
+// Blog tags index (`/${blogRoute}/tags`).
 //
-// Tags grouped by first letter (uppercase, alphabetical), each letter a
-// h2 — the Docusaurus tags page groups the same way.
+// Tags grouped by first letter, each letter an h2 (the golden headings
+// for this page are the letters), with a count per tag.
 import { getCollection } from "astro:content";
 import config from "porto:config";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -13,38 +13,100 @@ const blogRoute = config.site.blogRoute;
 const title = pageTitle("Tags", siteTitle);
 
 const posts = await getCollection("blog");
-const tags = new Set();
+const counts = new Map();
 for (const post of posts) {
   for (const tag of post.data.tags ?? []) {
-    tags.add(tag);
+    counts.set(tag, (counts.get(tag) ?? 0) + 1);
   }
 }
 
+// Group alphabetically by first letter (uppercase), tags sorted within.
 const groups = new Map();
-for (const tag of [...tags].sort((a, b) => a.localeCompare(b))) {
+for (const tag of [...counts.keys()].sort((a, b) => a.localeCompare(b))) {
   const letter = tag.charAt(0).toUpperCase();
   if (!groups.has(letter)) {
     groups.set(letter, []);
   }
   groups.get(letter).push(tag);
 }
-const letters = [...groups.keys()].sort((a, b) => a.localeCompare(b));
 ---
 
 <BaseLayout title={title}>
-  <h1>Tags</h1>
-  {
-    letters.map((letter) => (
-      <>
-        <h2>{letter}</h2>
-        <ul>
-          {groups.get(letter).map((tag) => (
-            <li>
-              <a href={`/${blogRoute}/tags/${tag}/`}>{tag}</a>
-            </li>
-          ))}
-        </ul>
-      </>
-    ))
-  }
+  <div class="porto-blog-tags-page">
+    <h1>Tags</h1>
+    {groups.size === 0 ? (
+      <p class="porto-blog-tags-page__empty">No tags yet.</p>
+    ) : (
+      [...groups.entries()].map(([letter, tags]) => (
+        <section>
+          <h2>{letter}</h2>
+          <ul class="porto-blog-tags">
+            {tags.map((tag) => (
+              <li>
+                <a href={`/${blogRoute}/tags/${tag}/`}>
+                  {tag}{" "}
+                  <span class="porto-blog-tags__count">
+                    ({counts.get(tag)})
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
 </BaseLayout>
+
+<style>
+  .porto-blog-tags-page {
+    max-width: 80rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .porto-blog-tags-page h1 {
+    margin-bottom: -0.5rem;
+  }
+
+  .porto-blog-tags-page section h2 {
+    margin: 0 0 0.75rem;
+  }
+
+  .porto-blog-tags-page__empty {
+    color: var(--porto-text-muted);
+  }
+
+  .porto-blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .porto-blog-tags a {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    color: var(--porto-text-muted);
+    text-decoration: none;
+    border: 1px solid var(--porto-border);
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+
+  .porto-blog-tags a:hover {
+    color: var(--porto-primary);
+    border-color: var(--porto-primary);
+  }
+
+  .porto-blog-tags__count {
+    color: var(--porto-text-muted);
+    font-size: 0.8em;
+  }
+</style>

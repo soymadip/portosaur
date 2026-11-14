@@ -27,7 +27,8 @@
     "test:smoke": "bun run tests/smoke/smoke-test.mjs"
   },
   "devDependencies": {
-    "prettier": "latest"
+    "prettier": "latest",
+    "prettier-plugin-astro": "^1.1.2"
   },
   "engines": {
     "node": ">=24.15.0"
