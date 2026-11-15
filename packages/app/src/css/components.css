@@ -142,6 +142,7 @@ main {
   flex-direction: column;
   flex: 1 0 auto;
   padding-top: 0.75rem;
+  padding-bottom: 0.5rem;
 }
 /* The article container is the last link in the stretch chain: a
    flex column the doc footer can push against. It is also OG's
@@ -299,7 +300,7 @@ main {
 .porto-nav-link {
   cursor: pointer;
   border-radius: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.625rem;
   font-size: 0.95rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
@@ -1802,10 +1803,10 @@ html.porto-navbar-hidden .porto-nav-progress {
    border. */
 .porto-footer {
   border-top: 1px solid var(--porto-color-hairline);
-  /* Slim, matching the OG Portosaur footer: Docusaurus set
-     --ifm-footer-padding-vertical to 0.1rem. Horizontal padding
-     stays 1rem so a wrapped line never touches the edges. */
-  padding: 0.1rem 1rem;
+  /* Keep horizontal padding so a wrapped line never touches the
+    edges, the footer itself stays compact. 
+  */
+  padding: 0 1rem;
   text-align: center;
 }
 
@@ -4045,9 +4046,6 @@ a.porto-blog-article-author-name:hover {
   min-width: 0;
   padding: 1rem 1.25rem;
   border: 1px solid var(--porto-color-hairline-light);
-  /* OG: the card sits on the scheme's raised surface (Docusaurus
-     `.card` → `--ifm-background-surface-color`) — the same surface
-     the note cards and feature cards use. */
   background-color: var(--porto-color-gray-6);
   border-radius: 0.5rem;
   box-shadow: var(--porto-shadow-sm);
@@ -4077,7 +4075,7 @@ a.porto-blog-article-author-name:hover {
   min-width: 0;
   flex: 0 1 auto;
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 750;
   color: var(--porto-color-text);
 }
@@ -4086,7 +4084,7 @@ a.porto-blog-article-author-name:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 23px;
+  font-size: 2px;
 }
 .porto-topic-list__title-text {
   overflow: hidden;
@@ -4104,9 +4102,10 @@ a.porto-blog-article-author-name:hover {
   border-radius: 999px;
   background-color: var(--porto-color-gray-5);
   color: var(--porto-color-gray-3);
-  font-size: 0.75rem;
+  font-size: 0.5rem;
   font-weight: 500;
   line-height: 1.5;
+  /* display: none; */
 }
 .porto-topic-list__description {
   margin: 0;
@@ -4114,7 +4113,7 @@ a.porto-blog-article-author-name:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   opacity: 0.6;
 }
 

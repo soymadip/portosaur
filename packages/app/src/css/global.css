@@ -222,9 +222,8 @@
 
   /* Key layout values */
   --porto-nav-height: 3.5rem;
-  /* Mobile edge padding for the navbar (12px); desktop raises it
-     to 1.5rem in the media query below. */
-  --porto-nav-pad-x: 0.75rem;
+  /* Navbar edge padding; desktop raises it in the media query below. */
+  --porto-nav-pad-x: 0.55rem;
   --porto-nav-pad-y: 0.75rem;
   --porto-mobile-toc-height: 3rem;
   /* 265px: the left sidebar and the right TOC panel share this
@@ -310,8 +309,8 @@
 @media (min-width: 50em) {
   :root {
     /* 60px, matching the OG Portosaur/Docusaurus navbar height. */
-    --porto-nav-height: 3.75rem;
-    --porto-nav-pad-x: 1.5rem;
+    --porto-nav-height: 3.4rem;
+    --porto-nav-pad-x: 0.5rem;
     --porto-text-h1: var(--porto-text-5xl);
     --porto-text-h2: var(--porto-text-4xl);
     --porto-text-h3: var(--porto-text-3xl);
