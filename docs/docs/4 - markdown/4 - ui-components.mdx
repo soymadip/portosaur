@@ -4,13 +4,15 @@ desc: "Interactive buttons, dropdown menus, and icon utilities."
 icon: "🧩"
 ---
 
-Portosaur exports custom UI components globally through `@portosaur/theme`. You do not need to import them into your MDX files.
+Portosaur exports custom UI components globally through `@portosaur/app`. You do not need to import them into your MDX files.
+
+`<Btn>` and `<Dropdown>` are thin MDX wrappers around the app's shared `Button` and `Dropdown` components — the same Button renders the page actions and the dropdown triggers, and the same Dropdown renders the navbar menus and the theme select. Styling them in `custom_css` (`.porto-button`, `.porto-dropdown`) styles every button and menu on the site at once.
 
 ---
 
 ## `<Btn>`
 
-The `<Btn>` component provides styled action buttons with built-in client-side routing, icons, and tooltips.
+The `<Btn>` component provides styled action buttons with built-in client-side routing and icons.
 
 ### Basic Usage
 
@@ -20,56 +22,63 @@ The `<Btn>` component provides styled action buttons with built-in client-side r
 
 ### Color Variants
 
-Apply semantic color variants using boolean props:
+Pick a variant with the `variant` prop, and add `outline` for the outlined form:
 
 ```jsx
-<Btn primary>Primary</Btn>
-<Btn secondary>Secondary</Btn>
-<Btn success>Success</Btn>
-<Btn info>Info</Btn>
-<Btn warning>Warning</Btn>
-<Btn danger>Danger</Btn>
+<Btn variant="primary">Primary</Btn>
+<Btn variant="secondary">Secondary</Btn>
+<Btn variant="success">Success</Btn>
+<Btn variant="info">Info</Btn>
+<Btn variant="warning">Warning</Btn>
+<Btn variant="danger">Danger</Btn>
+<Btn variant="ghost">Ghost</Btn>
+<Btn variant="primary" outline>Outlined</Btn>
+```
+
+### Sizes
+
+```jsx
+<Btn size="sm">Small</Btn>
+<Btn size="lg">Large</Btn>
 ```
 
 ### Links & Navigation
 
-Passing `href` transforms the button into a Docusaurus `<Link>`:
+Passing `to` renders a Next.js `<Link>`; passing `href` renders a plain anchor:
 
-- **Internal Links**: Routes seamlessly via client-side SPA navigation without full page reloads.
-- **External Links**: Automatically opens securely in a new tab with `target="_blank"` and `rel="noopener noreferrer"`.
+- **Internal Links** (`to`): navigate client-side, without a full page reload.
+- **External Links** (`href`): automatically open securely in a new tab with `target="_blank"` and `rel="noopener noreferrer"`.
 - **`sameTab`**: Forces external links to open within the existing tab.
 
 ```jsx
-<Btn primary href="/docs/getting-started/installation">
+<Btn variant="primary" to="/docs/getting-started/installation">
   Install Now
 </Btn>
 
-<Btn secondary href="https://github.com/soymadip/portosaur">
+<Btn variant="secondary" href="https://github.com/soymadip/portosaur">
   GitHub Repo
 </Btn>
 ```
 
 ### Props Reference
 
-| Prop                                                                | Type                     | Default                                | Description                                                                                                      |
-| :------------------------------------------------------------------ | :----------------------- | :------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
-| `primary` / `secondary` / `success` / `info` / `warning` / `danger` | `boolean`                | `false`                                | Sets the button's semantic color.                                                                                |
-| `href`                                                              | `string`                 | `null`                                 | Link destination. Internal URLs use Docusaurus routing; external URLs open in a new tab unless `sameTab` is set. |
-| `sameTab`                                                           | `boolean`                | `false`                                | Keep an external `href` in the current tab.                                                                      |
-| `icon`                                                              | `string \| ReactElement` | None                                   | Leading text/emoji, image path/URL, or icon component. Use `<Icon id="..." />` for a bundled vector icon.        |
-| `desc`                                                              | `ReactNode`              | None                                   | Tooltip content.                                                                                                 |
-| `hint` / `hintTop`                                                  | `ReactNode`              | None                                   | Tooltip content positioned above the button.                                                                     |
-| `hintRight` / `hintLeft` / `hintBottom`                             | `ReactNode`              | None                                   | Tooltip content and position.                                                                                    |
-| `disabled`                                                          | `boolean`                | `false`                                | Disables button interaction and applies disabled styling.                                                        |
-| `onClick`                                                           | `function`               | None                                   | Click handler. Receives the click event.                                                                         |
-| `as`                                                                | `ElementType`            | `Link` with `href`, otherwise `button` | Render a different element or component.                                                                         |
-| `title`                                                             | `string`                 | None                                   | Native title attribute on the rendered element.                                                                  |
-| `className`                                                         | `string`                 | None                                   | Additional class on the rendered element.                                                                        |
-
-Other standard button/link attributes are forwarded to the rendered element. Pass an `<Icon>` component for a vector icon; a string such as `"lucide:download"` is rendered as text, not resolved as an icon:
+| Prop        | Type                                                                                 | Default     | Description                                                                                 |
+| :---------- | :----------------------------------------------------------------------------------- | :---------- | :------------------------------------------------------------------------------------------ |
+| `variant`   | `"primary" \| "secondary" \| "success" \| "info" \| "warning" \| "danger" \| "ghost"` | `"primary"` | Sets the button's color.                                                                    |
+| `outline`   | `boolean`                                                                            | `false`     | Outlined form: a colored border with a transparent background that fills on hover.          |
+| `size`      | `"sm" \| "lg"`                                                                       | None        | Small or large size.                                                                        |
+| `to`        | `string`                                                                             | None        | Internal page path. Renders a Next.js `<Link>` with client-side navigation.                 |
+| `href`      | `string`                                                                             | None        | Link destination. External URLs open in a new tab unless `sameTab` is set.                  |
+| `sameTab`   | `boolean`                                                                            | `false`     | Keep an external `href` in the current tab.                                                 |
+| `icon`      | `string`                                                                             | None        | Icon identifier (for example `"lucide:download"`), rendered before the label.               |
+| `className` | `string`                                                                             | `""`        | Additional class on the rendered element.                                                   |
+| `disabled`  | `boolean`                                                                            | `false`     | Disables button interaction and applies disabled styling.                                   |
+| `onClick`   | `function`                                                                           | None        | Click handler. Receives the click event.                                                    |
+| `title`     | `string`                                                                             | None        | Native title attribute on the rendered element.                                             |
+| `ariaLabel` | `string`                                                                             | None        | Accessible label for the button.                                                            |
 
 ```jsx
-<Btn icon={<Icon id="lucide:download" />} primary>
+<Btn icon="lucide:download" variant="primary">
   Download
 </Btn>
 ```
@@ -78,36 +87,44 @@ Other standard button/link attributes are forwarded to the rendered element. Pas
 
 ## `<Dropdown>`
 
-Renders an interactive dropdown menu for links or action items.
+Renders an interactive dropdown menu for links or action items. A click opens the menu — there is no hover-open, so it works on touch too. Clicking an item, clicking elsewhere, or pressing Escape closes it. The menu centers under the trigger by default and shifts back inside the viewport when it would overflow.
 
 ```jsx
 <Dropdown
-  label="Downloads"
+  label="Jump to"
   items={[
-    { label: "Linux (x64)", href: "/downloads/linux-x64.tar.gz" },
-    { label: "macOS (Apple Silicon)", href: "/downloads/darwin-arm64.tar.gz" },
-    { label: "Windows (x64)", href: "/downloads/win-x64.zip" },
+    { label: "Getting Started", to: "/docs/getting-started" },
+    { label: "CLI Reference", to: "/docs/cli-reference" },
+    { label: "Markdown", to: "/docs/markdown" },
   ]}
 />
 ```
 
+<Dropdown
+  label="Jump to"
+  items={[
+    { label: "Getting Started", to: "/docs/getting-started" },
+    { label: "CLI Reference", to: "/docs/cli-reference" },
+    { label: "Markdown", to: "/docs/markdown" },
+  ]}
+/>
+
 ### Props Reference
 
-| Prop                     | Type                  | Default  | Description                                                                                                                     |
-| :----------------------- | :-------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `label`                  | `string`              | `"Menu"` | Text for the default trigger.                                                                                                   |
-| `trigger`                | `ReactNode \| string` | None     | Custom trigger. If omitted, `label` and button props are used.                                                                  |
-| `items`                  | `DropdownItem[]`      | `[]`     | Menu entries described below.                                                                                                   |
-| `openOnHover`            | `boolean`             | `true`   | Open on hover. The trigger also toggles on click. Set `false` for click-only behavior; outside click and Escape close the menu. |
-| `hoverDelay`             | `number`              | `150`    | Delay before closing after the pointer leaves when hover behavior is enabled.                                                   |
-| `top` / `left` / `right` | `boolean`             | Bottom   | Menu placement relative to the trigger.                                                                                         |
-| `noArrow`                | `boolean`             | `false`  | Hide the trigger arrow.                                                                                                         |
-| `className`              | `string`              | `""`     | Additional class on the dropdown wrapper.                                                                                       |
-| `style`                  | `object`              | None     | Inline styles on the dropdown wrapper.                                                                                          |
-| `menuClassName`          | `string`              | `""`     | Additional class on the menu.                                                                                                   |
-| `primary` / `secondary`  | `boolean`             | `false`  | Variant props for the default `<Btn>` trigger.                                                                                  |
+| Prop               | Type                      | Default    | Description                                                                                             |
+| :----------------- | :------------------------ | :--------- | :------------------------------------------------------------------------------------------------------ |
+| `label`            | `string`                  | `"Menu"`   | Text for the default trigger.                                                                           |
+| `trigger`          | `ReactNode \| string`     | None       | Custom trigger content. If omitted, `label` is used.                                                    |
+| `items`            | `DropdownItem[]`          | None       | Menu entries described below.                                                                           |
+| `children`         | `ReactNode`               | None       | Menu content when no `items` are given.                                                                 |
+| `align`            | `"left" \| "center" \| "right"` | `"center"` | Menu alignment relative to the trigger. The edge clamp applies to every alignment.               |
+| `noArrow`          | `boolean`                 | `false`    | Hide the trigger chevron.                                                                               |
+| `className`        | `string`                  | `""`       | Additional class on the dropdown wrapper.                                                               |
+| `menuClassName`    | `string`                  | `""`       | Additional class on the menu.                                                                           |
+| `triggerClassName` | `string`                  | `""`       | Additional class on the trigger.                                                                        |
+| `ariaLabel`        | `string`                  | None       | Accessible label for the trigger.                                                                       |
 
-Regular items support `label`, `href`, `icon`, `sameTab`, `onClick`, `active`, and `desc`. External links open in a new tab unless `sameTab` is true. Use `{ type: "separator" }` for a divider. An item can instead provide `render: ({ closeMenu }) => ReactNode` for custom content and to close the menu programmatically.
+Regular items support `label`, `to`, `href`, `icon`, `active`, `onClick`, `sameTab`, `desc`, and `prefetch` (`false` skips Next.js prefetch for that link). `to` is an internal page path (client-side navigation); `href` is a full URL or absolute path, and external links open in a new tab unless `sameTab` is true. Use `{ type: "separator" }` for a divider. An item can instead provide `render: ({ close }) => ReactNode` for custom content and to close the menu programmatically.
 
 ---
 
