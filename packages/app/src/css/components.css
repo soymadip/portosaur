@@ -242,6 +242,10 @@ main {
   color: var(--porto-color-gray-2);
   list-style: none;
   white-space: nowrap;
+  /* Fumadocs `transition-colors` (150ms): every interactive row
+     in the app fades its colors instead of snapping. The same
+     150ms value is used for all the hover fades below. */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-nav-link:hover,
 .porto-nav-summary:hover {
@@ -256,6 +260,13 @@ main {
   content: "▾";
   margin-inline-start: 0.25rem;
   font-size: 0.75em;
+  /* Inline-block so the marker can rotate when the dropdown
+     opens (Fumadocs rotates its chevrons the same way). */
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+details[open] > .porto-nav-summary::after {
+  transform: rotate(180deg);
 }
 .porto-nav-summary::-webkit-details-marker {
   display: none;
@@ -286,6 +297,9 @@ main {
   font-size: 0.95rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-dropdown-link:hover {
   background-color: var(--porto-color-hairline-light);
@@ -315,6 +329,7 @@ main {
   background-color: transparent;
   color: var(--porto-color-gray-1);
   cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-menu-button:hover {
   color: var(--porto-color-white);
@@ -433,6 +448,7 @@ body:has(#porto__sidebar:popover-open)
   color: var(--porto-color-gray-2);
   list-style: none;
   white-space: nowrap;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-theme-select__summary:hover {
   color: var(--porto-color-white);
@@ -441,6 +457,11 @@ body:has(#porto__sidebar:popover-open)
   content: "▾";
   margin-inline-start: 0.25rem;
   font-size: 0.75em;
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+details[open] > .porto-theme-select__summary::after {
+  transform: rotate(180deg);
 }
 .porto-theme-select__summary::-webkit-details-marker {
   display: none;
@@ -484,6 +505,9 @@ body:has(#porto__sidebar:popover-open)
   text-align: start;
   color: var(--porto-color-gray-2);
   cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-theme-select__option svg {
   width: 0.875rem;
@@ -517,6 +541,7 @@ body:has(#porto__sidebar:popover-open)
   cursor: pointer;
   height: 2.5rem;
   font-size: var(--porto-text-xl);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-search-trigger:hover {
   color: var(--porto-color-white);
@@ -612,6 +637,9 @@ body:has(#porto__sidebar:popover-open)
   text-decoration: none;
   color: var(--porto-color-gray-2);
   background-color: var(--porto-color-black);
+  /* The keyboard-selected result fades its tint in as you arrow
+     through the list (the hover outline itself can't fade). */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-search-result:hover,
 .porto-search-result--active {
@@ -926,9 +954,11 @@ body:has(#porto__sidebar:popover-open)
    visible` and hide the content ourselves: `block-size: 0` +
    `opacity: 0` + `visibility: hidden` (which also takes the
    links out of the tab order while folded). `visibility` flips
-   mid-transition, by which point the opacity fade has already
-   made the content nearly invisible. `interpolate-size` on
-   `.porto-sidebar` lets `block-size: auto` interpolate.
+   immediately on open and only after the fade on close — the
+   delay lives on the closed rule, the instant flip on the open
+   rule, because a transition runs with the after-change style.
+   `interpolate-size` on `.porto-sidebar` lets `block-size: auto`
+   interpolate.
    Browsers without `::details-content` support open/close
    instantly, as before. */
 .porto-sidebar details::details-content {
@@ -940,13 +970,17 @@ body:has(#porto__sidebar:popover-open)
   transition:
     block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
     opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
-    visibility 150ms;
+    visibility 0s 150ms;
   transition-behavior: allow-discrete;
 }
 .porto-sidebar details[open]::details-content {
   block-size: auto;
   opacity: 1;
   visibility: visible;
+  transition:
+    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1134,6 +1168,7 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-2);
   cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-nav a:hover,
 .porto-mobile-nav a:focus,
@@ -1180,6 +1215,7 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-3);
   opacity: 0.64;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-preferences__version-link:hover {
   color: var(--porto-color-white);
@@ -1208,6 +1244,9 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-3);
   overflow-wrap: anywhere;
+  /* The scroll-spy moves `aria-current` between headings as you
+     read — the fade makes the highlight travel instead of snap. */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-toc-panel a:hover {
   color: var(--porto-color-white);
@@ -1243,6 +1282,9 @@ body:has(#porto__sidebar:popover-open) {
   font-size: var(--porto-text-sm);
   text-decoration: none;
   outline-offset: var(--porto-outline-offset-inside);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-toc-list--mobile:first-child > li:first-child > a {
   border-top: 0;
@@ -1314,6 +1356,9 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   background-color: var(--porto-color-black);
   user-select: none;
   cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-toc details[open] .porto-mobile-toc__toggle {
   color: var(--porto-color-white);
@@ -1421,6 +1466,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   align-items: center;
   text-decoration: none;
   color: var(--porto-color-gray-3);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-edit-link:hover {
   color: var(--porto-color-white);
@@ -1452,6 +1498,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-gray-2);
   box-shadow: var(--porto-shadow-md);
   overflow-wrap: anywhere;
+  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-pagination [rel="next"] {
   justify-content: end;
@@ -1738,6 +1785,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
+    box-shadow 0.2s ease,
     transform 0.2s ease;
 }
 
@@ -2461,6 +2509,7 @@ a.feature-card:focus-visible {
 .porto-blog-sidebar-link {
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-sidebar-link:hover {
   color: var(--porto-color-text-accent);
@@ -2492,6 +2541,7 @@ a.feature-card:focus-visible {
    Docusaurus list style). */
 .porto-blog-post-title--plain a {
   color: var(--porto-color-text);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-post-title--plain a:hover {
   color: var(--porto-color-text-accent);
@@ -2582,6 +2632,9 @@ a.porto-blog-post-author-name:hover {
   font-size: 0.8rem;
   color: var(--porto-color-gray-3);
   text-decoration: none;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-tag:hover {
   border-color: var(--porto-color-text-accent);
@@ -2701,6 +2754,7 @@ a.porto-blog-article-author-name:hover {
   padding: 1rem;
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-article-nav-link:hover {
   border-color: var(--porto-color-text-accent);
@@ -2761,6 +2815,7 @@ a.porto-blog-article-author-name:hover {
 .porto-blog-author-entry-title a {
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-author-entry-title a:hover {
   color: var(--porto-color-text-accent);
@@ -3589,6 +3644,11 @@ a.porto-blog-article-author-name:hover {
 .porto-mdx-dropdown__trigger::after {
   content: "▾";
   font-size: 0.75em;
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mdx-dropdown[open] > .porto-mdx-dropdown__trigger::after {
+  transform: rotate(180deg);
 }
 .porto-mdx-dropdown__menu {
   position: absolute;
@@ -3610,6 +3670,9 @@ a.porto-blog-article-author-name:hover {
   font-size: 0.95rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mdx-dropdown__item:hover {
   background-color: var(--porto-color-hairline-light);
@@ -3678,6 +3741,12 @@ a.porto-blog-article-author-name:hover {
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
+  /* The selected tab's underline is a box-shadow on the border
+     variable — fading both makes switching tabs feel like the
+     indicator slides over instead of jumping. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tabs__tab [role="tab"][aria-selected="true"] {
   --porto-tab-color-border: var(--porto-color-text-accent);
@@ -3706,6 +3775,9 @@ a.porto-blog-article-author-name:hover {
   border-radius: 0.5rem;
   text-decoration: none;
   color: var(--porto-color-text);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-topic-list a:hover {
   border-color: var(--porto-color-text-accent);
@@ -3723,6 +3795,9 @@ a.porto-blog-article-author-name:hover {
   padding: 0.5rem 1rem;
   color: var(--porto-color-gray-3);
   text-decoration: none;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 a.porto-pv:hover {
   border-color: var(--porto-color-text-accent);
@@ -3777,6 +3852,9 @@ a.porto-pv:hover {
   font-size: var(--porto-text-xs);
   text-align: center;
   overflow-wrap: anywhere;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-icon-search__result:hover {
   border-color: var(--porto-color-text-accent);
@@ -3790,4 +3868,42 @@ a.porto-pv:hover {
 .porto-icon-search__status {
   text-align: center;
   color: var(--porto-color-gray-3);
+}
+
+/* The 150ms hover fades above, all off for reduced motion.
+   (The sidebar has its own guard next to its rules; the dialog,
+   menu, and dropdown motion guards live in animations.css.) */
+@media (prefers-reduced-motion: reduce) {
+  .porto-nav-link,
+  .porto-nav-summary,
+  .porto-nav-summary::after,
+  .porto-dropdown-link,
+  .porto-menu-button,
+  .porto-theme-select__summary,
+  .porto-theme-select__summary::after,
+  .porto-theme-select__option,
+  .porto-search-trigger,
+  .porto-search-result,
+  .porto-mobile-nav a,
+  .porto-mobile-nav summary,
+  .porto-mobile-preferences__version-link,
+  .porto-toc-panel a,
+  .porto-toc-list--mobile a,
+  .porto-mobile-toc__toggle,
+  .porto-edit-link,
+  .porto-pagination a,
+  .porto-topic-list a,
+  .porto-pv,
+  .porto-blog-sidebar-link,
+  .porto-blog-post-title--plain a,
+  .porto-blog-tag,
+  .porto-blog-article-nav-link,
+  .porto-blog-author-entry-title a,
+  .porto-tabs__tab > [role="tab"],
+  .porto-mdx-dropdown__trigger::after,
+  .porto-mdx-dropdown__item,
+  .porto-icon-search__result,
+  .porto-code-copy {
+    transition: none;
+  }
 }

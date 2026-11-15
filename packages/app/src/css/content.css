@@ -165,6 +165,8 @@
 
   border-inline-start: 2px solid var(--porto-details-border-color);
   padding-inline-start: 1rem;
+  /* Lets `block-size: 0 -> auto` interpolate for the fold below. */
+  interpolate-size: allow-keywords;
 }
 .porto-markdown-content details:not([open]):hover:not(:where(.not-content *)),
 .porto-markdown-content
@@ -205,6 +207,41 @@
 @media (prefers-reduced-motion: no-preference) {
   .porto-markdown-content summary:not(:where(.not-content *))::before {
     transition: transform 0.2s ease-in-out;
+  }
+
+  /* The border tint fades on hover (150ms, like the other rows). */
+  .porto-markdown-content details:not(:where(.not-content *)) {
+    transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* The fold, Fumadocs `animate-fd-accordion-down/up`: 200ms
+     height + opacity, ease-out. Same `::details-content` trick
+     as the sidebar fold: the UA's `content-visibility: hidden`
+     flips instantly, so we override it and hide via opacity +
+     visibility instead. `visibility` flips immediately on open
+     and only after the fade on close — the delay lives on the
+     closed rule, the instant flip on the open rule. */
+  .porto-markdown-content details:not(:where(.not-content *))::details-content {
+    overflow: hidden;
+    block-size: 0;
+    opacity: 0;
+    visibility: hidden;
+    content-visibility: visible;
+    transition:
+      block-size 200ms ease-out,
+      opacity 200ms ease-out,
+      visibility 0s 200ms;
+    transition-behavior: allow-discrete;
+  }
+  .porto-markdown-content
+    details[open]:not(:where(.not-content *))::details-content {
+    block-size: auto;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      block-size 200ms ease-out,
+      opacity 200ms ease-out,
+      visibility 0s;
   }
 }
 .porto-markdown-content

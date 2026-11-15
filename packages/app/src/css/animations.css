@@ -120,17 +120,39 @@
     opacity 0.25s ease;
 }
 
-/* Theme select dropdown: fade + slide, 200ms. */
-.porto-theme-select__menu {
+/* Dropdown menus (navbar "More" + nav dropdowns, theme select,
+   MDX dropdown): Fumadocs popover feel — 200ms fade + slide,
+   both directions. The motion runs on the <details>
+   `::details-content` wrapper, not the menu: the UA hides a
+   closed details' content with `content-visibility: hidden`,
+   which flips instantly, so we override it and hide via opacity
+   + visibility instead (same trick as the sidebar fold).
+   `visibility` flips immediately on open and only after the
+   fade on close — the delay lives on the closed rule, the
+   instant flip on the open rule, because a transition runs with
+   the after-change style. Browsers without `::details-content`
+   support open/close instantly, as before. */
+details.porto-navbar__dropdown::details-content,
+.porto-mdx-dropdown::details-content {
+  content-visibility: visible;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
   transition:
     opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    visibility 0s 0.2s;
+  transition-behavior: allow-discrete;
 }
-@starting-style {
-  .porto-theme-select__menu {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+details.porto-navbar__dropdown[open]::details-content,
+.porto-mdx-dropdown[open]::details-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -140,7 +162,8 @@
   .porto-search-dialog,
   .porto-search-dialog::backdrop,
   .porto-hamburger span,
-  .porto-theme-select__menu {
+  details.porto-navbar__dropdown::details-content,
+  .porto-mdx-dropdown::details-content {
     transition: none;
   }
 }
