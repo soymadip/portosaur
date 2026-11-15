@@ -101,9 +101,9 @@ main {
 .content-panel {
   padding: 1.5rem var(--porto-content-pad-x);
 }
-/* The breadcrumbs + title panel sits flush under the navbar, like
-   OG — Docusaurus puts no padding between the navbar and the
-   breadcrumbs. Its bottom padding is small too: the title and the
+/* The title panel sits flush under the navbar, like OG —
+   Docusaurus puts no padding between the navbar and the page
+   title. Its bottom padding is small too: the title and the
    body content flow together in OG, with no panel split between
    them, so the two panels split a single small gap across the
    hairline instead of each adding a full 1.5rem. */
@@ -1447,39 +1447,6 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   background-color: var(--porto-color-black);
   box-shadow: var(--porto-shadow-md);
   overscroll-behavior: contain;
-}
-
-/* ----- Breadcrumbs ----- */
-/* OG sizes: Docusaurus' breadcrumbs run at 0.8rem (Infima's
- * `1rem * --ifm-breadcrumb-size-multiplier`, with theme-classic
- * setting the multiplier to 0.8) with a 0.8rem bottom margin. */
-.porto-breadcrumbs ol {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem;
-  margin: 0 0 0.8rem;
-  padding: 0;
-  list-style: none;
-  font-size: 0.8rem;
-}
-
-.porto-breadcrumbs li + li::before {
-  content: "›";
-  margin-inline-end: 0.25rem;
-  color: var(--porto-color-gray-3);
-}
-
-.porto-breadcrumbs a {
-  color: var(--porto-color-text-accent);
-  text-decoration: none;
-}
-.porto-breadcrumbs a:hover {
-  text-decoration: underline;
-}
-
-.porto-breadcrumbs__current {
-  color: var(--porto-color-text-accent);
 }
 
 /* ----- Page title ----- */
