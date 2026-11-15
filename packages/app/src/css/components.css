@@ -1806,6 +1806,18 @@ html.porto-navbar-hidden .porto-nav-progress {
   top: 0;
 }
 
+/* On desktop pages with a persistent sidebar (docs + notes
+   detail pages), the bar spans only the content area — it starts
+   at the sidebar's right edge instead of the viewport's. The bar
+   lives in the root layout, outside the frame, so the scope is
+   `body:has(...)`. The breakpoint matches the sidebar's. */
+@media (min-width: 50rem) {
+  body:has(.main-frame--sidebar) .porto-nav-progress {
+    inset-inline-start: var(--porto-sidebar-width);
+    width: calc(100% - var(--porto-sidebar-width));
+  }
+}
+
 /* ----- Site footer ----- */
 /* Renders only when `theme.footer.enable` is set. No background of
    its own: like the navbar and sidebar, the footer sits on the
