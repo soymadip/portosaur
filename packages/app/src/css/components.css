@@ -806,10 +806,8 @@ body:has(#porto__sidebar:popover-open)
 /* The section title above the tree ("Docs" / "Notes") — the
    sidebar's answer to the TOC's "On this page" title, same size
    and weight, aligned with the row text via the shared inline
-   padding. Muted grey, not white: the top-level rows are
-   semibold white, so a white title would read as another row.
-   A <p>, not a heading: an <h2> here would enter every page's
-   heading list (same reason as the TOC title). */
+   padding. A <p>, not a heading: an <h2> here would enter every
+   page's heading list (same reason as the TOC title). */
 .porto-sidebar-title {
   font-size: var(--porto-text-h5);
   font-weight: 600;
