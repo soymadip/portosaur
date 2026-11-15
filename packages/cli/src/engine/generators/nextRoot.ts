@@ -292,18 +292,18 @@ export default config;
  * (the create-fumadocs-app scaffold shape, with `@/*` mapped to the
  * generated root).
  *
- * The type globs MUST be derived from the export `distDir`, not
- * hardcoded to `.next`: Next's `writeConfigurationDefaults`
- * requires exactly the patterns from
- * `getTypeDefinitionGlobPatterns(distDir)` — the `types` and
- * `dev/types` globs under the distDir — in `include` (verified
- * in Next 16's `type-paths.js`), and rewrites the file on every
- * `next dev` / `next build` when they are missing. The hardcoded
- * `.next` globs from the scaffold were wrong for Portosaur's
- * custom distDir, so every dev start printed the "reconfigured
- * your tsconfig.json" message — and the rewrite was wiped by the
- * next regeneration anyway. Glob patterns use forward slashes on
- * every platform.
+ * The type globs cover BOTH the export distDir and `.next`, because
+ * dev and build ask Next for different ones (verified in Next 16):
+ * `next dev` passes the configured `distDir` to
+ * `writeConfigurationDefaults` (setup-dev-bundler.js), while
+ * `next build` passes `getBuildDistDir(config)` (type-check.js) —
+ * which is `.next` whenever `output: 'export'` has a custom
+ * distDir, because build artifacts stay in `.next` and only the
+ * export goes to the custom dir (export/utils.js). Emitting only
+ * one set makes the other mode rewrite the file on every run —
+ * and the rewrite is wiped by the next regeneration anyway, so
+ * the "reconfigured your tsconfig.json" message never goes away.
+ * Glob patterns use forward slashes on every platform.
  */
 export function buildTsConfigContent(args: NextRootArgs): string {
   const { mtime } = args;
@@ -340,7 +340,9 @@ export function buildTsConfigContent(args: NextRootArgs): string {
     "**/*.ts",
     "**/*.tsx",
     "${distDirPosix}/types/**/*.ts",
-    "${distDirPosix}/dev/types/**/*.ts"
+    "${distDirPosix}/dev/types/**/*.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

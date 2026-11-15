@@ -193,12 +193,15 @@ describe("buildTsConfigContent", () => {
       // `@portosaur/app/*` import (explicit `.ts`/`.tsx` extensions).
       expect(content).toContain('"allowImportingTsExtensions": true');
       expect(content).toContain('"moduleResolution": "bundler"');
-      // Type globs come from the export distDir, not the scaffold's
-      // hardcoded `.next` paths — Next rewrites the tsconfig on
-      // every run when its distDir-derived globs are missing.
+      // Type globs cover BOTH the export distDir (what `next dev`
+      // wants) and `.next` (what `next build` wants — build
+      // artifacts stay in `.next` under `output: 'export'`).
+      // Emitting only one set makes the other mode rewrite the
+      // tsconfig on every run.
       expect(content).toContain('"../build/types/**/*.ts"');
       expect(content).toContain('"../build/dev/types/**/*.ts"');
-      expect(content).not.toContain(".next/types");
+      expect(content).toContain('".next/types/**/*.ts"');
+      expect(content).toContain('".next/dev/types/**/*.ts"');
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }
@@ -212,6 +215,8 @@ describe("buildTsConfigContent", () => {
       );
       expect(content).toContain('"../dist/types/**/*.ts"');
       expect(content).toContain('"../dist/dev/types/**/*.ts"');
+      expect(content).toContain('".next/types/**/*.ts"');
+      expect(content).toContain('".next/dev/types/**/*.ts"');
       expect(content).not.toContain("../build/types");
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
