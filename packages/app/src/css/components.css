@@ -3919,12 +3919,20 @@ a.porto-blog-article-author-name:hover {
   border-color: var(--porto-color-text-accent);
   box-shadow: var(--porto-shadow-md);
 }
+/* The title row: the `h2` takes the available width and
+   truncates, the count badge keeps its size beside it. */
+.porto-topic-list__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
 .porto-topic-list__title {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
-  width: 100%;
+  flex: 1 1 auto;
   margin: 0;
   font-size: 1.4rem;
   font-weight: 750;
@@ -3942,6 +3950,24 @@ a.porto-blog-article-author-name:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The category child count: a small pill beside the title, in
+   the title's accent family — the number only, the full
+   "N items" label is the tooltip. Never shrinks, so it stays
+   visible when a long title truncates. */
+.porto-topic-list__count {
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 15%,
+    transparent
+  );
+  color: var(--porto-color-accent-high);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
 .porto-topic-list__description {
   margin: 0;
   min-width: 0;
@@ -3950,9 +3976,6 @@ a.porto-blog-article-author-name:hover {
   white-space: nowrap;
   font-size: 0.8rem;
   opacity: 0.6;
-}
-.porto-topic-list__separator {
-  opacity: 0.5;
 }
 
 /* Pv (Preview) — trigger only in Phase 1: a plain link/button.

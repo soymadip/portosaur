@@ -32,8 +32,9 @@ export type { TopicListItem } from "../../lib/content.ts";
  * The description line resolves like the original: children, then
  * the `desc` prop, then the context (frontmatter `topic_list.desc`,
  * else the page `desc`), then the default — `null` disables it.
- * Categories prefix their description with the child count
- * ("3 items • ..."); plain pages show the description as-is.
+ * Categories show their child count as a badge beside the title;
+ * the card description is the page text alone (OG prefixed the
+ * count into it — "3 items • ...").
  *
  * The cards' icon HTML is resolved server-side by the doc page —
  * the icon packs are megabytes of JSON and must never load
@@ -79,14 +80,17 @@ function itemsCountLabel(count: number): string {
 }
 
 function TopicCard({ card }: { card: TopicListItem }) {
+  /* Categories show their child count as a badge beside the
+     title — a bare number in a pill, with the full "N items"
+     label as its tooltip. The badge sits OUTSIDE the `h2`, so
+     the URL snapshot (which tracks h1/h2 text) keeps reading
+     the plain title. */
   const count =
-    card.isCategory && card.itemsCount !== undefined
-      ? itemsCountLabel(card.itemsCount)
+    card.isCategory &&
+    card.itemsCount !== undefined &&
+    card.itemsCount > 0
+      ? card.itemsCount
       : null;
-  const fullDescription =
-    count && card.description
-      ? `${count} • ${card.description}`
-      : (count ?? card.description);
   /* A card is an internal page link — Next.js `<Link>` navigates
      client-side, so the sidebar and shell stay mounted. A plain
      `<a>` reloaded the whole document on every card click, and
@@ -99,29 +103,29 @@ function TopicCard({ card }: { card: TopicListItem }) {
     <Link
       href={card.href}
       className="porto-topic-list__card"
-      title={fullDescription || undefined}
+      title={card.description || undefined}
     >
-      <h2 className="porto-topic-list__title" title={card.title}>
-        {card.iconHtml ? (
-          <span
-            className="porto-topic-list__icon"
-            dangerouslySetInnerHTML={{ __html: card.iconHtml }}
-          />
-        ) : null}
-        <span className="porto-topic-list__title-text">{card.title}</span>
-      </h2>
-      {fullDescription ? (
-        <p className="porto-topic-list__description">
-          {count ? <strong>{count}</strong> : null}
-          {count && card.description ? (
-            <>
-              {" "}
-              <span className="porto-topic-list__separator">•</span>{" "}
-              {card.description}
-            </>
+      <div className="porto-topic-list__header">
+        <h2 className="porto-topic-list__title" title={card.title}>
+          {card.iconHtml ? (
+            <span
+              className="porto-topic-list__icon"
+              dangerouslySetInnerHTML={{ __html: card.iconHtml }}
+            />
           ) : null}
-          {!count && card.description ? card.description : null}
-        </p>
+          <span className="porto-topic-list__title-text">{card.title}</span>
+        </h2>
+        {count !== null ? (
+          <span
+            className="porto-topic-list__count"
+            title={itemsCountLabel(count)}
+          >
+            {count}
+          </span>
+        ) : null}
+      </div>
+      {card.description ? (
+        <p className="porto-topic-list__description">{card.description}</p>
       ) : null}
     </Link>
   );
