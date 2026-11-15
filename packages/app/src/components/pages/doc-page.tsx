@@ -4,7 +4,6 @@ import type { MDXComponents, MDXContent } from "mdx/types";
 import dynamic from "next/dynamic";
 import type { PortosaurOptions } from "../../lib/config.ts";
 import {
-  findBreadcrumbs,
   findCategoryItems,
   findPrevNext,
   tocToHeadings,
@@ -27,7 +26,6 @@ import {
   type ContentTitle,
 } from "../../plugins/remarkContentTitle.ts";
 import { HAS_MATH_KEY } from "../../plugins/remarkHasMath.ts";
-import { Breadcrumbs } from "./parts/Breadcrumbs.tsx";
 import { ContentPanel } from "./parts/ContentPanel.tsx";
 import { DocFooter } from "./parts/DocFooter.tsx";
 import { getMDXComponents } from "../mdx.tsx";
@@ -54,9 +52,9 @@ import { PageTitle } from "./parts/PageTitle.tsx";
  * - `page.data.desc` — the page description (NOT `description`)
  *
  * Structure: the two-column split (TOC aside + main pane) with
- * two content panels — breadcrumbs + the `<h1>`, then the MDX
- * body + the automatic topic list (index pages) + the doc footer.
- * The header panel renders only when it has something in it.
+ * two content panels — the `<h1>`, then the MDX body + the
+ * automatic topic list (index pages) + the doc footer. The
+ * header panel renders only when the page has a heading.
  *
  * The KaTeX stylesheet loads only on math pages: `KaTeXStyles`
  * is a dynamic import, so its CSS chunk is emitted only when
@@ -122,20 +120,14 @@ export function DocPage({
   );
   const hasMath = data.math === true || data._exports?.[HAS_MATH_KEY] === true;
 
-  // The section crumb comes from the mode/route, not the tree —
-  // the tree carries no root category. The home link prepends the
-  // pagination order, so the first doc's "Previous" still points
-  // at the collection home.
+  // The collection home link prepends the pagination order, so
+  // the first doc's "Previous" still points at the collection
+  // home. The tree carries no root category, so the home comes
+  // from the mode/route instead.
   const section: SidebarLink = {
     title: config.siteMode === "docs" ? "Docs" : "Notes",
     href: pageHref(`/${config.site.notesRoute}`),
   };
-  const breadcrumbs = config.theme.breadcrumbs
-    ? findBreadcrumbs(tree.children, page.url, section).map((crumb) => ({
-        ...crumb,
-        href: crumb.href ? pageHref(crumb.href) : null,
-      }))
-    : [];
   const { prev, next } = findPrevNext(tree.children, page.url, section);
   const prevLink = prev ? { ...prev, href: pageHref(prev.href) } : null;
   const nextLink = next ? { ...next, href: pageHref(next.href) } : null;
@@ -191,7 +183,7 @@ export function DocPage({
           </div>
         </div>
         <div className={`main-pane${hasToc ? " main-pane--toc" : ""}`}>
-          {(breadcrumbs.length > 0 || heading) && (
+          {heading && (
             <ContentPanel
               className={
                 shouldRenderTopicList
@@ -199,8 +191,7 @@ export function DocPage({
                   : "content-panel--header"
               }
             >
-              {breadcrumbs.length > 0 && <Breadcrumbs crumbs={breadcrumbs} />}
-              {heading && <PageTitle title={heading.text} id={heading.id} />}
+              <PageTitle title={heading.text} id={heading.id} />
             </ContentPanel>
           )}
           <ContentPanel className="content-panel--body">

@@ -74,7 +74,6 @@ export interface PortosaurOptions {
     disableProjectLink: boolean;
     hideNavbarOnScroll: boolean;
     navbarItems: any[];
-    breadcrumbs: boolean;
     collapsableSidebar: boolean;
     footer: {
       enable: boolean;
@@ -410,8 +409,6 @@ export function buildSiteConfig(
   const robotsRules = rawGet("site.robots_txt.rules", []); // List of rules (e.g., user_agent, allow, disallow).
   const robotsCustomLines = rawGet("site.robots_txt.custom_lines", []); // Extra raw lines to append to robots.txt.
 
-  const breadcrumbs = get("theme.navigation.breadcrumbs", true); // Show breadcrumbs in the notes pages.
-
   const editUrl = get("site.edit_url", ""); // Base URL for Edit this page link.
 
   const rssEnable = get("site.rss.enable", true); // Toggle RSS feed generation for the blog.
@@ -488,7 +485,6 @@ export function buildSiteConfig(
       disableProjectLink,
       hideNavbarOnScroll,
       navbarItems: customNavbarItems,
-      breadcrumbs,
       collapsableSidebar,
       footer: {
         enable: footerEnable,

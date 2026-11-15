@@ -62,7 +62,6 @@ export interface PortosaurOptions {
     disableProjectLink: boolean;
     hideNavbarOnScroll: boolean;
     navbarItems: any[];
-    breadcrumbs: boolean;
     collapsableSidebar: boolean;
     footer: {
       enable: boolean;

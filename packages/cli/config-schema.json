@@ -262,11 +262,6 @@
               "type": ["boolean", "null"],
               "description": "Enable collapsable sidebar navigation.",
               "default": true
-            },
-            "breadcrumbs": {
-              "type": ["boolean", "null"],
-              "description": "Show breadcrumbs in the notes pages.",
-              "default": true
             }
           }
         },

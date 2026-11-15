@@ -53,7 +53,6 @@ export { SearchDialog } from "./components/pages/frame/SearchDialog.tsx";
 export { ThemeSelect } from "./components/pages/frame/ThemeSelect.tsx";
 export { Footer } from "./components/pages/parts/Footer.tsx";
 export { Pagination } from "./components/pages/parts/Pagination.tsx";
-export { Breadcrumbs } from "./components/pages/parts/Breadcrumbs.tsx";
 export { EditLink } from "./components/pages/parts/EditLink.tsx";
 export { LastUpdated } from "./components/pages/parts/LastUpdated.tsx";
 export { SkipLink } from "./components/pages/frame/SkipLink.tsx";
@@ -113,7 +112,6 @@ export {
 } from "./lib/pageUrl.ts";
 export { cn } from "./lib/cn.ts";
 export {
-  findBreadcrumbs,
   findPrevNext,
   findCategoryItems,
   topicCardTitle,
@@ -123,12 +121,7 @@ export {
   blogSlug,
   nodeName,
 } from "./lib/content.ts";
-export type {
-  SidebarLink,
-  Breadcrumb,
-  TocHeading,
-  TocItem,
-} from "./lib/content.ts";
+export type { SidebarLink, TocHeading, TocItem } from "./lib/content.ts";
 export { buildNavEntries, isDropdown, PORTO_HOMEPAGE } from "./lib/navbar.ts";
 export type {
   NavLink,

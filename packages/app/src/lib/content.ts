@@ -1,6 +1,6 @@
 /**
- * Shared helpers for the doc routes — breadcrumbs, prev/next,
- * TOC nesting, and the Docusaurus page-title rules.
+ * Shared helpers for the doc routes — prev/next, TOC nesting,
+ * and the Docusaurus page-title rules.
  *
  * Ported from the Astro app (`packages/app/src/utils/content.ts`),
  * adapted to the Fumadocs page tree (`PageTree.Root` from
@@ -15,16 +15,10 @@ import type * as PageTree from "fumadocs-core/page-tree";
 import type { ReactNode } from "react";
 import { pageHref } from "./pageUrl.ts";
 
-/** One `{ title, href }` breadcrumb / prev-next link. */
+/** One `{ title, href }` prev-next link. */
 export interface SidebarLink {
   title: string;
   href: string;
-}
-
-/** A breadcrumb: categories without an index doc have `href: null`. */
-export interface Breadcrumb {
-  title: string;
-  href: string | null;
 }
 
 /** Normalizes an href for comparison (trailing slashes ignored). */
@@ -35,84 +29,6 @@ function normalizeHref(href: string | null | undefined): string {
 /** The display name of a tree node (always a string in practice). */
 export function nodeName(node: PageTree.Node): string {
   return typeof node.name === "string" ? node.name : String(node.name ?? "");
-}
-
-/** The link href of a tree node, if it has one. */
-function nodeHref(node: PageTree.Node): string | null {
-  if (node.type === "page") {
-    return node.url;
-  }
-  if (node.type === "folder") {
-    return node.index?.url ?? null;
-  }
-  return null;
-}
-
-/**
- * The breadcrumb path for a tree href: the `{ title, href }` items
- * from the top-level item down to the item matching `href` (trailing
- * slashes ignored), or `[]` when no item matches. Categories without
- * a link (no index doc) appear with `href: null` — the layout renders
- * them as plain text, not links.
- *
- * The path has no section crumb — the tree carries no root category,
- * so the "Docs"/"Notes" crumb comes from the mode/route instead (see
- * `findBreadcrumbs`).
- */
-export function findSidebarPath(
-  tree: PageTree.Node[] | undefined,
-  href: string,
-): Breadcrumb[] {
-  const normalized = normalizeHref(href);
-  const path: Breadcrumb[] = [];
-
-  function walk(nodes: PageTree.Node[]): boolean {
-    for (const node of nodes) {
-      if (node.type === "separator") {
-        continue;
-      }
-      const href = nodeHref(node);
-      if (href && normalizeHref(href) === normalized) {
-        path.push({ title: nodeName(node), href });
-        return true;
-      }
-      if (node.type === "folder") {
-        path.push({ title: nodeName(node), href });
-        if (walk(node.children)) {
-          return true;
-        }
-        path.pop();
-      }
-    }
-    return false;
-  }
-
-  if (walk(tree ?? [])) {
-    return path;
-  }
-  return [];
-}
-
-/**
- * The breadcrumb path for a tree href, with the section crumb
- * ("Docs"/"Notes" → the collection home) prepended: the tree carries
- * no root category, so the section crumb comes from the mode/route
- * instead of the tree. On the collection home itself the path is just
- * the section crumb; `[]` when the href is not in the tree at all.
- */
-export function findBreadcrumbs(
-  tree: PageTree.Node[] | undefined,
-  href: string,
-  section: SidebarLink,
-): Breadcrumb[] {
-  const path = findSidebarPath(tree, href);
-  if (path.length > 0) {
-    return [{ title: section.title, href: section.href }, ...path];
-  }
-  if (normalizeHref(href) === normalizeHref(section.href)) {
-    return [{ title: section.title, href: section.href }];
-  }
-  return [];
 }
 
 /**
