@@ -811,13 +811,11 @@ body:has(#porto__sidebar:popover-open)
    A <p>, not a heading: an <h2> here would enter every page's
    heading list (same reason as the TOC title). */
 .porto-sidebar-title {
-  color: var(--porto-color-gray-3);
   font-size: var(--porto-text-h5);
   font-weight: 600;
   line-height: var(--porto-line-height-headings);
   padding-inline: var(--porto-sidebar-item-padding-inline);
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--porto-color-hairline-light);
   margin-bottom: 0.5rem;
 }
 .porto-sidebar ul {
