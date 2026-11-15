@@ -695,6 +695,17 @@ describe("theming", () => {
       expect(html).toContain("data-open-modal");
     });
 
+    builtTest("build emits immutable cache headers for fingerprinted assets", () => {
+      const headers = fs.readFileSync(
+        path.join(DOCS_BUILD_DIR, "_headers"),
+        "utf8",
+      );
+      expect(headers).toContain("/_astro/*");
+      expect(headers).toContain(
+        "Cache-Control: public, max-age=31536000, immutable",
+      );
+    });
+
     // The navbar is unified: search shows on every page, home pages
     // included (deliberate divergence from OG's
     // hideSearchBarWithNoSearchContext — see Navbar.astro).

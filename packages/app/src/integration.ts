@@ -28,10 +28,12 @@
  * manifest, screenshots) into a staging dir (`.portosaur/static`) —
  * writing directly to outDir there is unsafe because Astro may wipe it
  * during the build. `astro:build:done` copies the staged assets and the
- * theme's `static/` files into the finished outDir, then builds the
- * Pagefind search index over the emitted HTML. Dev mode never runs the
- * build hooks, so `astro:server:setup` generates the staged assets once
- * and serves them (plus theme `static/`) through Vite middleware.
+ * theme's `static/` files into the finished outDir, writes the
+ * long-lived cache headers for the fingerprinted assets (`_headers`),
+ * then builds the Pagefind search index over the emitted HTML. Dev
+ * mode never runs the build hooks, so `astro:server:setup` generates
+ * the staged assets once and serves them (plus theme `static/`)
+ * through Vite middleware.
  *
  * Styling is plain CSS: Starlight's CSS system (copied into
  * `src/css/` and integrated into Portosaur's own stylesheets,
@@ -165,6 +167,41 @@ function copyDirRecursive(src: string, dest: string, overwrite: boolean): void {
       fs.copyFileSync(from, to);
     }
   }
+}
+
+/**
+ * Long-lived cache headers for the fingerprinted build assets, in the
+ * Netlify / Cloudflare Pages `_headers` format (hosts that don't
+ * understand the file ignore it). Astro's `/_astro/*` files carry
+ * content hashes in their names, so they are immutable — but hosts
+ * default to `max-age=0, must-revalidate`, which makes the browser
+ * revalidate the CSS/JS on every navigation. HTML keeps the host
+ * default (revalidate), so updates propagate. A user-provided
+ * `_headers` (via `public/`) is kept, with the rule appended when it
+ * doesn't already cover `/_astro/`. Only `/_astro/*` is covered:
+ * Pagefind and favicon files have stable names across builds, so
+ * marking them immutable would serve stale search results and icons
+ * after a redeploy.
+ */
+const ASTRO_CACHE_HEADERS_RULE =
+  "/_astro/*\n  Cache-Control: public, max-age=31536000, immutable\n";
+
+function writeCacheHeaders(outDir: string): void {
+  const headersPath = path.join(outDir, "_headers");
+  let existing = "";
+  try {
+    existing = fs.readFileSync(headersPath, "utf8");
+  } catch {
+    // No user-provided _headers — create one below.
+  }
+  if (existing.includes("/_astro/")) {
+    return;
+  }
+  const suffix = existing && !existing.endsWith("\n") ? "\n" : "";
+  fs.writeFileSync(
+    headersPath,
+    `${existing}${suffix}${ASTRO_CACHE_HEADERS_RULE}`,
+  );
 }
 
 /**
@@ -589,6 +626,11 @@ export default function portosaur(
         // … then theme static defaults (user files already in the output
         // win — Astro copied the project's `static/` via `publicDir`).
         copyDirRecursive(path.join(appRoot, "static"), outDir, false);
+
+        // Long-lived cache headers for the fingerprinted assets (see
+        // writeCacheHeaders). Runs after the static copies so a
+        // user-provided `_headers` is already in the output.
+        writeCacheHeaders(outDir);
 
         // Pagefind search index over the emitted HTML.
         try {
