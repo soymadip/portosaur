@@ -829,6 +829,19 @@ body:has(#porto__sidebar:popover-open)
   overflow-wrap: anywhere;
 }
 
+/* The inactive branches sit slightly dimmed so the branch holding
+   the current page reads as the focus: top-level items render at
+   80% opacity, and only the top-level item containing the active
+   page goes to full opacity. When no page is active (the
+   collection home), everything stays dimmed — no exception. */
+.porto-sidebar > ul > li {
+  opacity: 0.8;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-sidebar > ul > li:has(a[aria-current="page"]) {
+  opacity: 1;
+}
+
 .porto-sidebar ul ul li {
   margin-inline-start: var(--porto-sidebar-item-padding-inline);
   border-inline-start: 1px solid var(--porto-sidebar-guide-color);
