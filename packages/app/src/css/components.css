@@ -267,6 +267,10 @@ main {
   white-space: nowrap;
   min-width: 0;
 }
+.porto-navbar .porto-site-title,
+.porto-mobile-menu__brand .porto-site-title {
+  gap: 0.5rem;
+}
 .porto-site-title span {
   overflow: hidden;
 }
@@ -860,7 +864,7 @@ body:has(#porto__sidebar:popover-open)
    and color plus the indentation and guide line. 700 was too
    heavy here; 600 matches the active row's weight. */
 .porto-sidebar__large {
-  font-weight: 600;
+  font-weight: 650;
   color: var(--porto-color-white);
 }
 
@@ -1300,6 +1304,7 @@ body:has(#porto__sidebar:popover-open) {
     top: 0;
     z-index: 1;
     height: var(--porto-nav-height);
+    margin-inline: -0.3rem;
     padding-inline: var(--porto-nav-pad-x);
     background-color: var(--porto-color-bg-sidebar);
   }
