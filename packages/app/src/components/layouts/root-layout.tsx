@@ -35,6 +35,7 @@ export function RootLayout({
   const scheme = config.theme.colorScheme || "portosaur";
   const defaultModeJson = JSON.stringify(defaultMode);
   const themeScript = `(function(){try{var stored=localStorage.getItem("theme");var mode=stored==="light"||stored==="dark"?stored:(stored==="auto"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):${defaultModeJson});document.documentElement.setAttribute("data-theme",mode);}catch(error){document.documentElement.setAttribute("data-theme",${defaultModeJson});}})();`;
+
   return (
     <html
       lang="en"
