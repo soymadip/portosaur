@@ -87,6 +87,11 @@ export function ThemeSelect() {
           <PortoIcon name={ICONS[preference]} size="0.875rem" />
           <span>{THEME_LABELS[preference]}</span>
         </span>
+        <PortoIcon
+          name="chevron-down"
+          size="0.875rem"
+          className="porto-theme-select__chevron"
+        />
       </summary>
       <ul className="porto-theme-select__menu" role="menu">
         {OPTIONS.map((option) => (

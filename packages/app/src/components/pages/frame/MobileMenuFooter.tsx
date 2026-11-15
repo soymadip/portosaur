@@ -11,6 +11,7 @@ import {
   type NavEntry,
 } from "../../../lib/navbar.ts";
 import { stripBase } from "../../../lib/pageUrl.ts";
+import { PortoIcon } from "../../PortoIcon.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
 
 /**
@@ -36,7 +37,14 @@ export function MobileMenuFooter() {
     if (isDropdown(entry)) {
       return (
         <details key={key} className="porto-navbar__dropdown">
-          <summary>{entry.label}</summary>
+          <summary>
+            {entry.label}
+            <PortoIcon
+              name="chevron-down"
+              size="0.875rem"
+              className="porto-mobile-nav__chevron"
+            />
+          </summary>
           <ul>
             {entry.items.map((item) => (
               <li key={item.label}>
@@ -96,7 +104,14 @@ export function MobileMenuFooter() {
           renderEntry(entry, `${entry.label}-${index}`),
         )}
         <details className="porto-navbar__dropdown">
-          <summary>More</summary>
+          <summary>
+            More
+            <PortoIcon
+              name="chevron-down"
+              size="0.875rem"
+              className="porto-mobile-nav__chevron"
+            />
+          </summary>
           <ul>
             {moreItems.map((item) => (
               <li key={item.label}>

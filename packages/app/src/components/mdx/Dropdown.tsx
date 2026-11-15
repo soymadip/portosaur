@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { pageHref } from "../../lib/pageUrl.ts";
+import { PortoIcon } from "../PortoIcon.tsx";
 
 /**
  * Dropdown — simplified from OG's Dropdown (trigger/label/items).
@@ -25,6 +26,11 @@ export function Dropdown({
     <details className="porto-mdx-dropdown">
       <summary className="porto-mdx-dropdown__trigger">
         {trigger ?? label ?? "Menu"}
+        <PortoIcon
+          name="chevron-down"
+          size="0.875rem"
+          className="porto-mdx-dropdown__chevron"
+        />
       </summary>
       <ul className="porto-mdx-dropdown__menu">
         {items

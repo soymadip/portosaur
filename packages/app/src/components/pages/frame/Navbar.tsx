@@ -10,6 +10,7 @@ import {
 } from "../../../lib/navbar.ts";
 import { stripBase } from "../../../lib/pageUrl.ts";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
+import { PortoIcon } from "../../PortoIcon.tsx";
 import { SearchDialog } from "./SearchDialog.tsx";
 import { SiteTitle } from "./SiteTitle.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
@@ -131,7 +132,14 @@ export function Navbar({
     if (isDropdown(entry)) {
       return (
         <details key={key} className="porto-navbar__dropdown">
-          <summary className="porto-nav-summary">{entry.label}</summary>
+          <summary className="porto-nav-summary">
+            {entry.label}
+            <PortoIcon
+              name="chevron-down"
+              size="0.875rem"
+              className="porto-nav-summary__chevron"
+            />
+          </summary>
           <ul className="porto-dropdown-menu">
             {entry.items.map((item) => (
               <li key={item.label}>
@@ -238,7 +246,14 @@ export function Navbar({
               renderEntry(entry, `${entry.label}-${index}`),
             )}
             <details className="porto-navbar__dropdown porto-navbar__more-dropdown">
-              <summary className="porto-nav-summary">More</summary>
+              <summary className="porto-nav-summary">
+                More
+                <PortoIcon
+                  name="chevron-down"
+                  size="0.875rem"
+                  className="porto-nav-summary__chevron"
+                />
+              </summary>
               <ul className="porto-dropdown-menu">
                 {moreItems.map((item) => (
                   <li key={item.label}>

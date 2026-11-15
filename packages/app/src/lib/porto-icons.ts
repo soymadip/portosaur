@@ -7,12 +7,21 @@
  * because the same glyphs are part of Portosaur's own UI; only the
  * icons the React UI actually uses are included.
  *
+ * One exception: `chevron-down` is Lucide's `ChevronDown` (ISC
+ * License, Copyright (c) 2020 Lucide Contributors) — the chevron
+ * Fumadocs' dropdown buttons use. Unlike the fill-based Starlight
+ * paths, it is stroke-based, so the path carries its own
+ * `fill="none"` + stroke attributes (they override the
+ * `fill="currentColor"` PortoIcon sets on the `<svg>`).
+ *
  * Content icons (frontmatter `icon`, note cards, feature icons) do
  * NOT come from here — those resolve through `lib/icons.ts` (Iconify
  * packs) at build time.
  */
 
 export const PortoIcons = {
+  "chevron-down":
+    '<path d="m6 9l6 6l6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   "right-caret":
     '<path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/>',
   "left-arrow":
