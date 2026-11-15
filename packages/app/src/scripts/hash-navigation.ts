@@ -30,6 +30,15 @@ export interface HashNavigationOptions {
   enabled?: boolean;
 }
 
+// The previous run's cleanup, if its effect is still active — and the
+// pending scroll timeout, if its effect hasn't started yet. A second
+// run (same-page hash change) clears the first run instead of stacking
+// a second highlight and overlay on top of it: without this, the
+// first run's delayed timeout would also remove the second run's
+// highlight when it fires.
+let clearPreviousEffect: (() => void) | null = null;
+let pendingScrollTimeoutId: number | null = null;
+
 export function initHashNavigation(options: HashNavigationOptions = {}): void {
   const {
     elementPrefix = "note-",
@@ -44,6 +53,20 @@ export function initHashNavigation(options: HashNavigationOptions = {}): void {
   if (!enabled) {
     return;
   }
+
+  // A re-run supersedes the previous run — clear its effect (or its
+  // not-yet-started scroll) first, even when this run finds no hash
+  // or target: a stale highlight must not outlive the hash that
+  // caused it.
+  if (clearPreviousEffect) {
+    clearPreviousEffect();
+    clearPreviousEffect = null;
+  }
+  if (pendingScrollTimeoutId !== null) {
+    window.clearTimeout(pendingScrollTimeoutId);
+    pendingScrollTimeoutId = null;
+  }
+
   if (!window.location.hash) {
     return;
   }
@@ -54,7 +77,8 @@ export function initHashNavigation(options: HashNavigationOptions = {}): void {
     return;
   }
 
-  window.setTimeout(() => {
+  pendingScrollTimeoutId = window.setTimeout(() => {
+    pendingScrollTimeoutId = null;
     targetElement.scrollIntoView(scrollOptions);
 
     const container = document.querySelector(containerSelector);
@@ -81,6 +105,9 @@ export function initHashNavigation(options: HashNavigationOptions = {}): void {
         window.clearTimeout(effectTimeoutId);
         effectTimeoutId = null;
       }
+      if (clearPreviousEffect === removeEffects) {
+        clearPreviousEffect = null;
+      }
       allElements.forEach((element) => {
         element.classList.remove("hash-nav-blur");
       });
@@ -105,6 +132,7 @@ export function initHashNavigation(options: HashNavigationOptions = {}): void {
     overlay.addEventListener("click", removeEffects);
     overlay.addEventListener("touchstart", removeEffects);
     document.addEventListener("keydown", handleKeyDown);
+    clearPreviousEffect = removeEffects;
     effectTimeoutId = window.setTimeout(removeEffects, effectDuration);
   }, scrollDelay);
 }

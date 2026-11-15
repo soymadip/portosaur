@@ -170,6 +170,21 @@ const isHome =
     (pathname === basePrefix || pathname === `${basePrefix}/`));
 const isPortfolioHome = isHome && config.siteMode === "portfolio";
 
+// Absolute URL of the current page, for og:url and the canonical
+// link — built like the social-card URL (site origin + base + path).
+// Astro.url.pathname already carries the base prefix, so strip it
+// before withBase re-adds it, or a non-root base would double.
+// Only emitted when the site URL is absolute (a relative og:url /
+// canonical is worse than none).
+const pagePath =
+  basePrefix !== "" &&
+  (pathname === basePrefix || pathname.startsWith(`${basePrefix}/`))
+    ? pathname.slice(basePrefix.length) || "/"
+    : pathname;
+const pageUrl = /^https?:\/\//.test(site.url ?? "")
+  ? absoluteUrl(pagePath)
+  : undefined;
+
 const pwaEnabled = site.pwa?.enable ?? false;
 const pwaNotifications = site.pwa?.notifications ?? false;
 const swUrl = withBase("sw.js");
@@ -193,6 +208,9 @@ const swUrl = withBase("sw.js");
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
+    {pageUrl && <meta property="og:url" content={pageUrl} />}
+    <meta property="og:site_name" content={site.title} />
+    {pageUrl && <link rel="canonical" href={pageUrl} />}
     {socialCardUrl && <meta property="og:image" content={socialCardUrl} />}
     <meta
       name="twitter:card"

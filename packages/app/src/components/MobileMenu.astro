@@ -86,6 +86,16 @@ const { hasSidebar = false } = Astro.props;
         this.addEventListener("toggle", ({ newState }) => {
           const open = newState === "open";
           this.trapFocus(open);
+          // Announce the menu state: the navbar toggle button
+          // carries `aria-expanded`, and the popover API doesn't
+          // update it — so sync it here on every toggle. The button
+          // is re-rendered with `aria-expanded="false"` on each
+          // navigation, and this element is re-created with it, so
+          // the two never drift apart across client-side nav.
+          const toggleButton = document.querySelector(
+            '[popovertarget="porto__sidebar"]',
+          );
+          toggleButton?.setAttribute("aria-expanded", open ? "true" : "false");
           if (open) {
             this.prefetchNavLinks();
             // The sidebar just became visible: prefetch the
@@ -146,13 +156,21 @@ const { hasSidebar = false } = Astro.props;
       // for the persistent (docs) variant, where the pane becomes
       // the always-visible sidebar. The menu-only variant keeps
       // its popover at every width (its toggle hides at desktop,
-      // so it can never open there).
+      // so it can never open there). The dialog semantics follow
+      // the popover: the persistent pane is a sidebar, not a
+      // dialog, so `role`/`aria-modal` come off with it.
       resetPopoverAttribute() {
-        this.popover =
+        const persistent =
           this.dataset.persistent !== undefined &&
-          this.desktopMediaQuery.matches
-            ? null
-            : "auto";
+          this.desktopMediaQuery.matches;
+        this.popover = persistent ? null : "auto";
+        if (persistent) {
+          this.removeAttribute("role");
+          this.removeAttribute("aria-modal");
+        } else {
+          this.setAttribute("role", "dialog");
+          this.setAttribute("aria-modal", "true");
+        }
       }
       /** Trap keyboard focus inside the header and menu when the menu is expanded. */
       trapFocus(shouldTrap: boolean) {
@@ -173,6 +191,9 @@ const { hasSidebar = false } = Astro.props;
   <porto-sidebar-pane
     popover=""
     id="porto__sidebar"
+    role="dialog"
+    aria-modal="true"
+    aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
     data-persistent={hasSidebar || undefined}
     class:list={["sidebar-pane", { "sidebar-pane--persistent": hasSidebar }]}
   >

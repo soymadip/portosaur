@@ -122,5 +122,5 @@ tasks:
   enable: true
   list:
     - title: "Build the future"
-      status: "done"
+      status: "completed"
       desc: "Implementing the core framework."

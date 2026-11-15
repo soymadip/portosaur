@@ -35,6 +35,7 @@ import Sidebar from "../components/Sidebar.astro";
 import TwoColumnContent from "../components/TwoColumnContent.astro";
 import { findBreadcrumbs, findPrevNext } from "../utils/content.ts";
 import type { PageHeading } from "../utils/content.ts";
+import { pageHref } from "../utils/icons.ts";
 
 interface Props {
   title: string;
@@ -75,7 +76,7 @@ const {
 // the collection home.
 const section = {
   title: config.siteMode === "docs" ? "Docs" : "Notes",
-  href: `/${config.site.notesRoute}`,
+  href: pageHref(`/${config.site.notesRoute}`),
 };
 const breadcrumbs = config.theme.breadcrumbs
   ? findBreadcrumbs(sidebar, currentHref, section)

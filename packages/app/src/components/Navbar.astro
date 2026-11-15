@@ -64,6 +64,7 @@ const showThemeSwitch = theme.showThemeSwitch;
 <header
   class:list={["header", { "header--home": isHome }]}
   data-navbar
+  data-pagefind-ignore
   data-hide-on-scroll={hideOnScroll || undefined}
 >
   <div class="header-inner">
@@ -182,12 +183,16 @@ const showThemeSwitch = theme.showThemeSwitch;
       {/* Mobile menu button (right side) — VitePress's hamburger icon
           (VPNavBarHamburger, MIT License): three staggered lines that
           animate into an X while the menu is open. Opens the
-          MobileMenu popover via the popover API, no JavaScript. */}
+          MobileMenu popover via the popover API, no JavaScript needed
+          to open/close; MobileMenu's toggle handler syncs
+          `aria-expanded` so the open state is announced. */}
       <button
         type="button"
         class="menu-button porto-flex md:porto-hidden"
         popovertarget="porto__sidebar"
         aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="porto__sidebar"
       >
         <span class="hamburger-container">
           <span class="hamburger-line top"></span>

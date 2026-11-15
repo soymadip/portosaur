@@ -56,10 +56,28 @@ const notes = (await getCollection("notes")).filter((entry) => {
   <script>
     import { initHashNavigation } from "../scripts/hash-navigation.ts";
 
-    // Page-load only, no direct call: `astro:page-load` fires on the
-    // initial load too, and calling init twice for the same hash
-    // would stack two highlight overlays.
-    document.addEventListener("astro:page-load", () => {
+    // The hash the highlight last ran for. One hash change can
+    // surface as both `hashchange` and `popstate` (back/forward
+    // traversal fires both, and a native hash change can too), so
+    // the hash handlers skip a repeat for the hash they already
+    // handled.
+    let lastHash = "";
+
+    // Runs the highlight for the current hash, but only on the
+    // notecards page — this module script loads once and the
+    // listeners below persist across client-side navigations, so
+    // the container guard keeps other pages' hashes inert. Page
+    // loads always run: a return visit to the same hash needs a
+    // fresh highlight, not a skipped one.
+    const runHashNavigation = (fromPageLoad) => {
+      if (!document.querySelector(".notesContainer")) {
+        return;
+      }
+      const hash = window.location.hash;
+      if (!fromPageLoad && hash === lastHash) {
+        return;
+      }
+      lastHash = hash;
       initHashNavigation({
         elementPrefix: "note-",
         // The card class is `noteCard` (the old ".note-card" selector never
@@ -68,6 +86,26 @@ const notes = (await getCollection("notes")).filter((entry) => {
         containerSelector: ".notesContainer",
         effectDuration: 6000,
       });
+    };
+
+    // No direct call: `astro:page-load` fires on the initial load
+    // too, and calling init twice for the same hash would stack two
+    // highlight overlays.
+    document.addEventListener("astro:page-load", () => {
+      runHashNavigation(true);
+    });
+
+    // Hash-only navigation (e.g. `/notes/#a` -> `/notes/#b`) doesn't
+    // fire `astro:page-load`. A native hash change fires `hashchange`,
+    // but a link click goes through the ClientRouter, which swaps the
+    // hash via `history.pushState` (no `hashchange`, no page load)
+    // and only emits `popstate` — so listen for both. Registered once
+    // at module level — module scripts run once under ClientRouter.
+    window.addEventListener("hashchange", () => {
+      runHashNavigation(false);
+    });
+    window.addEventListener("popstate", () => {
+      runHashNavigation(false);
     });
   </script>
 </BaseLayout>
