@@ -145,4 +145,31 @@ describe("buildSiteConfig", () => {
     expect(options.tasks.enable).toBe(true);
     expect(options.tasks.list).toEqual([{ title: "Ship it", status: "doing" }]);
   });
+
+  test("keeps valid feature colors and drops invalid ones", () => {
+    const options = buildSiteConfig(
+      {
+        site: { url: "auto", base_url: "auto" },
+        docs_home: {
+          title: "My Docs",
+          features: [
+            { title: "Hex", icon: "lucide:zap", desc: "d", color: "#fe640b" },
+            { title: "Named", icon: "lucide:zap", desc: "d", color: "red" },
+            {
+              title: "Invalid",
+              icon: "lucide:zap",
+              desc: "d",
+              color: "notacolor",
+            },
+            { title: "None", icon: "lucide:zap", desc: "d" },
+          ],
+        },
+      },
+      process.cwd(),
+      { gitDate: "June 26, 2026", portoPaths, env: {} },
+    );
+
+    const colors = options.docsHome.features.map((f: any) => f.color);
+    expect(colors).toEqual(["#fe640b", "red", undefined, undefined]);
+  });
 });

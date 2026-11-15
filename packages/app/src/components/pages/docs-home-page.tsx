@@ -125,6 +125,11 @@ export async function DocsHomePage({ config }: { config: PortosaurOptions }) {
                     {feature.icon && (
                       <div
                         className="feature-icon"
+                        style={
+                          feature.color
+                            ? { color: feature.color }
+                            : undefined
+                        }
                         dangerouslySetInnerHTML={{
                           __html: renderDynamicIcon(feature.icon, { base }),
                         }}

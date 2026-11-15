@@ -7,7 +7,11 @@ import { resolveVars, getNestedValue } from "../utils/config.ts";
 import { getPortoDotDir } from "../utils/fs.ts";
 import { resolveSiteUrl, resolveBasePath } from "../utils/site.ts";
 import { createAssetValidator } from "../utils/assets.ts";
-import { getDefaultColorScheme, resolveSiteCssFiles } from "../utils/css.ts";
+import {
+  getDefaultColorScheme,
+  isValidCssColor,
+  resolveSiteCssFiles,
+} from "../utils/css.ts";
 
 export interface PortoPkg {
   version?: string;
@@ -390,8 +394,11 @@ export function buildSiteConfig(
             ? genFallback(validateAsset(f.icon, ""))
             : f.icon
           : undefined,
+        // Only a valid CSS color reaches the site — an invalid
+        // `color` is dropped, so the icon keeps its default color.
+        color: isValidCssColor(f.color) ? f.color : undefined,
       };
-    }), // Project Features. @items { title: string, desc: string, icon?: string, link?: string }
+    }), // Project Features. @items { title: string, desc: string, icon?: string, link?: string, color?: string }
   };
 
   const tasks = {
