@@ -395,7 +395,7 @@ export function buildRootLayoutContent(
   return `${header(mtime)}import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { config } from "@/lib/config";
-import { RootLayout } from "@portosaur/app/components/root-layout";
+import { RootLayout } from "@portosaur/app/components/layouts/root-layout";
 import "@portosaur/app/css/global.css";
 ${customImports ? `${customImports}\n` : ""}
 export const metadata: Metadata = {
@@ -438,7 +438,7 @@ export function buildHomePageContent(
   const absoluteTitle = `${title} | ${options.site.title}`;
   if (options.siteMode === "docs") {
     return `${header(mtime)}import { config } from "@/lib/config";
-import { DocsHomePage } from "@portosaur/app/components/docs-home-page";
+import { DocsHomePage } from "@portosaur/app/components/pages/docs-home-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: { absolute: ${JSON.stringify(absoluteTitle)} } };
@@ -476,7 +476,7 @@ export function buildDocsLayoutContent(mtime: number): string {
   return `${header(mtime)}import type { ReactNode } from "react";
 import { source } from "@/lib/source";
 import { config } from "@/lib/config";
-import { DocsLayout } from "@portosaur/app/components/docs-layout";
+import { DocsLayout } from "@portosaur/app/components/layouts/docs-layout";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -516,7 +516,7 @@ export function buildDocPageContent(
       : "return source.generateParams().filter((p) => p.slug.length > 0);";
   return `${header(mtime)}import { source } from "@/lib/source";
 import { config } from "@/lib/config";
-import { DocPage } from "@portosaur/app/components/doc-page";
+import { DocPage } from "@portosaur/app/components/pages/doc-page";
 import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
 import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
 import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
@@ -591,7 +591,7 @@ import { config } from "@/lib/config";
 import {
   NotesIndexPage,
   type NoteCardPage,
-} from "@portosaur/app/components/notes-index-page";
+} from "@portosaur/app/components/pages/notes-index-page";
 import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
 import { pageHref } from "@portosaur/app/lib/pageUrl";
 import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
@@ -656,8 +656,8 @@ import {
   sortPostsByDateDesc,
   type BlogAuthor,
 } from "@portosaur/app/lib/blog";
-import type { BlogIndexPost } from "@portosaur/app/components/blog-index-page";
-import type { BlogSidebarPost } from "@portosaur/app/components/BlogSidebar";
+import type { BlogIndexPost } from "@portosaur/app/components/pages/blog-index-page";
+import type { BlogSidebarPost } from "@portosaur/app/components/pages/frame/BlogSidebar";
 import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
 
 /** The blog authors from \`blog/authors.yml\` ([] when absent). */
@@ -728,7 +728,7 @@ export function getBlogAuthorsWithCounts(): BlogAuthor[] {
 export function buildBlogIndexContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { getBlogAuthors, getBlogPosts } from "@/lib/blog";
-import { BlogIndexPage } from "@portosaur/app/components/blog-index-page";
+import { BlogIndexPage } from "@portosaur/app/components/pages/blog-index-page";
 import type { Metadata } from "next";
 
 export function generateMetadata(): Metadata {
@@ -764,7 +764,7 @@ import {
   getBlogSidebarPosts,
   getSortedBlogPosts,
 } from "@/lib/blog";
-import { BlogPostPage } from "@portosaur/app/components/blog-post-page";
+import { BlogPostPage } from "@portosaur/app/components/pages/blog-post-page";
 import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
 import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
 import { pageHref } from "@portosaur/app/lib/pageUrl";
@@ -843,7 +843,7 @@ export async function generateMetadata(
 export function buildBlogAuthorsContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { getBlogAuthorsWithCounts } from "@/lib/blog";
-import { BlogAuthorsPage } from "@portosaur/app/components/blog-authors-page";
+import { BlogAuthorsPage } from "@portosaur/app/components/pages/blog-authors-page";
 import type { Metadata } from "next";
 
 export function generateMetadata(): Metadata {
@@ -873,7 +873,7 @@ export function buildTasksPageContent(
     ? options.tasks.title
     : "Tasks are Disabled";
   return `${header(mtime)}import { config } from "@/lib/config";
-import { TasksPage } from "@portosaur/app/components/tasks-page";
+import { TasksPage } from "@portosaur/app/components/pages/tasks-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: ${JSON.stringify(title)} };
@@ -891,7 +891,7 @@ export default function Page() {
  */
 export function buildSearchPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { SearchPage } from "@portosaur/app/components/search-page";
+import { SearchPage } from "@portosaur/app/components/pages/search-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -910,7 +910,7 @@ export default function Page() {
  */
 export function buildOfflinePageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { OfflinePage } from "@portosaur/app/components/offline-page";
+import { OfflinePage } from "@portosaur/app/components/pages/offline-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "You're Offline" };
@@ -927,7 +927,7 @@ export default function Page() {
  */
 export function buildRedirectPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { RedirectPage } from "@portosaur/app/components/redirect-page";
+import { RedirectPage } from "@portosaur/app/components/pages/redirect-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Opening in browser…" };
@@ -944,7 +944,7 @@ export default function Page() {
  */
 export function buildNotFoundContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { NotFoundPage } from "@portosaur/app/components/not-found-page";
+import { NotFoundPage } from "@portosaur/app/components/pages/not-found-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Page Not Found" };

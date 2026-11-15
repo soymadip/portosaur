@@ -231,7 +231,7 @@ describe("buildRootLayoutContent", () => {
       const content = buildRootLayoutContent(options(), args(projectDir));
       expect(content).toContain('import "@portosaur/app/css/global.css"');
       expect(content).toContain(
-        'import { RootLayout } from "@portosaur/app/components/root-layout"',
+        'import { RootLayout } from "@portosaur/app/components/layouts/root-layout"',
       );
       expect(content).toContain(
         "<RootLayout config={config}>{children}</RootLayout>",
@@ -259,7 +259,7 @@ describe("buildHomePageContent", () => {
   test("renders the docs home in docs mode", () => {
     const content = buildHomePageContent(options(), 0);
     expect(content).toContain(
-      'import { DocsHomePage } from "@portosaur/app/components/docs-home-page"',
+      'import { DocsHomePage } from "@portosaur/app/components/pages/docs-home-page"',
     );
     expect(content).toContain("<DocsHomePage config={config} />");
   });
@@ -316,7 +316,7 @@ describe("buildDocPageContent", () => {
   test("renders the app DocPage with static params and metadata", () => {
     const content = buildDocPageContent("docs", 0);
     expect(content).toContain(
-      'import { DocPage } from "@portosaur/app/components/doc-page"',
+      'import { DocPage } from "@portosaur/app/components/pages/doc-page"',
     );
     expect(content).toContain('PageProps<"/docs/[[...slug]]">');
     // The route passes the page tree (breadcrumbs/prev-next), the
@@ -363,7 +363,7 @@ describe("buildBlogPostContent", () => {
   test("uses the same metadata title rule as doc pages", () => {
     const content = buildBlogPostContent(0);
     expect(content).toContain(
-      'import { BlogPostPage } from "@portosaur/app/components/blog-post-page"',
+      'import { BlogPostPage } from "@portosaur/app/components/pages/blog-post-page"',
     );
     expect(content).toContain('PageProps<"/blog/[slug]">');
     // The route passes the post (renamed prop), the sidebar list,
@@ -397,7 +397,7 @@ describe("buildNotesIndexContent", () => {
     expect(content).toContain("NotesIndexPage,");
     expect(content).toContain("type NoteCardPage,");
     expect(content).toContain(
-      '} from "@portosaur/app/components/notes-index-page"',
+      '} from "@portosaur/app/components/pages/notes-index-page"',
     );
     expect(content).toContain(".filter((page) => page.slugs.length === 1)");
     expect(content).toContain("const pages: NoteCardPage[] = source");

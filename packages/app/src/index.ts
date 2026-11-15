@@ -1,6 +1,6 @@
 /**
  * @portosaur/app — the public barrel. The generated root imports
- * most things via deep paths (`@portosaur/app/components/doc-page`,
+ * most things via deep paths (`@portosaur/app/components/pages/doc-page`,
  * …); this barrel re-exports the same surface for convenience.
  *
  * NOT re-exported here (import via their deep paths):
@@ -16,63 +16,66 @@
  */
 
 // Layouts + route components
-export { RootLayout } from "./components/root-layout.tsx";
-export { DocsLayout } from "./components/docs-layout.tsx";
-export { DocPage } from "./components/doc-page.tsx";
-export type { PortoDocPage, PortoDocPageData } from "./components/doc-page.tsx";
-export { DocsHomePage } from "./components/docs-home-page.tsx";
-export { NotesIndexPage } from "./components/notes-index-page.tsx";
-export type { NoteCardPage } from "./components/notes-index-page.tsx";
-export { BlogIndexPage } from "./components/blog-index-page.tsx";
-export type { BlogIndexPost } from "./components/blog-index-page.tsx";
-export { BlogPostPage } from "./components/blog-post-page.tsx";
-export type { PortoBlogPost } from "./components/blog-post-page.tsx";
-export { BlogAuthorsPage } from "./components/blog-authors-page.tsx";
-export { TasksPage } from "./components/tasks-page.tsx";
-export { SearchPage } from "./components/search-page.tsx";
-export { OfflinePage } from "./components/offline-page.tsx";
-export { RedirectPage } from "./components/redirect-page.tsx";
-export { NotFoundPage } from "./components/not-found-page.tsx";
+export { RootLayout } from "./components/layouts/root-layout.tsx";
+export { DocsLayout } from "./components/layouts/docs-layout.tsx";
+export { DocPage } from "./components/pages/doc-page.tsx";
+export type {
+  PortoDocPage,
+  PortoDocPageData,
+} from "./components/pages/doc-page.tsx";
+export { DocsHomePage } from "./components/pages/docs-home-page.tsx";
+export { NotesIndexPage } from "./components/pages/notes-index-page.tsx";
+export type { NoteCardPage } from "./components/pages/notes-index-page.tsx";
+export { BlogIndexPage } from "./components/pages/blog-index-page.tsx";
+export type { BlogIndexPost } from "./components/pages/blog-index-page.tsx";
+export { BlogPostPage } from "./components/pages/blog-post-page.tsx";
+export type { PortoBlogPost } from "./components/pages/blog-post-page.tsx";
+export { BlogAuthorsPage } from "./components/pages/blog-authors-page.tsx";
+export { TasksPage } from "./components/pages/tasks-page.tsx";
+export { SearchPage } from "./components/pages/search-page.tsx";
+export { OfflinePage } from "./components/pages/offline-page.tsx";
+export { RedirectPage } from "./components/pages/redirect-page.tsx";
+export { NotFoundPage } from "./components/pages/not-found-page.tsx";
 
-// Shell + chrome components
-export { SiteShell } from "./components/SiteShell.tsx";
-export { Navbar } from "./components/Navbar.tsx";
-export { Sidebar } from "./components/Sidebar.tsx";
-export { MobileMenu } from "./components/MobileMenu.tsx";
-export { MobileMenuFooter } from "./components/MobileMenuFooter.tsx";
+// Page frame + parts
+export { SiteShell } from "./components/pages/frame/SiteShell.tsx";
+export { Navbar } from "./components/pages/frame/Navbar.tsx";
+export { Sidebar } from "./components/pages/frame/Sidebar.tsx";
+export { MobileMenu } from "./components/pages/frame/MobileMenu.tsx";
+export { MobileMenuFooter } from "./components/pages/frame/MobileMenuFooter.tsx";
 export {
   TableOfContents,
   TableOfContentsList,
-} from "./components/TableOfContents.tsx";
-export { MobileTableOfContents } from "./components/MobileTableOfContents.tsx";
-export { PageSidebar } from "./components/PageSidebar.tsx";
-export { SearchDialog } from "./components/SearchDialog.tsx";
-export { ThemeSelect } from "./components/ThemeSelect.tsx";
-export { Footer } from "./components/Footer.tsx";
-export { Pagination } from "./components/Pagination.tsx";
-export { Breadcrumbs } from "./components/Breadcrumbs.tsx";
-export { EditLink } from "./components/EditLink.tsx";
-export { LastUpdated } from "./components/LastUpdated.tsx";
-export { SkipLink } from "./components/SkipLink.tsx";
-export { NavProgress } from "./components/NavProgress.tsx";
-export { PageTitle } from "./components/PageTitle.tsx";
-export { ContentPanel } from "./components/ContentPanel.tsx";
-export { DocFooter } from "./components/DocFooter.tsx";
-export { SiteTitle } from "./components/SiteTitle.tsx";
+} from "./components/pages/frame/TableOfContents.tsx";
+export { MobileTableOfContents } from "./components/pages/frame/MobileTableOfContents.tsx";
+export { PageSidebar } from "./components/pages/frame/PageSidebar.tsx";
+export { SearchDialog } from "./components/pages/frame/SearchDialog.tsx";
+export { ThemeSelect } from "./components/pages/frame/ThemeSelect.tsx";
+export { Footer } from "./components/pages/parts/Footer.tsx";
+export { Pagination } from "./components/pages/parts/Pagination.tsx";
+export { Breadcrumbs } from "./components/pages/parts/Breadcrumbs.tsx";
+export { EditLink } from "./components/pages/parts/EditLink.tsx";
+export { LastUpdated } from "./components/pages/parts/LastUpdated.tsx";
+export { SkipLink } from "./components/pages/frame/SkipLink.tsx";
+export { NavProgress } from "./components/pages/frame/NavProgress.tsx";
+export { PageTitle } from "./components/pages/parts/PageTitle.tsx";
+export { ContentPanel } from "./components/pages/parts/ContentPanel.tsx";
+export { DocFooter } from "./components/pages/parts/DocFooter.tsx";
+export { SiteTitle } from "./components/pages/frame/SiteTitle.tsx";
 export { PortoIcon } from "./components/PortoIcon.tsx";
-export { HeroImage } from "./components/HeroImage.tsx";
-export { KaTeXStyles } from "./components/KaTeXStyles.tsx";
-export { BlogSidebar } from "./components/BlogSidebar.tsx";
-export type { BlogSidebarPost } from "./components/BlogSidebar.tsx";
-export { TasksTable } from "./components/TasksTable.tsx";
+export { HeroImage } from "./components/pages/HeroImage.tsx";
+export { KaTeXStyles } from "./components/pages/parts/KaTeXStyles.tsx";
+export { BlogSidebar } from "./components/pages/frame/BlogSidebar.tsx";
+export type { BlogSidebarPost } from "./components/pages/frame/BlogSidebar.tsx";
+export { TasksTable } from "./components/pages/TasksTable.tsx";
 export type {
   TasksTab,
   TasksRow,
   TasksStats,
-} from "./components/TasksTable.tsx";
-export { SearchPageBody } from "./components/SearchPageBody.tsx";
-export { RedirectBody } from "./components/RedirectBody.tsx";
-export { ReloadButton } from "./components/ReloadButton.tsx";
+} from "./components/pages/TasksTable.tsx";
+export { SearchPageBody } from "./components/pages/SearchPageBody.tsx";
+export { RedirectBody } from "./components/pages/RedirectBody.tsx";
+export { ReloadButton } from "./components/pages/ReloadButton.tsx";
 
 // MDX entry (canonical Fumadocs pattern)
 export {
