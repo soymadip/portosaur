@@ -95,7 +95,12 @@ export function NavProgress() {
       }
       // A link to the current page starts no navigation — and no
       // pathname change follows to finish a bar started for it.
-      if (samePath(new URL(href, window.location.href).pathname, pathnameRef.current)) {
+      if (
+        samePath(
+          new URL(href, window.location.href).pathname,
+          pathnameRef.current,
+        )
+      ) {
         return;
       }
       scheduleShow();

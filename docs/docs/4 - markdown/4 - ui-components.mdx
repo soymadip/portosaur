@@ -35,7 +35,13 @@ Pick a variant with the `variant` prop, and add `outline` for the outlined form:
 <Btn variant="primary" outline>Outlined</Btn>
 ```
 
-<Btn variant="primary">Primary</Btn> <Btn variant="secondary">Secondary</Btn> <Btn variant="success">Success</Btn> <Btn variant="info">Info</Btn> <Btn variant="warning">Warning</Btn> <Btn variant="danger">Danger</Btn> <Btn variant="ghost">Ghost</Btn> <Btn variant="primary" outline>Outlined</Btn>
+<Btn variant="primary">Primary</Btn> <Btn variant="secondary">Secondary</Btn>
+<Btn variant="success">Success</Btn> <Btn variant="info">Info</Btn>
+<Btn variant="warning">Warning</Btn> <Btn variant="danger">Danger</Btn>
+<Btn variant="ghost">Ghost</Btn>
+<Btn variant="primary" outline>
+  Outlined
+</Btn>
 
 ### Sizes
 
@@ -64,20 +70,20 @@ Passing `to` renders a Next.js `<Link>`; passing `href` renders a plain anchor:
 
 ### Props Reference
 
-| Prop        | Type                                                                                 | Default     | Description                                                                                 |
-| :---------- | :----------------------------------------------------------------------------------- | :---------- | :------------------------------------------------------------------------------------------ |
-| `variant`   | `"primary" \| "secondary" \| "success" \| "info" \| "warning" \| "danger" \| "ghost"` | `"primary"` | Sets the button's color.                                                                    |
-| `outline`   | `boolean`                                                                            | `false`     | Outlined form: a colored border with a transparent background that fills on hover.          |
-| `size`      | `"sm" \| "lg"`                                                                       | None        | Small or large size.                                                                        |
-| `to`        | `string`                                                                             | None        | Internal page path. Renders a Next.js `<Link>` with client-side navigation.                 |
-| `href`      | `string`                                                                             | None        | Link destination. External URLs open in a new tab unless `sameTab` is set.                  |
-| `sameTab`   | `boolean`                                                                            | `false`     | Keep an external `href` in the current tab.                                                 |
-| `icon`      | `string`                                                                             | None        | Icon identifier (for example `"lucide:download"`), rendered before the label.               |
-| `className` | `string`                                                                             | `""`        | Additional class on the rendered element.                                                   |
-| `disabled`  | `boolean`                                                                            | `false`     | Disables button interaction and applies disabled styling.                                   |
-| `onClick`   | `function`                                                                           | None        | Click handler. Receives the click event.                                                    |
-| `title`     | `string`                                                                             | None        | Native title attribute on the rendered element.                                             |
-| `ariaLabel` | `string`                                                                             | None        | Accessible label for the button.                                                            |
+| Prop        | Type                                                                                  | Default     | Description                                                                        |
+| :---------- | :------------------------------------------------------------------------------------ | :---------- | :--------------------------------------------------------------------------------- |
+| `variant`   | `"primary" \| "secondary" \| "success" \| "info" \| "warning" \| "danger" \| "ghost"` | `"primary"` | Sets the button's color.                                                           |
+| `outline`   | `boolean`                                                                             | `false`     | Outlined form: a colored border with a transparent background that fills on hover. |
+| `size`      | `"sm" \| "lg"`                                                                        | None        | Small or large size.                                                               |
+| `to`        | `string`                                                                              | None        | Internal page path. Renders a Next.js `<Link>` with client-side navigation.        |
+| `href`      | `string`                                                                              | None        | Link destination. External URLs open in a new tab unless `sameTab` is set.         |
+| `sameTab`   | `boolean`                                                                             | `false`     | Keep an external `href` in the current tab.                                        |
+| `icon`      | `string`                                                                              | None        | Icon identifier (for example `"lucide:download"`), rendered before the label.      |
+| `className` | `string`                                                                              | `""`        | Additional class on the rendered element.                                          |
+| `disabled`  | `boolean`                                                                             | `false`     | Disables button interaction and applies disabled styling.                          |
+| `onClick`   | `function`                                                                            | None        | Click handler. Receives the click event.                                           |
+| `title`     | `string`                                                                              | None        | Native title attribute on the rendered element.                                    |
+| `ariaLabel` | `string`                                                                              | None        | Accessible label for the button.                                                   |
 
 ```jsx
 <Btn icon="lucide:download" variant="primary">
@@ -117,18 +123,18 @@ Renders an interactive dropdown menu for links or action items. A click opens th
 
 ### Props Reference
 
-| Prop               | Type                      | Default    | Description                                                                                             |
-| :----------------- | :------------------------ | :--------- | :------------------------------------------------------------------------------------------------------ |
-| `label`            | `string`                  | `"Menu"`   | Text for the default trigger.                                                                           |
-| `trigger`          | `ReactNode \| string`     | None       | Custom trigger content. If omitted, `label` is used.                                                    |
-| `items`            | `DropdownItem[]`          | None       | Menu entries described below.                                                                           |
-| `children`         | `ReactNode`               | None       | Menu content when no `items` are given.                                                                 |
-| `align`            | `"left" \| "center" \| "right"` | `"center"` | Menu alignment relative to the trigger. The edge clamp applies to every alignment.               |
-| `noArrow`          | `boolean`                 | `false`    | Hide the trigger chevron.                                                                               |
-| `className`        | `string`                  | `""`       | Additional class on the dropdown wrapper.                                                               |
-| `menuClassName`    | `string`                  | `""`       | Additional class on the menu.                                                                           |
-| `triggerClassName` | `string`                  | `""`       | Additional class on the trigger.                                                                        |
-| `ariaLabel`        | `string`                  | None       | Accessible label for the trigger.                                                                       |
+| Prop               | Type                            | Default    | Description                                                                        |
+| :----------------- | :------------------------------ | :--------- | :--------------------------------------------------------------------------------- |
+| `label`            | `string`                        | `"Menu"`   | Text for the default trigger.                                                      |
+| `trigger`          | `ReactNode \| string`           | None       | Custom trigger content. If omitted, `label` is used.                               |
+| `items`            | `DropdownItem[]`                | None       | Menu entries described below.                                                      |
+| `children`         | `ReactNode`                     | None       | Menu content when no `items` are given.                                            |
+| `align`            | `"left" \| "center" \| "right"` | `"center"` | Menu alignment relative to the trigger. The edge clamp applies to every alignment. |
+| `noArrow`          | `boolean`                       | `false`    | Hide the trigger chevron.                                                          |
+| `className`        | `string`                        | `""`       | Additional class on the dropdown wrapper.                                          |
+| `menuClassName`    | `string`                        | `""`       | Additional class on the menu.                                                      |
+| `triggerClassName` | `string`                        | `""`       | Additional class on the trigger.                                                   |
+| `ariaLabel`        | `string`                        | None       | Accessible label for the trigger.                                                  |
 
 Regular items support `label`, `to`, `href`, `icon`, `active`, `onClick`, `sameTab`, `desc`, and `prefetch` (`false` skips Next.js prefetch for that link). `to` is an internal page path (client-side navigation); `href` is a full URL or absolute path, and external links open in a new tab unless `sameTab` is true. Use `{ type: "separator" }` for a divider. An item can instead provide `render: ({ close }) => ReactNode` for custom content and to close the menu programmatically.
 

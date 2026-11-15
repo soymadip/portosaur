@@ -3795,9 +3795,7 @@ a.porto-blog-article-author-name:hover {
 .porto-markdown-content a.porto-dropdown__item.active {
   color: var(--porto-color-accent-high);
 }
-[data-theme="dark"]
-  .porto-markdown-content
-  a.porto-dropdown__item.active {
+[data-theme="dark"] .porto-markdown-content a.porto-dropdown__item.active {
   color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 

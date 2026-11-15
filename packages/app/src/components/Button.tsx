@@ -27,13 +27,7 @@ import { pageHref } from "../lib/pageUrl.ts";
  */
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "danger"
-  | "info"
-  | "ghost";
+  "primary" | "secondary" | "success" | "warning" | "danger" | "info" | "ghost";
 
 export type ButtonSize = "sm" | "lg" | "icon" | "icon-sm" | "icon-xs";
 
