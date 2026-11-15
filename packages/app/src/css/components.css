@@ -3950,22 +3950,19 @@ a.porto-blog-article-author-name:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* The category child count: a small pill beside the title, in
-   the title's accent family — the number only, the full
-   "N items" label is the tooltip. Never shrinks, so it stays
-   visible when a long title truncates. */
+/* The category child count: a small muted pill beside the
+   title — the number only, the full "N items" label is the
+   tooltip. Deliberately quiet (neutral gray, not accent):
+   the count is metadata, the title is the highlight. Never
+   shrinks, so it stays visible when a long title truncates. */
 .porto-topic-list__count {
   flex-shrink: 0;
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-text-accent) 15%,
-    transparent
-  );
-  color: var(--porto-color-accent-high);
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-gray-3);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.5;
 }
 .porto-topic-list__description {
