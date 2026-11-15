@@ -12,6 +12,17 @@
 // JavaScript needed to open/close; the script below only resets the
 // popover attribute on desktop (persistent variant) and traps focus
 // while the menu is open.
+//
+// Open/close animation — ported from VitePress's VPNavScreen
+// (vitepress 1.6.4, theme-default): the pane fades (opacity 0.25s)
+// while its content slides down 8px into place (transform 0.25s
+// ease), and reverses on close. VitePress does it with Vue's
+// <transition>; here it is pure CSS — `@starting-style` supplies
+// the enter state (popovers go from `display: none`, so no
+// transition would run otherwise) and `allow-discrete` on `display`
+// and `overlay` keeps the pane rendered in the top layer for the
+// 0.25s exit fade instead of vanishing instantly. Both are stable
+// CSS, shipped in all major browsers since 2023–2024.
 import MobileMenuFooter from "./MobileMenuFooter.astro";
 
 interface Props {
@@ -113,7 +124,31 @@ const { hasSidebar = false } = Astro.props;
          it the rows run to the content padding; a classic scrollbar
          takes its own space when the content does overflow, and the
          TOC panel already behaves this way. */
-      transition: inset-block-start 0.2s ease-in-out;
+      /* Open/close animation (VitePress's nav screen): the pane
+         fades over 0.25s. `display`/`overlay` with
+         `allow-discrete` keep it rendered in the top layer for the
+         exit fade instead of vanishing instantly. */
+      opacity: 0;
+      transition:
+        opacity 0.25s,
+        inset-block-start 0.2s ease-in-out,
+        display 0.25s allow-discrete,
+        overlay 0.25s allow-discrete;
+    }
+
+    .sidebar-pane:popover-open {
+      opacity: 1;
+    }
+
+    /* Enter state: without this the pane would start at opacity 1
+       (popovers go from `display: none`, so no transition runs). */
+    @starting-style {
+      .sidebar-pane:popover-open {
+        opacity: 0;
+      }
+      .sidebar-pane:popover-open .sidebar-content {
+        transform: translateY(-8px);
+      }
     }
 
     /* The navbar hides on scroll down (hideNavbarOnScroll) — the
@@ -134,6 +169,15 @@ const { hasSidebar = false } = Astro.props;
       padding: 1rem 0.3rem 0;
       flex-direction: column;
       gap: 1rem;
+      /* Open/close animation (VitePress's nav screen): the content
+         slides down 8px into place as the pane fades in, and back
+         up as it fades out. Scoped to `[popover]` so the persistent
+         desktop sidebar (no popover attribute there) never shifts. */
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-pane[popover]:not(:popover-open) .sidebar-content {
+      transform: translateY(-8px);
     }
 
     @media (min-width: 50rem) {
@@ -151,6 +195,9 @@ const { hasSidebar = false } = Astro.props;
         background-color: var(--porto-color-bg-sidebar);
         /* Same separator as the TOC panel's left border. */
         border-inline-end: 1px solid var(--porto-color-hairline);
+        /* Not a popover at desktop widths, so it never matches
+           `:popover-open` — keep it fully opaque. */
+        opacity: 1;
       }
     }
   }
