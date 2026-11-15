@@ -414,14 +414,14 @@ details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
   margin: 0;
   padding: 0.5rem;
   list-style: none;
-  border-radius: 0.75rem;
+  /* The topic-list cards' radius. */
+  border-radius: 0.5rem;
   border: 1px solid var(--porto-color-hairline-light);
   /* Solid, no backdrop blur — the translucent Fumadocs popover
      looked smudged on the live preview. */
   background-color: var(--porto-color-bg-nav);
-  /* The medium shadow — the large one cast too far down
-     (25px) and too heavy under the menu. */
-  box-shadow: var(--porto-shadow-md);
+  /* The small shadow — the medium one was still too heavy. */
+  box-shadow: var(--porto-shadow-sm);
   transform: translateX(calc(-50% + var(--porto-menu-offset, 0px)));
 }
 .porto-dropdown__menu[data-align="left"] {
