@@ -13,6 +13,9 @@
 // sections), re-setting both up on every page load — client-side
 // navigation replaces the sections, and the title updater would
 // otherwise keep overwriting the next page's title on scroll. The
+// section titles reach the module script as a JSON data block (a
+// `define:vars` script can't hold imports — Astro renders it as a
+// classic script, where `import` is a SyntaxError). The
 // scroll button is the full NavArrow component (next-section /
 // back-to-top), ported from the old theme.
 //
@@ -65,9 +68,35 @@ const sectionTitles = {
       {experience.enable && <ExperienceSection id="experience" />}
       {social.enable && <ContactSection id="contact" />}
       <NavArrow />
-      <script define:vars={{ sectionTitles, defaultTitle: siteTitle }}>
+      {/*
+        Section titles for the title updater, as a JSON data block
+        the module script below reads. A `define:vars` script can't
+        carry the imports — Astro renders it as a classic script,
+        where `import` is a SyntaxError and the whole script dies.
+        The `<` escape keeps a `</script>` in a title from breaking
+        out of the block.
+      */}
+      <script
+        type="application/json"
+        id="porto-home-titles"
+        set:html={JSON.stringify({
+          sections: sectionTitles,
+          defaultTitle: siteTitle,
+        }).replaceAll("<", "\\u003c")}
+      ></script>
+      <script>
         import { initUpdateTitle } from "../scripts/update-title.ts";
         import { initScrollReveal } from "../scripts/scroll-reveal.ts";
+
+        // Titles are config-derived, so the values parsed on first
+        // load stay valid across client-side navigations (the module
+        // script runs once; only setupHome re-runs per page load).
+        const titlesElement = document.getElementById("porto-home-titles");
+        const homeTitles = (
+          titlesElement ? JSON.parse(titlesElement.textContent ?? "{}") : {}
+        ) as { sections?: Record<string, string>; defaultTitle?: string };
+        const sectionTitles = homeTitles.sections ?? {};
+        const defaultTitle = homeTitles.defaultTitle ?? "";
 
         // Both modules track the current page's elements, so they
         // are torn down and re-set-up on every page load.
