@@ -1766,9 +1766,15 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transform: scaleX(0);
   transform-origin: left;
   opacity: 0;
+  /* The top transition matches the navbar's hide transition
+     (transform 0.2s ease-in-out) so the bar slides up glued to
+     the navbar's bottom edge instead of jumping to the top while
+     the navbar is still sliding. It rides on all three states —
+     each overrides `transition` wholesale. */
   transition:
     transform 0.2s ease,
-    opacity 0.3s ease;
+    opacity 0.3s ease,
+    top 0.2s ease-in-out;
 }
 
 /* In flight: crawl slowly toward 80% — the navigation finishes
@@ -1778,7 +1784,8 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   opacity: 1;
   transition:
     transform 2.5s ease-out,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    top 0.2s ease-in-out;
 }
 
 /* Finished: complete the crawl, then fade out. */
@@ -1787,7 +1794,8 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   opacity: 0;
   transition:
     transform 0.2s ease,
-    opacity 0.3s ease 0.15s;
+    opacity 0.3s ease 0.15s,
+    top 0.2s ease-in-out;
 }
 
 /* The navbar hides on scroll — the bar docks to the top edge with
