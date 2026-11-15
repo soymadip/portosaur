@@ -810,11 +810,12 @@ body:has(#porto__sidebar:popover-open)
   padding-inline-start: var(--porto-sidebar-item-padding-inline);
 }
 
-/* Top-level rows are bold and brighter than nested rows — the
-   size stays the same, so the hierarchy reads from weight and
-   color plus the indentation and guide line. */
+/* Top-level rows are semibold and brighter than nested rows —
+   the size stays the same, so the hierarchy reads from weight
+   and color plus the indentation and guide line. 700 was too
+   heavy here; 600 matches the active row's weight. */
 .porto-sidebar__large {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--porto-color-white);
 }
 
@@ -958,16 +959,6 @@ body:has(#porto__sidebar:popover-open)
     var(--porto-color-text-accent) 10%,
     transparent
   );
-}
-
-/* An active top-level row stays bold: the 600 above would
-   otherwise make it lighter than its inactive top-level
-   siblings. The extra class beats the active rule's specificity
-   in every state. */
-.porto-sidebar [aria-current="page"].porto-sidebar__large,
-.porto-sidebar [aria-current="page"].porto-sidebar__large:hover,
-.porto-sidebar [aria-current="page"].porto-sidebar__large:focus {
-  font-weight: 700;
 }
 
 /* The active category row highlights as one uniform box: the
