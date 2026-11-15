@@ -1762,7 +1762,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   /* Above the navbar (z-index 10), below the skip link (20). */
   z-index: 11;
   width: 100%;
-  height: 2px;
+  height: 1px;
   background-color: var(--porto-color-text-accent);
   pointer-events: none;
   transform: scaleX(0);
