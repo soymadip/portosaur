@@ -42,7 +42,13 @@ const title = pageTitle("Opening in browser…", config.site.title);
     </div>
   </div>
 
-  <script>
+  {/*
+    Inline + `data-astro-rerun`: the redirect must run on EVERY
+    visit. A bundled module script runs once per session, so a
+    repeat visit via client-side navigation would otherwise sit on
+    this page instead of redirecting.
+  */}
+  <script is:inline data-astro-rerun>
     const params = new URLSearchParams(window.location.search);
     const url = params.get("url");
 

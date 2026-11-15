@@ -29,11 +29,19 @@ const title = pageTitle("You're Offline", config.site.title);
   </div>
 
   <script>
-    const button = document.querySelector("[data-reload]");
-    if (button) {
+    // Runs on every page load: client-side navigation replaces the
+    // button, so the new one needs wiring.
+    const setupReload = () => {
+      const button = document.querySelector("[data-reload]");
+      if (!button || button.hasAttribute("data-porto-wired")) {
+        return;
+      }
+      button.setAttribute("data-porto-wired", "");
       button.addEventListener("click", () => {
         window.location.reload();
       });
-    }
+    };
+    setupReload();
+    document.addEventListener("astro:page-load", setupReload);
   </script>
 </BaseLayout>

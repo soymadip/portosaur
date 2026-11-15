@@ -17,6 +17,12 @@ export function initTasksFilter(): void {
   if (!container) {
     return;
   }
+  // The marker keeps a re-run on the same container (initial load
+  // plus `astro:page-load`) from double-wiring the tab buttons.
+  if (container.hasAttribute("data-porto-wired")) {
+    return;
+  }
+  container.setAttribute("data-porto-wired", "");
 
   const tabs = container.querySelectorAll<HTMLElement>("[data-task-tab]");
   const rows = container.querySelectorAll<HTMLElement>("[data-task-status]");

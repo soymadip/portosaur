@@ -32,53 +32,65 @@ import { renderIcon } from "../utils/icons.ts";
 </button>
 
 <script>
-  const navArrow = document.getElementById("nav-arrow");
+  // The button is replaced on client-side navigation, so the scroll
+  // listener (registered once) re-queries it fresh, and the click
+  // listener is wired per button on every page load.
+  const getSections = () => {
+    const main = document.querySelector("main");
+    if (!main) {
+      return [];
+    }
+    return Array.from(main.querySelectorAll(":scope > [id]"))
+      .map((el) => el.id)
+      .filter((id) => id !== "nav-arrow");
+  };
 
-  if (navArrow instanceof HTMLButtonElement) {
-    let scrollTimeout = 0;
+  const setDirection = (navArrow, direction) => {
+    navArrow.setAttribute("data-direction", direction);
+    const isDown = direction === "down";
+    navArrow.setAttribute(
+      "aria-label",
+      isDown ? "Scroll to next section" : "Scroll to top",
+    );
+    navArrow.setAttribute("title", isDown ? "Next Section" : "Back to Top");
+  };
 
-    const getSections = () => {
-      const main = document.querySelector("main");
-      if (!main) {
-        return [];
-      }
-      return Array.from(main.querySelectorAll(":scope > [id]"))
-        .map((el) => el.id)
-        .filter((id) => id !== "nav-arrow");
-    };
+  let scrollTimeout = 0;
 
-    const setDirection = (direction) => {
-      navArrow.setAttribute("data-direction", direction);
-      const isDown = direction === "down";
-      navArrow.setAttribute(
-        "aria-label",
-        isDown ? "Scroll to next section" : "Scroll to top",
-      );
-      navArrow.setAttribute("title", isDown ? "Next Section" : "Back to Top");
-    };
+  const handleScroll = () => {
+    const navArrow = document.getElementById("nav-arrow");
+    if (!(navArrow instanceof HTMLButtonElement)) {
+      return;
+    }
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const fullHeight = document.documentElement.scrollHeight;
 
-    const handleScroll = () => {
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+    navArrow.classList.toggle("visible", scrollTop > 100);
 
-      navArrow.classList.toggle("visible", scrollTop > 100);
+    if (scrollTop + windowHeight >= fullHeight - 50) {
+      setDirection(navArrow, "up");
+    } else {
+      setDirection(navArrow, "down");
+    }
 
-      if (scrollTop + windowHeight >= fullHeight - 50) {
-        setDirection("up");
-      } else {
-        setDirection("down");
-      }
+    navArrow.classList.add("scrolling");
+    window.clearTimeout(scrollTimeout);
+    scrollTimeout = window.setTimeout(() => {
+      navArrow.classList.remove("scrolling");
+    }, 800);
+  };
 
-      navArrow.classList.add("scrolling");
-      window.clearTimeout(scrollTimeout);
-      scrollTimeout = window.setTimeout(() => {
-        navArrow.classList.remove("scrolling");
-      }, 800);
-    };
-
-    const handleClick = () => {
+  const setupNavArrow = () => {
+    const navArrow = document.getElementById("nav-arrow");
+    if (!(navArrow instanceof HTMLButtonElement)) {
+      return;
+    }
+    if (navArrow.hasAttribute("data-porto-wired")) {
+      return;
+    }
+    navArrow.setAttribute("data-porto-wired", "");
+    navArrow.addEventListener("click", () => {
       if (navArrow.getAttribute("data-direction") === "up") {
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
@@ -120,10 +132,11 @@ import { renderIcon } from "../utils/icons.ts";
           behavior: "smooth",
         });
       }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    });
     handleScroll();
-    navArrow.addEventListener("click", handleClick);
-  }
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  setupNavArrow();
+  document.addEventListener("astro:page-load", setupNavArrow);
 </script>

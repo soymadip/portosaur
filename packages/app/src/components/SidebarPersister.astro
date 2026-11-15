@@ -48,6 +48,37 @@ declare global {
   <script is:inline aria-hidden="true">
     (() => {
       try {
+        // Define the restore element once, unconditionally: with
+        // client-side navigation this inline script runs only on the
+        // first docs page load (the router keeps scripts that exist
+        // on the new page), so gating the define on stored state
+        // would leave later pages' restore elements undefined.
+        // The callback reads fresh state on every connect — the
+        // state from this script's first run would be stale after
+        // navigation — and checks the current sidebar's hash.
+        if (!customElements.get("porto-sidebar-restore")) {
+          customElements.define(
+            "porto-sidebar-restore",
+            class SidebarRestore extends HTMLElement {
+              connectedCallback() {
+                try {
+                  const state = JSON.parse(
+                    sessionStorage.getItem("porto-sidebar-state") || "0",
+                  );
+                  const target = document.querySelector(
+                    "porto-sidebar-state-persist",
+                  );
+                  if (!state || !target || target.dataset.hash !== state.hash)
+                    return;
+                  const idx = parseInt(this.dataset.index || "");
+                  const details = this.closest("details");
+                  if (details && typeof state.open[idx] === "boolean")
+                    details.open = state.open[idx];
+                } catch {}
+              }
+            },
+          );
+        }
         if (!matchMedia("(min-width: 50em)").matches) return;
         /** @type {HTMLElement | null} */
         const target = document.querySelector("porto-sidebar-state-persist");
@@ -56,19 +87,6 @@ declare global {
         );
         if (!target || !state || target.dataset.hash !== state.hash) return;
         window._portoScrollRestore = state.scroll;
-        customElements.define(
-          "porto-sidebar-restore",
-          class SidebarRestore extends HTMLElement {
-            connectedCallback() {
-              try {
-                const idx = parseInt(this.dataset.index || "");
-                const details = this.closest("details");
-                if (details && typeof state.open[idx] === "boolean")
-                  details.open = state.open[idx];
-              } catch {}
-            }
-          },
-        );
       } catch {}
     })();
   </script>

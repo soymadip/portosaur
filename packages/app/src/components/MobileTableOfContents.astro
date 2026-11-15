@@ -141,38 +141,55 @@ const toc = nestHeadings(headings);
       }
     }
 
-    constructor() {
-      super();
-      const details = this.querySelector("details");
-      if (!details) {
-        return;
+    private details = this.querySelector("details");
+
+    private closeToC = () => {
+      if (this.details) {
+        this.details.open = false;
       }
-      const closeToC = () => {
-        details.open = false;
-      };
-      // Close the table of contents whenever a link is clicked.
-      details.querySelectorAll("a").forEach((a) => {
-        a.addEventListener("click", closeToC);
-      });
-      // Close the table of contents when a user clicks outside of it.
-      window.addEventListener("click", (e) => {
-        if (!details.contains(e.target as Node)) {
-          closeToC();
-        }
-      });
-      // Or when they press the escape key.
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && details.open) {
-          const hasFocus = details.contains(document.activeElement);
-          closeToC();
-          if (hasFocus) {
-            const summary = details.querySelector("summary");
-            if (summary) {
-              summary.focus();
-            }
+    };
+
+    private onWindowClick = (e: MouseEvent) => {
+      if (this.details && !this.details.contains(e.target as Node)) {
+        this.closeToC();
+      }
+    };
+
+    private onWindowKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && this.details?.open) {
+        const hasFocus = this.details.contains(document.activeElement);
+        this.closeToC();
+        if (hasFocus) {
+          const summary = this.details.querySelector("summary");
+          if (summary) {
+            summary.focus();
           }
         }
+      }
+    };
+
+    constructor() {
+      super();
+      if (!this.details) {
+        return;
+      }
+      // Close the table of contents whenever a link is clicked.
+      this.details.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", this.closeToC);
       });
+      // Close the table of contents when a user clicks outside of it.
+      window.addEventListener("click", this.onWindowClick);
+      // Or when they press the escape key.
+      window.addEventListener("keydown", this.onWindowKeyDown);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      // Client-side navigation discards the TOC, but the window
+      // listeners live on — remove them, or each navigation leaks a
+      // pair that closes a detached dropdown.
+      window.removeEventListener("click", this.onWindowClick);
+      window.removeEventListener("keydown", this.onWindowKeyDown);
     }
   }
 

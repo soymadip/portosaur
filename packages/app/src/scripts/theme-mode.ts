@@ -126,12 +126,21 @@ export function updateThemeColor(): void {
   }
 }
 
-function initThemeMode(): void {
-  // Sync every dropdown with the resolved preference, then wire its
-  // option buttons (the pre-paint script already applied the mode).
-  const preference = loadTheme();
-  syncThemeControls(preference);
+/**
+ * Per-page setup: sync every dropdown with the resolved preference,
+ * then wire its option buttons (the pre-paint script already applied
+ * the mode). Runs on every page load — client-side navigation
+ * replaces the body, so the new page's controls need syncing and
+ * wiring. The `data-porto-wired` marker keeps a re-run on the same
+ * controls from double-wiring the buttons.
+ */
+function setupThemeControls(): void {
+  syncThemeControls(loadTheme());
   document.querySelectorAll("porto-theme-select").forEach((control) => {
+    if (control.hasAttribute("data-porto-wired")) {
+      return;
+    }
+    control.setAttribute("data-porto-wired", "");
     control
       .querySelectorAll<HTMLButtonElement>("[data-theme-value]")
       .forEach((button) => {
@@ -146,7 +155,14 @@ function initThemeMode(): void {
         });
       });
   });
+}
 
+/**
+ * One-time global setup: the OS-preference listener, the
+ * `data-theme` observer (both live on `window` / `<html>`, which
+ * survive navigation), and the theme-color sync.
+ */
+function initThemeMode(): void {
   // React to changes in system color scheme.
   window
     .matchMedia("(prefers-color-scheme: light)")
@@ -179,3 +195,5 @@ function initThemeMode(): void {
 }
 
 initThemeMode();
+setupThemeControls();
+document.addEventListener("astro:page-load", setupThemeControls);

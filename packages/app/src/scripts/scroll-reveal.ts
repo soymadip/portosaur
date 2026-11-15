@@ -7,8 +7,10 @@
  * itself (initial hidden state + `.is-visible` shown state) lives in
  * the theme CSS.
  *
- * Auto-initializes on import; `initScrollReveal` is exported for pages
- * that add `[data-reveal]` elements after load and need a re-scan.
+ * Call `initScrollReveal` explicitly and keep its cleanup: with
+ * client-side navigation the observed elements are replaced, so the
+ * page re-scans on `astro:page-load` and disconnects the old
+ * observer (an auto-init on import would leak it).
  */
 
 const DEFAULT_CLASS = "is-visible";
@@ -44,5 +46,3 @@ export function initScrollReveal(
     observer.disconnect();
   };
 }
-
-initScrollReveal();

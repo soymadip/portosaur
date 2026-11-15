@@ -88,3 +88,7 @@ if (document.readyState === "loading") {
 } else {
   frameCodeBlocks();
 }
+// Client-side navigation replaces the body: frame the new page's
+// blocks too. Already-framed blocks are skipped, so re-running is
+// safe.
+document.addEventListener("astro:page-load", frameCodeBlocks);

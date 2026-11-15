@@ -29,6 +29,7 @@
 import "../css/custom.css";
 import "porto:user-css";
 
+import { ClientRouter } from "astro:transitions";
 import config from "porto:config";
 import { getAssetHeadTags } from "../utils/assets.ts";
 import MobileMenu from "../components/MobileMenu.astro";
@@ -184,25 +185,53 @@ const swUrl = withBase("sw.js");
       configured defaultMode) before first paint, so there is no
       flash. A stored `auto` resolves against the OS preference.
       The full theme-mode module loads at the end of <body>.
+
+      With client-side navigation the swap copies the new page's
+      server-rendered data-theme (the site default) onto <html>,
+      losing the user's stored choice — so the script also
+      registers an `astro:before-swap` listener that carries the
+      resolved mode into the incoming document before the swap.
+      The listener registers once (guarded): inline scripts can
+      re-execute on repeat visits.
     */}
     <script is:inline define:vars={{ defaultMode: theme.defaultMode }}>
       (function () {
-        var mode = defaultMode;
-        try {
-          var stored = window.localStorage.getItem("theme");
-          if (stored === "light" || stored === "dark") {
-            mode = stored;
-          } else if (stored === "auto") {
-            mode = window.matchMedia("(prefers-color-scheme: light)").matches
-              ? "light"
-              : "dark";
+        function resolveMode() {
+          var mode = defaultMode;
+          try {
+            var stored = window.localStorage.getItem("theme");
+            if (stored === "light" || stored === "dark") {
+              mode = stored;
+            } else if (stored === "auto") {
+              mode = window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+            }
+          } catch (error) {
+            // Storage unavailable — fall back to the configured default.
           }
-        } catch (error) {
-          // Storage unavailable — fall back to the configured default.
+          return mode;
         }
-        document.documentElement.setAttribute("data-theme", mode);
+        document.documentElement.setAttribute("data-theme", resolveMode());
+        if (!window.__portoThemeSwap) {
+          window.__portoThemeSwap = true;
+          document.addEventListener("astro:before-swap", function (event) {
+            event.newDocument.documentElement.setAttribute(
+              "data-theme",
+              resolveMode(),
+            );
+          });
+        }
       })();
     </script>
+    {/*
+      Client-side routing (SPA mode): internal links navigate without
+      a full page reload, with a fade transition. Module scripts run
+      once, so every script that touches the DOM re-runs its setup on
+      `astro:page-load` (see theme-mode.ts, code-blocks.ts, and the
+      component scripts).
+    */}
+    <ClientRouter />
   </head>
   <body>
     <SkipLink />

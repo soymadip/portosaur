@@ -8,10 +8,13 @@
 // one h2 per enabled section heading (docs mode: one h2 per feature).
 //
 // The inline script wires the shared `update-title` module (document
-// title + hash follow the most-visible section) and imports the shared
-// `scroll-reveal` module (auto-inits: toggles `is-visible` on the
-// `data-reveal` sections). The scroll button is the full NavArrow
-// component (next-section / back-to-top), ported from the old theme.
+// title + hash follow the most-visible section) and the shared
+// `scroll-reveal` module (toggles `is-visible` on the `data-reveal`
+// sections), re-setting both up on every page load — client-side
+// navigation replaces the sections, and the title updater would
+// otherwise keep overwriting the next page's title on scroll. The
+// scroll button is the full NavArrow component (next-section /
+// back-to-top), ported from the old theme.
 //
 // The old page also hid the navbar shadow and the brand in landscape via
 // Docusaurus navbar classes; those rules cannot port until the new
@@ -64,10 +67,30 @@ const sectionTitles = {
       <NavArrow />
       <script define:vars={{ sectionTitles, defaultTitle: siteTitle }}>
         import { initUpdateTitle } from "../scripts/update-title.ts";
-        // Auto-inits on import: toggles `is-visible` on [data-reveal].
-        import "../scripts/scroll-reveal.ts";
+        import { initScrollReveal } from "../scripts/scroll-reveal.ts";
 
-        initUpdateTitle({ sections: sectionTitles, defaultTitle });
+        // Both modules track the current page's elements, so they
+        // are torn down and re-set-up on every page load.
+        let cleanupTitle = () => {};
+        let cleanupReveal = () => {};
+        const setupHome = () => {
+          cleanupTitle();
+          cleanupReveal();
+          // Only track sections on a page that has them (the home
+          // page): on any other page the updater would reset the
+          // title to the site default on scroll.
+          if (
+            Object.keys(sectionTitles).some((id) => document.getElementById(id))
+          ) {
+            cleanupTitle = initUpdateTitle({
+              sections: sectionTitles,
+              defaultTitle,
+            });
+          }
+          cleanupReveal = initScrollReveal();
+        };
+        setupHome();
+        document.addEventListener("astro:page-load", setupHome);
       </script>
     </>
   )}

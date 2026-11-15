@@ -329,5 +329,8 @@ const STATUS_BADGE: Record<string, string> = {
   <script>
     import { initTasksFilter } from "../scripts/tasks-filter.ts";
     initTasksFilter();
+    // Client-side navigation replaces the tabs: re-wire them on
+    // every page load (initTasksFilter skips already-wired tabs).
+    document.addEventListener("astro:page-load", initTasksFilter);
   </script>
 </BaseLayout>

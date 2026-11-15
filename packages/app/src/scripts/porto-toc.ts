@@ -31,12 +31,55 @@ export class PortoTOC extends HTMLElement {
   private onIdle = (cb: IdleRequestCallback) =>
     (window.requestIdleCallback || ((cb) => setTimeout(cb, 1)))(cb);
 
+  private observer: IntersectionObserver | undefined;
+  private resizeTimeout: number | undefined;
+  private setCurrent: IntersectionObserverCallback = () => {};
+  private toObserve: NodeListOf<Element> | Element[] = [];
+
+  private onResize = () => {
+    // Disable intersection observer while window is resizing.
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = undefined;
+    }
+    window.clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = window.setTimeout(
+      () => this.onIdle(this.observe),
+      200,
+    );
+  };
+
   constructor() {
     super();
     this.onIdle(() => this.init());
   }
 
+  disconnectedCallback() {
+    // Client-side navigation discards the TOC: disconnect the
+    // observer (it holds the old page's headings) and drop the
+    // resize listener, or each navigation leaks both.
+    this.observer?.disconnect();
+    this.observer = undefined;
+    window.clearTimeout(this.resizeTimeout);
+    window.removeEventListener("resize", this.onResize);
+  }
+
+  private observe = (): void => {
+    if (this.observer || !this.isConnected) {
+      return;
+    }
+    this.observer = new IntersectionObserver(this.setCurrent, {
+      rootMargin: this.getRootMargin(),
+    });
+    this.toObserve.forEach((h) => this.observer!.observe(h));
+  };
+
   private init = (): void => {
+    // The idle callback can fire after navigation (the element was
+    // discarded while waiting) — never observe from a detached TOC.
+    if (!this.isConnected) {
+      return;
+    }
     /** All the links in the table of contents. */
     const links = [...this.querySelectorAll("a")];
 
@@ -68,7 +111,7 @@ export class PortoTOC extends HTMLElement {
     };
 
     /** Handle intersections and set the current link to the heading for the current intersection. */
-    const setCurrent: IntersectionObserverCallback = (entries) => {
+    this.setCurrent = (entries) => {
       for (const { isIntersecting, target } of entries) {
         if (!isIntersecting) continue;
         const heading = getElementHeading(target);
@@ -89,7 +132,7 @@ export class PortoTOC extends HTMLElement {
     // - direct children of `.porto-markdown-content` to include elements before the first subheading
     // - direct children of `main` that don’t include headings (mainly to target banners)
     // Ignore any elements that themselves contain a table-of-contents heading, as we are already observing those children.
-    const toObserve = document.querySelectorAll(
+    this.toObserve = document.querySelectorAll(
       [
         `main :where(${this.tocHeadingSelector})`,
         `main :where(${this.tocHeadingSelector}, .porto-heading-wrapper) ~ *:not(:has(${this.tocHeadingSelector}))`,
@@ -98,26 +141,8 @@ export class PortoTOC extends HTMLElement {
       ].join(),
     );
 
-    let observer: IntersectionObserver | undefined;
-    const observe = () => {
-      if (observer) return;
-      observer = new IntersectionObserver(setCurrent, {
-        rootMargin: this.getRootMargin(),
-      });
-      toObserve.forEach((h) => observer!.observe(h));
-    };
-    observe();
-
-    let timeout: NodeJS.Timeout;
-    window.addEventListener("resize", () => {
-      // Disable intersection observer while window is resizing.
-      if (observer) {
-        observer.disconnect();
-        observer = undefined;
-      }
-      clearTimeout(timeout);
-      timeout = setTimeout(() => this.onIdle(observe), 200);
-    });
+    this.observe();
+    window.addEventListener("resize", this.onResize);
   };
 
   private getRootMargin(): `-${number}px 0% ${number}px` {

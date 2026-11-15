@@ -36,8 +36,18 @@
 </button>
 
 <script>
-  const button = document.querySelector("[data-notify-btn]");
-  if (button instanceof HTMLButtonElement) {
+  // Runs on every page load: client-side navigation replaces the
+  // button, so the new one needs wiring. The marker keeps a re-run
+  // on the same button from double-wiring the click listener.
+  const setupNotifyButton = () => {
+    const button = document.querySelector("[data-notify-btn]");
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+    if (button.hasAttribute("data-porto-wired")) {
+      return;
+    }
+    button.setAttribute("data-porto-wired", "");
     const label = button.querySelector("[data-notify-label]");
 
     const setSubscribed = () => {
@@ -72,5 +82,8 @@
         });
       }
     }
-  }
+  };
+
+  setupNotifyButton();
+  document.addEventListener("astro:page-load", setupNotifyButton);
 </script>

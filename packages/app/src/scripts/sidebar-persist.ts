@@ -3,11 +3,12 @@
 // `sessionStorage` across page navigations, renamed to Portosaur's
 // `porto-` prefix throughout.
 
-// Collect required elements from the DOM.
-const scroller = document.getElementById("porto__sidebar");
-const target = scroller?.querySelector<HTMLElement>(
-  "porto-sidebar-state-persist",
-);
+// Elements are re-queried fresh on every use: client-side
+// navigation replaces the sidebar, so anything captured at module
+// load is detached after the first navigation.
+const getScroller = () => document.getElementById("porto__sidebar");
+const getTarget = () =>
+  getScroller()?.querySelector<HTMLElement>("porto-sidebar-state-persist");
 
 /** Portosaur uses this key to store sidebar state in `sessionStorage`. */
 const storageKey = "porto-sidebar-state";
@@ -27,7 +28,7 @@ interface SidebarState {
  */
 const getState = (): SidebarState => {
   let open: SidebarState["open"] = [];
-  const hash = target?.dataset.hash || "";
+  const hash = getTarget()?.dataset.hash || "";
   try {
     const rawStoredState = sessionStorage.getItem(storageKey);
     const storedState = JSON.parse(rawStoredState || "{}") as SidebarState;
@@ -37,7 +38,7 @@ const getState = (): SidebarState => {
   return {
     hash,
     open,
-    scroll: scroller?.scrollTop || 0,
+    scroll: getScroller()?.scrollTop || 0,
   };
 };
 
@@ -48,8 +49,18 @@ const storeState = (state: SidebarState): void => {
   } catch {}
 };
 
-/** Updates sidebar state in session storage without modifying `open` state. */
-const updateState = (): void => storeState(getState());
+/**
+ * Updates sidebar state in session storage without modifying `open`
+ * state. Skipped when the current page has no persist target (the
+ * mobile menu-only sidebar on non-docs pages): storing an empty
+ * state there would wipe the docs sidebar's saved state.
+ */
+const updateState = (): void => {
+  if (!getTarget()) {
+    return;
+  }
+  storeState(getState());
+};
 
 /** Updates sidebar state in session storage to include a new value for a specific `<details>` element. */
 const setToggleState = (open: boolean, detailsIndex: number): void => {
@@ -58,20 +69,53 @@ const setToggleState = (open: boolean, detailsIndex: number): void => {
   storeState(state);
 };
 
-// Store the current `open` state whenever a user interacts with one of the `<details>` groups.
-target?.addEventListener("click", (event) => {
-  if (!(event.target instanceof Element)) return;
-  // Query for the nearest `<summary>` and then its parent `<details>`.
-  // This excludes clicks outside of the `<summary>`, which don’t trigger toggles.
-  const toggledDetails = event.target.closest("summary")?.closest("details");
-  if (!toggledDetails) return;
-  const restoreElement = toggledDetails.querySelector<HTMLElement>(
-    "porto-sidebar-restore",
-  );
-  const index = parseInt(restoreElement?.dataset.index || "");
-  if (isNaN(index)) return;
-  setToggleState(!toggledDetails.open, index);
-});
+/**
+ * Per-page setup: wire the click listener that stores the `open`
+ * state of toggled `<details>` groups, and restore the sidebar's
+ * scroll position from the stored state (the inline script in
+ * SidebarPersister only runs on the first load — client-side
+ * navigation needs this re-run). The marker keeps a re-run on the
+ * same sidebar from double-wiring the listener.
+ */
+const setupSidebarPersist = (): void => {
+  const target = getTarget();
+  if (!target || target.hasAttribute("data-porto-wired")) {
+    return;
+  }
+  target.setAttribute("data-porto-wired", "");
+  // Restore the scroll position when the stored state belongs to
+  // this sidebar (same hash).
+  try {
+    const storedState = JSON.parse(
+      sessionStorage.getItem(storageKey) || "{}",
+    ) as SidebarState;
+    const scroller = getScroller();
+    if (
+      scroller &&
+      storedState.hash === target.dataset.hash &&
+      typeof storedState.scroll === "number"
+    ) {
+      scroller.scrollTop = storedState.scroll;
+    }
+  } catch {}
+  // Store the current `open` state whenever a user interacts with one of the `<details>` groups.
+  target.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    // Query for the nearest `<summary>` and then its parent `<details>`.
+    // This excludes clicks outside of the `<summary>`, which don’t trigger toggles.
+    const toggledDetails = event.target.closest("summary")?.closest("details");
+    if (!toggledDetails) return;
+    const restoreElement = toggledDetails.querySelector<HTMLElement>(
+      "porto-sidebar-restore",
+    );
+    const index = parseInt(restoreElement?.dataset.index || "");
+    if (isNaN(index)) return;
+    setToggleState(!toggledDetails.open, index);
+  });
+};
+
+setupSidebarPersist();
+document.addEventListener("astro:page-load", setupSidebarPersist);
 
 // Store sidebar state before navigating. These will also store it on tab blur etc.,
 // but avoid using the `beforeunload` event, which can cause issues with back/forward cache

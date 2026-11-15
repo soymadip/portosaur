@@ -43,31 +43,42 @@ const { hasSidebar = false } = Astro.props;
     // The mobile menu uses the popover API to open and close without JavaScript. We enhance this
     // behaviour with focus trapping while the menu is open.
     class PortoSidebarPane extends HTMLElement {
+      desktopMediaQuery = matchMedia("(min-width: 50em)");
+      onMediaChange = () => this.resetPopoverAttribute();
+
       constructor() {
         super();
 
-        const desktopMediaQuery = matchMedia("(min-width: 50em)");
-
-        // Remove the popover attribute on desktop viewports — only
-        // for the persistent (docs) variant, where the pane becomes
-        // the always-visible sidebar. The menu-only variant keeps
-        // its popover at every width (its toggle hides at desktop,
-        // so it can never open there).
-        const resetPopoverAttribute = () => {
-          this.popover =
-            this.dataset.persistent !== undefined && desktopMediaQuery.matches
-              ? null
-              : "auto";
-        };
-        resetPopoverAttribute();
-        desktopMediaQuery.addEventListener("change", () =>
-          resetPopoverAttribute(),
-        );
+        this.resetPopoverAttribute();
+        this.desktopMediaQuery.addEventListener("change", this.onMediaChange);
 
         // Update the menu state when the sidebar popover is toggled.
         this.addEventListener("toggle", ({ newState }) =>
           this.trapFocus(newState === "open"),
         );
+      }
+
+      disconnectedCallback() {
+        // Client-side navigation discards the pane, but the
+        // MediaQueryList lives on — remove the listener, or each
+        // navigation leaks one on a detached element.
+        this.desktopMediaQuery.removeEventListener(
+          "change",
+          this.onMediaChange,
+        );
+      }
+
+      // Remove the popover attribute on desktop viewports — only
+      // for the persistent (docs) variant, where the pane becomes
+      // the always-visible sidebar. The menu-only variant keeps
+      // its popover at every width (its toggle hides at desktop,
+      // so it can never open there).
+      resetPopoverAttribute() {
+        this.popover =
+          this.dataset.persistent !== undefined &&
+          this.desktopMediaQuery.matches
+            ? null
+            : "auto";
       }
       /** Trap keyboard focus inside the header and menu when the menu is expanded. */
       trapFocus(shouldTrap: boolean) {

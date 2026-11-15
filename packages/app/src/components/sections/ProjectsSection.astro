@@ -259,6 +259,12 @@ const KNOWN_STATES = new Set([
     }
 
     function onResize() {
+      // Self-cleaning: client-side navigation discards the carousel,
+      // but the window listener lives on — drop it once detached.
+      if (!root.isConnected) {
+        window.removeEventListener("resize", onResize);
+        return;
+      }
       slidesToShow = computeSlidesToShow();
       carousel.style.setProperty("--slides-to-show", String(slidesToShow));
       update();
@@ -278,5 +284,18 @@ const KNOWN_STATES = new Set([
     onResize();
   }
 
-  document.querySelectorAll("[data-porto-carousel]").forEach(initCarousel);
+  // Runs on every page load: client-side navigation replaces the
+  // carousel, so the new one needs wiring. The marker keeps a
+  // re-run on the same carousel from double-wiring it.
+  function setupCarousels() {
+    document.querySelectorAll("[data-porto-carousel]").forEach((root) => {
+      if (root.hasAttribute("data-porto-wired")) {
+        return;
+      }
+      root.setAttribute("data-porto-wired", "");
+      initCarousel(root);
+    });
+  }
+  setupCarousels();
+  document.addEventListener("astro:page-load", setupCarousels);
 </script>

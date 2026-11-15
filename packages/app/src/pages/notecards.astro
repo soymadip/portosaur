@@ -56,13 +56,18 @@ const notes = (await getCollection("notes")).filter((entry) => {
   <script>
     import { initHashNavigation } from "../scripts/hash-navigation.ts";
 
-    initHashNavigation({
-      elementPrefix: "note-",
-      // The card class is `noteCard` (the old ".note-card" selector never
-      // matched the hashed CSS-module class, so the blur never applied).
-      elementSelector: ".noteCard",
-      containerSelector: ".notesContainer",
-      effectDuration: 6000,
+    // Page-load only, no direct call: `astro:page-load` fires on the
+    // initial load too, and calling init twice for the same hash
+    // would stack two highlight overlays.
+    document.addEventListener("astro:page-load", () => {
+      initHashNavigation({
+        elementPrefix: "note-",
+        // The card class is `noteCard` (the old ".note-card" selector never
+        // matched the hashed CSS-module class, so the blur never applied).
+        elementSelector: ".noteCard",
+        containerSelector: ".notesContainer",
+        effectDuration: 6000,
+      });
     });
   </script>
 </BaseLayout>

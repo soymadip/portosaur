@@ -34,10 +34,8 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
   </div>
 
   <script define:vars={{ pagefindUrl, basePrefix }}>
-    const input = document.getElementById("porto-search-input");
-    const resultsEl = document.getElementById("porto-search-results");
-
     // Pagefind is loaded lazily (the index only exists in built output).
+    // The loaded module is cached across navigations.
     let pagefind = null;
     let loadFailed = false;
 
@@ -57,64 +55,72 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
       return pagefind;
     }
 
-    function renderResults(results, query) {
-      if (!resultsEl) {
+    // Runs on every page load: client-side navigation replaces the
+    // input and results, so the new ones need wiring (and the ?q=
+    // prefill re-run). The marker keeps a re-run on the same input
+    // from double-wiring the listener or double-running the prefill.
+    const setupSearch = () => {
+      const input = document.getElementById("porto-search-input");
+      const resultsEl = document.getElementById("porto-search-results");
+      if (!(input instanceof HTMLInputElement) || !resultsEl) {
         return;
       }
-      if (results.length === 0) {
-        resultsEl.textContent = `No results found for "${query}".`;
+      if (input.hasAttribute("data-porto-wired")) {
         return;
       }
-      const list = document.createElement("ul");
-      list.className = "porto-search-results__list";
-      results.forEach((result) => {
-        const item = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = result.url;
-        link.textContent = result.title || result.url;
-        item.appendChild(link);
-        if (result.excerpt) {
-          const excerpt = document.createElement("p");
-          // The excerpt is Pagefind-generated from the site's own
-          // content (with <mark> highlights) — safe to inject.
-          excerpt.innerHTML = result.excerpt;
-          item.appendChild(excerpt);
+      input.setAttribute("data-porto-wired", "");
+
+      function renderResults(results, query) {
+        if (results.length === 0) {
+          resultsEl.textContent = `No results found for "${query}".`;
+          return;
         }
-        list.appendChild(item);
-      });
-      resultsEl.replaceChildren(list);
-    }
-
-    async function runSearch(query) {
-      if (!resultsEl) {
-        return;
-      }
-      if (!query) {
-        resultsEl.innerHTML =
-          '<p class="porto-search__hint">Type to search the documentation.</p>';
-        return;
-      }
-      const index = await loadPagefind();
-      if (!index) {
-        resultsEl.textContent =
-          "Search index is not available yet. Build the site to enable search.";
-        return;
-      }
-      const response = await index.search(query);
-      const results = [];
-      for (const result of response.results) {
-        const data = await result.data();
-        results.push({
-          url: data.url,
-          title: data.meta?.title,
-          excerpt: data.excerpt,
+        const list = document.createElement("ul");
+        list.className = "porto-search-results__list";
+        results.forEach((result) => {
+          const item = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = result.url;
+          link.textContent = result.title || result.url;
+          item.appendChild(link);
+          if (result.excerpt) {
+            const excerpt = document.createElement("p");
+            // The excerpt is Pagefind-generated from the site's own
+            // content (with <mark> highlights) — safe to inject.
+            excerpt.innerHTML = result.excerpt;
+            item.appendChild(excerpt);
+          }
+          list.appendChild(item);
         });
+        resultsEl.replaceChildren(list);
       }
-      renderResults(results, query);
-    }
 
-    let debounce = 0;
-    if (input instanceof HTMLInputElement) {
+      async function runSearch(query) {
+        if (!query) {
+          resultsEl.innerHTML =
+            '<p class="porto-search__hint">Type to search the documentation.</p>';
+          return;
+        }
+        const index = await loadPagefind();
+        if (!index) {
+          resultsEl.textContent =
+            "Search index is not available yet. Build the site to enable search.";
+          return;
+        }
+        const response = await index.search(query);
+        const results = [];
+        for (const result of response.results) {
+          const data = await result.data();
+          results.push({
+            url: data.url,
+            title: data.meta?.title,
+            excerpt: data.excerpt,
+          });
+        }
+        renderResults(results, query);
+      }
+
+      let debounce = 0;
       // Prefill from ?q= and search on load.
       const params = new URLSearchParams(window.location.search);
       const initialQuery = params.get("q") ?? "";
@@ -136,7 +142,10 @@ const pagefindUrl = `${basePrefix}/pagefind/pagefind.js`;
           runSearch(query);
         }, 200);
       });
-    }
+    };
+
+    setupSearch();
+    document.addEventListener("astro:page-load", setupSearch);
   </script>
 </BaseLayout>
 

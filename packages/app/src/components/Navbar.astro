@@ -219,9 +219,16 @@ const showThemeSwitch = theme.showThemeSwitch;
     let lastScrollY = window.scrollY;
     let ticking = false;
     const update = () => {
+      // Re-query the navbar on every scroll: client-side navigation
+      // replaces the body, so the element captured at load is
+      // detached after the first navigation.
+      const current = document.querySelector("[data-navbar]");
       const y = window.scrollY;
-      const hidden = y > navbar.offsetHeight && y > lastScrollY;
-      navbar.classList.toggle("porto-navbar--hidden", hidden);
+      const hidden =
+        current instanceof HTMLElement &&
+        y > current.offsetHeight &&
+        y > lastScrollY;
+      current?.classList.toggle("porto-navbar--hidden", hidden);
       document.documentElement.classList.toggle("porto-navbar-hidden", hidden);
       lastScrollY = y;
       ticking = false;

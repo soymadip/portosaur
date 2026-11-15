@@ -79,4 +79,8 @@ const base = config.site.baseUrl;
   }
   applySocialDelays();
   window.addEventListener("resize", applySocialDelays);
+  // Client-side navigation replaces the links: re-apply the delays
+  // to the new page's links too. (The resize listener re-queries
+  // fresh, so it needs no change.)
+  document.addEventListener("astro:page-load", applySocialDelays);
 </script>

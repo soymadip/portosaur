@@ -77,6 +77,18 @@ const isDev = import.meta.env.DEV;
 
 <script>
   class PortoSearch extends HTMLElement {
+    // Window listeners, stored so disconnectedCallback can remove
+    // them: client-side navigation discards the element, but window
+    // listeners live on — a stale Ctrl+K handler would call
+    // showModal() on a detached dialog (which throws).
+    private onClick: (event: MouseEvent) => void = () => {};
+    private onKeyDown: (event: KeyboardEvent) => void = () => {};
+
+    disconnectedCallback() {
+      window.removeEventListener("click", this.onClick);
+      window.removeEventListener("keydown", this.onKeyDown);
+    }
+
     constructor() {
       super();
       const openBtn = this.querySelector<HTMLButtonElement>(
@@ -99,6 +111,7 @@ const isDev = import.meta.env.DEV;
           closeModal();
         }
       };
+      this.onClick = onClick;
 
       const openModal = (event?: MouseEvent) => {
         dialog.showModal();
@@ -120,7 +133,7 @@ const isDev = import.meta.env.DEV;
       });
 
       // Listen for `ctrl + k` and `cmd + k` keyboard shortcuts.
-      window.addEventListener("keydown", (e) => {
+      const onKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey === true || e.ctrlKey === true) && e.key === "k") {
           if (dialog.open) {
             closeModal();
@@ -129,7 +142,9 @@ const isDev = import.meta.env.DEV;
           }
           e.preventDefault();
         }
-      });
+      };
+      this.onKeyDown = onKeyDown;
+      window.addEventListener("keydown", onKeyDown);
 
       if (import.meta.env.DEV) {
         return;
@@ -139,6 +154,14 @@ const isDev = import.meta.env.DEV;
       onIdle(async () => {
         // @ts-expect-error — Missing types for @pagefind/default-ui package.
         const { PagefindUI } = await import("@pagefind/default-ui");
+        // Another search element (from before a client-side
+        // navigation, whose idle callback fired late) may already
+        // have mounted the UI into this page's container — mounting
+        // twice would stack two search UIs.
+        const target = document.querySelector("#porto__search");
+        if (!target || target.querySelector(".pagefind-ui")) {
+          return;
+        }
         new PagefindUI({
           element: "#porto__search",
           baseUrl: this.dataset.baseUrl,
