@@ -13,6 +13,13 @@
  * - `renderDynamicIcon(iconStr, options)` — the old DynamicIcon logic:
  *   raw SVG, image path, emoji, Iconify id, techMap/devicon guess by
  *   slug, then a fallback icon.
+ * - `collectSidebarSprite(items)` / `renderSidebarIcon(...)` — the
+ *   sidebar's deduplicated icons: icons that repeat across sidebar
+ *   rows render as `<use>` references into a per-page sprite, while
+ *   single-use icons keep rendering inline (a symbol + reference
+ *   costs more bytes than the inline SVG when the icon appears
+ *   once). The sprite only ever shrinks a page — see the section
+ *   comment above `collectSidebarSprite`.
  * - `withBase(path, baseUrl)` — base-aware asset URL (the old
  *   `withBaseUrl`); absolute URLs, protocol-relative URLs, and hashes
  *   pass through unchanged.
@@ -206,6 +213,27 @@ export interface RenderIconOptions {
 }
 
 /**
+ * The `class`/`style` attributes for an icon `<svg>`, shared by
+ * `renderIcon` and `renderIconUse` — the two renderings must stay
+ * identical apart from the body.
+ */
+function iconSvgExtraAttrs(options: RenderIconOptions): string {
+  const styleBits = [];
+  if (options.size) {
+    styleBits.push(`font-size:${options.size}`);
+  }
+  if (options.color) {
+    styleBits.push(`color:${options.color}`);
+  }
+  const classAttr = options.className
+    ? ` class="${escapeAttr(options.className)}"`
+    : "";
+  const styleAttr =
+    styleBits.length > 0 ? ` style="${escapeAttr(styleBits.join(";"))}"` : "";
+  return `${classAttr}${styleAttr}`;
+}
+
+/**
  * Renders an icon as an inline SVG string.
  *
  * @param id - An Iconify id (`"md:home"`, shorthand or canonical
@@ -249,20 +277,8 @@ export function renderIcon(
   const attributes = Object.entries(rendered.attributes)
     .map(([key, value]) => `${key}="${escapeAttr(value)}"`)
     .join(" ");
-  const styleBits = [];
-  if (options.size) {
-    styleBits.push(`font-size:${options.size}`);
-  }
-  if (options.color) {
-    styleBits.push(`color:${options.color}`);
-  }
-  const classAttr = options.className
-    ? ` class="${escapeAttr(options.className)}"`
-    : "";
-  const styleAttr =
-    styleBits.length > 0 ? ` style="${escapeAttr(styleBits.join(";"))}"` : "";
 
-  const svg = `<svg ${attributes}${classAttr}${styleAttr} aria-hidden="true">${rendered.body}</svg>`;
+  const svg = `<svg ${attributes}${iconSvgExtraAttrs(options)} aria-hidden="true">${rendered.body}</svg>`;
   renderCache.set(cacheKey, svg);
   return svg;
 }
@@ -458,4 +474,260 @@ export function renderDynamicIcon(
 
   // 6. Final fallback
   return renderIcon(fallbackIcon, { size });
+}
+
+/**
+ * Sidebar icon sprite — deduplicated inline SVGs.
+ *
+ * The sidebar inlines one full Iconify SVG per row, and the same
+ * icon repeats across rows (the folder/notebook fallbacks most of
+ * all) — every docs page re-downloads all of it on every
+ * navigation. Rows whose icon repeats render as a `<use>` reference
+ * into a per-page sprite instead; single-use icons keep rendering
+ * inline, because a symbol + reference costs more bytes than the
+ * inline SVG when the icon appears once.
+ *
+ * The sprite only ever shrinks a page: an icon joins it only when
+ * serving its rows from the sprite is strictly smaller than
+ * inlining them (measured on the exact strings, not estimated),
+ * and the sprite is emitted only when the total saving covers its
+ * container. A page with no repeated icons gets no sprite at all
+ * and renders byte-identically to before. Non-Iconify rows (emoji,
+ * images, raw SVG) are untouched — they never enter the sprite.
+ */
+
+/**
+ * The sprite's `<symbol>` id for an Iconify id. The `:` is kept —
+ * it is legal in an HTML id and in a fragment reference (`<use
+ * href="#...">` matches by string, not by CSS selector, so it needs
+ * no escaping); keeping the id verbatim also makes collisions
+ * impossible, where replacing `:` with `-` could merge two ids.
+ */
+export function spriteSymbolId(iconId: string): string {
+  return `porto-icon-${iconId}`;
+}
+
+/**
+ * The parts of an icon's SVG a `<symbol>` needs: its viewBox (each
+ * icon keeps its own — viewBoxes vary: 24x24, 128x128, wide logos)
+ * and its body, verbatim (fills, strokes and gradient defs all live
+ * in the body, so a symbol renders exactly like the inline SVG).
+ */
+interface IconSvgParts {
+  viewBox: string;
+  body: string;
+}
+
+const svgPartsCache = new Map<string, IconSvgParts | null>();
+
+function iconSvgParts(iconId: string): IconSvgParts | null {
+  const cached = svgPartsCache.get(iconId);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const iconData = resolveIconData(iconId, true);
+  const rendered = iconData ? iconToSVG(iconData) : null;
+  const viewBox = rendered?.attributes?.viewBox;
+  const parts =
+    rendered && viewBox
+      ? { viewBox: String(viewBox), body: rendered.body }
+      : null;
+  svgPartsCache.set(iconId, parts);
+  return parts;
+}
+
+/**
+ * Renders an icon as a sprite `<symbol>` — the icon's body under
+ * its own viewBox, so `<use>` references scale it exactly like the
+ * inline SVG. Returns `""` when the id is unknown.
+ */
+export function renderIconSymbol(iconId: string): string {
+  const parts = iconSvgParts(iconId);
+  if (!parts) {
+    return "";
+  }
+  return (
+    `<symbol id="${escapeAttr(spriteSymbolId(iconId))}" ` +
+    `viewBox="${escapeAttr(parts.viewBox)}">${parts.body}</symbol>`
+  );
+}
+
+/**
+ * Renders an icon as a `<use>` reference into the sidebar sprite —
+ * the same 1em `<svg>` `renderIcon` emits, with the body replaced by
+ * a reference to the icon's symbol. The symbol carries the viewBox,
+ * so the reference scales identically (including non-square icons,
+ * which letterbox the same way). `size`/`color`/`className` behave
+ * exactly as in `renderIcon` (currentColor flows through `<use>`).
+ */
+export function renderIconUse(
+  iconId: string,
+  options: RenderIconOptions = {},
+): string {
+  return (
+    `<svg width="1em" height="1em"${iconSvgExtraAttrs(options)} aria-hidden="true">` +
+    `<use href="#${escapeAttr(spriteSymbolId(iconId))}"/></svg>`
+  );
+}
+
+/**
+ * Resolves a frontmatter/config icon value to the Iconify id that
+ * would render — the same resolution order as `renderDynamicIcon`,
+ * but returning the canonical id (after techMap mapping) instead of
+ * HTML. Returns null for every non-Iconify case (raw SVG, image,
+ * emoji) and when nothing resolves (unknown id, unknown slug, no
+ * fallback). Checks are silent: the fallback `renderDynamicIcon`
+ * call still warns once for an unknown explicit id, exactly as
+ * before.
+ */
+export function resolveDynamicIconId(
+  iconStr?: DynamicIconValue,
+  options: RenderDynamicIconOptions = {},
+): string | null {
+  const { slug, fallbackIcon } = options;
+
+  if (iconStr) {
+    if (typeof iconStr === "string" && iconStr.trim().startsWith("<svg")) {
+      return null;
+    }
+    if (
+      typeof iconStr === "object" ||
+      iconStr.includes(".") ||
+      iconStr.includes("/")
+    ) {
+      return null;
+    }
+    if (/\p{Emoji}/u.test(iconStr)) {
+      return null;
+    }
+    const mappedId = techMap[iconStr.toLowerCase()]?.icon ?? iconStr;
+    return resolveIconData(mappedId, true) ? mappedId : null;
+  }
+
+  if (slug) {
+    const slugLower = slug.toLowerCase();
+    if (techMap[slugLower]) {
+      const mappedId = techMap[slugLower].icon;
+      return resolveIconData(mappedId, true) ? mappedId : null;
+    }
+    const potentialDevicon = `di:${slugLower}`;
+    if (resolveIconData(potentialDevicon, true)) {
+      return potentialDevicon;
+    }
+  }
+
+  if (fallbackIcon) {
+    const mappedId = techMap[fallbackIcon.toLowerCase()]?.icon ?? fallbackIcon;
+    return resolveIconData(mappedId, true) ? mappedId : null;
+  }
+  return null;
+}
+
+/** A sidebar tree node, as far as icon collection needs to see it. */
+export interface SidebarSpriteItem {
+  icon?: DynamicIconValue;
+  label?: string;
+  type?: string;
+  items?: SidebarSpriteItem[];
+}
+
+/** A collected sprite: its markup and the ids it contains. */
+export interface SidebarSprite {
+  html: string;
+  ids: Set<string>;
+}
+
+/**
+ * The sprite wrapper: a zero-size, absolutely positioned `<svg>`
+ * (never `display: none` — a hidden sprite still has to be
+ * referenceable, and zero-size + overflow hidden is bulletproof for
+ * `<use>` in every browser). `aria-hidden` — the symbols are
+ * referenced by the rows' own `aria-hidden` svgs.
+ */
+const SPRITE_OPEN =
+  `<svg aria-hidden="true" data-porto-sprite ` +
+  `style="position:absolute;width:0;height:0;overflow:hidden">`;
+const SPRITE_CLOSE = "</svg>";
+
+/**
+ * Collects the icon sprite for a sidebar tree: walks every row,
+ * counts how often each resolved Iconify id occurs, and keeps the
+ * icons whose rows are strictly smaller served from the sprite than
+ * inlined (measured on the exact rendered strings). The sprite is
+ * emitted only when the total saving covers its container — so a
+ * tree with no repeated icons yields an empty sprite and the page
+ * renders exactly as before.
+ *
+ * @param items - The sidebar tree (top-level items; children are
+ *   walked recursively).
+ * @returns The sprite markup ("" when no sprite is worthwhile) and
+ *   the set of icon ids it contains, for `renderSidebarIcon`.
+ */
+export function collectSidebarSprite(
+  items: SidebarSpriteItem[],
+): SidebarSprite {
+  const empty: SidebarSprite = { html: "", ids: new Set<string>() };
+  const counts = new Map<string, number>();
+  const visit = (nodes: SidebarSpriteItem[] | undefined) => {
+    for (const item of nodes ?? []) {
+      const id = resolveDynamicIconId(item.icon, {
+        slug: item.label,
+        fallbackIcon: item.type === "category" ? "md:folder" : "md:notebook",
+      });
+      if (id) {
+        counts.set(id, (counts.get(id) ?? 0) + 1);
+      }
+      visit(item.items);
+    }
+  };
+  visit(items);
+
+  const members: string[] = [];
+  let totalSaving = 0;
+  for (const [id, count] of counts) {
+    if (count < 2) {
+      continue;
+    }
+    const saving =
+      count * renderIcon(id).length -
+      (count * renderIconUse(id).length + renderIconSymbol(id).length);
+    if (saving > 0) {
+      members.push(id);
+      totalSaving += saving;
+    }
+  }
+  if (
+    members.length === 0 ||
+    totalSaving <= SPRITE_OPEN.length + SPRITE_CLOSE.length
+  ) {
+    return empty;
+  }
+  const symbols = members.map((id) => renderIconSymbol(id)).join("");
+  return {
+    html: `${SPRITE_OPEN}${symbols}${SPRITE_CLOSE}`,
+    ids: new Set(members),
+  };
+}
+
+/**
+ * Renders a sidebar row's icon: a `<use>` reference when the icon
+ * is in the page's sprite, `renderDynamicIcon` otherwise (emoji,
+ * images, raw SVG, single-use and unknown icons all render exactly
+ * as before).
+ *
+ * @param iconStr - The raw icon value.
+ * @param options - The same options as `renderDynamicIcon`.
+ * @param spriteIds - The ids in the page's sprite, from
+ *   `collectSidebarSprite`.
+ */
+export function renderSidebarIcon(
+  iconStr?: DynamicIconValue,
+  options: RenderDynamicIconOptions = {},
+  spriteIds: Set<string> = new Set<string>(),
+): string {
+  const id = resolveDynamicIconId(iconStr, options);
+  if (id && spriteIds.has(id)) {
+    return renderIconUse(id, { size: options.size });
+  }
+  return renderDynamicIcon(iconStr, options);
 }

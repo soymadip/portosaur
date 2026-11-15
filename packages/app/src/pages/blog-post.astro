@@ -23,6 +23,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogSidebar from "../components/BlogSidebar.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
+import { HAS_MATH_KEY } from "../plugins/remarkHasMath.ts";
 import { pageTitle, blogSlug, postDate } from "../utils/content.ts";
 import {
   localImageDimensions,
@@ -188,7 +189,11 @@ function postUrl(other) {
 }
 ---
 
-<BaseLayout title={title} description={post.data.description}>
+<BaseLayout
+  title={title}
+  description={post.data.description}
+  hasMath={remarkPluginFrontmatter?.[HAS_MATH_KEY] === true}
+>
   <div class="porto-blog-layout">
     <BlogSidebar posts={sidebarPosts} currentUrl={currentUrl} />
     <article class="porto-blog-article">

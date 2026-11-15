@@ -31,6 +31,7 @@ import sidebar from "porto:sidebar";
 import DocLayout from "../layouts/DocLayout.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
+import { HAS_MATH_KEY } from "../plugins/remarkHasMath.ts";
 import {
   pageTitle,
   docFileTitle,
@@ -148,6 +149,7 @@ const items = showTopicList ? findCategoryItems(sidebar, currentHref) : [];
   headings={headings}
   editUrl={editUrl}
   lastUpdated={lastUpdated}
+  hasMath={remarkPluginFrontmatter?.[HAS_MATH_KEY] === true}
 >
   <Content components={mdxComponents} />
   {items.length > 0 && (

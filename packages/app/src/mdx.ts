@@ -10,7 +10,9 @@
  *
  * Plugin order matters: remarkContentTitle runs first — it hoists the
  * page's first H1 into the title slot before any content transform
- * sees it. remark-directive runs before remarkAdmonitions (which
+ * sees it. remarkHasMath runs right after remarkMath — it flags
+ * pages with math nodes, which only exist once remarkMath has
+ * created them. remark-directive runs before remarkAdmonitions (which
  * consumes its nodes); remarkIcons runs before remark-emoji so icon
  * shortcodes are claimed first. remarkGithubAlerts runs beside
  * remarkAdmonitions — both emit the same admonition `<div>`s, from
@@ -30,6 +32,7 @@ import remarkEmoji from "remark-emoji";
 import type { BuiltinTheme } from "shiki";
 
 import remarkContentTitle from "./plugins/remarkContentTitle.ts";
+import remarkHasMath from "./plugins/remarkHasMath.ts";
 import remarkVars from "./plugins/remarkVars.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
@@ -76,6 +79,7 @@ export function portosaurMdxOptions({
     remarkPlugins: [
       remarkContentTitle,
       remarkMath,
+      remarkHasMath,
       [remarkVars, userVars],
       remarkIcons,
       remarkDirective,

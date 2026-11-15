@@ -29,19 +29,30 @@
 // - Every row shows an icon: the frontmatter `icon` when the entry
 //   declares one, else DocCardList's fallbacks (folder for
 //   categories, notebook for docs) — Fumadocs-style. The frontmatter
-//   `color`, when declared, colors the icon.
+//   `color`, when declared, colors the icon. Icons that repeat
+//   across rows render as `<use>` references into a per-page sprite
+//   (see `collectSidebarSprite`); single-use icons, emoji and
+//   images render inline as before.
 import config from "porto:config";
 import Icon from "./Icon.astro";
 import SidebarRestorePoint from "./SidebarRestorePoint.astro";
-import { renderDynamicIcon } from "../utils/icons.ts";
+import { collectSidebarSprite, renderSidebarIcon } from "../utils/icons.ts";
 
 interface Props {
   items: any[];
   currentHref: string;
   nested?: boolean;
+  spriteIds?: Set<string>;
 }
 
-const { items, currentHref, nested } = Astro.props;
+const { items, currentHref, nested, spriteIds: parentSpriteIds } = Astro.props;
+
+// The icon sprite is collected once, at the top level, from the
+// whole tree — nested levels reuse the same id set via the
+// `spriteIds` prop, so an icon repeated across branches is still
+// deduped (a per-branch collection would miss those).
+const sprite = nested ? null : collectSidebarSprite(items);
+const spriteIds = sprite?.ids ?? parentSpriteIds ?? new Set<string>();
 
 const collapsable = config.theme.collapsableSidebar !== false;
 
@@ -85,12 +96,18 @@ function hasActiveDescendant(item: any): boolean {
 }
 ---
 
+{sprite?.html && <Fragment set:html={sprite.html} />}
+
 <ul class:list={{ "top-level": !nested }}>
   {items.map((item) => {
-    const iconHtml = renderDynamicIcon(item.icon, {
-      slug: item.label,
-      fallbackIcon: item.type === "category" ? "md:folder" : "md:notebook",
-    });
+    const iconHtml = renderSidebarIcon(
+      item.icon,
+      {
+        slug: item.label,
+        fallbackIcon: item.type === "category" ? "md:folder" : "md:notebook",
+      },
+      spriteIds,
+    );
     const icon = (
       <span
         class="sidebar-icon"
@@ -134,6 +151,7 @@ function hasActiveDescendant(item: any): boolean {
                 items={item.items ?? []}
                 currentHref={currentHref}
                 nested
+                spriteIds={spriteIds}
               />
             </details>
           ) : (
@@ -162,6 +180,7 @@ function hasActiveDescendant(item: any): boolean {
                 items={item.items ?? []}
                 currentHref={currentHref}
                 nested
+                spriteIds={spriteIds}
               />
             </>
           )

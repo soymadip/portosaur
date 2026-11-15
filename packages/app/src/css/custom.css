@@ -34,7 +34,11 @@
 /* ----- Global Fonts ----- */
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
-@import "katex/dist/katex.min.css";
+
+/* KaTeX CSS is NOT imported here — it loads per-page from
+ * BaseLayout, only on pages that render math (flagged by the
+ * remarkHasMath plugin). Importing it here put ~25KB on every
+ * page, while most sites have no math pages at all. */
 
 /* ----- Portosaur CSS system (derived from Starlight, renamed) ----- */
 @import "./variables.css";

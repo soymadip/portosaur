@@ -38,6 +38,23 @@ import NavProgress from "../components/NavProgress.astro";
 import Footer from "../components/Footer.astro";
 import SkipLink from "../components/SkipLink.astro";
 
+// Font preloads: the two latin variable-font files every page
+// downloads (Geist + Geist Mono, normal weight — the italic and
+// latin-ext faces only load when used). Imported with `?url` so Vite
+// resolves the hashed asset URL at build time; the fontsource CSS
+// references the same files, so Vite emits each one once.
+import geistLatinWoff2 from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import geistMonoLatinWoff2 from "@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url";
+
+// KaTeX stylesheet URL, resolved at build time via `?url` (never a
+// hardcoded hashed path). The stylesheet is linked only on pages
+// that render math (`hasMath`, flagged by the remarkHasMath plugin)
+// — it used to be imported globally from custom.css, ~25KB on every
+// page. The `?url` import keeps Vite emitting the file (and its
+// fonts) as a standalone asset; browsers only download it when the
+// link below (or the fallback script) asks for it.
+import katexCssUrl from "katex/dist/katex.min.css?url";
+
 interface Props {
   title: string;
   description?: string;
@@ -45,6 +62,14 @@ interface Props {
   wrapperClassName?: string;
   hasSidebar?: boolean;
   hasToc?: boolean;
+  /**
+   * The page renders math (flagged by the remarkHasMath plugin) —
+   * links the KaTeX stylesheet. Pages without math get no KaTeX
+   * CSS; pages with math whose flag was never plumbed through
+   * still get the stylesheet from the fallback script at the end
+   * of <body>.
+   */
+  hasMath?: boolean;
 }
 
 const {
@@ -54,6 +79,7 @@ const {
   wrapperClassName,
   hasSidebar = false,
   hasToc = false,
+  hasMath = false,
 } = Astro.props;
 
 const site = config.site;
@@ -175,6 +201,20 @@ const swUrl = withBase("sw.js");
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     {socialCardUrl && <meta name="twitter:image" content={socialCardUrl} />}
+    <link
+      rel="preload"
+      href={geistLatinWoff2}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={geistMonoLatinWoff2}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     {headTags.map((tag) => {
       const Tag = tag.tagName as any;
       if (tag.innerHTML) {
@@ -182,6 +222,13 @@ const swUrl = withBase("sw.js");
       }
       return <Tag {...tag.attributes} />;
     })}
+    {/*
+      KaTeX stylesheet, only on pages that render math — see the
+      `?url` import above. `data-katex-css` marks the link so the
+      fallback script at the end of <body> can tell it is already
+      present.
+    */}
+    {hasMath && <link rel="stylesheet" href={katexCssUrl} data-katex-css />}
     {/*
       Blocking theme-mode script: applies the stored choice (or the
       configured defaultMode) before first paint, so there is no
@@ -351,6 +398,40 @@ const swUrl = withBase("sw.js");
     {pwaEnabled && pwaNotifications && <script>
       import "../clientModules/periodicSync.ts";
     </script>}
+
+    {/*
+      KaTeX fallback: the head link above covers pages whose `hasMath`
+      flag is plumbed through, but a page that renders math without
+      the flag (a page type nobody wired yet) would show unstyled
+      math — so when KaTeX markup is present but no stylesheet link
+      is, inject one. Runs on load and on every client-side
+      navigation (`astro:page-load` — the listener registers once,
+      guarded, since inline scripts can re-execute on repeat
+      visits). A no-op on pages without math and on pages whose
+      head link already exists.
+    */}
+    <script is:inline define:vars={{ katexCssUrl }}>
+      (function () {
+        function ensureKatexCss() {
+          if (!document.querySelector(".katex")) {
+            return;
+          }
+          if (document.querySelector("link[data-katex-css]")) {
+            return;
+          }
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.setAttribute("data-katex-css", "");
+          link.href = katexCssUrl;
+          document.head.appendChild(link);
+        }
+        ensureKatexCss();
+        if (!window.__portoKatexCss) {
+          window.__portoKatexCss = true;
+          document.addEventListener("astro:page-load", ensureKatexCss);
+        }
+      })();
+    </script>
   </body>
 </html>
 

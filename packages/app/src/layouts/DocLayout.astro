@@ -50,6 +50,12 @@ interface Props {
   headings?: { depth: number; slug: string; text: string }[];
   editUrl?: string;
   lastUpdated?: string;
+  /**
+   * Whether the page renders math — flagged by `remarkHasMath`.
+   * Forwarded to BaseLayout, which loads the KaTeX stylesheet
+   * only on math pages.
+   */
+  hasMath?: boolean;
 }
 
 const {
@@ -60,6 +66,7 @@ const {
   headings = [],
   editUrl,
   lastUpdated,
+  hasMath,
 } = Astro.props;
 
 // The section crumb comes from the mode/route, not the tree — the
@@ -80,7 +87,13 @@ const tocHeadings = headings.filter(
 const hasToc = tocHeadings.length > 0;
 ---
 
-<BaseLayout title={title} description={description} hasSidebar hasToc={hasToc}>
+<BaseLayout
+  title={title}
+  description={description}
+  hasSidebar
+  hasToc={hasToc}
+  hasMath={hasMath}
+>
   <MobileMenu hasSidebar>
     <Sidebar currentHref={currentHref} />
   </MobileMenu>

@@ -17,6 +17,7 @@ import DocLayout from "../layouts/DocLayout.astro";
 import DocCardList from "../components/DocCardList.astro";
 import { mdxComponents } from "../components/mdx/index.ts";
 import { CONTENT_TITLE_KEY } from "../plugins/remarkContentTitle.ts";
+import { HAS_MATH_KEY } from "../plugins/remarkHasMath.ts";
 import {
   pageTitle,
   docPageTitles,
@@ -78,6 +79,7 @@ if (projectRelative) {
   currentHref={currentHref}
   headings={[]}
   editUrl={editUrl}
+  hasMath={rendered?.remarkPluginFrontmatter?.[HAS_MATH_KEY] === true}
 >
   {description && <p>{description}</p>}
   {Content && <Content components={mdxComponents} />}
