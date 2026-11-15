@@ -1785,7 +1785,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   margin-bottom: 1rem;
   transition: transform 200ms ease;
   position: relative;
-  display: inline-block;
+  /* Block, not inline-block: as an inline-block the tagline slid up
+     onto the title's line wherever the hero was wide enough for
+     both (tablets, desktop-site mode on phones) — "Portosaurfor
+     your digital personality". OG stacks them, so do we. The title
+     stays inline-block so its underline hugs the text width. */
+  display: block;
   opacity: 0;
   animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s
     forwards;
