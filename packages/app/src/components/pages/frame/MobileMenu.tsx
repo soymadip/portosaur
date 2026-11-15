@@ -1,7 +1,19 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
+import { buttonClass } from "../../Button.tsx";
+import { PortoIcon } from "../../PortoIcon.tsx";
 import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
 import { SiteTitle } from "./SiteTitle.tsx";
 
@@ -31,7 +43,72 @@ import { SiteTitle } from "./SiteTitle.tsx";
  * the pane fades (opacity 0.25s) while its content slides down
  * 8px into place, and reverses on close. Pure CSS —
  * `@starting-style` + `allow-discrete` (see animations.css).
+ *
+ * Desktop sidebar collapse — ported from Fumadocs' docs layout:
+ * the tree's title row holds a collapse trigger (Lucide's
+ * sidebar glyph — the brand row would hide it behind the navbar
+ * until the navbar hides on scroll); clicking it slides the pane
+ * out by its own width while the content expands into the freed
+ * space (250ms, the same duration Fumadocs uses), and a floating
+ * panel with the same trigger offers the way back. Hovering the
+ * viewport's left edge while collapsed peeks the sidebar back in
+ * as a floating card. Cmd/Ctrl+B toggles too. State only —
+ * Fumadocs doesn't persist it either, so a reload reopens the
+ * sidebar. The collapse only exists on desktop (`isDesktop`
+ * gates the `inert` attribute; the CSS rules are all inside the
+ * 50rem block), and only on pages with a sidebar — the menu-only
+ * variant has nothing to collapse.
  */
+
+/** The collapse state, shared with the sidebar tree: the trigger
+ * lives in the tree's title row (the brand row sits hidden behind
+ * the navbar until it hides on scroll, so a trigger there would
+ * be unclickable on page load). */
+const SidebarCollapseContext = createContext<{
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+} | null>(null);
+
+export function useSidebarCollapse(): {
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+} {
+  const ctx = useContext(SidebarCollapseContext);
+  if (!ctx) {
+    throw new Error("useSidebarCollapse must be used inside <MobileMenu>");
+  }
+  return ctx;
+}
+
+/** Fumadocs' `SidebarCollapseTrigger`: the sidebar glyph in a ghost
+ * icon button, with the expanded state on `aria-expanded` (the
+ * label stays "Collapse sidebar" — the toggle pattern Fumadocs
+ * uses, same button in the title row and the floating panel). */
+export function SidebarCollapseTrigger({
+  collapsed,
+  onClick,
+}: {
+  collapsed: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={buttonClass({
+        variant: "ghost",
+        size: "icon-sm",
+        className: "porto-sidebar-collapse-trigger",
+      })}
+      aria-label="Collapse sidebar"
+      aria-controls="porto__sidebar"
+      aria-expanded={!collapsed}
+      data-collapsed={collapsed}
+      onClick={onClick}
+    >
+      <PortoIcon name="sidebar" />
+    </button>
+  );
+}
 
 export function MobileMenu({
   hasSidebar = false,
@@ -41,6 +118,7 @@ export function MobileMenu({
   children?: ReactNode;
 }) {
   const paneRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef(0);
   const config = usePortoConfig();
   // OG Docusaurus renders the sidebar logo only when the navbar
   // hides on scroll — otherwise the brand copy would sit hidden
@@ -48,6 +126,9 @@ export function MobileMenu({
   // need the navbar-height offset from padding instead (the
   // `--no-brand` content variant below).
   const showBrand = hasSidebar && config.theme.hideNavbarOnScroll;
+  const [collapsed, setCollapsed] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     const pane = paneRef.current;
@@ -64,7 +145,9 @@ export function MobileMenu({
     // the popover: the persistent pane is a sidebar, not a
     // dialog, so `role`/`aria-modal` come off with it.
     const resetPopoverAttribute = () => {
-      const persistent = hasSidebar && mediaQuery.matches;
+      const desktop = mediaQuery.matches;
+      setIsDesktop(desktop);
+      const persistent = hasSidebar && desktop;
       if (persistent) {
         pane.removeAttribute("popover");
         pane.removeAttribute("role");
@@ -129,11 +212,143 @@ export function MobileMenu({
     };
   }, [hasSidebar]);
 
+  // The collapse state lives on <html> as classes — the pane
+  // slide, the content expansion, the floating panel and the
+  // peek strip are all pure CSS keyed off them.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("porto-sidebar-collapsed", collapsed && hasSidebar);
+    root.classList.toggle(
+      "porto-sidebar-peeked",
+      collapsed && hovered && hasSidebar,
+    );
+    return () => {
+      root.classList.remove("porto-sidebar-collapsed");
+      root.classList.remove("porto-sidebar-peeked");
+    };
+  }, [collapsed, hovered, hasSidebar]);
+
+  // Collapsing drops any in-progress peek.
+  useEffect(() => {
+    if (collapsed) {
+      setHovered(false);
+    }
+  }, [collapsed]);
+
+  // Cmd/Ctrl+B toggles the collapse on desktop, like Fumadocs —
+  // except while typing (an input, textarea, select, or editable
+  // element has focus).
+  useEffect(() => {
+    if (!hasSidebar) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        !(event.metaKey || event.ctrlKey) ||
+        event.shiftKey ||
+        event.altKey ||
+        event.key !== "b"
+      ) {
+        return;
+      }
+      if (!window.matchMedia("(min-width: 50rem)").matches) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      setCollapsed((prev) => !prev);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [hasSidebar]);
+
+  // When the collapse hides the trigger that had focus (the
+  // brand-row button goes inert with the pane), hand focus to the
+  // floating panel's trigger — Fumadocs does the same.
+  useEffect(() => {
+    if (
+      collapsed &&
+      paneRef.current?.contains(document.activeElement)
+    ) {
+      document
+        .querySelector<HTMLElement>(".porto-sidebar-collapse-panel button")
+        ?.focus();
+    }
+  }, [collapsed]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => !prev);
+  }, []);
+
+  // Memoized on `collapsed` only, so hovering the peek strip
+  // doesn't re-render the sidebar tree (it doesn't consume the
+  // hover state).
+  const collapseValue = useMemo(
+    () => ({ collapsed, toggleCollapsed }),
+    [collapsed, toggleCollapsed],
+  );
+
+  // The peek only answers the mouse (never touch) while collapsed
+  // — and never mid-slide, or the hover flickers the pane.
+  const shouldIgnoreHover = (event: ReactPointerEvent): boolean => {
+    const pane = paneRef.current;
+    if (!pane) {
+      return true;
+    }
+    return (
+      !collapsed ||
+      event.pointerType === "touch" ||
+      pane.getAnimations().length > 0
+    );
+  };
+
+  const onPeekEnter = (event: ReactPointerEvent) => {
+    if (shouldIgnoreHover(event)) {
+      return;
+    }
+    window.clearTimeout(hoverTimerRef.current);
+    setHovered(true);
+  };
+
+  const onPeekLeave = (event: ReactPointerEvent) => {
+    if (shouldIgnoreHover(event)) {
+      return;
+    }
+    window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = window.setTimeout(
+      () => setHovered(false),
+      // Leaving toward the viewport edge gets a close delay, so a
+      // slip off the sidebar doesn't snap it shut immediately.
+      Math.min(event.clientX, document.body.clientWidth - event.clientX) >
+        100
+        ? 0
+        : 500,
+    );
+  };
+
   return (
-    <nav
-      className="print:hidden"
-      aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
-    >
+    <SidebarCollapseContext.Provider value={collapseValue}>
+      <nav
+        className="print:hidden"
+        aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
+      >
       <div
         ref={paneRef}
         popover="auto"
@@ -146,6 +361,12 @@ export function MobileMenu({
             ? "porto-mobile-menu porto-mobile-menu--persistent"
             : "porto-mobile-menu"
         }
+        // The collapsed pane is inert (except while peeked) so
+        // its links can't be tabbed to off-screen — desktop only,
+        // where the collapse exists at all.
+        inert={collapsed && !hovered && isDesktop}
+        onPointerEnter={onPeekEnter}
+        onPointerLeave={onPeekLeave}
       >
         <div
           className={
@@ -165,6 +386,31 @@ export function MobileMenu({
           </div>
         </div>
       </div>
-    </nav>
+      {hasSidebar && (
+        <>
+          {/* The floating way back: visible only while the
+              sidebar is collapsed and not peeked. The panel's
+              trigger is inert with it, so it can't be tabbed to
+              while hidden. */}
+          <div
+            className="porto-sidebar-collapse-panel"
+            inert={!collapsed || hovered}
+          >
+            <SidebarCollapseTrigger
+              collapsed={collapsed}
+              onClick={toggleCollapsed}
+            />
+          </div>
+          {/* The hover-peek strip: Fumadocs' 16px edge zone. */}
+          <div
+            className="porto-sidebar-collapse-strip"
+            aria-hidden="true"
+            onPointerEnter={onPeekEnter}
+            onPointerLeave={onPeekLeave}
+          />
+        </>
+      )}
+      </nav>
+    </SidebarCollapseContext.Provider>
   );
 }

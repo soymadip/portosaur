@@ -7,6 +7,10 @@ import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../lib/sidebar.ts";
 import { PortoIcon } from "../../PortoIcon.tsx";
+import {
+  SidebarCollapseTrigger,
+  useSidebarCollapse,
+} from "./MobileMenu.tsx";
 
 /**
  * The docs sidebar — nested categories, icons, carets, 265px.
@@ -79,6 +83,7 @@ function hasActiveDescendant(item: SidebarItem, current: string): boolean {
 
 export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   const config = usePortoConfig();
+  const { collapsed, toggleCollapsed } = useSidebarCollapse();
   const rawPathname = usePathname();
   const pathname = stripBase(rawPathname ?? "/", config.site.baseUrl);
   const current = normalizeHref(pathname);
@@ -393,7 +398,13 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   return (
     <nav className="porto-sidebar" aria-label="Docs sidebar">
       {spriteHtml && <span dangerouslySetInnerHTML={{ __html: spriteHtml }} />}
-      <p className="porto-sidebar-title">{sectionTitle}</p>
+      <div className="porto-sidebar-title-row">
+        <p className="porto-sidebar-title">{sectionTitle}</p>
+        <SidebarCollapseTrigger
+          collapsed={collapsed}
+          onClick={toggleCollapsed}
+        />
+      </div>
       {renderItems(items, false)}
     </nav>
   );

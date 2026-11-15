@@ -55,6 +55,12 @@ main {
 @media (min-width: 50rem) {
   .main-frame--sidebar {
     padding-inline-start: var(--porto-sidebar-width);
+    /* Slides to 0 with the pane when the sidebar collapses —
+       the same 250ms Fumadocs animates its sidebar column. */
+    transition: padding-inline-start 0.25s ease;
+  }
+  html.porto-sidebar-collapsed .main-frame--sidebar {
+    padding-inline-start: 0;
   }
 }
 
@@ -1316,6 +1322,36 @@ body:has(#porto__sidebar:popover-open) {
        the sidebar stays exactly where it is instead of sliding
        up, and the brand takes the navbar's place. */
     inset-block: 0 0;
+    /* The collapse slide (see below) animates transform +
+       inset-block over the same 250ms Fumadocs uses; the popover
+       transitions stay so a resize mid-animation doesn't snap. */
+    transition:
+      transform 0.25s ease,
+      inset-block 0.25s ease,
+      opacity 0.25s,
+      display 0.25s allow-discrete,
+      overlay 0.25s allow-discrete;
+  }
+  /* Desktop sidebar collapse (Fumadocs' docs layout): the pane
+     slides out by its own width while the content expands into
+     the freed space, and becomes a floating card — inset,
+     rounded, bordered — so the hover peek slides a card back in
+     over the content instead of the full-height pane. */
+  html.porto-sidebar-collapsed .porto-mobile-menu--persistent {
+    inset-block: 0.5rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    transform: translateX(-100%);
+  }
+  html.porto-sidebar-peeked .porto-mobile-menu--persistent {
+    transform: translateX(0.5rem);
+    box-shadow: var(--porto-shadow-lg);
+  }
+  html[dir="rtl"].porto-sidebar-collapsed .porto-mobile-menu--persistent {
+    transform: translateX(100%);
+  }
+  html[dir="rtl"].porto-sidebar-peeked .porto-mobile-menu--persistent {
+    transform: translateX(-0.5rem);
   }
   .porto-mobile-menu--persistent .porto-mobile-menu__content {
     /* No top padding: the brand row occupies the navbar-height
@@ -1345,6 +1381,77 @@ body:has(#porto__sidebar:popover-open) {
     margin-inline: -0.3rem;
     padding-inline: var(--porto-nav-pad-x);
     background-color: var(--porto-color-bg-sidebar);
+  }
+}
+
+/* The collapse trigger: Fumadocs' sidebar glyph in a ghost icon
+   button, muted at rest (white on hover, from the ghost rule).
+   In the title row it sits at the right end, next to the section
+   title — Fumadocs puts it in the sidebar header the same way
+   (Portosaur's brand row would hide it behind the navbar until
+   the navbar hides on scroll, so the title row is the header
+   that can hold it). The row is exactly the title's height, so
+   the title's position doesn't move. */
+.porto-sidebar-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.porto-sidebar-title-row .porto-sidebar-collapse-trigger {
+  margin-inline-start: auto;
+  /* Desktop only — on mobile the sidebar is a popover that
+     closes instead of collapsing, so the trigger would be dead. */
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-sidebar-title-row .porto-sidebar-collapse-trigger {
+    display: inline-flex;
+  }
+}
+.porto-sidebar-collapse-trigger {
+  color: var(--porto-color-gray-3);
+}
+
+/* The floating expand panel: Fumadocs shows the same trigger in
+   a small floating card at the content's top-left while the
+   sidebar is collapsed (and not peeked — then the sidebar itself
+   is visible). Desktop only. */
+.porto-sidebar-collapse-panel {
+  display: none;
+}
+.porto-sidebar-collapse-strip {
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-sidebar-collapse-panel {
+    position: fixed;
+    top: calc(var(--porto-nav-height) + 1rem);
+    inset-inline-start: 1rem;
+    z-index: var(--porto-z-index-menu);
+    display: flex;
+    padding: 0.125rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    background-color: var(--porto-color-bg-nav);
+    box-shadow: var(--porto-shadow-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  html.porto-sidebar-collapsed:not(.porto-sidebar-peeked)
+    .porto-sidebar-collapse-panel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* The hover-peek strip: Fumadocs' 16px edge zone. Hovering it
+     while collapsed slides the sidebar back in as a card. */
+  html.porto-sidebar-collapsed .porto-sidebar-collapse-strip {
+    display: block;
+    position: fixed;
+    inset-inline-start: 0;
+    inset-block: 0;
+    width: 1rem;
+    z-index: var(--porto-z-index-menu);
   }
 }
 
@@ -1863,6 +1970,14 @@ html.porto-navbar-hidden .porto-nav-progress {
     inset-inline-start: var(--porto-sidebar-width);
     width: calc(100% - var(--porto-sidebar-width));
   }
+  /* With the sidebar collapsed the bar spans the full width
+     again (it jumps — the bar's transitions cover transform and
+     top only — but at 1px tall the jump is invisible mid-slide). */
+  html.porto-sidebar-collapsed body:has(.main-frame--sidebar)
+    .porto-nav-progress {
+    inset-inline-start: 0;
+    width: 100%;
+  }
 }
 
 /* ----- Site footer ----- */
@@ -1889,6 +2004,12 @@ html.porto-navbar-hidden .porto-nav-progress {
 @media (min-width: 50rem) {
   body:has(.main-frame--sidebar) .porto-footer {
     margin-inline-start: var(--porto-sidebar-width);
+  }
+  /* With the sidebar collapsed the border spans full-width
+     again (the TOC-side margin at 72rem is unaffected — that
+     rail doesn't move). */
+  html.porto-sidebar-collapsed body:has(.main-frame--sidebar) .porto-footer {
+    margin-inline-start: 0;
   }
 }
 

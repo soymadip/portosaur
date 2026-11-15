@@ -22,6 +22,10 @@
 export const PortoIcons = {
   "chevron-down":
     '<path d="m6 9l6 6l6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  // Lucide's `panel-left` (aliased `sidebar`) — Fumadocs'
+  // `SidebarIcon`, the docs sidebar's collapse trigger glyph.
+  sidebar:
+    '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></g>',
   "right-caret":
     '<path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/>',
   "left-arrow":
