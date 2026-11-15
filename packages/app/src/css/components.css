@@ -2302,6 +2302,10 @@ a.feature-card:focus-visible {
 }
 
 @media (max-width: 480px) {
+  .porto-notes-inner {
+    padding-inline: 0.7rem;
+  }
+
   .porto-note-grid {
     flex-direction: column;
     align-items: stretch;
@@ -2317,6 +2321,8 @@ a.feature-card:focus-visible {
     min-height: auto;
     gap: 0.9rem;
     padding-block: 0.6rem;
+    padding-inline: 0.75rem;
+    border-radius: 0.9rem;
   }
   .porto-note-grid .noteCard:hover {
     transform: none;
