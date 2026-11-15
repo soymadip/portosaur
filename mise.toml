@@ -1,7 +1,10 @@
 [tools]
 uv = "latest"
 "pipx:commitizen" = "latest"
-bun = "latest"
+# Pinned: bun.lock is lockfile v2 (bun 1.4+). Netlify's image ships bun
+# 1.3.12, which cannot parse it and silently ignores the lockfile —
+# an exact pin makes mise install a bun that reads it.
+bun = "1.4.4"
 node = "24"
 prettier = "latest"
 

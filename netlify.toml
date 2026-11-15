@@ -7,3 +7,9 @@
   # The repo's engines field requires Node >= 24.15.0; Next.js runs on
   # Node even though Bun manages the packages.
   NODE_VERSION = "24"
+  # The docs site is a static export (output: 'export') served from
+  # docs/build — Netlify's Next.js Runtime plugin (auto-installed when
+  # it detects Next.js) is for SSR and fails its onBuild check looking
+  # for .next in the publish dir. Skip it; the plugin still handles
+  # build caching.
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
