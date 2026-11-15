@@ -91,26 +91,24 @@ function TopicCard({ card }: { card: TopicListItem }) {
      client-side, so the sidebar and shell stay mounted. A plain
      `<a>` reloaded the whole document on every card click, and
      the sidebar visibly re-mounted (fold animations replaying). */
-  /* Fumadocs' Card layout: the icon sits in a small bordered tile
-     above the title, the title is small and medium-weight, and
-     the description is muted text that wraps — the OG card's big
-     accent title with the icon inline is gone. The title stays
-     an `h2`: the URL snapshot only tracks h1/h2 headings, and OG
-     renders card titles as h2 too. */
+  /* OG's card: the icon sits inline in the title row beside a
+     big accent title, and the description is one truncated
+     line. The title stays an `h2`: the URL snapshot only tracks
+     h1/h2 headings, and OG renders card titles as h2 too. */
   return (
     <Link
       href={card.href}
       className="porto-topic-list__card"
       title={fullDescription || undefined}
     >
-      {card.iconHtml ? (
-        <span
-          className="porto-topic-list__icon"
-          dangerouslySetInnerHTML={{ __html: card.iconHtml }}
-        />
-      ) : null}
       <h2 className="porto-topic-list__title" title={card.title}>
-        {card.title}
+        {card.iconHtml ? (
+          <span
+            className="porto-topic-list__icon"
+            dangerouslySetInnerHTML={{ __html: card.iconHtml }}
+          />
+        ) : null}
+        <span className="porto-topic-list__title-text">{card.title}</span>
       </h2>
       {fullDescription ? (
         <p className="porto-topic-list__description">

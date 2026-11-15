@@ -1534,54 +1534,41 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   gap: 1rem;
 }
 
-/* Fumadocs' docs-footer cards (`flex flex-col gap-2 rounded-lg
-   border p-4 text-sm`): the title row beside a chevron, a muted
-   direction line under it, hovering to the accent surface. */
 .porto-pagination a {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   width: 100%;
+  flex-basis: calc(50% - 0.5rem);
+  flex-grow: 1;
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
   padding: 1rem;
-  font-size: 0.875rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
+  box-shadow: var(--porto-shadow-md);
   overflow-wrap: anywhere;
-  transition:
-    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.porto-pagination a:hover {
-  background-color: var(--porto-color-hairline-light);
-  color: var(--porto-color-white);
+  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-pagination [rel="next"] {
+  justify-content: end;
   text-align: end;
-}
-.porto-pagination [rel="next"] .porto-pagination__row {
   flex-direction: row-reverse;
 }
-
-.porto-pagination__row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-weight: 500;
+.porto-pagination a:hover {
+  border-color: var(--porto-color-gray-2);
 }
-.porto-pagination__row svg {
+.porto-pagination svg {
   flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .porto-pagination__title {
   color: var(--porto-color-white);
-}
-
-.porto-pagination__label {
-  color: var(--porto-color-gray-3);
+  font-size: var(--porto-text-2xl);
+  line-height: var(--porto-line-height-headings);
 }
 
 /* ----- Skip link ----- */
@@ -3881,11 +3868,10 @@ a.porto-blog-article-author-name:hover {
   margin-top: 1rem;
 }
 
-/* TopicList — the Docusaurus `TopicCard` list, in Fumadocs'
-   `Card` design: a centered description line above a grid of
-   cards, each with a small icon tile above a small
-   medium-weight title and a muted wrapping description. Two
-   columns above OG's 996px `col` breakpoint, one below it. */
+/* TopicList — the Docusaurus `TopicCard` list: a centered
+   description line above a grid of cards, each with an icon, an
+   accent title, and a one-line muted description. Two columns
+   above OG's 996px `col` breakpoint, one below it. */
 /* The list follows the body content directly — no extra top
    margin on top of the last paragraph's own bottom margin (and
    none at all when the body is empty). */
@@ -3911,57 +3897,59 @@ a.porto-blog-article-author-name:hover {
 .porto-topic-list__card {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  /* The one-line description must not force the grid track wider
+     than the container — without this the mobile grid blows out. */
   min-width: 0;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--porto-color-hairline-light);
   /* OG: the card sits on the scheme's raised surface (Docusaurus
      `.card` → `--ifm-background-surface-color`) — the same surface
      the note cards and feature cards use. */
   background-color: var(--porto-color-gray-6);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--porto-shadow-sm);
   text-decoration: none;
   color: var(--porto-color-text);
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Fumadocs' card hover is a background change only
-   (`hover:bg-fd-accent/80`) — no border or shadow shift. */
 .porto-topic-list__card:hover {
-  background-color: var(--porto-color-gray-5);
-}
-/* The icon tile matches the docs-homepage feature cards
-   (`.feature-icon`): a 48px tinted tile with a 24px glyph, no
-   border or shadow. */
-.porto-topic-list__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-1) 15%,
-    var(--porto-color-black)
-  );
-  color: var(--porto-color-gray-2);
-  font-size: 1.5rem;
-}
-.porto-topic-list__icon svg,
-.porto-topic-list__icon img {
-  width: 24px;
-  height: 24px;
+  border-color: var(--porto-color-text-accent);
+  box-shadow: var(--porto-shadow-md);
 }
 .porto-topic-list__title {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 750;
+  color: var(--porto-color-text-accent);
+}
+.porto-topic-list__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 23px;
+}
+.porto-topic-list__title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .porto-topic-list__description {
   margin: 0;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.8rem;
-  color: var(--porto-color-gray-3);
+  opacity: 0.6;
 }
 .porto-topic-list__separator {
   opacity: 0.5;

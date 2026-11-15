@@ -172,7 +172,7 @@ export function DocPage({
           slug: card.title,
           fallbackIcon: card.isCategory ? "md:folder" : "md:notebook",
           base: config.site.baseUrl,
-          size: "24px",
+          size: "23px",
         }),
       };
     },
