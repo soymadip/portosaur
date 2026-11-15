@@ -2072,7 +2072,8 @@ a.feature-card:focus-visible {
   margin-bottom: 0.5rem;
   text-align: center;
   font-size: 2.5rem;
-  color: var(--porto-color-white);
+  /* OG: the page title takes the site's primary/accent color. */
+  color: var(--porto-color-accent);
   animation: porto-slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
@@ -2106,7 +2107,11 @@ a.feature-card:focus-visible {
   min-height: 225px;
   overflow: hidden;
   border: 1px solid var(--porto-color-hairline-light);
-  background: var(--porto-color-black);
+  /* OG: the card is the scheme's raised surface with rounded
+     corners (Infima's card radius, ~0.5rem measured on the OG
+     site) — the same surface the feature cards use. */
+  background: var(--porto-color-gray-6);
+  border-radius: 0.5rem;
   padding: 1.5rem 1rem;
   color: var(--porto-color-text);
   text-decoration: none;
@@ -2120,7 +2125,6 @@ a.feature-card:focus-visible {
   z-index: 2;
   transform: translateY(-4px);
   border-color: var(--note-color);
-  background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
   box-shadow: var(--porto-shadow-lg);
 }
 
@@ -2172,6 +2176,13 @@ a.feature-card:focus-visible {
   fill: currentColor;
 }
 
+/* The text wrapper must be allowed to shrink below its content's
+   intrinsic width, or a long unbroken title word pushes it past
+   the card's edge (flex items default to min-width: auto). */
+.porto-note-text {
+  min-width: 0;
+}
+
 .porto-note-title {
   margin: 0;
   text-align: center;
@@ -2179,22 +2190,21 @@ a.feature-card:focus-visible {
   font-weight: 700;
   line-height: 1.3;
   text-overflow: ellipsis;
-  overflow-wrap: break-word;
+  /* `anywhere` (OG's value), not `break-word`: only `anywhere`
+     counts the break opportunities during min-content sizing, so
+     a long word wraps inside the card instead of overflowing it. */
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Chevron under the card title. The old component rendered the
-   same `md:chevron-right` icon with a `display: none` desktop rule
-   — but the old Icon applied its own `display: inline-block` class
-   to the same <svg>, and in the built OG bundle that won the
-   cascade, so the golden screenshots show the chevron on desktop
-   too (small, centered, in the card's text color). Shown here
-   deliberately. */
+/* The chevron is a mobile-list affordance only: OG hides it on
+   desktop (`display: none` in the base rule) and shows it only
+   under 480px. */
 .porto-note-grid .mobileChevron {
-  display: block;
+  display: none;
   width: 1rem;
   height: 1rem;
   margin-top: 0.5rem;
@@ -2226,7 +2236,6 @@ a.feature-card:focus-visible {
   }
   .porto-note-grid .noteCard:active {
     scale: 0.98;
-    background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
   }
 
   .porto-note-icon-wrap {
@@ -2258,6 +2267,7 @@ a.feature-card:focus-visible {
   }
 
   .porto-note-grid .mobileChevron {
+    display: block;
     width: 1.4rem;
     height: 1.4rem;
     margin-top: 0;

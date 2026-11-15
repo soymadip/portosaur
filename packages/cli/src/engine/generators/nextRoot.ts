@@ -469,8 +469,10 @@ export default function Page() {
 
 /**
  * Builds the contents of a docs-frame layout
- * (`.portosaur/app/docs/layout.tsx`, and `app/notes/layout.tsx` in
- * portfolio mode — notes share the docs layout frame).
+ * (`.portosaur/app/docs/layout.tsx`, and
+ * `app/notes/(with-sidebar)/layout.tsx` in portfolio mode — notes
+ * share the docs layout frame, scoped to the detail routes by the
+ * route group so the index keeps its own shell).
  */
 export function buildDocsLayoutContent(mtime: number): string {
   return `${header(mtime)}import type { ReactNode } from "react";
@@ -491,10 +493,11 @@ export default function Layout({ children }: { children: ReactNode }) {
 /**
  * Builds the contents of a doc detail page
  * (`.portosaur/app/docs/[[...slug]]/page.tsx`, and
- * `app/notes/[...slug]/page.tsx` in portfolio mode). The loaded page
- * goes to the app's `DocPage`, which renders the hoisted H1 (from
- * `page.data._exports.__portoContentTitle`), the MDX body, pagination,
- * and the doc footer.
+ * `app/notes/(with-sidebar)/[...slug]/page.tsx` in portfolio
+ * mode). The loaded page goes to the app's `DocPage`, which
+ * renders the hoisted H1 (from
+ * `page.data._exports.__portoContentTitle`), the MDX body,
+ * pagination, and the doc footer.
  *
  * The docs route is an OPTIONAL catch-all: the collection's root page
  * (the README) renders at `/docs/` through it. The notes route is a
@@ -1168,8 +1171,15 @@ export function buildNextRootFiles(
     files["app/docs/layout.tsx"] = buildDocsLayoutContent(mtime);
     files["app/docs/[[...slug]]/page.tsx"] = buildDocPageContent("docs", mtime);
   } else {
-    files["app/notes/layout.tsx"] = buildDocsLayoutContent(mtime);
-    files["app/notes/[...slug]/page.tsx"] = buildDocPageContent(
+    // The detail routes live in a route group so the docs layout
+    // (sidebar + shell) wraps ONLY them: a layout at
+    // `app/notes/layout.tsx` would wrap the index too, and the
+    // index renders its own shell — double navbar, double footer,
+    // and a sidebar the index must not have. Route groups don't
+    // affect URLs, so the pages still serve at `/notes/<slug>`.
+    files["app/notes/(with-sidebar)/layout.tsx"] =
+      buildDocsLayoutContent(mtime);
+    files["app/notes/(with-sidebar)/[...slug]/page.tsx"] = buildDocPageContent(
       "notes",
       mtime,
       "required",

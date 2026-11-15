@@ -11,6 +11,8 @@ import {
   openInBrowser,
   getPortoDotDir,
   loadUserConfig,
+  ensurePublicUnion,
+  generateFavicons,
 } from "../engine/index.ts";
 import type { PortoPaths, SiteConfigContext } from "../engine/index.ts";
 import { logger } from "../logger/index.ts";
@@ -198,28 +200,22 @@ export async function writeNextRoot(
     fs.writeFileSync(target, await formatGeneratedFile(target, content));
   }
 
-  // Static passthrough: `.portosaur/public` links to the user's
-  // `static/` dir. Only a missing path or a stale symlink is replaced —
-  // a real directory is left alone (something else owns it).
-  const staticDir = path.join(UserRoot, "static");
-  if (fs.existsSync(staticDir)) {
-    const publicLink = path.join(nextRoot, "public");
-    let needsLink = true;
-    try {
-      const stat = fs.lstatSync(publicLink);
-      if (stat.isSymbolicLink()) {
-        needsLink = fs.readlinkSync(publicLink) !== "../static";
-      } else {
-        needsLink = false;
-      }
-    } catch {
-      // Missing — the link needs creating.
-    }
-    if (needsLink) {
-      fs.rmSync(publicLink, { force: true });
-      fs.symlinkSync("../static", publicLink, "dir");
-    }
-  }
+  // Static passthrough: `.portosaur/public` is a real directory
+  // that unions the user's `static/` (per-entry symlinks) with the
+  // generated favicon set, so Next.js serves both in dev and copies
+  // both into the static export at build time. The union runs first
+  // so a user-provided `static/favicon/` wins over generation.
+  const publicDir = path.join(nextRoot, "public");
+  ensurePublicUnion({ projectDir: UserRoot, publicDir });
+  await generateFavicons({
+    projectDir: UserRoot,
+    options,
+    publicDir,
+    cacheDir: path.join(nextRoot, "cache"),
+    appStaticDir: portoPaths.static ?? path.join(portoPaths.appRoot, "static"),
+    appAssetsDir: portoPaths.assets,
+    logger,
+  });
 
   return { nextRoot, outDir };
 }

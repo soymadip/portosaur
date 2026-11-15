@@ -451,8 +451,10 @@ describe("buildNextRootFiles", () => {
       const files = buildNextRootFiles(options(), args(projectDir));
       expect(files["app/docs/[[...slug]]/page.tsx"]).toBeDefined();
       expect(files["app/docs/layout.tsx"]).toBeDefined();
-      expect(files["app/notes/[...slug]/page.tsx"]).toBeUndefined();
-      expect(files["app/notes/layout.tsx"]).toBeUndefined();
+      expect(
+        files["app/notes/(with-sidebar)/[...slug]/page.tsx"],
+      ).toBeUndefined();
+      expect(files["app/notes/(with-sidebar)/layout.tsx"]).toBeUndefined();
       // The notes index exists in both modes.
       expect(files["app/notes/page.tsx"]).toBeDefined();
     } finally {
@@ -470,8 +472,14 @@ describe("buildNextRootFiles", () => {
         }),
         args(projectDir),
       );
-      expect(files["app/notes/[...slug]/page.tsx"]).toBeDefined();
-      expect(files["app/notes/layout.tsx"]).toBeDefined();
+      expect(
+        files["app/notes/(with-sidebar)/[...slug]/page.tsx"],
+      ).toBeDefined();
+      expect(files["app/notes/(with-sidebar)/layout.tsx"]).toBeDefined();
+      // No layout at the notes root: it would wrap the index too,
+      // and the index renders its own shell (double navbar/footer
+      // + a sidebar the index must not have).
+      expect(files["app/notes/layout.tsx"]).toBeUndefined();
       expect(files["app/docs/[[...slug]]/page.tsx"]).toBeUndefined();
       expect(files["app/docs/layout.tsx"]).toBeUndefined();
     } finally {

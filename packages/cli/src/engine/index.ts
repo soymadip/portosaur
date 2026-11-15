@@ -28,6 +28,18 @@ export type { NextRootArgs } from "./generators/nextRoot.ts";
 
 export { resolveSiteUrl, resolveBasePath } from "./utils/site.ts";
 export { createAssetValidator } from "./utils/assets.ts";
+export {
+  resolveSiteIconSpec,
+  findLocalIcon,
+  downloadIcon,
+  reshapeToCircle,
+  ensurePublicUnion,
+  generateFavicons,
+} from "./utils/favicons.ts";
+export type {
+  FaviconLogger,
+  GenerateFaviconsParams,
+} from "./utils/favicons.ts";
 export { getDefaultColorScheme, resolveSiteCssFiles } from "./utils/css.ts";
 
 export { resolveVars, getNestedValue } from "./utils/config.ts";

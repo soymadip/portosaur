@@ -17,7 +17,10 @@ export function SiteTitle() {
   const logoSrc = `${basePrefix}/favicon/favicon.ico`;
   return (
     <Link href="/" className="porto-site-title">
-      <img src={logoSrc} alt={`${site.title} logo`} />
+      {/* Explicit dimensions: CSS sizes the rendered logo, but
+          without attributes a missing file renders its alt text
+          at the title's font size instead of a 32px box. */}
+      <img src={logoSrc} alt={`${site.title} logo`} width={32} height={32} />
       <span translate="no">{site.title}</span>
     </Link>
   );
