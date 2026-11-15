@@ -25,6 +25,15 @@ import { PortoIcon } from "../../PortoIcon.tsx";
  * (categories containing the current page start open) and there
  * is no hydration mismatch.
  *
+ * Every navigation reopens the path to the current page: a
+ * stored "closed" from an earlier visit must never hide the
+ * active link after a search or direct-link navigation — a
+ * sidebar click can only land inside an already-open category,
+ * so those two routes are exactly where a closed active category
+ * strands the user. Closing a category while reading inside it
+ * still works (the close is the user's choice); the next
+ * navigation opens the new page's path again.
+ *
  * When `theme.collapsable_sidebar` is false, categories render as
  * plain groups (label + list, no `<details>`).
  *
@@ -98,6 +107,13 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   openStateRef.current = openState;
 
   const isOpen = (item: SidebarItem): boolean => {
+    // The current page's ancestors open ahead of any stored
+    // state — a category the user closed earlier reopens the
+    // moment the current page lands inside it again. The stored
+    // value still applies once the user navigates away.
+    if (hasActiveDescendant(item, current)) {
+      return true;
+    }
     const index = categoryIndex.get(item);
     if (index === undefined) {
       return false;
@@ -106,7 +122,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     if (stored !== null && stored !== undefined) {
       return stored;
     }
-    return hasActiveDescendant(item, current);
+    return false;
   };
 
   const storeState = (open: Array<boolean | null>) => {
@@ -176,6 +192,24 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     // Restore once per tree (hash change = new tree).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash]);
+
+  // After every navigation, open the current page's ancestors in
+  // the DOM. React only writes the `open` attribute when the prop
+  // changes, so navigating between two pages in the same closed
+  // category (e.g. via search) would otherwise leave the active
+  // link hidden — the prop stays `true` throughout, and React
+  // never notices the browser closed the element natively.
+  // Closing a category by hand doesn't change `current`, so a
+  // deliberate close is left alone until the next navigation.
+  useEffect(() => {
+    const sidebar = document.querySelector(".porto-sidebar");
+    const active = sidebar?.querySelector('a[aria-current="page"]');
+    let details = active?.closest("details") ?? null;
+    while (details) {
+      details.open = true;
+      details = details.parentElement?.closest("details") ?? null;
+    }
+  }, [current]);
 
   const setCategoryOpen = (item: SidebarItem, open: boolean) => {
     const index = categoryIndex.get(item);
