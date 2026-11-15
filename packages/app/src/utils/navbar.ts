@@ -15,11 +15,19 @@
 
 import type { PortosaurOptions } from "../integration.ts";
 import { pageHref } from "./icons.ts";
+import { isSamePage } from "./pageUrl.ts";
 
 export interface NavLink {
   label: string;
   href: string;
   active?: boolean;
+  /**
+   * True when this link points at the current page itself (an exact
+   * pathname match) — unlike `active`, which is section-wide. The
+   * prefetch skip must use this: skipping on `active` never
+   * prefetches Docs from any docs page (see the audit's finding 5).
+   */
+  current?: boolean;
   external?: boolean;
 }
 
@@ -80,26 +88,41 @@ export function buildNavEntries(
   const rightEntries: NavEntry[] = [];
 
   if (siteMode === "docs") {
+    const docsHref = pageHref(withBase(`/${site.notesRoute}`));
     rightEntries.push({
       label: "Docs",
-      href: pageHref(withBase(`/${site.notesRoute}`)),
+      href: docsHref,
       active: isActivePath(`/${site.notesRoute}`),
+      current: isSamePage(docsHref, pathname),
     });
   } else {
     if (homePage.aboutSection?.enable) {
-      rightEntries.push({ label: "About Me", href: withBase("/#about") });
+      rightEntries.push({
+        label: "About Me",
+        href: withBase("/#about"),
+        current: isSamePage(withBase("/#about"), pathname),
+      });
     }
     if (homePage.projectShelf?.enable) {
-      rightEntries.push({ label: "Projects", href: withBase("/#projects") });
+      rightEntries.push({
+        label: "Projects",
+        href: withBase("/#projects"),
+        current: isSamePage(withBase("/#projects"), pathname),
+      });
     }
     if (homePage.experienceSection?.enable) {
       rightEntries.push({
         label: "Experience",
         href: withBase("/#experience"),
+        current: isSamePage(withBase("/#experience"), pathname),
       });
     }
     if (homePage.socialSection?.enable) {
-      rightEntries.push({ label: "Contact", href: withBase("/#contact") });
+      rightEntries.push({
+        label: "Contact",
+        href: withBase("/#contact"),
+        current: isSamePage(withBase("/#contact"), pathname),
+      });
     }
   }
 
@@ -107,12 +130,18 @@ export function buildNavEntries(
   // `items` (an array of `{ label, to?, href? }`) renders a dropdown.
   for (const item of theme.navbarItems ?? []) {
     const target = item.position === "left" ? leftEntries : rightEntries;
-    const toLink = (entry: any): NavLink => ({
-      label: entry.label,
-      href: entry.to ? pageHref(withBase(entry.to)) : (entry.href ?? "#"),
-      active: entry.to ? isActivePath(entry.to) : false,
-      external: !entry.to && /^https?:\/\//.test(entry.href ?? ""),
-    });
+    const toLink = (entry: any): NavLink => {
+      const href = entry.to
+        ? pageHref(withBase(entry.to))
+        : (entry.href ?? "#");
+      return {
+        label: entry.label,
+        href,
+        active: entry.to ? isActivePath(entry.to) : false,
+        current: isSamePage(href, pathname),
+        external: !entry.to && /^https?:\/\//.test(entry.href ?? ""),
+      };
+    };
     if (Array.isArray(item.items) && item.items.length > 0) {
       target.push({
         label: item.label,
@@ -128,22 +157,28 @@ export function buildNavEntries(
 
   const moreItems: NavLink[] = [];
   if (siteMode !== "docs") {
+    const notesHref = pageHref(withBase(`/${site.notesRoute}`));
     moreItems.push({
       label: "Notes",
-      href: pageHref(withBase(`/${site.notesRoute}`)),
+      href: notesHref,
       active: isActivePath(`/${site.notesRoute}`),
+      current: isSamePage(notesHref, pathname),
     });
   }
+  const blogHref = pageHref(withBase(`/${site.blogRoute}`));
   moreItems.push({
     label: "Blog",
-    href: pageHref(withBase(`/${site.blogRoute}`)),
+    href: blogHref,
     active: isActivePath(`/${site.blogRoute}`),
+    current: isSamePage(blogHref, pathname),
   });
   if (tasks.enable) {
+    const tasksHref = pageHref(withBase("/tasks"));
     moreItems.push({
       label: "Tasks",
-      href: pageHref(withBase("/tasks")),
+      href: tasksHref,
       active: isActivePath("/tasks"),
+      current: isSamePage(tasksHref, pathname),
     });
   }
   if (showProjectLink) {

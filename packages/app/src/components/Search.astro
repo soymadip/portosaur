@@ -8,8 +8,11 @@
 // stripping (Portosaur sets `trailingSlash: "ignore"`).
 //
 // A navbar button opens a native <dialog> modal; `@pagefind/default-ui`
-// lazy-loads on idle and renders results inside. A vanilla custom
-// element (<porto-search>), zero framework.
+// lazy-loads the first time the modal opens (or the button is focused
+// or pressed, as a head start) and renders results inside. It used to
+// load on idle on every page — a 97KB bundle competing with
+// navigation fetches on slow connections, for a UI most visits never
+// open. A vanilla custom element (<porto-search>), zero framework.
 //
 // Portosaur difference from Starlight's Search: the button is a bare
 // magnifier icon at every width (Starlight renders a wide bar with a
@@ -68,6 +71,9 @@ const isDev = import.meta.env.DEV;
         </div>
       ) : (
         <div class="search-container">
+          <p data-search-loading hidden>
+            Loading search…
+          </p>
           <div id="porto__search" />
         </div>
       )}
@@ -99,6 +105,59 @@ const isDev = import.meta.env.DEV;
       )!;
       const dialog = this.querySelector("dialog")!;
       const dialogFrame = this.querySelector(".dialog-frame")!;
+      const loading = this.querySelector<HTMLElement>("[data-search-loading]");
+
+      // Lazily loads + mounts the Pagefind UI the first time search
+      // is needed — the 97KB `ui-core` bundle downloads only when
+      // the user opens (or is about to open) search, instead of on
+      // idle on every page. In-flight loads are shared, and the
+      // modal shows a loading state until the UI mounts. The mount
+      // is guarded against double-mounting: a late load from before
+      // a client-side navigation may already have mounted the UI
+      // into this page's container — mounting twice would stack two
+      // search UIs.
+      let pagefindLoading: Promise<void> | null = null;
+      const ensurePagefindUI = (): Promise<void> => {
+        if (import.meta.env.DEV) {
+          return Promise.resolve();
+        }
+        const target = document.querySelector("#porto__search");
+        if (!target || target.querySelector(".pagefind-ui")) {
+          return Promise.resolve();
+        }
+        if (!pagefindLoading) {
+          loading?.removeAttribute("hidden");
+          pagefindLoading = (async () => {
+            try {
+              // @ts-expect-error — Missing types for @pagefind/default-ui package.
+              const { PagefindUI } = await import("@pagefind/default-ui");
+              const mountTarget = document.querySelector("#porto__search");
+              if (!mountTarget || mountTarget.querySelector(".pagefind-ui")) {
+                return;
+              }
+              new PagefindUI({
+                element: "#porto__search",
+                baseUrl: this.dataset.baseUrl,
+                bundlePath: this.dataset.bundlePath,
+                showImages: false,
+                showSubResults: true,
+              });
+              // If the user opened the modal before the UI mounted, focus the
+              // input now that it exists.
+              if (dialog.open) {
+                this.querySelector("input")?.focus();
+              }
+            } catch {
+              // The bundle failed to load (offline, flaky network)
+              // — leave the modal empty; the next open retries.
+            } finally {
+              loading?.setAttribute("hidden", "");
+              pagefindLoading = null;
+            }
+          })();
+        }
+        return pagefindLoading;
+      };
 
       /** Close the modal if a user clicks on a link or outside of the modal. */
       const onClick = (event: MouseEvent) => {
@@ -116,6 +175,9 @@ const isDev = import.meta.env.DEV;
       const openModal = (event?: MouseEvent) => {
         dialog.showModal();
         document.body.toggleAttribute("data-search-modal-open", true);
+        // Kick off the Pagefind load (a no-op once mounted) — the
+        // modal shows a loading state until the UI mounts.
+        void ensurePagefindUI();
         this.querySelector("input")?.focus();
         event?.stopPropagation();
         window.addEventListener("click", onClick);
@@ -124,6 +186,10 @@ const isDev = import.meta.env.DEV;
       const closeModal = () => dialog.close();
 
       openBtn.addEventListener("click", openModal);
+      // Head start: begin loading the bundle when the button is
+      // focused or pressed, so it is (partway) there by open time.
+      openBtn.addEventListener("focus", () => void ensurePagefindUI());
+      openBtn.addEventListener("pointerdown", () => void ensurePagefindUI());
       openBtn.disabled = false;
       closeBtn.addEventListener("click", closeModal);
 
@@ -145,36 +211,6 @@ const isDev = import.meta.env.DEV;
       };
       this.onKeyDown = onKeyDown;
       window.addEventListener("keydown", onKeyDown);
-
-      if (import.meta.env.DEV) {
-        return;
-      }
-      const onIdle =
-        window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1));
-      onIdle(async () => {
-        // @ts-expect-error — Missing types for @pagefind/default-ui package.
-        const { PagefindUI } = await import("@pagefind/default-ui");
-        // Another search element (from before a client-side
-        // navigation, whose idle callback fired late) may already
-        // have mounted the UI into this page's container — mounting
-        // twice would stack two search UIs.
-        const target = document.querySelector("#porto__search");
-        if (!target || target.querySelector(".pagefind-ui")) {
-          return;
-        }
-        new PagefindUI({
-          element: "#porto__search",
-          baseUrl: this.dataset.baseUrl,
-          bundlePath: this.dataset.bundlePath,
-          showImages: false,
-          showSubResults: true,
-        });
-        // If the user opened the modal before the UI mounted, focus the
-        // input now that it exists.
-        if (dialog.open) {
-          this.querySelector("input")?.focus();
-        }
-      });
     }
   }
   customElements.define("porto-search", PortoSearch);
@@ -202,6 +238,15 @@ const isDev = import.meta.env.DEV;
     }
     button[data-open-modal]:hover {
       color: var(--porto-color-white);
+    }
+
+    /* Loading state while the Pagefind bundle downloads on first
+       open (the UI lazy-loads — see the script). */
+    [data-search-loading] {
+      margin: 0;
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--porto-color-gray-3);
     }
 
     /* Floating panel at every width (Starlight's dialog is

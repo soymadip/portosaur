@@ -34,6 +34,7 @@ import config from "porto:config";
 import { getAssetHeadTags } from "../utils/assets.ts";
 import MobileMenu from "../components/MobileMenu.astro";
 import Navbar from "../components/Navbar.astro";
+import NavProgress from "../components/NavProgress.astro";
 import Footer from "../components/Footer.astro";
 import SkipLink from "../components/SkipLink.astro";
 
@@ -151,6 +152,7 @@ const swUrl = withBase("sw.js");
 <!doctype html>
 <html
   lang="en"
+  transition:animate="none"
   data-scheme={theme.colorScheme}
   data-theme={theme.defaultMode}
   data-has-sidebar={hasSidebar || undefined}
@@ -226,15 +228,18 @@ const swUrl = withBase("sw.js");
     </script>
     {/*
       Client-side routing (SPA mode): internal links navigate without
-      a full page reload, with a fade transition. Module scripts run
-      once, so every script that touches the DOM re-runs its setup on
-      `astro:page-load` (see theme-mode.ts, code-blocks.ts, and the
-      component scripts).
+      a full page reload. No page transition animation
+      (`transition:animate="none"` on <html>) — like VitePress and
+      Docusaurus, the swap is instant instead of a 180ms cross-fade.
+      Module scripts run once, so every script that touches the DOM
+      re-runs its setup on `astro:page-load` (see theme-mode.ts,
+      code-blocks.ts, and the component scripts).
     */}
     <ClientRouter />
   </head>
   <body>
     <SkipLink />
+    <NavProgress />
 
     <Navbar isHome={isHome} isPortfolioHome={isPortfolioHome} />
 
@@ -267,6 +272,57 @@ const swUrl = withBase("sw.js");
     {/* Code-block framing (copy button, language label) on every page. */}
     <script>
       import "../scripts/code-blocks.ts";
+    </script>
+
+    {/* Stricter slow-connection gate for prefetching (every page). */}
+    <script>
+      import "../scripts/prefetch-gate.ts";
+    </script>
+
+    {/* Touchstart preload for internal links (every page). */}
+    <script>
+      import "../scripts/touch-preload.ts";
+    </script>
+
+    {/* Delayed navigation progress bar (every page). */}
+    <script>
+      import "../scripts/nav-progress.ts";
+    </script>
+
+    {/*
+      Slow-connection prefetch gate, initial load: Astro's own 2g
+      check never fires on a throttled-but-"4g" connection, so strip
+      the viewport-prefetch attributes when the Network Information
+      API reports a slow link — stripped links fall back to the hover
+      strategy (`prefetchAll`), which is intent-based and one link at
+      a time. This classic script runs during parsing, before Astro's
+      deferred prefetch module initializes; navigations are gated by
+      the `astro:before-swap` listener in `scripts/prefetch-gate.ts`
+      (same thresholds — keep the two in sync).
+    */}
+    <script is:inline>
+      (function () {
+        try {
+          var conn = navigator.connection;
+          if (!conn) {
+            return;
+          }
+          var slow =
+            conn.saveData ||
+            /2g/.test(conn.effectiveType || "") ||
+            (typeof conn.downlink === "number" && conn.downlink < 1) ||
+            (typeof conn.rtt === "number" && conn.rtt > 400);
+          if (slow) {
+            document
+              .querySelectorAll("[data-astro-prefetch='viewport']")
+              .forEach(function (el) {
+                el.removeAttribute("data-astro-prefetch");
+              });
+          }
+        } catch (error) {
+          // Network Information API unavailable — prefetch as normal.
+        }
+      })();
     </script>
 
     {/*

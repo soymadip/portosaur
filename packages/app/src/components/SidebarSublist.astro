@@ -17,12 +17,15 @@
 // - Rows are Fumadocs-style: uniform size across levels and the
 //   caret pinned to the row's right edge (the label grows to fill
 //   the row). Vertical padding is 0.3em — 0.5em felt too airy.
-// - Every link prefetches on viewport, except the current page
-//   (prefetching it would re-fetch the page already open). Links
-//   inside closed categories — and, on mobile, inside the closed
-//   menu popover — are not visible, so they prefetch only once
-//   they come into view; the cost stays bounded by what's on
-//   screen instead of the whole tree.
+// - Viewport prefetching covers top-level links only, except the
+//   current page (prefetching it would re-fetch the page already
+//   open). Nested links prefetch when their category opens instead
+//   (see `scripts/sidebar-prefetch.ts`): viewport-prefetching the
+//   whole visible tree saturated slow connections (17 destinations,
+//   ~1.5MB on one throttled run), and the router's fetch doesn't
+//   reuse an in-flight prefetch. When categories aren't collapsable
+//   the whole tree is always visible, so nested links keep the
+//   viewport attribute there.
 // - Every row shows an icon: the frontmatter `icon` when the entry
 //   declares one, else DocCardList's fallbacks (folder for
 //   categories, notebook for docs) — Fumadocs-style. The frontmatter
@@ -54,6 +57,19 @@ function isActiveItem(item: any): boolean {
     return false;
   }
   return normalize(href) === current;
+}
+
+function isPrefetchable(item: any): boolean {
+  if (isActiveItem(item)) {
+    return false;
+  }
+  // Nested links prefetch when their category opens (see
+  // `scripts/sidebar-prefetch.ts`) — except when categories aren't
+  // collapsable, where the whole tree is always visible.
+  if (nested && collapsable) {
+    return false;
+  }
+  return true;
 }
 
 function hasActiveDescendant(item: any): boolean {
@@ -96,7 +112,7 @@ function hasActiveDescendant(item: any): boolean {
                       href={item.link.href}
                       aria-current={isActiveItem(item) ? "page" : undefined}
                       data-astro-prefetch={
-                        isActiveItem(item) ? undefined : "viewport"
+                        isPrefetchable(item) ? "viewport" : undefined
                       }
                     >
                       {icon}
@@ -128,7 +144,7 @@ function hasActiveDescendant(item: any): boolean {
                   href={item.link.href}
                   aria-current={isActiveItem(item) ? "page" : undefined}
                   data-astro-prefetch={
-                    isActiveItem(item) ? undefined : "viewport"
+                    isPrefetchable(item) ? "viewport" : undefined
                   }
                 >
                   {icon}
@@ -154,7 +170,7 @@ function hasActiveDescendant(item: any): boolean {
             href={item.href}
             aria-current={isActiveItem(item) ? "page" : undefined}
             class:list={[{ large: !nested }]}
-            data-astro-prefetch={isActiveItem(item) ? undefined : "viewport"}
+            data-astro-prefetch={isPrefetchable(item) ? "viewport" : undefined}
           >
             {icon}
             <span>{item.label}</span>

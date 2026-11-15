@@ -2,6 +2,17 @@
 // Persists the docs sidebar's open/closed groups and scroll position in
 // `sessionStorage` across page navigations, renamed to Portosaur's
 // `porto-` prefix throughout.
+//
+// Also prefetches a category's children when the category opens (and
+// the already-open categories' children once the sidebar is visible):
+// nested links carry no viewport-prefetch attribute (see
+// SidebarSublist), so without this the tap after opening a category
+// would fetch the whole page from cold.
+
+import {
+  prefetchCategoryChildren,
+  prefetchOpenCategoryChildren,
+} from "./sidebar-prefetch.ts";
 
 // Elements are re-queried fresh on every use: client-side
 // navigation replaces the sidebar, so anything captured at module
@@ -111,7 +122,21 @@ const setupSidebarPersist = (): void => {
     const index = parseInt(restoreElement?.dataset.index || "");
     if (isNaN(index)) return;
     setToggleState(!toggledDetails.open, index);
+    if (!toggledDetails.open) {
+      // Opening the category reveals its children — prefetch them
+      // now, so the tap after opening swaps instantly instead of
+      // fetching the whole page from cold.
+      prefetchCategoryChildren(toggledDetails);
+    }
   });
+  // The categories already open (the active section, or restored
+  // state) show their children — prefetch them now, but only while
+  // the sidebar is actually visible. On desktop it always is; on
+  // mobile it sits inside the closed menu popover, and the
+  // menu-open prefetch (MobileMenu) covers it instead.
+  if (window.matchMedia("(min-width: 50em)").matches) {
+    prefetchOpenCategoryChildren();
+  }
 };
 
 setupSidebarPersist();

@@ -11,8 +11,12 @@
 // mobile only) and opens this popover via `popovertarget` — no
 // JavaScript needed to open/close; the script below only resets the
 // popover attribute on desktop (persistent variant), traps focus
-// while the menu is open, and prefetches the menu's nav links when
-// it opens (they sit inside the closed popover, so viewport
+// while the menu is open, syncs the navbar toggle button's
+// `aria-expanded` on open/close, closes the menu the moment a link inside
+// it is tapped (before the navigation fetch — the user gets
+// immediate feedback instead of staring at the open menu while the
+// next page loads), and prefetches the menu's nav links when it
+// opens (they sit inside the closed popover, so viewport
 // prefetching never fires for them — and on a phone there is no
 // hover to trigger the default strategy either).
 //
@@ -44,6 +48,9 @@ const { hasSidebar = false } = Astro.props;
 >
   <script>
     import { prefetch } from "astro:prefetch";
+    import { isSlowConnection } from "../scripts/prefetch-gate.ts";
+    import { prefetchOpenCategoryChildren } from "../scripts/sidebar-prefetch.ts";
+    import { isSamePage } from "../utils/pageUrl.ts";
 
     // The mobile menu uses the popover API to open and close without JavaScript. We enhance this
     // behaviour with focus trapping while the menu is open.
@@ -58,12 +65,32 @@ const { hasSidebar = false } = Astro.props;
         this.resetPopoverAttribute();
         this.desktopMediaQuery.addEventListener("change", this.onMediaChange);
 
+        // Close the menu the moment a link inside it is tapped —
+        // before the navigation fetch starts (VitePress and
+        // Docusaurus both close on tap). Links only: the footer's
+        // theme select is a <details> dropdown, and opening it must
+        // not close the menu — and neither must toggling a sidebar
+        // category. The `:popover-open` guard keeps the desktop
+        // persistent sidebar (no popover there) out of this.
+        this.addEventListener("click", (event) => {
+          if (
+            event.target instanceof Element &&
+            event.target.closest("a[href]") &&
+            this.matches(":popover-open")
+          ) {
+            this.hidePopover();
+          }
+        });
+
         // Update the menu state when the sidebar popover is toggled.
         this.addEventListener("toggle", ({ newState }) => {
           const open = newState === "open";
           this.trapFocus(open);
           if (open) {
             this.prefetchNavLinks();
+            // The sidebar just became visible: prefetch the
+            // children of the categories already open in it.
+            prefetchOpenCategoryChildren();
           }
         });
       }
@@ -72,12 +99,16 @@ const { hasSidebar = false } = Astro.props;
       // destinations now, while the user scans the menu, so the tap
       // swaps instantly instead of fetching the whole page at tap
       // time. Only the footer's nav links (a handful) — the sidebar
-      // tree prefetches on viewport instead (its rows come into
-      // view as the menu opens and scrolls). The active link is
-      // skipped (it points at the page already open). Each URL is
-      // prefetched at most once per page; `prefetch()` itself skips
-      // data-saver and slow connections.
+      // tree prefetches on viewport (top level) and on category
+      // open (nested) instead. The current page is skipped by
+      // pathname comparison — the `active` class is section-wide,
+      // so skipping on it would never prefetch Docs from any docs
+      // page. Each URL is prefetched at most once per page, and
+      // nothing prefetches on a slow connection.
       prefetchNavLinks() {
+        if (isSlowConnection()) {
+          return;
+        }
         this.querySelectorAll(".mobile-nav a[href]").forEach((link) => {
           const href = link.getAttribute("href");
           if (
@@ -85,11 +116,18 @@ const { hasSidebar = false } = Astro.props;
             href.startsWith("/") &&
             !href.startsWith("//") &&
             !link.hasAttribute("target") &&
-            !link.classList.contains("active") &&
-            !this.prefetchedNavLinks.has(href)
+            !isSamePage(href, location.pathname)
           ) {
-            this.prefetchedNavLinks.add(href);
-            prefetch(href);
+            // Normalize to an absolute URL: Astro's viewport
+            // strategy passes `anchor.href` (absolute) to
+            // `prefetch()`, and its dedupe is a string comparison —
+            // a relative href for the same page would append a
+            // second prefetch link for it.
+            const url = new URL(href, location.href).href;
+            if (!this.prefetchedNavLinks.has(url)) {
+              this.prefetchedNavLinks.add(url);
+              prefetch(url);
+            }
           }
         });
       }

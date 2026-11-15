@@ -1,0 +1,53 @@
+---
+// NavProgress — the thin top progress bar for client-side
+// navigations (Docusaurus's NProgress mechanism: a 2px bar in the
+// accent color, fixed at the very top, no spinner). The driver
+// lives in `scripts/nav-progress.ts`: the bar appears only after a
+// 200ms delay, so slow navigations show something and fast ones
+// show nothing. The animation is pure CSS — the bar crawls to 80%
+// while the navigation is in flight, completes to 100% on the swap,
+// then fades out.
+---
+
+<div id="porto-nav-progress" aria-hidden="true"></div>
+
+<style>
+  @layer porto.core {
+    #porto-nav-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      /* Above the navbar (z-index 10), below the skip link (20). */
+      z-index: 11;
+      width: 100%;
+      height: 2px;
+      background-color: var(--porto-color-text-accent);
+      pointer-events: none;
+      transform: scaleX(0);
+      transform-origin: left;
+      opacity: 0;
+      transition:
+        transform 0.2s ease,
+        opacity 0.3s ease;
+    }
+
+    /* In flight: crawl slowly toward 80% — the navigation finishes
+       the bar, so it never sits at 100% while still loading. */
+    #porto-nav-progress.is-active {
+      transform: scaleX(0.8);
+      opacity: 1;
+      transition:
+        transform 2.5s ease-out,
+        opacity 0.2s ease;
+    }
+
+    /* Finished: complete the crawl, then fade out. */
+    #porto-nav-progress.is-done {
+      transform: scaleX(1);
+      opacity: 0;
+      transition:
+        transform 0.2s ease,
+        opacity 0.3s ease 0.15s;
+    }
+  }
+</style>
