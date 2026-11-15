@@ -20,6 +20,12 @@
     accent-color: var(--porto-color-accent);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* No blue flash on tap: mobile browsers paint their default
+       tap highlight over links and buttons while touched. The
+       property is inherited, so setting it here covers the page;
+       press feedback comes from the elements' own :active and
+       :hover styles instead. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   html[data-theme="light"] {
