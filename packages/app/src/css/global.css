@@ -179,6 +179,17 @@
   --porto-color-hairline-light: var(--porto-color-gray-5);
   --porto-color-hairline: var(--porto-color-gray-6);
   --porto-color-hairline-shade: var(--porto-color-black);
+  /* Card borders (topic-list, feature, note cards) anchor on the
+     card surface itself, 10% toward the text color — the hairline
+     token's step from the card varies by scheme (+8 in nord,
+     +22 in catppuccin), so cards looked bordered in one scheme
+     and borderless in another. This gives every scheme the same
+     visible edge. */
+  --porto-color-card-border: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    var(--porto-color-gray-6)
+  );
 
   --porto-color-backdrop-overlay: hsla(223, 13%, 10%, 0.66);
 
@@ -248,7 +259,14 @@
   color-scheme: dark;
 }
 
-:root[data-theme="light"],
+/* NOTE: plain `[data-theme="light"]`, NOT `:root[data-theme="light"]` —
+   the `:root` qualifier raised this block to (0,2,0), tying the
+   `[data-scheme][data-theme="light"]` scheme rules — and since
+   global.css loads after the @imported themes, the tie went to
+   this block, so light mode always rendered Portosaur's colors
+   no matter the scheme. At (0,1,0) the schemes override it, the
+   way the dark `:root` block already works. */
+[data-theme="light"],
 [data-theme="light"] ::backdrop {
   /* Colors (Portosaur light) */
   --porto-color-white: #09090b;
@@ -289,6 +307,14 @@
   --porto-color-bg-accent: var(--porto-color-accent);
   --porto-color-hairline-light: var(--porto-color-gray-6);
   --porto-color-hairline-shade: var(--porto-color-gray-6);
+  /* Same card-border mix as dark mode — in light mode the
+     hairline token IS the card color, so the border was
+     invisible in every scheme. */
+  --porto-color-card-border: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    var(--porto-color-gray-6)
+  );
 
   --porto-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
 

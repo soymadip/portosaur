@@ -2430,7 +2430,7 @@ html.porto-navbar-hidden .porto-nav-progress {
 
 .feature-card {
   background-color: var(--porto-color-gray-6);
-  border: 1px solid var(--porto-color-hairline-light);
+  border: 1px solid var(--porto-color-card-border);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -2675,7 +2675,7 @@ a.feature-card:focus-visible {
   width: 165px;
   min-height: 225px;
   overflow: hidden;
-  border: 1px solid var(--porto-color-hairline-light);
+  border: 1px solid var(--porto-color-card-border);
   /* OG: the card is the scheme's raised surface with rounded
      corners (Infima's card radius, ~0.5rem measured on the OG
      site) — the same surface the feature cards use. */
@@ -4272,7 +4272,7 @@ a.porto-blog-article-author-name:hover {
      than the container — without this the mobile grid blows out. */
   min-width: 0;
   padding: 1rem 1.25rem;
-  border: 1px solid var(--porto-color-hairline-light);
+  border: 1px solid var(--porto-color-card-border);
   background-color: var(--porto-color-gray-6);
   border-radius: 0.5rem;
   box-shadow: var(--porto-shadow-sm);

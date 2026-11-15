@@ -75,8 +75,9 @@ The grayscale and black/white are **semantic roles, not literal colors**: they f
 | `--porto-color-text`, `--porto-color-text-accent`, `--porto-color-text-invert`                                                                  | Body text, accent text (links), text on accent backgrounds    |
 | `--porto-color-bg-nav`, `--porto-color-bg-sidebar`, `--porto-color-bg-inline-code`, `--porto-color-bg-accent`                                   | Navbar, sidebar, inline-code, and accent backgrounds          |
 | `--porto-color-hairline`, `--porto-color-hairline-light`, `--porto-color-hairline-shade`                                                        | Borders and dividers                                          |
+| `--porto-color-card-border`                                                                                                                     | Card borders (topic-list, feature, note cards) — the card surface mixed 10% toward the text color, so the edge reads the same in every scheme |
 
-The derived variables (`--porto-color-text`, `--porto-color-bg-nav`, `--porto-color-bg-sidebar`, `--porto-color-bg-inline-code`, `--porto-color-bg-accent`, the hairlines) are computed from the base palette in `variables.css` — schemes don't override them, and neither should you unless you need to break the derivation.
+The derived variables (`--porto-color-text`, `--porto-color-bg-nav`, `--porto-color-bg-sidebar`, `--porto-color-bg-inline-code`, `--porto-color-bg-accent`, the hairlines, `--porto-color-card-border`) are computed from the base palette in `variables.css` — schemes don't override them, and neither should you unless you need to break the derivation.
 
 There are no `-rgb` triplet tokens. Build translucent colors with `color-mix()` instead: `color-mix(in srgb, var(--porto-color-accent) 10%, transparent)`.
 
