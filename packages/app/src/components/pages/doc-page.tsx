@@ -9,14 +9,17 @@ import {
   findPrevNext,
   tocToHeadings,
   topicListCards,
+  topicListDesc,
   topicListShouldRender,
   type SidebarLink,
+  type TopicListItem,
 } from "../../lib/content.ts";
 import {
   PAGE_TITLE_ID,
   docFileTitle,
   docPageTitles,
 } from "../../lib/docPage.ts";
+import { renderDynamicIcon } from "../../lib/icons.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
 import { isIndexFile, type PortoDocData } from "../../lib/source.ts";
 import {
@@ -153,7 +156,29 @@ export function DocPage({
   const categoryItems = shouldRenderTopicList
     ? findCategoryItems(tree.children, page.url, `/${config.site.notesRoute}`)
     : [];
-  const topicCards = topicListCards(categoryItems);
+  /* The topic-list cards, with their icons resolved to HTML here
+     on the server — the icon packs must never load client-side.
+     An emoji icon is already part of the title text
+     (`topicCardTitle` prepends it), so it gets no icon element. */
+  const topicCards: TopicListItem[] = topicListCards(categoryItems).map(
+    (card) => {
+      const iconInTitle =
+        card.icon !== undefined && !card.icon.includes(":");
+      if (iconInTitle) {
+        return card;
+      }
+      return {
+        ...card,
+        iconHtml: renderDynamicIcon(card.icon ?? undefined, {
+          slug: card.title,
+          fallbackIcon: card.isCategory ? "md:folder" : "md:notebook",
+          base: config.site.baseUrl,
+          size: "23px",
+        }),
+      };
+    },
+  );
+  const topicDesc = topicListDesc(data.topic_list, data.desc);
 
   const MDXBody = data.body;
 
@@ -168,7 +193,7 @@ export function DocPage({
         </div>
         <div className={`main-pane${hasToc ? " main-pane--toc" : ""}`}>
           {(breadcrumbs.length > 0 || heading) && (
-            <ContentPanel>
+            <ContentPanel className="content-panel--header">
               {breadcrumbs.length > 0 && <Breadcrumbs crumbs={breadcrumbs} />}
               {heading && <PageTitle title={heading.text} id={heading.id} />}
             </ContentPanel>
@@ -177,7 +202,8 @@ export function DocPage({
             <div className="porto-markdown-content">
               <TopicListProvider
                 value={{
-                  items: categoryItems,
+                  cards: topicCards,
+                  desc: topicDesc,
                   shouldRender: shouldRenderTopicList,
                 }}
               >
@@ -185,7 +211,7 @@ export function DocPage({
               </TopicListProvider>
             </div>
             {shouldRenderTopicList && topicCards.length > 0 && (
-              <TopicList items={topicCards} />
+              <TopicList items={topicCards} desc={topicDesc} />
             )}
             <DocFooter
               editUrl={editUrl}

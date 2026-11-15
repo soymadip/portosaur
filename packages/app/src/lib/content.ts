@@ -223,20 +223,107 @@ export function topicCardTitle(node: PageTree.Node): string {
   return `${prefix}${nodeName(node)}`;
 }
 
-/** One topic-list card: a title and the page it links to. */
+/**
+ * One topic-list card: the title and the page it links to, plus the
+ * description and icon the card renders (the Docusaurus `TopicCard`
+ * shape). Categories also carry their linkable child count, so the
+ * card can prefix the description with it ("3 items • ...").
+ */
 export interface TopicListItem {
   title: string;
   href: string;
+  description?: string;
+  icon?: string;
+  isCategory?: boolean;
+  itemsCount?: number;
+  /**
+   * The icon as resolved HTML, filled in server-side (the icon packs
+   * are megabytes of JSON and must never load client-side). Items
+   * passed manually — without a server resolution step — carry no
+   * icon HTML and render without an icon.
+   */
+  iconHtml?: string;
+}
+
+/* A child that would itself render as a card: a page, or a folder
+ * with an index page to link to. Separators and index-less folders
+ * are not counted. */
+function isCardChild(node: PageTree.Node): boolean {
+  if (node.type === "page") {
+    return true;
+  }
+  if (node.type === "folder") {
+    return node.index !== undefined;
+  }
+  return false;
 }
 
 function nodeToCard(node: PageTree.Node): TopicListItem | null {
   if (node.type === "page") {
-    return { title: topicCardTitle(node), href: pageHref(node.url) };
+    return {
+      title: topicCardTitle(node),
+      href: pageHref(node.url),
+      /* A node description is a ReactNode in Fumadocs' types —
+         only a plain string renders as card text. */
+      description:
+        typeof node.description === "string" ? node.description : undefined,
+      icon: typeof node.icon === "string" ? node.icon : undefined,
+    };
   }
   if (node.type === "folder" && node.index) {
-    return { title: topicCardTitle(node), href: pageHref(node.index.url) };
+    return {
+      title: topicCardTitle(node),
+      href: pageHref(node.index.url),
+      /* A folder description is a ReactNode in Fumadocs' types —
+         only a plain string renders as card text. */
+      description:
+        typeof node.description === "string"
+          ? node.description
+          : typeof node.index.description === "string"
+            ? node.index.description
+            : undefined,
+      icon:
+        typeof node.icon === "string"
+          ? node.icon
+          : typeof node.index.icon === "string"
+            ? node.index.icon
+            : undefined,
+      isCategory: true,
+      itemsCount: (node.children ?? []).filter(isCardChild).length,
+    };
   }
   return null;
+}
+
+/** The topic-list description when no frontmatter provides one. */
+export const TOPIC_LIST_DEFAULT_DESC =
+  "Click on the links below to explore the topics.";
+
+/**
+ * The description line above a topic list (the Docusaurus
+ * resolution, minus the component-level props, which the
+ * `TopicList` component resolves itself): the frontmatter
+ * `topic_list.desc` wins (`null` disables the line entirely), then
+ * the page's own `desc`, then the default. A `topic_list` boolean
+ * carries no description.
+ */
+export function topicListDesc(
+  topicListConfig: unknown,
+  pageDesc?: string,
+): string | null {
+  if (typeof topicListConfig === "object" && topicListConfig !== null) {
+    const desc = (topicListConfig as { desc?: unknown }).desc;
+    if (desc === null) {
+      return null;
+    }
+    if (typeof desc === "string" && desc !== "") {
+      return desc;
+    }
+  }
+  if (typeof pageDesc === "string" && pageDesc !== "") {
+    return pageDesc;
+  }
+  return TOPIC_LIST_DEFAULT_DESC;
 }
 
 /**

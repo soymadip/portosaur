@@ -1,6 +1,11 @@
 import { describe, test, expect } from "bun:test";
 import { createElement, Fragment } from "react";
-import { tocToHeadings } from "../src/lib/content.ts";
+import {
+  TOPIC_LIST_DEFAULT_DESC,
+  tocToHeadings,
+  topicListCards,
+  topicListDesc,
+} from "../src/lib/content.ts";
 
 /**
  * `tocToHeadings` converts Fumadocs TOC items to flat headings for
@@ -59,5 +64,91 @@ describe("tocToHeadings", () => {
       { title: "No hash", url: "/docs/page", depth: 2 },
     ]);
     expect(headings).toEqual([]);
+  });
+});
+
+describe("topicListCards", () => {
+  test("maps a page to a card with its description and icon", () => {
+    const cards = topicListCards([
+      {
+        type: "page",
+        name: "Setup",
+        url: "/docs/setup",
+        description: "How to install.",
+        icon: "md:rocket",
+      } as any,
+    ]);
+    expect(cards).toEqual([
+      {
+        title: "Setup",
+        href: "/docs/setup/",
+        description: "How to install.",
+        icon: "md:rocket",
+      },
+    ]);
+  });
+
+  test("maps a folder to a category card with its index description and child count", () => {
+    const cards = topicListCards([
+      {
+        type: "folder",
+        name: "Guides",
+        index: {
+          type: "page",
+          name: "Guides",
+          url: "/docs/guides",
+          description: "Step-by-step guides.",
+          icon: "md:folder",
+        },
+        children: [
+          { type: "page", name: "One", url: "/docs/guides/one" },
+          { type: "page", name: "Two", url: "/docs/guides/two" },
+          {
+            type: "folder",
+            name: "Nested",
+            index: { type: "page", name: "Nested", url: "/docs/guides/nested" },
+            children: [],
+          },
+          { type: "folder", name: "No index", children: [] },
+          { type: "separator", name: "---" },
+        ],
+      } as any,
+    ]);
+    expect(cards).toEqual([
+      {
+        title: "Guides",
+        href: "/docs/guides/",
+        description: "Step-by-step guides.",
+        icon: "md:folder",
+        isCategory: true,
+        itemsCount: 3,
+      },
+    ]);
+  });
+
+  test("skips folders without an index page and separators", () => {
+    const cards = topicListCards([
+      { type: "folder", name: "No index", children: [] } as any,
+      { type: "separator", name: "---" } as any,
+    ]);
+    expect(cards).toEqual([]);
+  });
+});
+
+describe("topicListDesc", () => {
+  test("frontmatter topic_list.desc wins", () => {
+    expect(topicListDesc({ desc: "Pick a topic." }, "Page desc.")).toBe(
+      "Pick a topic.",
+    );
+  });
+
+  test("topic_list.desc null disables the line", () => {
+    expect(topicListDesc({ desc: null }, "Page desc.")).toBeNull();
+  });
+
+  test("falls back to the page desc, then the default", () => {
+    expect(topicListDesc({ enable: true }, "Page desc.")).toBe("Page desc.");
+    expect(topicListDesc(undefined, undefined)).toBe(TOPIC_LIST_DEFAULT_DESC);
+    expect(topicListDesc(true, undefined)).toBe(TOPIC_LIST_DEFAULT_DESC);
   });
 });
