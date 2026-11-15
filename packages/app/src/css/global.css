@@ -240,6 +240,11 @@
   /* 265px: the left sidebar and the right TOC panel share this
      width, and the content offset follows it. */
   --porto-sidebar-width: 16.5625rem;
+  /* The desktop sidebar collapse slide: the pane, the frame
+     padding, the content cap, and the footer margins all animate
+     on this one duration, so the pane's edge and the content's
+     edge move together through the whole animation. */
+  --porto-sidebar-collapse-duration: 0.35s;
   --porto-sidebar-pad-x: 1rem;
   --porto-content-width: 45rem;
   --porto-content-pad-x: 1rem;

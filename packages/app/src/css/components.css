@@ -55,9 +55,10 @@ main {
 @media (min-width: 50rem) {
   .main-frame--sidebar {
     padding-inline-start: var(--porto-sidebar-width);
-    /* Slides to 0 with the pane when the sidebar collapses —
-       the same 250ms Fumadocs animates its sidebar column. */
-    transition: padding-inline-start 0.25s ease;
+    /* Slides to 0 with the pane when the sidebar collapses — the
+       shared collapse duration and easing, so the frame's edge
+       tracks the pane's edge through the whole animation. */
+    transition: padding-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
   html.porto-sidebar-collapsed .main-frame--sidebar {
     padding-inline-start: 0;
@@ -182,6 +183,20 @@ main {
 .porto-content-container {
   max-width: 80rem;
   margin-inline: auto;
+  /* The cap animates with the sidebar collapse (see below): the
+     container widens into the freed space in lockstep with the
+     pane slide, so its left edge tracks the pane's right edge
+     instead of drifting at half speed behind it. */
+  transition: max-width var(--porto-sidebar-collapse-duration) ease;
+}
+@media (min-width: 50rem) {
+  /* With the sidebar collapsed the freed 265px goes to the
+     content, not the auto margins: the cap grows by exactly the
+     sidebar width, so the column widens by 265px and the side
+     margins stay as they were. */
+  html.porto-sidebar-collapsed .porto-content-container {
+    max-width: calc(80rem + var(--porto-sidebar-width));
+  }
 }
 .porto-content-container > * + * {
   margin-top: 1.5rem;
@@ -819,8 +834,10 @@ body:has(#porto__sidebar:popover-open)
   font-weight: 600;
   line-height: var(--porto-line-height-headings);
   padding-inline: var(--porto-sidebar-item-padding-inline);
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
+  /* No bottom padding/margin here: the title shares its row with
+     the collapse trigger, and anything below the text would push
+     the trigger under the title's line — the 1rem gap to the
+     tree lives on the row instead (see below). */
 }
 .porto-sidebar ul {
   list-style: none;
@@ -1322,12 +1339,22 @@ body:has(#porto__sidebar:popover-open) {
        the sidebar stays exactly where it is instead of sliding
        up, and the brand takes the navbar's place. */
     inset-block: 0 0;
-    /* The collapse slide (see below) animates transform +
-       inset-block over the same 250ms Fumadocs uses; the popover
-       transitions stay so a resize mid-animation doesn't snap. */
+  }
+  /* The collapse slide: transform + inset-block + border-radius
+     + shadow over the shared collapse duration, so the pane
+     morphs between the full-height sidebar and the floating card
+     in lockstep with the content. DOUBLED selector on purpose:
+     animations.css (loaded after this file) sets a `transition`
+     on `.porto-mobile-menu` for the mobile popover fade — at
+     equal specificity it wiped this list out, and the pane
+     snapped open instantly while the content animated. The
+     popover entries stay so a resize mid-animation doesn't snap. */
+  .porto-mobile-menu.porto-mobile-menu--persistent {
     transition:
-      transform 0.25s ease,
-      inset-block 0.25s ease,
+      transform var(--porto-sidebar-collapse-duration) ease,
+      inset-block var(--porto-sidebar-collapse-duration) ease,
+      border-radius var(--porto-sidebar-collapse-duration) ease,
+      box-shadow var(--porto-sidebar-collapse-duration) ease,
       opacity 0.25s,
       display 0.25s allow-discrete,
       overlay 0.25s allow-discrete;
@@ -1352,6 +1379,24 @@ body:has(#porto__sidebar:popover-open) {
   }
   html[dir="rtl"].porto-sidebar-peeked .porto-mobile-menu--persistent {
     transform: translateX(-0.5rem);
+  }
+  /* In the collapsed state the floating card drops the
+     navbar-brand copy: the card's top sits under the navbar
+     (z-index 10 over 5), so the brand would hide behind it —
+     and a floating card needs no navbar copy anyway. The content
+     takes the navbar-height offset from padding instead (the
+     `--no-brand` pattern — the brand row provided the offset),
+     so the title row clears the navbar and sits at the card's
+     visible top. */
+  html.porto-sidebar-collapsed
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__brand {
+    display: none;
+  }
+  html.porto-sidebar-collapsed
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__content {
+    padding-top: calc(var(--porto-nav-height) + 1rem);
   }
   .porto-mobile-menu--persistent .porto-mobile-menu__content {
     /* No top padding: the brand row occupies the navbar-height
@@ -1390,12 +1435,14 @@ body:has(#porto__sidebar:popover-open) {
    title — Fumadocs puts it in the sidebar header the same way
    (Portosaur's brand row would hide it behind the navbar until
    the navbar hides on scroll, so the title row is the header
-   that can hold it). The row is exactly the title's height, so
-   the title's position doesn't move. */
+   that can hold it). The row is the button's height and the
+   title centers in it, so the trigger sits on the title's line;
+   the 1rem gap to the tree lives here, not on the title. */
 .porto-sidebar-title-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 .porto-sidebar-title-row .porto-sidebar-collapse-trigger {
   margin-inline-start: auto;
@@ -2005,6 +2052,10 @@ html.porto-navbar-hidden .porto-nav-progress {
 @media (min-width: 50rem) {
   body:has(.main-frame--sidebar) .porto-footer {
     margin-inline-start: var(--porto-sidebar-width);
+    /* The border's left edge slides with the pane, on the shared
+       collapse duration — without the transition it jumped
+       while the sidebar animated. */
+    transition: margin-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
   /* With the sidebar collapsed the border spans full-width
      again (the TOC-side margin at 72rem is unaffected — that
