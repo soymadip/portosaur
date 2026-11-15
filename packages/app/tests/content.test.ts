@@ -76,6 +76,7 @@ describe("topicListCards", () => {
         url: "/docs/setup",
         description: "How to install.",
         icon: "md:rocket",
+        color: "#f00",
       } as any,
     ]);
     expect(cards).toEqual([
@@ -84,6 +85,7 @@ describe("topicListCards", () => {
         href: "/docs/setup/",
         description: "How to install.",
         icon: "md:rocket",
+        color: "#f00",
       },
     ]);
   });
@@ -99,6 +101,7 @@ describe("topicListCards", () => {
           url: "/docs/guides",
           description: "Step-by-step guides.",
           icon: "md:folder",
+          color: "#0f0",
         },
         children: [
           { type: "page", name: "One", url: "/docs/guides/one" },
@@ -120,6 +123,7 @@ describe("topicListCards", () => {
         href: "/docs/guides/",
         description: "Step-by-step guides.",
         icon: "md:folder",
+        color: "#0f0",
         isCategory: true,
         itemsCount: 3,
       },

@@ -234,6 +234,7 @@ export interface TopicListItem {
   href: string;
   description?: string;
   icon?: string;
+  color?: string;
   isCategory?: boolean;
   itemsCount?: number;
   /**
@@ -243,6 +244,14 @@ export interface TopicListItem {
    * icon HTML and render without an icon.
    */
   iconHtml?: string;
+}
+
+function nodeColor(node: PageTree.Node | undefined): string | undefined {
+  if (!node) {
+    return undefined;
+  }
+  const color = (node as { color?: unknown }).color;
+  return typeof color === "string" && color !== "" ? color : undefined;
 }
 
 /* A child that would itself render as a card: a page, or a folder
@@ -260,6 +269,7 @@ function isCardChild(node: PageTree.Node): boolean {
 
 function nodeToCard(node: PageTree.Node): TopicListItem | null {
   if (node.type === "page") {
+    const color = nodeColor(node);
     return {
       title: topicCardTitle(node),
       href: pageHref(node.url),
@@ -268,9 +278,11 @@ function nodeToCard(node: PageTree.Node): TopicListItem | null {
       description:
         typeof node.description === "string" ? node.description : undefined,
       icon: typeof node.icon === "string" ? node.icon : undefined,
+      ...(color ? { color } : {}),
     };
   }
   if (node.type === "folder" && node.index) {
+    const color = nodeColor(node) ?? nodeColor(node.index);
     return {
       title: topicCardTitle(node),
       href: pageHref(node.index.url),
@@ -288,6 +300,7 @@ function nodeToCard(node: PageTree.Node): TopicListItem | null {
           : typeof node.index.icon === "string"
             ? node.index.icon
             : undefined,
+      ...(color ? { color } : {}),
       isCategory: true,
       itemsCount: (node.children ?? []).filter(isCardChild).length,
     };

@@ -3937,7 +3937,7 @@ a.porto-blog-article-author-name:hover {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 750;
-  color: var(--porto-color-text-accent);
+  color: var(--porto-color-text);
 }
 .porto-topic-list__icon {
   display: inline-flex;

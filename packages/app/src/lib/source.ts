@@ -149,9 +149,9 @@ function cleanFolderName(name: string): string {
  * Page-tree transformers (passed as `pageTree.transformers` to the
  * loader). One transformer object with `file` + `folder` hooks:
  *
- * - `file`: `sidebar_label` overrides the node's display name, and
- *   `desc` becomes the node's description (the builder copies only
- *   Fumadocs' `description` field, which Portosaur doesn't use).
+ * - `file`: `sidebar_label` overrides the node's display name,
+ *   `desc` becomes the node's description, and `color` is copied
+ *   onto the node for sidebar and topic-list icon styling.
  * - `folder`: a folder whose name is the builder's path fallback
  *   (no meta title, no index page) gets its number prefix stripped
  *   (`3 - config` → `Config`). Names from meta.json or an index page
@@ -192,6 +192,9 @@ export const portoTreeTransformers: PageTreeTransformer<any>[] = [
       }
       if (typeof data.desc === "string" && data.desc !== "") {
         node.description = data.desc;
+      }
+      if (typeof data.color === "string" && data.color !== "") {
+        Object.assign(node, { color: data.color });
       }
       return node;
     },

@@ -183,6 +183,18 @@ describe("portoTreeTransformers", () => {
     expect(out.description).toBe("How to install.");
   });
 
+  test("file: frontmatter color is copied onto the node", () => {
+    const ctx = fileContext({
+      "guide/setup.mdx": {
+        format: "page",
+        data: { title: "Setup", color: "#f00" },
+      },
+    });
+    const node: any = { type: "page", name: "Setup", url: "/docs/setup" };
+    const out = transformer.file!.call(ctx, node, "guide/setup.mdx") as any;
+    expect(out.color).toBe("#f00");
+  });
+
   test("file: leaves the node alone with no sidebar_label or desc", () => {
     const ctx = fileContext({
       "guide/setup.mdx": { format: "page", data: { title: "Setup" } },

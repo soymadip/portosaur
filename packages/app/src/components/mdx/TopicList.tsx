@@ -108,6 +108,7 @@ function TopicCard({ card }: { card: TopicListItem }) {
           {card.iconHtml ? (
             <span
               className="porto-topic-list__icon"
+              style={card.color ? { color: card.color } : undefined}
               dangerouslySetInnerHTML={{ __html: card.iconHtml }}
             />
           ) : null}
