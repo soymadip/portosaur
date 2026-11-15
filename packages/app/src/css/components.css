@@ -1236,8 +1236,7 @@ body:has(#porto__sidebar:popover-open) {
        brand — exactly where the old padding put it. */
     padding-top: 0;
   }
-  .porto-mobile-menu--persistent
-    .porto-mobile-menu__content--no-brand {
+  .porto-mobile-menu--persistent .porto-mobile-menu__content--no-brand {
     /* No brand row (hideNavbarOnScroll off): the navbar never
        hides, so the tree still needs the navbar-height offset
        from padding. */
