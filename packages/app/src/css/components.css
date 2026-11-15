@@ -409,7 +409,9 @@ details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
   /* Solid, no backdrop blur — the translucent Fumadocs popover
      looked smudged on the live preview. */
   background-color: var(--porto-color-bg-nav);
-  box-shadow: var(--porto-shadow-lg);
+  /* The medium shadow — the large one cast too far down
+     (25px) and too heavy under the menu. */
+  box-shadow: var(--porto-shadow-md);
   transform: translateX(calc(-50% + var(--porto-menu-offset, 0px)));
 }
 .porto-dropdown__menu[data-align="left"] {
@@ -1760,15 +1762,21 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   /* Above the navbar (z-index 10), below the skip link (20). */
   z-index: 11;
   width: 100%;
-  height: 2px;
+  height: 1px;
   background-color: var(--porto-color-text-accent);
   pointer-events: none;
   transform: scaleX(0);
   transform-origin: left;
   opacity: 0;
+  /* The top transition matches the navbar's hide transition
+     (transform 0.2s ease-in-out) so the bar slides up glued to
+     the navbar's bottom edge instead of jumping to the top while
+     the navbar is still sliding. It rides on all three states —
+     each overrides `transition` wholesale. */
   transition:
     transform 0.2s ease,
-    opacity 0.3s ease;
+    opacity 0.3s ease,
+    top 0.2s ease-in-out;
 }
 
 /* In flight: crawl slowly toward 80% — the navigation finishes
@@ -1778,7 +1786,8 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   opacity: 1;
   transition:
     transform 2.5s ease-out,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    top 0.2s ease-in-out;
 }
 
 /* Finished: complete the crawl, then fade out. */
@@ -1787,13 +1796,26 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   opacity: 0;
   transition:
     transform 0.2s ease,
-    opacity 0.3s ease 0.15s;
+    opacity 0.3s ease 0.15s,
+    top 0.2s ease-in-out;
 }
 
 /* The navbar hides on scroll — the bar docks to the top edge with
    it, like the mobile TOC bar, instead of floating mid-page. */
 html.porto-navbar-hidden .porto-nav-progress {
   top: 0;
+}
+
+/* On desktop pages with a persistent sidebar (docs + notes
+   detail pages), the bar spans only the content area — it starts
+   at the sidebar's right edge instead of the viewport's. The bar
+   lives in the root layout, outside the frame, so the scope is
+   `body:has(...)`. The breakpoint matches the sidebar's. */
+@media (min-width: 50rem) {
+  body:has(.main-frame--sidebar) .porto-nav-progress {
+    inset-inline-start: var(--porto-sidebar-width);
+    width: calc(100% - var(--porto-sidebar-width));
+  }
 }
 
 /* ----- Site footer ----- */

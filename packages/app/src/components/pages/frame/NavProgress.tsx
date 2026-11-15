@@ -33,6 +33,25 @@ import { useEffect, useRef, useState } from "react";
  * starts the bar when the URL actually moves away from the
  * pathname this component last rendered (same rule for clicks:
  * a link to the current page starts no bar).
+ *
+ * One more race: a navigation that commits just around the 200ms
+ * show timer. If it commits before the timer fires, the pathname
+ * effect is still pending when the timer fires and runs while the
+ * bar is still `idle` (React flushes it before the pending
+ * `active` render) — and if it commits just after the timer
+ * fires, the same thing happens in reverse: the pathname effect
+ * runs before the active render commits. Either way the bar shows
+ * with no pathname change left to finish it, frozen at 80%. Two
+ * checks close the race, both against the navigation's starting
+ * URL (recorded when it begins): the timer doesn't show the bar
+ * if the URL already moved, and a bar that does become active
+ * finishes at once if the URL has moved since it started. Both
+ * checks read the URL, not the rendered pathname — the pathname
+ * effect is exactly what lags in this race, while the URL updates
+ * at commit. (For a router.push the URL moves at commit, not at
+ * click time, so a genuinely slow navigation still shows the bar:
+ * the URL hasn't moved when the timer fires or when the bar
+ * becomes active.)
  */
 
 type BarState = "idle" | "active" | "done";
@@ -59,16 +78,34 @@ export function NavProgress() {
   // The pathname this component last rendered — the bar only
   // starts when a navigation moves away from it.
   const pathnameRef = useRef(pathname);
+  // The URL when the current navigation started — the show timer
+  // compares against it (see the header comment).
+  const pendingPathRef = useRef<string | null>(null);
 
   // A navigation begins — schedule the delayed show. Fast
   // navigations finish before the delay and show nothing.
   useEffect(() => {
     const scheduleShow = () => {
+      // Recorded on every call: a second click while the timer
+      // runs re-bases the check on the URL that click started
+      // from, so a fast first navigation can't hide a slow
+      // second one.
+      pendingPathRef.current = window.location.pathname;
       if (showTimer.current !== undefined) {
         return;
       }
       showTimer.current = window.setTimeout(() => {
         showTimer.current = undefined;
+        // If the URL already moved, the navigation committed
+        // before the delay elapsed — show nothing. (The pathname
+        // effect may still be pending; the URL is the authority
+        // here, not the rendered pathname.)
+        if (
+          pendingPathRef.current === null ||
+          !samePath(window.location.pathname, pendingPathRef.current)
+        ) {
+          return;
+        }
         setState("active");
       }, SHOW_DELAY_MS);
     };
@@ -122,6 +159,7 @@ export function NavProgress() {
       window.clearTimeout(resetTimer.current);
       showTimer.current = undefined;
       resetTimer.current = undefined;
+      pendingPathRef.current = null;
       setState("idle");
     };
     const onPageHide = () => {
@@ -146,32 +184,68 @@ export function NavProgress() {
     };
   }, []);
 
+  // Schedule the reset that takes a finished bar back to empty. A
+  // new navigation may have started meanwhile — only reset when
+  // the bar is not active again.
+  const scheduleReset = () => {
+    resetTimer.current = window.setTimeout(() => {
+      if (stateRef.current !== "active") {
+        setState("idle");
+      }
+    }, RESET_DELAY_MS);
+  };
+
+  // Finish the bar: full width, then fade and reset.
+  const finishBar = () => {
+    setState("done");
+    scheduleReset();
+  };
+
   // The pathname change is the navigation completing — finish the
   // bar. If it never appeared (fast navigation), cancel the pending
-  // show instead.
+  // show instead. If a second navigation landed during the fade,
+  // the cleanup below just cleared the reset — re-arm it so the
+  // bar can't stick in `done`.
   useEffect(() => {
     pathnameRef.current = pathname;
     if (showTimer.current !== undefined) {
       window.clearTimeout(showTimer.current);
       showTimer.current = undefined;
     }
-    if (stateRef.current !== "active") {
-      return;
+    if (stateRef.current === "active") {
+      finishBar();
+    } else if (stateRef.current === "done") {
+      scheduleReset();
     }
-    setState("done");
-    resetTimer.current = window.setTimeout(() => {
-      // A new navigation may have started meanwhile — only reset
-      // when the bar is idle.
-      if (stateRef.current !== "active") {
-        setState("idle");
-      }
-    }, RESET_DELAY_MS);
     return () => {
       window.clearTimeout(resetTimer.current);
     };
     // Only the pathname change finishes the bar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+
+  // Stale-active guard (see the header comment): a bar that
+  // becomes active after its navigation already committed — the
+  // URL moved away from where the navigation started — finishes
+  // at once instead of freezing at 80%. A genuinely slow
+  // navigation leaves the URL unmoved, so the guard leaves the
+  // bar alone. No cleanup: the reset the finish schedules must
+  // survive the active -> done transition (unmount is covered by
+  // the listener effect's cleanup).
+  useEffect(() => {
+    if (state !== "active") {
+      return;
+    }
+    if (
+      pendingPathRef.current !== null &&
+      samePath(window.location.pathname, pendingPathRef.current)
+    ) {
+      return;
+    }
+    finishBar();
+    // Only the bar becoming active can trip the guard.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <div
