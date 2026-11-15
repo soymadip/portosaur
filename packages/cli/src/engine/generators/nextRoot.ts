@@ -39,6 +39,18 @@ export interface NextRootArgs {
    * from `authors.yml` alone).
    */
   hasBlogPosts: boolean;
+  /**
+   * Hosts allowed to reach Next.js dev resources (HMR, `/_next/*`
+   * internals) in addition to Next's own defaults (`localhost`,
+   * `**.localhost`, and the hostname the dev server started with).
+   * Next 15.2+ blocks anything else with a 403 — so without this,
+   * `porto dev --host 0.0.0.0` serves pages fine but hot reload is
+   * dead from `127.0.0.1` and from LAN devices (phones). Resolved
+   * by the runner: `127.0.0.1` plus the machine's LAN IPv4
+   * addresses. Emitted as `allowedDevOrigins`, a dev-only option
+   * `next build` ignores.
+   */
+  devOrigins: string[];
 }
 
 /**
@@ -75,6 +87,21 @@ function siteOrigin(options: PortosaurOptions): string {
 }
 
 /**
+ * The export output dir as Next sees it: relative to the generated
+ * root (`.portosaur/`). Shared by the config builder (which emits
+ * it as `distDir`) and the tsconfig builder (whose type globs are
+ * derived from it — see `buildTsConfigContent`).
+ */
+function distDirOf({
+  projectDir,
+  outDir,
+}: Pick<NextRootArgs, "projectDir" | "outDir">): string {
+  // Relative to the generated root — see the doc comment on
+  // `buildNextConfigContent` below.
+  return path.relative(path.join(projectDir, ".portosaur"), outDir);
+}
+
+/**
  * Builds the contents of the generated `.portosaur/next.config.mjs`.
  *
  * With `output: 'export'` and a custom `distDir`, Next.js writes the
@@ -89,17 +116,23 @@ function siteOrigin(options: PortosaurOptions): string {
  * a junk directory inside the generated root. The default output
  * dir is therefore `../build`, not the absolute path.
  * `basePath` takes the base URL without its trailing slash.
+ *
+ * `allowedDevOrigins` is a dev-only option (`next build` ignores
+ * it): Next's dev server allows HMR and `/_next/*` requests only
+ * from `localhost`, `**.localhost`, the started hostname, and this
+ * list (verified in Next 16's `block-cross-site-dev.js`). Without
+ * it, `porto dev --host 0.0.0.0` serves pages but hot reload is
+ * blocked from `127.0.0.1` and LAN devices.
  */
 export function buildNextConfigContent(
   options: PortosaurOptions,
-  { projectDir, outDir, mtime }: NextRootArgs,
+  { projectDir, outDir, mtime, devOrigins }: NextRootArgs,
 ): string {
   const basePath =
     options.site.baseUrl === "/"
       ? ""
       : `\n  basePath: ${JSON.stringify(options.site.baseUrl.replace(/\/$/, ""))},`;
-  // Relative to the generated root — see the doc comment above.
-  const distDir = path.relative(path.join(projectDir, ".portosaur"), outDir);
+  const distDir = distDirOf({ projectDir, outDir });
 
   return `${header(mtime)}import { createMDX } from "fumadocs-mdx/next";
 
@@ -113,6 +146,7 @@ const config = {
   images: { unoptimized: true },
   transpilePackages: ["@portosaur/app"],
   distDir: ${JSON.stringify(distDir)},${basePath}
+  allowedDevOrigins: ${JSON.stringify(devOrigins)},
 };
 
 export default withMDX(config);
@@ -257,8 +291,24 @@ export default config;
  * Builds the contents of the generated `.portosaur/tsconfig.json`
  * (the create-fumadocs-app scaffold shape, with `@/*` mapped to the
  * generated root).
+ *
+ * The type globs MUST be derived from the export `distDir`, not
+ * hardcoded to `.next`: Next's `writeConfigurationDefaults`
+ * requires exactly the patterns from
+ * `getTypeDefinitionGlobPatterns(distDir)` — the `types` and
+ * `dev/types` globs under the distDir — in `include` (verified
+ * in Next 16's `type-paths.js`), and rewrites the file on every
+ * `next dev` / `next build` when they are missing. The hardcoded
+ * `.next` globs from the scaffold were wrong for Portosaur's
+ * custom distDir, so every dev start printed the "reconfigured
+ * your tsconfig.json" message — and the rewrite was wiped by the
+ * next regeneration anyway. Glob patterns use forward slashes on
+ * every platform.
  */
-export function buildTsConfigContent(mtime: number): string {
+export function buildTsConfigContent(args: NextRootArgs): string {
+  const { mtime } = args;
+  const distDirPosix = distDirOf(args).replace(/\\/g, "/");
+
   return `${header(mtime)}{
   "compilerOptions": {
     "target": "ESNext",
@@ -289,8 +339,8 @@ export function buildTsConfigContent(mtime: number): string {
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "${distDirPosix}/types/**/*.ts",
+    "${distDirPosix}/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
@@ -1092,7 +1142,7 @@ export function buildNextRootFiles(
     "lib/config.ts": buildLibConfigContent(options, mtime),
     "lib/blog.ts": buildLibBlogContent(mtime),
     "postcss.config.mjs": buildPostcssConfigContent(mtime),
-    "tsconfig.json": buildTsConfigContent(mtime),
+    "tsconfig.json": buildTsConfigContent(args),
     "next-env.d.ts": buildNextEnvContent(),
     "app/layout.tsx": buildRootLayoutContent(options, args),
     "app/page.tsx": buildHomePageContent(options, mtime),

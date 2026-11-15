@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -117,6 +118,28 @@ function dirHasMdxFiles(dir: string): boolean {
   return false;
 }
 
+/**
+ * Hosts the generated `next.config.mjs` allows to reach Next.js dev
+ * resources (`allowedDevOrigins`): `127.0.0.1` plus the machine's
+ * LAN IPv4 addresses, so hot reload works when the dev server is
+ * opened from another loopback address or from a phone on the
+ * network. `localhost` and the started hostname are already
+ * allowed by Next itself, so they are not listed here.
+ */
+function resolveDevOrigins(): string[] {
+  const origins = new Set<string>(["127.0.0.1"]);
+
+  for (const addrs of Object.values(os.networkInterfaces())) {
+    for (const addr of addrs ?? []) {
+      if (addr.family === "IPv4" && !addr.internal) {
+        origins.add(addr.address);
+      }
+    }
+  }
+
+  return [...origins];
+}
+
 export async function writeNextRoot(
   UserRoot: string,
   portoPaths: PortoPaths,
@@ -166,6 +189,7 @@ export async function writeNextRoot(
     outDir,
     mtime: configMtime,
     hasBlogPosts: dirHasMdxFiles(path.join(UserRoot, options.site.blogDir)),
+    devOrigins: resolveDevOrigins(),
   });
 
   for (const [relPath, content] of Object.entries(files)) {

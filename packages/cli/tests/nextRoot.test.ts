@@ -63,6 +63,7 @@ function args(projectDir: string, overrides: Record<string, any> = {}) {
     outDir: path.join(projectDir, "build"),
     mtime: 0,
     hasBlogPosts: true,
+    devOrigins: ["127.0.0.1", "192.168.1.5"],
     ...overrides,
   };
 }
@@ -84,6 +85,12 @@ describe("buildNextConfigContent", () => {
       expect(content).toContain('distDir: "../build"');
       expect(content).not.toContain(projectDir);
       expect(content).toContain("export default withMDX(config);");
+      // Dev origins: without 127.0.0.1 + the LAN IPs, Next blocks
+      // HMR from those origins with a 403 when the dev server runs
+      // on --host 0.0.0.0 (localhost is allowed by Next itself).
+      expect(content).toContain(
+        'allowedDevOrigins: ["127.0.0.1","192.168.1.5"]',
+      );
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }
@@ -179,11 +186,36 @@ describe("buildLibConfigContent", () => {
 
 describe("buildTsConfigContent", () => {
   test("allows importing .ts extensions (the app package uses them everywhere)", () => {
-    const content = buildTsConfigContent(0);
-    // Without this flag Next's typecheck fails with TS5097 on every
-    // `@portosaur/app/*` import (explicit `.ts`/`.tsx` extensions).
-    expect(content).toContain('"allowImportingTsExtensions": true');
-    expect(content).toContain('"moduleResolution": "bundler"');
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-tsconfig-"));
+    try {
+      const content = buildTsConfigContent(args(projectDir));
+      // Without this flag Next's typecheck fails with TS5097 on every
+      // `@portosaur/app/*` import (explicit `.ts`/`.tsx` extensions).
+      expect(content).toContain('"allowImportingTsExtensions": true');
+      expect(content).toContain('"moduleResolution": "bundler"');
+      // Type globs come from the export distDir, not the scaffold's
+      // hardcoded `.next` paths — Next rewrites the tsconfig on
+      // every run when its distDir-derived globs are missing.
+      expect(content).toContain('"../build/types/**/*.ts"');
+      expect(content).toContain('"../build/dev/types/**/*.ts"');
+      expect(content).not.toContain(".next/types");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("derives the type globs from a custom output dir", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-tsconfig-"));
+    try {
+      const content = buildTsConfigContent(
+        args(projectDir, { outDir: path.join(projectDir, "dist") }),
+      );
+      expect(content).toContain('"../dist/types/**/*.ts"');
+      expect(content).toContain('"../dist/dev/types/**/*.ts"');
+      expect(content).not.toContain("../build/types");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
   });
 });
 
