@@ -2308,6 +2308,7 @@ html.porto-navbar-hidden .porto-nav-progress {
 
 .feature-card {
   background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-hairline-light);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -2351,10 +2352,26 @@ a.feature-card:focus-visible {
     var(--porto-color-gray-1) 15%,
     var(--porto-color-black)
   );
-  border-radius: 8px;
+  /* The pagination bars' radius. */
+  border-radius: 0.4rem;
   margin-bottom: 1rem;
   color: var(--porto-color-text-accent);
   font-size: 26px;
+}
+
+/* Dark mode: OG's tile is a full emphasis step lighter than its
+   card (gray-800 #444950 on gray-900 #1c1e21, +40), but the
+   ported 15%-toward-black mix lands only +16 in the portosaur
+   scheme — near-invisible in catppuccin, inverted in dracula.
+   Anchor the tile on the card color instead, 20% toward the
+   text color: +25..+42 in every scheme. Light mode keeps the
+   base rule — its -10 step already matches OG. */
+[data-theme="dark"] .feature-icon {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 20%,
+    var(--porto-color-gray-6)
+  );
 }
 
 .feature-icon svg,
