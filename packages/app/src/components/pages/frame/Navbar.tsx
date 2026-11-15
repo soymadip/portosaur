@@ -10,7 +10,7 @@ import {
 } from "../../../lib/navbar.ts";
 import { stripBase } from "../../../lib/pageUrl.ts";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { Dropdown } from "../../Dropdown.tsx";
 import { SearchDialog } from "./SearchDialog.tsx";
 import { SiteTitle } from "./SiteTitle.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
@@ -61,38 +61,6 @@ export function Navbar({
 
   const headerRef = useRef<HTMLElement>(null);
 
-  // Close open dropdowns on outside click / Escape (<details>
-  // doesn't close itself). The toggle click itself lands inside
-  // the <details>, so it isn't treated as outside.
-  useEffect(() => {
-    const closeDropdowns = () => {
-      document
-        .querySelectorAll("details.porto-navbar__dropdown[open]")
-        .forEach((dropdown) => {
-          dropdown.removeAttribute("open");
-        });
-    };
-    const onClick = (event: MouseEvent) => {
-      if (
-        event.target instanceof Node &&
-        !event.target.parentElement?.closest("details.porto-navbar__dropdown")
-      ) {
-        closeDropdowns();
-      }
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeDropdowns();
-      }
-    };
-    document.addEventListener("click", onClick);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("click", onClick);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
-
   // Hide-on-scroll: slide the navbar away while scrolling down,
   // bring it back on scroll up (or at the top of the page). Two
   // classes are toggled: one on the header itself (the transform)
@@ -131,48 +99,16 @@ export function Navbar({
   const renderEntry = (entry: NavEntry, key: string): ReactNode => {
     if (isDropdown(entry)) {
       return (
-        <details key={key} className="porto-navbar__dropdown">
-          <summary className="porto-nav-summary">
-            {entry.label}
-            <PortoIcon
-              name="chevron-down"
-              size="0.875rem"
-              className="porto-nav-summary__chevron"
-            />
-          </summary>
-          <ul className="porto-dropdown-menu">
-            {entry.items.map((item) => (
-              <li key={item.label}>
-                {item.external ? (
-                  <a
-                    className={
-                      item.active
-                        ? "porto-dropdown-link active"
-                        : "porto-dropdown-link"
-                    }
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  <Link
-                    className={
-                      item.active
-                        ? "porto-dropdown-link active"
-                        : "porto-dropdown-link"
-                    }
-                    href={item.href}
-                    prefetch={item.current ? false : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        </details>
+        <Dropdown
+          key={key}
+          label={entry.label}
+          items={entry.items.map((item) => ({
+            label: item.label,
+            href: item.href,
+            active: item.active,
+            prefetch: item.current ? false : undefined,
+          }))}
+        />
       );
     }
     if (entry.external) {
@@ -245,48 +181,16 @@ export function Navbar({
             {rightEntries.map((entry, index) =>
               renderEntry(entry, `${entry.label}-${index}`),
             )}
-            <details className="porto-navbar__dropdown porto-navbar__more-dropdown">
-              <summary className="porto-nav-summary">
-                More
-                <PortoIcon
-                  name="chevron-down"
-                  size="0.875rem"
-                  className="porto-nav-summary__chevron"
-                />
-              </summary>
-              <ul className="porto-dropdown-menu">
-                {moreItems.map((item) => (
-                  <li key={item.label}>
-                    {item.external ? (
-                      <a
-                        className={
-                          item.active
-                            ? "porto-dropdown-link active"
-                            : "porto-dropdown-link"
-                        }
-                        href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {item.label}
-                      </a>
-                    ) : (
-                      <Link
-                        className={
-                          item.active
-                            ? "porto-dropdown-link active"
-                            : "porto-dropdown-link"
-                        }
-                        href={item.href}
-                        prefetch={item.current ? false : undefined}
-                      >
-                        {item.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </details>
+            <Dropdown
+              label="More"
+              className="porto-navbar__more-dropdown"
+              items={moreItems.map((item) => ({
+                label: item.label,
+                href: item.href,
+                active: item.active,
+                prefetch: item.current ? false : undefined,
+              }))}
+            />
           </nav>
           {/* Mobile menu button (right side) — VitePress's hamburger
               icon: three staggered lines that animate into an X

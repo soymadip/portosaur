@@ -120,20 +120,49 @@
     opacity 0.25s ease;
 }
 
-/* Dropdown menus (navbar "More" + nav dropdowns, theme select,
-   MDX dropdown): Fumadocs popover feel — 200ms fade + slide,
-   both directions. The motion runs on the <details>
-   `::details-content` wrapper, not the menu: the UA hides a
-   closed details' content with `content-visibility: hidden`,
-   which flips instantly, so we override it and hide via opacity
-   + visibility instead (same trick as the sidebar fold).
-   `visibility` flips immediately on open and only after the
-   fade on close — the delay lives on the closed rule, the
-   instant flip on the open rule, because a transition runs with
-   the after-change style. Browsers without `::details-content`
-   support open/close instantly, as before. */
-details.porto-navbar__dropdown::details-content,
-.porto-mdx-dropdown::details-content {
+/* Dropdown menus (the shared Dropdown): Fumadocs popover feel —
+   200ms fade + slide, both directions. The motion runs on the
+   MENU itself, not the <details> `::details-content` wrapper: a
+   transform on the wrapper traps the menu underneath later
+   content (a dropdown in content painted below the next heading,
+   and no z-index on the details lifted it out). The wrapper only
+   overrides the UA's `content-visibility: hidden`, which would
+   otherwise hide a closed menu instantly and kill the close
+   animation. The slide uses the `translate` property, not
+   `transform`, so the centering/clamp transform on the menu
+   never animates. `visibility` flips immediately on open and
+   only after the fade on close — the delay lives on the closed
+   rule, the instant flip on the open rule, because a transition
+   runs with the after-change style. Browsers without
+   `::details-content` support open/close instantly, as before. */
+details.porto-dropdown::details-content {
+  content-visibility: visible;
+}
+.porto-dropdown__menu {
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 -4px;
+  transition:
+    opacity 0.2s ease,
+    translate 0.2s ease,
+    visibility 0s 0.2s;
+  transition-behavior: allow-discrete;
+}
+details.porto-dropdown[open] .porto-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition:
+    opacity 0.2s ease,
+    translate 0.2s ease,
+    visibility 0s;
+}
+
+/* The mobile footer's inline nav accordions: the same 200ms
+   fade + slide, on the `::details-content` wrapper — in-flow
+   content has nothing to paint over, so the wrapper transform
+   is harmless here. */
+details.porto-navbar__dropdown::details-content {
   content-visibility: visible;
   opacity: 0;
   visibility: hidden;
@@ -144,8 +173,7 @@ details.porto-navbar__dropdown::details-content,
     visibility 0s 0.2s;
   transition-behavior: allow-discrete;
 }
-details.porto-navbar__dropdown[open]::details-content,
-.porto-mdx-dropdown[open]::details-content {
+details.porto-navbar__dropdown[open]::details-content {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
@@ -162,8 +190,8 @@ details.porto-navbar__dropdown[open]::details-content,
   .porto-search-dialog,
   .porto-search-dialog::backdrop,
   .porto-hamburger span,
-  details.porto-navbar__dropdown::details-content,
-  .porto-mdx-dropdown::details-content {
+  .porto-dropdown__menu,
+  details.porto-navbar__dropdown::details-content {
     transition: none;
   }
 }
