@@ -3,63 +3,30 @@ node_modules/
 .pnp
 .pnp.js
 
-# Build and Output
-*.bkp
-*favicon/
-dist/
+# Next.js / Fumadocs build output
+.next/
+out/
+.source/
 build/
 dist/
-cache/
-.docusaurus/
+
+# Generated Portosaur project root
 .portosaur/
-.bun-cache/
-.turbo/
-configSchema.json
-scratch
-scratch.*
-TestimonialsSection/
 
 # Env
 .env
-.secrets
 .env.*
 !.env.example
+
 # OS
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 bun-debug.log*
 
-# Test / Temporary
-!tests/*
-!tests/**
-my-portfolio/
-*test-site/
-test+.js
-*test/
-TEST*/
-.smoke-test-site/
+# Playgrounds and scratch sites
 .playground/
-.*-source
-
-
-ss.*
-*tmp*
-*.tmp
-*.temp
-temp/
-!templates/**
-wiki/
-ifm-vars-list.css
-.playground---/
-.embed-pdf-viewer
-📦 plugin-pwa  Docusaurus.md
-implementation_plan*.md
-docs-old/
-docs/docs copy/*
-examples/
+*test-site/
+.smoke-test-site/

@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and Output
+*.bkp
+*favicon/
+dist/
+build/
+dist/
+cache/
+.docusaurus/
+.portosaur/
+.bun-cache/
+.turbo/
+configSchema.json
+scratch
+scratch.*
+TestimonialsSection/
+
+# Env
+.env
+.secrets
+.env.*
+!.env.example
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# Test / Temporary
+!tests/*
+!tests/**
+my-portfolio/
+*test-site/
+test+.js
+*test/
+TEST*/
+.smoke-test-site/
+.playground/
+.*-source
+
+
+ss.*
+*tmp*
+*.tmp
+*.temp
+temp/
+!templates/**
+wiki/
+ifm-vars-list.css
+.playground---/
+.embed-pdf-viewer
+📦 plugin-pwa  Docusaurus.md
+implementation_plan*.md
+docs-old/
+docs/docs copy/*
+examples/

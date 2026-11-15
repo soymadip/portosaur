@@ -1,55 +1,23 @@
-<div align="center">
-    <img src="./packages/theme/static/img/icon.png" width=110>
-    <h1>Portosaur</h1>
-    <p>Complete portfolio and personal website solution for your digital personality.</p>
-    <br />
-</div>
+# Portosaur
 
-## 🧩 Features
+Complete portfolio cum personal website solution for your digital personality.
 
-- **👨‍💻 Fully Featured Portfolio** — Showcase yourself, your projects, skills, experience & social identity.
-- **📚 Knowledge Base** — Never forget a thing. Build your digital second brain with integrated notes vault.
-- **📝 Blog Platform** — Share your journey in blog that's easy to write & beautiful to read.
-- **📋 Task Tracking** — Track your plans with priority levels & completion status.
-- **📱 Mobile Optimized** — Adapts seamlessly on all devices, from desktop to mobiles.
-- **🛠️ Highly Configurable** — Extensive customization options through a central, logic-less config.
+This branch (`fresh/fumadocs`) rebuilds Portosaur on **Fumadocs headless core + Next.js 16**,
+targeting **1.0.0**. The old Docusaurus-based code lives in `backup/` as a reference only —
+see the spec in the migration goal for the full plan.
 
-## Quick Start
+## Layout
 
-Get your portfolio up and running in seconds:
+- `packages/app` — the application (Next.js App Router routes, React components, CSS).
+  Started from the official `create-fumadocs-app` static template.
+- `packages/cli` — the `porto` binary, config engine, and Next.js root generator.
+- `packages/wizard` — interactive prompt library used by `porto init`.
+- `docs/` — the documentation site (dogfood).
+- `backup/` — the 0.26.0 Docusaurus codebase, kept as a reference.
 
-```bash
-# Initialize a new project (interactive)
-bunx @portosaur/cli init
+## Development
 
-# Start development
-cd <your-project-dir>
-bun run dev   # or: npm run dev
+```sh
+bun install
+bun run --cwd docs dev
 ```
-
-## 📍 Documentation
-
-For user guides and CLI reference, visit the **[Documentation Site](https://soymadip.github.io/portosaur)**.
-
-<br>
-
-## 🏗️ Architecture
-
-This repository is a monorepo structured for performance and extensibility:
-
-- **[`@portosaur/cli`](./packages/cli)** — The CLI for project lifecycle & builds.
-- **[`@portosaur/core`](./packages/core)** — The logic engine for configuration & variable resolution.
-- **[`@portosaur/theme`](./packages/theme)** — The UI core containing components, assets, & plugins.
-- **[`@portosaur/wizard`](./packages/wizard)** — The interaction engine for CLI prompt workflows.
-
-## Credits
-
-- [Docusaurus](https://docusaurus.io/) - The underlying engine.
-- [Hugo Profile](https://hugo-profile.netlify.app/) - Design inspiration for portfolio landing page
-- [VitePress](https://vitepress.dev) - Design inspiration for Doc mode homepage.
-
----
-
-<div align="center">
-    Built with 🦖 by <a href="https://github.com/soymadip">soymadip</a>
-</div>
