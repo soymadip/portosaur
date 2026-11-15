@@ -2425,7 +2425,7 @@ html.porto-navbar-hidden .porto-nav-progress {
   grid-auto-rows: minmax(205px, auto);
   gap: 1rem;
   width: 100%;
-  max-width: 72rem;
+  max-width: 64rem;
 }
 
 .feature-card {
