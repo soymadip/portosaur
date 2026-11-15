@@ -2,21 +2,74 @@
   "name": "@portosaur/app",
   "version": "0.26.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./mdx": {
+      "types": "./src/mdx.ts",
+      "default": "./src/mdx.ts"
+    },
+    "./lib/*": {
+      "types": "./src/lib/*.ts",
+      "default": "./src/lib/*.ts"
+    },
+    "./plugins/*": {
+      "types": "./src/plugins/*.ts",
+      "default": "./src/plugins/*.ts"
+    },
+    "./components/*": {
+      "types": "./src/components/*.tsx",
+      "default": "./src/components/*.tsx"
+    },
+    "./config/*": {
+      "types": "./src/config/*.ts",
+      "default": "./src/config/*.ts"
+    },
+    "./css/global.css": "./src/css/global.css",
+    "./lib/porto-context": {
+      "types": "./src/lib/porto-context.tsx",
+      "default": "./src/lib/porto-context.tsx"
+    },
+    "./lib/mdx-link": {
+      "types": "./src/lib/mdx-link.tsx",
+      "default": "./src/lib/mdx-link.tsx"
+    }
+  },
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "serve out",
-    "types:check": "next typegen && tsc --noEmit"
+    "test": "bun test tests",
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "cn": "^0.5.2",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@iconify-json/devicon": "^1.2.62",
+    "@iconify-json/fa7-solid": "^1.2.5",
+    "@iconify-json/line-md": "^1.2.16",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.120",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/octicon": "^1.2.30",
+    "@iconify-json/simple-icons": "^1.2.92",
+    "@iconify-json/streamline-sharp": "^1.2.0",
+    "@iconify/types": "^2.0.0",
+    "@iconify/utils": "^3.1.4",
+    "clsx": "^2.1.1",
     "fumadocs-core": "16.19.3",
     "fumadocs-mdx": "15.6.2",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.19.3",
-    "lucide-react": "^1.71.0",
-    "next": "16.4.6",
+    "github-slugger": "^2.0.0",
+    "js-yaml": "^5.2.2",
+    "katex": "^0.18.1",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "rehype-katex": "^7.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-emoji": "^5.0.2",
+    "remark-math": "^6.0.0",
+    "shiki": "^4.6.0",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",
@@ -24,9 +77,14 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "next": "^16.4.6",
     "postcss": "^8.5.32",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
     "serve": "^14.2.7",
     "tailwindcss": "^4.3.5",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "unified": "^11.0.5"
   }
 }

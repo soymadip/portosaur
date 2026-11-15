@@ -1,0 +1,16 @@
+image: oven/bun:latest
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  script:
+    - bun install
+    - bun run build
+    - bunx surge ./build --domain {{repo_name}}.surge.sh
+  variables:
+    SURGE_LOGIN: $SURGE_LOGIN
+    SURGE_TOKEN: $SURGE_TOKEN

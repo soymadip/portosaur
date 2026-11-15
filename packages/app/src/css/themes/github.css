@@ -1,0 +1,91 @@
+/* GitHub scheme — light / dark. Overrides of the `--porto-color-*`
+ * properties, scoped by data-scheme + data-theme. Only the active
+ * scheme's block applies. See portosaur.css for how the gray scale
+ * and the accent trio map onto the OG values. */
+
+[data-scheme="github"][data-theme="light"] {
+  --porto-color-white: #24292f;
+  --porto-color-gray-1: #24292f;
+  --porto-color-gray-2: #24292f;
+  --porto-color-gray-3: #57606a;
+  --porto-color-gray-4: #c8ced6;
+  --porto-color-gray-5: #d8dde3;
+  --porto-color-gray-6: #eaeef2;
+  --porto-color-gray-7: #f6f8fa;
+  --porto-color-black: #ffffff;
+
+  --porto-color-orange-low: color-mix(in srgb, #d15704 12%, white);
+  --porto-color-orange: #d15704;
+  --porto-color-orange-high: color-mix(in srgb, #d15704 70%, black);
+  --porto-color-green-low: color-mix(in srgb, #1a7f37 12%, white);
+  --porto-color-green: #1a7f37;
+  --porto-color-green-high: color-mix(in srgb, #1a7f37 70%, black);
+  --porto-color-blue-low: color-mix(in srgb, #0969da 12%, white);
+  --porto-color-blue: #0969da;
+  --porto-color-blue-high: color-mix(in srgb, #0969da 70%, black);
+  --porto-color-purple-low: color-mix(in srgb, #8250df 12%, white);
+  --porto-color-purple: #8250df;
+  --porto-color-purple-high: color-mix(in srgb, #8250df 70%, black);
+  --porto-color-red-low: color-mix(in srgb, #cf222e 12%, white);
+  --porto-color-red: #cf222e;
+  --porto-color-red-high: color-mix(in srgb, #cf222e 70%, black);
+
+  --porto-color-accent-low: color-mix(in srgb, #0969da 12%, white);
+  --porto-color-accent: #0969da;
+  --porto-color-accent-high: #0758b7;
+
+  --porto-color-bg: #ffffff;
+}
+
+[data-scheme="github"][data-theme="dark"] {
+  --porto-color-white: #c9d1d9;
+  --porto-color-gray-1: #c9d1d9;
+  --porto-color-gray-2: #c9d1d9;
+  --porto-color-gray-3: #8b949e;
+  --porto-color-gray-4: #6e7681;
+  --porto-color-gray-5: #21262d;
+  --porto-color-gray-6: #161b22;
+  --porto-color-black: #090d13;
+
+  --porto-color-orange-low: color-mix(
+    in srgb,
+    #bd561d 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-orange: #bd561d;
+  --porto-color-orange-high: color-mix(in srgb, #bd561d 65%, white);
+  --porto-color-green-low: color-mix(
+    in srgb,
+    #2ea043 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-green: #2ea043;
+  --porto-color-green-high: color-mix(in srgb, #2ea043 65%, white);
+  --porto-color-blue-low: color-mix(
+    in srgb,
+    #58a6ff 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-blue: #58a6ff;
+  --porto-color-blue-high: color-mix(in srgb, #58a6ff 65%, white);
+  --porto-color-purple-low: color-mix(
+    in srgb,
+    #a371f7 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-purple: #a371f7;
+  --porto-color-purple-high: color-mix(in srgb, #a371f7 65%, white);
+  --porto-color-red-low: color-mix(in srgb, #f85149 25%, var(--porto-color-bg));
+  --porto-color-red: #f85149;
+  --porto-color-red-high: color-mix(in srgb, #f85149 65%, white);
+
+  --porto-color-accent-low: color-mix(
+    in srgb,
+    #58a6ff 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-accent: #0969da;
+  --porto-color-accent-high: #58a6ff;
+
+  --porto-color-bg: #0d1117;
+}

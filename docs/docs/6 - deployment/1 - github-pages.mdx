@@ -1,0 +1,67 @@
+---
+title: "GitHub Pages"
+desc: "Deploy your Portosaur site to GitHub Pages with GitHub Actions."
+icon: "si:refinedgithub"
+---
+
+Portosaur automates GitHub Pages deployment using GitHub Actions workflows.
+
+## 1. Repository Setup
+
+The repository name determines your default site URL:
+
+- **User / Organization Site (Root Domain)**:
+  - Repository name: `<username>.github.io`
+  - URL: `https://<username>.github.io/`
+  - Configuration: `site.url: "auto"`, `site.base_url: "auto"` (resolves to `/`)
+
+- **Project Site (Subpath)**:
+  - Repository name: `<my-project>`
+  - URL: `https://<username>.github.io/<my-project>/`
+  - Configuration: `site.url: "auto"`, `site.base_url: "auto"` (automatically resolves to `/<my-project>/`)
+
+## 2. Generating the Workflow Files
+
+### In a New Project
+
+Choose **GitHub** as the VCS Provider and **GitHub Pages** as the Hosting Platform during `porto init`:
+
+```bash
+porto init -p github -h github-pages -u octocat
+```
+
+### In an Existing Project
+
+Run the following command inside your project directory:
+
+```bash
+porto init --ci-only -h github-pages
+```
+
+<br />
+
+This generates `.github/workflows/deploy.yml`
+
+## 3. Enable GitHub Actions in Repository Settings
+
+Before your site will deploy, you must enable GitHub Actions to publish Pages:
+
+1. Navigate to your repository on GitHub Repository.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment → Source**
+4. Change the dropdown from **Deploy from a branch** to **GitHub Actions**.
+
+Once set, push a commit to the `main` branch. GitHub Actions will build your site and publish it immediately.
+
+## 4. Using Custom Domains
+
+If you are using a custom domain (e.g. `docs.example.com` or `myportfolio.com`):
+
+1. Set your custom domain under **Settings → Pages → Custom domain**.
+2. Update `site.url` in `config.yml` to your custom domain:
+
+   ```yaml
+   site:
+     url: "https://docs.example.com"
+     base_url: "/"
+   ```

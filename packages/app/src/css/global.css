@@ -1,0 +1,388 @@
+/* Portosaur theme CSS entry (Tailwind v4).
+ *
+ * Load order: this file loads first (imported by the generated
+ * root), user `theme.custom_css` files load after it, so user
+ * overrides win.
+ *
+ * Tailwind v4 notes:
+ * - `@source` below tells Tailwind to scan this package's own
+ *   `src/` for utility classes — without it, utilities used only
+ *   inside `@portosaur/app` components would never be generated
+ *   (contracts §5). Verified by the throwaway-app check (see the
+ *   Phase 1 report).
+ * - `@theme` maps Portosaur's `--porto-color-*` custom properties
+ *   onto Tailwind color tokens (`bg-porto-bg`, `text-porto-text`,
+ *   …). The indirection matters: the scheme files override the
+ *   `--porto-color-*` properties under `[data-scheme][data-theme]`,
+ *   and the utilities follow through the `var()` reference.
+ * - Breakpoints override Tailwind's defaults to match the design:
+ *   `md` is the 50rem sidebar/navbar breakpoint, `lg` the 72rem
+ *   TOC breakpoint.
+ * - Portosaur's own styles are plain unlayered CSS, so they beat
+ *   Tailwind's layered utilities on the same property. Components
+ *   use utilities only where no component class sets that property.
+ *
+ * The base `:root` values are the Portosaur scheme in dark mode —
+ * the Phase 1 default scheme (contracts §7). The pre-paint script
+ * in the root layout sets `data-theme` before first paint, so the
+ * light block below applies immediately on light-mode sites.
+ */
+
+/* All @imports first (CSS requires it), print last: its
+ * `:root[data-theme]` overrides tie the scheme blocks on
+ * specificity and win by import order. */
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "./themes/catppuccin.css";
+@import "./themes/dracula.css";
+@import "./themes/github.css";
+@import "./themes/gruvbox.css";
+@import "./themes/nord.css";
+@import "./themes/portosaur.css";
+@import "./callouts.css";
+@import "./code.css";
+@import "./content.css";
+@import "./components.css";
+@import "./animations.css";
+@import "./print.css";
+
+/* Scan this package's own sources for Tailwind utilities. */
+@source "../**/*.{ts,tsx}";
+
+@theme {
+  /* Colors — every token points at the scheme-driven property. */
+  --color-porto-bg: var(--porto-color-bg);
+  --color-porto-bg-nav: var(--porto-color-bg-nav);
+  --color-porto-bg-sidebar: var(--porto-color-bg-sidebar);
+  --color-porto-bg-inline-code: var(--porto-color-bg-inline-code);
+  --color-porto-bg-accent: var(--porto-color-bg-accent);
+  --color-porto-text: var(--porto-color-text);
+  --color-porto-text-accent: var(--porto-color-text-accent);
+  --color-porto-text-invert: var(--porto-color-text-invert);
+  --color-porto-white: var(--porto-color-white);
+  --color-porto-black: var(--porto-color-black);
+  --color-porto-gray-1: var(--porto-color-gray-1);
+  --color-porto-gray-2: var(--porto-color-gray-2);
+  --color-porto-gray-3: var(--porto-color-gray-3);
+  --color-porto-gray-4: var(--porto-color-gray-4);
+  --color-porto-gray-5: var(--porto-color-gray-5);
+  --color-porto-gray-6: var(--porto-color-gray-6);
+  --color-porto-gray-7: var(--porto-color-gray-7);
+  --color-porto-accent-low: var(--porto-color-accent-low);
+  --color-porto-accent: var(--porto-color-accent);
+  --color-porto-accent-high: var(--porto-color-accent-high);
+  --color-porto-orange-low: var(--porto-color-orange-low);
+  --color-porto-orange: var(--porto-color-orange);
+  --color-porto-orange-high: var(--porto-color-orange-high);
+  --color-porto-green-low: var(--porto-color-green-low);
+  --color-porto-green: var(--porto-color-green);
+  --color-porto-green-high: var(--porto-color-green-high);
+  --color-porto-blue-low: var(--porto-color-blue-low);
+  --color-porto-blue: var(--porto-color-blue);
+  --color-porto-blue-high: var(--porto-color-blue-high);
+  --color-porto-purple-low: var(--porto-color-purple-low);
+  --color-porto-purple: var(--porto-color-purple);
+  --color-porto-purple-high: var(--porto-color-purple-high);
+  --color-porto-red-low: var(--porto-color-red-low);
+  --color-porto-red: var(--porto-color-red);
+  --color-porto-red-high: var(--porto-color-red-high);
+  --color-porto-hairline: var(--porto-color-hairline);
+  --color-porto-hairline-light: var(--porto-color-hairline-light);
+  --color-porto-hairline-shade: var(--porto-color-hairline-shade);
+  --color-porto-backdrop-overlay: var(--porto-color-backdrop-overlay);
+
+  /* Typefaces — Geist Variable for UI/prose, Geist Mono for code. */
+  --font-sans:
+    "Geist Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Breakpoints — the design's own: 50rem sidebar/navbar, 72rem TOC. */
+  --breakpoint-md: 50rem;
+  --breakpoint-lg: 72rem;
+
+  /* Shadows follow the scheme-driven properties. */
+  --shadow-sm: var(--porto-shadow-sm);
+  --shadow-md: var(--porto-shadow-md);
+  --shadow-lg: var(--porto-shadow-lg);
+}
+
+/* Base tokens — Portosaur scheme, dark mode. The scheme files
+ * override the color properties under [data-scheme][data-theme];
+ * the layout/type tokens below are scheme-independent. */
+:root,
+::backdrop {
+  /* Colors (Portosaur dark) */
+  --porto-color-white: #f5f6f7;
+  --porto-color-gray-1: #f5f6f7;
+  --porto-color-gray-2: #f5f6f7;
+  --porto-color-gray-3: #a1a1aa;
+  --porto-color-gray-4: #727477;
+  --porto-color-gray-5: #2f3032;
+  --porto-color-gray-6: #242526;
+  --porto-color-black: #121314;
+
+  --porto-color-orange-low: color-mix(
+    in srgb,
+    #fb923c 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-orange: #fb923c;
+  --porto-color-orange-high: color-mix(in srgb, #fb923c 65%, white);
+  --porto-color-green-low: color-mix(
+    in srgb,
+    #4ade80 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-green: #4ade80;
+  --porto-color-green-high: color-mix(in srgb, #4ade80 65%, white);
+  --porto-color-blue-low: color-mix(
+    in srgb,
+    #60a5fa 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-blue: #60a5fa;
+  --porto-color-blue-high: color-mix(in srgb, #60a5fa 65%, white);
+  --porto-color-purple-low: color-mix(
+    in srgb,
+    #a78bfa 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-purple: #a78bfa;
+  --porto-color-purple-high: color-mix(in srgb, #a78bfa 65%, white);
+  --porto-color-red-low: color-mix(in srgb, #f87171 25%, var(--porto-color-bg));
+  --porto-color-red: #f87171;
+  --porto-color-red-high: color-mix(in srgb, #f87171 65%, white);
+
+  --porto-color-accent-low: color-mix(
+    in srgb,
+    #60fc02 25%,
+    var(--porto-color-bg)
+  );
+  --porto-color-accent: #40a701;
+  --porto-color-accent-high: #60fc02;
+
+  --porto-color-text: var(--porto-color-gray-2);
+  --porto-color-text-accent: var(--porto-color-accent-high);
+  --porto-color-text-invert: var(--porto-color-accent-low);
+  --porto-color-bg: #18191a;
+  --porto-color-bg-nav: var(--porto-color-gray-6);
+  /* Navbar, sidebar, and content share one background — panels are
+     separated by hairline borders, not color. */
+  --porto-color-bg-sidebar: var(--porto-color-bg);
+  --porto-color-bg-inline-code: var(--porto-color-gray-5);
+  --porto-color-bg-accent: var(--porto-color-accent-high);
+  --porto-color-hairline-light: var(--porto-color-gray-5);
+  --porto-color-hairline: var(--porto-color-gray-6);
+  --porto-color-hairline-shade: var(--porto-color-black);
+
+  --porto-color-backdrop-overlay: hsla(223, 13%, 10%, 0.66);
+
+  /* Shadows (dark mode) */
+  --porto-shadow-sm:
+    0px 1px 1px hsla(0, 0%, 0%, 0.12), 0px 2px 1px hsla(0, 0%, 0%, 0.24);
+  --porto-shadow-md:
+    0px 8px 4px hsla(0, 0%, 0%, 0.08), 0px 5px 2px hsla(0, 0%, 0%, 0.08),
+    0px 3px 2px hsla(0, 0%, 0%, 0.12), 0px 1px 1px hsla(0, 0%, 0%, 0.15);
+  --porto-shadow-lg:
+    0px 25px 7px hsla(0, 0%, 0%, 0.03), 0px 16px 6px hsla(0, 0%, 0%, 0.1),
+    0px 9px 5px hsla(223, 13%, 10%, 0.33), 0px 4px 4px hsla(0, 0%, 0%, 0.75),
+    0px 4px 2px hsla(0, 0%, 0%, 0.25);
+
+  /* Text size and line height */
+  --porto-text-2xs: 0.75rem;
+  --porto-text-xs: 0.8125rem;
+  --porto-text-sm: 0.875rem;
+  --porto-text-base: 1rem;
+  --porto-text-lg: 1.125rem;
+  --porto-text-xl: 1.25rem;
+  --porto-text-2xl: 1.5rem;
+  --porto-text-3xl: 1.8125rem;
+  --porto-text-4xl: 2.1875rem;
+  --porto-text-5xl: 2.625rem;
+  --porto-text-6xl: 4rem;
+
+  --porto-text-body: var(--porto-text-base);
+  --porto-text-body-sm: var(--porto-text-xs);
+  --porto-text-code: var(--porto-text-sm);
+  --porto-text-code-sm: var(--porto-text-xs);
+  --porto-text-h1: var(--porto-text-4xl);
+  --porto-text-h2: var(--porto-text-3xl);
+  --porto-text-h3: var(--porto-text-2xl);
+  --porto-text-h4: var(--porto-text-xl);
+  --porto-text-h5: var(--porto-text-lg);
+  --porto-text-h6: var(--porto-text-base);
+
+  --porto-line-height: 1.75;
+  --porto-line-height-headings: 1.2;
+
+  /* Key layout values */
+  --porto-nav-height: 3.5rem;
+  /* Mobile edge padding for the navbar (12px); desktop raises it
+     to 1.5rem in the media query below. */
+  --porto-nav-pad-x: 0.75rem;
+  --porto-nav-pad-y: 0.75rem;
+  --porto-mobile-toc-height: 3rem;
+  /* 265px: the left sidebar and the right TOC panel share this
+     width, and the content offset follows it. */
+  --porto-sidebar-width: 16.5625rem;
+  --porto-sidebar-pad-x: 1rem;
+  --porto-content-width: 45rem;
+  --porto-content-pad-x: 1rem;
+  --porto-content-gap-y: 1rem;
+  --porto-main-pad: 0 0 3vh 0;
+  --porto-menu-button-size: 2rem;
+  --porto-nav-gap: var(--porto-content-pad-x);
+  /* Offset required to show outline inside an element instead of round the outside */
+  --porto-outline-offset-inside: -0.1875rem;
+
+  /* Global z-index values */
+  --porto-z-index-toc: 4;
+  --porto-z-index-menu: 5;
+  --porto-z-index-navbar: 10;
+  --porto-z-index-skiplink: 20;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"],
+[data-theme="light"] ::backdrop {
+  /* Colors (Portosaur light) */
+  --porto-color-white: #09090b;
+  --porto-color-gray-1: #09090b;
+  --porto-color-gray-2: #09090b;
+  --porto-color-gray-3: #52525b;
+  --porto-color-gray-4: #71717a;
+  --porto-color-gray-5: #d4d4d8;
+  --porto-color-gray-6: #e4e4e7;
+  --porto-color-gray-7: #f4f4f5;
+  --porto-color-black: #ffffff;
+
+  --porto-color-orange-low: color-mix(in srgb, #f97316 12%, white);
+  --porto-color-orange: #f97316;
+  --porto-color-orange-high: color-mix(in srgb, #f97316 70%, black);
+  --porto-color-green-low: color-mix(in srgb, #22c55e 12%, white);
+  --porto-color-green: #22c55e;
+  --porto-color-green-high: color-mix(in srgb, #22c55e 70%, black);
+  --porto-color-blue-low: color-mix(in srgb, #3b82f6 12%, white);
+  --porto-color-blue: #3b82f6;
+  --porto-color-blue-high: color-mix(in srgb, #3b82f6 70%, black);
+  --porto-color-purple-low: color-mix(in srgb, #8b5cf6 12%, white);
+  --porto-color-purple: #8b5cf6;
+  --porto-color-purple-high: color-mix(in srgb, #8b5cf6 70%, black);
+  --porto-color-red-low: color-mix(in srgb, #ef4444 12%, white);
+  --porto-color-red: #ef4444;
+  --porto-color-red-high: color-mix(in srgb, #ef4444 70%, black);
+
+  --porto-color-accent-low: color-mix(in srgb, #40a701 12%, white);
+  --porto-color-accent: #40a701;
+  --porto-color-accent-high: color-mix(in srgb, #40a701 60%, black);
+
+  --porto-color-text-accent: var(--porto-color-accent);
+  --porto-color-text-invert: var(--porto-color-black);
+  --porto-color-bg: #ffffff;
+  --porto-color-bg-nav: var(--porto-color-gray-7);
+  --porto-color-bg-inline-code: var(--porto-color-gray-6);
+  --porto-color-bg-accent: var(--porto-color-accent);
+  --porto-color-hairline-light: var(--porto-color-gray-6);
+  --porto-color-hairline-shade: var(--porto-color-gray-6);
+
+  --porto-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
+
+  /* Shadows (light mode) */
+  --porto-shadow-sm:
+    0px 1px 1px hsla(0, 0%, 0%, 0.06), 0px 2px 1px hsla(0, 0%, 0%, 0.06);
+  --porto-shadow-md:
+    0px 8px 4px hsla(0, 0%, 0%, 0.03), 0px 5px 2px hsla(0, 0%, 0%, 0.03),
+    0px 3px 2px hsla(0, 0%, 0%, 0.06), 0px 1px 1px hsla(0, 0%, 0%, 0.06);
+  --porto-shadow-lg:
+    0px 25px 7px rgba(0, 0, 0, 0.01), 0px 16px 6px hsla(0, 0%, 0%, 0.03),
+    0px 9px 5px hsla(223, 13%, 10%, 0.08), 0px 4px 4px hsla(0, 0%, 0%, 0.16),
+    0px 4px 2px hsla(0, 0%, 0%, 0.04);
+
+  color-scheme: light;
+}
+
+@media (min-width: 50em) {
+  :root {
+    /* 60px, matching the OG Portosaur/Docusaurus navbar height. */
+    --porto-nav-height: 3.75rem;
+    --porto-nav-pad-x: 1.5rem;
+    --porto-text-h1: var(--porto-text-5xl);
+    --porto-text-h2: var(--porto-text-4xl);
+    --porto-text-h3: var(--porto-text-3xl);
+    --porto-text-h4: var(--porto-text-2xl);
+  }
+}
+
+@media (min-width: 72rem) {
+  :root {
+    --porto-content-pad-x: 1.5rem;
+    --porto-mobile-toc-height: 0rem;
+  }
+}
+
+/* Base styles. Tailwind's preflight already resets margins and
+ * box-sizing; these are the Portosaur document defaults. */
+html {
+  /* No blue flash when tapping links/buttons on touch devices. */
+  -webkit-tap-highlight-color: transparent;
+  /* Anchor headings clear the fixed navbar. Pages with a mobile
+     TOC (doc pages below the lg breakpoint) add its height via
+     the :has rule below — the TOC only exists on those pages, so
+     other pages must not pay its 3rem. */
+  scroll-padding-top: calc(var(--porto-nav-height) + 1rem);
+}
+
+html:has(.porto-mobile-toc) {
+  scroll-padding-top: calc(
+    var(--porto-nav-height) + var(--porto-mobile-toc-height) + 1rem
+  );
+}
+
+@media (min-width: 72rem) {
+  html:has(.porto-mobile-toc) {
+    scroll-padding-top: calc(var(--porto-nav-height) + 1rem);
+  }
+}
+
+body {
+  background-color: var(--porto-color-bg);
+  color: var(--porto-color-text);
+  font-family: var(--font-sans);
+  font-size: var(--porto-text-body);
+  line-height: var(--porto-line-height);
+  overflow-wrap: break-word;
+}
+
+:focus-visible {
+  outline: 2px solid var(--porto-color-text-accent);
+  outline-offset: 2px;
+}
+
+/* Headings use the heading line-height everywhere, not just prose. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: var(--porto-line-height-headings);
+}
+
+/* Anchor links inside headings (rehype-autolink-headings): the link
+ * icon sits after the heading text and only shows on hover/focus. */
+.porto-markdown-content :is(h2, h3, h4, h5, h6) a[href^="#"] {
+  margin-inline-start: 0.375rem;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.porto-markdown-content :is(h2, h3, h4, h5, h6):hover a[href^="#"],
+.porto-markdown-content :is(h2, h3, h4, h5, h6) a[href^="#"]:focus-visible {
+  opacity: 1;
+}

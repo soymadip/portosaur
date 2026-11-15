@@ -1,0 +1,146 @@
+/* Entrance and interaction animations (decision 26: short
+ * 200–300ms transitions, fades for dialogs, slide for the sidebar).
+ * All motion respects `prefers-reduced-motion`. */
+
+@keyframes porto-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes porto-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes porto-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes porto-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes porto-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes porto-skill-appear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile menu: the pane fades in 0.25s, its content slides down 8px
+ * (ported from VitePress's VPNavScreen). Pure CSS via
+ * `@starting-style` + `allow-discrete` — no JS animation state. */
+.porto-mobile-menu {
+  transition:
+    opacity 0.25s ease,
+    display 0.25s ease allow-discrete;
+}
+.porto-mobile-menu::backdrop {
+  background-color: var(--porto-color-backdrop-overlay);
+  transition:
+    opacity 0.25s ease,
+    display 0.25s ease allow-discrete;
+}
+.porto-mobile-menu .porto-mobile-menu__content {
+  transition: transform 0.25s ease;
+}
+@starting-style {
+  .porto-mobile-menu,
+  .porto-mobile-menu::backdrop {
+    opacity: 0;
+  }
+  .porto-mobile-menu .porto-mobile-menu__content {
+    transform: translateY(-8px);
+  }
+}
+
+/* Search dialog: fade + slight scale, 200ms. */
+.porto-search-dialog {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    display 0.2s ease allow-discrete;
+}
+.porto-search-dialog::backdrop {
+  background-color: var(--porto-color-backdrop-overlay);
+  backdrop-filter: blur(4px);
+  transition:
+    opacity 0.2s ease,
+    display 0.2s ease allow-discrete;
+}
+@starting-style {
+  .porto-search-dialog,
+  .porto-search-dialog::backdrop {
+    opacity: 0;
+  }
+  .porto-search-dialog {
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+
+/* Hamburger icon morph (three lines -> X), 0.25s. */
+.porto-hamburger span {
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+/* Theme select dropdown: fade + slide, 200ms. */
+.porto-theme-select__menu {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+@starting-style {
+  .porto-theme-select__menu {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-mobile-menu,
+  .porto-mobile-menu::backdrop,
+  .porto-mobile-menu .porto-mobile-menu__content,
+  .porto-search-dialog,
+  .porto-search-dialog::backdrop,
+  .porto-hamburger span,
+  .porto-theme-select__menu {
+    transition: none;
+  }
+}

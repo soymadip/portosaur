@@ -1,0 +1,683 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Portosaur Project Configuration",
+  "description": "Schema for config.yml — validated at build time by porto.",
+  "type": "object",
+  "properties": {
+    "site": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": ["string", "null"],
+          "default": "auto"
+        },
+        "base_url": {
+          "type": ["string", "null"],
+          "default": "auto"
+        },
+        "title": {
+          "type": ["string", "null"],
+          "description": "Global site title."
+        },
+        "tagline": {
+          "type": ["string", "null"],
+          "description": "Global site tagline.",
+          "default": "My Digital space, personal knowledge base & blogging platform"
+        },
+        "head_tags": {
+          "type": ["array", "null"],
+          "description": "Custom head tags to inject into the document."
+        },
+        "docs": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": ["string", "null"],
+              "description": "Docs directory name for docs mode. Relative to project Root.",
+              "default": "docs"
+            },
+            "route": {
+              "type": ["string", "null"],
+              "description": "Docs route for docs mode.",
+              "default": "docs"
+            }
+          }
+        },
+        "notes": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": ["string", "null"],
+              "description": "Notes directory name. Relative to project root.",
+              "default": "notes"
+            },
+            "route": {
+              "type": ["string", "null"],
+              "description": "Notes Route (eg, my-notes -> my-website.in/my-notes)",
+              "default": "notes"
+            },
+            "topic_list": {
+              "type": ["boolean", "null"],
+              "description": "Toggle automatically adding topic lists to notes pages.",
+              "default": true
+            }
+          }
+        },
+        "blog": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": ["string", "null"],
+              "description": "Blog directory name. Relative to project root.",
+              "default": "blog"
+            },
+            "route": {
+              "type": ["string", "null"],
+              "description": "Blog Route (eg, my-blog -> my-website.in/my-blog)",
+              "default": "blog"
+            }
+          }
+        },
+        "on_broken_anchors": {
+          "type": ["string", "null"],
+          "description": "Behavior when a link anchor (#) is missing.",
+          "default": "warn"
+        },
+        "on_broken_links": {
+          "type": ["string", "null"],
+          "description": "Behavior when a link is broken.",
+          "default": "throw"
+        },
+        "pwa": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "default": true
+            },
+            "notifications": {
+              "type": ["boolean", "null"],
+              "default": false
+            }
+          }
+        },
+        "markdown": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "mermaid": {
+              "type": ["boolean", "null"],
+              "description": "Enable support for Mermaid.js diagrams.",
+              "default": true
+            },
+            "render_emoji_shortcodes": {
+              "type": ["boolean", "null"],
+              "description": "Render emoji shortcodes like :smile:.",
+              "default": true
+            },
+            "on_broken_links": {
+              "type": ["string", "null"],
+              "description": "Broken link behavior.",
+              "default": "throw"
+            },
+            "on_broken_images": {
+              "type": ["string", "null"],
+              "description": "Broken image behavior.",
+              "default": "throw"
+            }
+          }
+        },
+        "social_card": {
+          "type": ["string", "null"],
+          "description": "Preview image used when sharing your site on social media.",
+          "default": ""
+        },
+        "favicon": {
+          "type": ["string", "null"],
+          "description": "Path to site's favicon.",
+          "default": ""
+        },
+        "preview": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "timeout": {
+              "type": ["number", "null"],
+              "description": "Timeout in seconds for fetching preview content (default: 15s).",
+              "default": 15
+            }
+          }
+        },
+        "robots_txt": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle robots.txt file generation.",
+              "default": true
+            },
+            "rules": {
+              "type": ["array", "null"],
+              "description": "List of rules (e.g., user_agent, allow, disallow)."
+            },
+            "custom_lines": {
+              "type": ["array", "null"],
+              "description": "Extra raw lines to append to robots.txt."
+            }
+          }
+        },
+        "edit_url": {
+          "type": ["string", "null"],
+          "description": "Base URL for Edit this page link.",
+          "default": ""
+        },
+        "rss": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle RSS feed generation for the blog.",
+              "default": true
+            },
+            "copyright": {
+              "type": ["string", "null"],
+              "description": "Custom copyright string for the feed."
+            },
+            "desc": {
+              "type": ["string", "null"],
+              "description": "Description for the feed."
+            }
+          }
+        },
+        "build": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "output_dir": {
+              "type": ["string", "null"],
+              "description": "Directory name for the compiled site output. Relative to project root.",
+              "default": "build"
+            }
+          }
+        }
+      }
+    },
+    "vars": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "theme": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "default_mode": {
+          "type": ["string", "null"],
+          "description": "Default theme mode (light or dark).",
+          "default": "dark"
+        },
+        "color_scheme": {
+          "type": ["string", "null"],
+          "description": "The site's color scheme."
+        },
+        "navigation": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "navbar_items": {
+              "type": ["array", "null"],
+              "description": "List of custom navbar items.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": ["string", "null"]
+                  },
+                  "to": {
+                    "type": ["string", "null"]
+                  },
+                  "href": {
+                    "type": ["string", "null"]
+                  },
+                  "position": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "additionalProperties": false,
+                "required": ["label"]
+              }
+            },
+            "hide_navbar_on_scroll": {
+              "type": ["boolean", "null"],
+              "description": "Automatically hide the navbar when scrolling down.",
+              "default": true
+            },
+            "collapsable_sidebar": {
+              "type": ["boolean", "null"],
+              "description": "Enable collapsable sidebar navigation.",
+              "default": true
+            },
+            "breadcrumbs": {
+              "type": ["boolean", "null"],
+              "description": "Show breadcrumbs in the notes pages.",
+              "default": true
+            }
+          }
+        },
+        "appearance": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "show_theme_switch": {
+              "type": ["boolean", "null"],
+              "description": "Show the dark/light mode toggle.",
+              "default": true
+            },
+            "disable_project_link": {
+              "type": ["boolean", "null"],
+              "description": "Hide the Project link in the navbar.",
+              "default": false
+            }
+          }
+        },
+        "footer": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the footer section.",
+              "default": true
+            },
+            "message": {
+              "type": ["string", "null"],
+              "description": "Custom copyright message."
+            },
+            "disable_project_link": {
+              "type": ["boolean", "null"],
+              "description": "Hide the Project link in the footer.",
+              "default": false
+            }
+          }
+        },
+        "custom_css": {
+          "type": ["string", "null", "array"],
+          "description": "Custom CSS file(s) to load.",
+          "default": ""
+        }
+      }
+    },
+    "docs_home": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": ["string", "null"],
+          "description": "Your project's title",
+          "default": "Your Name"
+        },
+        "icon": {
+          "type": ["string", "null"],
+          "description": "Project icon.",
+          "default": ""
+        },
+        "tagline": {
+          "type": ["string", "null"],
+          "description": "Your project's tagline",
+          "default": "this is my awsome project"
+        },
+        "desc": {
+          "type": ["string", "null"],
+          "description": "Short description about the project",
+          "default": "A awsome project for solving this practical projblem"
+        },
+        "actions": {
+          "type": ["array", "null"]
+        },
+        "features": {
+          "type": ["array", "null"]
+        }
+      }
+    },
+    "home_page": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "hero": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": ["string", "null"],
+              "description": "Main title or name in the hero section.",
+              "default": "Your Name"
+            },
+            "profile_pic": {
+              "type": ["string", "null"],
+              "description": "Path/URL to profile picture in the hero section.",
+              "default": ""
+            },
+            "intro": {
+              "type": ["string", "null"],
+              "description": "Intro text before name.",
+              "default": "Hello there, I'm"
+            },
+            "subtitle": {
+              "type": ["string", "null"],
+              "description": "Subtitle text after name.",
+              "default": "I am a"
+            },
+            "profession": {
+              "type": ["string", "null"],
+              "default": "Your Profession"
+            },
+            "desc": {
+              "type": ["string", "null"],
+              "description": "Short description about you, your passion, goals etc.",
+              "default": "Short description about you, your passion, your goals etc."
+            },
+            "learn_more_button_txt": {
+              "type": ["string", "null"],
+              "description": "Text for the call-to-action button.",
+              "default": "Learn More"
+            },
+            "social": {
+              "type": ["array", "null"],
+              "description": "List of social links.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": ["string", "null"]
+                  },
+                  "url": {
+                    "type": ["string", "null"]
+                  },
+                  "icon": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "additionalProperties": false,
+                "required": ["name", "url"]
+              }
+            }
+          }
+        },
+        "about": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the About Me section.",
+              "default": true
+            },
+            "heading": {
+              "type": ["string", "null"],
+              "description": "Heading for the About Me section.",
+              "default": "About Me"
+            },
+            "image": {
+              "type": ["string", "null"],
+              "default": ""
+            },
+            "bio": {
+              "type": ["array", "null"],
+              "description": "Paragraphs for your biography."
+            },
+            "skills": {
+              "type": ["array", "null"]
+            },
+            "skills_heading": {
+              "type": ["string", "null"],
+              "description": "Heading for the skills list.",
+              "default": "My Skills"
+            },
+            "resume": {
+              "type": ["string", "null"],
+              "default": "none"
+            }
+          }
+        },
+        "project_shelf": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the Project Shelf section.",
+              "default": true
+            },
+            "heading": {
+              "type": ["string", "null"],
+              "description": "Heading for the projects section.",
+              "default": "My Projects"
+            },
+            "subheading": {
+              "type": ["string", "null"],
+              "description": "Subheading for the projects section.",
+              "default": "A collection of all my works, with featured projects highlighted"
+            },
+            "autoplay": {
+              "type": ["boolean", "null"],
+              "description": "Autoplay the project carousel.",
+              "default": true
+            },
+            "projects": {
+              "type": ["array", "null"],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": ["string", "null"]
+                  },
+                  "icon": {
+                    "type": ["string", "null"]
+                  },
+                  "bg": {
+                    "type": ["string", "null"]
+                  },
+                  "state": {
+                    "type": ["string", "null"],
+                    "enum": [
+                      "active",
+                      "completed",
+                      "maintenance",
+                      "paused",
+                      "archived",
+                      "planned",
+                      null
+                    ]
+                  },
+                  "desc": {
+                    "type": ["string", "null"]
+                  },
+                  "tags": {
+                    "type": ["array", "null"],
+                    "items": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "featured": {
+                    "type": ["boolean", "null"]
+                  },
+                  "website": {
+                    "type": ["string", "null"]
+                  },
+                  "repo": {
+                    "type": ["string", "null"]
+                  },
+                  "demo": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "additionalProperties": false,
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "experience": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the Experience section.",
+              "default": false
+            },
+            "heading": {
+              "type": ["string", "null"],
+              "description": "Heading for the experience section.",
+              "default": "Experience"
+            },
+            "subheading": {
+              "type": ["string", "null"],
+              "description": "Subheading for the experience section.",
+              "default": "My professional journey, in a glance"
+            },
+            "list": {
+              "type": ["array", "null"],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "company": {
+                    "type": ["string", "null"]
+                  },
+                  "role": {
+                    "type": ["string", "null"]
+                  },
+                  "duration": {
+                    "type": ["string", "null"]
+                  },
+                  "desc": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "additionalProperties": false,
+                "required": ["company", "role"]
+              }
+            }
+          }
+        },
+        "social": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the Social Links section.",
+              "default": true
+            },
+            "heading": {
+              "type": ["string", "null"],
+              "description": "Heading for the social links section.",
+              "default": "Get In Touch"
+            },
+            "subheading": {
+              "type": ["string", "null"],
+              "description": "Subheading for the social links section.",
+              "default": "Feel free to reach out for collaborations, questions, or just to say hello!"
+            },
+            "links": {
+              "type": ["array", "null"],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": ["string", "null"]
+                  },
+                  "url": {
+                    "type": ["string", "null"]
+                  },
+                  "icon": {
+                    "type": ["string", "null"]
+                  },
+                  "desc": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "additionalProperties": false,
+                "required": ["name", "url"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "enable": {
+          "type": ["boolean", "null"],
+          "description": "Toggle the Tasks page.",
+          "default": false
+        },
+        "title": {
+          "type": ["string", "null"],
+          "description": "Title for the tasks page.",
+          "default": "Tasks"
+        },
+        "subtitle": {
+          "type": ["string", "null"],
+          "default": "My current focus"
+        },
+        "list": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": ["string", "null"]
+              },
+              "status": {
+                "type": ["string", "null"]
+              },
+              "desc": {
+                "type": ["string", "null"]
+              }
+            },
+            "additionalProperties": false,
+            "required": ["title", "status"]
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "link_shortener": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": ["boolean", "null"],
+              "description": "Toggle the internal link shortener.",
+              "default": false
+            },
+            "deploy_path": {
+              "type": ["string", "null"],
+              "description": "URL base path for redirects.",
+              "default": "/l"
+            },
+            "short_links": {
+              "type": ["object", "null"],
+              "additionalProperties": true,
+              "description": "Key-value map of slugs to target URLs."
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

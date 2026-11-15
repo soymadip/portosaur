@@ -1,0 +1,129 @@
+/* Print styles — force the light palette and hide the chrome.
+ *
+ * The `:root[data-theme]` selector ties the scheme blocks
+ * (`[data-scheme][data-theme]`, 0,2,0) and wins by import order —
+ * this file loads last. Without it the active scheme's dark palette
+ * would print. The values are the Portosaur light scheme. */
+
+@media print {
+  :root[data-theme="light"],
+  :root[data-theme="dark"] {
+    --porto-color-white: #09090b;
+    --porto-color-gray-1: #09090b;
+    --porto-color-gray-2: #09090b;
+    --porto-color-gray-3: #52525b;
+    --porto-color-gray-4: #71717a;
+    --porto-color-gray-5: #d4d4d8;
+    --porto-color-gray-6: #e4e4e7;
+    --porto-color-gray-7: #f4f4f5;
+    --porto-color-black: #ffffff;
+
+    --porto-color-orange-low: color-mix(in srgb, #f97316 12%, white);
+    --porto-color-orange: #f97316;
+    --porto-color-orange-high: color-mix(in srgb, #f97316 70%, black);
+    --porto-color-green-low: color-mix(in srgb, #22c55e 12%, white);
+    --porto-color-green: #22c55e;
+    --porto-color-green-high: color-mix(in srgb, #22c55e 70%, black);
+    --porto-color-blue-low: color-mix(in srgb, #3b82f6 12%, white);
+    --porto-color-blue: #3b82f6;
+    --porto-color-blue-high: color-mix(in srgb, #3b82f6 70%, black);
+    --porto-color-purple-low: color-mix(in srgb, #8b5cf6 12%, white);
+    --porto-color-purple: #8b5cf6;
+    --porto-color-purple-high: color-mix(in srgb, #8b5cf6 70%, black);
+    --porto-color-red-low: color-mix(in srgb, #ef4444 12%, white);
+    --porto-color-red: #ef4444;
+    --porto-color-red-high: color-mix(in srgb, #ef4444 70%, black);
+
+    --porto-color-accent-low: color-mix(in srgb, #40a701 12%, white);
+    --porto-color-accent: #40a701;
+    --porto-color-accent-high: color-mix(in srgb, #40a701 60%, black);
+
+    --porto-color-text-accent: var(--porto-color-accent);
+    --porto-color-text-invert: var(--porto-color-black);
+    --porto-color-bg: #ffffff;
+    --porto-color-bg-nav: var(--porto-color-gray-7);
+    --porto-color-bg-inline-code: var(--porto-color-gray-6);
+    --porto-color-bg-accent: var(--porto-color-accent);
+    --porto-color-hairline-light: var(--porto-color-gray-6);
+    --porto-color-hairline-shade: var(--porto-color-gray-6);
+
+    --porto-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
+
+    /* Disable shadows when printing. */
+    --porto-shadow-sm: none;
+    --porto-shadow-md: none;
+    --porto-shadow-lg: none;
+  }
+
+  /* Utility classes for controlling element visibility when printing. */
+  .print\:hidden {
+    display: none;
+  }
+  .print\:flex {
+    display: flex;
+  }
+  .print\:block {
+    display: block;
+  }
+
+  /* Hide the chrome — navbar, sidebars, TOC, menus, progress. */
+  .porto-navbar,
+  .porto-sidebar,
+  .porto-toc,
+  .porto-mobile-toc,
+  .porto-mobile-menu,
+  .porto-nav-progress,
+  .porto-skip-link,
+  .porto-search-dialog {
+    display: none;
+  }
+
+  /* Page layout tweaks. */
+  main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .main-frame {
+    padding-top: 0;
+    padding-inline-start: 0;
+  }
+  .main-pane > .content-panel:first-child {
+    padding-block-start: 0;
+  }
+  .content-panel + .content-panel {
+    border: 0;
+  }
+
+  /* Prose tweaks. */
+  .porto-markdown-content :is(h1, h2, h3, h4, h5, h6) {
+    break-after: avoid;
+  }
+  .porto-markdown-content :is(p, li) {
+    orphans: 2;
+    widows: 2;
+  }
+  .porto-markdown-content pre {
+    overflow-x: hidden;
+    white-space: pre-wrap;
+  }
+  .porto-markdown-content .porto-code-frame,
+  .porto-markdown-content figure,
+  .porto-markdown-content pre,
+  .porto-markdown-content .admonition {
+    break-inside: avoid;
+  }
+  .porto-code-copy {
+    display: none;
+  }
+  .porto-markdown-content code:not(:where(.not-content *)) {
+    background-color: transparent;
+    padding: 0;
+    margin-block: unset;
+    font-size: 0.9375em;
+  }
+  .porto-markdown-content :is(th, td):not(:where(.not-content *)),
+  .porto-markdown-content :is(th, td) *:not(:where(.not-content *)) {
+    /* Wrap table contents to prevent overflow outside the page width. */
+    overflow-wrap: anywhere;
+  }
+}

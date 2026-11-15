@@ -1,0 +1,201 @@
+/* Shiki code blocks.
+ *
+ * Portosaur uses Shiki everywhere (via fumadocs-core's rehype-code
+ * plugin, configured in `config/shiki.ts`). The frame is plain CSS:
+ * a bordered panel with a header (terminal dots, language label,
+ * copy button). The frame markup is added by the `CodeBlock` MDX
+ * component — without it, the bare `pre` keeps the content.css
+ * styling.
+ *
+ * Dual-theme flip: fumadocs emits dual-theme Shiki with
+ * `defaultColor: false`, so spans carry `--shiki-light` /
+ * `--shiki-dark` custom properties and no inline color — the flip
+ * below is a plain rule keyed to Portosaur's `data-theme`
+ * attribute (fumadocs-ui keys its own to `.dark`; Portosaur does
+ * not use that class). No `!important` is needed.
+ */
+
+.porto-markdown-content pre {
+  overflow-x: auto;
+}
+
+.porto-code-frame {
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--porto-shadow-sm);
+}
+
+.porto-code-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--porto-color-gray-6);
+  border-bottom: 1px solid var(--porto-color-gray-5);
+}
+
+.porto-code-dots {
+  display: flex;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.porto-code-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: var(--porto-color-gray-4);
+}
+.porto-code-dot:nth-child(1) {
+  background-color: var(--porto-color-red);
+}
+.porto-code-dot:nth-child(2) {
+  background-color: var(--porto-color-orange);
+}
+.porto-code-dot:nth-child(3) {
+  background-color: var(--porto-color-green);
+}
+
+.porto-code-lang {
+  font-family: var(--font-mono);
+  font-size: var(--porto-text-code-sm);
+  color: var(--porto-color-gray-3);
+  text-transform: lowercase;
+  overflow-wrap: anywhere;
+}
+
+.porto-code-copy {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-2);
+  font-size: var(--porto-text-xs);
+  line-height: 1.25;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.porto-code-copy:hover {
+  color: var(--porto-color-white);
+  border-color: var(--porto-color-gray-2);
+}
+.porto-code-copy svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+.porto-code-copy[data-copied="true"] {
+  color: var(--porto-color-text-accent);
+  border-color: var(--porto-color-text-accent);
+}
+
+/* The frame owns the border — the `pre` inside drops its own. */
+.porto-code-frame pre {
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Shiki token colors: light theme by default, dark under
+ * `data-theme="dark"`. Both the block (`pre.shiki`) and inline
+ * (`code.shiki`) forms flip. */
+.shiki code span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+}
+
+html[data-theme="dark"] .shiki code span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}
+
+code.shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+}
+
+html[data-theme="dark"] code.shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}
+
+/* Shiki line structure (line numbers, diff, highlight) — the
+ * transformers are Phase 2 work; the styles are here so the
+ * markup renders correctly when they land. */
+.shiki .line {
+  position: relative;
+  padding-inline: 1rem;
+}
+
+.shiki .line:empty {
+  height: 1lh;
+}
+
+.shiki .highlighted {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+}
+
+.shiki .highlighted::after {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  content: "";
+  border-inline-start: 2px solid
+    color-mix(in srgb, var(--porto-color-text-accent) 50%, transparent);
+}
+
+.shiki .diff::before {
+  position: absolute;
+  inset-inline-start: 0.375rem;
+}
+
+.shiki .diff.remove {
+  opacity: 0.7;
+  background-color: color-mix(in srgb, var(--porto-color-red) 12%, transparent);
+}
+
+.shiki .diff.remove::before {
+  content: "-";
+  color: var(--porto-color-red);
+}
+
+.shiki .diff.add {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-green) 12%,
+    transparent
+  );
+}
+
+.shiki .diff.add::before {
+  content: "+";
+  color: var(--porto-color-green);
+}
+
+.shiki[data-line-numbers] {
+  counter-reset: line;
+}
+
+.shiki[data-line-numbers] .line {
+  counter-increment: line;
+  padding-inline-start: 2.75rem;
+}
+
+.shiki[data-line-numbers] .line::after {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 1.75rem;
+  content: counter(line);
+  text-align: end;
+  color: color-mix(in srgb, var(--porto-color-gray-3) 60%, transparent);
+}

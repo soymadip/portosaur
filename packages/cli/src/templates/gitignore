@@ -1,0 +1,8 @@
+# gitignore, init time generated
+
+node_modules/
+.portosaur/
+.cache-loader/
+build/
+notes/index.md*
+test*

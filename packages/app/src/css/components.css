@@ -1,0 +1,3690 @@
+/* Component styles — navbar, sidebar, TOC, search, menus, footer,
+ * pagination, docs home, notes, blog, tasks, empty states, and the
+ * MDX components. Fresh CSS in Portosaur's design language: the
+ * values come from the Astro design, the selectors are new (no
+ * Starlight classes or IDs).
+ *
+ * Responsive notes: components use Tailwind utilities (`hidden`,
+ * `md:flex`, …) only on wrapper elements that carry no component
+ * class of their own — plain CSS here beats Tailwind's layered
+ * utilities on the same property. Where a styled element itself
+ * needs responsive display, the rule lives in this file. */
+
+/* ----- Document shell ----- */
+/* The body is the flex column: navbar (fixed) + main + footer. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.porto-content-wrapper {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: row;
+}
+
+/* The navbar is fixed, so <main> reserves its height. */
+main {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: var(--porto-nav-height);
+}
+
+/* ----- Main frame (docs pages) ----- */
+/* The frame adds the sidebar offset at desktop widths on pages
+ * with a sidebar (`.main-frame--sidebar`). The mobile-TOC height
+ * lives on the main pane instead (`.main-pane--toc` below): only
+ * the doc page knows whether it has headings, and the layout
+ * doesn't. */
+.main-frame {
+  padding-top: 0;
+  padding-inline-start: 0;
+}
+
+@media (min-width: 50rem) {
+  .main-frame--sidebar {
+    padding-inline-start: var(--porto-sidebar-width);
+  }
+}
+
+/* ----- Two-column doc area (TOC aside + main pane) ----- */
+.main-pane {
+  isolation: isolate;
+  width: 100%;
+}
+
+/* On pages with a TOC, reserve room for the fixed mobile TOC bar
+ * below the navbar (3rem below the `lg` breakpoint; the variable
+ * is 0 at desktop widths, where the bar is hidden). */
+.main-pane--toc {
+  padding-top: var(--porto-mobile-toc-height);
+}
+
+@media (min-width: 72rem) {
+  /* Docusaurus-style three-column row: the main pane fills
+     everything except the TOC width, and the TOC container is
+     exactly sidebar-width, pinned to the right edge. */
+  .porto-doc-columns {
+    display: flex;
+  }
+
+  .porto-right-sidebar-container {
+    order: 2;
+    position: relative;
+    margin-inline-start: auto;
+    width: var(--porto-sidebar-width);
+  }
+
+  .porto-right-sidebar {
+    position: fixed;
+    top: 0;
+    border-inline-start: 1px solid var(--porto-color-hairline);
+    padding-top: var(--porto-nav-height);
+    /* Exactly the container width: `width: 100%` on a fixed
+       element resolves against the viewport, not the container. */
+    width: var(--porto-sidebar-width);
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .main-pane--toc {
+    order: 1;
+    width: calc(100% - var(--porto-sidebar-width));
+  }
+}
+
+/* ----- Content panels ----- */
+.content-panel {
+  padding: 1.5rem var(--porto-content-pad-x);
+}
+.content-panel + .content-panel {
+  border-top: 1px solid var(--porto-color-hairline);
+}
+/* The article is capped at 80rem and centered. Generous on
+   purpose: at 1920px the middle column is ~1390px, so the cap
+   barely binds and the full-width Docusaurus feel stays — but on
+   ultrawide monitors the line length stops running away. */
+.porto-content-container {
+  max-width: 80rem;
+  margin-inline: auto;
+}
+.porto-content-container > * + * {
+  margin-top: 1.5rem;
+}
+
+/* ----- Navbar ----- */
+/* ONE navbar on every page (like OG Docusaurus): brand left; right
+ * cluster is the search icon, the theme select (desktop only — on
+ * mobile it lives in the menu), the nav links (desktop only), and
+ * the menu button (mobile only, right side, VitePress-style).
+ * Search shows on every page (a deliberate divergence from OG's
+ * `hideSearchBarWithNoSearchContext`). */
+.porto-navbar {
+  z-index: var(--porto-z-index-navbar);
+  position: fixed;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  width: 100%;
+  height: var(--porto-nav-height);
+  /* No bottom border on mobile — it only appears at desktop
+     widths (see the media query below). */
+  padding: var(--porto-nav-pad-y) var(--porto-nav-pad-x);
+  padding-inline-end: var(--porto-nav-pad-x);
+  /* The header shares the content background — it is separated
+     by the border above, not by color. */
+  background-color: var(--porto-color-bg);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Hide-on-scroll: React toggles `.porto-navbar--hidden` on the
+   header while scrolling down. */
+.porto-navbar--hidden {
+  transform: translateY(-100%);
+}
+
+.porto-navbar__inner {
+  display: flex;
+  gap: var(--porto-nav-gap);
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.porto-navbar__title-column {
+  display: flex;
+  align-items: center;
+  gap: var(--porto-nav-gap);
+  min-width: 0;
+  flex: 1;
+}
+
+.porto-navbar__title-wrapper {
+  display: flex;
+  /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
+  overflow: clip;
+  /* Avoid clipping focus ring around link inside title wrapper. */
+  padding: 0.25rem;
+  margin: -0.25rem;
+  min-width: 0;
+}
+
+@media (orientation: landscape) {
+  .porto-navbar__title-wrapper--home {
+    display: none;
+  }
+}
+
+.porto-navbar__right-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.porto-navbar__search-group {
+  display: flex;
+  gap: var(--porto-nav-gap);
+  align-items: center;
+}
+
+/* Site title: favicon logo + site title, linked to the root. */
+.porto-site-title {
+  display: flex;
+  align-items: center;
+  gap: var(--porto-nav-gap);
+  font-size: var(--porto-text-h4);
+  font-weight: 600;
+  color: var(--porto-color-white);
+  text-decoration: none;
+  white-space: nowrap;
+  min-width: 0;
+}
+.porto-site-title span {
+  overflow: hidden;
+}
+.porto-site-title img {
+  height: calc(var(--porto-nav-height) - 2 * var(--porto-nav-pad-y));
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: 0 50%;
+}
+
+/* Nav links + dropdowns. */
+.porto-primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Desktop-only nav (the links live in the mobile menu below
+   50rem). A dedicated class, not a Tailwind utility: this file's
+   unlayered rules beat Tailwind's layered utilities. */
+.porto-primary-nav--desktop {
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-primary-nav--desktop {
+    display: flex;
+  }
+}
+
+.porto-nav-link,
+.porto-nav-summary {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  list-style: none;
+  white-space: nowrap;
+}
+.porto-nav-link:hover,
+.porto-nav-summary:hover {
+  color: var(--porto-color-white);
+}
+.porto-nav-link.active,
+.porto-nav-summary.active {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+.porto-nav-summary::after {
+  content: "▾";
+  margin-inline-start: 0.25rem;
+  font-size: 0.75em;
+}
+.porto-nav-summary::-webkit-details-marker {
+  display: none;
+}
+
+.porto-navbar__dropdown {
+  position: relative;
+}
+
+.porto-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 101;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  border-radius: 0.5rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  background-color: var(--porto-color-bg-nav);
+  box-shadow: var(--porto-shadow-md);
+}
+
+.porto-dropdown-link {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+}
+.porto-dropdown-link:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+.porto-dropdown-link.active {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+
+/* Divider between the nav links and the "More" dropdown. */
+.porto-navbar__more-dropdown {
+  margin-inline-start: -7px;
+  border-inline-start: 1.5px solid var(--porto-color-hairline);
+  padding-inline-start: 0.5rem;
+}
+
+/* Mobile menu button (right side) — a plain icon button in the
+   navbar's right cluster. */
+.porto-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-1);
+  cursor: pointer;
+}
+.porto-menu-button:hover {
+  color: var(--porto-color-white);
+}
+
+/* Mobile only — the menu button hides at desktop widths. */
+@media (min-width: 50rem) {
+  .porto-menu-button {
+    display: none;
+  }
+}
+
+/* VitePress's hamburger icon (VPNavBarHamburger, MIT License),
+   ported from the source (vitepress 1.6.4): three 16px lines in a
+   16×14 box with overflow hidden. The stagger is NOT different
+   line widths — every line is 16px, and the default translateX
+   offsets (top 0, middle 8px, bottom 4px) clip the middle to 8px
+   and the bottom to 12px visible, all right-aligned. Hover shifts
+   the stagger (top 4px, middle 0, bottom 8px). While the menu
+   popover is open the lines animate into an X — top rotates 225°,
+   bottom 135°, middle slides fully out — and hovering the open
+   button dims the lines. The button and the popover are not
+   siblings (the button lives in the header, the popover in the
+   layout), so the open state reads off <body>. */
+.porto-hamburger {
+  position: relative;
+  width: 16px;
+  height: 14px;
+  overflow: hidden;
+}
+.porto-hamburger span {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 2px;
+  background-color: currentColor;
+  transition:
+    top 0.25s,
+    background-color 0.5s,
+    transform 0.25s;
+}
+.porto-hamburger__line--top {
+  top: 0;
+  transform: translateX(0);
+}
+.porto-hamburger__line--middle {
+  top: 6px;
+  transform: translateX(8px);
+}
+.porto-hamburger__line--bottom {
+  top: 12px;
+  transform: translateX(4px);
+}
+.porto-menu-button:hover .porto-hamburger__line--top {
+  transform: translateX(4px);
+}
+.porto-menu-button:hover .porto-hamburger__line--middle {
+  transform: translateX(0);
+}
+.porto-menu-button:hover .porto-hamburger__line--bottom {
+  transform: translateX(8px);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--top {
+  top: 6px;
+  transform: translateX(0) rotate(225deg);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--middle {
+  top: 6px;
+  transform: translateX(16px);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--bottom {
+  top: 6px;
+  transform: translateX(0) rotate(135deg);
+}
+body:has(#porto__sidebar:popover-open)
+  .porto-menu-button:hover
+  .porto-hamburger
+  span {
+  background-color: var(--porto-color-gray-2);
+  transition:
+    top 0.25s,
+    background-color 0.25s,
+    transform 0.25s;
+}
+
+@media (min-width: 50rem) {
+  /* Desktop only: the bottom border returns (same separator as
+     the TOC panel's left border). Home pages keep it transparent
+     — the override sits after the border rule (same specificity,
+     so source order decides). */
+  .porto-navbar {
+    border-bottom: 1px solid var(--porto-color-hairline);
+  }
+  .porto-navbar--home {
+    border-bottom-color: transparent;
+  }
+}
+
+/* ----- Theme select ----- */
+/* Portosaur's own theme control — a Light / Dark / Auto dropdown
+   built like the navbar's "More" dropdown (<details> + <summary> +
+   menu), so its option list is our own markup instead of the
+   browser-native <select> popup. The control matches the navbar's
+   "More" dropdown exactly — same summary text + ▾ indicator and
+   spacing, same menu surface — so the two dropdowns look like one
+   component. */
+.porto-theme-select {
+  position: relative;
+}
+
+.porto-theme-select__summary {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--porto-color-gray-2);
+  list-style: none;
+  white-space: nowrap;
+}
+.porto-theme-select__summary:hover {
+  color: var(--porto-color-white);
+}
+.porto-theme-select__summary::after {
+  content: "▾";
+  margin-inline-start: 0.25rem;
+  font-size: 0.75em;
+}
+.porto-theme-select__summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Icon + label sit tight together. */
+.porto-theme-select__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.porto-theme-select__current svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.porto-theme-select__menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 101;
+  min-width: 9rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  border-radius: 0.5rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  background-color: var(--porto-color-bg-nav);
+  box-shadow: var(--porto-shadow-md);
+}
+
+.porto-theme-select__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: 0;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  font-size: 0.95rem;
+  text-align: start;
+  color: var(--porto-color-gray-2);
+  cursor: pointer;
+}
+.porto-theme-select__option svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.porto-theme-select__option:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+.porto-theme-select__option[aria-checked="true"] {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+
+/* ----- Search ----- */
+/* A navbar button opens a native <dialog> modal; ZBSearch
+ * (Fumadocs' static search) renders results inside. The button is
+ * a bare magnifier icon at every width. The dialog is a floating
+ * panel at every width: 1rem from the top and sides on mobile,
+ * sized to its content like Fumadocs' search — the page stays
+ * visible behind it, blurred by the backdrop. */
+.porto-search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-1);
+  cursor: pointer;
+  height: 2.5rem;
+  font-size: var(--porto-text-xl);
+}
+.porto-search-trigger:hover {
+  color: var(--porto-color-white);
+}
+.porto-search-trigger svg {
+  width: 20px;
+  height: 20px;
+}
+
+.porto-search-dialog {
+  margin: 1rem auto auto;
+  padding: 0;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  width: calc(100% - 2rem);
+  max-width: 40rem;
+  height: max-content;
+  max-height: calc(100% - 2rem);
+  box-shadow: var(--porto-shadow-lg);
+}
+.porto-search-dialog[open] {
+  display: flex;
+}
+.porto-search-dialog::backdrop {
+  background-color: var(--porto-color-backdrop-overlay);
+  -webkit-backdrop-filter: blur(0.25rem);
+  backdrop-filter: blur(0.25rem);
+}
+
+.porto-search-dialog__frame {
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* The Cancel button sits over the input's right edge on mobile. */
+.porto-search-dialog__cancel {
+  position: absolute;
+  z-index: 1;
+  align-self: flex-end;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--porto-color-text-accent);
+}
+
+.porto-search-dialog__input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  padding-inline-end: 5rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-search-dialog__input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-search-dialog__input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}
+
+.porto-search-dialog__loading,
+.porto-search-dialog__empty {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-search-result {
+  display: block;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  background-color: var(--porto-color-black);
+}
+.porto-search-result:hover,
+.porto-search-result--active {
+  outline: 1px solid var(--porto-color-accent-high);
+}
+.porto-search-result--active {
+  background-color: var(--porto-color-accent-low);
+}
+
+.porto-search-result__title {
+  display: block;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+.porto-search-result__breadcrumbs {
+  display: block;
+  font-size: var(--porto-text-xs);
+  color: var(--porto-color-gray-3);
+}
+.porto-search-result__excerpt {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--porto-text-sm);
+  overflow-wrap: anywhere;
+}
+.porto-search-result__excerpt mark {
+  color: var(--porto-color-gray-2);
+  background-color: transparent;
+  font-weight: 600;
+}
+
+/* Match highlights from `useHighlightQuery` (CSS Custom Highlight
+ * API) — the search terms in result excerpts. */
+::highlight(fd-search) {
+  color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 35%,
+    transparent
+  );
+}
+
+/* Body scroll lock while the search modal is open. */
+[data-search-modal-open] {
+  overflow: hidden;
+}
+
+@media (min-width: 50rem) {
+  .porto-search-dialog {
+    margin: 4rem auto auto;
+    width: 90%;
+    max-width: 40rem;
+    min-height: 15rem;
+    max-height: calc(100% - 8rem);
+  }
+  .porto-search-dialog__frame {
+    padding: 1.5rem;
+  }
+  .porto-search-dialog__input {
+    padding-inline-end: 1rem;
+  }
+}
+
+/* ----- Sidebar ----- */
+/* Nested categories, icons, carets, 265px. Rows are uniform size
+   across levels and the caret is pinned to the row's right edge
+   (the label grows to fill the row). Vertical padding is 0.3em —
+   0.5em felt too airy. */
+.porto-sidebar ul {
+  --porto-sidebar-item-padding-inline: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.porto-sidebar li {
+  overflow-wrap: anywhere;
+}
+
+.porto-sidebar ul ul li {
+  margin-inline-start: var(--porto-sidebar-item-padding-inline);
+  border-inline-start: 1px solid var(--porto-color-hairline-light);
+  padding-inline-start: var(--porto-sidebar-item-padding-inline);
+}
+
+/* Top-level rows are the same size and weight as nested rows —
+   hierarchy comes from indentation and the guide line, not a
+   bigger font. Only the color stays brighter. */
+.porto-sidebar__large {
+  color: var(--porto-color-white);
+}
+
+.porto-sidebar__top-level > li + li {
+  margin-top: 0.5rem;
+}
+
+.porto-sidebar summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Same font size as a leaf link, so the 0.3em padding below
+     resolves to the same pixels — without this the summary
+     inherits the 16px base size and category rows come out
+     1.2px taller than leaf rows. */
+  font-size: var(--porto-text-sm);
+  /* Same vertical padding as a leaf link, so category rows and
+     leaf rows are the same height. The end padding is halved
+     (0.25rem vs the shared 0.5rem): the caret is pinned to the
+     row's end edge, so the full 0.5rem read as dead space after
+     the arrow. Leaf links keep the shared value — their text is
+     start-aligned, so their end padding is invisible. */
+  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+  padding-inline-end: 0.25rem;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+}
+.porto-sidebar summary::marker,
+.porto-sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.porto-sidebar__caret {
+  /* A square hit area around the chevron, with its own hover
+     background: the negative margins more than cancel the padding,
+     so the 1.25rem chevron (20px) never makes the row taller than
+     the 19.6px text line sets it. Only the chevron itself rotates
+     when the group opens — the span and its hover background stay
+     put, so the hover box never spins through a diamond
+     mid-animation. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Horizontal padding is 0.1rem (vertical stays 0.2rem): the
+     chevron sits closer to the row's end edge. */
+  padding: 0.2rem 0.1rem;
+  margin-block: -0.25rem;
+  border-radius: 0.375rem;
+}
+.porto-sidebar__caret svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 0.2s ease-in-out;
+}
+[dir="rtl"] .porto-sidebar__caret svg {
+  transform: rotateZ(180deg);
+}
+.porto-sidebar details[open] > summary .porto-sidebar__caret svg {
+  transform: rotateZ(90deg);
+}
+
+.porto-sidebar a {
+  /* Flex so the icon centers vertically when the label wraps
+     over several lines instead of sitting on the first line. */
+  display: flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+  line-height: 1.4;
+}
+.porto-sidebar a > * {
+  min-width: 0;
+}
+
+/* A hovered leaf row gets the same full-width tint box as a
+   hovered category row (summary:hover below) — without the
+   background the leaf only changed text color. */
+.porto-sidebar a:hover,
+.porto-sidebar a:focus {
+  color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+}
+
+/* OG-style active item: accent text on a subtle 10% accent tint.
+   The solid-accent box fails in light mode, where the mid accent
+   vs white is under 4.5:1 in four schemes — the tint + accent text
+   reads in every scheme × mode. The tint uses text-accent (the
+   per-mode visible primary), so dark mode tints with the dark
+   primary like OG. */
+.porto-sidebar [aria-current="page"],
+.porto-sidebar [aria-current="page"]:hover,
+.porto-sidebar [aria-current="page"]:focus {
+  font-weight: 600;
+  color: var(--porto-color-accent-high);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+}
+
+/* The active category row highlights as one uniform box: the
+   background sits on the <summary>, not the inner link, so the
+   box spans the full row at leaf-row height with the caret
+   inside it. The link keeps only the accent text color — its
+   own background is cleared. */
+.porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+  border-radius: 0.375rem;
+  color: var(--porto-color-accent-high);
+}
+
+/* Dark mode only: lighten the active text one step — the same 65%
+   white tint the hue `-high` colors use. The OG primaries are mid
+   lightness, so dracula purple and gruvbox orange don't reach
+   4.5:1 on the gray-6 sidebar bg at full strength. */
+[data-theme="dark"] .porto-sidebar [aria-current="page"],
+[data-theme="dark"] .porto-sidebar [aria-current="page"]:hover,
+[data-theme="dark"] .porto-sidebar [aria-current="page"]:focus,
+[data-theme="dark"]
+  .porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
+}
+
+/* A hovered category row gets the same full-width box, in a
+   translucent foreground tint (lightens dark sidebars, darkens
+   light ones, in every scheme). The caret has its own hover
+   background in the same tint, stacking on top of the row
+   hover so the caret area goes slightly darker. */
+.porto-sidebar summary:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+  border-radius: 0.375rem;
+}
+.porto-sidebar__caret:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+}
+.porto-sidebar__group-label a[aria-current="page"],
+.porto-sidebar__group-label a[aria-current="page"]:hover,
+.porto-sidebar__group-label a[aria-current="page"]:focus {
+  background-color: transparent;
+}
+
+/* Same for hover: the category label link sits inside the
+   <summary>, whose own hover box already covers the row — the
+   link must not paint a second tint box on top of it. */
+.porto-sidebar__group-label a:hover,
+.porto-sidebar__group-label a:focus {
+  background-color: transparent;
+}
+
+/* Row icons: the injected SVG is 1em, so the icon scales with
+   its row's text. The icon carries its own trailing gap. Vertical
+   centering comes from the row's flex layout, so a wrapped label
+   centers the icon on the whole block. */
+.porto-sidebar__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 0.5em;
+  /* Optical centering: the icon is geometrically centered on the
+     1.4 line box, but the text's visual (cap-height) center sits
+     ~0.4px above the line-box center, so the icon reads as
+     slightly low. The 0.5px bottom margin shifts it up ~0.35px
+     through flex centering. */
+  margin-bottom: 0.5px;
+}
+.porto-sidebar__icon:empty {
+  display: none;
+}
+.porto-sidebar__icon svg,
+.porto-sidebar__icon img {
+  width: 1em;
+  height: 1em;
+}
+
+.porto-sidebar a > *:not(.porto-sidebar__icon):not(:last-child),
+.porto-sidebar__group-label > *:not(:last-child) {
+  margin-inline-end: 0.25em;
+}
+
+/* The group label grows to fill the summary row, pinning the
+   caret to the right edge — inside the active highlight box
+   when the category is the current page. */
+.porto-sidebar__group-label {
+  flex: 1;
+}
+
+/* A category link inside a <summary> is the group label, not a
+   list link — no list-link padding (the summary provides it). */
+.porto-sidebar__group-label a {
+  padding: 0;
+}
+
+/* A plain (non-link) category label centers its icon the same
+   way a link row does. */
+.porto-sidebar__group-label > span {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 50rem) {
+  .porto-sidebar__top-level > li + li {
+    margin-top: 0.25rem;
+  }
+  .porto-sidebar__large,
+  .porto-sidebar a {
+    font-size: var(--porto-text-sm);
+  }
+}
+
+/* ----- Mobile menu ----- */
+/* The mobile navigation popover, shared by every page. On docs
+   pages it also holds the sidebar tree and becomes the persistent
+   sidebar from 50rem up; on other pages it holds only the footer
+   (nav links, theme select, version link). The toggle lives in the
+   navbar and opens this popover via `popovertarget`. The open/close
+   animation (VitePress's nav screen — pane fades 0.25s, content
+   slides down 8px) lives in animations.css. */
+.porto-mobile-menu {
+  /* User agents apply opinionated styles to popovers; reset them. */
+  border: unset;
+  padding: unset;
+  height: unset;
+  color: unset;
+
+  position: fixed;
+  z-index: var(--porto-z-index-menu);
+  inset-block: var(--porto-nav-height) 0;
+  inset-inline-start: 0;
+  width: 100%;
+  background-color: var(--porto-color-black);
+  overflow-y: auto;
+  opacity: 0;
+  transition:
+    opacity 0.25s,
+    inset-block-start 0.2s ease-in-out,
+    display 0.25s allow-discrete,
+    overlay 0.25s allow-discrete;
+}
+
+.porto-mobile-menu:popover-open {
+  opacity: 1;
+}
+
+/* The navbar hides on scroll down (hideNavbarOnScroll) — the
+   sidebar follows it to the top of the viewport. */
+html.porto-navbar-hidden .porto-mobile-menu {
+  inset-block-start: 0;
+}
+
+/* Horizontal padding is 0.3rem each side, not the 1rem sidebar
+   gutter: at 1rem every entry sat one nest-level in from the pane
+   edge (a nest level is 1rem: 0.5rem margin + 0.5rem padding on
+   `ul ul li`). Docusaurus's sidebar menu uses 0.5rem; this sits
+   tighter, with the links' own 0.5rem padding providing the text
+   gutter. */
+.porto-mobile-menu__content {
+  height: 100%;
+  min-height: max-content;
+  padding: 1rem 0.3rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.25s ease;
+}
+
+.porto-mobile-menu[popover]:not(:popover-open) .porto-mobile-menu__content {
+  transform: translateY(-8px);
+}
+
+/* Lock body scroll while the menu popover is open (mobile only —
+   the persistent desktop sidebar is not a popover). */
+body:has(#porto__sidebar:popover-open) {
+  overflow: hidden;
+}
+
+@media (min-width: 50rem) {
+  body:has(#porto__sidebar:popover-open) {
+    overflow: auto;
+  }
+
+  .porto-mobile-menu__content::after {
+    content: "";
+    padding-bottom: 1px;
+  }
+
+  /* The persistent (docs) variant becomes the always-visible
+     sidebar; the menu-only variant stays a popover (its toggle
+     hides at desktop, so it can never open there). */
+  .porto-mobile-menu--persistent {
+    display: block;
+    width: var(--porto-sidebar-width);
+    background-color: var(--porto-color-bg-sidebar);
+    /* Same separator as the TOC panel's left border. */
+    border-inline-end: 1px solid var(--porto-color-hairline);
+    /* Not a popover at desktop widths, so it never matches
+       `:popover-open` — keep it fully opaque. */
+    opacity: 1;
+  }
+}
+
+/* Mobile menu footer: navbar links + theme select + version link. */
+.porto-mobile-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--porto-color-gray-6);
+  padding: 0.5rem 0;
+}
+
+.porto-mobile-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.porto-mobile-nav a,
+.porto-mobile-nav summary {
+  display: block;
+  border-radius: 0.25rem;
+  padding: 0.3em 0.5rem;
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  cursor: pointer;
+}
+.porto-mobile-nav a:hover,
+.porto-mobile-nav a:focus,
+.porto-mobile-nav summary:hover {
+  color: var(--porto-color-white);
+}
+.porto-mobile-nav a.active {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+.porto-mobile-nav summary::marker,
+.porto-mobile-nav summary::-webkit-details-marker {
+  display: none;
+}
+.porto-mobile-nav summary::after {
+  content: "▾";
+  float: inline-end;
+  font-size: 0.75em;
+  line-height: 1.75;
+  color: var(--porto-color-gray-3);
+}
+.porto-mobile-nav details[open] > summary::after {
+  content: "▴";
+}
+.porto-mobile-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1rem;
+}
+
+.porto-mobile-preferences__theme-row {
+  /* Flex so the select shrink-wraps; in a block context the label
+     stretches full width and the caret drifts to the far edge. */
+  display: flex;
+  padding: 0.3em 0.5rem;
+}
+
+.porto-mobile-preferences__version-link {
+  display: block;
+  border-top: 1px solid var(--porto-color-gray-6);
+  padding-top: 0.75rem;
+  text-align: center;
+  font-size: var(--porto-text-sm);
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+  opacity: 0.64;
+}
+.porto-mobile-preferences__version-link:hover {
+  color: var(--porto-color-white);
+}
+
+/* ----- Table of contents ----- */
+/* Desktop right sidebar (≥72rem) + mobile bar below the navbar.
+ * The "On this page" title renders as a <p>, not an <h2> — an <h2>
+ * here would enter every doc page's heading list. */
+.porto-toc-panel {
+  padding: 1rem var(--porto-sidebar-pad-x);
+}
+.porto-toc-container {
+  width: calc(var(--porto-sidebar-width) - 2 * var(--porto-sidebar-pad-x));
+}
+.porto-toc-title {
+  color: var(--porto-color-white);
+  font-size: var(--porto-text-h5);
+  font-weight: 600;
+  line-height: var(--porto-line-height-headings);
+  margin-bottom: 0.5rem;
+}
+.porto-toc-panel a {
+  display: block;
+  font-size: var(--porto-text-xs);
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+  overflow-wrap: anywhere;
+}
+.porto-toc-panel a:hover {
+  color: var(--porto-color-white);
+}
+
+.porto-toc-list {
+  padding: 0;
+  list-style: none;
+}
+.porto-toc-list a {
+  --porto-toc-pad-inline: 0.5rem;
+  display: block;
+  border-radius: 0.25rem;
+  padding-block: 0.25rem;
+  padding-inline: calc(
+      1rem * var(--porto-toc-depth, 0) + var(--porto-toc-pad-inline)
+    )
+    var(--porto-toc-pad-inline);
+  line-height: 1.25;
+}
+.porto-toc-list a[aria-current="true"] {
+  color: var(--porto-color-text-accent);
+}
+.porto-toc-list--mobile a {
+  --porto-toc-pad-inline: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--porto-toc-pad-inline);
+  border-top: 1px solid var(--porto-color-gray-6);
+  border-radius: 0;
+  padding-block: 0.5rem;
+  color: var(--porto-color-text);
+  font-size: var(--porto-text-sm);
+  text-decoration: none;
+  outline-offset: var(--porto-outline-offset-inside);
+}
+.porto-toc-list--mobile:first-child > li:first-child > a {
+  border-top: 0;
+}
+.porto-toc-list--mobile a[aria-current="true"],
+.porto-toc-list--mobile a[aria-current="true"]:hover,
+.porto-toc-list--mobile a[aria-current="true"]:focus {
+  color: var(--porto-color-white);
+  background-color: unset;
+}
+.porto-toc-list--mobile a[aria-current="true"]::after {
+  content: "";
+  width: 1rem;
+  background-color: var(--porto-color-text-accent);
+  /* Check mark icon */
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==");
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+/* Mobile TOC: fixed bar below the navbar, follows hide-on-scroll. */
+.porto-mobile-toc nav {
+  position: fixed;
+  z-index: var(--porto-z-index-toc);
+  top: calc(var(--porto-nav-height) - 1px);
+  inset-inline: 0;
+  border-top: 1px solid var(--porto-color-gray-5);
+  background-color: var(--porto-color-bg-nav);
+  transition: top 0.2s ease-in-out;
+}
+html.porto-navbar-hidden .porto-mobile-toc nav {
+  top: -1px;
+}
+@media (min-width: 50rem) {
+  .main-frame--sidebar .porto-mobile-toc nav {
+    inset-inline-start: var(--porto-sidebar-width);
+  }
+}
+
+.porto-mobile-toc summary {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  height: var(--porto-mobile-toc-height);
+  border-bottom: 1px solid var(--porto-color-hairline-shade);
+  padding: 0.5rem 1rem;
+  font-size: var(--porto-text-xs);
+  outline-offset: var(--porto-outline-offset-inside);
+}
+.porto-mobile-toc summary::marker,
+.porto-mobile-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.porto-mobile-toc__toggle {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  padding-block: 0.5rem;
+  padding-inline-start: 0.75rem;
+  padding-inline-end: 0.5rem;
+  line-height: 1;
+  background-color: var(--porto-color-black);
+  user-select: none;
+  cursor: pointer;
+}
+.porto-mobile-toc details[open] .porto-mobile-toc__toggle {
+  color: var(--porto-color-white);
+  border-color: var(--porto-color-accent);
+}
+.porto-mobile-toc details .porto-mobile-toc__toggle:hover {
+  color: var(--porto-color-white);
+  border-color: var(--porto-color-gray-2);
+}
+.porto-mobile-toc__toggle svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease-in-out;
+}
+[dir="rtl"] .porto-mobile-toc__toggle svg {
+  transform: rotateZ(180deg);
+}
+.porto-mobile-toc details[open] .porto-mobile-toc__toggle svg {
+  transform: rotateZ(90deg);
+}
+
+.porto-mobile-toc__current {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: var(--porto-color-white);
+}
+
+.porto-mobile-toc__dropdown {
+  --porto-mobile-toc-border-top: 1px;
+  margin-top: calc(-1 * var(--porto-mobile-toc-border-top));
+  border: var(--porto-mobile-toc-border-top) solid var(--porto-color-gray-6);
+  border-top-color: var(--porto-color-hairline-shade);
+  max-height: calc(
+    85vh - var(--porto-nav-height) - var(--porto-mobile-toc-height)
+  );
+  overflow-y: auto;
+  background-color: var(--porto-color-black);
+  box-shadow: var(--porto-shadow-md);
+  overscroll-behavior: contain;
+}
+
+/* ----- Breadcrumbs ----- */
+.porto-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.porto-breadcrumbs li + li::before {
+  content: "›";
+  margin-inline-end: 0.25rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-breadcrumbs a {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.porto-breadcrumbs__current {
+  color: var(--porto-color-text-accent);
+}
+
+/* ----- Page title ----- */
+/* OG colors the page title with the primary. */
+.porto-page-title {
+  margin-top: 1rem;
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+
+/* ----- Doc footer ----- */
+.porto-doc-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.porto-doc-footer__meta {
+  display: flex;
+  gap: 0.75rem 3rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 3rem;
+  font-size: var(--porto-text-sm);
+  color: var(--porto-color-gray-3);
+}
+.porto-doc-footer__meta > p:only-child {
+  margin-inline-start: auto;
+}
+
+.porto-edit-link {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+}
+.porto-edit-link:hover {
+  color: var(--porto-color-white);
+}
+.porto-edit-link svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+/* ----- Pagination ----- */
+.porto-pagination {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: 1rem;
+}
+
+.porto-pagination a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  flex-basis: calc(50% - 0.5rem);
+  flex-grow: 1;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  box-shadow: var(--porto-shadow-md);
+  overflow-wrap: anywhere;
+}
+.porto-pagination [rel="next"] {
+  justify-content: end;
+  text-align: end;
+  flex-direction: row-reverse;
+}
+.porto-pagination a:hover {
+  border-color: var(--porto-color-gray-2);
+}
+.porto-pagination svg {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.porto-pagination__title {
+  color: var(--porto-color-white);
+  font-size: var(--porto-text-2xl);
+  line-height: var(--porto-line-height-headings);
+}
+
+/* ----- Skip link ----- */
+.porto-skip-link {
+  clip: rect(0, 0, 0, 0);
+  position: fixed;
+  top: 0.75rem;
+  inset-inline-start: 0.75rem;
+}
+.porto-skip-link:focus {
+  clip: unset;
+  z-index: var(--porto-z-index-skiplink);
+  display: block;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  /* OG-style: accent text on a subtle 10% accent tint (same as the
+     active sidebar item). */
+  color: var(--porto-color-accent-high);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+  box-shadow: var(--porto-shadow-lg);
+}
+/* Dark mode only: lighten the text one step, as in the sidebar —
+   the pill sits over the navbar (gray-6), so the same dracula /
+   gruvbox primaries fall short at full strength. */
+[data-theme="dark"] .porto-skip-link:focus {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
+}
+
+/* ----- Nav progress ----- */
+/* The thin top progress bar for client-side navigations
+ * (Docusaurus's NProgress mechanism: a 2px bar in the accent color,
+ * fixed at the very top, no spinner). The bar appears only after a
+ * 200ms delay, so slow navigations show something and fast ones
+ * show nothing. The animation is pure CSS — the bar crawls to 80%
+ * while the navigation is in flight, completes to 100% on the swap,
+ * then fades out. */
+.porto-nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Above the navbar (z-index 10), below the skip link (20). */
+  z-index: 11;
+  width: 100%;
+  height: 2px;
+  background-color: var(--porto-color-text-accent);
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition:
+    transform 0.2s ease,
+    opacity 0.3s ease;
+}
+
+/* In flight: crawl slowly toward 80% — the navigation finishes
+   the bar, so it never sits at 100% while still loading. */
+.porto-nav-progress--active {
+  transform: scaleX(0.8);
+  opacity: 1;
+  transition:
+    transform 2.5s ease-out,
+    opacity 0.2s ease;
+}
+
+/* Finished: complete the crawl, then fade out. */
+.porto-nav-progress--done {
+  transform: scaleX(1);
+  opacity: 0;
+  transition:
+    transform 0.2s ease,
+    opacity 0.3s ease 0.15s;
+}
+
+/* ----- Site footer ----- */
+/* Renders only when `theme.footer.enable` is set. No background of
+   its own: like the navbar and sidebar, the footer sits on the
+   content background, separated from the content by its top
+   border. */
+.porto-footer {
+  border-top: 1px solid var(--porto-color-hairline);
+  /* Slim, matching the OG Portosaur footer: Docusaurus set
+     --ifm-footer-padding-vertical to 0.1rem. Horizontal padding
+     stays 1rem so a wrapped line never touches the edges. */
+  padding: 0.1rem 1rem;
+  text-align: center;
+}
+
+.porto-footer__message {
+  font-size: 0.8rem;
+  color: var(--porto-color-gray-3);
+}
+
+/* The "Built with Portosaur" link is accent-colored. */
+.porto-footer a {
+  color: var(--porto-color-text-accent);
+}
+
+/* ----- Docs home ----- */
+/* A port of OG's DocsHomeSection (Docusaurus) — the whole page,
+ * hero and feature cards alike, translated to the token system.
+ *
+ * Divergences from OG (kept from the Astro port):
+ * - The hero image hover lift is removed entirely: on touch it
+ *   sticks after tapping.
+ * - On small phones (≤480px) the hero section's side padding drops
+ *   from OG's 2rem to 1rem so the tagline and description get more
+ *   room. The description gets a further `-0.5rem` inline margin
+ *   where the hero stacks, so it sits wider than the tagline.
+ * - Where the hero stacks (≤996px) the section's top padding drops
+ *   from OG's 3.5rem to 2rem so the icon sits closer to the navbar.
+ * - The action icons are 1.25rem (OG inherits the button's 1rem)
+ *   and centered on the text line with an inline-flex wrapper.
+ * - The description is 1rem where the hero stacks (OG: 1.1rem).
+ * - The tagline's top margin is 0.25rem (OG: 0.5rem).
+ * - `.hero-section` has `overflow-x: clip`: the glow's `inset:
+ *   -10%` box extends past the icon box, and with 1rem section
+ *   padding the icon box is wide enough that the glow reaches past
+ *   the viewport on phones — Chrome then expands the layout
+ *   viewport and a horizontal scrollbar appears.
+ * - Where the hero stacks the glow's blur drops from OG's 40px to
+ *   20px: with the tighter 2rem top padding the 40px blur spreads
+ *   the glow up behind the fixed navbar.
+ * - A `prefers-reduced-motion` guard: the entrance animations
+ *   start at `opacity: 0`, which would hide content for users who
+ *   disable animation.
+ */
+.docs-home {
+  width: 100%;
+}
+
+@keyframes porto-hero-slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes porto-hero-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-section {
+  padding: 3.5rem 2rem 3rem;
+  display: flex;
+  justify-content: center;
+  /* Clip the glow's sideways overhang: the ::before extends 10%
+     past the icon box, and on phones that reaches past the
+     viewport — Chrome expands the layout viewport and a
+     horizontal scrollbar appears. The cut lands exactly at the
+     screen edge, where nothing is visible past it anyway. */
+  overflow-x: clip;
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 72rem;
+  gap: 2rem;
+}
+
+.hero-text {
+  flex: 1.2;
+  text-align: left;
+  max-width: 700px;
+}
+
+.hero-title {
+  font-size: 4.1rem;
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 0;
+  color: var(--porto-color-text-accent);
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s
+    forwards;
+}
+
+.hero-title:hover {
+  transform: translateY(-2px);
+}
+
+.hero-title::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 4px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--porto-color-text-accent);
+  transition: width 0.3s ease;
+}
+
+.hero-title:hover::after {
+  width: 100%;
+}
+
+.hero-tagline {
+  font-size: 2.34rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-white);
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s
+    forwards;
+}
+
+.hero-tagline:hover {
+  transform: translateY(-2px);
+}
+
+.hero-description {
+  font-size: 1.17rem;
+  line-height: 1.4;
+  color: var(--porto-color-gray-3);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s
+    forwards;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s
+    forwards;
+}
+
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hero-button:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--porto-shadow-md);
+}
+
+.hero-button--brand {
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+}
+
+.hero-button--brand:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 80%,
+    white
+  );
+  color: var(--porto-color-black);
+}
+
+.hero-button--alt {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 20%,
+    var(--porto-color-black)
+  );
+  color: var(--porto-color-text);
+}
+
+.hero-button--alt:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 30%,
+    var(--porto-color-black)
+  );
+  color: var(--porto-color-text);
+}
+
+/* Action icons: bigger than OG's inherited 1rem, and centered
+   on the text line — a bare inline SVG/emoji sits on the
+   baseline and reads high, so the wrapper is inline-flex.
+   Nudged 1px up: the icon's optical center sits below its
+   box center, so exact centering still reads low — but 2px
+   read too high. */
+.hero-action-img {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transform: translateY(-1px);
+}
+
+.hero-icon {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Glow behind the hero image */
+.hero-icon::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--porto-color-text-accent) 35%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  z-index: 0;
+  opacity: 0;
+  animation: porto-hero-float-in 1s ease 0.4s forwards;
+}
+
+.hero-icon > img {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  /* `width: auto`: the <img> carries width/height attributes, and
+     without it the max-height cap distorts the box and
+     `object-fit: cover` crops the image. */
+  width: auto;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 20%;
+  opacity: 0;
+  animation: porto-hero-float-in 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s
+    forwards;
+}
+
+/* No hover effect on the hero image: OG lifts it on hover, but
+   on touch that state sticks after tapping. */
+
+@media (max-width: 996px) {
+  /* Less space above the icon where the hero stacks (the icon
+     sits on top here). The glow still fades above the image —
+     it extends past the icon box and is transparent at the
+     edge, so nothing looks cut off. */
+  .hero-section {
+    padding-top: 2rem;
+  }
+
+  /* Less blur where the hero stacks: with the tighter top
+     padding the 40px blur spreads the glow up behind the
+     fixed navbar, and the navbar's bottom edge cuts it off
+     visibly. 20px keeps it fading out before the navbar. */
+  .hero-icon::before {
+    filter: blur(20px);
+  }
+
+  .hero-container {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+
+  .hero-text {
+    text-align: center;
+    max-width: 100%;
+    margin-top: 0;
+  }
+
+  .hero-title {
+    font-size: 2.7rem;
+  }
+
+  .hero-tagline {
+    font-size: 1.7rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+    /* Wider than the tagline: the section padding is 1rem on
+       small phones, so this leaves the description 0.5rem from
+       the edge while the tagline stays at 1rem. */
+    margin-inline: -0.5rem;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-icon {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .hero-icon > img {
+    max-height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Tighter side padding on small phones: OG's 2rem leaves the
+     tagline and description squeezed, so the whole hero gets
+     1rem instead. */
+  .hero-section {
+    padding-inline: 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.6rem;
+  }
+
+  .hero-tagline {
+    font-size: 1.5rem;
+  }
+
+  .hero-icon {
+    margin-top: 0.8rem;
+  }
+
+  .hero-icon > img {
+    max-height: 160px;
+  }
+
+  .hero-button {
+    flex: 0 0 auto;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.45rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .hero-action-img {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 359px) {
+  .hero-actions {
+    gap: 0.25rem;
+  }
+
+  .hero-button {
+    gap: 0.25rem;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Features grid */
+.features-section {
+  padding: 0.7rem;
+  padding-bottom: 0.4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.features-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-auto-rows: minmax(205px, auto);
+  gap: 1rem;
+  width: 100%;
+  max-width: 72rem;
+}
+
+.feature-card {
+  background-color: var(--porto-color-gray-6);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1)
+    forwards;
+  animation-delay: calc(0.5s + var(--animation-order, 0) * 0.15s);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+a.feature-card,
+a.feature-card:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.feature-card:focus-visible {
+  outline: 2px solid var(--porto-color-text-accent);
+  outline-offset: 3px;
+}
+
+.feature-card:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 20%,
+    var(--porto-color-black)
+  );
+}
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 15%,
+    var(--porto-color-black)
+  );
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: var(--porto-color-text-accent);
+  font-size: 26px;
+}
+
+.feature-icon svg,
+.feature-icon div svg,
+.feature-icon span svg,
+.feature-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.feature-content {
+  width: 100%;
+}
+
+.feature-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--porto-color-white);
+}
+
+.feature-desc {
+  font-size: 0.95rem;
+  color: var(--porto-color-gray-3);
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 996px) {
+  .feature-icon {
+    margin-bottom: 0.5rem;
+  }
+
+  .features-section {
+    padding-bottom: 3.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-section {
+    padding: 0.25rem 0.7rem 0.8rem;
+  }
+
+  .features-container {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+    gap: 0.5rem;
+  }
+
+  .feature-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem;
+    border: 1px solid
+      color-mix(
+        in srgb,
+        var(--porto-color-gray-1) 15%,
+        var(--porto-color-black)
+      );
+    border-radius: 8px;
+  }
+
+  .feature-card:hover {
+    background-color: var(--porto-color-gray-6);
+  }
+
+  .feature-icon {
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0;
+    font-size: 1.35rem;
+  }
+
+  .feature-icon svg,
+  .feature-icon div svg,
+  .feature-icon span svg,
+  .feature-icon img {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .feature-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .feature-title {
+    font-size: 1.05rem;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-desc {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+}
+
+/* Entrance animations start at `opacity: 0`; users who disable
+   animation must still see the content. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-title,
+  .hero-tagline,
+  .hero-description,
+  .hero-actions,
+  .hero-icon::before,
+  .hero-icon > img,
+  .feature-card {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ----- Notes page + note cards ----- */
+.porto-notes-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8vh;
+}
+
+/* The old page wrapped the grid in Docusaurus' `.container`
+   (max-width 1280px, 1rem padding → 1248px of content), which fits
+   exactly 6 cards per row (6×165px + 5×1rem = 1070px; a 7th needs
+   1251px). This theme has no global `.container`, so the width cap
+   lives on the grid itself and this wrapper only centers it. */
+.porto-notes-inner {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.porto-notes-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.porto-notes-title {
+  margin-top: 1.3rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 2.5rem;
+  color: var(--porto-color-white);
+  animation: porto-slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.porto-notes-subtitle {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--porto-color-gray-3);
+  animation: porto-slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s forwards;
+}
+
+.porto-note-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  max-width: calc(6 * 165px + 5 * 1rem);
+  margin-inline: auto;
+  margin-block: 4rem;
+}
+
+/* `.noteCard` is the hash-navigation selector, so the class name
+   stays; its rules are scoped under the grid. */
+.porto-note-grid .noteCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 165px;
+  min-height: 225px;
+  overflow: hidden;
+  border: 1px solid var(--porto-color-hairline-light);
+  background: var(--porto-color-black);
+  padding: 1.5rem 1rem;
+  color: var(--porto-color-text);
+  text-decoration: none;
+  box-shadow: var(--porto-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: porto-note-fade-in 0.5s ease-out forwards;
+  animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
+  opacity: 0;
+}
+.porto-note-grid .noteCard:hover {
+  z-index: 2;
+  transform: translateY(-4px);
+  border-color: var(--note-color);
+  background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+  box-shadow: var(--porto-shadow-lg);
+}
+
+@keyframes porto-note-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.porto-note-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--note-color) 15%, transparent);
+}
+
+/* The icon renders via dangerouslySetInnerHTML inside this wrapper
+   span; the inner svg/img fills it. */
+.porto-note-grid .noteIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.2rem;
+  font-size: 3.5rem;
+  color: var(--note-color);
+  transition: scale 0.3s ease;
+}
+.porto-note-grid .noteCard:hover .noteIcon {
+  scale: 1.2;
+}
+.porto-note-grid .noteIcon svg,
+.porto-note-grid .noteIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.porto-note-grid .noteIcon svg {
+  fill: currentColor;
+}
+
+.porto-note-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Chevron under the card title. The old component rendered the
+   same `md:chevron-right` icon with a `display: none` desktop rule
+   — but the old Icon applied its own `display: inline-block` class
+   to the same <svg>, and in the built OG bundle that won the
+   cascade, so the golden screenshots show the chevron on desktop
+   too (small, centered, in the card's text color). Shown here
+   deliberately. */
+.porto-note-grid .mobileChevron {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.5rem;
+}
+.porto-note-grid .mobileChevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 480px) {
+  .porto-note-grid {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    margin-top: 0.2rem;
+    padding-inline: 0.2rem;
+  }
+
+  .porto-note-grid .noteCard {
+    flex-direction: row;
+    width: 100%;
+    min-height: auto;
+    gap: 0.9rem;
+    padding-block: 0.6rem;
+  }
+  .porto-note-grid .noteCard:hover {
+    transform: none;
+  }
+  .porto-note-grid .noteCard:active {
+    scale: 0.98;
+    background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+  }
+
+  .porto-note-icon-wrap {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    margin: 0;
+    border-radius: 18px;
+  }
+
+  .porto-note-grid .noteIcon {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 2.8rem;
+  }
+
+  .porto-note-text {
+    min-width: 0;
+    flex: 1;
+    text-align: left;
+  }
+
+  .porto-note-title {
+    text-align: left;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--porto-color-text);
+    -webkit-line-clamp: 2;
+  }
+
+  .porto-note-grid .mobileChevron {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0;
+    margin-left: auto;
+    color: var(--porto-color-text-accent);
+  }
+}
+
+/* ----- Blog ----- */
+/* The blog list, post, and authors pages. Original Portosaur code
+ * in the design language: hairline borders, square cards, pill tag
+ * chips. Phase 1 is minimal: all posts on one page (no pagination),
+ * the recent-posts sidebar, and the author index. */
+/* Sidebar + main column (index, post). */
+.porto-blog-layout {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.porto-blog-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2.5rem;
+  min-width: 0;
+  max-width: 46rem;
+}
+
+/* Single-column list pages (authors). */
+.porto-blog-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.porto-blog-list-page--tight {
+  gap: 1.5rem;
+}
+
+.porto-blog-list-title {
+  margin-bottom: -1rem;
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-list-title--tight {
+  margin-bottom: -0.5rem;
+}
+
+.porto-blog-empty-text {
+  color: var(--porto-color-gray-3);
+}
+
+/* Sidebar ("Recent posts"). */
+.porto-blog-sidebar {
+  flex: 0 0 16rem;
+  min-width: 0;
+}
+
+.porto-blog-sidebar-title {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-sidebar-group {
+  margin-bottom: 1rem;
+}
+
+.porto-blog-sidebar-year {
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-sidebar-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-blog-sidebar-list li {
+  margin-bottom: 0.35rem;
+}
+
+.porto-blog-sidebar-link {
+  color: var(--porto-color-text);
+  text-decoration: none;
+}
+.porto-blog-sidebar-link:hover {
+  color: var(--porto-color-text-accent);
+}
+
+.porto-blog-sidebar-link[aria-current="page"] {
+  font-weight: 700;
+  color: var(--porto-color-text-accent);
+}
+
+/* Post list items. */
+.porto-blog-post-title {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-post-title a {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-blog-post-title a:hover {
+  text-decoration: underline;
+}
+
+/* Author list titles link in body color, accent on hover (the
+   Docusaurus list style). */
+.porto-blog-post-title--plain a {
+  color: var(--porto-color-text);
+}
+.porto-blog-post-title--plain a:hover {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+
+.porto-blog-post-title--sm {
+  font-size: 1.8rem;
+}
+
+.porto-blog-post-meta {
+  margin-bottom: 0.75rem;
+}
+
+.porto-blog-post-date {
+  font-size: 0.9rem;
+  color: var(--porto-color-text);
+}
+
+.porto-blog-post-authors {
+  margin-top: 0.75rem;
+}
+
+.porto-blog-post-author {
+  margin-bottom: 0.25rem;
+}
+
+.porto-blog-post-author-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+a.porto-blog-post-author-name {
+  text-decoration: none;
+}
+a.porto-blog-post-author-name:hover {
+  text-decoration: underline;
+}
+
+.porto-blog-post-author-title {
+  font-size: 0.85rem;
+  color: var(--porto-color-gray-3);
+}
+
+/* The excerpt is injected HTML, so its inner elements can't carry
+   classes — these rules style them by element. */
+.porto-blog-excerpt {
+  margin-bottom: 0.5rem;
+}
+
+.porto-blog-excerpt p,
+.porto-blog-excerpt ul,
+.porto-blog-excerpt ol,
+.porto-blog-excerpt pre {
+  margin: 0 0 1rem;
+}
+
+.porto-blog-excerpt > *:last-child {
+  margin-bottom: 0;
+}
+
+.porto-blog-post-desc {
+  margin-bottom: 0.5rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-post-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.porto-blog-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-blog-tag {
+  display: inline-block;
+  border: 1px solid var(--porto-color-hairline-light);
+  border-radius: 999rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--porto-color-gray-3);
+  text-decoration: none;
+}
+.porto-blog-tag:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+
+.porto-blog-tag--lg {
+  font-size: 0.9rem;
+}
+
+.porto-blog-tag-count {
+  font-size: 0.8em;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-read-more {
+  margin-left: auto;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-blog-read-more:hover {
+  text-decoration: underline;
+}
+
+/* Post page. */
+.porto-blog-article {
+  flex: 1;
+  min-width: 0;
+  max-width: 46rem;
+}
+
+.porto-blog-article-title {
+  margin-bottom: 0.5rem;
+  font-size: 3rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-article-date {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-article-authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.porto-blog-article-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.porto-blog-article-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.porto-blog-article-author-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.porto-blog-article-author-name {
+  font-weight: 700;
+  color: var(--porto-color-text);
+}
+a.porto-blog-article-author-name {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+a.porto-blog-article-author-name:hover {
+  text-decoration: underline;
+}
+
+.porto-blog-article-author-title {
+  font-size: 0.85rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--porto-color-hairline-light);
+  padding-top: 1rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-article-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.porto-blog-article-nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  border-radius: 0.5rem;
+  background: var(--porto-color-black);
+  padding: 1rem;
+  color: var(--porto-color-text);
+  text-decoration: none;
+}
+.porto-blog-article-nav-link:hover {
+  border-color: var(--porto-color-text-accent);
+}
+
+.porto-blog-article-nav-link--next {
+  text-align: right;
+}
+
+.porto-blog-article-nav-label {
+  font-size: 0.85rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-article-nav-title {
+  font-size: 1.1rem;
+  color: var(--porto-color-white);
+}
+
+/* Authors index. */
+.porto-blog-author-header {
+  margin-bottom: -1rem;
+}
+
+.porto-blog-author-name {
+  margin-bottom: 0.25rem;
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-author-title {
+  margin: 0;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-author-url {
+  margin-top: 0.25rem;
+}
+
+.porto-blog-author-url a {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-blog-author-url a:hover {
+  text-decoration: underline;
+}
+
+.porto-blog-author-entry-title {
+  margin-bottom: 0.25rem;
+  font-size: var(--porto-text-h2);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-author-entry-title a {
+  color: var(--porto-color-text);
+  text-decoration: none;
+}
+.porto-blog-author-entry-title a:hover {
+  color: var(--porto-color-text-accent);
+}
+
+.porto-blog-post-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-group-title {
+  margin-bottom: 0.75rem;
+  font-size: var(--porto-text-h3);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+@media (max-width: 996px) {
+  .porto-blog-sidebar {
+    display: none;
+  }
+
+  .porto-blog-main,
+  .porto-blog-article {
+    max-width: none;
+  }
+}
+
+/* ----- Tasks ----- */
+/* The /tasks page: stats cards, status tabs, and the task table.
+ * Original Portosaur code in the design language: hairline
+ * borders, square cards, `-low` / `-high` status badges. */
+.porto-tasks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px);
+  margin-bottom: 2rem;
+  padding-inline: 1rem;
+}
+
+.porto-tasks-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 1000px;
+}
+
+/* Disabled state. */
+.porto-tasks-disabled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.porto-tasks-disabled-icon {
+  font-size: 4rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-tasks-disabled-title {
+  margin-bottom: 0.75rem;
+  font-size: 2rem;
+  color: var(--porto-color-text);
+}
+
+.porto-tasks-disabled-text {
+  max-width: 500px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-tasks-disabled-text code {
+  border-radius: 3px;
+  background: var(--porto-color-gray-5);
+  padding: 2px 0.25rem;
+  color: var(--porto-color-text-accent);
+}
+
+/* Heading. */
+.porto-tasks-heading {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.porto-tasks-title {
+  margin-bottom: 0.1rem;
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-tasks-subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--porto-color-text-accent);
+}
+
+/* Stats. */
+.porto-tasks-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.porto-tasks-stat {
+  border: 1px solid var(--porto-color-hairline-light);
+  background: var(--porto-color-black);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: var(--porto-shadow-sm);
+  transition: transform 0.2s ease;
+}
+.porto-tasks-stat:hover {
+  transform: translateY(-2px);
+}
+
+.porto-tasks-stat-label {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tasks-stat-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--porto-color-text);
+}
+
+.porto-tasks-stat-value--success {
+  color: var(--porto-color-green-high);
+}
+
+.porto-tasks-stat-value--accent {
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tasks-stat-value--warning {
+  color: var(--porto-color-orange-high);
+}
+
+.porto-tasks-progress-track {
+  width: 100%;
+  height: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--porto-color-gray-5);
+}
+
+.porto-tasks-progress-bar {
+  height: 100%;
+  border-radius: 0.25rem;
+  background: var(--porto-color-text-accent);
+}
+
+/* Tabs + table shell. */
+.porto-tasks-panel {
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  background: var(--porto-color-black);
+  box-shadow: var(--porto-shadow-sm);
+}
+
+.porto-tasks-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--porto-color-hairline-light);
+  background: var(--porto-color-bg-nav);
+}
+
+.porto-tasks-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  padding: 1rem;
+  font-size: 1rem;
+  line-height: var(--porto-line-height);
+  color: var(--porto-color-text);
+  transition: all 0.2s ease;
+}
+.porto-tasks-tab:hover {
+  background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+  color: var(--porto-color-text-accent);
+}
+.porto-tasks-tab:focus {
+  outline: none;
+}
+
+.porto-tasks-tab--active {
+  border-bottom: 3px solid var(--porto-color-text-accent);
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+  background-color: var(--porto-color-gray-6);
+}
+
+.porto-tasks-tab--active:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-2) 8%,
+    transparent
+  );
+}
+
+.porto-tasks-tab--active .porto-tasks-tab-count {
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+}
+
+.porto-tasks-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+}
+.porto-tasks-tab-icon svg,
+.porto-tasks-tab-icon img {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.porto-tasks-tab-label {
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+
+.porto-tasks-tab .porto-tasks-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  min-height: 1.1rem;
+  margin-left: 0.2rem;
+  border-radius: 50%;
+  background: var(--porto-color-gray-5);
+  padding: 0;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--porto-color-gray-2);
+}
+
+.porto-tasks-content {
+  min-height: 300px;
+  background: transparent;
+  animation: porto-tasks-fade-in 0.3s ease;
+}
+
+@keyframes porto-tasks-fade-in {
+  from {
+    opacity: 0.7;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.porto-tasks-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--porto-color-text);
+}
+
+.porto-tasks-empty-icon {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  opacity: 0.3;
+}
+
+/* Table. */
+.porto-tasks-table {
+  width: 100%;
+  overflow: hidden;
+  margin-top: -1px;
+  background: var(--porto-color-black);
+  box-shadow: var(--porto-shadow-sm);
+}
+
+.porto-tasks-table-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  border-bottom: 2px solid var(--porto-color-text-accent);
+  background: var(--porto-color-bg-nav);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--porto-color-text-accent);
+  box-shadow: var(--porto-shadow-sm);
+}
+
+.porto-tasks-table-head-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--porto-color-hairline-light);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tasks-table-head-cell--details {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border-inline: 1px solid var(--porto-color-hairline-light);
+  padding: 0.75rem 0.5rem 0.75rem 1rem;
+  text-align: left;
+}
+
+.porto-tasks-table-head-cell--priority {
+  border-right: 0;
+  border-left: 1px solid var(--porto-color-hairline-light);
+}
+
+.porto-tasks-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  border-bottom: 1px solid var(--porto-color-hairline-light);
+  background: var(--porto-color-black);
+  transition: all 0.15s ease;
+}
+.porto-tasks-row:last-child {
+  border-bottom: 0;
+}
+.porto-tasks-row:hover {
+  background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
+}
+
+.porto-tasks-row--striped {
+  background: var(--porto-color-gray-6);
+}
+
+.porto-tasks-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+}
+
+.porto-tasks-cell--details {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border-inline: 1px solid var(--porto-color-hairline-light);
+  padding: 0.75rem 0.5rem 0.75rem 1rem;
+}
+
+.porto-tasks-title-text {
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--porto-color-text);
+}
+
+.porto-tasks-title-text--completed {
+  color: var(--porto-color-green-high);
+  opacity: 0.8;
+  text-decoration: line-through;
+}
+
+.porto-tasks-title-text--active {
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tasks-desc {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--porto-color-text);
+  opacity: 0.85;
+}
+
+.porto-tasks-desc--completed {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+/* Badges. */
+.porto-tasks-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 1rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-transform: capitalize;
+  box-shadow: var(--porto-shadow-sm);
+}
+
+.porto-tasks-badge--bold {
+  font-weight: 700;
+}
+
+.porto-tasks-badge--done {
+  background: var(--porto-color-green-low);
+  color: var(--porto-color-green-high);
+}
+
+.porto-tasks-badge--active {
+  background: var(--porto-color-accent-low);
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tasks-badge--planned {
+  background: var(--porto-color-gray-5);
+  color: var(--porto-color-gray-2);
+}
+
+.porto-tasks-badge--high {
+  background: var(--porto-color-red-low);
+  color: var(--porto-color-red-high);
+}
+
+.porto-tasks-badge--low {
+  background: var(--porto-color-green-low);
+  color: var(--porto-color-green-high);
+}
+
+.porto-tasks-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.4rem;
+  font-size: 0.85rem;
+  vertical-align: -0.125em;
+}
+
+.porto-tasks .porto-spin {
+  animation: porto-spin 2s linear infinite;
+}
+
+@keyframes porto-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .porto-tasks {
+    padding-inline: 0.5rem;
+  }
+
+  .porto-tasks-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .porto-tasks-tab {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .porto-tasks-tab-icon {
+    margin-right: 0.3rem;
+    font-size: 1rem;
+    line-height: var(--porto-line-height);
+  }
+
+  .porto-tasks-tab .porto-tasks-tab-count {
+    width: 1rem;
+    min-width: 1rem;
+    height: 1rem;
+    min-height: 1rem;
+    font-size: 0.6rem;
+  }
+
+  .porto-tasks-content {
+    padding: 1rem;
+  }
+
+  .porto-tasks-empty {
+    padding-block: 2rem;
+  }
+
+  .porto-tasks-table-head,
+  .porto-tasks-row {
+    grid-template-columns: 100px 1fr 100px;
+  }
+}
+
+@media (max-width: 576px) {
+  .porto-tasks-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .porto-tasks-badge-icon {
+    margin-right: 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .porto-tasks-table-head,
+  .porto-tasks-row {
+    grid-template-columns: 80px 1fr 80px;
+  }
+
+  .porto-tasks-table-head {
+    font-size: 0.7rem;
+  }
+
+  .porto-tasks-table-head-cell,
+  .porto-tasks-cell {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .porto-tasks-title-text {
+    font-size: 1rem;
+    line-height: var(--porto-line-height);
+  }
+
+  .porto-tasks-desc {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .porto-tasks-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .porto-tasks-tab {
+    justify-content: flex-start;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+
+  .porto-tasks-tab-label {
+    flex: 1;
+    margin-right: 0.3rem;
+  }
+
+  .porto-tasks-tab .porto-tasks-tab-count {
+    font-size: 0.55rem;
+  }
+}
+
+/* ----- Empty states (offline / redirect / 404) ----- */
+.porto-empty-state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.porto-empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--porto-color-gray-3);
+}
+.porto-empty-state__icon svg,
+.porto-empty-state__icon img {
+  width: 5rem;
+  height: 5rem;
+}
+.porto-empty-state__icon--sm svg,
+.porto-empty-state__icon--sm img {
+  width: 3rem;
+  height: 3rem;
+}
+
+.porto-empty-state__title {
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-empty-state__text {
+  max-width: 32rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-empty-state__link {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-empty-state__link:hover {
+  text-decoration: underline;
+}
+
+/* ----- Search page ----- */
+.porto-search-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1.5rem var(--porto-content-pad-x);
+}
+
+.porto-search-page__input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-search-page__input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-search-page__input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}
+
+.porto-search-page__hint {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--porto-color-gray-3);
+}
+
+/* ----- MDX components ----- */
+/* Btn — variants ported from OG's Button component. */
+.porto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+.porto-btn:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.porto-btn svg,
+.porto-btn img {
+  width: 1em;
+  height: 1em;
+}
+
+.porto-btn--primary {
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+}
+.porto-btn--primary:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 80%,
+    white
+  );
+  color: var(--porto-color-black);
+}
+.porto-btn--secondary {
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-white);
+}
+.porto-btn--secondary:hover {
+  background-color: var(--porto-color-gray-4);
+  color: var(--porto-color-white);
+}
+.porto-btn--success {
+  background-color: var(--porto-color-green);
+  color: var(--porto-color-black);
+}
+.porto-btn--success:hover {
+  background-color: var(--porto-color-green-high);
+  color: var(--porto-color-black);
+}
+.porto-btn--warning {
+  background-color: var(--porto-color-orange);
+  color: var(--porto-color-black);
+}
+.porto-btn--warning:hover {
+  background-color: var(--porto-color-orange-high);
+  color: var(--porto-color-black);
+}
+.porto-btn--danger {
+  background-color: var(--porto-color-red);
+  color: var(--porto-color-black);
+}
+.porto-btn--danger:hover {
+  background-color: var(--porto-color-red-high);
+  color: var(--porto-color-black);
+}
+.porto-btn--info {
+  background-color: var(--porto-color-blue);
+  color: var(--porto-color-black);
+}
+.porto-btn--info:hover {
+  background-color: var(--porto-color-blue-high);
+  color: var(--porto-color-black);
+}
+
+.porto-btn--outline {
+  background-color: transparent;
+}
+.porto-btn--outline.porto-btn--primary {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+.porto-btn--outline.porto-btn--primary:hover {
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+}
+.porto-btn--outline.porto-btn--secondary {
+  border-color: var(--porto-color-gray-4);
+  color: var(--porto-color-gray-2);
+}
+.porto-btn--outline.porto-btn--secondary:hover {
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-white);
+}
+.porto-btn--outline.porto-btn--success {
+  border-color: var(--porto-color-green);
+  color: var(--porto-color-green);
+}
+.porto-btn--outline.porto-btn--success:hover {
+  background-color: var(--porto-color-green);
+  color: var(--porto-color-black);
+}
+.porto-btn--outline.porto-btn--warning {
+  border-color: var(--porto-color-orange);
+  color: var(--porto-color-orange);
+}
+.porto-btn--outline.porto-btn--warning:hover {
+  background-color: var(--porto-color-orange);
+  color: var(--porto-color-black);
+}
+.porto-btn--outline.porto-btn--danger {
+  border-color: var(--porto-color-red);
+  color: var(--porto-color-red);
+}
+.porto-btn--outline.porto-btn--danger:hover {
+  background-color: var(--porto-color-red);
+  color: var(--porto-color-black);
+}
+.porto-btn--outline.porto-btn--info {
+  border-color: var(--porto-color-blue);
+  color: var(--porto-color-blue);
+}
+.porto-btn--outline.porto-btn--info:hover {
+  background-color: var(--porto-color-blue);
+  color: var(--porto-color-black);
+}
+
+.porto-btn--sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+.porto-btn--lg {
+  padding: 0.75rem 1.75rem;
+  font-size: 1.125rem;
+}
+
+/* Dropdown (MDX) — a <details>-based menu, simplified from OG's
+   Dropdown (trigger/label/items, hover+click). */
+.porto-mdx-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.porto-mdx-dropdown__trigger {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.porto-mdx-dropdown__trigger::-webkit-details-marker {
+  display: none;
+}
+.porto-mdx-dropdown__trigger::after {
+  content: "▾";
+  font-size: 0.75em;
+}
+.porto-mdx-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 101;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  border-radius: 0.5rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  background-color: var(--porto-color-bg-nav);
+  box-shadow: var(--porto-shadow-md);
+}
+.porto-mdx-dropdown__item {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+}
+.porto-mdx-dropdown__item:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+
+/* Hint — simplified tooltip: the message renders in a tinted box
+   above the children. OG's full portal tooltip is Phase 2 scope. */
+.porto-hint {
+  border: 1px solid var(--porto-color-hairline-light);
+  border-inline-start: 0.25rem solid var(--porto-color-blue);
+  border-radius: 0.25rem;
+  background-color: var(--porto-color-blue-low);
+  padding: 0.75rem 1rem;
+  color: var(--porto-color-white);
+}
+.porto-hint__msg {
+  font-weight: 600;
+  color: var(--porto-color-blue-high);
+}
+.porto-hint__msg + * {
+  margin-top: 0.5rem;
+}
+
+/* Indent — an indented block. */
+.porto-indent {
+  margin-inline-start: 1.5rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--porto-color-gray-5);
+}
+
+/* Tabs — the tab styles from the Astro tabs.css, under the React
+   component's classes. */
+.porto-tabs {
+  display: block;
+}
+
+.porto-tabs__tablist-wrapper {
+  overflow-x: auto;
+}
+
+.porto-tabs [role="tablist"] {
+  display: flex;
+  list-style: none;
+  border-bottom: 2px solid var(--porto-color-gray-5);
+  padding: 0;
+}
+
+.porto-tabs__tab {
+  display: flex;
+}
+.porto-tabs__tab > [role="tab"] {
+  --porto-tab-color-border: var(--porto-color-gray-5);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: var(--porto-line-height-headings);
+  padding: 0.275rem 1.25rem;
+  text-decoration: none;
+  box-shadow: 0 2px 0 var(--porto-tab-color-border);
+  color: var(--porto-color-gray-3);
+  outline-offset: var(--porto-outline-offset-inside);
+  overflow-wrap: initial;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+.porto-tabs__tab [role="tab"][aria-selected="true"] {
+  --porto-tab-color-border: var(--porto-color-text-accent);
+  color: var(--porto-color-white);
+  font-weight: 600;
+}
+
+.porto-tabs__tablist-wrapper ~ [role="tabpanel"] {
+  margin-top: 1rem;
+}
+
+/* TopicList — h2 cards for a category's child items. */
+.porto-topic-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.porto-topic-list h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.porto-topic-list a {
+  display: block;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: var(--porto-color-text);
+}
+.porto-topic-list a:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+
+/* Pv (Preview) — trigger only in Phase 1: a plain link/button.
+   The viewer is Phase 2. */
+.porto-pv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px dashed var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  color: var(--porto-color-gray-3);
+  text-decoration: none;
+}
+a.porto-pv:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+
+/* IconSearch — the searchable icon picker (client component). */
+.porto-icon-search {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.porto-icon-search__input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-icon-search__input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-icon-search__input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}
+
+.porto-icon-search__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-icon-search__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  border-radius: 0.375rem;
+  padding: 0.75rem 0.5rem;
+  background: transparent;
+  color: var(--porto-color-gray-2);
+  cursor: pointer;
+  font-size: var(--porto-text-xs);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.porto-icon-search__result:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-white);
+}
+.porto-icon-search__result img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.porto-icon-search__status {
+  text-align: center;
+  color: var(--porto-color-gray-3);
+}
