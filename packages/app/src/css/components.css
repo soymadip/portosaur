@@ -1664,7 +1664,11 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-pagination__link:hover {
-  border-color: var(--porto-color-text-accent);
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
 }
 .porto-pagination__link--next {
   grid-column: 2 / 3;
@@ -4102,7 +4106,11 @@ a.porto-blog-article-author-name:hover {
     box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-topic-list__card:hover {
-  border-color: var(--porto-color-text-accent);
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
   box-shadow: var(--porto-shadow-md);
 }
 /* The title row: the `h2` sizes to its text (it never grows,
