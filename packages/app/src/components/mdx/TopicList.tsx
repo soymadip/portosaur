@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createContext, useContext, useRef, type ReactNode } from "react";
 import {
   TOPIC_LIST_DEFAULT_DESC,
+  isEmojiIcon,
   type TopicListItem,
 } from "../../lib/content.ts";
 
@@ -40,8 +41,11 @@ export type { TopicListItem } from "../../lib/content.ts";
  * the icon packs are megabytes of JSON and must never load
  * client-side, so this component only injects the given HTML.
  * Items passed manually carry no icon HTML and render without an
- * icon. An emoji icon renders as part of the title text instead
- * (`topicCardTitle` prepends it), never as a separate icon.
+ * icon. An emoji icon renders as text in the same icon span an
+ * SVG icon uses — same span, same 0.5rem gap to the title — so
+ * emoji and SVG cards space their icons identically. (It used
+ * to be prepended to the title text with no separator at all,
+ * which left emoji cards with a visibly tighter gap.)
  */
 
 export interface TopicListContextValue {
@@ -111,6 +115,16 @@ function TopicCard({ card }: { card: TopicListItem }) {
               style={card.color ? { color: card.color } : undefined}
               dangerouslySetInnerHTML={{ __html: card.iconHtml }}
             />
+          ) : isEmojiIcon(card.icon) ? (
+            /* Rendered as a React text child, not injected HTML —
+               the emoji comes from frontmatter, so it must never
+               reach `dangerouslySetInnerHTML` unescaped. */
+            <span
+              className="porto-topic-list__icon porto-topic-list__icon--emoji"
+              style={card.color ? { color: card.color } : undefined}
+            >
+              {card.icon}
+            </span>
           ) : null}
           <span className="porto-topic-list__title-text">{card.title}</span>
         </h2>

@@ -4468,6 +4468,18 @@ a.porto-blog-article-author-name:hover {
   flex-shrink: 0;
   font-size: 2px;
 }
+/* An emoji icon renders as text in the icon span — at the SVG
+   icons' size (23px), not the span's 2px: the 2px is invisible
+   on SVGs (they carry their own size) but would shrink an emoji
+   to nothing. Same span, same gap as an SVG icon. */
+.porto-topic-list__icon--emoji {
+  font-size: 23px;
+  /* A text line box is 1.2x the font size — without this the
+     span's box is 27.6px tall next to the SVG span's 23px. The
+     glyph is centered either way, but identical boxes keep the
+     two icon kinds truly interchangeable. */
+  line-height: 1;
+}
 .porto-topic-list__title-text {
   overflow: hidden;
   text-overflow: ellipsis;

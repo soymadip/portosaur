@@ -129,14 +129,12 @@ export function findCategoryItems(
 }
 
 /**
- * The text a topic-list card renders for a tree node: an emoji icon
- * (a literal emoji, not an `id:` icon reference, which renders as SVG
- * and contributes no text) prepended directly to the label.
+ * Whether an `icon` value is a literal emoji rather than an `id:`
+ * icon reference: emoji has no colon, so it renders as text in the
+ * card's icon span instead of an SVG.
  */
-export function topicCardTitle(node: PageTree.Node): string {
-  const icon = typeof node.icon === "string" ? node.icon : "";
-  const prefix = icon && !icon.includes(":") ? icon : "";
-  return `${prefix}${nodeName(node)}`;
+export function isEmojiIcon(icon: unknown): icon is string {
+  return typeof icon === "string" && icon !== "" && !icon.includes(":");
 }
 
 /**
@@ -187,7 +185,7 @@ function nodeToCard(node: PageTree.Node): TopicListItem | null {
   if (node.type === "page") {
     const color = nodeColor(node);
     return {
-      title: topicCardTitle(node),
+      title: nodeName(node),
       href: pageHref(node.url),
       /* A node description is a ReactNode in Fumadocs' types —
          only a plain string renders as card text. */
@@ -200,7 +198,7 @@ function nodeToCard(node: PageTree.Node): TopicListItem | null {
   if (node.type === "folder" && node.index) {
     const color = nodeColor(node) ?? nodeColor(node.index);
     return {
-      title: topicCardTitle(node),
+      title: nodeName(node),
       href: pageHref(node.index.url),
       /* A folder description is a ReactNode in Fumadocs' types —
          only a plain string renders as card text. */

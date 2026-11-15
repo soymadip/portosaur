@@ -114,7 +114,7 @@ export { cn } from "./lib/cn.ts";
 export {
   findPrevNext,
   findCategoryItems,
-  topicCardTitle,
+  isEmojiIcon,
   topicListShouldRender,
   tocToHeadings,
   nestHeadings,

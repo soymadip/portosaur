@@ -6,6 +6,7 @@ import type { PortosaurOptions } from "../../lib/config.ts";
 import {
   findCategoryItems,
   findPrevNext,
+  isEmojiIcon,
   tocToHeadings,
   topicListCards,
   topicListDesc,
@@ -150,12 +151,11 @@ export function DocPage({
     : [];
   /* The topic-list cards, with their icons resolved to HTML here
      on the server — the icon packs must never load client-side.
-     An emoji icon is already part of the title text
-     (`topicCardTitle` prepends it), so it gets no icon element. */
+     An emoji icon gets no icon HTML: the card renders it as text
+     in its own icon span (same span, same gap as an SVG icon). */
   const topicCards: TopicListItem[] = topicListCards(categoryItems).map(
     (card) => {
-      const iconInTitle = card.icon !== undefined && !card.icon.includes(":");
-      if (iconInTitle) {
+      if (isEmojiIcon(card.icon)) {
         return card;
       }
       return {
