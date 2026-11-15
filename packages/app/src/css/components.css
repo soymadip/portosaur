@@ -3896,6 +3896,10 @@ a.porto-blog-article-author-name:hover {
   min-width: 0;
   padding: 1rem 1.25rem;
   border: 1px solid var(--porto-color-hairline-light);
+  /* OG: the card sits on the scheme's raised surface (Docusaurus
+     `.card` → `--ifm-background-surface-color`) — the same surface
+     the note cards and feature cards use. */
+  background-color: var(--porto-color-gray-6);
   border-radius: 0.5rem;
   box-shadow: var(--porto-shadow-sm);
   text-decoration: none;
