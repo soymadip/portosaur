@@ -679,7 +679,16 @@ body:has(#porto__sidebar:popover-open)
 /* Nested categories, icons, carets, 265px. Rows are uniform size
    across levels and the caret is pinned to the row's right edge
    (the label grows to fill the row). Vertical padding is 0.3em —
-   0.5em felt too airy. */
+   0.5em felt too airy.
+   Motion follows the Fumadocs docs sidebar (decision 26): 150ms
+   color fades on rows, instant on hover with the fade only on
+   the way out, and a 150ms height + opacity fold for categories. */
+.porto-sidebar {
+  /* Lets `block-size: 0 -> auto` interpolate for the
+     `::details-content` fold below (Chrome 131+, Firefox 143+).
+     Older browsers ignore it and open/close instantly. */
+  interpolate-size: allow-keywords;
+}
 .porto-sidebar ul {
   --porto-sidebar-item-padding-inline: 0.5rem;
   list-style: none;
@@ -727,6 +736,15 @@ body:has(#porto__sidebar:popover-open)
   line-height: 1.4;
   cursor: pointer;
   user-select: none;
+  /* The hover/active tint boxes are rounded; the radius lives
+     on the base row so it doesn't snap when the tint fades in. */
+  border-radius: 0.375rem;
+  /* Fumadocs `transition-colors`: the tint and text fade on the
+     way out; `:hover` below disables the transition so the hover
+     state lands instantly. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-sidebar summary::marker,
 .porto-sidebar summary::-webkit-details-marker {
@@ -750,11 +768,14 @@ body:has(#porto__sidebar:popover-open)
   padding: 0.2rem 0.1rem;
   margin-block: -0.25rem;
   border-radius: 0.375rem;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-sidebar__caret svg {
   width: 1.25rem;
   height: 1.25rem;
-  transition: transform 0.2s ease-in-out;
+  /* Fumadocs `transition-transform` (150ms): the caret swings
+     with the fold instead of snapping. */
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 [dir="rtl"] .porto-sidebar__caret svg {
   transform: rotateZ(180deg);
@@ -773,6 +794,13 @@ body:has(#porto__sidebar:popover-open)
   color: var(--porto-color-gray-2);
   padding: 0.3em var(--porto-sidebar-item-padding-inline);
   line-height: 1.4;
+  /* Fumadocs `transition-colors`: the hover tint fades out on
+     mouse-leave, and the active tint cross-fades when navigating
+     to another page. `:hover` below disables it so the hover
+     state lands instantly. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-sidebar a > * {
   min-width: 0;
@@ -789,6 +817,23 @@ body:has(#porto__sidebar:popover-open)
     var(--porto-color-gray-1) 10%,
     transparent
   );
+}
+/* Fumadocs `hover:transition-none`: the hover state applies
+   instantly; the 150ms fade runs only on the way out. Focus
+   keeps the transition (keyboard users get the fade both ways),
+   and the active row keeps it on hover too (its colors don't
+   change under the cursor, so the fade is what animates a
+   selection change while hovering). */
+.porto-sidebar a:hover,
+.porto-sidebar summary:hover {
+  transition: none;
+}
+.porto-sidebar [aria-current="page"]:hover,
+.porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]):hover {
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* OG-style active item: accent text on a subtle 10% accent tint.
@@ -821,7 +866,6 @@ body:has(#porto__sidebar:popover-open)
     var(--porto-color-text-accent) 10%,
     transparent
   );
-  border-radius: 0.375rem;
   color: var(--porto-color-accent-high);
 }
 
@@ -849,7 +893,6 @@ body:has(#porto__sidebar:popover-open)
     var(--porto-color-gray-1) 10%,
     transparent
   );
-  border-radius: 0.375rem;
 }
 .porto-sidebar__caret:hover {
   background-color: color-mix(
@@ -870,6 +913,50 @@ body:has(#porto__sidebar:popover-open)
 .porto-sidebar__group-label a:hover,
 .porto-sidebar__group-label a:focus {
   background-color: transparent;
+}
+
+/* The category fold, Fumadocs `animate-fd-collapsible-down/up`:
+   150ms height + opacity, `cubic-bezier(0.45, 0, 0.55, 1)`.
+   `::details-content` is the content after the <summary>.
+   The UA hides a closed details' content with
+   `content-visibility: hidden` — but that flips instantly (the
+   discrete transition doesn't delay it in Chrome), so a plain
+   `::details-content` fold only animates on open and snaps shut.
+   Instead we override the UA hiding with `content-visibility:
+   visible` and hide the content ourselves: `block-size: 0` +
+   `opacity: 0` + `visibility: hidden` (which also takes the
+   links out of the tab order while folded). `visibility` flips
+   mid-transition, by which point the opacity fade has already
+   made the content nearly invisible. `interpolate-size` on
+   `.porto-sidebar` lets `block-size: auto` interpolate.
+   Browsers without `::details-content` support open/close
+   instantly, as before. */
+.porto-sidebar details::details-content {
+  overflow: hidden;
+  block-size: 0;
+  opacity: 0;
+  visibility: hidden;
+  content-visibility: visible;
+  transition:
+    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 150ms;
+  transition-behavior: allow-discrete;
+}
+.porto-sidebar details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-sidebar a,
+  .porto-sidebar summary,
+  .porto-sidebar__caret,
+  .porto-sidebar__caret svg,
+  .porto-sidebar details::details-content {
+    transition: none;
+  }
 }
 
 /* Row icons: the injected SVG is 1em, so the icon scales with
