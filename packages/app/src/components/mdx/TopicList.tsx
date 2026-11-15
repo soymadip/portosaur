@@ -86,9 +86,7 @@ function TopicCard({ card }: { card: TopicListItem }) {
      the URL snapshot (which tracks h1/h2 text) keeps reading
      the plain title. */
   const count =
-    card.isCategory &&
-    card.itemsCount !== undefined &&
-    card.itemsCount > 0
+    card.isCategory && card.itemsCount !== undefined && card.itemsCount > 0
       ? card.itemsCount
       : null;
   /* A card is an internal page link — Next.js `<Link>` navigates
