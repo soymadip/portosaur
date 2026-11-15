@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build and Cache
+dist/
+build/
+cache/
+.bun-cache/
+.next/
+.source/
+.portosaur/
+.playground/
+
+# Reference code (0.26.0, kept for consultation — not formatted)
+backup/
+
+# Lock files
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+
+# System
+.DS_Store

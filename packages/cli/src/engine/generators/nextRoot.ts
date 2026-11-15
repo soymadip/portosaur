@@ -28,6 +28,17 @@ export interface NextRootArgs {
   projectDir: string;
   outDir: string;
   mtime: number;
+  /**
+   * Whether the blog directory holds at least one post. When false
+   * only the `/blog/[slug]` route is skipped: under
+   * `output: "export"` a dynamic route whose
+   * `generateStaticParams()` returns [] fails the build, so a
+   * post-less blog must have no post route. The blog index and
+   * authors pages are static routes — they always exist and render
+   * their empty state (`/blog/` with no posts, `/blog/authors/`
+   * from `authors.yml` alone).
+   */
+  hasBlogPosts: boolean;
 }
 
 /**
@@ -69,19 +80,26 @@ function siteOrigin(options: PortosaurOptions): string {
  * With `output: 'export'` and a custom `distDir`, Next.js writes the
  * static export to `distDir` while build artifacts and the Turbopack
  * cache stay in `.next` (verified in Next 16's `export/utils.js`:
- * `hasCustomExportOutput` / `getBuildDistDir`). `distDir` is absolute —
- * Next resolves it relative to the project root (`.portosaur/`), so a
- * relative path would land inside the generated root instead of the user
- * project. `basePath` takes the base URL without its trailing slash.
+ * `hasCustomExportOutput` / `getBuildDistDir`).
+ *
+ * `distDir` MUST be relative to the generated root (`.portosaur/`):
+ * Next joins it onto the project dir with `path.join`, which does
+ * not treat a leading `/` as an anchor — an absolute path gets
+ * mangled into `.portosaur/home/.../build` and the export lands in
+ * a junk directory inside the generated root. The default output
+ * dir is therefore `../build`, not the absolute path.
+ * `basePath` takes the base URL without its trailing slash.
  */
 export function buildNextConfigContent(
   options: PortosaurOptions,
-  { outDir, mtime }: NextRootArgs,
+  { projectDir, outDir, mtime }: NextRootArgs,
 ): string {
   const basePath =
     options.site.baseUrl === "/"
       ? ""
       : `\n  basePath: ${JSON.stringify(options.site.baseUrl.replace(/\/$/, ""))},`;
+  // Relative to the generated root — see the doc comment above.
+  const distDir = path.relative(path.join(projectDir, ".portosaur"), outDir);
 
   return `${header(mtime)}import { createMDX } from "fumadocs-mdx/next";
 
@@ -94,7 +112,7 @@ const config = {
   reactStrictMode: true,
   images: { unoptimized: true },
   transpilePackages: ["@portosaur/app"],
-  distDir: ${JSON.stringify(outDir)},${basePath}
+  distDir: ${JSON.stringify(distDir)},${basePath}
 };
 
 export default withMDX(config);
@@ -122,7 +140,7 @@ import { portosaurMdxOptions } from "@portosaur/app/mdx";
 
 export default defineConfig({
   mdxOptions: portosaurMdxOptions({
-    userVars: ${JSON.stringify(options.userVars ?? {})},
+    userVars: ${JSON.stringify(options.userVars ?? {}, null, 2)},
     colorScheme: ${JSON.stringify(options.theme.colorScheme)},
   }),
 });
@@ -348,15 +366,30 @@ export default function Layout({ children }: { children: ReactNode }) {
  *
  * Docs mode renders the app's docs home (hero + feature cards from
  * `config.docsHome`). Portfolio mode renders a minimal placeholder in
- * Phase 1 — the portfolio home sections land in Phase 3.
+ * Phase 1 — the portfolio home sections land in Phase 3. The title
+ * follows the OG rule (Astro `index.astro`): "Home" in docs mode,
+ * "Me" in portfolio mode, suffixed with `| {site title}`.
+ *
+ * The suffix is baked in as an absolute title instead of relying on
+ * the root layout's template: Next's `accumulateMetadata` only
+ * stashes a layer's title template for items before the last two
+ * (the leaf layout + leaf page), and for the root route the layout
+ * IS one of the last two — so the root template never applies to
+ * the home page itself (verified in Next 16's `resolve-metadata.js`).
+ * Nested pages are unaffected.
  */
 export function buildHomePageContent(
   options: PortosaurOptions,
   mtime: number,
 ): string {
+  const title = options.siteMode === "docs" ? "Home" : "Me";
+  const absoluteTitle = `${title} | ${options.site.title}`;
   if (options.siteMode === "docs") {
     return `${header(mtime)}import { config } from "@/lib/config";
 import { DocsHomePage } from "@portosaur/app/components/docs-home-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: { absolute: ${JSON.stringify(absoluteTitle)} } };
 
 export default function Page() {
   return <DocsHomePage config={config} />;
@@ -365,6 +398,9 @@ export default function Page() {
   }
 
   return `${header(mtime)}import { config } from "@/lib/config";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: { absolute: ${JSON.stringify(absoluteTitle)} } };
 
 // Phase 1 placeholder — the portfolio home sections (hero, about,
 // projects, experience, social links, contact) land in Phase 3.
@@ -403,35 +439,67 @@ export default function Layout({ children }: { children: ReactNode }) {
 /**
  * Builds the contents of a doc detail page
  * (`.portosaur/app/docs/[[...slug]]/page.tsx`, and
- * `app/notes/[[...slug]]/page.tsx` in portfolio mode). The loaded page
+ * `app/notes/[...slug]/page.tsx` in portfolio mode). The loaded page
  * goes to the app's `DocPage`, which renders the hoisted H1 (from
  * `page.data._exports.__portoContentTitle`), the MDX body, pagination,
  * and the doc footer.
+ *
+ * The docs route is an OPTIONAL catch-all: the collection's root page
+ * (the README) renders at `/docs/` through it. The notes route is a
+ * REQUIRED catch-all: `/notes/` is owned by the notes index page
+ * (`app/notes/page.tsx`), and Next.js forbids a static route at the
+ * same specificity as an optional catch-all. The required catch-all's
+ * `generateStaticParams` therefore drops the empty root slug — a
+ * root README in a user's notes dir has no detail page.
  */
-export function buildDocPageContent(route: string, mtime: number): string {
+export function buildDocPageContent(
+  route: string,
+  mtime: number,
+  catchAll: "optional" | "required" = "optional",
+): string {
+  const slugParam = catchAll === "optional" ? "[[...slug]]" : "[...slug]";
+  const staticParams =
+    catchAll === "optional"
+      ? "return source.generateParams();"
+      : "return source.generateParams().filter((p) => p.slug.length > 0);";
   return `${header(mtime)}import { source } from "@/lib/source";
 import { config } from "@/lib/config";
 import { DocPage } from "@portosaur/app/components/doc-page";
 import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
+import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
 import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-export default async function Page(props: PageProps<"/${route}/[[...slug]]">) {
+export default async function Page(props: PageProps<"/${route}/${slugParam}">) {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) {
     notFound();
   }
-  return <DocPage config={config} page={page} />;
+  // Edit URL: the configured edit base + the file path relative to
+  // the content dir (the edit base already includes the content dir).
+  const editBase = config.site.editUrl;
+  const editUrl = editBase
+    ? (editBase.endsWith("/") ? editBase : editBase + "/") + page.path
+    : undefined;
+  return (
+    <DocPage
+      config={config}
+      page={page}
+      tree={source.getPageTree()}
+      editUrl={editUrl}
+      components={{ a: createRelativeLink(source, page) }}
+    />
+  );
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  ${staticParams}
 }
 
 export async function generateMetadata(
-  props: PageProps<"/${route}/[[...slug]]">,
+  props: PageProps<"/${route}/${slugParam}">,
 ): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
@@ -468,10 +536,135 @@ export async function generateMetadata(
 export function buildNotesIndexContent(mtime: number): string {
   return `${header(mtime)}import { source } from "@/lib/source";
 import { config } from "@/lib/config";
-import { NotesIndexPage } from "@portosaur/app/components/notes-index-page";
+import {
+  NotesIndexPage,
+  type NoteCardPage,
+} from "@portosaur/app/components/notes-index-page";
+import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
+import { pageHref } from "@portosaur/app/lib/pageUrl";
+import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+import type { Metadata } from "next";
+
+export function generateMetadata(): Metadata {
+  const route = config.site.notesRoute;
+  return { title: route.charAt(0).toUpperCase() + route.slice(1) };
+}
 
 export default function Page() {
-  return <NotesIndexPage config={config} pages={source.getPages()} />;
+  // Top-level files + top-level dirs with an index, in filename
+  // order (numeric-aware: 1 -, 2 -, 10 -). The root index itself
+  // (no slugs) is not a card.
+  const pages: NoteCardPage[] = source
+    .getPages()
+    .filter((page) => page.slugs.length === 1)
+    .sort((a, b) =>
+      a.path.localeCompare(b.path, undefined, { numeric: true }),
+    )
+    .map((page) => {
+      const contentTitle =
+        (page.data._exports as Record<string, unknown> | undefined)?.[
+          CONTENT_TITLE_KEY
+        ] ?? null;
+      const { metaTitle } = docPageTitles(
+        page.data,
+        contentTitle as { text: string; slug: string } | null,
+        docFileTitle(page.path),
+      );
+      return {
+        title: metaTitle,
+        href: pageHref(page.url),
+        description: page.data.desc,
+        icon: page.data.icon,
+        color: page.data.color,
+        slug: page.slugs.join("-"),
+        draft: page.data.draft,
+      };
+    });
+  return <NotesIndexPage config={config} pages={pages} />;
+}
+`;
+}
+
+/**
+ * Builds the contents of the generated `.portosaur/lib/blog.ts` —
+ * helpers shared by the blog routes (index, post, authors): the
+ * authors file, the post summaries, the date sort, the sidebar
+ * list. The generated root owns this wiring (which loader, which
+ * paths); the pure pieces live in `@portosaur/app/lib/blog`.
+ */
+export function buildLibBlogContent(mtime: number): string {
+  return `${header(mtime)}import path from "node:path";
+import { blogSource } from "./source";
+import { config } from "./config";
+import { loadBlogAuthors } from "@portosaur/app/lib/blog-server";
+import { docFileTitle, docPageTitles } from "@portosaur/app/lib/docPage";
+import { pageHref } from "@portosaur/app/lib/pageUrl";
+import {
+  resolveAuthor,
+  sortPostsByDateDesc,
+  type BlogAuthor,
+} from "@portosaur/app/lib/blog";
+import type { BlogIndexPost } from "@portosaur/app/components/blog-index-page";
+import type { BlogSidebarPost } from "@portosaur/app/components/BlogSidebar";
+import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+
+/** The blog authors from \`blog/authors.yml\` ([] when absent). */
+export function getBlogAuthors(): BlogAuthor[] {
+  return loadBlogAuthors(
+    path.join(config.projectDir, config.site.blogDir, "authors.yml"),
+  );
+}
+
+/** Every blog post as an index summary (unsorted). */
+export function getBlogPosts(): BlogIndexPost[] {
+  return blogSource.getPages().map((page) => {
+    const contentTitle =
+      (page.data._exports as Record<string, unknown> | undefined)?.[
+        CONTENT_TITLE_KEY
+      ] ?? null;
+    const { metaTitle } = docPageTitles(
+      page.data,
+      contentTitle as { text: string; slug: string } | null,
+      docFileTitle(page.path),
+    );
+    return {
+      id: page.slugs.join("/"),
+      title: metaTitle,
+      href: pageHref(page.url),
+      date: page.data.date ?? null,
+      description: page.data.desc,
+      authors: page.data.authors,
+      tags: page.data.tags,
+    };
+  });
+}
+
+/** Blog posts newest first (undated posts sort last, by id). */
+export function getSortedBlogPosts(): BlogIndexPost[] {
+  return sortPostsByDateDesc(getBlogPosts());
+}
+
+/** The year-grouped sidebar list, newest first. */
+export function getBlogSidebarPosts(): BlogSidebarPost[] {
+  return getSortedBlogPosts().map((post) => ({
+    url: post.href,
+    title: post.title,
+    date: post.date ?? null,
+  }));
+}
+
+/** The blog authors with their post counts (authors page only). */
+export function getBlogAuthorsWithCounts(): BlogAuthor[] {
+  const authors = getBlogAuthors();
+  const posts = getBlogPosts();
+  return authors.map((author) => ({
+    ...author,
+    count: posts.filter((post) =>
+      (post.authors ?? []).some(
+        (ref) => resolveAuthor(ref, authors).key === author.key,
+      ),
+    ).length,
+  }));
 }
 `;
 }
@@ -481,12 +674,23 @@ export default function Page() {
  * (minimal blog index — the full blog lands in Phase 3).
  */
 export function buildBlogIndexContent(mtime: number): string {
-  return `${header(mtime)}import { blogSource } from "@/lib/source";
-import { config } from "@/lib/config";
+  return `${header(mtime)}import { config } from "@/lib/config";
+import { getBlogAuthors, getBlogPosts } from "@/lib/blog";
 import { BlogIndexPage } from "@portosaur/app/components/blog-index-page";
+import type { Metadata } from "next";
+
+export function generateMetadata(): Metadata {
+  return { title: "Blog" };
+}
 
 export default function Page() {
-  return <BlogIndexPage config={config} pages={blogSource.getPages()} />;
+  return (
+    <BlogIndexPage
+      config={config}
+      posts={getBlogPosts()}
+      authors={getBlogAuthors()}
+    />
+  );
 }
 `;
 }
@@ -503,8 +707,15 @@ export default function Page() {
 export function buildBlogPostContent(mtime: number): string {
   return `${header(mtime)}import { blogSource } from "@/lib/source";
 import { config } from "@/lib/config";
+import {
+  getBlogAuthors,
+  getBlogSidebarPosts,
+  getSortedBlogPosts,
+} from "@/lib/blog";
 import { BlogPostPage } from "@portosaur/app/components/blog-post-page";
 import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
+import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
+import { pageHref } from "@portosaur/app/lib/pageUrl";
 import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -515,7 +726,28 @@ export default async function Page(props: PageProps<"/blog/[slug]">) {
   if (!page) {
     notFound();
   }
-  return <BlogPostPage config={config} page={page} />;
+  // Newer/older neighbors in the newest-first sort.
+  const sorted = getSortedBlogPosts();
+  const index = sorted.findIndex((post) => post.href === pageHref(page.url));
+  const newer =
+    index > 0
+      ? { title: sorted[index - 1].title, href: sorted[index - 1].href }
+      : null;
+  const older =
+    index >= 0 && index < sorted.length - 1
+      ? { title: sorted[index + 1].title, href: sorted[index + 1].href }
+      : null;
+  return (
+    <BlogPostPage
+      config={config}
+      post={{ ...page, date: page.data.date ?? null }}
+      sidebarPosts={getBlogSidebarPosts()}
+      newer={newer}
+      older={older}
+      authors={getBlogAuthors()}
+      components={{ a: createRelativeLink(blogSource, page) }}
+    />
+  );
 }
 
 export async function generateStaticParams() {
@@ -557,12 +789,19 @@ export async function generateMetadata(
  * full blog lands in Phase 3).
  */
 export function buildBlogAuthorsContent(mtime: number): string {
-  return `${header(mtime)}import { blogSource } from "@/lib/source";
-import { config } from "@/lib/config";
+  return `${header(mtime)}import { config } from "@/lib/config";
+import { getBlogAuthorsWithCounts } from "@/lib/blog";
 import { BlogAuthorsPage } from "@portosaur/app/components/blog-authors-page";
+import type { Metadata } from "next";
+
+export function generateMetadata(): Metadata {
+  return { title: "Authors" };
+}
 
 export default function Page() {
-  return <BlogAuthorsPage config={config} pages={blogSource.getPages()} />;
+  return (
+    <BlogAuthorsPage config={config} authors={getBlogAuthorsWithCounts()} />
+  );
 }
 `;
 }
@@ -570,11 +809,22 @@ export default function Page() {
 /**
  * Builds the contents of the generated `.portosaur/app/tasks/page.tsx`
  * (minimal tasks page from `config.tasks` — the full version lands in
- * Phase 3).
+ * Phase 3). The title follows the OG rule: the configured tasks
+ * title when tasks are enabled, "Tasks are Disabled" when they are
+ * not; the root layout's template appends `| {site title}`.
  */
-export function buildTasksPageContent(mtime: number): string {
+export function buildTasksPageContent(
+  options: PortosaurOptions,
+  mtime: number,
+): string {
+  const title = options.tasks.enable
+    ? options.tasks.title
+    : "Tasks are Disabled";
   return `${header(mtime)}import { config } from "@/lib/config";
 import { TasksPage } from "@portosaur/app/components/tasks-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: ${JSON.stringify(title)} };
 
 export default function Page() {
   return <TasksPage config={config} />;
@@ -584,11 +834,17 @@ export default function Page() {
 
 /**
  * Builds the contents of the generated `.portosaur/app/search/page.tsx`.
- * The app's `SearchPage` reads the `?q=` query client-side.
+ * The app's `SearchPage` reads the `?q=` query client-side. The title
+ * is absolute — the OG search page has no `| {site title}` suffix.
  */
 export function buildSearchPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { SearchPage } from "@portosaur/app/components/search-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: { absolute: "Search the documentation" },
+};
 
 export default function Page() {
   return <SearchPage config={config} />;
@@ -603,6 +859,9 @@ export default function Page() {
 export function buildOfflinePageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { OfflinePage } from "@portosaur/app/components/offline-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "You're Offline" };
 
 export default function Page() {
   return <OfflinePage config={config} />;
@@ -617,6 +876,9 @@ export default function Page() {
 export function buildRedirectPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { RedirectPage } from "@portosaur/app/components/redirect-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Opening in browser…" };
 
 export default function Page() {
   return <RedirectPage config={config} />;
@@ -631,6 +893,9 @@ export default function Page() {
 export function buildNotFoundContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { NotFoundPage } from "@portosaur/app/components/not-found-page";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Page Not Found" };
 
 export default function NotFound() {
   return <NotFoundPage config={config} />;
@@ -670,6 +935,11 @@ import { source, blogSource } from "@/lib/source";
 import { config } from "@/lib/config";
 import { pageHref } from "@portosaur/app/lib/pageUrl";
 
+// Metadata routes compile to route handlers; with
+// \`output: 'export'\` they must be marked static or the build
+// fails at page-data collection.
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const site = \`\${config.site.url.replace(/\\/$/, "")}\${
     config.site.baseUrl === "/" ? "" : config.site.baseUrl.replace(/\\/$/, "")
@@ -702,6 +972,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
 export function buildRobotsContent(mtime: number): string {
   return `${header(mtime)}import type { MetadataRoute } from "next";
 import { config } from "@/lib/config";
+
+// Metadata routes compile to route handlers; with
+// \`output: 'export'\` they must be marked static or the build
+// fails at page-data collection.
+export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   const site = \`\${config.site.url.replace(/\\/$/, "")}\${
@@ -797,7 +1072,12 @@ export async function generateStaticParams() {
  * collection IS the docs collection there, so the `app/notes/` detail
  * routes are skipped); portfolio mode generates the `app/notes/`
  * detail routes and no `app/docs/` routes at all. The notes index
- * (`app/notes/page.tsx`) exists in both modes.
+ * (`app/notes/page.tsx`) exists in both modes, which is why the notes
+ * detail route is a required catch-all (`[...slug]`) while the docs
+ * one is optional (`[[...slug]]`) — see `buildDocPageContent`. The
+ * blog index and
+ * authors pages always exist; only the `/blog/[slug]` post route
+ * needs at least one post (see `NextRootArgs.hasBlogPosts`).
  */
 export function buildNextRootFiles(
   options: PortosaurOptions,
@@ -810,16 +1090,16 @@ export function buildNextRootFiles(
     "source.config.ts": buildSourceConfigContent(options, mtime),
     "lib/source.ts": buildLibSourceContent(options, mtime),
     "lib/config.ts": buildLibConfigContent(options, mtime),
+    "lib/blog.ts": buildLibBlogContent(mtime),
     "postcss.config.mjs": buildPostcssConfigContent(mtime),
     "tsconfig.json": buildTsConfigContent(mtime),
     "next-env.d.ts": buildNextEnvContent(),
     "app/layout.tsx": buildRootLayoutContent(options, args),
     "app/page.tsx": buildHomePageContent(options, mtime),
     "app/notes/page.tsx": buildNotesIndexContent(mtime),
+    "app/tasks/page.tsx": buildTasksPageContent(options, mtime),
     "app/blog/page.tsx": buildBlogIndexContent(mtime),
-    "app/blog/[slug]/page.tsx": buildBlogPostContent(mtime),
     "app/blog/authors/page.tsx": buildBlogAuthorsContent(mtime),
-    "app/tasks/page.tsx": buildTasksPageContent(mtime),
     "app/search/page.tsx": buildSearchPageContent(mtime),
     "app/offline/page.tsx": buildOfflinePageContent(mtime),
     "app/redirect/page.tsx": buildRedirectPageContent(mtime),
@@ -837,10 +1117,17 @@ export function buildNextRootFiles(
     files["app/docs/[[...slug]]/page.tsx"] = buildDocPageContent("docs", mtime);
   } else {
     files["app/notes/layout.tsx"] = buildDocsLayoutContent(mtime);
-    files["app/notes/[[...slug]]/page.tsx"] = buildDocPageContent(
+    files["app/notes/[...slug]/page.tsx"] = buildDocPageContent(
       "notes",
       mtime,
+      "required",
     );
+  }
+
+  // Only the post route needs a post: the index and authors pages
+  // are static routes that render their empty state.
+  if (args.hasBlogPosts) {
+    files["app/blog/[slug]/page.tsx"] = buildBlogPostContent(mtime);
   }
 
   return files;

@@ -8,6 +8,7 @@ import {
   findCategoryItems,
   findPrevNext,
   tocToHeadings,
+  topicListCards,
   topicListShouldRender,
   type SidebarLink,
 } from "../lib/content.ts";
@@ -23,11 +24,7 @@ import { Breadcrumbs } from "./Breadcrumbs.tsx";
 import { ContentPanel } from "./ContentPanel.tsx";
 import { DocFooter } from "./DocFooter.tsx";
 import { getMDXComponents } from "./mdx.tsx";
-import {
-  TopicList,
-  TopicListProvider,
-  topicListCards,
-} from "./mdx/TopicList.tsx";
+import { TopicList, TopicListProvider } from "./mdx/TopicList.tsx";
 import { PageSidebar } from "./PageSidebar.tsx";
 import { PageTitle } from "./PageTitle.tsx";
 

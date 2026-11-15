@@ -34,7 +34,7 @@ These options apply to documents in the configured notes/docs directory. Docusau
 | Field                        | Type        | Default                                | Description                                                                                                                                                                                                                      |
 | :--------------------------- | :---------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`title`**                  | `str`       | 1st heading or filename                | Document title.                                                                                                                                                                                                                  |
-| **`desc`**                   | `str`       | 1st para when available                | Summary used for page metadata, note cards & topic-list.                                                                                                                                                                       |
+| **`desc`**                   | `str`       | 1st para when available                | Summary used for page metadata, note cards & topic-list.                                                                                                                                                                         |
 | **`slug`**                   | `str`       | Generated from the file path           | Overrides the URL path.<br/>- Portosaur removes numeric ordering prefixes from generated paths.<br/>- A leading `/` makes the slug relative to the configured docs/notes route, otherwise it is relative to the containing path. |
 | **`icon`**                   | `str`       | `null`                                 | Emoji or icon identifier shown in note and topic cards.                                                                                                                                                                          |
 | **`color`**                  | `str`       | Theme/default card color               | CSS color used as the card accent, for example `#FF0000` or `rgb(0, 0, 0)`.                                                                                                                                                      |
@@ -55,7 +55,7 @@ These options apply to documents in the configured notes/docs directory. Docusau
 | Option           | Type             | Default                                                 | Description                                                                                                                |
 | :--------------- | :--------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------- |
 | **`enable`**     | `boolean`        | Automatic on category index pages when globally enabled | Enables or disables the list on this page.                                                                                 |
-| **`desc`**       | `string \| null` | Page `desc` or a fallback sentence               | Text above the cards. Set to `null` to hide the description block, or use an empty string for no visible description text. |
+| **`desc`**       | `string \| null` | Page `desc` or a fallback sentence                      | Text above the cards. Set to `null` to hide the description block, or use an empty string for no visible description text. |
 | **`class`**      | `string`         | None                                                    | Additional CSS class name(s) on the topic-card grid.                                                                       |
 | **`desc_class`** | `string`         | None                                                    | Additional CSS class name(s) on the description wrapper.                                                                   |
 
@@ -88,15 +88,15 @@ slug: first-release
 ---
 ```
 
-| Field             | Type                 | Default                                    | Description                                                                            |
-| :---------------- | :------------------- | :----------------------------------------- | :------------------------------------------------------------------------------------- |
-| **`title`**       | `string`             | Filename                                   | Post title.                                                                            |
-| **`desc`**        | `string`             | None                                       | Short post summary used in metadata and previews.                                      |
-| **`slug`**        | `string`             | Generated from the file path/date          | Overrides the post URL.                                                                |
-| **`date`**        | `date`               | Date in filename or file modification time | Publication date.                                                                      |
-| **`authors`**     | `string \| string[]` | None                                       | Author key or keys defined in the blog's authors configuration.                        |
-| **`tags`**        | `string[]`           | None                                       | Tags used to categorize the post.                                                      |
-| **`draft`**       | `boolean`            | `false`                                    | Draft posts are available during local development and omitted from production builds. |
-| **`image`**       | `string`             | None                                       | Cover image path or URL used for social sharing and previews.                          |
+| Field         | Type                 | Default                                    | Description                                                                            |
+| :------------ | :------------------- | :----------------------------------------- | :------------------------------------------------------------------------------------- |
+| **`title`**   | `string`             | Filename                                   | Post title.                                                                            |
+| **`desc`**    | `string`             | None                                       | Short post summary used in metadata and previews.                                      |
+| **`slug`**    | `string`             | Generated from the file path/date          | Overrides the post URL.                                                                |
+| **`date`**    | `date`               | Date in filename or file modification time | Publication date.                                                                      |
+| **`authors`** | `string \| string[]` | None                                       | Author key or keys defined in the blog's authors configuration.                        |
+| **`tags`**    | `string[]`           | None                                       | Tags used to categorize the post.                                                      |
+| **`draft`**   | `boolean`            | `false`                                    | Draft posts are available during local development and omitted from production builds. |
+| **`image`**   | `string`             | None                                       | Cover image path or URL used for social sharing and previews.                          |
 
 Other Docusaurus frontmatter fields may also be used. For Portosaur's `{vars.*}` variables in Markdown and MDX, see [Dynamic Variables](/docs/config/dynamic-variables/).

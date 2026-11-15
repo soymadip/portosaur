@@ -70,13 +70,27 @@ export async function postSetup({ logger, projectDir, projectName }) {
 
 The hook receives an execution context object:
 
-| Property      | Type     | Description                                                                  |
-| :------------ | :------- | :--------------------------------------------------------------------------- |
-| `logger`      | `Logger` | Instance of `@portosaur/logger` (`info`, `success`, `warn`, `error`, `tip`). |
-| `projectDir`  | `string` | Absolute path to the user's project root directory.                          |
-| `projectName` | `string` | Directory name of the project.                                               |
-| `userName`    | `string` | VCS username provided by the user.                                           |
-| `fullName`    | `string` | User's full name.                                                            |
+| Property      | Type     | Description                                                                               |
+| :------------ | :------- | :---------------------------------------------------------------------------------------- |
+| `logger`      | `Logger` | Instance of the logger from `@portosaur/cli` (`info`, `success`, `warn`, `error`, `tip`). |
+| `projectDir`  | `string` | Absolute path to the user's project root directory.                                       |
+| `projectName` | `string` | Directory name of the project.                                                            |
+| `userName`    | `string` | VCS username provided by the user.                                                        |
+| `fullName`    | `string` | User's full name.                                                                         |
+
+---
+
+## Generated Files (`.portosaur/`)
+
+`porto dev` and `porto build` generate the files that wire a project to the Next.js engine, inside the project's `.portosaur/` directory:
+
+- `next.config.mjs` — the Next.js configuration, generated from the resolved `config.yml` (static export, base path, output directory, the Fumadocs MDX plugin).
+- `source.config.ts` — the global MDX options (Portosaur's remark/rehype plugins).
+- `lib/source.ts` — the Fumadocs content collections for the docs/notes and blog directories, plus the loader.
+- `lib/config.ts` — the resolved `config.yml` as typed JSON for the app to read.
+- `app/` — thin route files (docs, notes, blog, search, tasks) that import the real pages from `@portosaur/app`.
+
+All files are regenerated on every run (and whenever `config.yml` changes during `porto dev`), so they are never hand-edited. They live outside the template tree — the scaffolding engine only creates the user-facing project files.
 
 ---
 

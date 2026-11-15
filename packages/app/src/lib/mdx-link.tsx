@@ -18,9 +18,17 @@ import { pageHref } from "./pageUrl.ts";
  * as plain anchors.
  */
 
-/** The loader surface this helper needs (a subset of `LoaderOutput`). */
+/**
+ * The loader surface this helper needs (a subset of `LoaderOutput`).
+ *
+ * `resolveHref` is declared as a METHOD, not a function-type
+ * property, deliberately: methods are bivariant, so a typed loader
+ * (whose `resolveHref` takes its specific page type) stays
+ * assignable here. Fumadocs does the same on `LoaderOutput` itself
+ * for exactly this reason.
+ */
 export interface HrefResolver {
-  resolveHref: (href: string, page: unknown) => string;
+  resolveHref(href: string, page: unknown): string;
 }
 
 type AnchorProps = ComponentProps<"a">;

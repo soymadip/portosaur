@@ -22,6 +22,7 @@ import type {
   ContentStoragePageFile,
   PageTreeTransformer,
 } from "fumadocs-core/source";
+import type * as PageTree from "fumadocs-core/page-tree";
 import type { SlugFn } from "fumadocs-core/source/plugins/slugs";
 import { pageSchema } from "fumadocs-core/source/schema";
 import {
@@ -156,8 +157,26 @@ function cleanFolderName(name: string): string {
  *   (`3 - config` → `Config`). Names from meta.json or an index page
  *   are author-chosen and left alone. The icon fallback (meta icon,
  *   else the index page's icon) is already built into the builder.
+ *   A README page is also promoted to the folder index: Fumadocs
+ *   only treats a file named `index` as an index, but Portosaur
+ *   content uses README.mdx, and the slugs function already
+ *   collapses its URL to the folder URL — so the index page is the
+ *   child page whose URL every sibling page URL starts with. The
+ *   promoted page leaves the children list, and its title becomes
+ *   the folder name when the name is still the path fallback.
+ *   Children are re-sorted into pure filename order (Fumadocs
+ *   groups pages before folders); a meta.json `pages` list keeps
+ *   its author-chosen order.
+ *
+ * The storage generic is `any` deliberately: the loader's storage
+ * type is generated per collection by the fumadocs-mdx macro (its
+ * meta files carry `locale: undefined` without i18n), so a
+ * transformer typed against the base `ContentStorage` is not
+ * assignable to any concrete loader — and a mistyped `transformers`
+ * option breaks the whole loader call's type inference (the page
+ * data falls back to the base `PageData`, losing the schema fields).
  */
-export const portoTreeTransformers: PageTreeTransformer[] = [
+export const portoTreeTransformers: PageTreeTransformer<any>[] = [
   {
     file(node, filePath) {
       if (!filePath) {
@@ -176,13 +195,76 @@ export const portoTreeTransformers: PageTreeTransformer[] = [
       }
       return node;
     },
-    folder(node, folderPath) {
+    folder(node, folderPath, metaPath) {
+      // Promote the README page to the folder index. Fumadocs only
+      // treats a file named `index` as a folder index, but Portosaur
+      // content uses README.mdx; the slugs function already
+      // collapses its URL to the folder URL, so it is the child
+      // page whose URL every sibling page URL starts with. The
+      // root folder has no index page of its own and is skipped.
+      if (!node.index && !node.root) {
+        const pages = node.children.filter(
+          (child): child is PageTree.Item => child.type === "page",
+        );
+        const index = pages.find((page) =>
+          pages.every(
+            (other) => other === page || other.url.startsWith(`${page.url}/`),
+          ),
+        );
+        if (index) {
+          node.index = index;
+          node.children = node.children.filter((child) => child !== index);
+        }
+      }
+
+      // Re-sort the children into pure filename order. Fumadocs'
+      // builder groups pages before folders (`buildRest` sorts by
+      // node type first), but Portosaur orders by filename — `1 -
+      // getting-started` before `2 - cli-reference` whether or not
+      // it is a folder. Each child carries its original content
+      // path on `$ref` (a string for pages, `{ folder }` for
+      // folders), so the sort is numeric-aware over the real
+      // filenames; separators carry no path and keep their relative
+      // order at the end. A meta.json with an explicit `pages` list
+      // is author-chosen order and is left alone.
+      const meta = metaPath ? this.storage.read(metaPath) : undefined;
+      const hasExplicitPages =
+        meta?.format === "meta" &&
+        Array.isArray((meta.data as { pages?: unknown }).pages);
+      if (!hasExplicitPages) {
+        const childPath = (child: PageTree.Node): string | undefined => {
+          if (child.type === "page") {
+            return child.$ref;
+          }
+          if (child.type === "folder") {
+            return child.$ref?.folder;
+          }
+          return undefined;
+        };
+        node.children.sort((a, b) => {
+          const aPath = childPath(a);
+          const bPath = childPath(b);
+          if (aPath === undefined && bPath === undefined) {
+            return 0;
+          }
+          if (aPath === undefined) {
+            return 1;
+          }
+          if (bPath === undefined) {
+            return -1;
+          }
+          return aPath.localeCompare(bPath, undefined, { numeric: true });
+        });
+      }
+
       // Only rewrite the path fallback: when the name is exactly
       // what the builder derived from the folder's basename, the
       // author gave it no title of their own.
       const base = folderPath.split("/").filter(Boolean).pop() ?? "";
       if (node.name === pathToName(base)) {
-        node.name = cleanFolderName(base);
+        // The index page's title wins over the folder name (it is
+        // author-chosen); otherwise strip the number prefix.
+        node.name = node.index ? node.index.name : cleanFolderName(base);
       }
       return node;
     },

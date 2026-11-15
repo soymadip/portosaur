@@ -74,13 +74,16 @@ function resolveVarPath(
 
 /**
  * @param vars - The resolved vars map from config.yml.
- * @returns The transformer. With no vars defined it returns a thunk
- *   yielding an identity transformer (the historical behavior — kept
- *   verbatim, so the return type is the inferred union, not `Plugin`).
+ * @returns The transformer. With no vars defined it returns the
+ *   identity transformer directly — NOT a thunk yielding one: unified
+ *   treats the factory's return value as the transformer, and a thunk
+ *   would run as the transformer, return a function, and unified
+ *   would replace the whole tree with that function (the next plugin
+ *   then crashes on a non-node tree).
  */
 export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
   if (!vars || Object.keys(vars).length === 0) {
-    return () => (tree: any) => tree;
+    return (tree: any) => tree;
   }
 
   // Matches {vars.key} or {vars.nested.key} in plain text / URLs

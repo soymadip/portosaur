@@ -1568,7 +1568,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   max-width: 700px;
 }
 
-.hero-title {
+.hero-text .title {
   font-size: 4.1rem;
   font-weight: 700;
   line-height: 1.05;
@@ -1582,11 +1582,11 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     forwards;
 }
 
-.hero-title:hover {
+.hero-text .title:hover {
   transform: translateY(-2px);
 }
 
-.hero-title::after {
+.hero-text .title::after {
   content: "";
   position: absolute;
   width: 0;
@@ -1597,11 +1597,11 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transition: width 0.3s ease;
 }
 
-.hero-title:hover::after {
+.hero-text .title:hover::after {
   width: 100%;
 }
 
-.hero-tagline {
+.hero-text .tagline {
   font-size: 2.34rem;
   font-weight: 600;
   line-height: 1.2;
@@ -1616,11 +1616,11 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     forwards;
 }
 
-.hero-tagline:hover {
+.hero-text .tagline:hover {
   transform: translateY(-2px);
 }
 
-.hero-description {
+.hero-text .description {
   font-size: 1.17rem;
   line-height: 1.4;
   color: var(--porto-color-gray-3);
@@ -1630,7 +1630,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     forwards;
 }
 
-.hero-actions {
+.hero-text .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -1639,7 +1639,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     forwards;
 }
 
-.hero-button {
+.hero-text .button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1654,18 +1654,18 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     transform 0.2s ease;
 }
 
-.hero-button:hover {
+.hero-text .button:hover {
   text-decoration: none;
   transform: translateY(-2px);
   box-shadow: var(--porto-shadow-md);
 }
 
-.hero-button--brand {
+.hero-text .button-brand {
   background-color: var(--porto-color-text-accent);
   color: var(--porto-color-black);
 }
 
-.hero-button--brand:hover {
+.hero-text .button-brand:hover {
   background-color: color-mix(
     in srgb,
     var(--porto-color-text-accent) 80%,
@@ -1674,7 +1674,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-black);
 }
 
-.hero-button--alt {
+.hero-text .button-alt {
   background-color: color-mix(
     in srgb,
     var(--porto-color-gray-1) 20%,
@@ -1683,7 +1683,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-text);
 }
 
-.hero-button--alt:hover {
+.hero-text .button-alt:hover {
   background-color: color-mix(
     in srgb,
     var(--porto-color-gray-1) 30%,
@@ -1698,7 +1698,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
    Nudged 1px up: the icon's optical center sits below its
    box center, so exact centering still reads low — but 2px
    read too high. */
-.hero-action-img {
+.hero-text .action-img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1779,15 +1779,15 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     margin-top: 0;
   }
 
-  .hero-title {
+  .hero-text .title {
     font-size: 2.7rem;
   }
 
-  .hero-tagline {
+  .hero-text .tagline {
     font-size: 1.7rem;
   }
 
-  .hero-description {
+  .hero-text .description {
     font-size: 1rem;
     /* Wider than the tagline: the section padding is 1rem on
        small phones, so this leaves the description 0.5rem from
@@ -1795,7 +1795,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     margin-inline: -0.5rem;
   }
 
-  .hero-actions {
+  .hero-text .actions {
     justify-content: center;
   }
 
@@ -1817,11 +1817,11 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     padding-inline: 1rem;
   }
 
-  .hero-title {
+  .hero-text .title {
     font-size: 2.6rem;
   }
 
-  .hero-tagline {
+  .hero-text .tagline {
     font-size: 1.5rem;
   }
 
@@ -1833,7 +1833,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     max-height: 160px;
   }
 
-  .hero-button {
+  .hero-text .button {
     flex: 0 0 auto;
     justify-content: center;
     gap: 0.35rem;
@@ -1842,17 +1842,17 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
     white-space: nowrap;
   }
 
-  .hero-action-img {
+  .hero-text .action-img {
     flex-shrink: 0;
   }
 }
 
 @media (max-width: 359px) {
-  .hero-actions {
+  .hero-text .actions {
     gap: 0.25rem;
   }
 
-  .hero-button {
+  .hero-text .button {
     gap: 0.25rem;
     padding: 0.55rem 0.35rem;
     font-size: 0.75rem;
@@ -2028,10 +2028,10 @@ a.feature-card:focus-visible {
 /* Entrance animations start at `opacity: 0`; users who disable
    animation must still see the content. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-title,
-  .hero-tagline,
-  .hero-description,
-  .hero-actions,
+  .hero-text .title,
+  .hero-text .tagline,
+  .hero-text .description,
+  .hero-text .actions,
   .hero-icon::before,
   .hero-icon > img,
   .feature-card {

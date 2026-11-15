@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
+import * as prettier from "prettier";
 import {
   buildSiteConfig,
   buildNextRootFiles,
@@ -37,6 +38,35 @@ const GENERATED_ROOT_FILES = [
 ];
 
 /**
+ * Formats one generated file with prettier (defaults — the repo has
+ * no prettier config, so generated files match the hand-written
+ * code's formatting). Generated files must read like human-written
+ * code: the builders emit reasonable templates, but embedded JSON
+ * and long literals only get proper line breaks from a real
+ * formatter. `tsconfig.json` carries `//` header comments, so it
+ * formats as JSONC, not JSON. On a formatting failure the file is
+ * written unformatted with a warning — a formatter quirk must not
+ * break a user's build (Next will still fail loudly on a real
+ * syntax error).
+ */
+async function formatGeneratedFile(
+  target: string,
+  content: string,
+): Promise<string> {
+  try {
+    return await prettier.format(content, {
+      filepath: target,
+      parser: target.endsWith(".json") ? "jsonc" : undefined,
+    });
+  } catch (error) {
+    logger.warn(
+      `Could not format generated file ${path.basename(target)}: ${(error as Error).message}`,
+    );
+    return content;
+  }
+}
+
+/**
  * Generates the thin Next.js project root in `.portosaur/` by resolving
  * the Portosaur config at CLI time and embedding the result as the
  * generated `lib/config.ts` module. The generated files are thin
@@ -48,6 +78,10 @@ const GENERATED_ROOT_FILES = [
  * static assets resolve from the user's directory in both dev and
  * build, with no copying step to go stale.
  *
+ * Every generated file is formatted with prettier before writing
+ * (async — prettier 3 has no sync API), so the generated root reads
+ * like hand-written code.
+ *
  * @param {string} UserRoot - The user's project directory.
  * @param {Object} portoPaths - Paths to Portosaur assets and theme.
  * @param {Object} [context={}] - Additional context for config resolution.
@@ -55,16 +89,44 @@ const GENERATED_ROOT_FILES = [
  * @param {Object} [cliOptions={}] - CLI flag overrides (`outDir`).
  * @returns {{ nextRoot: string, outDir: string }} Paths to the generated root and the resolved output dir.
  */
-export function writeNextRoot(
+/**
+ * Whether a directory holds at least one Markdown file (`.md` or
+ * `.mdx`), searching recursively. A missing directory holds none.
+ * Used to decide whether the blog routes exist at all (see
+ * `NextRootArgs.hasBlogPosts`).
+ */
+function dirHasMdxFiles(dir: string): boolean {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return false;
+  }
+
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (dirHasMdxFiles(full)) {
+        return true;
+      }
+    } else if (entry.isFile() && /\.(md|mdx)$/.test(entry.name)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function writeNextRoot(
   UserRoot: string,
   portoPaths: PortoPaths,
   context: SiteConfigContext = {},
   forceRefresh = false,
   cliOptions: NextRootCliOptions = {},
-): {
+): Promise<{
   nextRoot: string;
   outDir: string;
-} {
+}> {
   const nextRoot = getPortoDotDir(UserRoot);
 
   if (!fs.existsSync(nextRoot)) {
@@ -103,12 +165,13 @@ export function writeNextRoot(
     projectDir: UserRoot,
     outDir,
     mtime: configMtime,
+    hasBlogPosts: dirHasMdxFiles(path.join(UserRoot, options.site.blogDir)),
   });
 
   for (const [relPath, content] of Object.entries(files)) {
     const target = path.join(nextRoot, relPath);
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, content);
+    fs.writeFileSync(target, await formatGeneratedFile(target, content));
   }
 
   // Static passthrough: `.portosaur/public` links to the user's

@@ -76,7 +76,7 @@ export async function buildCommand(
   const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
-    const { nextRoot, outDir } = writeNextRoot(
+    const { nextRoot, outDir } = await writeNextRoot(
       UserRoot,
       portoPaths,
       {},
@@ -95,6 +95,20 @@ export async function buildCommand(
     await runNext("build", UserRoot, nextRoot, [], portoPaths);
 
     // ------- Post Build -------
+
+    // Remove Next's duplicate 404 artifacts. With `output: 'export'`
+    // + `trailingSlash`, the not-found route is emitted three times
+    // (byte-identical): `404.html`, `404/index.html`, and
+    // `_not-found/index.html`. Only `404.html` is part of the URL
+    // contract — static hosts serve it for missing pages, and
+    // client-side navigation to a bad URL falls back to a hard
+    // navigation that lands on it. The other two are junk URLs.
+    for (const artifact of ["404", "_not-found"]) {
+      fs.rmSync(path.join(outDir, artifact), {
+        recursive: true,
+        force: true,
+      });
+    }
 
     // Default static assets from the app package (img/icon.png,
     // img/project-blank.png, img/social-card.jpeg). Non-overwriting:

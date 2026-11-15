@@ -166,10 +166,7 @@ function computeSlug({
       finalSlug = currentRoutePath;
     } else {
       const lastDirSegment = segments[segments.length - 2];
-      finalSlug = posixResolve(
-        currentRoutePath,
-        cleanSegment(lastDirSegment),
-      );
+      finalSlug = posixResolve(currentRoutePath, cleanSegment(lastDirSegment));
     }
   } else if (userSlug) {
     if (userSlug.startsWith("/")) {
@@ -222,9 +219,7 @@ export function guessDocPermalink(
   const fileSlug =
     segments.length > 1
       ? cleanSegment(segments[0])
-      : cleanSegment(
-          posixBasename(segments[0], posixExtname(segments[0])),
-        );
+      : cleanSegment(posixBasename(segments[0], posixExtname(segments[0])));
 
   return { slug: slug.replace(/^\//, ""), fileSlug };
 }

@@ -57,7 +57,13 @@ export async function devCommand(
   const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
-    const { nextRoot } = writeNextRoot(UserRoot, portoPaths, {}, false, {});
+    const { nextRoot } = await writeNextRoot(
+      UserRoot,
+      portoPaths,
+      {},
+      false,
+      {},
+    );
 
     logResolvedSiteLocation(UserRoot, portoPaths);
 
@@ -66,12 +72,12 @@ export async function devCommand(
     // re-reads lib/config.ts on the next request either way.
     if (configYaml) {
       const configYamlPath = path.join(UserRoot, configYaml);
-      const watcher = fs.watch(configYamlPath, (eventType) => {
+      const watcher = fs.watch(configYamlPath, async (eventType) => {
         if (eventType === "change") {
           logger.info(`Detected change in ${configYaml}, reloading...`);
 
           try {
-            writeNextRoot(UserRoot, portoPaths, {}, false, {});
+            await writeNextRoot(UserRoot, portoPaths, {}, false, {});
             logResolvedSiteLocation(UserRoot, portoPaths);
           } catch (err) {
             logger.warn(
@@ -108,14 +114,14 @@ export async function devCommand(
       const coreWatcher = fs.watch(
         packagesDir,
         { recursive: true },
-        (_eventType, filename) => {
+        async (_eventType, filename) => {
           // Only trigger on .ts changes.
           // This naturally ignores .tsx and .css changes in the app,
           // preserving Next's instant Fast Refresh for components/styles!
           if (typeof filename === "string" && filename.endsWith(".ts")) {
             logger.info(`Detected backend change (${filename}), reloading...`);
             try {
-              writeNextRoot(UserRoot, portoPaths, {}, true, {}); // forceRefresh = true
+              await writeNextRoot(UserRoot, portoPaths, {}, true, {}); // forceRefresh = true
               logResolvedSiteLocation(UserRoot, portoPaths);
             } catch (err) {
               logger.warn(

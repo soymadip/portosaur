@@ -49,7 +49,7 @@ export async function serveCommand(
 
     // Regenerate the root so serve reads the current config (including
     // a --out-dir override) for the output directory to serve.
-    const { outDir } = writeNextRoot(UserRoot, portoPaths, {}, false, {
+    const { outDir } = await writeNextRoot(UserRoot, portoPaths, {}, false, {
       outDir: options.outDir,
     });
 

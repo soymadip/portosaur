@@ -2,8 +2,9 @@
 
 import type * as PageTree from "fumadocs-core/page-tree";
 import { createContext, useContext, type ReactNode } from "react";
-import { topicCardTitle } from "../../lib/content.ts";
-import { pageHref } from "../../lib/pageUrl.ts";
+import { topicListCards, type TopicListItem } from "../../lib/content.ts";
+
+export type { TopicListItem } from "../../lib/content.ts";
 
 /**
  * TopicList — explicit `<TopicList />` in MDX content.
@@ -24,11 +25,6 @@ import { pageHref } from "../../lib/pageUrl.ts";
  * Folders without an index page have no link target, so they are
  * skipped (a card linking nowhere is worse than no card).
  */
-
-export interface TopicListItem {
-  title: string;
-  href: string;
-}
 
 export interface TopicListContextValue {
   items: PageTree.Node[];
@@ -51,23 +47,6 @@ export function TopicListProvider({
       {children}
     </TopicListContext.Provider>
   );
-}
-
-function nodeToCard(node: PageTree.Node): TopicListItem | null {
-  if (node.type === "page") {
-    return { title: topicCardTitle(node), href: pageHref(node.url) };
-  }
-  if (node.type === "folder" && node.index) {
-    return { title: topicCardTitle(node), href: pageHref(node.index.url) };
-  }
-  return null;
-}
-
-/** Maps tree nodes to topic-list cards (folders without an index page are skipped). */
-export function topicListCards(nodes: PageTree.Node[]): TopicListItem[] {
-  return nodes
-    .map(nodeToCard)
-    .filter((card): card is TopicListItem => card !== null);
 }
 
 export function TopicList({

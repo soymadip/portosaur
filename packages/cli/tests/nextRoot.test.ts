@@ -7,11 +7,20 @@ import {
   buildSourceConfigContent,
   buildLibSourceContent,
   buildLibConfigContent,
+  buildLibBlogContent,
   buildTsConfigContent,
   buildRootLayoutContent,
   buildHomePageContent,
   buildDocPageContent,
+  buildNotesIndexContent,
+  buildTasksPageContent,
+  buildSearchPageContent,
+  buildOfflinePageContent,
+  buildRedirectPageContent,
+  buildNotFoundContent,
+  buildBlogIndexContent,
   buildBlogPostContent,
+  buildBlogAuthorsContent,
   buildNextRootFiles,
 } from "../src/engine/generators/nextRoot.ts";
 import type { PortosaurOptions } from "../src/engine/generators/siteConfig.ts";
@@ -37,15 +46,24 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
       ...(overrides.theme ?? {}),
     },
     siteMode: overrides.siteMode ?? "docs",
+    tasks: {
+      enable: false,
+      title: "Tasks",
+      subtitle: "My current focus",
+      list: [],
+      ...(overrides.tasks ?? {}),
+    },
     userVars: overrides.userVars ?? { project: "Test" },
   } as PortosaurOptions;
 }
 
-function args(projectDir: string) {
+function args(projectDir: string, overrides: Record<string, any> = {}) {
   return {
     projectDir,
     outDir: path.join(projectDir, "build"),
     mtime: 0,
+    hasBlogPosts: true,
+    ...overrides,
   };
 }
 
@@ -61,9 +79,10 @@ describe("buildNextConfigContent", () => {
       expect(content).toContain("trailingSlash: true");
       expect(content).toContain('transpilePackages: ["@portosaur/app"]');
       expect(content).toContain("images: { unoptimized: true }");
-      expect(content).toContain(
-        `distDir: ${JSON.stringify(path.join(projectDir, "build"))}`,
-      );
+      // distDir is relative to the generated root — an absolute path
+      // gets mangled by Next's path.join into a junk directory.
+      expect(content).toContain('distDir: "../build"');
+      expect(content).not.toContain(projectDir);
       expect(content).toContain("export default withMDX(config);");
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
@@ -98,7 +117,8 @@ describe("buildSourceConfigContent", () => {
     );
     expect(content).toContain("export default defineConfig({");
     expect(content).toContain("mdxOptions: portosaurMdxOptions({");
-    expect(content).toContain('userVars: {"project":"Test"}');
+    // userVars is pretty-printed with indent 2, like human-written code.
+    expect(content).toContain('userVars: {\n  "project": "Test"\n}');
     expect(content).toContain('colorScheme: "portosaur"');
     // The npm plugins live inside the app package — the generated file
     // must not import them (directly or via @portosaur/app/plugins/*),
@@ -212,6 +232,47 @@ describe("buildHomePageContent", () => {
     expect(content).not.toContain("DocsHomePage");
     expect(content).toContain("{config.site.title}");
   });
+
+  test("titles the home Home in docs mode, Me in portfolio mode (OG rule)", () => {
+    // Absolute, with the site title baked in: the root layout's
+    // template never applies to the root page itself (Next quirk —
+    // see the builder's doc comment).
+    expect(buildHomePageContent(options(), 0)).toContain(
+      'title: { absolute: "Home | Test Site" }',
+    );
+    expect(
+      buildHomePageContent(options({ siteMode: "portfolio" }), 0),
+    ).toContain('title: { absolute: "Me | Test Site" }');
+  });
+});
+
+describe("static page metadata", () => {
+  test("tasks title follows the tasks toggle", () => {
+    // Disabled (the fixture default) — the disabled page's title.
+    expect(buildTasksPageContent(options(), 0)).toContain(
+      'title: "Tasks are Disabled"',
+    );
+    // Enabled — the configured tasks title.
+    const enabled = buildTasksPageContent(
+      options({ tasks: { enable: true, title: "Tasks" } }),
+      0,
+    );
+    expect(enabled).toContain('title: "Tasks"');
+  });
+
+  test("search title is absolute (no | {site title} suffix)", () => {
+    expect(buildSearchPageContent(0)).toContain(
+      'title: { absolute: "Search the documentation" }',
+    );
+  });
+
+  test("offline, redirect, and not-found carry their OG titles", () => {
+    expect(buildOfflinePageContent(0)).toContain(`title: "You're Offline"`);
+    expect(buildRedirectPageContent(0)).toContain(
+      'title: "Opening in browser…"',
+    );
+    expect(buildNotFoundContent(0)).toContain('title: "Page Not Found"');
+  });
 });
 
 describe("buildDocPageContent", () => {
@@ -221,7 +282,17 @@ describe("buildDocPageContent", () => {
       'import { DocPage } from "@portosaur/app/components/doc-page"',
     );
     expect(content).toContain('PageProps<"/docs/[[...slug]]">');
-    expect(content).toContain("<DocPage config={config} page={page} />");
+    // The route passes the page tree (breadcrumbs/prev-next), the
+    // edit URL, and the relative-link `a` override — all part of
+    // DocPage's props contract.
+    expect(content).toContain("tree={source.getPageTree()}");
+    expect(content).toContain("editUrl={editUrl}");
+    expect(content).toContain(
+      "components={{ a: createRelativeLink(source, page) }}",
+    );
+    expect(content).toContain(
+      'import { createRelativeLink } from "@portosaur/app/lib/mdx-link"',
+    );
     expect(content).toContain("return source.generateParams();");
     // Metadata title is frontmatter ?? content H1 ?? file-base fallback
     // — never a bare page.data.title, which is undefined for title-less
@@ -238,6 +309,17 @@ describe("buildDocPageContent", () => {
     expect(content).not.toContain("title: page.data.title");
     expect(content).toContain("description: page.data.desc");
   });
+
+  test("required catch-all uses [...slug] and drops the empty root slug", () => {
+    const content = buildDocPageContent("notes", 0, "required");
+    expect(content).toContain('PageProps<"/notes/[...slug]">');
+    expect(content).not.toContain("[[...slug]]");
+    // The notes index owns /notes/, so the detail route must not
+    // generate the empty root slug.
+    expect(content).toContain(
+      "return source.generateParams().filter((p) => p.slug.length > 0);",
+    );
+  });
 });
 
 describe("buildBlogPostContent", () => {
@@ -247,6 +329,19 @@ describe("buildBlogPostContent", () => {
       'import { BlogPostPage } from "@portosaur/app/components/blog-post-page"',
     );
     expect(content).toContain('PageProps<"/blog/[slug]">');
+    // The route passes the post (renamed prop), the sidebar list,
+    // the newer/older neighbors, the authors, and the relative-link
+    // `a` override — all part of BlogPostPage's props contract.
+    expect(content).toContain(
+      "post={{ ...page, date: page.data.date ?? null }}",
+    );
+    expect(content).toContain("sidebarPosts={getBlogSidebarPosts()}");
+    expect(content).toContain("newer={newer}");
+    expect(content).toContain("older={older}");
+    expect(content).toContain("authors={getBlogAuthors()}");
+    expect(content).toContain(
+      "components={{ a: createRelativeLink(blogSource, page) }}",
+    );
     expect(content).toContain("docPageTitles(");
     expect(content).toContain("docFileTitle(page.path)");
     expect(content).toContain("title: metaTitle");
@@ -259,6 +354,59 @@ describe("buildBlogPostContent", () => {
   });
 });
 
+describe("buildNotesIndexContent", () => {
+  test("maps loader pages to note cards (top-level only, filename order)", () => {
+    const content = buildNotesIndexContent(0);
+    expect(content).toContain("NotesIndexPage,");
+    expect(content).toContain("type NoteCardPage,");
+    expect(content).toContain(
+      '} from "@portosaur/app/components/notes-index-page"',
+    );
+    expect(content).toContain(".filter((page) => page.slugs.length === 1)");
+    expect(content).toContain("const pages: NoteCardPage[] = source");
+    expect(content).toContain("docPageTitles(");
+    expect(content).toContain(
+      "title: route.charAt(0).toUpperCase() + route.slice(1)",
+    );
+  });
+});
+
+describe("buildLibBlogContent", () => {
+  test("exports the shared blog helpers (authors, posts, sidebar, counts)", () => {
+    const content = buildLibBlogContent(0);
+    expect(content).toContain("export function getBlogAuthors()");
+    expect(content).toContain("export function getBlogPosts()");
+    expect(content).toContain("export function getSortedBlogPosts()");
+    expect(content).toContain("export function getBlogSidebarPosts()");
+    expect(content).toContain("export function getBlogAuthorsWithCounts()");
+    expect(content).toContain(
+      'import { loadBlogAuthors } from "@portosaur/app/lib/blog-server"',
+    );
+    expect(content).toContain(
+      'path.join(config.projectDir, config.site.blogDir, "authors.yml")',
+    );
+  });
+});
+
+describe("buildBlogIndexContent", () => {
+  test("passes mapped posts + authors (not raw loader pages)", () => {
+    const content = buildBlogIndexContent(0);
+    expect(content).toContain("posts={getBlogPosts()}");
+    expect(content).toContain("authors={getBlogAuthors()}");
+    expect(content).not.toContain("pages={blogSource.getPages()}");
+    expect(content).toContain('return { title: "Blog" };');
+  });
+});
+
+describe("buildBlogAuthorsContent", () => {
+  test("passes authors with counts", () => {
+    const content = buildBlogAuthorsContent(0);
+    expect(content).toContain("authors={getBlogAuthorsWithCounts()}");
+    expect(content).not.toContain("pages={blogSource.getPages()}");
+    expect(content).toContain('return { title: "Authors" };');
+  });
+});
+
 describe("buildNextRootFiles", () => {
   test("docs mode generates docs routes and skips notes detail routes", () => {
     const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
@@ -266,7 +414,7 @@ describe("buildNextRootFiles", () => {
       const files = buildNextRootFiles(options(), args(projectDir));
       expect(files["app/docs/[[...slug]]/page.tsx"]).toBeDefined();
       expect(files["app/docs/layout.tsx"]).toBeDefined();
-      expect(files["app/notes/[[...slug]]/page.tsx"]).toBeUndefined();
+      expect(files["app/notes/[...slug]/page.tsx"]).toBeUndefined();
       expect(files["app/notes/layout.tsx"]).toBeUndefined();
       // The notes index exists in both modes.
       expect(files["app/notes/page.tsx"]).toBeDefined();
@@ -285,7 +433,7 @@ describe("buildNextRootFiles", () => {
         }),
         args(projectDir),
       );
-      expect(files["app/notes/[[...slug]]/page.tsx"]).toBeDefined();
+      expect(files["app/notes/[...slug]/page.tsx"]).toBeDefined();
       expect(files["app/notes/layout.tsx"]).toBeDefined();
       expect(files["app/docs/[[...slug]]/page.tsx"]).toBeUndefined();
       expect(files["app/docs/layout.tsx"]).toBeUndefined();
@@ -307,6 +455,7 @@ describe("buildNextRootFiles", () => {
           "source.config.ts",
           "lib/source.ts",
           "lib/config.ts",
+          "lib/blog.ts",
           "postcss.config.mjs",
           "tsconfig.json",
           "next-env.d.ts",
@@ -331,6 +480,32 @@ describe("buildNextRootFiles", () => {
           expect(files[rel], `${mode}: ${rel}`).toBeDefined();
         }
       }
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("only the blog post route needs a post", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
+    try {
+      const withPosts = buildNextRootFiles(options(), args(projectDir));
+      expect(withPosts["app/blog/page.tsx"]).toBeDefined();
+      expect(withPosts["app/blog/[slug]/page.tsx"]).toBeDefined();
+      expect(withPosts["app/blog/authors/page.tsx"]).toBeDefined();
+
+      // A post-less blog keeps its index and authors pages — they
+      // are static routes that render their empty state. Only the
+      // dynamic post route is skipped: under output "export" a
+      // route with zero generateStaticParams fails the build.
+      const withoutPosts = buildNextRootFiles(
+        options(),
+        args(projectDir, { hasBlogPosts: false }),
+      );
+      expect(withoutPosts["app/blog/page.tsx"]).toBeDefined();
+      expect(withoutPosts["app/blog/authors/page.tsx"]).toBeDefined();
+      expect(withoutPosts["app/blog/[slug]/page.tsx"]).toBeUndefined();
+      // The shared blog helpers still exist — only the route is gated.
+      expect(withoutPosts["lib/blog.ts"]).toBeDefined();
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }

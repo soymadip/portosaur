@@ -213,4 +213,150 @@ describe("portoTreeTransformers", () => {
     const out = transformer.folder!.call({} as any, node, "3 - config") as any;
     expect(out.name).toBe("Configuration Guide");
   });
+
+  test("folder: promotes the README page to the folder index", () => {
+    // Fumadocs only treats `index` as an index page; the README's
+    // URL is already the folder URL, so it is the child page whose
+    // URL every sibling page URL starts with.
+    const readme: any = {
+      type: "page",
+      name: "Getting Started",
+      url: "/docs/getting-started",
+    };
+    const node: any = {
+      type: "folder",
+      name: "1   getting started",
+      children: [
+        readme,
+        {
+          type: "page",
+          name: "Installation",
+          url: "/docs/getting-started/installation",
+        },
+        {
+          type: "page",
+          name: "Project Structure",
+          url: "/docs/getting-started/project-structure",
+        },
+      ],
+    };
+    const out = transformer.folder!.call(
+      {} as any,
+      node,
+      "1 - getting-started",
+    ) as any;
+    expect(out.index).toBe(readme);
+    expect(out.children).not.toContain(readme);
+    expect(out.children).toHaveLength(2);
+    // The index page's title wins over the folder name.
+    expect(out.name).toBe("Getting Started");
+  });
+
+  test("folder: does not promote when no child is the folder page", () => {
+    const node: any = {
+      type: "folder",
+      name: "1   getting started",
+      children: [
+        {
+          type: "page",
+          name: "Installation",
+          url: "/docs/getting-started/installation",
+        },
+        {
+          type: "page",
+          name: "Project Structure",
+          url: "/docs/getting-started/project-structure",
+        },
+      ],
+    };
+    const out = transformer.folder!.call(
+      {} as any,
+      node,
+      "1 - getting-started",
+    ) as any;
+    expect(out.index).toBeUndefined();
+    expect(out.children).toHaveLength(2);
+    expect(out.name).toBe("Getting started");
+  });
+
+  test("folder: sorts children into filename order, folders interleaved", () => {
+    // Fumadocs' builder groups pages before folders; Portosaur
+    // orders by filename — the root's sections read 1 -, 2 -, 3 -,
+    // 10 - in the sidebar and on the docs index alike. The sort is
+    // numeric-aware: "10 - pwa" comes after "3 - config".
+    const node: any = {
+      type: "folder",
+      root: true,
+      name: "Docs",
+      children: [
+        {
+          type: "page",
+          name: "CLI Reference",
+          url: "/docs/cli-reference",
+          $ref: "2 - cli-reference.mdx",
+        },
+        {
+          type: "page",
+          name: "PWA",
+          url: "/docs/pwa",
+          $ref: "10 - pwa.mdx",
+        },
+        {
+          type: "folder",
+          name: "1   getting started",
+          children: [],
+          $ref: { folder: "1 - getting-started" },
+        },
+        {
+          type: "folder",
+          name: "3   config",
+          children: [],
+          $ref: { folder: "3 - config" },
+        },
+      ],
+    };
+    const out = transformer.folder!.call({} as any, node, "") as any;
+    expect(out.children.map((child: any) => child.name)).toEqual([
+      "1   getting started",
+      "CLI Reference",
+      "3   config",
+      "PWA",
+    ]);
+  });
+
+  test("folder: leaves a meta.json pages order alone", () => {
+    // An explicit `pages` list is author-chosen order — the
+    // filename sort must not rewrite it.
+    const ctx = fileContext({
+      "meta.json": {
+        format: "meta",
+        data: { pages: ["b-page", "a-page"] },
+      },
+    });
+    const node: any = {
+      type: "folder",
+      name: "Guide",
+      children: [
+        {
+          type: "page",
+          name: "B",
+          url: "/docs/b",
+          $ref: "b-page.mdx",
+        },
+        {
+          type: "page",
+          name: "A",
+          url: "/docs/a",
+          $ref: "a-page.mdx",
+        },
+      ],
+    };
+    const out = transformer.folder!.call(
+      ctx,
+      node,
+      "guide",
+      "meta.json",
+    ) as any;
+    expect(out.children.map((child: any) => child.name)).toEqual(["B", "A"]);
+  });
 });

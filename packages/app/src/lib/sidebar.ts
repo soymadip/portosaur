@@ -49,7 +49,10 @@ export interface PreparedSidebar {
 }
 
 /** The icon value of a tree node (a string in practice). */
-function nodeIcon(node: PageTree.Node): string | undefined {
+function nodeIcon(node: PageTree.Node | undefined): string | undefined {
+  if (!node) {
+    return undefined;
+  }
   return typeof node.icon === "string" ? node.icon : undefined;
 }
 
@@ -76,7 +79,7 @@ function toSpriteItems(nodes: PageTree.Node[]): SidebarSpriteItem[] {
       continue;
     }
     items.push({
-      icon: nodeIcon(node) ?? nodeIcon(node.index as PageTree.Node),
+      icon: nodeIcon(node) ?? nodeIcon(node.index),
       label: nodeName(node),
       type: "category",
       items: toSpriteItems(node.children),
@@ -118,7 +121,7 @@ function toSidebarItem(
     label: nodeName(node),
     href: node.index?.url,
     iconHtml: renderSidebarIcon(
-      nodeIcon(node) ?? nodeIcon(node.index as PageTree.Node),
+      nodeIcon(node) ?? nodeIcon(node.index),
       { slug: nodeName(node), fallbackIcon: "md:folder" },
       spriteIds,
     ),

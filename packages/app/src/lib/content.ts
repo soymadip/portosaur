@@ -12,6 +12,8 @@
 
 import type { TOCItemType } from "fumadocs-core/toc";
 import type * as PageTree from "fumadocs-core/page-tree";
+import type { ReactNode } from "react";
+import { pageHref } from "./pageUrl.ts";
 
 /** One `{ title, href }` breadcrumb / prev-next link. */
 export interface SidebarLink {
@@ -221,6 +223,36 @@ export function topicCardTitle(node: PageTree.Node): string {
   return `${prefix}${nodeName(node)}`;
 }
 
+/** One topic-list card: a title and the page it links to. */
+export interface TopicListItem {
+  title: string;
+  href: string;
+}
+
+function nodeToCard(node: PageTree.Node): TopicListItem | null {
+  if (node.type === "page") {
+    return { title: topicCardTitle(node), href: pageHref(node.url) };
+  }
+  if (node.type === "folder" && node.index) {
+    return { title: topicCardTitle(node), href: pageHref(node.index.url) };
+  }
+  return null;
+}
+
+/**
+ * Maps tree nodes to topic-list cards (folders without an index
+ * page are skipped — a card linking nowhere is worse than no
+ * card). Lives here, not in the `TopicList` component file, so
+ * server components can call it: the component file is a client
+ * module (`"use client"` for its context), and server code cannot
+ * call functions from a client module.
+ */
+export function topicListCards(nodes: PageTree.Node[]): TopicListItem[] {
+  return nodes
+    .map(nodeToCard)
+    .filter((card): card is TopicListItem => card !== null);
+}
+
 /* Doc-page title rules (`docPageTitles`, `docFileTitle`,
  * `humanizeName`, `pageTitle`, `PAGE_TITLE_ID`) live in
  * `lib/docPage.ts` (coordinator-owned) — the single source of truth
@@ -243,10 +275,38 @@ export interface TocItem {
 }
 
 /**
+ * Extracts plain text from a TOC title. Fumadocs' `TOCItemType.title`
+ * is a `ReactNode`, and rehypeToc always emits it as a JSX element
+ * (a fragment wrapping the heading's children) — never a bare string.
+ * A naive `typeof title === "string"` check drops every heading, so
+ * the TOC renders empty. This walks the node tree (strings, numbers,
+ * arrays, elements' children) and concatenates the text parts.
+ */
+function tocTitleText(title: ReactNode): string {
+  if (typeof title === "string" || typeof title === "number") {
+    return String(title);
+  }
+  if (Array.isArray(title)) {
+    return title.map(tocTitleText).join("");
+  }
+  if (
+    title &&
+    typeof title === "object" &&
+    "props" in title &&
+    title.props &&
+    typeof title.props === "object" &&
+    "children" in title.props
+  ) {
+    return tocTitleText((title.props as { children?: ReactNode }).children);
+  }
+  return "";
+}
+
+/**
  * Converts Fumadocs TOC items to flat headings: the URL fragment
- * becomes the slug, the title (a string in practice) becomes the
- * text. H1s are dropped — the hoisted H1 is gone from the TOC by
- * the time the page renders, and a stray H1 must not enter the list.
+ * becomes the slug, the title's text becomes the text. H1s are
+ * dropped — the hoisted H1 is gone from the TOC by the time the
+ * page renders, and a stray H1 must not enter the list.
  */
 export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
   const headings: TocHeading[] = [];
@@ -257,7 +317,7 @@ export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
     const hashIndex = item.url.indexOf("#");
     const slug =
       hashIndex === -1 ? "" : decodeURIComponent(item.url.slice(hashIndex + 1));
-    const text = typeof item.title === "string" ? item.title : "";
+    const text = tocTitleText(item.title);
     if (slug && text) {
       headings.push({ depth: item.depth, slug, text });
     }
