@@ -22,48 +22,38 @@ export interface LevelFn {
   box(msg: string, options?: BoxOptions): void;
 }
 
-// ================= Astro-style Formatting ====================
+// ================= Next.js-style Prefixes ====================
 
-// The label shown in brackets on every log line, matching the app
-// integration's `[@portosaur/app]` label.
-export const LABEL = "@portosaur/cli";
-
-// Same timestamp format as Astro's logger: 24-hour HH:MM:SS in the
-// system locale (astro/dist/core/logger/core.js).
-const dateTimeFormat = new Intl.DateTimeFormat([], {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-});
+// The per-level prefixes, matching Next.js 16's own logger
+// (`next/dist/build/output/log.js`): a single symbol, no
+// timestamp, no label. Portosaur's lines blend into the `next
+// build` / `next dev` output around them instead of looking like
+// a different tool's log.
+//
+//   info    — bold white ' ' (renders as a 2-space indent)
+//   success — bold green '✓' (Next's `event`)
+//   warn    — bold yellow '⚠'
+//   error   — bold red '⨯'
+//   debug   — bold magenta '»' (Next's `trace`)
+const LEVEL_PREFIXES: Record<string, () => string> = {
+  info: () => chalk.white.bold(" "),
+  success: () => chalk.green.bold("✓"),
+  warn: () => chalk.yellow.bold("⚠"),
+  error: () => chalk.red.bold("⨯"),
+  debug: () => chalk.magenta.bold("»"),
+};
 
 /**
- * Build the prefix for a log line, mirroring Astro's `getEventPrefix`:
- * a dim timestamp and blue label for info-style levels, and a bold
- * timestamp plus level tag, all yellow or red, for warn and error.
+ * Build the prefix for a log line: the level's symbol, colored
+ * the way Next.js colors it. Unknown levels fall back to the
+ * info prefix.
  *
  * @param {string} level - The level (info, success, warn, error, debug, tip, note).
  * @returns {string} The colored prefix, without trailing space.
  */
-export function getEventPrefix(level: string): string {
-  const timestamp = dateTimeFormat.format(new Date());
-  const prefix = [];
-
-  if (level === "error" || level === "warn") {
-    prefix.push(chalk.bold(timestamp));
-    prefix.push(`[${level.toUpperCase()}]`);
-  } else {
-    prefix.push(timestamp);
-  }
-  prefix.push(`[${LABEL}]`);
-
-  if (level === "error") {
-    return chalk.red(prefix.join(" "));
-  }
-  if (level === "warn") {
-    return chalk.yellow(prefix.join(" "));
-  }
-  return chalk.dim(prefix[0]) + " " + chalk.blue(prefix.slice(1).join(" "));
+export function getLevelPrefix(level: string): string {
+  const prefix = LEVEL_PREFIXES[level] ?? LEVEL_PREFIXES.info;
+  return prefix();
 }
 
 // ================= Routing & Logging ====================
@@ -81,9 +71,10 @@ function stringify(msg: unknown): string {
 export const IS_CI = !!process.env.CI;
 
 /**
- * Write a message at the given level in Astro's format:
- * `HH:MM:SS [@portosaur/cli] message`. Errors go to stderr, everything
- * else to stdout — matching Astro's console destination.
+ * Write a message at the given level in Next.js's format:
+ * `<symbol> message` (one space after the symbol, matching
+ * Next's `prefixedLog`). Errors go to stderr, everything else
+ * to stdout.
  *
  * @param {unknown} msg - The message to log.
  * @param {string} level - The level (info, success, warn, error, debug).
@@ -104,7 +95,7 @@ function log(msg: unknown, level: string, messagePrefix = ""): void {
     return;
   }
 
-  const formatted = `${getEventPrefix(level)} ${messagePrefix}${body}`;
+  const formatted = `${getLevelPrefix(level)} ${messagePrefix}${body}`;
   if (level === "error") {
     console.error(formatted);
   } else {
@@ -157,7 +148,7 @@ function makeBox(
 // ================= Level Factories ====================
 
 /**
- * Standard level — an Astro-style log line.
+ * Standard level — a Next.js-style log line.
  * @param {string} level
  * @param {{ gated?: boolean }} options - gated: only log when DEBUG/VERBOSE is set
  */
@@ -176,7 +167,7 @@ export function createLevel(
 }
 
 /**
- * Custom level — an Astro-style log line with a colored `Tip:`/`Note:`
+ * Custom level — a Next.js-style log line with a colored `Tip:`/`Note:`
  * lead-in before the message.
  * @param {string} level
  * @param {Function} colorFn - chalk color function for the lead-in

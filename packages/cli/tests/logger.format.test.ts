@@ -1,30 +1,40 @@
 import { expect, test, describe } from "bun:test";
-import { getEventPrefix, LABEL } from "../src/logger/lib/helpers.ts";
+import { getLevelPrefix } from "../src/logger/lib/helpers.ts";
 
 const stripAnsi = (s: string) => (s || "").replace(/\x1b\[[0-9;]*m/g, "");
 
 describe("logger formatting", () => {
-  test("info prefix is a timestamp plus the CLI label", () => {
-    const raw = stripAnsi(getEventPrefix("info"));
-    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[@portosaur\/cli\]$/);
+  test("info prefix is a single space (Next.js info: renders indented)", () => {
+    expect(stripAnsi(getLevelPrefix("info"))).toBe(" ");
   });
 
-  test("success renders like info (Astro has no success level)", () => {
-    const raw = stripAnsi(getEventPrefix("success"));
-    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[@portosaur\/cli\]$/);
+  test("success prefix is a green check (Next.js event)", () => {
+    expect(stripAnsi(getLevelPrefix("success"))).toBe("✓");
   });
 
-  test("warn prefix carries a [WARN] tag", () => {
-    const raw = stripAnsi(getEventPrefix("warn"));
-    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[WARN\] \[@portosaur\/cli\]$/);
+  test("warn prefix is a warning sign, with no [WARN] tag", () => {
+    expect(stripAnsi(getLevelPrefix("warn"))).toBe("⚠");
   });
 
-  test("error prefix carries an [ERROR] tag", () => {
-    const raw = stripAnsi(getEventPrefix("error"));
-    expect(raw).toMatch(/^\d{2}:\d{2}:\d{2} \[ERROR\] \[@portosaur\/cli\]$/);
+  test("error prefix is a cross, with no [ERROR] tag", () => {
+    expect(stripAnsi(getLevelPrefix("error"))).toBe("⨯");
   });
 
-  test("label matches the theme integration's package naming", () => {
-    expect(LABEL).toBe("@portosaur/cli");
+  test("debug prefix is a chevron (Next.js trace)", () => {
+    expect(stripAnsi(getLevelPrefix("debug"))).toBe("»");
+  });
+
+  test("unknown levels fall back to the info prefix", () => {
+    expect(stripAnsi(getLevelPrefix("tip"))).toBe(" ");
+    expect(stripAnsi(getLevelPrefix("bogus"))).toBe(" ");
+  });
+
+  test("no prefix carries a timestamp or a package label", () => {
+    for (const level of ["info", "success", "warn", "error", "debug"]) {
+      const raw = stripAnsi(getLevelPrefix(level));
+      expect(raw).not.toMatch(/\d{2}:\d{2}:\d{2}/);
+      expect(raw).not.toContain("@portosaur");
+      expect(raw).not.toContain("[");
+    }
   });
 });

@@ -6,7 +6,7 @@ export type { Colors, ColorFn } from "./lib/colors.ts";
 export type { BoxOptions, LevelFn } from "./lib/helpers.ts";
 
 export interface Logger {
-  // Standard levels — Astro-style output (timestamp + [@portosaur/cli] label)
+  // Standard levels — Next.js-style output (one symbol, no timestamp, no label)
   info: LevelFn;
   success: LevelFn;
   warn: LevelFn;
@@ -15,7 +15,7 @@ export interface Logger {
   // Gated — only logs when DEBUG or VERBOSE env var is set
   debug: LevelFn;
 
-  // Custom levels — Astro-style lines with a colored `Tip:`/`Note:` lead-in
+  // Custom levels — Next.js-style lines with a colored `Tip:`/`Note:` lead-in
   tip: LevelFn;
   note: LevelFn;
 
@@ -35,11 +35,13 @@ export interface Logger {
 
 /*
  * Portosaur Logger
- * Astro-style log lines (timestamp + [@portosaur/cli] label) with
- * consola boxes and additional helpers.
+ * Next.js-style log lines (one symbol per level, no timestamp, no
+ * label) with consola boxes and additional helpers. The symbols
+ * match Next.js 16's own logger so Portosaur's lines blend into
+ * the `next build` / `next dev` output around them.
  */
 export const logger: Logger = {
-  // Standard levels — Astro-style `HH:MM:SS [@portosaur/cli] message` lines
+  // Standard levels — Next.js-style `<symbol> message` lines
   info: createLevel("info"),
   success: createLevel("success"),
   warn: createLevel("warn"),
@@ -48,7 +50,7 @@ export const logger: Logger = {
   // Gated — only logs when DEBUG or VERBOSE env var is set
   debug: createLevel("debug", { gated: true }),
 
-  // Custom levels — Astro-style lines with a colored `Tip:`/`Note:` lead-in
+  // Custom levels — Next.js-style lines with a colored `Tip:`/`Note:` lead-in
   tip: createCustomLevel("tip", colors.tip),
   note: createCustomLevel("note", colors.muted),
 
