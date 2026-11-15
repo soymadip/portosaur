@@ -16,7 +16,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p packages/app",
-    "schema": "bun packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json",
+    "schema": "bun packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json && bun x prettier --write packages/cli/config-schema.json",
+    "playground": "bun src/playground.mjs",
+    "build": "bun run playground build",
+    "dev": "bun run playground dev",
+    "dev:docs": "bun run --cwd docs dev",
     "test:all": "bun run tests/run-all.ts",
     "test:smoke": "bun run tests/smoke/smoke-test.ts"
   },

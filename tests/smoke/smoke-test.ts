@@ -76,15 +76,17 @@ try {
   // which is not a valid package name — strip the leading dots.
   pkgJson.name = dir.replace(/^\.+/, "");
 
-  // Point the Portosaur deps at this checkout via `file:` paths. The
-  // site is not a workspace member (the root workspaces glob is
-  // `packages/*`), so `workspace:*` would not resolve here.
+  // Wire the site to this checkout as a workspace: the site declares
+  // the checkout's packages as its workspaces and depends on them via
+  // `workspace:*`. This is what makes `@portosaur/cli`'s own
+  // `@portosaur/wizard: workspace:*` dependency resolve — `file:` paths
+  // alone cannot satisfy it, because `workspace:*` only resolves
+  // against a workspace root.
+  pkgJson.workspaces = ["../packages/*"];
   if (pkgJson.dependencies) {
     for (const dep of Object.keys(pkgJson.dependencies)) {
       if (dep.startsWith("@portosaur/")) {
-        const pkgName = dep.slice("@portosaur/".length);
-        pkgJson.dependencies[dep] =
-          `file:${path.join(REPO_ROOT, "packages", pkgName)}`;
+        pkgJson.dependencies[dep] = "workspace:*";
       }
     }
   }

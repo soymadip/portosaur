@@ -1,0 +1,59 @@
+name: Verify Codebase
+run-name: verify changes
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache Bun dependencies and Next.js build cache
+        uses: actions/cache@v5
+        with:
+          path: |-
+            ~/.bun/install/cache
+            docs/.portosaur/.next/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "ci@portosaur.org"
+          git config --global user.name "Portosaur CI"
+
+      - name: Verify Code Formatting
+        run: bun run format:check
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Run Unit Tests
+        run: bun run test:all
+
+      - name: Build documentation
+        run: bun run --cwd docs build
+
+      - name: Verify docs URLs against golden snapshot
+        run: bun tests/url-snapshot.ts --docs-only
+
+      - name: Validate generated config schema
+        run: bun run packages/cli/bin/porto.ts schema -o "$RUNNER_TEMP/config-schema.json"

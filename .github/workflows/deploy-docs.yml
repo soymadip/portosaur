@@ -1,0 +1,89 @@
+name: Deploy Documentation
+run-name: Deploy Documentation Version ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-docs.yml"
+      - "docs/**"
+      - "packages/app/**"
+      - "packages/cli/**"
+      - "package.json"
+      - "bun.lock"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  DOCS_DIR: docs
+  DOCS_OUT_DIR: docs/build
+  CLI_DIR: packages/cli
+
+jobs:
+  deploy:
+    concurrency:
+      group: docs
+      cancel-in-progress: true
+
+    environment:
+      name: documentation
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    name: Deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Cache dependencies and builds
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            ${{ env.DOCS_DIR }}/.portosaur/.next/cache
+          key: ${{ runner.os }}-docs-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate CLI Config Schema
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o packages/cli/config-schema.json
+
+      - name: Compile Site
+        run: bun run --cwd ${{ env.DOCS_DIR }} build
+
+      - name: Generate Published Config Schema
+        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o ${{ env.DOCS_OUT_DIR }}/config-schema.json
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ env.DOCS_OUT_DIR }}
+          include-hidden-files: true
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
