@@ -889,7 +889,9 @@ body:has(#porto__sidebar:popover-open)
 .porto-sidebar__top-level > li > details[open] > ul > li,
 .porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
   margin-inline-start: calc(var(--porto-sidebar-item-padding-inline) + 0.3rem);
-  padding-inline-start: calc(var(--porto-sidebar-item-padding-inline) - 0.36rem);
+  padding-inline-start: calc(
+    var(--porto-sidebar-item-padding-inline) - 0.36rem
+  );
 }
 .porto-sidebar details[open] > ul {
   padding-block-start: 0.25rem;

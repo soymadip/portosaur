@@ -133,7 +133,11 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
       }
     };
     walkSiblings(items);
-    return { categoryIndex: map, categorySiblings: siblings, categoryList: list };
+    return {
+      categoryIndex: map,
+      categorySiblings: siblings,
+      categoryList: list,
+    };
   }, [items]);
 
   const categoryCount = categoryIndex.size;
