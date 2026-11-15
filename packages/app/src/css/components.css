@@ -1412,7 +1412,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 .porto-mobile-toc__toggle svg {
   width: 1rem;
   height: 1rem;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 [dir="rtl"] .porto-mobile-toc__toggle svg {
   transform: rotateZ(180deg);
@@ -1749,7 +1749,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   line-height: 1.05;
   margin-bottom: 0;
   color: var(--porto-color-text-accent);
-  transition: all 0.3s ease;
+  transition: transform 200ms ease;
   position: relative;
   display: inline-block;
   opacity: 0;
@@ -1769,7 +1769,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   bottom: -2px;
   left: 0;
   background-color: var(--porto-color-text-accent);
-  transition: width 0.3s ease;
+  transition: width 200ms ease;
 }
 
 .hero-text .title:hover::after {
@@ -1783,7 +1783,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-white);
   margin-top: 0.25rem;
   margin-bottom: 1rem;
-  transition: all 0.3s ease;
+  transition: transform 200ms ease;
   position: relative;
   display: inline-block;
   opacity: 0;
@@ -1823,11 +1823,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   font-weight: 600;
   border-radius: 999px;
   text-decoration: none;
+  /* Fumadocs buttons fade in 100ms (`duration-100`). */
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    background-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero-text .button:hover {
@@ -2292,7 +2293,14 @@ a.feature-card:focus-visible {
   color: var(--porto-color-text);
   text-decoration: none;
   box-shadow: var(--porto-shadow-sm);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The hover lifts the card and tints its border; on touch the tap
+     presses it via `scale` instead. All four properties listed so
+     nothing else animates by accident. */
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
   animation: porto-note-fade-in 0.5s ease-out forwards;
   animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
   opacity: 0;
@@ -2337,7 +2345,7 @@ a.feature-card:focus-visible {
   padding: 0.2rem;
   font-size: 3.5rem;
   color: var(--note-color);
-  transition: scale 0.3s ease;
+  transition: scale 200ms ease;
 }
 .porto-note-grid .noteCard:hover .noteIcon {
   scale: 1.2;
@@ -3065,7 +3073,10 @@ a.porto-blog-article-author-name:hover {
   font-size: 1rem;
   line-height: var(--porto-line-height);
   color: var(--porto-color-text);
-  transition: all 0.2s ease;
+  /* 150ms, like the other rows. */
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tasks-tab:hover {
   background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
@@ -3218,7 +3229,8 @@ a.porto-blog-article-author-name:hover {
   grid-template-columns: 120px 1fr 120px;
   border-bottom: 1px solid var(--porto-color-hairline-light);
   background: var(--porto-color-black);
-  transition: all 0.15s ease;
+  /* 150ms, like the other rows. */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tasks-row:last-child {
   border-bottom: 0;
@@ -3536,11 +3548,12 @@ a.porto-blog-article-author-name:hover {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  /* Fumadocs buttons fade in 100ms (`duration-100`). */
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    background-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-btn:hover {
   text-decoration: none;
@@ -3959,7 +3972,19 @@ a.porto-pv:hover {
   .porto-mdx-dropdown__chevron,
   .porto-mdx-dropdown__item,
   .porto-icon-search__result,
-  .porto-code-copy {
+  .porto-code-copy,
+  .porto-btn,
+  .hero-text .button,
+  .hero-text .title,
+  .hero-text .title::after,
+  .hero-text .tagline,
+  .feature-card,
+  .porto-note-grid .noteCard,
+  .porto-note-grid .noteIcon,
+  .porto-tasks-stat,
+  .porto-tasks-tab,
+  .porto-tasks-row,
+  .porto-mobile-toc__toggle svg {
     transition: none;
   }
 }

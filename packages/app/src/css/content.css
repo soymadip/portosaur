@@ -86,12 +86,18 @@
   height: auto;
 }
 
-/* Links. */
+/* Links. The color fades on hover (150ms, like the other rows). */
 .porto-markdown-content a:not(:where(.not-content *)) {
   color: var(--porto-color-text-accent);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-markdown-content a:hover:not(:where(.not-content *)) {
   color: var(--porto-color-white);
+}
+@media (prefers-reduced-motion: reduce) {
+  .porto-markdown-content a:not(:where(.not-content *)) {
+    transition: none;
+  }
 }
 
 /* Inline code. */
@@ -206,7 +212,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .porto-markdown-content summary:not(:where(.not-content *))::before {
-    transition: transform 0.2s ease-in-out;
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* The border tint fades on hover (150ms, like the other rows). */
