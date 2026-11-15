@@ -162,8 +162,7 @@ export function DocPage({
      (`topicCardTitle` prepends it), so it gets no icon element. */
   const topicCards: TopicListItem[] = topicListCards(categoryItems).map(
     (card) => {
-      const iconInTitle =
-        card.icon !== undefined && !card.icon.includes(":");
+      const iconInTitle = card.icon !== undefined && !card.icon.includes(":");
       if (iconInTitle) {
         return card;
       }
