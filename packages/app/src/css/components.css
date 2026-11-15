@@ -4098,11 +4098,11 @@ a.porto-blog-article-author-name:hover {
    shrinks, so it stays visible when a long title truncates. */
 .porto-topic-list__count {
   flex-shrink: 0;
-  padding: 0.125rem 0.5rem;
+  padding: 0 0.25rem;
   border-radius: 999px;
   background-color: var(--porto-color-gray-5);
   color: var(--porto-color-gray-3);
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   font-weight: 500;
   line-height: 1.5;
   /* display: none; */
