@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { SidebarLink } from "../../../lib/content.ts";
-import { PortoIcon } from "../../PortoIcon.tsx";
 
 /**
- * Prev/next cards (grid, arrows, "Previous"/"Next" labels + titles).
- * Links prefetch on viewport (Next.js `<Link>` default) — the
- * destinations are always visible and few, so prefetching them
- * costs little.
+ * Prev/next navigation — Docusaurus `PaginationNav` (`DocPaginator` +
+ * `PaginatorNavLink`), ported 1:1: a `<nav>` with one link per side,
+ * each a "Previous"/"Next" sublabel over the page title. OG removes
+ * Infima's `«`/`»` label arrows (`overrides/pagination.css`), so
+ * there are no arrow icons here. Links prefetch on viewport
+ * (Next.js `<Link>` default) — the destinations are always visible
+ * and few, so prefetching them costs little.
  */
 export function Pagination({
   prev,
@@ -19,27 +21,27 @@ export function Pagination({
     return null;
   }
   return (
-    <div className="porto-pagination print:hidden">
+    <nav className="porto-pagination print:hidden" aria-label="Docs pages">
       {prev && (
-        <Link href={prev.href} rel="prev">
-          <PortoIcon name="left-arrow" size="1.5rem" />
-          <span>
-            Previous
-            <br />
-            <span className="porto-pagination__title">{prev.title}</span>
-          </span>
+        <Link
+          href={prev.href}
+          rel="prev"
+          className="porto-pagination__link porto-pagination__link--prev"
+        >
+          <div className="porto-pagination__sublabel">Previous</div>
+          <div className="porto-pagination__label">{prev.title}</div>
         </Link>
       )}
       {next && (
-        <Link href={next.href} rel="next">
-          <PortoIcon name="right-arrow" size="1.5rem" />
-          <span>
-            Next
-            <br />
-            <span className="porto-pagination__title">{next.title}</span>
-          </span>
+        <Link
+          href={next.href}
+          rel="next"
+          className="porto-pagination__link porto-pagination__link--next"
+        >
+          <div className="porto-pagination__sublabel">Next</div>
+          <div className="porto-pagination__label">{next.title}</div>
         </Link>
       )}
-    </div>
+    </nav>
   );
 }

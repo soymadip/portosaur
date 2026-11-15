@@ -39,7 +39,15 @@ main {
  * lives on the main pane instead (`.main-pane--toc` below): only
  * the doc page knows whether it has headings, and the layout
  * doesn't. */
+/* The frame is the first link in the stretch chain (OG's flex chain
+ * in `pagination.css`: wrapper → container → row → column, all
+ * `flex: 1 0 auto`): it fills `<main>`'s height so the doc footer
+ * can push itself to the bottom with `margin-top: auto` on short
+ * pages. */
 .main-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
   padding-top: 0;
   padding-inline-start: 0;
 }
@@ -51,8 +59,22 @@ main {
 }
 
 /* ----- Two-column doc area (TOC aside + main pane) ----- */
+/* A column by default; the 72rem rule below turns it into the row
+ * with the TOC aside. Stretches to fill the frame height. */
+.porto-doc-columns {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
 .main-pane {
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  /* Grow to fill the column height; shrink stays 1 so a page
+     without a TOC still fits beside the (empty) right-sidebar
+     container in the desktop row. */
+  flex: 1 1 auto;
   width: 100%;
 }
 
@@ -69,6 +91,7 @@ main {
      exactly sidebar-width, pinned to the right edge. */
   .porto-doc-columns {
     display: flex;
+    flex-direction: row;
   }
 
   .porto-right-sidebar-container {
@@ -112,9 +135,29 @@ main {
   padding-bottom: 0.75rem;
 }
 /* The body panel on doc pages: same small top padding, for the
-   same reason. */
+   same reason. It is also the last stretch link before the article
+   container: a flex column filling the main pane. */
 .content-panel--body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
   padding-top: 0.75rem;
+}
+/* The article container is the last link in the stretch chain: a
+   flex column the doc footer can push against. It is also OG's
+   `docContainer` query container: the pagination stacks when the
+   *content column* is narrow, even on a wide viewport. */
+.content-panel--body > .porto-content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  /* `container-type: inline-size` zeroes the element's intrinsic
+     width, so as a flex item it would collapse to 0 without an
+     explicit width (verified by CDP: the whole article column,
+     pagination included, measured 0px wide). `width: 100%` keeps
+     it full-width under the 80rem cap. */
+  width: 100%;
+  container-type: inline-size;
 }
 /* On pages with a topic list the description line is centered, so
    the title centers with it. Regular doc pages keep the
@@ -1460,19 +1503,27 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 
 /* ----- Doc footer ----- */
+/* OG (`theme-doc-footer`): the footer pushes itself to the bottom
+   of the article column with `margin-top: auto`, with 2rem above
+   it on long pages. The gap to the pagination below comes from the
+   pagination's own padding-top (1.5rem with meta, 2.9rem without),
+   not from a gap here. */
 .porto-doc-footer {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  margin-top: auto;
 }
 .porto-doc-footer__meta {
   display: flex;
   gap: 0.75rem 3rem;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-top: 3rem;
+  margin-top: 2rem;
   font-size: var(--porto-text-sm);
   color: var(--porto-color-gray-3);
+}
+.porto-doc-footer__meta:empty {
+  display: none;
 }
 .porto-doc-footer__meta > p:only-child {
   margin-inline-start: auto;
@@ -1495,47 +1546,91 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 
 /* ----- Pagination ----- */
+/* Docusaurus `PaginationNav`, ported from OG
+ * (`theme/css/overrides/pagination.css` + Infima): a 2-column grid
+ * of links, each a muted sublabel over a 1.1rem title. No arrows —
+ * OG removes Infima's `«`/`»`. The link background is the raised
+ * surface, its border the page background (invisible until hover
+ * turns it primary). */
 .porto-pagination {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  /* OG: 2.9rem above the nav, 1.5rem when the article has a doc
+     footer above it. */
+  padding-top: 2.9rem;
 }
-
-.porto-pagination a {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  width: 100%;
-  flex-basis: calc(50% - 0.5rem);
-  flex-grow: 1;
-  border: 1px solid var(--porto-color-gray-5);
-  border-radius: 0.5rem;
+.porto-doc-footer:has(.porto-doc-footer__meta > *) .porto-pagination {
+  padding-top: 1.5rem;
+}
+.porto-pagination__link {
+  display: block;
+  height: 100%;
   padding: 1rem;
+  border: 1px solid var(--porto-color-bg);
+  border-radius: 0.4rem;
+  background-color: var(--porto-color-gray-6);
+  color: var(--porto-color-text-accent);
   text-decoration: none;
-  color: var(--porto-color-gray-2);
-  box-shadow: var(--porto-shadow-md);
-  overflow-wrap: anywhere;
+  line-height: var(--porto-line-height-headings);
   transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-pagination [rel="next"] {
-  justify-content: end;
-  text-align: end;
-  flex-direction: row-reverse;
+.porto-pagination__link:hover {
+  border-color: var(--porto-color-text-accent);
 }
-.porto-pagination a:hover {
-  border-color: var(--porto-color-gray-2);
+.porto-pagination__link--next {
+  grid-column: 2 / 3;
+  text-align: right;
 }
-.porto-pagination svg {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
+.porto-pagination__sublabel {
+  color: var(--porto-color-gray-3);
+  font-size: var(--porto-text-sm);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.porto-pagination__label {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.porto-pagination__link--prev .porto-pagination__label {
+  justify-content: flex-start;
+  text-align: left;
+}
+.porto-pagination__link--next .porto-pagination__label {
+  justify-content: flex-end;
+  text-align: right;
 }
 
-.porto-pagination__title {
-  color: var(--porto-color-white);
-  font-size: var(--porto-text-2xl);
-  line-height: var(--porto-line-height-headings);
+/* Stack the two links on narrow screens — OG stacks below 768px,
+ * both by viewport and by content-column width. */
+@media (max-width: 768px) {
+  .porto-pagination {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .porto-pagination__link--prev {
+    text-align: left;
+  }
+  .porto-pagination__link--next {
+    grid-column: 1;
+    text-align: right;
+  }
+}
+@container (max-width: 768px) {
+  .porto-pagination {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .porto-pagination__link--prev {
+    text-align: left;
+  }
+  .porto-pagination__link--next {
+    grid-column: 1;
+    text-align: right;
+  }
 }
 
 /* ----- Skip link ----- */
@@ -4047,7 +4142,7 @@ a.porto-pv:hover {
   .porto-toc-list--mobile a,
   .porto-mobile-toc__toggle,
   .porto-edit-link,
-  .porto-pagination a,
+  .porto-pagination__link,
   .porto-topic-list__card,
   .porto-pv,
   .porto-blog-sidebar-link,
