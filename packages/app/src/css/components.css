@@ -101,6 +101,27 @@ main {
 .content-panel {
   padding: 1.5rem var(--porto-content-pad-x);
 }
+/* The breadcrumbs + title panel sits flush under the navbar, like
+   OG — Docusaurus puts no padding between the navbar and the
+   breadcrumbs. Its bottom padding is small too: the title and the
+   body content flow together in OG, with no panel split between
+   them, so the two panels split a single small gap across the
+   hairline instead of each adding a full 1.5rem. */
+.content-panel--header {
+  padding-top: 0;
+  padding-bottom: 0.75rem;
+}
+/* The body panel on doc pages: same small top padding, for the
+   same reason. */
+.content-panel--body {
+  padding-top: 0.75rem;
+}
+/* On pages with a topic list the description line is centered, so
+   the title centers with it. Regular doc pages keep the
+   left-aligned title. */
+.content-panel--centered .porto-page-title {
+  text-align: center;
+}
 .content-panel + .content-panel {
   border-top: 1px solid var(--porto-color-hairline);
 }
@@ -232,8 +253,7 @@ main {
   }
 }
 
-.porto-nav-link,
-.porto-nav-summary {
+.porto-nav-link {
   cursor: pointer;
   border-radius: 0.25rem;
   padding: 0.5rem 0.75rem;
@@ -242,58 +262,183 @@ main {
   color: var(--porto-color-gray-2);
   list-style: none;
   white-space: nowrap;
+  /* Fumadocs `transition-colors` (150ms): every interactive row
+     in the app fades its colors instead of snapping. The same
+     150ms value is used for all the hover fades below — except
+     the dropdown buttons, which follow Fumadocs' 100ms
+     `buttonVariants` timing (see below). */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-nav-link:hover,
-.porto-nav-summary:hover {
+.porto-nav-link:hover {
   color: var(--porto-color-white);
 }
-.porto-nav-link.active,
-.porto-nav-summary.active {
+.porto-nav-link.active {
   font-weight: 600;
   color: var(--porto-color-text-accent);
 }
-.porto-nav-summary::after {
-  content: "▾";
-  margin-inline-start: 0.25rem;
-  font-size: 0.75em;
-}
-.porto-nav-summary::-webkit-details-marker {
-  display: none;
-}
 
+/* The mobile footer's nav dropdowns are inline accordions, not
+   floating menus — plain `<details>` with a plain `<ul>`, kept
+   separate from the shared Dropdown on purpose. */
 .porto-navbar__dropdown {
   position: relative;
 }
 
-.porto-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+/* Dropdown — the shared dropdown (navbar nav + "More" menus,
+   theme select, MDX dropdown): one trigger, one menu, one item.
+   The trigger is the shared ghost Button (`buttonClass`) on a
+   `<summary>` — a `<button>` cannot toggle a `<details>` — with
+   the navbar-sized padding so it matches its sibling links, and
+   Fumadocs' `gap-1.5` between the label and the chevron. It
+   keeps the hover surface while open
+   (`data-[state=open]:bg-fd-accent`). */
+.porto-dropdown {
+  position: relative;
+  display: inline-block;
+}
+/* An open dropdown rises above the content that follows it, so
+   its menu paints over the next heading instead of under it. */
+details.porto-dropdown[open] {
   z-index: 101;
-  min-width: 12rem;
+}
+/* The `summary.` prefix lifts this rule above the markdown
+   content's `summary` rules (same specificity, later file wins)
+   — without it the content rules turn the trigger into a block
+   with a Details disclosure triangle. */
+summary.porto-dropdown__trigger.porto-button {
+  display: inline-flex;
+  gap: 0.375rem;
   margin: 0;
-  padding: 0.5rem 0;
-  list-style: none;
-  border-radius: 0.5rem;
-  border: 1px solid var(--porto-color-hairline-light);
-  background-color: var(--porto-color-bg-nav);
-  box-shadow: var(--porto-shadow-md);
-}
-
-.porto-dropdown-link {
-  display: block;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
-  text-decoration: none;
+  font-weight: 500;
   color: var(--porto-color-gray-2);
+  list-style: none;
+  white-space: nowrap;
 }
-.porto-dropdown-link:hover {
+.porto-dropdown__trigger::-webkit-details-marker {
+  display: none;
+}
+details[open] > .porto-dropdown__trigger {
   background-color: var(--porto-color-hairline-light);
   color: var(--porto-color-white);
 }
-.porto-dropdown-link.active {
+/* The compact trigger for dropdowns inside content. */
+summary.porto-dropdown__trigger--sm.porto-button {
+  padding: 0.375rem;
+  font-size: inherit;
+}
+/* Fumadocs' chevron: Lucide `ChevronDown`, 14px, rotating 180°
+   when the dropdown opens (Fumadocs rotates its chevrons the
+   same way). */
+.porto-dropdown__chevron {
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+/* Fumadocs' popover panel: a translucent blurred surface with
+   rounded-xl corners, a large shadow, and items inset from the
+   edges as rounded rows (their `PopoverContent` + language-select
+   item classes). Centered under the trigger by default
+   (`data-align="center"`, like Fumadocs' `align="center"`) —
+   `--porto-menu-offset` is the edge-aware clamp shifting the
+   menu back inside the viewport. */
+.porto-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 50%;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 15rem;
+  max-width: 98vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  border-radius: 0.75rem;
+  border: 1px solid var(--porto-color-hairline-light);
+  /* Solid, no backdrop blur — the translucent Fumadocs popover
+     looked smudged on the live preview. */
+  background-color: var(--porto-color-bg-nav);
+  box-shadow: var(--porto-shadow-lg);
+  transform: translateX(calc(-50% + var(--porto-menu-offset, 0px)));
+}
+.porto-dropdown__menu[data-align="left"] {
+  left: 0;
+  transform: translateX(var(--porto-menu-offset, 0px));
+}
+.porto-dropdown__menu[data-align="right"] {
+  left: auto;
+  right: 0;
+  transform: translateX(var(--porto-menu-offset, 0px));
+}
+
+.porto-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  background-color: transparent;
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: start;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-dropdown__item svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.porto-dropdown__item:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+/* The selected item reads like the sidebar's active row: accent
+   text on a 10% accent tint. Theme options carry the same style
+   through `aria-checked`. */
+.porto-dropdown__item.active,
+.porto-dropdown__item[aria-checked="true"] {
   font-weight: 600;
-  color: var(--porto-color-text-accent);
+  color: var(--porto-color-accent-high);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+}
+/* Dark mode only: lighten the selected menu text one step, like
+   the sidebar's active row — the mid primaries don't reach 4.5:1
+   on the dark panel at full strength in every scheme. */
+[data-theme="dark"] .porto-dropdown__item.active,
+[data-theme="dark"] .porto-dropdown__item[aria-checked="true"] {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
+}
+
+.porto-dropdown__item-icon {
+  display: inline-flex;
+  align-items: center;
+}
+.porto-dropdown__item-icon svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.porto-dropdown__separator {
+  margin: 0.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--porto-color-hairline-light);
 }
 
 /* Divider between the nav links and the "More" dropdown. */
@@ -315,6 +460,7 @@ main {
   background-color: transparent;
   color: var(--porto-color-gray-1);
   cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-menu-button:hover {
   color: var(--porto-color-white);
@@ -415,87 +561,19 @@ body:has(#porto__sidebar:popover-open)
 
 /* ----- Theme select ----- */
 /* Portosaur's own theme control — a Light / Dark / Auto dropdown
-   built like the navbar's "More" dropdown (<details> + <summary> +
-   menu), so its option list is our own markup instead of the
-   browser-native <select> popup. The control matches the navbar's
-   "More" dropdown exactly — same summary text + ▾ indicator and
-   spacing, same menu surface — so the two dropdowns look like one
-   component. */
-.porto-theme-select {
-  position: relative;
-}
-
-.porto-theme-select__summary {
-  cursor: pointer;
-  border-radius: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.95rem;
-  color: var(--porto-color-gray-2);
-  list-style: none;
-  white-space: nowrap;
-}
-.porto-theme-select__summary:hover {
-  color: var(--porto-color-white);
-}
-.porto-theme-select__summary::after {
-  content: "▾";
-  margin-inline-start: 0.25rem;
-  font-size: 0.75em;
-}
-.porto-theme-select__summary::-webkit-details-marker {
-  display: none;
-}
-
-/* Icon + label sit tight together. */
+   rendered with the shared Dropdown, so its option list is our
+   own markup instead of the browser-native <select> popup. The
+   trigger, menu, and options all use the shared Dropdown's
+   classes — only the icon + label inside the trigger are the
+   theme select's own. */
 .porto-theme-select__current {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
 }
 .porto-theme-select__current svg {
   width: 0.875rem;
   height: 0.875rem;
-}
-
-.porto-theme-select__menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  z-index: 101;
-  min-width: 9rem;
-  margin: 0;
-  padding: 0.5rem 0;
-  list-style: none;
-  border-radius: 0.5rem;
-  border: 1px solid var(--porto-color-hairline-light);
-  background-color: var(--porto-color-bg-nav);
-  box-shadow: var(--porto-shadow-md);
-}
-
-.porto-theme-select__option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  border: 0;
-  padding: 0.5rem 1rem;
-  background-color: transparent;
-  font-size: 0.95rem;
-  text-align: start;
-  color: var(--porto-color-gray-2);
-  cursor: pointer;
-}
-.porto-theme-select__option svg {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-.porto-theme-select__option:hover {
-  background-color: var(--porto-color-hairline-light);
-  color: var(--porto-color-white);
-}
-.porto-theme-select__option[aria-checked="true"] {
-  font-weight: 600;
-  color: var(--porto-color-text-accent);
 }
 
 /* ----- Search ----- */
@@ -505,27 +583,8 @@ body:has(#porto__sidebar:popover-open)
  * panel at every width: 1rem from the top and sides on mobile,
  * sized to its content like Fumadocs' search — the page stays
  * visible behind it, blurred by the backdrop. */
-.porto-search-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 0;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
-  background-color: transparent;
-  color: var(--porto-color-gray-1);
-  cursor: pointer;
-  height: 2.5rem;
-  font-size: var(--porto-text-xl);
-}
-.porto-search-trigger:hover {
-  color: var(--porto-color-white);
-}
-.porto-search-trigger svg {
-  width: 20px;
-  height: 20px;
-}
-
+/* The trigger is the shared ghost icon Button — no rules of its
+   own. */
 .porto-search-dialog {
   margin: 1rem auto auto;
   padding: 0;
@@ -612,6 +671,9 @@ body:has(#porto__sidebar:popover-open)
   text-decoration: none;
   color: var(--porto-color-gray-2);
   background-color: var(--porto-color-black);
+  /* The keyboard-selected result fades its tint in as you arrow
+     through the list (the hover outline itself can't fade). */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-search-result:hover,
 .porto-search-result--active {
@@ -926,9 +988,11 @@ body:has(#porto__sidebar:popover-open)
    visible` and hide the content ourselves: `block-size: 0` +
    `opacity: 0` + `visibility: hidden` (which also takes the
    links out of the tab order while folded). `visibility` flips
-   mid-transition, by which point the opacity fade has already
-   made the content nearly invisible. `interpolate-size` on
-   `.porto-sidebar` lets `block-size: auto` interpolate.
+   immediately on open and only after the fade on close — the
+   delay lives on the closed rule, the instant flip on the open
+   rule, because a transition runs with the after-change style.
+   `interpolate-size` on `.porto-sidebar` lets `block-size: auto`
+   interpolate.
    Browsers without `::details-content` support open/close
    instantly, as before. */
 .porto-sidebar details::details-content {
@@ -940,13 +1004,17 @@ body:has(#porto__sidebar:popover-open)
   transition:
     block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
     opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
-    visibility 150ms;
+    visibility 0s 150ms;
   transition-behavior: allow-discrete;
 }
 .porto-sidebar details[open]::details-content {
   block-size: auto;
   opacity: 1;
   visibility: visible;
+  transition:
+    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1134,29 +1202,44 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-2);
   cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-nav a:hover,
 .porto-mobile-nav a:focus,
 .porto-mobile-nav summary:hover {
+  background-color: var(--porto-color-hairline-light);
   color: var(--porto-color-white);
 }
 .porto-mobile-nav a.active {
   font-weight: 600;
   color: var(--porto-color-text-accent);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
 }
 .porto-mobile-nav summary::marker,
 .porto-mobile-nav summary::-webkit-details-marker {
   display: none;
 }
-.porto-mobile-nav summary::after {
-  content: "▾";
-  float: inline-end;
-  font-size: 0.75em;
-  line-height: 1.75;
-  color: var(--porto-color-gray-3);
+/* The label stays at the start, the chevron at the end edge. */
+.porto-mobile-nav summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem;
 }
-.porto-mobile-nav details[open] > summary::after {
-  content: "▴";
+/* Fumadocs' chevron: Lucide `ChevronDown`, 14px, rotating 180°
+   when the section opens. */
+.porto-mobile-nav__chevron {
+  flex-shrink: 0;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-nav details[open] > summary .porto-mobile-nav__chevron {
+  transform: rotate(180deg);
 }
 .porto-mobile-nav ul {
   list-style: none;
@@ -1180,6 +1263,7 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-3);
   opacity: 0.64;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-preferences__version-link:hover {
   color: var(--porto-color-white);
@@ -1208,6 +1292,9 @@ body:has(#porto__sidebar:popover-open) {
   text-decoration: none;
   color: var(--porto-color-gray-3);
   overflow-wrap: anywhere;
+  /* The scroll-spy moves `aria-current` between headings as you
+     read — the fade makes the highlight travel instead of snap. */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-toc-panel a:hover {
   color: var(--porto-color-white);
@@ -1243,6 +1330,9 @@ body:has(#porto__sidebar:popover-open) {
   font-size: var(--porto-text-sm);
   text-decoration: none;
   outline-offset: var(--porto-outline-offset-inside);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-toc-list--mobile:first-child > li:first-child > a {
   border-top: 0;
@@ -1314,6 +1404,9 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   background-color: var(--porto-color-black);
   user-select: none;
   cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-mobile-toc details[open] .porto-mobile-toc__toggle {
   color: var(--porto-color-white);
@@ -1326,7 +1419,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 .porto-mobile-toc__toggle svg {
   width: 1rem;
   height: 1rem;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 [dir="rtl"] .porto-mobile-toc__toggle svg {
   transform: rotateZ(180deg);
@@ -1357,15 +1450,18 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 
 /* ----- Breadcrumbs ----- */
+/* OG sizes: Docusaurus' breadcrumbs run at 0.8rem (Infima's
+ * `1rem * --ifm-breadcrumb-size-multiplier`, with theme-classic
+ * setting the multiplier to 0.8) with a 0.8rem bottom margin. */
 .porto-breadcrumbs ol {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
-  margin: 0 0 1rem;
+  margin: 0 0 0.8rem;
   padding: 0;
   list-style: none;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .porto-breadcrumbs li + li::before {
@@ -1421,6 +1517,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   align-items: center;
   text-decoration: none;
   color: var(--porto-color-gray-3);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-edit-link:hover {
   color: var(--porto-color-white);
@@ -1437,40 +1534,54 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   gap: 1rem;
 }
 
+/* Fumadocs' docs-footer cards (`flex flex-col gap-2 rounded-lg
+   border p-4 text-sm`): the title row beside a chevron, a muted
+   direction line under it, hovering to the accent surface. */
 .porto-pagination a {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  flex-direction: column;
   gap: 0.5rem;
   width: 100%;
-  flex-basis: calc(50% - 0.5rem);
-  flex-grow: 1;
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
   padding: 1rem;
+  font-size: 0.875rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
-  box-shadow: var(--porto-shadow-md);
   overflow-wrap: anywhere;
-}
-.porto-pagination [rel="next"] {
-  justify-content: end;
-  text-align: end;
-  flex-direction: row-reverse;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-pagination a:hover {
-  border-color: var(--porto-color-gray-2);
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
 }
-.porto-pagination svg {
+.porto-pagination [rel="next"] {
+  text-align: end;
+}
+.porto-pagination [rel="next"] .porto-pagination__row {
+  flex-direction: row-reverse;
+}
+
+.porto-pagination__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 500;
+}
+.porto-pagination__row svg {
   flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .porto-pagination__title {
   color: var(--porto-color-white);
-  font-size: var(--porto-text-2xl);
-  line-height: var(--porto-line-height-headings);
+}
+
+.porto-pagination__label {
+  color: var(--porto-color-gray-3);
 }
 
 /* ----- Skip link ----- */
@@ -1504,16 +1615,17 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 
 /* ----- Nav progress ----- */
-/* The thin top progress bar for client-side navigations
+/* The thin progress bar for client-side navigations
  * (Docusaurus's NProgress mechanism: a 2px bar in the accent color,
- * fixed at the very top, no spinner). The bar appears only after a
- * 200ms delay, so slow navigations show something and fast ones
- * show nothing. The animation is pure CSS — the bar crawls to 80%
- * while the navigation is in flight, completes to 100% on the swap,
- * then fades out. */
+ * no spinner), docked under the navbar instead of the top edge so
+ * it reads as the navbar's loading underline. The bar appears only
+ * after a 200ms delay, so slow navigations show something and fast
+ * ones show nothing. The animation is pure CSS — the bar crawls to
+ * 80% while the navigation is in flight, completes to 100% on the
+ * swap, then fades out. */
 .porto-nav-progress {
   position: fixed;
-  top: 0;
+  top: var(--porto-nav-height);
   left: 0;
   /* Above the navbar (z-index 10), below the skip link (20). */
   z-index: 11;
@@ -1546,6 +1658,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transition:
     transform 0.2s ease,
     opacity 0.3s ease 0.15s;
+}
+
+/* The navbar hides on scroll — the bar docks to the top edge with
+   it, like the mobile TOC bar, instead of floating mid-page. */
+html.porto-navbar-hidden .porto-nav-progress {
+  top: 0;
 }
 
 /* ----- Site footer ----- */
@@ -1661,7 +1779,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   line-height: 1.05;
   margin-bottom: 0;
   color: var(--porto-color-text-accent);
-  transition: all 0.3s ease;
+  transition: transform 200ms ease;
   position: relative;
   display: inline-block;
   opacity: 0;
@@ -1681,7 +1799,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   bottom: -2px;
   left: 0;
   background-color: var(--porto-color-text-accent);
-  transition: width 0.3s ease;
+  transition: width 200ms ease;
 }
 
 .hero-text .title:hover::after {
@@ -1695,9 +1813,14 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-white);
   margin-top: 0.25rem;
   margin-bottom: 1rem;
-  transition: all 0.3s ease;
+  transition: transform 200ms ease;
   position: relative;
-  display: inline-block;
+  /* Block, not inline-block: as an inline-block the tagline slid up
+     onto the title's line wherever the hero was wide enough for
+     both (tablets, desktop-site mode on phones) — "Portosaurfor
+     your digital personality". OG stacks them, so do we. The title
+     stays inline-block so its underline hugs the text width. */
+  display: block;
   opacity: 0;
   animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s
     forwards;
@@ -1735,10 +1858,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   font-weight: 600;
   border-radius: 999px;
   text-decoration: none;
+  /* Fumadocs buttons fade in 100ms (`duration-100`). */
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+    background-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero-text .button:hover {
@@ -2203,7 +2328,14 @@ a.feature-card:focus-visible {
   color: var(--porto-color-text);
   text-decoration: none;
   box-shadow: var(--porto-shadow-sm);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The hover lifts the card and tints its border; on touch the tap
+     presses it via `scale` instead. All four properties listed so
+     nothing else animates by accident. */
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
   animation: porto-note-fade-in 0.5s ease-out forwards;
   animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
   opacity: 0;
@@ -2248,7 +2380,7 @@ a.feature-card:focus-visible {
   padding: 0.2rem;
   font-size: 3.5rem;
   color: var(--note-color);
-  transition: scale 0.3s ease;
+  transition: scale 200ms ease;
 }
 .porto-note-grid .noteCard:hover .noteIcon {
   scale: 1.2;
@@ -2461,6 +2593,7 @@ a.feature-card:focus-visible {
 .porto-blog-sidebar-link {
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-sidebar-link:hover {
   color: var(--porto-color-text-accent);
@@ -2492,6 +2625,7 @@ a.feature-card:focus-visible {
    Docusaurus list style). */
 .porto-blog-post-title--plain a {
   color: var(--porto-color-text);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-post-title--plain a:hover {
   color: var(--porto-color-text-accent);
@@ -2582,6 +2716,9 @@ a.porto-blog-post-author-name:hover {
   font-size: 0.8rem;
   color: var(--porto-color-gray-3);
   text-decoration: none;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-tag:hover {
   border-color: var(--porto-color-text-accent);
@@ -2701,6 +2838,7 @@ a.porto-blog-article-author-name:hover {
   padding: 1rem;
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-article-nav-link:hover {
   border-color: var(--porto-color-text-accent);
@@ -2761,6 +2899,7 @@ a.porto-blog-article-author-name:hover {
 .porto-blog-author-entry-title a {
   color: var(--porto-color-text);
   text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-blog-author-entry-title a:hover {
   color: var(--porto-color-text-accent);
@@ -2969,7 +3108,10 @@ a.porto-blog-article-author-name:hover {
   font-size: 1rem;
   line-height: var(--porto-line-height);
   color: var(--porto-color-text);
-  transition: all 0.2s ease;
+  /* 150ms, like the other rows. */
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tasks-tab:hover {
   background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
@@ -3122,7 +3264,8 @@ a.porto-blog-article-author-name:hover {
   grid-template-columns: 120px 1fr 120px;
   border-bottom: 1px solid var(--porto-color-hairline-light);
   background: var(--porto-color-black);
-  transition: all 0.15s ease;
+  /* 150ms, like the other rows. */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tasks-row:last-child {
   border-bottom: 0;
@@ -3429,38 +3572,55 @@ a.porto-blog-article-author-name:hover {
 
 /* ----- MDX components ----- */
 /* Btn — variants ported from OG's Button component. */
-.porto-btn {
+/* Button — the shared button, following Fumadocs' `buttonVariants`
+   (`packages/radix-ui/src/components/ui/button.tsx`): base
+   inline-flex, rounded-md, medium weight, 100ms color fades;
+   variants primary / secondary / ghost (+ OG's colored success /
+   warning / danger / info), an `outline` modifier per colored
+   variant, and sizes sm / lg / icon / icon-sm / icon-xs. No
+   hover lift — Fumadocs buttons change color only. */
+.porto-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   border: 1px solid transparent;
-  font-size: 1rem;
-  font-weight: 600;
+  background-color: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
   text-decoration: none;
   cursor: pointer;
+  /* Fumadocs buttons fade in 100ms (`duration-100`). */
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    background-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 100ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-btn:hover {
+.porto-button:hover {
   text-decoration: none;
-  transform: translateY(-1px);
 }
-.porto-btn svg,
-.porto-btn img {
+.porto-button:focus-visible {
+  outline: 2px solid var(--porto-color-text-accent);
+  outline-offset: 2px;
+}
+.porto-button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.porto-button svg,
+.porto-button img {
   width: 1em;
   height: 1em;
 }
 
-.porto-btn--primary {
+.porto-button--primary {
   background-color: var(--porto-color-text-accent);
   color: var(--porto-color-black);
 }
-.porto-btn--primary:hover {
+.porto-button--primary:hover {
   background-color: color-mix(
     in srgb,
     var(--porto-color-text-accent) 80%,
@@ -3468,152 +3628,172 @@ a.porto-blog-article-author-name:hover {
   );
   color: var(--porto-color-black);
 }
-.porto-btn--secondary {
+.porto-button--secondary {
   background-color: var(--porto-color-gray-5);
   color: var(--porto-color-white);
 }
-.porto-btn--secondary:hover {
+.porto-button--secondary:hover {
   background-color: var(--porto-color-gray-4);
   color: var(--porto-color-white);
 }
-.porto-btn--success {
+.porto-button--success {
   background-color: var(--porto-color-green);
   color: var(--porto-color-black);
 }
-.porto-btn--success:hover {
+.porto-button--success:hover {
   background-color: var(--porto-color-green-high);
   color: var(--porto-color-black);
 }
-.porto-btn--warning {
+.porto-button--warning {
   background-color: var(--porto-color-orange);
   color: var(--porto-color-black);
 }
-.porto-btn--warning:hover {
+.porto-button--warning:hover {
   background-color: var(--porto-color-orange-high);
   color: var(--porto-color-black);
 }
-.porto-btn--danger {
+.porto-button--danger {
   background-color: var(--porto-color-red);
   color: var(--porto-color-black);
 }
-.porto-btn--danger:hover {
+.porto-button--danger:hover {
   background-color: var(--porto-color-red-high);
   color: var(--porto-color-black);
 }
-.porto-btn--info {
+.porto-button--info {
   background-color: var(--porto-color-blue);
   color: var(--porto-color-black);
 }
-.porto-btn--info:hover {
+.porto-button--info:hover {
   background-color: var(--porto-color-blue-high);
   color: var(--porto-color-black);
 }
-
-.porto-btn--outline {
+.porto-button--ghost {
   background-color: transparent;
 }
-.porto-btn--outline.porto-btn--primary {
+.porto-button--ghost:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+
+.porto-button--outline {
+  background-color: transparent;
+}
+.porto-button--outline.porto-button--primary {
   border-color: var(--porto-color-text-accent);
   color: var(--porto-color-text-accent);
 }
-.porto-btn--outline.porto-btn--primary:hover {
+.porto-button--outline.porto-button--primary:hover {
   background-color: var(--porto-color-text-accent);
   color: var(--porto-color-black);
 }
-.porto-btn--outline.porto-btn--secondary {
+.porto-button--outline.porto-button--secondary {
   border-color: var(--porto-color-gray-4);
   color: var(--porto-color-gray-2);
 }
-.porto-btn--outline.porto-btn--secondary:hover {
+.porto-button--outline.porto-button--secondary:hover {
   background-color: var(--porto-color-gray-5);
   color: var(--porto-color-white);
 }
-.porto-btn--outline.porto-btn--success {
+.porto-button--outline.porto-button--success {
   border-color: var(--porto-color-green);
   color: var(--porto-color-green);
 }
-.porto-btn--outline.porto-btn--success:hover {
+.porto-button--outline.porto-button--success:hover {
   background-color: var(--porto-color-green);
   color: var(--porto-color-black);
 }
-.porto-btn--outline.porto-btn--warning {
+.porto-button--outline.porto-button--warning {
   border-color: var(--porto-color-orange);
   color: var(--porto-color-orange);
 }
-.porto-btn--outline.porto-btn--warning:hover {
+.porto-button--outline.porto-button--warning:hover {
   background-color: var(--porto-color-orange);
   color: var(--porto-color-black);
 }
-.porto-btn--outline.porto-btn--danger {
+.porto-button--outline.porto-button--danger {
   border-color: var(--porto-color-red);
   color: var(--porto-color-red);
 }
-.porto-btn--outline.porto-btn--danger:hover {
+.porto-button--outline.porto-button--danger:hover {
   background-color: var(--porto-color-red);
   color: var(--porto-color-black);
 }
-.porto-btn--outline.porto-btn--info {
+.porto-button--outline.porto-button--info {
   border-color: var(--porto-color-blue);
   color: var(--porto-color-blue);
 }
-.porto-btn--outline.porto-btn--info:hover {
+.porto-button--outline.porto-button--info:hover {
   background-color: var(--porto-color-blue);
   color: var(--porto-color-black);
 }
 
-.porto-btn--sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.875rem;
+/* Fumadocs' small size: `gap-1 px-2 py-1.5 text-xs`. */
+.porto-button--sm {
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
 }
-.porto-btn--lg {
+.porto-button--lg {
   padding: 0.75rem 1.75rem;
   font-size: 1.125rem;
 }
+/* Fumadocs' icon sizes: `p-1.5` with 20px / 18px icons, and
+   `p-1` with a 16px icon for the extra-small one. */
+.porto-button--icon {
+  padding: 0.375rem;
+}
+.porto-button--icon svg,
+.porto-button--icon img {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.porto-button--icon-sm {
+  padding: 0.375rem;
+}
+.porto-button--icon-sm svg,
+.porto-button--icon-sm img {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.porto-button--icon-xs {
+  padding: 0.25rem;
+}
+.porto-button--icon-xs svg,
+.porto-button--icon-xs img {
+  width: 1rem;
+  height: 1rem;
+}
 
-/* Dropdown (MDX) — a <details>-based menu, simplified from OG's
-   Dropdown (trigger/label/items, hover+click). */
-.porto-mdx-dropdown {
-  position: relative;
-  display: inline-block;
+/* Dropdown (MDX) — the MDX `<Dropdown>` tag renders the shared
+   Dropdown. The markdown rules style every `details` / `summary`
+   / `ul` as content (the Details component's disclosure box and
+   triangle, list indentation) — the dropdown is not content, so
+   it takes its own borders, markers, and padding back. */
+.porto-markdown-content details.porto-dropdown {
+  border: 0;
+  padding: 0;
 }
-.porto-mdx-dropdown__trigger {
-  cursor: pointer;
+.porto-markdown-content details[open] > summary.porto-dropdown__trigger {
+  margin-bottom: 0;
+}
+.porto-markdown-content summary.porto-dropdown__trigger::before {
+  content: none;
+}
+.porto-markdown-content ul.porto-dropdown__menu {
+  padding: 0.5rem;
   list-style: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
 }
-.porto-mdx-dropdown__trigger::-webkit-details-marker {
-  display: none;
-}
-.porto-mdx-dropdown__trigger::after {
-  content: "▾";
-  font-size: 0.75em;
-}
-.porto-mdx-dropdown__menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  z-index: 101;
-  min-width: 12rem;
-  margin: 0;
-  padding: 0.5rem 0;
-  list-style: none;
-  border-radius: 0.5rem;
-  border: 1px solid var(--porto-color-hairline-light);
-  background-color: var(--porto-color-bg-nav);
-  box-shadow: var(--porto-shadow-md);
-}
-.porto-mdx-dropdown__item {
-  display: block;
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  text-decoration: none;
+/* Content links are accent-colored — menu items are not content
+   links, so they keep the menu's own text colors. */
+.porto-markdown-content a.porto-dropdown__item {
   color: var(--porto-color-gray-2);
 }
-.porto-mdx-dropdown__item:hover {
-  background-color: var(--porto-color-hairline-light);
-  color: var(--porto-color-white);
+.porto-markdown-content a.porto-dropdown__item.active {
+  color: var(--porto-color-accent-high);
+}
+[data-theme="dark"] .porto-markdown-content a.porto-dropdown__item.active {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 
 /* Hint — simplified tooltip: the message renders in a tinted box
@@ -3651,8 +3831,14 @@ a.porto-blog-article-author-name:hover {
   overflow-x: auto;
 }
 
+/* Fumadocs' tabs: underline-style triggers — small medium text
+   (`text-sm font-medium`), a gap between triggers instead of
+   wide per-tab padding, the active trigger in the primary color
+   with a primary underline. The underline stays Portosaur's
+   box-shadow trick (it animates), on the tablist's border track. */
 .porto-tabs [role="tablist"] {
   display: flex;
+  gap: 0.875rem;
   list-style: none;
   border-bottom: 2px solid var(--porto-color-gray-5);
   padding: 0;
@@ -3667,7 +3853,7 @@ a.porto-blog-article-author-name:hover {
   align-items: center;
   gap: 0.5rem;
   line-height: var(--porto-line-height-headings);
-  padding: 0.275rem 1.25rem;
+  padding: 0.5rem 0.25rem;
   text-decoration: none;
   box-shadow: 0 2px 0 var(--porto-tab-color-border);
   color: var(--porto-color-gray-3);
@@ -3676,40 +3862,109 @@ a.porto-blog-article-author-name:hover {
   background: transparent;
   border: 0;
   cursor: pointer;
-  font-size: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
   font-family: inherit;
+  /* The selected tab's underline is a box-shadow on the border
+     variable — fading both makes switching tabs feel like the
+     indicator slides over instead of jumping. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tabs__tab [role="tab"][aria-selected="true"] {
   --porto-tab-color-border: var(--porto-color-text-accent);
-  color: var(--porto-color-white);
-  font-weight: 600;
+  color: var(--porto-color-text-accent);
 }
 
 .porto-tabs__tablist-wrapper ~ [role="tabpanel"] {
   margin-top: 1rem;
 }
 
-/* TopicList — h2 cards for a category's child items. */
+/* TopicList — the Docusaurus `TopicCard` list, in Fumadocs'
+   `Card` design: a centered description line above a grid of
+   cards, each with a small icon tile above a small
+   medium-weight title and a muted wrapping description. Two
+   columns above OG's 996px `col` breakpoint, one below it. */
+/* The list follows the body content directly — no extra top
+   margin on top of the last paragraph's own bottom margin (and
+   none at all when the body is empty). */
+.porto-content-container > .porto-topic-list-wrapper {
+  margin-top: 0;
+}
+.porto-topic-list__desc {
+  margin: 1rem 0 1.9rem;
+  text-align: center;
+}
+.porto-topic-list__desc--auto {
+  margin-top: 0;
+}
 .porto-topic-list {
   display: grid;
   gap: 0.75rem;
-  margin-top: 1.5rem;
 }
-.porto-topic-list h2 {
-  margin: 0;
-  font-size: 1.1rem;
+@media (min-width: 997px) {
+  .porto-topic-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
-.porto-topic-list a {
-  display: block;
-  padding: 0.75rem 1rem;
+.porto-topic-list__card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem;
   border: 1px solid var(--porto-color-hairline-light);
-  border-radius: 0.5rem;
+  /* OG: the card sits on the scheme's raised surface (Docusaurus
+     `.card` → `--ifm-background-surface-color`) — the same surface
+     the note cards and feature cards use. */
+  background-color: var(--porto-color-gray-6);
+  border-radius: 0.75rem;
   text-decoration: none;
   color: var(--porto-color-text);
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-topic-list a:hover {
-  border-color: var(--porto-color-text-accent);
-  color: var(--porto-color-text-accent);
+/* Fumadocs' card hover is a background change only
+   (`hover:bg-fd-accent/80`) — no border or shadow shift. */
+.porto-topic-list__card:hover {
+  background-color: var(--porto-color-gray-5);
+}
+/* The icon tile matches the docs-homepage feature cards
+   (`.feature-icon`): a 48px tinted tile with a 24px glyph, no
+   border or shadow. */
+.porto-topic-list__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 15%,
+    var(--porto-color-black)
+  );
+  color: var(--porto-color-gray-2);
+  font-size: 1.5rem;
+}
+.porto-topic-list__icon svg,
+.porto-topic-list__icon img {
+  width: 24px;
+  height: 24px;
+}
+.porto-topic-list__title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.porto-topic-list__description {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--porto-color-gray-3);
+}
+.porto-topic-list__separator {
+  opacity: 0.5;
 }
 
 /* Pv (Preview) — trigger only in Phase 1: a plain link/button.
@@ -3723,6 +3978,9 @@ a.porto-blog-article-author-name:hover {
   padding: 0.5rem 1rem;
   color: var(--porto-color-gray-3);
   text-decoration: none;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 a.porto-pv:hover {
   border-color: var(--porto-color-text-accent);
@@ -3777,6 +4035,9 @@ a.porto-pv:hover {
   font-size: var(--porto-text-xs);
   text-align: center;
   overflow-wrap: anywhere;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-icon-search__result:hover {
   border-color: var(--porto-color-text-accent);
@@ -3790,4 +4051,49 @@ a.porto-pv:hover {
 .porto-icon-search__status {
   text-align: center;
   color: var(--porto-color-gray-3);
+}
+
+/* The hover fades above, all off for reduced motion.
+   (The sidebar has its own guard next to its rules; the dialog,
+   menu, and dropdown motion guards live in animations.css.) */
+@media (prefers-reduced-motion: reduce) {
+  .porto-nav-link,
+  .porto-dropdown__trigger,
+  .porto-dropdown__chevron,
+  .porto-dropdown__item,
+  .porto-menu-button,
+  .porto-search-result,
+  .porto-mobile-nav a,
+  .porto-mobile-nav summary,
+  .porto-mobile-nav__chevron,
+  .porto-mobile-preferences__version-link,
+  .porto-toc-panel a,
+  .porto-toc-list--mobile a,
+  .porto-mobile-toc__toggle,
+  .porto-edit-link,
+  .porto-pagination a,
+  .porto-topic-list__card,
+  .porto-pv,
+  .porto-blog-sidebar-link,
+  .porto-blog-post-title--plain a,
+  .porto-blog-tag,
+  .porto-blog-article-nav-link,
+  .porto-blog-author-entry-title a,
+  .porto-tabs__tab > [role="tab"],
+  .porto-icon-search__result,
+  .porto-code-copy,
+  .porto-button,
+  .hero-text .button,
+  .hero-text .title,
+  .hero-text .title::after,
+  .hero-text .tagline,
+  .feature-card,
+  .porto-note-grid .noteCard,
+  .porto-note-grid .noteIcon,
+  .porto-tasks-stat,
+  .porto-tasks-tab,
+  .porto-tasks-row,
+  .porto-mobile-toc__toggle svg {
+    transition: none;
+  }
 }

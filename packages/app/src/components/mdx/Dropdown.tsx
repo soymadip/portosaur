@@ -1,62 +1,57 @@
-import Link from "next/link";
-import { pageHref } from "../../lib/pageUrl.ts";
+import {
+  Dropdown as SharedDropdown,
+  type DropdownAlign,
+  type DropdownItem,
+} from "../Dropdown.tsx";
 
 /**
- * Dropdown — simplified from OG's Dropdown (trigger/label/items).
- * A `<details>`-based menu: click the trigger to open, click an
- * item (or elsewhere) to close. Hover-open is dropped — click
- * works on touch too, where hover doesn't exist.
- *
- * Items come from the `items` prop (`{ label, to?, href? }[]`); when
- * no items are given, the children render as the menu content.
+ * Dropdown — the MDX `<Dropdown>` tag: a thin wrapper around the
+ * shared Dropdown with the compact trigger, keeping OG's MDX
+ * API — `trigger` / `label`, an `items` array
+ * (`{ label, to?, href? }[]`), and `children` as the menu
+ * content when no items are given. `className`, `menuClassName`,
+ * and `triggerClassName` pass extra CSS classes through, like
+ * OG's. A click opens the menu (no hover-open — click works on
+ * touch too, where hover doesn't exist); clicking an item or
+ * elsewhere closes it.
  */
 export function Dropdown({
   label,
   trigger,
   items,
   children,
+  align,
+  noArrow = false,
+  className = "",
+  menuClassName = "",
+  triggerClassName = "",
+  ariaLabel,
 }: {
   label?: string;
   trigger?: string;
-  items?: Array<{ label: string; to?: string; href?: string }>;
+  items?: DropdownItem[];
   children?: React.ReactNode;
+  align?: DropdownAlign;
+  noArrow?: boolean;
+  className?: string;
+  menuClassName?: string;
+  triggerClassName?: string;
+  ariaLabel?: string;
 }) {
   return (
-    <details className="porto-mdx-dropdown">
-      <summary className="porto-mdx-dropdown__trigger">
-        {trigger ?? label ?? "Menu"}
-      </summary>
-      <ul className="porto-mdx-dropdown__menu">
-        {items
-          ? items.map((item) => (
-              <li key={item.label}>
-                {item.to ? (
-                  <Link
-                    href={pageHref(item.to)}
-                    className="porto-mdx-dropdown__item"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a
-                    href={item.href ?? "#"}
-                    className="porto-mdx-dropdown__item"
-                    target={
-                      item.href?.startsWith("http") ? "_blank" : undefined
-                    }
-                    rel={
-                      item.href?.startsWith("http")
-                        ? "noopener noreferrer"
-                        : undefined
-                    }
-                  >
-                    {item.label}
-                  </a>
-                )}
-              </li>
-            ))
-          : children}
-      </ul>
-    </details>
+    <SharedDropdown
+      label={label}
+      trigger={trigger}
+      items={items}
+      align={align}
+      noArrow={noArrow}
+      className={className}
+      menuClassName={menuClassName}
+      triggerClassName={triggerClassName}
+      ariaLabel={ariaLabel}
+      size="sm"
+    >
+      {children}
+    </SharedDropdown>
   );
 }

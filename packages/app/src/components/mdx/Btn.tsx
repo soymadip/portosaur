@@ -1,10 +1,15 @@
+import type { MouseEvent } from "react";
 import { renderDynamicIcon } from "../../lib/icons.ts";
+import { Button, type ButtonVariant } from "../Button.tsx";
 
 /**
- * Btn — a link styled as a button. Variants ported from OG's
- * Button component: primary / secondary / success / warning /
- * danger / info, `outline`, and `sm` / `lg` sizes. The `icon`
- * prop renders a DynamicIcon before the label.
+ * Btn — the MDX content button: a link styled as a button.
+ * A thin wrapper around the shared `Button` — the variants
+ * (primary / secondary / success / warning / danger / info /
+ * ghost), `outline`, and `sm` / `lg` sizes are OG's Button API,
+ * and the `icon` prop renders a DynamicIcon before the label.
+ * `className`, `disabled`, `onClick`, `title`, and `ariaLabel`
+ * pass straight through to the shared Button.
  */
 export function Btn({
   href,
@@ -13,34 +18,52 @@ export function Btn({
   outline = false,
   size,
   icon,
+  sameTab = false,
+  className = "",
+  disabled = false,
+  onClick,
+  title,
+  ariaLabel,
   children,
 }: {
   href?: string;
   to?: string;
-  variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "info";
+  variant?: ButtonVariant;
   outline?: boolean;
   size?: "sm" | "lg";
   icon?: string;
+  sameTab?: boolean;
+  className?: string;
+  disabled?: boolean;
+  onClick?: (event: MouseEvent) => void;
+  title?: string;
+  ariaLabel?: string;
   children?: React.ReactNode;
 }) {
-  const className = [
-    "porto-btn",
-    `porto-btn--${variant}`,
-    outline ? "porto-btn--outline" : "",
-    size ? `porto-btn--${size}` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
   return (
-    <a href={href ?? to ?? "#"} className={className}>
-      {icon && (
-        <span
-          dangerouslySetInnerHTML={{
-            __html: renderDynamicIcon(icon, {}),
-          }}
-        />
-      )}
+    <Button
+      variant={variant}
+      outline={outline}
+      size={size}
+      href={href}
+      to={to}
+      sameTab={sameTab}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      title={title}
+      ariaLabel={ariaLabel}
+      icon={
+        icon ? (
+          <span
+            dangerouslySetInnerHTML={{
+              __html: renderDynamicIcon(icon, {}),
+            }}
+          />
+        ) : undefined
+      }
+    >
       {children}
-    </a>
+    </Button>
   );
 }

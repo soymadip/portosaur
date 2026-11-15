@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { renderIcon } from "../../lib/icons.ts";
+import { Button } from "../Button.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**
@@ -25,9 +25,9 @@ export function NotFoundPage({ config }: { config: PortosaurOptions }) {
           The page you&apos;re looking for doesn&apos;t exist, has been moved,
           or is currently unavailable.
         </p>
-        <Link href="/" className="porto-btn porto-btn--primary">
+        <Button variant="primary" to="/">
           Go back home
-        </Link>
+        </Button>
       </div>
     </SiteShell>
   );

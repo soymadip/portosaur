@@ -63,6 +63,7 @@ export { TabItem } from "./mdx/TabItem.tsx";
 export { Tabs } from "./mdx/Tabs.tsx";
 export {
   TopicList,
+  AutoTopicList,
   TopicListProvider,
   TopicListContext,
 } from "./mdx/TopicList.tsx";

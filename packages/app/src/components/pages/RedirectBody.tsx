@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "../Button.tsx";
 
 /**
  * The redirect interstitial's client logic (a port of the old
@@ -57,14 +58,9 @@ export function RedirectBody() {
             This link lives outside the portfolio app. Tap the button below to
             open it in your browser.
           </p>
-          <a
-            className="porto-btn porto-btn--primary"
-            href={targetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Button variant="primary" href={targetUrl}>
             Open in browser
-          </a>
+          </Button>
         </div>
       )}
     </>

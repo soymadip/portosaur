@@ -12,6 +12,7 @@ import {
   flattenResults,
   type FlatResult,
 } from "../../../lib/search-results.ts";
+import { Button } from "../../Button.tsx";
 
 /**
  * Portosaur's own search dialog — a navbar magnifier button opens a
@@ -216,11 +217,11 @@ export function SearchDialog() {
 
   return (
     <>
-      <button
-        type="button"
-        className="porto-search-trigger"
-        aria-label="Search"
-        aria-keyshortcuts="Control+K"
+      <Button
+        variant="ghost"
+        size="icon"
+        ariaLabel="Search"
+        ariaKeyshortcuts="Control+K"
         onClick={openDialog}
       >
         <svg
@@ -237,7 +238,7 @@ export function SearchDialog() {
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.3-4.3" />
         </svg>
-      </button>
+      </Button>
 
       <dialog
         ref={dialogRef}

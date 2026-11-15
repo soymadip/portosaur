@@ -94,6 +94,7 @@ export {
   TabItem,
   Tabs,
   TopicList,
+  AutoTopicList,
   TopicListProvider,
   TopicListContext,
 } from "./components/mdx.tsx";
