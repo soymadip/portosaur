@@ -1166,6 +1166,13 @@ body:has(#porto__sidebar:popover-open)
   opacity: 1;
 }
 
+/* The navbar-brand copy at the top of the persistent sidebar —
+   hidden by default; only the desktop persistent variant shows
+   it (OG's sidebarLogo is likewise desktop-only). */
+.porto-mobile-menu__brand {
+  display: none;
+}
+
 /* Horizontal padding is 0.3rem each side, not the 1rem sidebar
    gutter: at 1rem every entry sat one nest-level in from the pane
    edge (a nest level is 1rem: 0.5rem margin + 0.5rem padding on
@@ -1216,15 +1223,41 @@ body:has(#porto__sidebar:popover-open) {
     opacity: 1;
     /* OG Docusaurus pattern: the sidebar is full-height and its
        top navbar-height slice sits hidden behind the navbar (the
-       navbar paints above it, z-index 10 over 5). The content
-       starts below the navbar via padding, not by insetting the
-       pane — so when the navbar hides on scroll, the sidebar
-       stays exactly where it is instead of sliding up, and the
-       top slice is just empty sidebar space. */
+       navbar paints above it, z-index 10 over 5). The slice holds
+       a copy of the navbar brand (see `__brand` below), revealed
+       when the navbar hides — so when the navbar hides on scroll,
+       the sidebar stays exactly where it is instead of sliding
+       up, and the brand takes the navbar's place. */
     inset-block: 0 0;
   }
   .porto-mobile-menu--persistent .porto-mobile-menu__content {
+    /* No top padding: the brand row occupies the navbar-height
+       slot, and the 1rem flex gap puts the tree 1rem below the
+       brand — exactly where the old padding put it. */
+    padding-top: 0;
+  }
+  .porto-mobile-menu--persistent
+    .porto-mobile-menu__content--no-brand {
+    /* No brand row (hideNavbarOnScroll off): the navbar never
+       hides, so the tree still needs the navbar-height offset
+       from padding. */
     padding-top: calc(var(--porto-nav-height) + 1rem);
+  }
+  .porto-mobile-menu--persistent .porto-mobile-menu__brand {
+    /* OG Docusaurus sidebarLogo: a copy of the navbar brand in
+       the sidebar's top navbar-height slice. Sticky — it stays
+       pinned to the pane's top while the tree scrolls beneath
+       it, on the sidebar background so scrolled rows don't show
+       through. The horizontal padding matches the navbar's, so
+       the copy aligns with the real brand. */
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: var(--porto-nav-height);
+    padding-inline: var(--porto-nav-pad-x);
+    background-color: var(--porto-color-bg-sidebar);
   }
 }
 

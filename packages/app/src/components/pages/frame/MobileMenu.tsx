@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
+import { SiteTitle } from "./SiteTitle.tsx";
 
 /**
  * MobileMenu — the mobile navigation popover, shared by every page.
@@ -39,6 +41,13 @@ export function MobileMenu({
   children?: ReactNode;
 }) {
   const paneRef = useRef<HTMLDivElement>(null);
+  const config = usePortoConfig();
+  // OG Docusaurus renders the sidebar logo only when the navbar
+  // hides on scroll — otherwise the brand copy would sit hidden
+  // behind the always-visible navbar forever, and the tree would
+  // need the navbar-height offset from padding instead (the
+  // `--no-brand` content variant below).
+  const showBrand = hasSidebar && config.theme.hideNavbarOnScroll;
 
   useEffect(() => {
     const pane = paneRef.current;
@@ -138,7 +147,18 @@ export function MobileMenu({
             : "porto-mobile-menu"
         }
       >
-        <div className="porto-mobile-menu__content">
+        <div
+          className={
+            hasSidebar && !config.theme.hideNavbarOnScroll
+              ? "porto-mobile-menu__content porto-mobile-menu__content--no-brand"
+              : "porto-mobile-menu__content"
+          }
+        >
+          {showBrand && (
+            <div className="porto-mobile-menu__brand">
+              <SiteTitle />
+            </div>
+          )}
           {children}
           <div className="md:hidden">
             <MobileMenuFooter />

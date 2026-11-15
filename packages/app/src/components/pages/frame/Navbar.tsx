@@ -64,8 +64,8 @@ export function Navbar({
   // Hide-on-scroll: slide the navbar away while scrolling down,
   // bring it back on scroll up (or at the top of the page). Two
   // classes are toggled: one on the header itself (the transform)
-  // and one on <html> so the mobile TOC and sidebar popover can
-  // follow the navbar.
+  // and one on <html> so the mobile TOC bar and the nav progress
+  // bar can dock to the top edge when the navbar hides.
   useEffect(() => {
     if (!hideOnScroll) {
       return;
