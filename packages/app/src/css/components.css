@@ -3919,8 +3919,9 @@ a.porto-blog-article-author-name:hover {
   border-color: var(--porto-color-text-accent);
   box-shadow: var(--porto-shadow-md);
 }
-/* The title row: the `h2` takes the available width and
-   truncates, the count badge keeps its size beside it. */
+/* The title row: the `h2` sizes to its text (it never grows,
+   so the count badge hugs the title instead of sitting at the
+   card's far edge) and truncates when space runs out. */
 .porto-topic-list__header {
   display: flex;
   align-items: center;
@@ -3932,7 +3933,7 @@ a.porto-blog-article-author-name:hover {
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   margin: 0;
   font-size: 1.4rem;
   font-weight: 750;
