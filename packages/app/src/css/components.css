@@ -1973,7 +1973,8 @@ html.porto-navbar-hidden .porto-nav-progress {
   /* With the sidebar collapsed the bar spans the full width
      again (it jumps — the bar's transitions cover transform and
      top only — but at 1px tall the jump is invisible mid-slide). */
-  html.porto-sidebar-collapsed body:has(.main-frame--sidebar)
+  html.porto-sidebar-collapsed
+    body:has(.main-frame--sidebar)
     .porto-nav-progress {
     inset-inline-start: 0;
     width: 100%;

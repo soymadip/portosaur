@@ -7,10 +7,7 @@ import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../lib/sidebar.ts";
 import { PortoIcon } from "../../PortoIcon.tsx";
-import {
-  SidebarCollapseTrigger,
-  useSidebarCollapse,
-} from "./MobileMenu.tsx";
+import { SidebarCollapseTrigger, useSidebarCollapse } from "./MobileMenu.tsx";
 
 /**
  * The docs sidebar — nested categories, icons, carets, 265px.

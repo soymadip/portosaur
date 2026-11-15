@@ -277,10 +277,7 @@ export function MobileMenu({
   // brand-row button goes inert with the pane), hand focus to the
   // floating panel's trigger — Fumadocs does the same.
   useEffect(() => {
-    if (
-      collapsed &&
-      paneRef.current?.contains(document.activeElement)
-    ) {
+    if (collapsed && paneRef.current?.contains(document.activeElement)) {
       document
         .querySelector<HTMLElement>(".porto-sidebar-collapse-panel button")
         ?.focus();
@@ -336,8 +333,7 @@ export function MobileMenu({
       () => setHovered(false),
       // Leaving toward the viewport edge gets a close delay, so a
       // slip off the sidebar doesn't snap it shut immediately.
-      Math.min(event.clientX, document.body.clientWidth - event.clientX) >
-        100
+      Math.min(event.clientX, document.body.clientWidth - event.clientX) > 100
         ? 0
         : 500,
     );
@@ -349,67 +345,67 @@ export function MobileMenu({
         className="print:hidden"
         aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
       >
-      <div
-        ref={paneRef}
-        popover="auto"
-        id="porto__sidebar"
-        role="dialog"
-        aria-modal="true"
-        aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
-        className={
-          hasSidebar
-            ? "porto-mobile-menu porto-mobile-menu--persistent"
-            : "porto-mobile-menu"
-        }
-        // The collapsed pane is inert (except while peeked) so
-        // its links can't be tabbed to off-screen — desktop only,
-        // where the collapse exists at all.
-        inert={collapsed && !hovered && isDesktop}
-        onPointerEnter={onPeekEnter}
-        onPointerLeave={onPeekLeave}
-      >
         <div
+          ref={paneRef}
+          popover="auto"
+          id="porto__sidebar"
+          role="dialog"
+          aria-modal="true"
+          aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
           className={
-            hasSidebar && !config.theme.hideNavbarOnScroll
-              ? "porto-mobile-menu__content porto-mobile-menu__content--no-brand"
-              : "porto-mobile-menu__content"
+            hasSidebar
+              ? "porto-mobile-menu porto-mobile-menu--persistent"
+              : "porto-mobile-menu"
           }
+          // The collapsed pane is inert (except while peeked) so
+          // its links can't be tabbed to off-screen — desktop only,
+          // where the collapse exists at all.
+          inert={collapsed && !hovered && isDesktop}
+          onPointerEnter={onPeekEnter}
+          onPointerLeave={onPeekLeave}
         >
-          {showBrand && (
-            <div className="porto-mobile-menu__brand">
-              <SiteTitle />
+          <div
+            className={
+              hasSidebar && !config.theme.hideNavbarOnScroll
+                ? "porto-mobile-menu__content porto-mobile-menu__content--no-brand"
+                : "porto-mobile-menu__content"
+            }
+          >
+            {showBrand && (
+              <div className="porto-mobile-menu__brand">
+                <SiteTitle />
+              </div>
+            )}
+            {children}
+            <div className="md:hidden">
+              <MobileMenuFooter />
             </div>
-          )}
-          {children}
-          <div className="md:hidden">
-            <MobileMenuFooter />
           </div>
         </div>
-      </div>
-      {hasSidebar && (
-        <>
-          {/* The floating way back: visible only while the
+        {hasSidebar && (
+          <>
+            {/* The floating way back: visible only while the
               sidebar is collapsed and not peeked. The panel's
               trigger is inert with it, so it can't be tabbed to
               while hidden. */}
-          <div
-            className="porto-sidebar-collapse-panel"
-            inert={!collapsed || hovered}
-          >
-            <SidebarCollapseTrigger
-              collapsed={collapsed}
-              onClick={toggleCollapsed}
+            <div
+              className="porto-sidebar-collapse-panel"
+              inert={!collapsed || hovered}
+            >
+              <SidebarCollapseTrigger
+                collapsed={collapsed}
+                onClick={toggleCollapsed}
+              />
+            </div>
+            {/* The hover-peek strip: Fumadocs' 16px edge zone. */}
+            <div
+              className="porto-sidebar-collapse-strip"
+              aria-hidden="true"
+              onPointerEnter={onPeekEnter}
+              onPointerLeave={onPeekLeave}
             />
-          </div>
-          {/* The hover-peek strip: Fumadocs' 16px edge zone. */}
-          <div
-            className="porto-sidebar-collapse-strip"
-            aria-hidden="true"
-            onPointerEnter={onPeekEnter}
-            onPointerLeave={onPeekLeave}
-          />
-        </>
-      )}
+          </>
+        )}
       </nav>
     </SidebarCollapseContext.Provider>
   );
