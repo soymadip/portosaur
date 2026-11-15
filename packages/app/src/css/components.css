@@ -1363,9 +1363,16 @@ body:has(#porto__sidebar:popover-open) {
      slides out by its own width while the content expands into
      the freed space, and becomes a floating card — inset,
      rounded, bordered — so the hover peek slides a card back in
-     over the content instead of the full-height pane. */
+     over the content instead of the full-height pane. The card
+     starts BELOW the navbar (navbar height + 0.5rem), so its top
+     margin from the navbar matches its 0.5rem bottom margin from
+     the page end — the same 8px inset on both ends. It used to
+     span the full height (0.5rem from the viewport top), which
+     hid its top edge behind the navbar and left a dead band of
+     navbar-height padding above the title. */
   html.porto-sidebar-collapsed .porto-mobile-menu--persistent {
-    inset-block: 0.5rem;
+    inset-block-start: calc(var(--porto-nav-height) + 0.5rem);
+    inset-block-end: 0.5rem;
     border: 1px solid var(--porto-color-hairline);
     border-radius: 0.75rem;
     transform: translateX(-100%);
@@ -1381,19 +1388,20 @@ body:has(#porto__sidebar:popover-open) {
     transform: translateX(-0.5rem);
   }
   /* In the collapsed state the floating card drops the
-     navbar-brand copy: the card's top sits under the navbar
-     (z-index 10 over 5), so the brand would hide behind it —
-     and a floating card needs no navbar copy anyway. The brand
+     navbar-brand copy — a floating card needs no navbar copy,
+     and the card starts below the navbar now, so the brand
+     slot would just be dead space at its top. The brand
      SHRINKS away (height + opacity over the collapse duration)
      instead of vanishing with `display: none`: the old instant
      removal jumped the whole tree up 54px in one frame while
      the compensating padding glided down over 0.35s, so the
      items jittered down on close and rose from below on open.
-     With the shrink and the padding on the same duration and
-     easing, the title glides just the 8px of the pane's inset.
-     The brand stays a rendered flex item at height 0, so the
-     1rem content gap above the title survives — the collapsed
-     padding is only the navbar height, not navbar + 1rem. The
+     With the shrink and the pane's top inset on the same
+     duration and easing, the two nearly cancel (the pane's top
+     moves down 62px as the brand gives back 54px) and the title
+     glides just 8px. The brand stays a rendered flex item at
+     height 0, so the 1rem content gap above the title survives
+     and the title sits 1rem below the card's top edge. The
      visibility flips hidden at the END of the shrink (the
      delayed flip in this rule's transition) so the brand's
      link leaves the focus order only once it is gone; on
@@ -1408,11 +1416,6 @@ body:has(#porto__sidebar:popover-open) {
       height var(--porto-sidebar-collapse-duration) ease,
       opacity var(--porto-sidebar-collapse-duration) ease,
       visibility 0s linear var(--porto-sidebar-collapse-duration);
-  }
-  html.porto-sidebar-collapsed
-    .porto-mobile-menu--persistent
-    .porto-mobile-menu__content {
-    padding-top: var(--porto-nav-height);
   }
   /* The default-collapsed first paint: a page that starts with
      the sidebar closed (`theme.navigation.sidebar_collapsed`, or
@@ -1434,7 +1437,8 @@ body:has(#porto__sidebar:popover-open) {
       :has([data-porto-sidebar-default="expanded"])
     )
     .porto-mobile-menu--persistent {
-    inset-block: 0.5rem;
+    inset-block-start: calc(var(--porto-nav-height) + 0.5rem);
+    inset-block-end: 0.5rem;
     border: 1px solid var(--porto-color-hairline);
     border-radius: 0.75rem;
     transform: translateX(-100%);
@@ -1447,13 +1451,6 @@ body:has(#porto__sidebar:popover-open) {
     height: 0;
     opacity: 0;
     visibility: hidden;
-  }
-  body:has([data-porto-sidebar-default="collapsed"]):not(
-      :has([data-porto-sidebar-default="expanded"])
-    )
-    .porto-mobile-menu--persistent
-    .porto-mobile-menu__content {
-    padding-top: var(--porto-nav-height);
   }
   html[dir="rtl"]
     body:has([data-porto-sidebar-default="collapsed"]):not(
