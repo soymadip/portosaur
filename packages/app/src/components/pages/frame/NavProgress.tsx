@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Navigation progress bar (Docusaurus's NProgress mechanism) — a
- * 2px bar in the accent color, fixed at the very top, no spinner.
+ * 2px bar in the accent color, fixed just under the navbar (it
+ * docks to the top edge when the navbar hides on scroll), no spinner.
  *
  * A navigation starts the bar only after a 200ms delay, so slow
  * navigations show something and fast ones show nothing — no

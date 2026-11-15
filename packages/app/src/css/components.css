@@ -1592,16 +1592,17 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 
 /* ----- Nav progress ----- */
-/* The thin top progress bar for client-side navigations
+/* The thin progress bar for client-side navigations
  * (Docusaurus's NProgress mechanism: a 2px bar in the accent color,
- * fixed at the very top, no spinner). The bar appears only after a
- * 200ms delay, so slow navigations show something and fast ones
- * show nothing. The animation is pure CSS — the bar crawls to 80%
- * while the navigation is in flight, completes to 100% on the swap,
- * then fades out. */
+ * no spinner), docked under the navbar instead of the top edge so
+ * it reads as the navbar's loading underline. The bar appears only
+ * after a 200ms delay, so slow navigations show something and fast
+ * ones show nothing. The animation is pure CSS — the bar crawls to
+ * 80% while the navigation is in flight, completes to 100% on the
+ * swap, then fades out. */
 .porto-nav-progress {
   position: fixed;
-  top: 0;
+  top: var(--porto-nav-height);
   left: 0;
   /* Above the navbar (z-index 10), below the skip link (20). */
   z-index: 11;
@@ -1634,6 +1635,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   transition:
     transform 0.2s ease,
     opacity 0.3s ease 0.15s;
+}
+
+/* The navbar hides on scroll — the bar docks to the top edge with
+   it, like the mobile TOC bar, instead of floating mid-page. */
+html.porto-navbar-hidden .porto-nav-progress {
+  top: 0;
 }
 
 /* ----- Site footer ----- */
