@@ -103,9 +103,24 @@ main {
 }
 /* The breadcrumbs + title panel sits flush under the navbar, like
    OG — Docusaurus puts no padding between the navbar and the
-   breadcrumbs. */
+   breadcrumbs. Its bottom padding is small too: the title and the
+   body content flow together in OG, with no panel split between
+   them, so the two panels split a single small gap across the
+   hairline instead of each adding a full 1.5rem. */
 .content-panel--header {
   padding-top: 0;
+  padding-bottom: 0.75rem;
+}
+/* The body panel on doc pages: same small top padding, for the
+   same reason. */
+.content-panel--body {
+  padding-top: 0.75rem;
+}
+/* On pages with a topic list the description line is centered, so
+   the title centers with it. Regular doc pages keep the
+   left-aligned title. */
+.content-panel--centered .porto-page-title {
+  text-align: center;
 }
 .content-panel + .content-panel {
   border-top: 1px solid var(--porto-color-hairline);
@@ -3850,6 +3865,12 @@ a.porto-blog-article-author-name:hover {
    description line above a grid of cards, each with an icon, an
    accent title, and a one-line muted description. Two columns
    above OG's 996px `col` breakpoint, one below it. */
+/* The list follows the body content directly — no extra top
+   margin on top of the last paragraph's own bottom margin (and
+   none at all when the body is empty). */
+.porto-content-container > .porto-topic-list-wrapper {
+  margin-top: 0;
+}
 .porto-topic-list__desc {
   margin: 1rem 0 1.9rem;
   text-align: center;

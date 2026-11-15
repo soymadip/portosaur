@@ -31,7 +31,7 @@ import { Breadcrumbs } from "./parts/Breadcrumbs.tsx";
 import { ContentPanel } from "./parts/ContentPanel.tsx";
 import { DocFooter } from "./parts/DocFooter.tsx";
 import { getMDXComponents } from "../mdx.tsx";
-import { TopicList, TopicListProvider } from "../mdx/TopicList.tsx";
+import { AutoTopicList, TopicListProvider } from "../mdx/TopicList.tsx";
 import { PageSidebar } from "./frame/PageSidebar.tsx";
 import { PageTitle } from "./parts/PageTitle.tsx";
 
@@ -192,26 +192,30 @@ export function DocPage({
         </div>
         <div className={`main-pane${hasToc ? " main-pane--toc" : ""}`}>
           {(breadcrumbs.length > 0 || heading) && (
-            <ContentPanel className="content-panel--header">
+            <ContentPanel
+              className={
+                shouldRenderTopicList
+                  ? "content-panel--header content-panel--centered"
+                  : "content-panel--header"
+              }
+            >
               {breadcrumbs.length > 0 && <Breadcrumbs crumbs={breadcrumbs} />}
               {heading && <PageTitle title={heading.text} id={heading.id} />}
             </ContentPanel>
           )}
-          <ContentPanel>
-            <div className="porto-markdown-content">
-              <TopicListProvider
-                value={{
-                  cards: topicCards,
-                  desc: topicDesc,
-                  shouldRender: shouldRenderTopicList,
-                }}
-              >
+          <ContentPanel className="content-panel--body">
+            <TopicListProvider
+              value={{
+                cards: topicCards,
+                desc: topicDesc,
+                shouldRender: shouldRenderTopicList,
+              }}
+            >
+              <div className="porto-markdown-content">
                 <MDXBody components={getMDXComponents(components)} />
-              </TopicListProvider>
-            </div>
-            {shouldRenderTopicList && topicCards.length > 0 && (
-              <TopicList items={topicCards} desc={topicDesc} />
-            )}
+              </div>
+              <AutoTopicList items={topicCards} desc={topicDesc} />
+            </TopicListProvider>
             <DocFooter
               editUrl={editUrl}
               lastUpdated={lastUpdated}

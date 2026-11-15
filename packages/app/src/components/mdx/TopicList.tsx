@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useRef, type ReactNode } from "react";
 import {
   TOPIC_LIST_DEFAULT_DESC,
   type TopicListItem,
@@ -14,14 +14,19 @@ export type { TopicListItem } from "../../lib/content.ts";
  *
  * Two modes, like the original:
  *
- * - **Automatic**: the doc page renders `<TopicList items={cards} />`
- *   after the content on index pages, with cards resolved server-side
+ * - **Automatic**: the doc page renders `<AutoTopicList />` after
+ *   the content on index pages, with cards resolved server-side
  *   (`topicListCards` + icon HTML). The description line above the
  *   cards comes from the context (resolved by the doc page).
  * - **Manual**: an explicit `<TopicList />` tag in MDX content
  *   renders the current category's cards from the context at the
  *   position where the tag appears. A manual list on a non-index
  *   page needs `forceRender`.
+ *
+ * A manual tag suppresses the automatic list: the author's placement
+ * wins, and the page never shows the list twice. The provider holds
+ * a shared flag the manual list sets when it renders; the automatic
+ * list reads it after the content has rendered.
  *
  * The description line resolves like the original: children, then
  * the `desc` prop, then the context (frontmatter `topic_list.desc`,
@@ -41,6 +46,11 @@ export interface TopicListContextValue {
   cards: TopicListItem[];
   desc: string | null;
   shouldRender: boolean;
+  /* Set by a manual `<TopicList />` tag when it renders, so the
+     automatic list below the content can stand down. The provider
+     owns the flag — it must live client-side, where both lists
+     render, so it is not part of the server-provided value. */
+  manualRendered: { current: boolean };
 }
 
 export const TopicListContext = createContext<TopicListContextValue | null>(
@@ -51,11 +61,12 @@ export function TopicListProvider({
   value,
   children,
 }: {
-  value: TopicListContextValue;
+  value: Omit<TopicListContextValue, "manualRendered">;
   children: ReactNode;
 }) {
+  const manualRendered = useRef(false);
   return (
-    <TopicListContext.Provider value={value}>
+    <TopicListContext.Provider value={{ ...value, manualRendered }}>
       {children}
     </TopicListContext.Provider>
   );
@@ -134,11 +145,18 @@ export function TopicList({
   if (!shouldRender || cards.length === 0) {
     return null;
   }
+  /* A manual list claims the page: the automatic list below the
+     content stands down. This runs during render, which is safe
+     here — React renders the content before the automatic list
+     below it, so the flag is always set before it is read. */
+  const isAutoList = propItems !== undefined;
+  if (!isAutoList && context) {
+    context.manualRendered.current = true;
+  }
   /* The automatic list sits in the body panel, whose padding is
      already the separation from the title panel above — its
      description needs no top margin. A manual tag follows MDX
      content, so it keeps the original top margin. */
-  const isAutoList = propItems !== undefined;
   return (
     <div className="porto-topic-list-wrapper">
       {resolvedDesc !== null && (
@@ -159,4 +177,27 @@ export function TopicList({
       </section>
     </div>
   );
+}
+
+/**
+ * The automatic list, rendered by the doc page after the content.
+ * Stands down when the content already placed a manual list — the
+ * author's placement wins.
+ */
+export function AutoTopicList({
+  items,
+  desc,
+}: {
+  items: TopicListItem[];
+  desc: string | null;
+}) {
+  const context = useContext(TopicListContext);
+  const shouldRender = context?.shouldRender ?? false;
+  if (!shouldRender || items.length === 0) {
+    return null;
+  }
+  if (context?.manualRendered.current) {
+    return null;
+  }
+  return <TopicList items={items} desc={desc} />;
 }
