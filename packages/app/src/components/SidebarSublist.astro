@@ -17,6 +17,12 @@
 // - Rows are Fumadocs-style: uniform size across levels and the
 //   caret pinned to the row's right edge (the label grows to fill
 //   the row). Vertical padding is 0.3em — 0.5em felt too airy.
+// - Every link prefetches on viewport, except the current page
+//   (prefetching it would re-fetch the page already open). Links
+//   inside closed categories — and, on mobile, inside the closed
+//   menu popover — are not visible, so they prefetch only once
+//   they come into view; the cost stays bounded by what's on
+//   screen instead of the whole tree.
 // - Every row shows an icon: the frontmatter `icon` when the entry
 //   declares one, else DocCardList's fallbacks (folder for
 //   categories, notebook for docs) — Fumadocs-style. The frontmatter
@@ -89,6 +95,9 @@ function hasActiveDescendant(item: any): boolean {
                       class="large"
                       href={item.link.href}
                       aria-current={isActiveItem(item) ? "page" : undefined}
+                      data-astro-prefetch={
+                        isActiveItem(item) ? undefined : "viewport"
+                      }
                     >
                       {icon}
                       {item.label}
@@ -118,6 +127,9 @@ function hasActiveDescendant(item: any): boolean {
                   class="large"
                   href={item.link.href}
                   aria-current={isActiveItem(item) ? "page" : undefined}
+                  data-astro-prefetch={
+                    isActiveItem(item) ? undefined : "viewport"
+                  }
                 >
                   {icon}
                   {item.label}
@@ -142,6 +154,7 @@ function hasActiveDescendant(item: any): boolean {
             href={item.href}
             aria-current={isActiveItem(item) ? "page" : undefined}
             class:list={[{ large: !nested }]}
+            data-astro-prefetch={isActiveItem(item) ? undefined : "viewport"}
           >
             {icon}
             <span>{item.label}</span>

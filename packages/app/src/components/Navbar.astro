@@ -23,9 +23,11 @@
 // prefetching with the hover strategy by default, which never fires
 // on a phone — so without this, tapping Docs fetched the whole page
 // at tap time. The navbar links are always visible and few, so
-// prefetching them costs little. Dropdown links keep the hover
-// default (they're hidden until the dropdown opens); the sidebar
-// tree is deliberately not prefetched (too many links).
+// prefetching them costs little. The active link is skipped (it
+// points at the page already open). Dropdown links keep the hover
+// default (they're hidden until the dropdown opens). The sidebar
+// links prefetch on viewport too (see SidebarSublist) — only the
+// visible rows, so the cost stays bounded.
 //
 // The fixed header is positioned by the `.header` rules below;
 // BaseLayout's <main> reserves its height (padding-top).
@@ -102,7 +104,9 @@ const showThemeSwitch = theme.showThemeSwitch;
                 href={entry.href}
                 target={entry.external ? "_blank" : undefined}
                 rel={entry.external ? "noopener noreferrer" : undefined}
-                data-astro-prefetch={entry.external ? undefined : "viewport"}
+                data-astro-prefetch={
+                  entry.external || entry.active ? undefined : "viewport"
+                }
               >
                 {entry.label}
               </a>
@@ -147,7 +151,9 @@ const showThemeSwitch = theme.showThemeSwitch;
               href={entry.href}
               target={entry.external ? "_blank" : undefined}
               rel={entry.external ? "noopener noreferrer" : undefined}
-              data-astro-prefetch={entry.external ? undefined : "viewport"}
+              data-astro-prefetch={
+                entry.external || entry.active ? undefined : "viewport"
+              }
             >
               {entry.label}
             </a>

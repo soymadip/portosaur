@@ -71,8 +71,10 @@ const { hasSidebar = false } = Astro.props;
       // Opening the menu is the intent signal: fetch the nav
       // destinations now, while the user scans the menu, so the tap
       // swaps instantly instead of fetching the whole page at tap
-      // time. Only the footer's nav links (a handful) — never the
-      // sidebar tree, which can hold a hundred links. Each URL is
+      // time. Only the footer's nav links (a handful) — the sidebar
+      // tree prefetches on viewport instead (its rows come into
+      // view as the menu opens and scrolls). The active link is
+      // skipped (it points at the page already open). Each URL is
       // prefetched at most once per page; `prefetch()` itself skips
       // data-saver and slow connections.
       prefetchNavLinks() {
@@ -83,6 +85,7 @@ const { hasSidebar = false } = Astro.props;
             href.startsWith("/") &&
             !href.startsWith("//") &&
             !link.hasAttribute("target") &&
+            !link.classList.contains("active") &&
             !this.prefetchedNavLinks.has(href)
           ) {
             this.prefetchedNavLinks.add(href);

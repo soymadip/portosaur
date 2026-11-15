@@ -89,10 +89,12 @@ export default defineConfig({
   // because importing astro:prefetch (the mobile menu prefetches
   // its nav links when it opens) requires the config to be set; the
   // ClientRouter default alone does not enable the module. The
-  // navbar links and docs-home actions/cards override the strategy
-  // per-link with data-astro-prefetch="viewport" (hover never
-  // fires on a phone); the sidebar tree keeps hover only, so a docs
-  // page does not prefetch its whole visible sidebar.
+  // navbar links, docs-home actions/cards, sidebar links, and
+  // prev/next override the strategy per-link with
+  // data-astro-prefetch="viewport" (hover never fires on a phone).
+  // Viewport prefetching stays bounded by what's on screen: links
+  // inside closed categories or the closed menu popover are not
+  // visible, so they prefetch only once they come into view.
   prefetch: {
     prefetchAll: true,
   },
