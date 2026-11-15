@@ -1383,20 +1383,36 @@ body:has(#porto__sidebar:popover-open) {
   /* In the collapsed state the floating card drops the
      navbar-brand copy: the card's top sits under the navbar
      (z-index 10 over 5), so the brand would hide behind it —
-     and a floating card needs no navbar copy anyway. The content
-     takes the navbar-height offset from padding instead (the
-     `--no-brand` pattern — the brand row provided the offset),
-     so the title row clears the navbar and sits at the card's
-     visible top. */
+     and a floating card needs no navbar copy anyway. The brand
+     SHRINKS away (height + opacity over the collapse duration)
+     instead of vanishing with `display: none`: the old instant
+     removal jumped the whole tree up 54px in one frame while
+     the compensating padding glided down over 0.35s, so the
+     items jittered down on close and rose from below on open.
+     With the shrink and the padding on the same duration and
+     easing, the title glides just the 8px of the pane's inset.
+     The brand stays a rendered flex item at height 0, so the
+     1rem content gap above the title survives — the collapsed
+     padding is only the navbar height, not navbar + 1rem. The
+     visibility flips hidden at the END of the shrink (the
+     delayed flip in this rule's transition) so the brand's
+     link leaves the focus order only once it is gone; on
+     expand the base rule's zero-delay flip shows it at once. */
   html.porto-sidebar-collapsed
     .porto-mobile-menu--persistent
     .porto-mobile-menu__brand {
-    display: none;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      height var(--porto-sidebar-collapse-duration) ease,
+      opacity var(--porto-sidebar-collapse-duration) ease,
+      visibility 0s linear var(--porto-sidebar-collapse-duration);
   }
   html.porto-sidebar-collapsed
     .porto-mobile-menu--persistent
     .porto-mobile-menu__content {
-    padding-top: calc(var(--porto-nav-height) + 1rem);
+    padding-top: var(--porto-nav-height);
   }
   /* The default-collapsed first paint: a page that starts with
      the sidebar closed (`theme.navigation.sidebar_collapsed`, or
@@ -1428,14 +1444,16 @@ body:has(#porto__sidebar:popover-open) {
     )
     .porto-mobile-menu--persistent
     .porto-mobile-menu__brand {
-    display: none;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
   }
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
     )
     .porto-mobile-menu--persistent
     .porto-mobile-menu__content {
-    padding-top: calc(var(--porto-nav-height) + 1rem);
+    padding-top: var(--porto-nav-height);
   }
   html[dir="rtl"]
     body:has([data-porto-sidebar-default="collapsed"]):not(
@@ -1497,6 +1515,17 @@ body:has(#porto__sidebar:popover-open) {
     margin-inline: -0.3rem;
     padding-inline: var(--porto-nav-pad-x);
     background-color: var(--porto-color-bg-sidebar);
+    /* Clipped while the collapse shrinks the row to height 0
+       (below), and the shrink + fade run on the collapse
+       duration so the tree glides with the pane instead of
+       jumping. The visibility flip has no delay here: on
+       expand the brand reappears the instant the pane starts
+       sliding back (the collapsed rule delays the hide). */
+    overflow: hidden;
+    transition:
+      height var(--porto-sidebar-collapse-duration) ease,
+      opacity var(--porto-sidebar-collapse-duration) ease,
+      visibility 0s;
   }
 }
 

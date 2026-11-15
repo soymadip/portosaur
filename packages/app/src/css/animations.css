@@ -78,10 +78,11 @@
 }
 .porto-mobile-menu .porto-mobile-menu__content {
   /* padding-top joins the transform: collapsing the sidebar
-     swaps the content's top padding (the brand row goes away
-     with the brand, so the navbar-height offset moves into
-     padding), and without the transition the tree would jump
-     the instant the pane starts sliding. */
+     swaps the content's top padding (the brand row shrinks to
+     height 0, so the navbar-height offset moves into padding),
+     on the same duration and easing as the brand's shrink —
+     the two stay in sync, so the tree glides with the pane
+     instead of jumping the instant it starts sliding. */
   transition:
     transform 0.25s ease,
     padding-top var(--porto-sidebar-collapse-duration) ease;
