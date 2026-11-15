@@ -810,10 +810,11 @@ body:has(#porto__sidebar:popover-open)
   padding-inline-start: var(--porto-sidebar-item-padding-inline);
 }
 
-/* Top-level rows are the same size and weight as nested rows —
-   hierarchy comes from indentation and the guide line, not a
-   bigger font. Only the color stays brighter. */
+/* Top-level rows are bold and brighter than nested rows — the
+   size stays the same, so the hierarchy reads from weight and
+   color plus the indentation and guide line. */
 .porto-sidebar__large {
+  font-weight: 700;
   color: var(--porto-color-white);
 }
 
@@ -957,6 +958,16 @@ body:has(#porto__sidebar:popover-open)
     var(--porto-color-text-accent) 10%,
     transparent
   );
+}
+
+/* An active top-level row stays bold: the 600 above would
+   otherwise make it lighter than its inactive top-level
+   siblings. The extra class beats the active rule's specificity
+   in every state. */
+.porto-sidebar [aria-current="page"].porto-sidebar__large,
+.porto-sidebar [aria-current="page"].porto-sidebar__large:hover,
+.porto-sidebar [aria-current="page"].porto-sidebar__large:focus {
+  font-weight: 700;
 }
 
 /* The active category row highlights as one uniform box: the
@@ -1156,19 +1167,12 @@ body:has(#porto__sidebar:popover-open)
   opacity: 0;
   transition:
     opacity 0.25s,
-    inset-block-start 0.2s ease-in-out,
     display 0.25s allow-discrete,
     overlay 0.25s allow-discrete;
 }
 
 .porto-mobile-menu:popover-open {
   opacity: 1;
-}
-
-/* The navbar hides on scroll down (hideNavbarOnScroll) — the
-   sidebar follows it to the top of the viewport. */
-html.porto-navbar-hidden .porto-mobile-menu {
-  inset-block-start: 0;
 }
 
 /* Horizontal padding is 0.3rem each side, not the 1rem sidebar
@@ -1219,6 +1223,17 @@ body:has(#porto__sidebar:popover-open) {
     /* Not a popover at desktop widths, so it never matches
        `:popover-open` — keep it fully opaque. */
     opacity: 1;
+    /* OG Docusaurus pattern: the sidebar is full-height and its
+       top navbar-height slice sits hidden behind the navbar (the
+       navbar paints above it, z-index 10 over 5). The content
+       starts below the navbar via padding, not by insetting the
+       pane — so when the navbar hides on scroll, the sidebar
+       stays exactly where it is instead of sliding up, and the
+       top slice is just empty sidebar space. */
+    inset-block: 0 0;
+  }
+  .porto-mobile-menu--persistent .porto-mobile-menu__content {
+    padding-top: calc(var(--porto-nav-height) + 1rem);
   }
 }
 
