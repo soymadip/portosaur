@@ -75,6 +75,12 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   const current = normalizeHref(pathname);
   const collapsable = config.theme.collapsableSidebar !== false;
 
+  // The section title above the tree — "Docs" on a docs site,
+  // "Notes" on a portfolio site, where the sidebar only ever
+  // shows the notes tree. Same mapping as the pagination section
+  // link in `doc-page.tsx`.
+  const sectionTitle = config.siteMode === "docs" ? "Docs" : "Notes";
+
   const { items, spriteHtml, hash } = prepared;
 
   // Categories in pre-order traversal — the stored `open` array is
@@ -310,6 +316,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   return (
     <nav className="porto-sidebar" aria-label="Docs sidebar">
       {spriteHtml && <span dangerouslySetInnerHTML={{ __html: spriteHtml }} />}
+      <p className="porto-sidebar-title">{sectionTitle}</p>
       {renderItems(items, false)}
     </nav>
   );
