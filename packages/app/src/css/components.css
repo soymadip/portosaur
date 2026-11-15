@@ -2422,10 +2422,10 @@ html.porto-navbar-hidden .porto-nav-progress {
 .features-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  grid-auto-rows: minmax(205px, auto);
+  grid-auto-rows: minmax(180px, auto);
   gap: 1rem;
   width: 100%;
-  max-width: 64rem;
+  max-width: 72rem;
 }
 
 .feature-card {
