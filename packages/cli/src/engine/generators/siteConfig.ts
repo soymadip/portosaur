@@ -75,6 +75,7 @@ export interface PortosaurOptions {
     hideNavbarOnScroll: boolean;
     navbarItems: any[];
     collapsableSidebar: boolean;
+    autoCollapse: boolean;
     footer: {
       enable: boolean;
       message: string;
@@ -259,6 +260,7 @@ export function buildSiteConfig(
   ); // Hide the Project link in the navbar.
 
   const collapsableSidebar = get("theme.navigation.collapsable_sidebar", true); // Enable collapsable sidebar navigation.
+  const autoCollapse = get("theme.navigation.auto_collapse", true); // Auto-collapse inactive sidebar categories.
 
   const footerEnable = get("theme.footer.enable", true); // Toggle the footer section.
   const footerMessage = get(
@@ -486,6 +488,7 @@ export function buildSiteConfig(
       hideNavbarOnScroll,
       navbarItems: customNavbarItems,
       collapsableSidebar,
+      autoCollapse,
       footer: {
         enable: footerEnable,
         message: footerMessage,

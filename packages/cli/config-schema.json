@@ -262,6 +262,11 @@
               "type": ["boolean", "null"],
               "description": "Enable collapsable sidebar navigation.",
               "default": true
+            },
+            "auto_collapse": {
+              "type": ["boolean", "null"],
+              "description": "Auto-collapse inactive sidebar categories.",
+              "default": true
             }
           }
         },

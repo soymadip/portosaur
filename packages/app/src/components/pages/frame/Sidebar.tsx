@@ -34,6 +34,14 @@ import { PortoIcon } from "../../PortoIcon.tsx";
  * still works (the close is the user's choice); the next
  * navigation opens the new page's path again.
  *
+ * Auto-collapse (`theme.navigation.auto_collapse`, default true)
+ * keeps one category open per level: opening a category closes
+ * its siblings, and navigating closes the old tree. The active
+ * branch is not exempt — opening a sibling while reading inside
+ * a category closes it, like closing it by hand; the next
+ * navigation opens the new page's path again. With the option
+ * off, categories open and close independently.
+ *
  * When `theme.collapsable_sidebar` is false, categories render as
  * plain groups (label + list, no `<details>`).
  *
@@ -74,6 +82,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   const pathname = stripBase(rawPathname ?? "/", config.site.baseUrl);
   const current = normalizeHref(pathname);
   const collapsable = config.theme.collapsableSidebar !== false;
+  const autoCollapse = config.theme.autoCollapse !== false;
 
   // The section title above the tree — "Docs" on a docs site,
   // "Notes" on a portfolio site, where the sidebar only ever
@@ -84,14 +93,20 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   const { items, spriteHtml, hash } = prepared;
 
   // Categories in pre-order traversal — the stored `open` array is
-  // positional over this list.
-  const categoryIndex = useMemo(() => {
+  // positional over this list. The sibling map (categories sharing
+  // a parent list) drives auto-collapse: opening one closes the
+  // others at its level. It is built in a second pass so the
+  // index assignment stays exactly pre-order — stored state from
+  // an older build maps onto the same positions.
+  const { categoryIndex, categorySiblings, categoryList } = useMemo(() => {
     const map = new Map<SidebarItem, number>();
+    const list: SidebarItem[] = [];
     let index = 0;
     const walk = (nodes: SidebarItem[]) => {
       for (const node of nodes) {
         if (node.type === "category") {
           map.set(node, index);
+          list.push(node);
           index += 1;
           if (node.items) {
             walk(node.items);
@@ -100,7 +115,25 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
       }
     };
     walk(items);
-    return map;
+    const siblings = new Map<SidebarItem, number[]>();
+    const walkSiblings = (nodes: SidebarItem[]) => {
+      const cats = nodes.filter((node) => node.type === "category");
+      for (const cat of cats) {
+        siblings.set(
+          cat,
+          cats
+            .filter((other) => other !== cat)
+            .map((other) => map.get(other) as number),
+        );
+      }
+      for (const cat of cats) {
+        if (cat.items) {
+          walkSiblings(cat.items);
+        }
+      }
+    };
+    walkSiblings(items);
+    return { categoryIndex: map, categorySiblings: siblings, categoryList: list };
   }, [items]);
 
   const categoryCount = categoryIndex.size;
@@ -113,6 +146,20 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   openStateRef.current = openState;
 
   const isOpen = (item: SidebarItem): boolean => {
+    const index = categoryIndex.get(item);
+    const stored = index !== undefined ? openState?.[index] : undefined;
+    if (autoCollapse) {
+      // A stored value is the truth, even for the active branch:
+      // opening a sibling closed it on purpose, and the active
+      // link stays hidden until the next navigation reopens the
+      // new path — the same standing a deliberate close has.
+      // With no stored value yet, the active path opens by
+      // default, like the independent mode.
+      if (stored !== null && stored !== undefined) {
+        return stored;
+      }
+      return hasActiveDescendant(item, current);
+    }
     // The current page's ancestors open ahead of any stored
     // state — a category the user closed earlier reopens the
     // moment the current page lands inside it again. The stored
@@ -120,11 +167,6 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     if (hasActiveDescendant(item, current)) {
       return true;
     }
-    const index = categoryIndex.get(item);
-    if (index === undefined) {
-      return false;
-    }
-    const stored = openState?.[index];
     if (stored !== null && stored !== undefined) {
       return stored;
     }
@@ -207,6 +249,11 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   // never notices the browser closed the element natively.
   // Closing a category by hand doesn't change `current`, so a
   // deliberate close is left alone until the next navigation.
+  // With auto-collapse, the navigation also closes the old tree:
+  // the active path's siblings go false in stored state, so the
+  // accordion holds after a search or direct-link navigation and
+  // not just after a manual toggle — and a later re-render keeps
+  // the DOM and the stored state in agreement.
   useEffect(() => {
     const sidebar = document.querySelector(".porto-sidebar");
     const active = sidebar?.querySelector('a[aria-current="page"]');
@@ -215,7 +262,50 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
       details.open = true;
       details = details.parentElement?.closest("details") ?? null;
     }
-  }, [current]);
+    if (!autoCollapse) {
+      return;
+    }
+    setOpenState((previous) => {
+      const next: Array<boolean | null> = previous
+        ? [...previous]
+        : Array.from({ length: categoryCount }, () => null);
+      let changed = false;
+      const fixLevel = (nodes: SidebarItem[]) => {
+        const activeNode = nodes.find(
+          (node) =>
+            node.type === "category" && hasActiveDescendant(node, current),
+        );
+        if (!activeNode) {
+          return;
+        }
+        for (const node of nodes) {
+          if (node.type !== "category") {
+            continue;
+          }
+          const index = categoryIndex.get(node);
+          if (index === undefined) {
+            continue;
+          }
+          const want = node === activeNode;
+          if (next[index] !== want) {
+            next[index] = want;
+            changed = true;
+          }
+        }
+        if (activeNode.items) {
+          fixLevel(activeNode.items);
+        }
+      };
+      fixLevel(items);
+      if (!changed) {
+        return previous;
+      }
+      storeState(next);
+      return next;
+    });
+    // The tree (items) and its index only change with a new tree.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, autoCollapse]);
 
   const setCategoryOpen = (item: SidebarItem, open: boolean) => {
     const index = categoryIndex.get(item);
@@ -223,10 +313,21 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
       return;
     }
     setOpenState((previous) => {
+      // The first stored snapshot captures the visible state —
+      // a branch open by default (the active path) gets a stored
+      // `true`, or navigating away would close it for having no
+      // stored value, even with auto-collapse off.
       const next: Array<boolean | null> = previous
         ? [...previous]
-        : Array.from({ length: categoryCount }, () => null);
+        : categoryList.map((cat) => isOpen(cat));
       next[index] = open;
+      // Opening a category closes its siblings; closing one
+      // never touches the rest.
+      if (open && autoCollapse) {
+        for (const sibling of categorySiblings.get(item) ?? []) {
+          next[sibling] = false;
+        }
+      }
       storeState(next);
       return next;
     });
