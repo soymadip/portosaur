@@ -806,8 +806,50 @@ body:has(#porto__sidebar:popover-open)
 
 .porto-sidebar ul ul li {
   margin-inline-start: var(--porto-sidebar-item-padding-inline);
-  border-inline-start: 1px solid var(--porto-color-hairline-light);
+  border-inline-start: 1px solid var(--porto-sidebar-guide-color);
   padding-inline-start: var(--porto-sidebar-item-padding-inline);
+  --porto-sidebar-guide-color: var(--porto-color-hairline-light);
+}
+
+/* The last child's segment stops a bit short of the row's
+   bottom edge — 0.3em up, about where the item's text ends
+   (the link's own padding is 0.3em at its slightly smaller
+   size, so the line lands a hair above the text's bottom edge)
+   — instead of hanging below it. A border can't be shortened,
+   so the last child keeps a transparent border (same geometry)
+   and draws its line with a ::before on the border's exact
+   footprint. */
+.porto-sidebar ul ul li:last-child {
+  position: relative;
+  border-inline-start-color: transparent;
+}
+.porto-sidebar ul ul li:last-child::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -1px;
+  top: 0;
+  bottom: 0.3em;
+  width: 1px;
+  background-color: var(--porto-sidebar-guide-color);
+}
+
+/* The guide line of the top-level category holding the active
+   page is tinted toward the primary — same 1px width as the
+   other guide lines, just a soft primary color — so the active
+   group reads at a glance. Only that category's direct children
+   get it (deeper levels keep the hairline), and the line is the
+   per-item borders, so it spans exactly the first child to the
+   last and never past it. Both variants: collapsable categories
+   (details) and plain groups (a direct ul). A 2px line was too
+   heavy, first in gray-3 then in the tint; the width went back
+   to 1px and only the tint stayed. */
+.porto-sidebar__top-level > li > details:has(a[aria-current="page"]) > ul > li,
+.porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
+  --porto-sidebar-guide-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 40%,
+    transparent
+  );
 }
 
 /* Top-level rows are semibold and brighter than nested rows —
