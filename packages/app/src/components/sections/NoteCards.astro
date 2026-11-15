@@ -22,6 +22,7 @@ import {
   renderDynamicIcon,
   renderIcon,
   techMap,
+  pageHref,
   withBase,
 } from "../../utils/icons.ts";
 
@@ -71,7 +72,7 @@ const notes = entries
 {notes.length > 0 && (
   <div class="porto-note-grid" role="list">
     {notes.map((note, index) => {
-      const noteUrl = withBase(`/${notesRoute}/${note.slug}`, base);
+      const noteUrl = pageHref(withBase(`/${notesRoute}/${note.slug}`, base));
       // Resolve color: explicit frontmatter first, then techMap
       // guessing, then default.
       const slugLower = note.slug.toLowerCase();

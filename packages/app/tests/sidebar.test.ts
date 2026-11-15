@@ -44,7 +44,7 @@ describe("buildSidebar", () => {
     const category = items.find(
       (item) => item.label === "Guide",
     ) as SidebarCategoryItem;
-    expect(category.link).toEqual({ href: "/notes/guide" });
+    expect(category.link).toEqual({ href: "/notes/guide/" });
     // The index doc is removed from the list (it acts as the category link).
     expect(category.items.map((item) => (item as SidebarDocItem).id)).toEqual([
       "guide/setup",
@@ -62,7 +62,7 @@ describe("buildSidebar", () => {
 
     // No "Docs" root category — the doc itself is the top-level item.
     expect(items).toEqual([
-      { type: "doc", label: "Intro", href: "/notes/intro", id: "intro" },
+      { type: "doc", label: "Intro", href: "/notes/intro/", id: "intro" },
     ]);
   });
 
@@ -86,7 +86,7 @@ describe("buildSidebar", () => {
     expect(doc).toMatchObject({
       type: "doc",
       label: "Tips",
-      href: "/notes/notes/tips",
+      href: "/notes/notes/tips/",
       id: "notes/tips",
       icon: "bulb",
       color: "yellow",
@@ -120,7 +120,7 @@ describe("buildSidebar", () => {
     const category = items[0] as SidebarCategoryItem;
     expect(category.label).toBe("Configuration Guide");
     expect(category.link).toEqual({
-      href: "/docs/config",
+      href: "/docs/config/",
       title: "Configuration Guide",
     });
   });
@@ -134,7 +134,7 @@ describe("buildSidebar", () => {
     ]) as SidebarCategoryItem[];
 
     expect(python.label).toBe("Python");
-    expect(python.link).toEqual({ href: "/python" });
+    expect(python.link).toEqual({ href: "/python/" });
     // "1 - basics" sorts before "2 - loops" despite input order.
     expect(python.items.map((item) => item.label)).toEqual(["Basics", "Loops"]);
     const loops = python.items[1] as SidebarCategoryItem;
@@ -144,7 +144,7 @@ describe("buildSidebar", () => {
       "While Loops",
     ]);
     expect((loops.items[1] as SidebarDocItem).href).toBe(
-      "/python/loops/while-loops",
+      "/python/loops/while-loops/",
     );
   });
 });
@@ -156,11 +156,11 @@ describe("buildSidebarHome", () => {
         routeBase: "/notes",
         sectionLabel: "Notes",
       }),
-    ).toEqual({ title: "Notes", href: "/notes" });
+    ).toEqual({ title: "Notes", href: "/notes/" });
     // Default section label is "Docs".
     expect(
       buildSidebarHome([entry("intro", "intro")], { routeBase: "/docs" }),
-    ).toEqual({ title: "Docs", href: "/docs" });
+    ).toEqual({ title: "Docs", href: "/docs/" });
   });
 
   test("puts the root index doc title on the home link, not the label", () => {
@@ -172,7 +172,7 @@ describe("buildSidebarHome", () => {
         ],
         { routeBase: "/docs" },
       ),
-    ).toEqual({ href: "/docs", title: "Portosaur Docs" });
+    ).toEqual({ href: "/docs/", title: "Portosaur Docs" });
   });
 
   test("uses the root index slug when it has a custom one", () => {
@@ -180,7 +180,7 @@ describe("buildSidebarHome", () => {
       buildSidebarHome([entry("index", "home", { title: "Home" })], {
         routeBase: "/notes",
       }),
-    ).toEqual({ title: "Home", href: "/notes/home" });
+    ).toEqual({ title: "Home", href: "/notes/home/" });
   });
 
   test("the last root index wins on duplicates", () => {
@@ -192,7 +192,7 @@ describe("buildSidebarHome", () => {
         ],
         { routeBase: "/notes" },
       ),
-    ).toEqual({ title: "Second", href: "/notes" });
+    ).toEqual({ title: "Second", href: "/notes/" });
   });
 });
 

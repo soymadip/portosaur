@@ -695,13 +695,16 @@ describe("theming", () => {
       expect(html).toContain("data-open-modal");
     });
 
-    builtTest("home has no search button", () => {
+    // The navbar is unified: search shows on every page, home pages
+    // included (deliberate divergence from OG's
+    // hideSearchBarWithNoSearchContext — see Navbar.astro).
+    builtTest("home renders the search button", () => {
       const html = fs.readFileSync(
         path.join(DOCS_BUILD_DIR, "index.html"),
         "utf8",
       );
-      expect(html).not.toContain("<porto-search");
-      expect(html).not.toContain("data-open-modal");
+      expect(html).toContain("<porto-search");
+      expect(html).toContain("data-open-modal");
     });
 
     builtTest("docs home renders data-scheme and data-theme on <html>", () => {

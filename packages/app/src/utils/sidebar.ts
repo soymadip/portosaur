@@ -35,10 +35,10 @@ import type { Frontmatter } from "./slug.ts";
  * Return shape: the root's children — the top-level items, no wrapper:
  *   [
  *     { type: "category", label: "Guide",
- *       link: { href: "/notes/guide", title: "Guide" }, // only when an
+ *       link: { href: "/notes/guide/", title: "Guide" }, // only when an
  *         // index doc exists; title omitted when the doc has none
  *       icon, color, description, items: [...] },
- *     { type: "doc", label: "Intro", href: "/notes/intro", id: "intro",
+ *     { type: "doc", label: "Intro", href: "/notes/intro/", id: "intro",
  *       icon, color, description },
  *   ]
  *
@@ -278,12 +278,17 @@ function dirToCategory(
   return category;
 }
 
-/** An href for a resolved slug under a route base ("" -> the base, or "/"). */
+/**
+ * An href for a resolved slug under a route base ("" -> the base, or
+ * "/"). Every href ends in `/`: pages are built as `path/index.html`,
+ * so a slash-less link makes the host answer with a 301 redirect to
+ * the slashed URL — an extra round-trip on every navigation.
+ */
 function hrefForSlug(base: string, slug: string): string {
   if (slug) {
-    return `${base}/${slug}`;
+    return `${base}/${slug}/`;
   }
-  return base || "/";
+  return base ? `${base}/` : "/";
 }
 
 /**

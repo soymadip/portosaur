@@ -14,6 +14,7 @@
  */
 
 import type { PortosaurOptions } from "../integration.ts";
+import { pageHref } from "./icons.ts";
 
 export interface NavLink {
   label: string;
@@ -81,7 +82,7 @@ export function buildNavEntries(
   if (siteMode === "docs") {
     rightEntries.push({
       label: "Docs",
-      href: withBase(`/${site.notesRoute}`),
+      href: pageHref(withBase(`/${site.notesRoute}`)),
       active: isActivePath(`/${site.notesRoute}`),
     });
   } else {
@@ -108,7 +109,7 @@ export function buildNavEntries(
     const target = item.position === "left" ? leftEntries : rightEntries;
     const toLink = (entry: any): NavLink => ({
       label: entry.label,
-      href: entry.to ? withBase(entry.to) : (entry.href ?? "#"),
+      href: entry.to ? pageHref(withBase(entry.to)) : (entry.href ?? "#"),
       active: entry.to ? isActivePath(entry.to) : false,
       external: !entry.to && /^https?:\/\//.test(entry.href ?? ""),
     });
@@ -129,19 +130,19 @@ export function buildNavEntries(
   if (siteMode !== "docs") {
     moreItems.push({
       label: "Notes",
-      href: withBase(`/${site.notesRoute}`),
+      href: pageHref(withBase(`/${site.notesRoute}`)),
       active: isActivePath(`/${site.notesRoute}`),
     });
   }
   moreItems.push({
     label: "Blog",
-    href: withBase(`/${site.blogRoute}`),
+    href: pageHref(withBase(`/${site.blogRoute}`)),
     active: isActivePath(`/${site.blogRoute}`),
   });
   if (tasks.enable) {
     moreItems.push({
       label: "Tasks",
-      href: withBase("/tasks"),
+      href: pageHref(withBase("/tasks")),
       active: isActivePath("/tasks"),
     });
   }

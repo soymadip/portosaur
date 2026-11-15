@@ -292,6 +292,84 @@ export function withBase(path: string, baseUrl = "/"): string {
   return `${base}${clean}`;
 }
 
+/** File extensions that mark a URL as an asset, not a page. */
+const PAGE_EXCLUDED_EXTENSIONS = new Set([
+  "atom",
+  "avif",
+  "css",
+  "eot",
+  "gif",
+  "gz",
+  "html",
+  "ico",
+  "jpeg",
+  "jpg",
+  "js",
+  "json",
+  "md",
+  "mjs",
+  "mp3",
+  "mp4",
+  "otf",
+  "pdf",
+  "png",
+  "rss",
+  "svg",
+  "tar",
+  "ttf",
+  "txt",
+  "webm",
+  "webp",
+  "woff",
+  "woff2",
+  "xml",
+  "zip",
+]);
+
+/**
+ * A trailing-slash page URL. Pages are built as `path/index.html`, so
+ * the canonical URL ends in `/` — a slash-less link makes the host
+ * answer with a 301 redirect to the slashed URL (an extra round-trip
+ * on every navigation; Netlify does this, and the sitemap already
+ * emits the slashed form). Apply to internal page links only, after
+ * `withBase` — never to assets.
+ *
+ * Absolute URLs, hash links, already-slashed paths, and asset URLs
+ * (a known file extension on the last segment) pass through
+ * unchanged; a `?query`/`#hash` suffix is preserved after the slash.
+ */
+export function pageHref(path: string): string {
+  if (!path) {
+    return path;
+  }
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(path)) {
+    return path;
+  }
+  const hashIndex = path.indexOf("#");
+  const queryIndex = path.indexOf("?");
+  let end = path.length;
+  if (hashIndex !== -1) {
+    end = Math.min(end, hashIndex);
+  }
+  if (queryIndex !== -1) {
+    end = Math.min(end, queryIndex);
+  }
+  const pathname = path.slice(0, end);
+  const suffix = path.slice(end);
+  if (pathname.endsWith("/")) {
+    return path;
+  }
+  const lastSegment = pathname.slice(pathname.lastIndexOf("/") + 1);
+  const dotIndex = lastSegment.lastIndexOf(".");
+  if (dotIndex !== -1) {
+    const ext = lastSegment.slice(dotIndex + 1).toLowerCase();
+    if (PAGE_EXCLUDED_EXTENSIONS.has(ext)) {
+      return path;
+    }
+  }
+  return `${pathname}/${suffix}`;
+}
+
 /** A frontmatter/config icon value: a path, id, emoji, SVG — or an image with a fallback. */
 export type DynamicIconValue = string | { src: string; fallback?: string };
 

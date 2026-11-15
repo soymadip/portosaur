@@ -80,7 +80,7 @@
 import { Image } from "astro:assets";
 import config from "porto:config";
 import { PAGE_TITLE_ID } from "../../constants.ts";
-import { renderDynamicIcon, withBase } from "../../utils/icons.ts";
+import { pageHref, renderDynamicIcon, withBase } from "../../utils/icons.ts";
 import {
   localImageDimensions,
   staticDirsForConfig,
@@ -118,7 +118,7 @@ const iconOnError = iconFallback
             <div class="actions">
               {docsHome.actions.map((action, index) => (
                 <a
-                  href={withBase(action.link, base)}
+                  href={pageHref(withBase(action.link, base))}
                   class:list={[
                     "button",
                     index === 0 ? "button-brand" : "button-alt",
@@ -175,7 +175,11 @@ const iconOnError = iconFallback
               <Tag
                 class="feature-card"
                 style={{ "--animation-order": index }}
-                href={feature.link ? withBase(feature.link, base) : undefined}
+                href={
+                  feature.link
+                    ? pageHref(withBase(feature.link, base))
+                    : undefined
+                }
               >
                 {feature.icon && (
                   <div
