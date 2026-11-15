@@ -362,12 +362,9 @@ details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
   list-style: none;
   border-radius: 0.75rem;
   border: 1px solid var(--porto-color-hairline-light);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-bg-nav) 60%,
-    transparent
-  );
-  backdrop-filter: blur(16px);
+  /* Solid, no backdrop blur — the translucent Fumadocs popover
+     looked smudged on the live preview. */
+  background-color: var(--porto-color-bg-nav);
   box-shadow: var(--porto-shadow-lg);
   transform: translateX(calc(-50% + var(--porto-menu-offset, 0px)));
 }
@@ -3931,37 +3928,39 @@ a.porto-blog-article-author-name:hover {
 .porto-topic-list__card:hover {
   background-color: var(--porto-color-gray-5);
 }
-/* Fumadocs' icon tile: a small bordered box above the title
-   (`w-fit shadow-md rounded-lg border bg-fd-muted p-1.5`) —
-   the tile sits on the page background, one step down from the
-   card's raised surface, with a muted 16px glyph. */
+/* The icon tile matches the docs-homepage feature cards
+   (`.feature-icon`): a 48px tinted tile with a 24px glyph, no
+   border or shadow. */
 .porto-topic-list__icon {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
-  margin-bottom: 0.5rem;
-  padding: 0.375rem;
-  border: 1px solid var(--porto-color-hairline-light);
-  border-radius: 0.5rem;
-  background-color: var(--porto-color-bg);
-  box-shadow: var(--porto-shadow-md);
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 15%,
+    var(--porto-color-black)
+  );
   color: var(--porto-color-gray-2);
-  font-size: 1rem;
+  font-size: 1.5rem;
 }
-.porto-topic-list__icon svg {
-  width: 1rem;
-  height: 1rem;
+.porto-topic-list__icon svg,
+.porto-topic-list__icon img {
+  width: 24px;
+  height: 24px;
 }
 .porto-topic-list__title {
   margin: 0 0 0.25rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 .porto-topic-list__description {
   margin: 0;
   min-width: 0;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--porto-color-gray-3);
 }
 .porto-topic-list__separator {
