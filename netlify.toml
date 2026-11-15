@@ -1,0 +1,9 @@
+[build]
+  base = "."
+  command = "bun run packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json && bun run --cwd docs build && bun run packages/cli/bin/porto.ts schema -o docs/build/config-schema.json"
+  publish = "docs/build"
+
+[build.environment]
+  # The repo's engines field requires Node >= 24.15.0; Next.js runs on
+  # Node even though Bun manages the packages.
+  NODE_VERSION = "24"
