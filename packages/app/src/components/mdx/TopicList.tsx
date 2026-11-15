@@ -169,8 +169,15 @@ export function TopicList({
      already the separation from the title panel above — its
      description needs no top margin. A manual tag follows MDX
      content, so it keeps the original top margin. */
+  /* `not-content` opts the whole list out of the markdown prose
+     rules (content.css): a manual list renders INSIDE the
+     markdown content, where the link rule recolored the cards
+     accent (the description inherits it) and wiped the hover
+     transitions — the automatic list sits outside the content
+     and never saw any of that. With the opt-out both lists
+     render from the card rules alone, identically. */
   return (
-    <div className="porto-topic-list-wrapper">
+    <div className="porto-topic-list-wrapper not-content">
       {resolvedDesc !== null && (
         <div
           className={

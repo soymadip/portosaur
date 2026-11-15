@@ -4432,15 +4432,6 @@ a.porto-blog-article-author-name:hover {
   font-weight: 750;
   color: var(--porto-color-text);
 }
-/* A manual list renders inside the markdown content, where the
-   heading rules outrank the card title's single class — pin the
-   title back to the card's own type so manual and automatic
-   lists render identically. */
-.porto-markdown-content .porto-topic-list__title {
-  color: var(--porto-color-text);
-  font-size: 1.5rem;
-  font-weight: 750;
-}
 .porto-topic-list__icon {
   display: inline-flex;
   align-items: center;
