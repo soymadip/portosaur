@@ -64,6 +64,7 @@ export interface PortosaurOptions {
     navbarItems: any[];
     collapsableSidebar: boolean;
     autoCollapse: boolean;
+    sidebarCollapsed: boolean;
     footer: {
       enable: boolean;
       message: string;

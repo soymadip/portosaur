@@ -1398,6 +1398,77 @@ body:has(#porto__sidebar:popover-open) {
     .porto-mobile-menu__content {
     padding-top: calc(var(--porto-nav-height) + 1rem);
   }
+  /* The default-collapsed first paint: a page that starts with
+     the sidebar closed (`theme.navigation.sidebar_collapsed`, or
+     per-page `sidebar_collapsed` frontmatter) carries a
+     `data-porto-sidebar-default="collapsed"` marker in the SSR
+     HTML — an attribute on the columns div for frontmatter, a
+     marker element for the global option — and these `:has()`
+     rules hold the collapsed geometry from the first paint,
+     before any JS runs, so the page never flashes the open
+     sidebar. The client reads the markers into state once it
+     takes over and removes them; from then on the
+     `porto-sidebar-collapsed` class governs (same geometry, so
+     the handover is invisible). An `="expanded"` marker
+     (frontmatter `false`) overrides the collapsed one. The pane
+     rule mirrors the collapsed rule above, including the
+     brand-less floating card; the frame, container, footer, and
+     panel rules mirror their collapsed overrides. */
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent {
+    inset-block: 0.5rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    transform: translateX(-100%);
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__brand {
+    display: none;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__content {
+    padding-top: calc(var(--porto-nav-height) + 1rem);
+  }
+  html[dir="rtl"]
+    body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent {
+    transform: translateX(100%);
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .main-frame--sidebar {
+    padding-inline-start: 0;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-content-container {
+    max-width: calc(80rem + var(--porto-sidebar-width));
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-footer {
+    margin-inline-start: 0;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-sidebar-collapse-panel {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .porto-mobile-menu--persistent .porto-mobile-menu__content {
     /* No top padding: the brand row occupies the navbar-height
        slot, and the 1rem flex gap puts the tree 1rem below the

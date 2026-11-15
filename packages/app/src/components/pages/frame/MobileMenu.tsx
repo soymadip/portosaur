@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -49,15 +50,24 @@ import { SiteTitle } from "./SiteTitle.tsx";
  * sidebar glyph — the brand row would hide it behind the navbar
  * until the navbar hides on scroll); clicking it slides the pane
  * out by its own width while the content expands into the freed
- * space (250ms, the same duration Fumadocs uses), and a floating
- * panel with the same trigger offers the way back. Hovering the
- * viewport's left edge while collapsed peeks the sidebar back in
- * as a floating card. Cmd/Ctrl+B toggles too. State only —
- * Fumadocs doesn't persist it either, so a reload reopens the
- * sidebar. The collapse only exists on desktop (`isDesktop`
- * gates the `inert` attribute; the CSS rules are all inside the
- * 50rem block), and only on pages with a sidebar — the menu-only
- * variant has nothing to collapse.
+ * space, and a floating panel with the same trigger offers the
+ * way back. Hovering the viewport's left edge while collapsed
+ * peeks the sidebar back in as a floating card. Cmd/Ctrl+B
+ * toggles too. State only — Fumadocs doesn't persist it either,
+ * so a reload reopens the sidebar. The collapse only exists on
+ * desktop (`isDesktop` gates the `inert` attribute; the CSS
+ * rules are all inside the 50rem block), and only on pages with
+ * a sidebar — the menu-only variant has nothing to collapse.
+ *
+ * Starting collapsed: `theme.navigation.sidebar_collapsed`
+ * (global) or per-page `sidebar_collapsed` frontmatter (which
+ * overrides the global). The default arrives as a marker element
+ * in the SSR HTML — this component renders one for the global
+ * option, DocPage renders one per page — and CSS `:has()` rules
+ * hold the collapsed geometry from the first paint, before any
+ * JS runs, so a default-collapsed page never flashes the open
+ * sidebar. The marker effect below reads the markers into state
+ * once the client takes over and removes them.
  */
 
 /** The collapse state, shared with the sidebar tree: the trigger
@@ -119,6 +129,8 @@ export function MobileMenu({
 }) {
   const paneRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef(0);
+  const ownMarkerRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const config = usePortoConfig();
   // OG Docusaurus renders the sidebar logo only when the navbar
   // hides on scroll — otherwise the brand copy would sit hidden
@@ -126,9 +138,19 @@ export function MobileMenu({
   // need the navbar-height offset from padding instead (the
   // `--no-brand` content variant below).
   const showBrand = hasSidebar && config.theme.hideNavbarOnScroll;
-  const [collapsed, setCollapsed] = useState(false);
+  // The global default is known at render time (the config is
+  // static, so server and client agree — no hydration mismatch);
+  // the per-page frontmatter default arrives via the marker
+  // effect below.
+  const [collapsed, setCollapsed] = useState(
+    config.theme.sidebarCollapsed === true,
+  );
   const [hovered, setHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  // True once the client has taken the sidebar's default state
+  // over from the first-paint markers (below) — this component's
+  // own global marker unmounts with it.
+  const [takenOver, setTakenOver] = useState(false);
 
   useEffect(() => {
     const pane = paneRef.current;
@@ -227,6 +249,49 @@ export function MobileMenu({
       root.classList.remove("porto-sidebar-peeked");
     };
   }, [collapsed, hovered, hasSidebar]);
+
+  // The sidebar's default state arrives as marker elements in the
+  // SSR HTML — this component renders one for the global
+  // `theme.navigation.sidebar_collapsed`, DocPage renders one per
+  // page from `sidebar_collapsed` frontmatter — and CSS `:has()`
+  // rules hold the collapsed geometry from the first paint, before
+  // any JS runs. This effect reads the markers into state once
+  // the client takes over, then removes them so they can't fight
+  // later toggles. It runs on every navigation: the new page's
+  // markers apply its own default (a page with no marker leaves
+  // the state as the user left it).
+  useEffect(() => {
+    if (!hasSidebar) {
+      return;
+    }
+    const collapsedMarker = document.querySelector(
+      '[data-porto-sidebar-default="collapsed"]',
+    );
+    const expandedMarker = document.querySelector(
+      '[data-porto-sidebar-default="expanded"]',
+    );
+    if (expandedMarker) {
+      setCollapsed(false);
+    } else if (collapsedMarker) {
+      setCollapsed(true);
+    }
+    // The page's marker is an attribute on the columns div, not
+    // an element: removing the ATTRIBUTE imperatively is safe
+    // (React only touches attributes when props change, and the
+    // server-rendered page never re-renders), while removing a
+    // React-rendered node would corrupt the fiber tree and crash
+    // the next client navigation. This component's own marker
+    // element is skipped here — React removes it via the
+    // `takenOver` re-render below.
+    document
+      .querySelectorAll("[data-porto-sidebar-default]")
+      .forEach((marker) => {
+        if (marker !== ownMarkerRef.current) {
+          marker.removeAttribute("data-porto-sidebar-default");
+        }
+      });
+    setTakenOver(true);
+  }, [pathname, hasSidebar]);
 
   // Collapsing drops any in-progress peek.
   useEffect(() => {
@@ -345,6 +410,17 @@ export function MobileMenu({
         className="print:hidden"
         aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
       >
+        {/* The global default marker (see the effect above):
+          rendered while the client hasn't taken over yet, so the
+          `:has()` rules hold the collapsed geometry from the
+          first paint. `hidden`, so it takes no space. */}
+        {hasSidebar && config.theme.sidebarCollapsed === true && !takenOver && (
+          <div
+            ref={ownMarkerRef}
+            data-porto-sidebar-default="collapsed"
+            hidden
+          />
+        )}
         <div
           ref={paneRef}
           popover="auto"

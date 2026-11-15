@@ -176,7 +176,31 @@ export function DocPage({
   return (
     <>
       {hasMath && <KaTeXStyles />}
-      <div className="porto-doc-columns">
+      {/* The sidebar default marker: `sidebar_collapsed`
+        frontmatter starts this page with the sidebar closed
+        (`false` forces it open, overriding the global
+        `theme.navigation.sidebar_collapsed`). The marker is an
+        attribute on the columns div — it's how the layout learns
+        the page's default (the layout renders above the page and
+        can't read its frontmatter) — and the CSS `:has()` rules
+        hold the collapsed geometry from the first paint, before
+        any JS runs. MobileMenu reads the attribute into state
+        once the client takes over and removes it. An attribute,
+        not a marker element: removing a React-rendered node
+        imperatively corrupts the fiber tree and crashes the next
+        client navigation, while removing an attribute is safe
+        (React only touches attributes when props change, and this
+        server component never re-renders). */}
+      <div
+        className="porto-doc-columns"
+        data-porto-sidebar-default={
+          data.sidebar_collapsed === true
+            ? "collapsed"
+            : data.sidebar_collapsed === false
+              ? "expanded"
+              : undefined
+        }
+      >
         <div className="porto-right-sidebar-container">
           <div className="porto-right-sidebar">
             <PageSidebar headings={tocHeadings} pageTitleId={PAGE_TITLE_ID} />

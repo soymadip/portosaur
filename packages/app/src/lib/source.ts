@@ -42,7 +42,9 @@ import { parseFileFrontmatter } from "./slug-server.ts";
  * 25, matching Portosaur's `desc` convention). The remaining fields
  * are the Astro `docSchema` shapes, minus `sidebar_position` (removed
  * — decision 24) and plus `math` (frontmatter flag for the KaTeX
- * stylesheet gate). Unknown keys are stripped by zod.
+ * stylesheet gate) and `sidebar_collapsed` (per-page sidebar
+ * default — overrides `theme.navigation.sidebar_collapsed`).
+ * Unknown keys are stripped by zod.
  *
  * The `file` transformer maps `desc` onto the page-tree node's
  * `description`; page metadata reads `page.data.desc` directly.
@@ -69,6 +71,7 @@ export const portoDocSchema = pageSchema
     date: z.coerce.date().optional(),
     draft: z.boolean().optional(),
     math: z.boolean().optional(),
+    sidebar_collapsed: z.boolean().optional(),
   });
 
 /** The validated frontmatter of a doc/note/blog page. */

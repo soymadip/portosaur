@@ -80,6 +80,7 @@ export interface PortosaurOptions {
     navbarItems: any[];
     collapsableSidebar: boolean;
     autoCollapse: boolean;
+    sidebarCollapsed: boolean;
     footer: {
       enable: boolean;
       message: string;
@@ -265,6 +266,7 @@ export function buildSiteConfig(
 
   const collapsableSidebar = get("theme.navigation.collapsable_sidebar", true); // Enable collapsable sidebar navigation.
   const autoCollapse = get("theme.navigation.auto_collapse", true); // Auto-collapse inactive sidebar categories.
+  const sidebarCollapsed = get("theme.navigation.sidebar_collapsed", false); // Start with the sidebar collapsed.
 
   const footerEnable = get("theme.footer.enable", true); // Toggle the footer section.
   const footerMessage = get(
@@ -496,6 +498,7 @@ export function buildSiteConfig(
       navbarItems: customNavbarItems,
       collapsableSidebar,
       autoCollapse,
+      sidebarCollapsed,
       footer: {
         enable: footerEnable,
         message: footerMessage,
