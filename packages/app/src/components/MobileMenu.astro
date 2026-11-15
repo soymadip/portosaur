@@ -10,8 +10,11 @@
 // version link). The toggle lives in the navbar (right cluster,
 // mobile only) and opens this popover via `popovertarget` — no
 // JavaScript needed to open/close; the script below only resets the
-// popover attribute on desktop (persistent variant) and traps focus
-// while the menu is open.
+// popover attribute on desktop (persistent variant), traps focus
+// while the menu is open, and prefetches the menu's nav links when
+// it opens (they sit inside the closed popover, so viewport
+// prefetching never fires for them — and on a phone there is no
+// hover to trigger the default strategy either).
 //
 // Open/close animation — ported from VitePress's VPNavScreen
 // (vitepress 1.6.4, theme-default): the pane fades (opacity 0.25s)
@@ -40,11 +43,14 @@ const { hasSidebar = false } = Astro.props;
   aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
 >
   <script>
+    import { prefetch } from "astro:prefetch";
+
     // The mobile menu uses the popover API to open and close without JavaScript. We enhance this
     // behaviour with focus trapping while the menu is open.
     class PortoSidebarPane extends HTMLElement {
       desktopMediaQuery = matchMedia("(min-width: 50em)");
       onMediaChange = () => this.resetPopoverAttribute();
+      prefetchedNavLinks = new Set<string>();
 
       constructor() {
         super();
@@ -53,9 +59,36 @@ const { hasSidebar = false } = Astro.props;
         this.desktopMediaQuery.addEventListener("change", this.onMediaChange);
 
         // Update the menu state when the sidebar popover is toggled.
-        this.addEventListener("toggle", ({ newState }) =>
-          this.trapFocus(newState === "open"),
-        );
+        this.addEventListener("toggle", ({ newState }) => {
+          const open = newState === "open";
+          this.trapFocus(open);
+          if (open) {
+            this.prefetchNavLinks();
+          }
+        });
+      }
+
+      // Opening the menu is the intent signal: fetch the nav
+      // destinations now, while the user scans the menu, so the tap
+      // swaps instantly instead of fetching the whole page at tap
+      // time. Only the footer's nav links (a handful) — never the
+      // sidebar tree, which can hold a hundred links. Each URL is
+      // prefetched at most once per page; `prefetch()` itself skips
+      // data-saver and slow connections.
+      prefetchNavLinks() {
+        this.querySelectorAll(".mobile-nav a[href]").forEach((link) => {
+          const href = link.getAttribute("href");
+          if (
+            href &&
+            href.startsWith("/") &&
+            !href.startsWith("//") &&
+            !link.hasAttribute("target") &&
+            !this.prefetchedNavLinks.has(href)
+          ) {
+            this.prefetchedNavLinks.add(href);
+            prefetch(href);
+          }
+        });
       }
 
       disconnectedCallback() {

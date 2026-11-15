@@ -119,6 +119,7 @@ const iconOnError = iconFallback
               {docsHome.actions.map((action, index) => (
                 <a
                   href={pageHref(withBase(action.link, base))}
+                  data-astro-prefetch="viewport"
                   class:list={[
                     "button",
                     index === 0 ? "button-brand" : "button-alt",
@@ -180,6 +181,7 @@ const iconOnError = iconFallback
                     ? pageHref(withBase(feature.link, base))
                     : undefined
                 }
+                data-astro-prefetch={feature.link ? "viewport" : undefined}
               >
                 {feature.icon && (
                   <div

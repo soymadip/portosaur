@@ -18,6 +18,15 @@
 // `hideSearchBarWithNoSearchContext`, which hid it off the
 // notes/blog routes — a unified navbar can't have a missing button).
 //
+// The visible nav links prefetch on viewport
+// (`data-astro-prefetch="viewport"`): ClientRouter enables
+// prefetching with the hover strategy by default, which never fires
+// on a phone — so without this, tapping Docs fetched the whole page
+// at tap time. The navbar links are always visible and few, so
+// prefetching them costs little. Dropdown links keep the hover
+// default (they're hidden until the dropdown opens); the sidebar
+// tree is deliberately not prefetched (too many links).
+//
 // The fixed header is positioned by the `.header` rules below;
 // BaseLayout's <main> reserves its height (padding-top).
 import config from "porto:config";
@@ -93,6 +102,7 @@ const showThemeSwitch = theme.showThemeSwitch;
                 href={entry.href}
                 target={entry.external ? "_blank" : undefined}
                 rel={entry.external ? "noopener noreferrer" : undefined}
+                data-astro-prefetch={entry.external ? undefined : "viewport"}
               >
                 {entry.label}
               </a>
@@ -137,6 +147,7 @@ const showThemeSwitch = theme.showThemeSwitch;
               href={entry.href}
               target={entry.external ? "_blank" : undefined}
               rel={entry.external ? "noopener noreferrer" : undefined}
+              data-astro-prefetch={entry.external ? undefined : "viewport"}
             >
               {entry.label}
             </a>
