@@ -1,4 +1,4 @@
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 
 /** The "Edit page" link (pencil icon), rendered only with an edit URL. */
 export function EditLink({ editUrl }: { editUrl?: string }) {

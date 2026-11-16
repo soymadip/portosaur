@@ -1,7 +1,7 @@
-import type { PortosaurOptions } from "../../../lib/config.ts";
-import { renderIcon } from "../../../lib/icons.ts";
-import { ReloadButton } from "../ReloadButton/index.tsx";
-import { SiteShell } from "../frame/SiteShell/index.tsx";
+import type { PortosaurOptions } from "../../lib/config.ts";
+import { renderIcon } from "../../lib/icons.ts";
+import { ReloadButton } from "./ReloadButton.tsx";
+import { SiteShell } from "./frame/SiteShell/index.tsx";
 
 /**
  * OfflinePage — the offline fallback page (served by the PWA

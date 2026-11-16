@@ -1,7 +1,7 @@
-import type { PortosaurOptions } from "../../../lib/config.ts";
-import { renderIcon } from "../../../lib/icons.ts";
-import { Button } from "../../Button/index.tsx";
-import { SiteShell } from "../frame/SiteShell/index.tsx";
+import type { PortosaurOptions } from "../../lib/config.ts";
+import { renderIcon } from "../../lib/icons.ts";
+import { Button } from "../Button/index.tsx";
+import { SiteShell } from "./frame/SiteShell/index.tsx";
 
 /**
  * NotFoundPage — the 404 page. Uses the shared empty-state

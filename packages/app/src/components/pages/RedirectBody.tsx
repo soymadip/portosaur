@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "../../Button/index.tsx";
+import { Button } from "../Button/index.tsx";
 
 /**
  * The redirect interstitial's client logic (a port of the old

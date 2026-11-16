@@ -23,7 +23,7 @@ import {
   type BlogSidebarPost,
 } from "../frame/BlogSidebar/index.tsx";
 import type { PortoDocPage } from "../doc-page/index.tsx";
-import { getMDXComponents } from "../../mdx/index.tsx";
+import { getMDXComponents } from "../../mdx.tsx";
 import { SiteShell } from "../frame/SiteShell/index.tsx";
 
 /**
@@ -53,7 +53,7 @@ export interface PortoBlogPost extends PortoDocPage {
 }
 
 const KaTeXStyles = dynamic(() =>
-  import("../parts/KaTeXStyles/index.tsx").then((mod) => mod.KaTeXStyles),
+  import("../parts/KaTeXStyles.tsx").then((mod) => mod.KaTeXStyles),
 );
 
 /** An author avatar URL: absolute and remote URLs pass through, a

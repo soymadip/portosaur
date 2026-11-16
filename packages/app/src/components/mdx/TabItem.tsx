@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, type ReactNode } from "react";
-import { TabsContext } from "../Tabs/index.tsx";
+import { TabsContext } from "./Tabs/index.tsx";
 
 /**
  * TabItem — one panel of a `Tabs` group. Hidden unless its `value`

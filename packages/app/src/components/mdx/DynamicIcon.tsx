@@ -1,5 +1,5 @@
-import { renderDynamicIcon } from "../../../lib/icons.ts";
-import type { DynamicIconValue } from "../../../lib/icons.ts";
+import { renderDynamicIcon } from "../../lib/icons.ts";
+import type { DynamicIconValue } from "../../lib/icons.ts";
 
 /**
  * DynamicIcon — renders a frontmatter `icon` value, which may be

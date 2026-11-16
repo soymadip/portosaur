@@ -7,7 +7,7 @@ import {
   staticDirsForConfig,
 } from "../../../lib/image-size.ts";
 import { pageHref } from "../../../lib/pageUrl.ts";
-import { HeroImage } from "../HeroImage/index.tsx";
+import { HeroImage } from "../HeroImage.tsx";
 import { SiteShell } from "../frame/SiteShell/index.tsx";
 
 /**

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import type { PortosaurOptions } from "../../../lib/config.ts";
-import { SearchPageBody } from "../SearchPageBody/index.tsx";
-import { SiteShell } from "../frame/SiteShell/index.tsx";
+import type { PortosaurOptions } from "../../lib/config.ts";
+import { SearchPageBody } from "./SearchPageBody/index.tsx";
+import { SiteShell } from "./frame/SiteShell/index.tsx";
 
 /**
  * SearchPage — the search page (`/search`).

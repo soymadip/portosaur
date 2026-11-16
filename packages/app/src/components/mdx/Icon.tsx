@@ -1,4 +1,4 @@
-import { renderIcon } from "../../../lib/icons.ts";
+import { renderIcon } from "../../lib/icons.ts";
 
 /**
  * Icon — renders a single Iconify icon by id (`md:book`,

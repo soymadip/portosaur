@@ -1,5 +1,5 @@
 import NextLink from "next/link";
-import { pageHref } from "../../../lib/pageUrl.ts";
+import { pageHref } from "../../lib/pageUrl.ts";
 
 /**
  * Link — the explicit `<Link to="…">` MDX tag (distinct from

@@ -16,7 +16,7 @@
  */
 
 // Layouts + route components
-export { RootLayout } from "./components/layouts/root-layout/index.tsx";
+export { RootLayout } from "./components/layouts/root-layout.tsx";
 export { DocsLayout } from "./components/layouts/docs-layout/index.tsx";
 export { DocPage } from "./components/pages/doc-page/index.tsx";
 export type {
@@ -32,10 +32,10 @@ export { BlogPostPage } from "./components/pages/blog-post-page/index.tsx";
 export type { PortoBlogPost } from "./components/pages/blog-post-page/index.tsx";
 export { BlogAuthorsPage } from "./components/pages/blog-authors-page/index.tsx";
 export { TasksPage } from "./components/pages/tasks-page/index.tsx";
-export { SearchPage } from "./components/pages/search-page/index.tsx";
-export { OfflinePage } from "./components/pages/offline-page/index.tsx";
-export { RedirectPage } from "./components/pages/redirect-page/index.tsx";
-export { NotFoundPage } from "./components/pages/not-found-page/index.tsx";
+export { SearchPage } from "./components/pages/search-page.tsx";
+export { OfflinePage } from "./components/pages/offline-page.tsx";
+export { RedirectPage } from "./components/pages/redirect-page.tsx";
+export { NotFoundPage } from "./components/pages/not-found-page.tsx";
 
 // Page frame + parts
 export { SiteShell } from "./components/pages/frame/SiteShell/index.tsx";
@@ -48,22 +48,22 @@ export {
   TableOfContentsList,
 } from "./components/pages/frame/TableOfContents/index.tsx";
 export { MobileTableOfContents } from "./components/pages/frame/MobileTableOfContents/index.tsx";
-export { PageSidebar } from "./components/pages/frame/PageSidebar/index.tsx";
+export { PageSidebar } from "./components/pages/frame/PageSidebar.tsx";
 export { SearchDialog } from "./components/pages/frame/SearchDialog/index.tsx";
 export { ThemeSelect } from "./components/pages/frame/ThemeSelect/index.tsx";
 export { Footer } from "./components/pages/parts/Footer/index.tsx";
 export { Pagination } from "./components/pages/parts/Pagination/index.tsx";
 export { EditLink } from "./components/pages/parts/EditLink/index.tsx";
-export { LastUpdated } from "./components/pages/parts/LastUpdated/index.tsx";
+export { LastUpdated } from "./components/pages/parts/LastUpdated.tsx";
 export { SkipLink } from "./components/pages/frame/SkipLink/index.tsx";
 export { NavProgress } from "./components/pages/frame/NavProgress/index.tsx";
 export { PageTitle } from "./components/pages/parts/PageTitle/index.tsx";
 export { ContentPanel } from "./components/pages/parts/ContentPanel/index.tsx";
 export { DocFooter } from "./components/pages/parts/DocFooter/index.tsx";
 export { SiteTitle } from "./components/pages/frame/SiteTitle/index.tsx";
-export { PortoIcon } from "./components/PortoIcon/index.tsx";
-export { HeroImage } from "./components/pages/HeroImage/index.tsx";
-export { KaTeXStyles } from "./components/pages/parts/KaTeXStyles/index.tsx";
+export { PortoIcon } from "./components/PortoIcon.tsx";
+export { HeroImage } from "./components/pages/HeroImage.tsx";
+export { KaTeXStyles } from "./components/pages/parts/KaTeXStyles.tsx";
 export { BlogSidebar } from "./components/pages/frame/BlogSidebar/index.tsx";
 export type { BlogSidebarPost } from "./components/pages/frame/BlogSidebar/index.tsx";
 export { TasksTable } from "./components/pages/TasksTable/index.tsx";
@@ -73,8 +73,8 @@ export type {
   TasksStats,
 } from "./components/pages/TasksTable/index.tsx";
 export { SearchPageBody } from "./components/pages/SearchPageBody/index.tsx";
-export { RedirectBody } from "./components/pages/RedirectBody/index.tsx";
-export { ReloadButton } from "./components/pages/ReloadButton/index.tsx";
+export { RedirectBody } from "./components/pages/RedirectBody.tsx";
+export { ReloadButton } from "./components/pages/ReloadButton.tsx";
 
 // MDX entry (canonical Fumadocs pattern)
 export {
@@ -96,11 +96,11 @@ export {
   AutoTopicList,
   TopicListProvider,
   TopicListContext,
-} from "./components/mdx/index.tsx";
+} from "./components/mdx.tsx";
 export type {
   TopicListContextValue,
   TopicListItem,
-} from "./components/mdx/index.tsx";
+} from "./components/mdx.tsx";
 
 // Lib
 export type { PortosaurOptions, PortoPkg, PortoPaths } from "./lib/config.ts";

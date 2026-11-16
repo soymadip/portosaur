@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
-import { renderDynamicIcon } from "../../../lib/icons.ts";
-import { Button, type ButtonVariant } from "../../Button/index.tsx";
+import { renderDynamicIcon } from "../../lib/icons.ts";
+import { Button, type ButtonVariant } from "../Button/index.tsx";
 
 /**
  * Btn — the MDX content button: a link styled as a button.

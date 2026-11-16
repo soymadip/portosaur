@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { TocHeading } from "../../../../lib/content.ts";
 import { nestHeadings } from "../../../../lib/content.ts";
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 import {
   TableOfContentsList,
   useTocScrollSpy,

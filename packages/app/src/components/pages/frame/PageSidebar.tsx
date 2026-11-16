@@ -1,6 +1,6 @@
-import type { TocHeading } from "../../../../lib/content.ts";
-import { MobileTableOfContents } from "../MobileTableOfContents/index.tsx";
-import { TableOfContents } from "../TableOfContents/index.tsx";
+import type { TocHeading } from "../../../lib/content.ts";
+import { MobileTableOfContents } from "./MobileTableOfContents/index.tsx";
+import { TableOfContents } from "./TableOfContents/index.tsx";
 
 /**
  * The doc page's sidebar: the mobile TOC below the `lg`

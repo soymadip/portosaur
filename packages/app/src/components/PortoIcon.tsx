@@ -1,7 +1,7 @@
 import {
   PortoIcons,
   type PortoIcon as PortoIconName,
-} from "../../lib/porto-icons.ts";
+} from "../lib/porto-icons.ts";
 
 /**
  * A built-in Portosaur icon — the small SVG paths the chrome itself

@@ -10,7 +10,7 @@ import {
 } from "react";
 import { pageHref } from "../../lib/pageUrl.ts";
 import { buttonClass } from "../Button/index.tsx";
-import { PortoIcon } from "../PortoIcon/index.tsx";
+import { PortoIcon } from "../PortoIcon.tsx";
 
 /**
  * Dropdown — the one shared dropdown for the whole app: the

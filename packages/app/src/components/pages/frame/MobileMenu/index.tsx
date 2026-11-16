@@ -14,7 +14,7 @@ import {
 } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
 import { buttonClass } from "../../../Button/index.tsx";
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 import { MobileMenuFooter } from "../MobileMenuFooter/index.tsx";
 import { SiteTitle } from "../SiteTitle/index.tsx";
 

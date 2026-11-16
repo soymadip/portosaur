@@ -11,7 +11,7 @@ import {
   type NavEntry,
 } from "../../../../lib/navbar.ts";
 import { stripBase } from "../../../../lib/pageUrl.ts";
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 import { ThemeSelect } from "../ThemeSelect/index.tsx";
 
 /**

@@ -28,12 +28,12 @@ import {
 import { HAS_MATH_KEY } from "../../../plugins/remarkHasMath.ts";
 import { ContentPanel } from "../parts/ContentPanel/index.tsx";
 import { DocFooter } from "../parts/DocFooter/index.tsx";
-import { getMDXComponents } from "../../mdx/index.tsx";
+import { getMDXComponents } from "../../mdx.tsx";
 import {
   AutoTopicList,
   TopicListProvider,
 } from "../../mdx/TopicList/index.tsx";
-import { PageSidebar } from "../frame/PageSidebar/index.tsx";
+import { PageSidebar } from "../frame/PageSidebar.tsx";
 import { PageTitle } from "../parts/PageTitle/index.tsx";
 
 /**
@@ -80,7 +80,7 @@ export interface PortoDocPage {
 }
 
 const KaTeXStyles = dynamic(() =>
-  import("../parts/KaTeXStyles/index.tsx").then((mod) => mod.KaTeXStyles),
+  import("../parts/KaTeXStyles.tsx").then((mod) => mod.KaTeXStyles),
 );
 
 function readContentTitle(

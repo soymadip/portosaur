@@ -1,6 +1,6 @@
 import type { SidebarLink } from "../../../../lib/content.ts";
 import { EditLink } from "../EditLink/index.tsx";
-import { LastUpdated } from "../LastUpdated/index.tsx";
+import { LastUpdated } from "../LastUpdated.tsx";
 import { Pagination } from "../Pagination/index.tsx";
 
 /** The doc-page footer: meta row (edit + last updated) + Pagination. */

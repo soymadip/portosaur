@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../../lib/sidebar.ts";
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 import {
   SidebarCollapseTrigger,
   useSidebarCollapse,

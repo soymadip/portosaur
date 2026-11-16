@@ -24,6 +24,82 @@
       "types": "./src/components/*/index.tsx",
       "default": "./src/components/*/index.tsx"
     },
+    "./components/PortoIcon": {
+      "types": "./src/components/PortoIcon.tsx",
+      "default": "./src/components/PortoIcon.tsx"
+    },
+    "./components/layouts/root-layout": {
+      "types": "./src/components/layouts/root-layout.tsx",
+      "default": "./src/components/layouts/root-layout.tsx"
+    },
+    "./components/mdx": {
+      "types": "./src/components/mdx.tsx",
+      "default": "./src/components/mdx.tsx"
+    },
+    "./components/mdx/Btn": {
+      "types": "./src/components/mdx/Btn.tsx",
+      "default": "./src/components/mdx/Btn.tsx"
+    },
+    "./components/mdx/Details": {
+      "types": "./src/components/mdx/Details.tsx",
+      "default": "./src/components/mdx/Details.tsx"
+    },
+    "./components/mdx/DynamicIcon": {
+      "types": "./src/components/mdx/DynamicIcon.tsx",
+      "default": "./src/components/mdx/DynamicIcon.tsx"
+    },
+    "./components/mdx/Icon": {
+      "types": "./src/components/mdx/Icon.tsx",
+      "default": "./src/components/mdx/Icon.tsx"
+    },
+    "./components/mdx/Link": {
+      "types": "./src/components/mdx/Link.tsx",
+      "default": "./src/components/mdx/Link.tsx"
+    },
+    "./components/mdx/TabItem": {
+      "types": "./src/components/mdx/TabItem.tsx",
+      "default": "./src/components/mdx/TabItem.tsx"
+    },
+    "./components/pages/HeroImage": {
+      "types": "./src/components/pages/HeroImage.tsx",
+      "default": "./src/components/pages/HeroImage.tsx"
+    },
+    "./components/pages/RedirectBody": {
+      "types": "./src/components/pages/RedirectBody.tsx",
+      "default": "./src/components/pages/RedirectBody.tsx"
+    },
+    "./components/pages/ReloadButton": {
+      "types": "./src/components/pages/ReloadButton.tsx",
+      "default": "./src/components/pages/ReloadButton.tsx"
+    },
+    "./components/pages/frame/PageSidebar": {
+      "types": "./src/components/pages/frame/PageSidebar.tsx",
+      "default": "./src/components/pages/frame/PageSidebar.tsx"
+    },
+    "./components/pages/not-found-page": {
+      "types": "./src/components/pages/not-found-page.tsx",
+      "default": "./src/components/pages/not-found-page.tsx"
+    },
+    "./components/pages/offline-page": {
+      "types": "./src/components/pages/offline-page.tsx",
+      "default": "./src/components/pages/offline-page.tsx"
+    },
+    "./components/pages/parts/KaTeXStyles": {
+      "types": "./src/components/pages/parts/KaTeXStyles.tsx",
+      "default": "./src/components/pages/parts/KaTeXStyles.tsx"
+    },
+    "./components/pages/parts/LastUpdated": {
+      "types": "./src/components/pages/parts/LastUpdated.tsx",
+      "default": "./src/components/pages/parts/LastUpdated.tsx"
+    },
+    "./components/pages/redirect-page": {
+      "types": "./src/components/pages/redirect-page.tsx",
+      "default": "./src/components/pages/redirect-page.tsx"
+    },
+    "./components/pages/search-page": {
+      "types": "./src/components/pages/search-page.tsx",
+      "default": "./src/components/pages/search-page.tsx"
+    },
     "./config/*": {
       "types": "./src/config/*.ts",
       "default": "./src/config/*.ts"

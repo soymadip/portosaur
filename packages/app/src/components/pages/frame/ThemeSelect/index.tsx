@@ -7,7 +7,7 @@ import {
   type ThemePreference,
 } from "../../../../lib/theme.ts";
 import { Dropdown } from "../../../Dropdown/index.tsx";
-import { PortoIcon } from "../../../PortoIcon/index.tsx";
+import { PortoIcon } from "../../../PortoIcon.tsx";
 
 /**
  * Portosaur's own theme control — a Light / Dark / Auto dropdown
