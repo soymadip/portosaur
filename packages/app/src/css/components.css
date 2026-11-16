@@ -1580,12 +1580,35 @@ body:has(#porto__sidebar:popover-open) {
     box-shadow: var(--porto-shadow-sm);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    /* `top` joins the opacity: the panel glides up into the
+       mobile TOC bar's row when it docks there (below), and
+       follows the bar when the navbar hides. */
+    transition:
+      opacity 0.2s ease,
+      top 0.2s ease-in-out;
   }
   html.porto-sidebar-collapsed:not(.porto-sidebar-peeked)
     .porto-sidebar-collapse-panel {
     opacity: 1;
     pointer-events: auto;
+  }
+  /* Collapsed on a page with a mobile TOC bar (below the `lg`
+     breakpoint), the panel docks INTO the bar's row instead of
+     floating 1rem below the navbar: the bar spans the full
+     width once the sidebar is gone, so the panel's old spot
+     would sit on top of the bar, over the "On this page" pill.
+     The panel is 38px tall in a 3rem bar, so navbar height +
+     0.3rem centers it; it follows the bar when the navbar
+     hides (the bar docks to the viewport top). At desktop
+     widths the bar is hidden and the panel goes back below
+     the navbar (see the `lg` override after the strip). */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: calc(var(--porto-nav-height) + 0.3rem);
+  }
+  html.porto-navbar-hidden.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: 0.3rem;
   }
   /* The hover-peek strip: Fumadocs' 16px edge zone. Hovering it
      while collapsed slides the sidebar back in as a card. */
@@ -1596,6 +1619,15 @@ body:has(#porto__sidebar:popover-open) {
     inset-block: 0;
     width: 1rem;
     z-index: var(--porto-z-index-menu);
+  }
+}
+@media (min-width: 72rem) {
+  /* The mobile TOC bar is hidden at desktop widths, so the
+     expand panel is not docked — back to its usual spot below
+     the navbar. */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: calc(var(--porto-nav-height) + 1rem);
   }
 }
 
@@ -1783,7 +1815,9 @@ body:has(#porto__sidebar:popover-open) {
   inset-inline: 0;
   border-top: 1px solid var(--porto-color-gray-5);
   background-color: var(--porto-color-bg-nav);
-  transition: top 0.2s ease-in-out;
+  transition:
+    top 0.2s ease-in-out,
+    inset-inline-start var(--porto-sidebar-collapse-duration) ease;
 }
 html.porto-navbar-hidden .porto-mobile-toc nav {
   top: -1px;
@@ -1791,6 +1825,23 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 @media (min-width: 50rem) {
   .main-frame--sidebar .porto-mobile-toc nav {
     inset-inline-start: var(--porto-sidebar-width);
+  }
+  /* Sidebar collapsed: the bar spans the full width — keeping
+     the sidebar's offset would leave a dead 265px strip at the
+     left with the pill stranded mid-page. It glides on the
+     collapse duration, in sync with the content widening. */
+  html.porto-sidebar-collapsed .main-frame--sidebar .porto-mobile-toc nav {
+    inset-inline-start: 0;
+  }
+  /* Collapsed on a TOC page, the expand panel docks into this
+     bar's row (see the panel rules below), so the summary's
+     start padding grows by the panel's width (2.375rem,
+     measured) plus a 0.5rem gap — the pill clears the panel. */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .main-frame--sidebar
+    .porto-mobile-toc
+    summary {
+    padding-inline-start: calc(1rem + 2.375rem + 0.5rem);
   }
 }
 
