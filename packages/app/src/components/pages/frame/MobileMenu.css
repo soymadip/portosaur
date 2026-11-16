@@ -1,0 +1,434 @@
+/* Mobile menu — the popover pane (the persistent sidebar on
+ * desktop), plus the collapse trigger, floating expand panel, and
+ * peek strip. Rendered by MobileMenu. (The title-row rules live
+ * here with the collapse trigger they position.)
+ */
+
+/* The mobile navigation popover, shared by every page. On docs
+   pages it also holds the sidebar tree and becomes the persistent
+   sidebar from 50rem up; on other pages it holds only the footer
+   (nav links, theme select, version link). The toggle lives in the
+   navbar and opens this popover via `popovertarget`. The open/close
+   animation (VitePress's nav screen — pane fades 0.25s, content
+   slides down 8px) lives in animations.css. */
+.porto-mobile-menu {
+  /* User agents apply opinionated styles to popovers; reset them. */
+  border: unset;
+  padding: unset;
+  height: unset;
+  color: unset;
+
+  position: fixed;
+  z-index: var(--porto-z-index-menu);
+  inset-block: var(--porto-nav-height) 0;
+  inset-inline-start: 0;
+  width: 100%;
+  background-color: var(--porto-color-black);
+  overflow-y: auto;
+  opacity: 0;
+  transition:
+    opacity 0.25s,
+    display 0.25s allow-discrete,
+    overlay 0.25s allow-discrete;
+}
+
+.porto-mobile-menu:popover-open {
+  opacity: 1;
+}
+
+/* The navbar-brand copy at the top of the persistent sidebar —
+   hidden by default; only the desktop persistent variant shows
+   it (OG's sidebarLogo is likewise desktop-only). */
+.porto-mobile-menu__brand {
+  display: none;
+}
+
+/* Horizontal padding is 0.3rem each side, not the 1rem sidebar
+   gutter: at 1rem every entry sat one nest-level in from the pane
+   edge (a nest level is 1rem: 0.5rem margin + 0.5rem padding on
+   `ul ul li`). Docusaurus's sidebar menu uses 0.5rem; this sits
+   tighter, with the links' own 0.5rem padding providing the text
+   gutter. */
+.porto-mobile-menu__content {
+  height: 100%;
+  min-height: max-content;
+  padding: 1rem 0.3rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.25s ease;
+}
+
+.porto-mobile-menu[popover]:not(:popover-open) .porto-mobile-menu__content {
+  transform: translateY(-8px);
+}
+
+/* Lock body scroll while the menu popover is open (mobile only —
+   the persistent desktop sidebar is not a popover). */
+body:has(#porto__sidebar:popover-open) {
+  overflow: hidden;
+}
+
+@media (min-width: 50rem) {
+  body:has(#porto__sidebar:popover-open) {
+    overflow: auto;
+  }
+
+  .porto-mobile-menu__content::after {
+    content: "";
+    padding-bottom: 1px;
+  }
+
+  /* The persistent (docs) variant becomes the always-visible
+     sidebar; the menu-only variant stays a popover (its toggle
+     hides at desktop, so it can never open there). */
+  .porto-mobile-menu--persistent {
+    display: block;
+    width: var(--porto-sidebar-width);
+    background-color: var(--porto-color-bg-sidebar);
+    /* Same separator as the TOC panel's left border. */
+    border-inline-end: 1px solid var(--porto-color-hairline);
+    /* Not a popover at desktop widths, so it never matches
+       `:popover-open` — keep it fully opaque. */
+    opacity: 1;
+    /* OG Docusaurus pattern: the sidebar is full-height and its
+       top navbar-height slice sits hidden behind the navbar (the
+       navbar paints above it, z-index 10 over 5). The slice holds
+       a copy of the navbar brand (see `__brand` below), revealed
+       when the navbar hides — so when the navbar hides on scroll,
+       the sidebar stays exactly where it is instead of sliding
+       up, and the brand takes the navbar's place. */
+    inset-block: 0 0;
+  }
+  /* The collapse slide: transform + inset-block + border-radius
+     + shadow over the shared collapse duration, so the pane
+     morphs between the full-height sidebar and the floating card
+     in lockstep with the content. DOUBLED selector on purpose:
+     animations.css (loaded after this file) sets a `transition`
+     on `.porto-mobile-menu` for the mobile popover fade — at
+     equal specificity it wiped this list out, and the pane
+     snapped open instantly while the content animated. The
+     popover entries stay so a resize mid-animation doesn't snap. */
+  .porto-mobile-menu.porto-mobile-menu--persistent {
+    transition:
+      transform var(--porto-sidebar-collapse-duration) ease,
+      inset-block var(--porto-sidebar-collapse-duration) ease,
+      border-radius var(--porto-sidebar-collapse-duration) ease,
+      box-shadow var(--porto-sidebar-collapse-duration) ease,
+      opacity 0.25s,
+      display 0.25s allow-discrete,
+      overlay 0.25s allow-discrete;
+  }
+  /* Desktop sidebar collapse (Fumadocs' docs layout): the pane
+     slides out by its own width while the content expands into
+     the freed space, and becomes a floating card — inset,
+     rounded, bordered — so the hover peek slides a card back in
+     over the content instead of the full-height pane. The card
+     starts BELOW the navbar (navbar height + 0.5rem), so its top
+     margin from the navbar matches its 0.5rem bottom margin from
+     the page end — the same 8px inset on both ends. It used to
+     span the full height (0.5rem from the viewport top), which
+     hid its top edge behind the navbar and left a dead band of
+     navbar-height padding above the title. */
+  html.porto-sidebar-collapsed .porto-mobile-menu--persistent {
+    inset-block-start: calc(var(--porto-nav-height) + 0.5rem);
+    inset-block-end: 0.5rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    transform: translateX(-100%);
+  }
+  html.porto-sidebar-peeked .porto-mobile-menu--persistent {
+    transform: translateX(0.5rem);
+    box-shadow: var(--porto-shadow-lg);
+  }
+  html[dir="rtl"].porto-sidebar-collapsed .porto-mobile-menu--persistent {
+    transform: translateX(100%);
+  }
+  html[dir="rtl"].porto-sidebar-peeked .porto-mobile-menu--persistent {
+    transform: translateX(-0.5rem);
+  }
+  /* In the collapsed state the floating card drops the
+     navbar-brand copy — a floating card needs no navbar copy,
+     and the card starts below the navbar now, so the brand
+     slot would just be dead space at its top. The brand
+     SHRINKS away (height + opacity over the collapse duration)
+     instead of vanishing with `display: none`: the old instant
+     removal jumped the whole tree up 54px in one frame while
+     the compensating padding glided down over 0.35s, so the
+     items jittered down on close and rose from below on open.
+     With the shrink and the pane's top inset on the same
+     duration and easing, the two nearly cancel (the pane's top
+     moves down 62px as the brand gives back 54px) and the title
+     glides just 8px. The brand stays a rendered flex item at
+     height 0, so the 1rem content gap above the title survives
+     and the title sits 1rem below the card's top edge. The
+     visibility flips hidden at the END of the shrink (the
+     delayed flip in this rule's transition) so the brand's
+     link leaves the focus order only once it is gone; on
+     expand the base rule's zero-delay flip shows it at once. */
+  html.porto-sidebar-collapsed
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__brand {
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      height var(--porto-sidebar-collapse-duration) ease,
+      opacity var(--porto-sidebar-collapse-duration) ease,
+      visibility 0s linear var(--porto-sidebar-collapse-duration);
+  }
+  /* The default-collapsed first paint: a page that starts with
+     the sidebar closed (`theme.navigation.sidebar_collapsed`, or
+     per-page `sidebar_collapsed` frontmatter) carries a
+     `data-porto-sidebar-default="collapsed"` marker in the SSR
+     HTML — an attribute on the columns div for frontmatter, a
+     marker element for the global option — and these `:has()`
+     rules hold the collapsed geometry from the first paint,
+     before any JS runs, so the page never flashes the open
+     sidebar. The client reads the markers into state once it
+     takes over and removes them; from then on the
+     `porto-sidebar-collapsed` class governs (same geometry, so
+     the handover is invisible). An `="expanded"` marker
+     (frontmatter `false`) overrides the collapsed one. The pane
+     rule mirrors the collapsed rule above, including the
+     brand-less floating card; the frame, container, footer, and
+     panel rules mirror their collapsed overrides. */
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent {
+    inset-block-start: calc(var(--porto-nav-height) + 0.5rem);
+    inset-block-end: 0.5rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    transform: translateX(-100%);
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent
+    .porto-mobile-menu__brand {
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+  }
+  html[dir="rtl"]
+    body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-mobile-menu--persistent {
+    transform: translateX(100%);
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .main-frame--sidebar {
+    padding-inline-start: 2.25rem;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-content-container {
+    max-width: calc(80rem + var(--porto-sidebar-width));
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .main-frame--sidebar
+    .content-panel {
+    padding-inline-start: 0.5rem;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-footer {
+    margin-inline-start: 2.25rem;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
+    .porto-sidebar-collapse-panel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .porto-mobile-menu--persistent .porto-mobile-menu__content {
+    /* No top padding: the brand row occupies the navbar-height
+       slot, and the 1rem flex gap puts the tree 1rem below the
+       brand — exactly where the old padding put it. */
+    padding-top: 0;
+  }
+  .porto-mobile-menu--persistent .porto-mobile-menu__content--no-brand {
+    /* No brand row (hideNavbarOnScroll off): the navbar never
+       hides, so the tree still needs the navbar-height offset
+       from padding. */
+    padding-top: calc(var(--porto-nav-height) + 1rem);
+  }
+  .porto-mobile-menu--persistent .porto-mobile-menu__brand {
+    /* OG Docusaurus sidebarLogo: a copy of the navbar brand in
+       the sidebar's top navbar-height slice. Sticky — it stays
+       pinned to the pane's top while the tree scrolls beneath
+       it, on the sidebar background so scrolled rows don't show
+       through. The horizontal padding matches the navbar's, so
+       the copy aligns with the real brand. */
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: var(--porto-nav-height);
+    margin-inline: -0.3rem;
+    padding-inline: var(--porto-nav-pad-x);
+    background-color: var(--porto-color-bg-sidebar);
+    /* Clipped while the collapse shrinks the row to height 0
+       (below), and the shrink + fade run on the collapse
+       duration so the tree glides with the pane instead of
+       jumping. The visibility flip has no delay here: on
+       expand the brand reappears the instant the pane starts
+       sliding back (the collapsed rule delays the hide). */
+    overflow: hidden;
+    transition:
+      height var(--porto-sidebar-collapse-duration) ease,
+      opacity var(--porto-sidebar-collapse-duration) ease,
+      visibility 0s;
+  }
+}
+@media (min-width: 50rem) and (max-width: 71.999rem) {
+  /* First-paint mirror of the band exception above: a
+     default-collapsed TOC page in the mobile-bar band starts
+     with no rail, so the first paint matches the state the
+     client takes over with (no 2.25rem flash-and-jump). */
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    ):has(.main-pane--toc)
+    .main-frame--sidebar {
+    padding-inline-start: 0;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    ):has(.main-pane--toc)
+    .porto-footer {
+    margin-inline-start: 0;
+  }
+}
+
+/* The collapse trigger: Fumadocs' sidebar glyph in a ghost icon
+   button, muted at rest (white on hover, from the ghost rule).
+   In the title row it sits at the right end, next to the section
+   title — Fumadocs puts it in the sidebar header the same way
+   (Portosaur's brand row would hide it behind the navbar until
+   the navbar hides on scroll, so the title row is the header
+   that can hold it). The row is the button's height and the
+   title centers in it, so the trigger sits on the title's line;
+   the 1rem gap to the tree lives here, not on the title. */
+.porto-sidebar-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.porto-sidebar-title-row .porto-sidebar-collapse-trigger {
+  margin-inline-start: auto;
+  /* Desktop only — on mobile the sidebar is a popover that
+     closes instead of collapsing, so the trigger would be dead. */
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-sidebar-title-row .porto-sidebar-collapse-trigger {
+    display: inline-flex;
+  }
+}
+.porto-sidebar-collapse-trigger {
+  color: var(--porto-color-gray-3);
+}
+
+/* The floating expand panel: Fumadocs shows the same trigger in
+   a small floating card at the content's top-left while the
+   sidebar is collapsed (and not peeked — then the sidebar itself
+   is visible). The frame keeps a 2.25rem rail at the start when
+   collapsed, so the panel never covers the H1 (without the rail
+   it hid the title's first letters — 30px of overlap at 1600px,
+   7px even at 1920px). Desktop only. */
+.porto-sidebar-collapse-panel {
+  display: none;
+}
+.porto-sidebar-collapse-strip {
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-sidebar-collapse-panel {
+    position: fixed;
+    top: calc(var(--porto-nav-height) + 1rem);
+    inset-inline-start: 0.22rem;
+    /* Above the peek strip (below): the panel starts 0.25rem in,
+       so it overlaps the strip's 24px edge zone — at the strip's
+       z-index the strip would eat clicks on the button's left
+       edge and trigger a peek while clicking it. The panel never
+       meets the navbar vertically, so sharing its level is safe. */
+    z-index: var(--porto-z-index-navbar);
+    display: flex;
+    padding: 0.125rem;
+    border: 1px solid var(--porto-color-hairline);
+    border-radius: 0.75rem;
+    background-color: var(--porto-color-bg-nav);
+    box-shadow: var(--porto-shadow-sm);
+    opacity: 0;
+    pointer-events: none;
+    /* `top` joins the opacity: the panel glides up into the
+       mobile TOC bar's row when it docks there (below), and
+       follows the bar when the navbar hides. */
+    transition:
+      opacity 0.2s ease,
+      top 0.2s ease-in-out;
+  }
+  /* The trigger inside the panel doesn't need the full
+     icon-button padding — the card is the frame, so the button's
+     own padding would just be dead space around the icon. */
+  .porto-sidebar-collapse-panel .porto-sidebar-collapse-trigger {
+    padding: 0.25rem;
+  }
+  html.porto-sidebar-collapsed:not(.porto-sidebar-peeked)
+    .porto-sidebar-collapse-panel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Collapsed on a page with a mobile TOC bar (below the `lg`
+     breakpoint), the panel docks INTO the bar's row instead of
+     floating 1rem below the navbar: the bar spans the full
+     width once the sidebar is gone, so the panel's old spot
+     would sit on top of the bar, over the "On this page" pill.
+     The panel is 34px tall in a 3rem bar, so navbar height +
+     0.375rem centers it; it follows the bar when the navbar
+     hides (the bar docks to the viewport top). At desktop
+     widths the bar is hidden and the panel goes back below
+     the navbar (see the `lg` override after the strip). */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: calc(var(--porto-nav-height) + 0.375rem);
+  }
+  html.porto-navbar-hidden.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: 0.375rem;
+  }
+  /* The hover-peek strip: the edge zone that slides the sidebar
+     back in as a card while collapsed. Fumadocs uses 16px;
+     Portosaur widens it to 24px so the trigger is easier to
+     hit without reaching into the content (which starts 36px
+     in, at the collapsed rail). */
+  html.porto-sidebar-collapsed .porto-sidebar-collapse-strip {
+    display: block;
+    position: fixed;
+    inset-inline-start: 0;
+    inset-block: 0;
+    width: 1.5rem;
+    z-index: var(--porto-z-index-menu);
+  }
+}
+@media (min-width: 72rem) {
+  /* The mobile TOC bar is hidden at desktop widths, so the
+     expand panel is not docked — back to its usual spot below
+     the navbar. */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .porto-sidebar-collapse-panel {
+    top: calc(var(--porto-nav-height) + 1rem);
+  }
+}

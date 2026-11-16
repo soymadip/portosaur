@@ -1,0 +1,249 @@
+/* Notes page + note cards. Rendered by notes-index-page. */
+
+.porto-notes-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8vh;
+}
+
+/* The old page wrapped the grid in Docusaurus' `.container`
+   (max-width 1280px, 1rem padding → 1248px of content), which fits
+   exactly 6 cards per row (6×165px + 5×1rem = 1070px; a 7th needs
+   1251px). This theme has no global `.container`, so the width cap
+   lives on the grid itself and this wrapper only centers it. */
+.porto-notes-inner {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.porto-notes-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.porto-notes-title {
+  margin-top: 1.3rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 2.5rem;
+  /* OG: the page title takes the site's primary/accent color. */
+  color: var(--porto-color-accent);
+  animation: porto-slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.porto-notes-subtitle {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--porto-color-gray-3);
+  animation: porto-slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s forwards;
+}
+
+.porto-note-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  max-width: calc(6 * 165px + 5 * 1rem);
+  margin-inline: auto;
+  margin-block: 4rem;
+}
+
+/* `.noteCard` is the hash-navigation selector, so the class name
+   stays; its rules are scoped under the grid. */
+.porto-note-grid .noteCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 165px;
+  min-height: 225px;
+  overflow: hidden;
+  border: 1px solid var(--porto-color-card-border);
+  /* OG: the card is the scheme's raised surface with rounded
+     corners (Infima's card radius, ~0.5rem measured on the OG
+     site) — the same surface the feature cards use. */
+  background: var(--porto-color-gray-6);
+  border-radius: 0.5rem;
+  padding: 1.5rem 1rem;
+  color: var(--porto-color-text);
+  text-decoration: none;
+  box-shadow: var(--porto-shadow-sm);
+  /* The hover lifts the card and tints its border; on touch the tap
+     presses it via `scale` instead. All four properties listed so
+     nothing else animates by accident. */
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: porto-note-fade-in 0.5s ease-out forwards;
+  animation-delay: calc(0.1s + (var(--card-index, 0) * 0.05s));
+  opacity: 0;
+}
+.porto-note-grid .noteCard:hover {
+  z-index: 2;
+  transform: translateY(-4px);
+  border-color: var(--note-color);
+  box-shadow: var(--porto-shadow-lg);
+}
+
+@keyframes porto-note-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.porto-note-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--note-color) 15%, transparent);
+}
+
+/* The icon renders via dangerouslySetInnerHTML inside this wrapper
+   span; the inner svg/img fills it. */
+.porto-note-grid .noteIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.2rem;
+  font-size: 3.5rem;
+  color: var(--note-color);
+  transition: scale 200ms ease;
+}
+.porto-note-grid .noteCard:hover .noteIcon {
+  scale: 1.2;
+}
+.porto-note-grid .noteIcon svg,
+.porto-note-grid .noteIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.porto-note-grid .noteIcon svg {
+  fill: currentColor;
+}
+
+/* The text wrapper must be allowed to shrink below its content's
+   intrinsic width, or a long unbroken title word pushes it past
+   the card's edge (flex items default to min-width: auto). */
+.porto-note-text {
+  min-width: 0;
+}
+
+.porto-note-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  /* `anywhere` (OG's value), not `break-word`: only `anywhere`
+     counts the break opportunities during min-content sizing, so
+     a long word wraps inside the card instead of overflowing it. */
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* The chevron is a mobile-list affordance only: OG hides it on
+   desktop (`display: none` in the base rule) and shows it only
+   under 480px. */
+.porto-note-grid .mobileChevron {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.5rem;
+}
+.porto-note-grid .mobileChevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 480px) {
+  .porto-notes-inner {
+    padding-inline: 0.7rem;
+  }
+
+  .porto-note-grid {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    margin-top: 0.2rem;
+    padding-inline: 0.2rem;
+  }
+
+  .porto-note-grid .noteCard {
+    flex-direction: row;
+    width: 100%;
+    min-height: auto;
+    gap: 0.9rem;
+    padding-block: 0.6rem;
+    padding-inline: 0.75rem;
+    border-radius: 0.9rem;
+  }
+  .porto-note-grid .noteCard:hover {
+    transform: none;
+  }
+  .porto-note-grid .noteCard:active {
+    scale: 0.98;
+  }
+
+  .porto-note-icon-wrap {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    margin: 0;
+    border-radius: 18px;
+  }
+
+  .porto-note-grid .noteIcon {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 2.8rem;
+  }
+
+  .porto-note-text {
+    min-width: 0;
+    flex: 1;
+    text-align: left;
+  }
+
+  .porto-note-title {
+    text-align: left;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--porto-color-text);
+    -webkit-line-clamp: 2;
+  }
+
+  .porto-note-grid .mobileChevron {
+    display: block;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0;
+    margin-left: auto;
+    color: var(--porto-color-text-accent);
+  }
+}

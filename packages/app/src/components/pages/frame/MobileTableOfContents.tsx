@@ -14,7 +14,7 @@ import { TableOfContentsList, useTocScrollSpy } from "./TableOfContents.tsx";
  *
  * The nav follows the hide-on-scroll navbar — when the navbar
  * hides, the mobile TOC slides up to the top of the viewport
- * (`html.porto-navbar-hidden` rule in components.css).
+ * (`html.porto-navbar-hidden` rule in MobileTableOfContents.css).
  *
  * Closes on link click, outside click, and Escape (returning
  * focus to the summary when it had focus).

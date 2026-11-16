@@ -1,0 +1,201 @@
+/* Blog index — the shared blog layout (the index, post, and authors
+ * pages all use it) plus list items, excerpts, and tags. The list
+ * block sat after the sidebar rules in the old file; it lives here
+ * now so the index page's rules are together (the selectors don't
+ * overlap the rules they pass, so the move is inert).
+ */
+
+/* The blog list, post, and authors pages. Original Portosaur code
+ * in the design language: hairline borders, square cards, pill tag
+ * chips. Phase 1 is minimal: all posts on one page (no pagination),
+ * the recent-posts sidebar, and the author index. */
+/* Sidebar + main column (index, post). */
+.porto-blog-layout {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.porto-blog-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2.5rem;
+  min-width: 0;
+  max-width: 46rem;
+}
+
+/* Single-column list pages (authors). */
+.porto-blog-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.porto-blog-list-page--tight {
+  gap: 1.5rem;
+}
+
+.porto-blog-list-title {
+  margin-bottom: -1rem;
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-list-title--tight {
+  margin-bottom: -0.5rem;
+}
+
+.porto-blog-empty-text {
+  color: var(--porto-color-gray-3);
+}
+
+/* Post list items. */
+.porto-blog-post-title {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-post-title a {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-blog-post-title a:hover {
+  text-decoration: underline;
+}
+
+/* Author list titles link in body color, accent on hover (the
+   Docusaurus list style). */
+.porto-blog-post-title--plain a {
+  color: var(--porto-color-text);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-blog-post-title--plain a:hover {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+
+.porto-blog-post-title--sm {
+  font-size: 1.8rem;
+}
+
+.porto-blog-post-meta {
+  margin-bottom: 0.75rem;
+}
+
+.porto-blog-post-date {
+  font-size: 0.9rem;
+  color: var(--porto-color-text);
+}
+
+.porto-blog-post-authors {
+  margin-top: 0.75rem;
+}
+
+.porto-blog-post-author {
+  margin-bottom: 0.25rem;
+}
+
+.porto-blog-post-author-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+a.porto-blog-post-author-name {
+  text-decoration: none;
+}
+a.porto-blog-post-author-name:hover {
+  text-decoration: underline;
+}
+
+.porto-blog-post-author-title {
+  font-size: 0.85rem;
+  color: var(--porto-color-gray-3);
+}
+
+/* The excerpt is injected HTML, so its inner elements can't carry
+   classes — these rules style them by element. */
+.porto-blog-excerpt {
+  margin-bottom: 0.5rem;
+}
+
+.porto-blog-excerpt p,
+.porto-blog-excerpt ul,
+.porto-blog-excerpt ol,
+.porto-blog-excerpt pre {
+  margin: 0 0 1rem;
+}
+
+.porto-blog-excerpt > *:last-child {
+  margin-bottom: 0;
+}
+
+.porto-blog-post-desc {
+  margin-bottom: 0.5rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-post-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.porto-blog-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-blog-tag {
+  display: inline-block;
+  border: 1px solid var(--porto-color-hairline-light);
+  border-radius: 999rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--porto-color-gray-3);
+  text-decoration: none;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-blog-tag:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+
+.porto-blog-tag--lg {
+  font-size: 0.9rem;
+}
+
+.porto-blog-tag-count {
+  font-size: 0.8em;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-blog-read-more {
+  margin-left: auto;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-blog-read-more:hover {
+  text-decoration: underline;
+}

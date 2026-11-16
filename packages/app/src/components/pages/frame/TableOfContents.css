@@ -1,0 +1,88 @@
+/* Table of contents — desktop panel + list. The panel is rendered
+ * by PageSidebar, the list by TableOfContents.
+ */
+
+/* Desktop right sidebar (≥72rem) + mobile bar below the navbar.
+ * The "On this page" title renders as a <p>, not an <h2> — an <h2>
+ * here would enter every doc page's heading list. */
+.porto-toc-panel {
+  padding: 1rem var(--porto-sidebar-pad-x);
+}
+.porto-toc-container {
+  width: calc(var(--porto-sidebar-width) - 2 * var(--porto-sidebar-pad-x));
+}
+.porto-toc-title {
+  color: var(--porto-color-white);
+  font-size: var(--porto-text-h5);
+  font-weight: 600;
+  line-height: var(--porto-line-height-headings);
+  margin-bottom: 0.7rem;
+}
+.porto-toc-panel a {
+  display: block;
+  font-size: var(--porto-text-xs);
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+  overflow-wrap: anywhere;
+  /* The scroll-spy moves `aria-current` between headings as you
+     read — the fade makes the highlight travel instead of snap. */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-toc-panel a:hover {
+  color: var(--porto-color-white);
+}
+
+.porto-toc-list {
+  padding: 0;
+  list-style: none;
+}
+.porto-toc-list a {
+  --porto-toc-pad-inline: 0.5rem;
+  display: block;
+  border-radius: 0.25rem;
+  padding-block: 0.25rem;
+  padding-inline: calc(
+      1rem * var(--porto-toc-depth, 0) + var(--porto-toc-pad-inline)
+    )
+    var(--porto-toc-pad-inline);
+  line-height: 1.25;
+}
+.porto-toc-list a[aria-current="true"] {
+  color: var(--porto-color-text-accent);
+}
+.porto-toc-list--mobile a {
+  --porto-toc-pad-inline: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--porto-toc-pad-inline);
+  border-top: 1px solid var(--porto-color-gray-6);
+  border-radius: 0;
+  padding-block: 0.5rem;
+  color: var(--porto-color-text);
+  font-size: var(--porto-text-sm);
+  text-decoration: none;
+  outline-offset: var(--porto-outline-offset-inside);
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-toc-list--mobile:first-child > li:first-child > a {
+  border-top: 0;
+}
+.porto-toc-list--mobile a[aria-current="true"],
+.porto-toc-list--mobile a[aria-current="true"]:hover,
+.porto-toc-list--mobile a[aria-current="true"]:focus {
+  color: var(--porto-color-white);
+  background-color: unset;
+}
+.porto-toc-list--mobile a[aria-current="true"]::after {
+  content: "";
+  width: 1rem;
+  background-color: var(--porto-color-text-accent);
+  /* Check mark icon */
+  -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==");
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  flex-shrink: 0;
+}

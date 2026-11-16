@@ -1,0 +1,19 @@
+/* Theme select — the Light / Dark / Auto control. Rendered by
+ * ThemeSelect (the menu itself is the shared Dropdown's).
+ */
+
+/* Portosaur's own theme control — a Light / Dark / Auto dropdown
+   rendered with the shared Dropdown, so its option list is our
+   own markup instead of the browser-native <select> popup. The
+   trigger, menu, and options all use the shared Dropdown's
+   classes — only the icon + label inside the trigger are the
+   theme select's own. */
+.porto-theme-select__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.porto-theme-select__current svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}

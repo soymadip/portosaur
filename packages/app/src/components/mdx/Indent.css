@@ -1,0 +1,8 @@
+/* Indent — an indented block. Rendered by Indent. */
+
+/* Indent — an indented block. */
+.porto-indent {
+  margin-inline-start: 1.5rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--porto-color-gray-5);
+}

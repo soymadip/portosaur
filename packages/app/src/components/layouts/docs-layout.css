@@ -1,0 +1,67 @@
+/* Main frame (docs pages) — sidebar offset, collapse rail, and the
+ * 50–72rem band where the rail drops. Rendered by docs-layout.
+ * (The band block also carries the footer/progress exceptions —
+ * they belong to the frame's band, not to those components.)
+ */
+
+/* The frame adds the sidebar offset at desktop widths on pages
+ * with a sidebar (`.main-frame--sidebar`). The mobile-TOC height
+ * lives on the main pane instead (`.main-pane--toc` below): only
+ * the doc page knows whether it has headings, and the layout
+ * doesn't. */
+/* The frame is the first link in the stretch chain (OG's flex chain
+ * in `pagination.css`: wrapper → container → row → column, all
+ * `flex: 1 0 auto`): it fills `<main>`'s height so the doc footer
+ * can push itself to the bottom with `margin-top: auto` on short
+ * pages. */
+.main-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  padding-top: 0;
+  padding-inline-start: 0;
+}
+
+@media (min-width: 50rem) {
+  .main-frame--sidebar {
+    padding-inline-start: var(--porto-sidebar-width);
+    /* Slides to 0 with the pane when the sidebar collapses — the
+       shared collapse duration and easing, so the frame's edge
+       tracks the pane's edge through the whole animation. */
+    transition: padding-inline-start var(--porto-sidebar-collapse-duration) ease;
+  }
+  /* Collapsed, the frame keeps a 2.25rem rail at the start — the
+     floating expand panel lives there (top-left, ending 2.625rem
+     in), and without the rail it hid the H1's first letters (its
+     top edge coincided with the title's, and the title's left
+     edge sat inside the panel's span at every desktop width).
+     The rail glides on the shared duration, like the 265px
+     slide. On TOC pages in the mobile-bar band the rail is
+     dropped (below) — the bar sits between the panel and the
+     title there, so nothing needs clearing. */
+  html.porto-sidebar-collapsed .main-frame--sidebar {
+    padding-inline-start: 1.45rem;
+  }
+}
+@media (min-width: 50rem) and (max-width: 71.999rem) {
+  /* TOC pages in the mobile-bar band need no rail: the panel
+     docks into the bar's row, the title sits below the bar, and
+     the two can never meet — so the frame, the footer border,
+     and the progress bar all take the full width back. At
+     desktop widths the bar is hidden and the rail applies to
+     every page again (above). */
+  html.porto-sidebar-collapsed:has(.main-pane--toc) .main-frame--sidebar {
+    padding-inline-start: 0;
+  }
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    body:has(.main-frame--sidebar)
+    .porto-footer {
+    margin-inline-start: 0;
+  }
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    body:has(.main-frame--sidebar)
+    .porto-nav-progress {
+    inset-inline-start: 0;
+    width: 100%;
+  }
+}

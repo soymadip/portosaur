@@ -1,0 +1,61 @@
+/* Tabs — tablist, triggers, panels. Rendered by Tabs + TabItem. */
+
+/* Tabs — the tab styles from the Astro tabs.css, under the React
+   component's classes. */
+.porto-tabs {
+  display: block;
+}
+
+.porto-tabs__tablist-wrapper {
+  overflow-x: auto;
+}
+
+/* Fumadocs' tabs: underline-style triggers — small medium text
+   (`text-sm font-medium`), a gap between triggers instead of
+   wide per-tab padding, the active trigger in the primary color
+   with a primary underline. The underline stays Portosaur's
+   box-shadow trick (it animates), on the tablist's border track. */
+.porto-tabs [role="tablist"] {
+  display: flex;
+  gap: 0.875rem;
+  list-style: none;
+  border-bottom: 2px solid var(--porto-color-gray-5);
+  padding: 0;
+}
+
+.porto-tabs__tab {
+  display: flex;
+}
+.porto-tabs__tab > [role="tab"] {
+  --porto-tab-color-border: var(--porto-color-gray-5);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: var(--porto-line-height-headings);
+  padding: 0.5rem 0.25rem;
+  text-decoration: none;
+  box-shadow: 0 2px 0 var(--porto-tab-color-border);
+  color: var(--porto-color-gray-3);
+  outline-offset: var(--porto-outline-offset-inside);
+  overflow-wrap: initial;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  /* The selected tab's underline is a box-shadow on the border
+     variable — fading both makes switching tabs feel like the
+     indicator slides over instead of jumping. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-tabs__tab [role="tab"][aria-selected="true"] {
+  --porto-tab-color-border: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+}
+
+.porto-tabs__tablist-wrapper ~ [role="tabpanel"] {
+  margin-top: 1rem;
+}

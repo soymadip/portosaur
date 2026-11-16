@@ -1,0 +1,121 @@
+/* Mobile TOC — the fixed bar below the navbar. Rendered by
+ * MobileTableOfContents.
+ */
+
+/* Mobile TOC: fixed bar below the navbar, follows hide-on-scroll. */
+.porto-mobile-toc nav {
+  position: fixed;
+  z-index: var(--porto-z-index-toc);
+  top: calc(var(--porto-nav-height) - 1px);
+  inset-inline: 0;
+  border-top: 1px solid var(--porto-color-gray-5);
+  background-color: var(--porto-color-bg-nav);
+  transition:
+    top 0.2s ease-in-out,
+    inset-inline-start var(--porto-sidebar-collapse-duration) ease;
+}
+html.porto-navbar-hidden .porto-mobile-toc nav {
+  top: -1px;
+}
+@media (min-width: 50rem) {
+  .main-frame--sidebar .porto-mobile-toc nav {
+    inset-inline-start: var(--porto-sidebar-width);
+  }
+  /* Sidebar collapsed: the bar spans the full width — keeping
+     the sidebar's offset would leave a dead 265px strip at the
+     left with the pill stranded mid-page. It does NOT follow
+     the frame's 3rem rail: the expand panel docks into this
+     row at the viewport's left edge, and a bar starting at the
+     rail would leave the panel hanging half outside it while
+     the pill's panel-clearing padding pushed the pill 56px
+     away from it. It glides on the collapse duration, in sync
+     with the content widening. */
+  html.porto-sidebar-collapsed .main-frame--sidebar .porto-mobile-toc nav {
+    inset-inline-start: 0;
+  }
+  /* Collapsed on a TOC page, the expand panel docks into this
+     bar's row (see the panel rules below), so the summary's
+     start padding clears the panel's right edge (2.625rem,
+     measured) plus a 0.5rem gap — the pill clears the panel. */
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    .main-frame--sidebar
+    .porto-mobile-toc
+    summary {
+    padding-inline-start: calc(2.625rem + 0.5rem);
+  }
+}
+
+.porto-mobile-toc summary {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  height: var(--porto-mobile-toc-height);
+  border-bottom: 1px solid var(--porto-color-hairline-shade);
+  padding: 0.5rem 1rem;
+  font-size: var(--porto-text-xs);
+  outline-offset: var(--porto-outline-offset-inside);
+}
+.porto-mobile-toc summary::marker,
+.porto-mobile-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.porto-mobile-toc__toggle {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  padding-block: 0.5rem;
+  padding-inline-start: 0.75rem;
+  padding-inline-end: 0.5rem;
+  line-height: 1;
+  background-color: var(--porto-color-black);
+  user-select: none;
+  cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-toc details[open] .porto-mobile-toc__toggle {
+  color: var(--porto-color-white);
+  border-color: var(--porto-color-accent);
+}
+.porto-mobile-toc details .porto-mobile-toc__toggle:hover {
+  color: var(--porto-color-white);
+  border-color: var(--porto-color-gray-2);
+}
+.porto-mobile-toc__toggle svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[dir="rtl"] .porto-mobile-toc__toggle svg {
+  transform: rotateZ(180deg);
+}
+.porto-mobile-toc details[open] .porto-mobile-toc__toggle svg {
+  transform: rotateZ(90deg);
+}
+
+.porto-mobile-toc__current {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: var(--porto-color-white);
+}
+
+.porto-mobile-toc__dropdown {
+  --porto-mobile-toc-border-top: 1px;
+  margin-top: calc(-1 * var(--porto-mobile-toc-border-top));
+  border: var(--porto-mobile-toc-border-top) solid var(--porto-color-gray-6);
+  border-top-color: var(--porto-color-hairline-shade);
+  max-height: calc(
+    85vh - var(--porto-nav-height) - var(--porto-mobile-toc-height)
+  );
+  overflow-y: auto;
+  background-color: var(--porto-color-black);
+  box-shadow: var(--porto-shadow-md);
+  overscroll-behavior: contain;
+}

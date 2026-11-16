@@ -1,0 +1,85 @@
+/* Content panels — header/body panels, the divider between them,
+ * and the content cap. Rendered by ContentPanel.
+ */
+
+.content-panel {
+  padding: 1.5rem var(--porto-content-pad-x);
+}
+/* The title panel sits flush under the navbar, like OG —
+   Docusaurus puts no padding between the navbar and the page
+   title. Its bottom padding is small too: the title and the
+   body content flow together in OG, with no panel split between
+   them, so the two panels split a single small gap across the
+   hairline instead of each adding a full 1.5rem. */
+.content-panel--header {
+  padding-top: 0;
+  padding-bottom: 0.75rem;
+}
+/* The body panel on doc pages: same small top padding, for the
+   same reason. It is also the last stretch link before the article
+   container: a flex column filling the main pane. */
+.content-panel--body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+/* The article container is the last link in the stretch chain: a
+   flex column the doc footer can push against. It is also OG's
+   `docContainer` query container: the pagination stacks when the
+   *content column* is narrow, even on a wide viewport. */
+.content-panel--body > .porto-content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  /* `container-type: inline-size` zeroes the element's intrinsic
+     width, so as a flex item it would collapse to 0 without an
+     explicit width (verified by CDP: the whole article column,
+     pagination included, measured 0px wide). `width: 100%` keeps
+     it full-width under the 80rem cap. */
+  width: 100%;
+  container-type: inline-size;
+}
+.content-panel + .content-panel {
+  position: relative;
+}
+/* The divider between the header and body panels starts where
+   the text starts — at the panel's inline padding, like the
+   rules inside the article — instead of spanning the full panel
+   edge to edge. A border always spans the whole element, so the
+   line is a pseudo-element; the right end still runs to the
+   panel edge (and the TOC border beside it). */
+.content-panel + .content-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline-start: var(--porto-content-pad-x);
+  inset-inline-end: 0;
+  border-top: 1px solid var(--porto-color-hairline);
+}
+/* The article is capped at 80rem and centered. Generous on
+   purpose: at 1920px the middle column is ~1390px, so the cap
+   barely binds and the full-width Docusaurus feel stays — but on
+   ultrawide monitors the line length stops running away. */
+.porto-content-container {
+  max-width: 80rem;
+  margin-inline: auto;
+  /* The cap animates with the sidebar collapse (see below): the
+     container widens into the freed space in lockstep with the
+     pane slide, so its left edge tracks the pane's right edge
+     instead of drifting at half speed behind it. */
+  transition: max-width var(--porto-sidebar-collapse-duration) ease;
+}
+@media (min-width: 50rem) {
+  /* With the sidebar collapsed the freed 265px goes to the
+     content, not the auto margins: the cap grows by exactly the
+     sidebar width, so the column widens by 265px and the side
+     margins stay as they were. */
+  html.porto-sidebar-collapsed .porto-content-container {
+    max-width: calc(80rem + var(--porto-sidebar-width));
+  }
+}
+.porto-content-container > * + * {
+  margin-top: 1.5rem;
+}

@@ -1,0 +1,19 @@
+/* Hint — the tooltip message box. Rendered by Hint. */
+
+/* Hint — simplified tooltip: the message renders in a tinted box
+   above the children. OG's full portal tooltip is Phase 2 scope. */
+.porto-hint {
+  border: 1px solid var(--porto-color-hairline-light);
+  border-inline-start: 0.25rem solid var(--porto-color-blue);
+  border-radius: 0.25rem;
+  background-color: var(--porto-color-blue-low);
+  padding: 0.75rem 1rem;
+  color: var(--porto-color-white);
+}
+.porto-hint__msg {
+  font-weight: 600;
+  color: var(--porto-color-blue-high);
+}
+.porto-hint__msg + * {
+  margin-top: 0.5rem;
+}

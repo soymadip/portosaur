@@ -1,0 +1,437 @@
+/* Sidebar — tree, section title, dimming, guide line, rows, fold.
+ * Rendered by Sidebar.
+ */
+
+/* Nested categories, icons, carets, 265px. Rows are uniform size
+   across levels and the caret is pinned to the row's right edge
+   (the label grows to fill the row). Vertical padding is 0.3em —
+   0.5em felt too airy.
+   Motion follows the Fumadocs docs sidebar (decision 26): 150ms
+   color fades on rows, instant on hover with the fade only on
+   the way out, and a 150ms height + opacity fold for categories. */
+.porto-sidebar {
+  /* Lets `block-size: 0 -> auto` interpolate for the
+     `::details-content` fold below (Chrome 131+, Firefox 143+).
+     Older browsers ignore it and open/close instantly. */
+  interpolate-size: allow-keywords;
+  --porto-sidebar-item-padding-inline: 0.5rem;
+}
+
+/* The section title above the tree ("Docs" / "Notes") — the
+   sidebar's answer to the TOC's "On this page" title, same size
+   and weight, aligned with the row text via the shared inline
+   padding. A <p>, not a heading: an <h2> here would enter every
+   page's heading list (same reason as the TOC title). */
+.porto-sidebar-title {
+  font-size: var(--porto-text-h5);
+  font-weight: 600;
+  line-height: var(--porto-line-height-headings);
+  padding-inline: var(--porto-sidebar-item-padding-inline);
+  /* No bottom padding/margin here: the title shares its row with
+     the collapse trigger, and anything below the text would push
+     the trigger under the title's line — the 1rem gap to the
+     tree lives on the row instead (see below). */
+}
+.porto-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.porto-sidebar li {
+  overflow-wrap: anywhere;
+}
+
+/* The inactive branches sit slightly dimmed so the branch holding
+   the current page reads as the focus: top-level items render at
+   80% opacity, and only the top-level item containing the active
+   page goes to full opacity. When no page is active (the
+   collection home), everything stays dimmed — no exception. */
+.porto-sidebar > ul > li {
+  opacity: 0.8;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-sidebar > ul > li:has(a[aria-current="page"]) {
+  opacity: 1;
+}
+
+.porto-sidebar ul ul li {
+  margin-inline-start: var(--porto-sidebar-item-padding-inline);
+  border-inline-start: 1px solid var(--porto-sidebar-guide-color);
+  padding-inline-start: var(--porto-sidebar-item-padding-inline);
+  --porto-sidebar-guide-color: var(--porto-color-hairline-light);
+}
+
+/* The last child's segment stops a bit short of the row's
+   bottom edge — 0.3em up, about where the item's text ends
+   (the link's own padding is 0.3em at its slightly smaller
+   size, so the line lands a hair above the text's bottom edge)
+   — instead of hanging below it. A border can't be shortened,
+   so the last child keeps a transparent border (same geometry)
+   and draws its line with a ::before on the border's exact
+   footprint. */
+.porto-sidebar ul ul li:last-child {
+  position: relative;
+  border-inline-start-color: transparent;
+}
+.porto-sidebar ul ul li:last-child::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -1px;
+  top: 0;
+  bottom: 0.3em;
+  width: 1px;
+  background-color: var(--porto-sidebar-guide-color);
+}
+
+/* The guide line of the top-level category holding the active
+   page is tinted toward the primary — same 1px width as the
+   other guide lines, just a soft primary color — so the active
+   group reads at a glance. Only that category's direct children
+   get it (deeper levels keep the hairline), and the line is the
+   per-item borders, so it spans exactly the first child to the
+   last and never past it. Both variants: collapsable categories
+   (details) and plain groups (a direct ul). A 2px line was too
+   heavy, first in gray-3 then in the tint; the width went back
+   to 1px and only the tint stayed. */
+.porto-sidebar__top-level > li > details:has(a[aria-current="page"]) > ul > li,
+.porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
+  --porto-sidebar-guide-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 30%,
+    transparent
+  );
+}
+
+.porto-sidebar__top-level > li > details[open] > ul > li,
+.porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
+  margin-inline-start: calc(var(--porto-sidebar-item-padding-inline) + 0.3rem);
+  padding-inline-start: calc(
+    var(--porto-sidebar-item-padding-inline) - 0.15rem
+  );
+}
+.porto-sidebar details[open] > ul {
+  padding-block-start: 0.25rem;
+}
+
+/* Top-level rows are semibold and brighter than nested rows —
+   the size stays the same, so the hierarchy reads from weight
+   and color plus the indentation and guide line. 700 was too
+   heavy here; 600 matches the active row's weight. */
+.porto-sidebar__large {
+  font-weight: 650;
+  color: var(--porto-color-white);
+}
+
+.porto-sidebar__top-level > li + li {
+  margin-top: 0.5rem;
+}
+
+.porto-sidebar summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Same font size as a leaf link, so the 0.3em padding below
+     resolves to the same pixels — without this the summary
+     inherits the 16px base size and category rows come out
+     1.2px taller than leaf rows. */
+  font-size: var(--porto-text-sm);
+  /* Same vertical padding as a leaf link, so category rows and
+     leaf rows are the same height. The end padding is halved
+     (0.25rem vs the shared 0.5rem): the caret is pinned to the
+     row's end edge, so the full 0.5rem read as dead space after
+     the arrow. Leaf links keep the shared value — their text is
+     start-aligned, so their end padding is invisible. */
+  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+  padding-inline-end: 0.25rem;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  /* The hover/active tint boxes are rounded; the radius lives
+     on the base row so it doesn't snap when the tint fades in. */
+  border-radius: 0.375rem;
+  /* Fumadocs `transition-colors`: the tint and text fade on the
+     way out; `:hover` below disables the transition so the hover
+     state lands instantly. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-sidebar summary::marker,
+.porto-sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.porto-sidebar__caret {
+  /* A square hit area around the chevron, with its own hover
+     background: the negative margins more than cancel the padding,
+     so the 1.25rem chevron (20px) never makes the row taller than
+     the 19.6px text line sets it. Only the chevron itself rotates
+     when the group opens — the span and its hover background stay
+     put, so the hover box never spins through a diamond
+     mid-animation. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Horizontal padding is 0.1rem (vertical stays 0.2rem): the
+     chevron sits closer to the row's end edge. */
+  padding: 0.2rem 0.1rem;
+  margin-block: -0.25rem;
+  border-radius: 0.375rem;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-sidebar__caret svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  /* Fumadocs `transition-transform` (150ms): the caret swings
+     with the fold instead of snapping. */
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[dir="rtl"] .porto-sidebar__caret svg {
+  transform: rotateZ(180deg);
+}
+.porto-sidebar details[open] > summary .porto-sidebar__caret svg {
+  transform: rotateZ(90deg);
+}
+
+.porto-sidebar a {
+  /* Flex so the icon centers vertically when the label wraps
+     over several lines instead of sitting on the first line. */
+  display: flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+  line-height: 1.4;
+  /* Fumadocs `transition-colors`: the hover tint fades out on
+     mouse-leave, and the active tint cross-fades when navigating
+     to another page. `:hover` below disables it so the hover
+     state lands instantly. */
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-sidebar a > * {
+  min-width: 0;
+}
+
+/* A hovered leaf row gets the same full-width tint box as a
+   hovered category row (summary:hover below) — without the
+   background the leaf only changed text color. */
+.porto-sidebar a:hover,
+.porto-sidebar a:focus {
+  color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+}
+/* Fumadocs `hover:transition-none`: the hover state applies
+   instantly; the 150ms fade runs only on the way out. Focus
+   keeps the transition (keyboard users get the fade both ways),
+   and the active row keeps it on hover too (its colors don't
+   change under the cursor, so the fade is what animates a
+   selection change while hovering). */
+.porto-sidebar a:hover,
+.porto-sidebar summary:hover {
+  transition: none;
+}
+.porto-sidebar [aria-current="page"]:hover,
+.porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]):hover {
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* OG-style active item: accent text on a subtle 10% accent tint.
+   The solid-accent box fails in light mode, where the mid accent
+   vs white is under 4.5:1 in four schemes — the tint + accent text
+   reads in every scheme × mode. The tint uses text-accent (the
+   per-mode visible primary), so dark mode tints with the dark
+   primary like OG. */
+.porto-sidebar [aria-current="page"],
+.porto-sidebar [aria-current="page"]:hover,
+.porto-sidebar [aria-current="page"]:focus {
+  font-weight: 600;
+  color: var(--porto-color-accent-high);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+}
+
+/* The active category row highlights as one uniform box: the
+   background sits on the <summary>, not the inner link, so the
+   box spans the full row at leaf-row height with the caret
+   inside it. The link keeps only the accent text color — its
+   own background is cleared. */
+.porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+  color: var(--porto-color-accent-high);
+}
+
+/* Dark mode only: lighten the active text one step — the same 65%
+   white tint the hue `-high` colors use. The OG primaries are mid
+   lightness, so dracula purple and gruvbox orange don't reach
+   4.5:1 on the gray-6 sidebar bg at full strength. */
+[data-theme="dark"] .porto-sidebar [aria-current="page"],
+[data-theme="dark"] .porto-sidebar [aria-current="page"]:hover,
+[data-theme="dark"] .porto-sidebar [aria-current="page"]:focus,
+[data-theme="dark"]
+  .porto-sidebar
+  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
+}
+
+/* A hovered category row gets the same full-width box, in a
+   translucent foreground tint (lightens dark sidebars, darkens
+   light ones, in every scheme). The caret has its own hover
+   background in the same tint, stacking on top of the row
+   hover so the caret area goes slightly darker. */
+.porto-sidebar summary:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+}
+.porto-sidebar__caret:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+}
+.porto-sidebar__group-label a[aria-current="page"],
+.porto-sidebar__group-label a[aria-current="page"]:hover,
+.porto-sidebar__group-label a[aria-current="page"]:focus {
+  background-color: transparent;
+}
+
+/* Same for hover: the category label link sits inside the
+   <summary>, whose own hover box already covers the row — the
+   link must not paint a second tint box on top of it. */
+.porto-sidebar__group-label a:hover,
+.porto-sidebar__group-label a:focus {
+  background-color: transparent;
+}
+
+/* The category fold, Fumadocs `animate-fd-collapsible-down/up`:
+   150ms height + opacity, `cubic-bezier(0.45, 0, 0.55, 1)`.
+   `::details-content` is the content after the <summary>.
+   The UA hides a closed details' content with
+   `content-visibility: hidden` — but that flips instantly (the
+   discrete transition doesn't delay it in Chrome), so a plain
+   `::details-content` fold only animates on open and snaps shut.
+   Instead we override the UA hiding with `content-visibility:
+   visible` and hide the content ourselves: `block-size: 0` +
+   `opacity: 0` + `visibility: hidden` (which also takes the
+   links out of the tab order while folded). `visibility` flips
+   immediately on open and only after the fade on close — the
+   delay lives on the closed rule, the instant flip on the open
+   rule, because a transition runs with the after-change style.
+   `interpolate-size` on `.porto-sidebar` lets `block-size: auto`
+   interpolate.
+   Browsers without `::details-content` support open/close
+   instantly, as before. */
+.porto-sidebar details::details-content {
+  overflow: hidden;
+  block-size: 0;
+  opacity: 0;
+  visibility: hidden;
+  content-visibility: visible;
+  transition:
+    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s 150ms;
+  transition-behavior: allow-discrete;
+}
+.porto-sidebar details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-sidebar a,
+  .porto-sidebar summary,
+  .porto-sidebar__caret,
+  .porto-sidebar__caret svg,
+  .porto-sidebar details::details-content {
+    transition: none;
+  }
+}
+
+/* Row icons: the injected SVG is 1em, so the icon scales with
+   its row's text. The icon carries its own trailing gap. Vertical
+   centering comes from the row's flex layout, so a wrapped label
+   centers the icon on the whole block. */
+.porto-sidebar__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 0.5em;
+  /* Optical centering: the icon is geometrically centered on the
+     1.4 line box, but the text's visual (cap-height) center sits
+     ~0.4px above the line-box center, so the icon reads as
+     slightly low. The 0.5px bottom margin shifts it up ~0.35px
+     through flex centering. */
+  margin-bottom: 0.5px;
+}
+.porto-sidebar__icon:empty {
+  display: none;
+}
+.porto-sidebar__icon svg,
+.porto-sidebar__icon img {
+  width: 1em;
+  height: 1em;
+}
+
+.porto-sidebar a > *:not(.porto-sidebar__icon):not(:last-child),
+.porto-sidebar__group-label > *:not(:last-child) {
+  margin-inline-end: 0.25em;
+}
+
+/* The group label grows to fill the summary row, pinning the
+   caret to the right edge — inside the active highlight box
+   when the category is the current page. */
+.porto-sidebar__group-label {
+  flex: 1;
+}
+
+/* A category link inside a <summary> is the group label, not a
+   list link — no list-link padding (the summary provides it). */
+.porto-sidebar__group-label a {
+  padding: 0;
+}
+
+/* A plain (non-link) category label centers its icon the same
+   way a link row does. */
+.porto-sidebar__group-label > span {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 50rem) {
+  .porto-sidebar__top-level > li + li {
+    margin-top: 0.25rem;
+  }
+  .porto-sidebar__large,
+  .porto-sidebar a {
+    font-size: var(--porto-text-sm);
+  }
+}

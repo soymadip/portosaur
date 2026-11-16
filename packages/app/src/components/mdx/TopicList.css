@@ -1,0 +1,121 @@
+/* Topic list — cards, titles, count badge. Rendered by TopicList. */
+
+/* TopicList — the Docusaurus `TopicCard` list: a grid of cards,
+   each with an icon, an accent title, and a one-line muted
+   description. Two columns above OG's 996px `col` breakpoint,
+   one below it. The list carries no description line — the page
+   description renders under the H1 instead. */
+/* The list gets the page's own block rhythm above it: the
+   prose spacing is margin-top-only (paragraphs carry no bottom
+   margin), so a zero top margin left the cards sitting flush
+   against whatever came before them. This covers both modes —
+   the automatic list under the body and a manual `<TopicList />`
+   inside the article — and also gives the list room under the
+   divider when the body is empty. */
+.porto-topic-list-wrapper {
+  margin-top: var(--porto-content-gap-y);
+}
+.porto-topic-list {
+  display: grid;
+  gap: 0.96rem;
+}
+@media (min-width: 997px) {
+  .porto-topic-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.porto-topic-list__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* The one-line description must not force the grid track wider
+     than the container — without this the mobile grid blows out. */
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--porto-color-card-border);
+  background-color: var(--porto-color-gray-6);
+  border-radius: 0.5rem;
+  box-shadow: var(--porto-shadow-sm);
+  text-decoration: none;
+  color: var(--porto-color-text);
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-topic-list__card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
+  box-shadow: var(--porto-shadow-md);
+}
+/* The title row: the `h2` sizes to its text (it never grows,
+   so the count badge hugs the title instead of sitting at the
+   card's far edge) and truncates when space runs out. */
+.porto-topic-list__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.porto-topic-list__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 750;
+  color: var(--porto-color-text);
+}
+.porto-topic-list__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 2px;
+}
+/* An emoji icon renders as text in the icon span — at the SVG
+   icons' size (23px), not the span's 2px: the 2px is invisible
+   on SVGs (they carry their own size) but would shrink an emoji
+   to nothing. Same span, same gap as an SVG icon. */
+.porto-topic-list__icon--emoji {
+  font-size: 23px;
+  /* A text line box is 1.2x the font size — without this the
+     span's box is 27.6px tall next to the SVG span's 23px. The
+     glyph is centered either way, but identical boxes keep the
+     two icon kinds truly interchangeable. */
+  line-height: 1;
+}
+.porto-topic-list__title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The category child count: a small muted pill beside the
+   title — the number only, the full "N items" label is the
+   tooltip. Deliberately quiet (neutral gray, not accent):
+   the count is metadata, the title is the highlight. Never
+   shrinks, so it stays visible when a long title truncates. */
+.porto-topic-list__count {
+  flex-shrink: 0;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-gray-3);
+  font-size: 0.6rem;
+  font-weight: 500;
+  line-height: 1.5;
+  /* display: none; */
+}
+.porto-topic-list__description {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}

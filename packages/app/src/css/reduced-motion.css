@@ -1,0 +1,50 @@
+/* Reduced motion — one guard switching off the component hover
+ * fades. Cross-cutting by nature (it lists selectors from across
+ * the components), so it stays a shared file, imported last so it
+ * wins over the transitions above.
+ */
+
+/* The hover fades above, all off for reduced motion.
+   (The sidebar has its own guard next to its rules; the dialog,
+   menu, and dropdown motion guards live in animations.css.) */
+@media (prefers-reduced-motion: reduce) {
+  .porto-nav-link,
+  .porto-dropdown__trigger,
+  .porto-dropdown__chevron,
+  .porto-dropdown__item,
+  .porto-menu-button,
+  .porto-search-result,
+  .porto-mobile-nav a,
+  .porto-mobile-nav summary,
+  .porto-mobile-nav__chevron,
+  .porto-mobile-preferences__version-link,
+  .porto-toc-panel a,
+  .porto-toc-list--mobile a,
+  .porto-mobile-toc__toggle,
+  .porto-edit-link,
+  .porto-pagination__link,
+  .porto-topic-list__card,
+  .porto-pv,
+  .porto-blog-sidebar-link,
+  .porto-blog-post-title--plain a,
+  .porto-blog-tag,
+  .porto-blog-article-nav-link,
+  .porto-blog-author-entry-title a,
+  .porto-tabs__tab > [role="tab"],
+  .porto-icon-search__result,
+  .porto-code-copy,
+  .porto-button,
+  .hero-text .button,
+  .hero-text .title,
+  .hero-text .title::after,
+  .hero-text .tagline,
+  .feature-card,
+  .porto-note-grid .noteCard,
+  .porto-note-grid .noteIcon,
+  .porto-tasks-stat,
+  .porto-tasks-tab,
+  .porto-tasks-row,
+  .porto-mobile-toc__toggle svg {
+    transition: none;
+  }
+}

@@ -1,0 +1,93 @@
+/* Mobile menu footer — nav links, theme row, version link.
+ * Rendered by MobileMenuFooter.
+ */
+
+/* Mobile menu footer: navbar links + theme select + version link. */
+.porto-mobile-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--porto-color-gray-6);
+  padding: 0.5rem 0;
+}
+
+.porto-mobile-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.porto-mobile-nav a,
+.porto-mobile-nav summary {
+  display: block;
+  border-radius: 0.25rem;
+  padding: 0.3em 0.5rem;
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-nav a:hover,
+.porto-mobile-nav a:focus,
+.porto-mobile-nav summary:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+.porto-mobile-nav a.active {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 10%,
+    transparent
+  );
+}
+.porto-mobile-nav summary::marker,
+.porto-mobile-nav summary::-webkit-details-marker {
+  display: none;
+}
+/* The label stays at the start, the chevron at the end edge. */
+.porto-mobile-nav summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem;
+}
+/* Fumadocs' chevron: Lucide `ChevronDown`, 14px, rotating 180°
+   when the section opens. */
+.porto-mobile-nav__chevron {
+  flex-shrink: 0;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-nav details[open] > summary .porto-mobile-nav__chevron {
+  transform: rotate(180deg);
+}
+.porto-mobile-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1rem;
+}
+
+.porto-mobile-preferences__theme-row {
+  /* Flex so the select shrink-wraps; in a block context the label
+     stretches full width and the caret drifts to the far edge. */
+  display: flex;
+  padding: 0.3em 0.5rem;
+}
+
+.porto-mobile-preferences__version-link {
+  display: block;
+  border-top: 1px solid var(--porto-color-gray-6);
+  padding-top: 0.75rem;
+  text-align: center;
+  font-size: var(--porto-text-sm);
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+  opacity: 0.64;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-preferences__version-link:hover {
+  color: var(--porto-color-white);
+}

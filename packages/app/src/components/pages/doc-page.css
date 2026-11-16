@@ -1,0 +1,71 @@
+/* Two-column doc area — TOC aside + main pane. Rendered by doc-page. */
+
+/* A column by default; the 72rem rule below turns it into the row
+ * with the TOC aside. Stretches to fill the frame height. */
+.porto-doc-columns {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.main-pane {
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  /* Grow to fill the column height; shrink stays 1 so a page
+     without a TOC still fits beside the (empty) right-sidebar
+     container in the desktop row. */
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* On pages with a TOC, reserve room for the fixed mobile TOC bar
+ * below the navbar (3rem below the `lg` breakpoint; the variable
+ * is 0 at desktop widths, where the bar is hidden). */
+.main-pane--toc {
+  padding-top: var(--porto-mobile-toc-height);
+}
+
+@media (min-width: 72rem) {
+  /* Docusaurus-style three-column row: the main pane fills
+     everything except the TOC width, and the TOC container is
+     exactly sidebar-width, pinned to the right edge. */
+  .porto-doc-columns {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .porto-right-sidebar-container {
+    order: 2;
+    position: relative;
+    margin-inline-start: auto;
+    width: var(--porto-sidebar-width);
+    /* Never shrink: on a page without a TOC the main pane has no
+       width rule, so its 100% basis overflows the row and the
+       shrink used to come out of this container instead (it
+       squeezed to 233px, the fixed bar inside it overflowed past
+       the viewport edge, and the footer — which assumes a
+       sidebar-width TOC column — stopped 32px short of the
+       border). Pinned, the column is exactly sidebar-width on
+       every page and the main pane absorbs the shrink instead. */
+    flex-shrink: 0;
+  }
+
+  .porto-right-sidebar {
+    position: fixed;
+    top: 0;
+    border-inline-start: 1px solid var(--porto-color-hairline);
+    padding-top: var(--porto-nav-height);
+    /* Exactly the container width: `width: 100%` on a fixed
+       element resolves against the viewport, not the container. */
+    width: var(--porto-sidebar-width);
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .main-pane--toc {
+    order: 1;
+    width: calc(100% - var(--porto-sidebar-width));
+  }
+}

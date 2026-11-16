@@ -1,0 +1,247 @@
+/* Navbar — bar, hide-on-scroll, nav links, More divider, menu
+ * button, hamburger. The nav-links and menu-button blocks sat after
+ * the site-title and dropdown rules in the old file; they live here
+ * now so the navbar's rules are together (the selectors don't
+ * overlap the rules they pass, so the move is inert).
+ */
+
+/* ONE navbar on every page (like OG Docusaurus): brand left; right
+ * cluster is the search icon, the theme select (desktop only — on
+ * mobile it lives in the menu), the nav links (desktop only), and
+ * the menu button (mobile only, right side, VitePress-style).
+ * Search shows on every page (a deliberate divergence from OG's
+ * `hideSearchBarWithNoSearchContext`). */
+.porto-navbar {
+  z-index: var(--porto-z-index-navbar);
+  position: fixed;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  width: 100%;
+  height: var(--porto-nav-height);
+  /* No bottom border on mobile — it only appears at desktop
+     widths (see the media query below). */
+  padding: var(--porto-nav-pad-y) var(--porto-nav-pad-x);
+  padding-inline-end: var(--porto-nav-pad-x);
+  /* The header shares the content background — it is separated
+     by the border above, not by color. */
+  background-color: var(--porto-color-bg);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Hide-on-scroll: React toggles `.porto-navbar--hidden` on the
+   header while scrolling down. */
+.porto-navbar--hidden {
+  transform: translateY(-100%);
+}
+
+.porto-navbar__inner {
+  display: flex;
+  gap: var(--porto-nav-gap);
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.porto-navbar__title-column {
+  display: flex;
+  align-items: center;
+  gap: var(--porto-nav-gap);
+  min-width: 0;
+  flex: 1;
+}
+
+.porto-navbar__title-wrapper {
+  display: flex;
+  /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
+  overflow: clip;
+  /* Avoid clipping focus ring around link inside title wrapper. */
+  padding: 0.25rem;
+  margin: -0.25rem;
+  min-width: 0;
+}
+
+@media (orientation: landscape) {
+  .porto-navbar__title-wrapper--home {
+    display: none;
+  }
+}
+
+.porto-navbar__right-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.porto-navbar__search-group {
+  display: flex;
+  gap: var(--porto-nav-gap);
+  align-items: center;
+}
+
+/* Nav links + dropdowns. */
+.porto-primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Desktop-only nav (the links live in the mobile menu below
+   50rem). A dedicated class, not a Tailwind utility: this file's
+   unlayered rules beat Tailwind's layered utilities. */
+.porto-primary-nav--desktop {
+  display: none;
+}
+@media (min-width: 50rem) {
+  .porto-primary-nav--desktop {
+    display: flex;
+  }
+}
+
+.porto-nav-link {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  list-style: none;
+  white-space: nowrap;
+  /* Fumadocs `transition-colors` (150ms): every interactive row
+     in the app fades its colors instead of snapping. The same
+     150ms value is used for all the hover fades below — except
+     the dropdown buttons, which follow Fumadocs' 100ms
+     `buttonVariants` timing (see below). */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-nav-link:hover {
+  color: var(--porto-color-white);
+}
+.porto-nav-link.active {
+  font-weight: 600;
+  color: var(--porto-color-text-accent);
+}
+
+/* The mobile footer's nav dropdowns are inline accordions, not
+   floating menus — plain `<details>` with a plain `<ul>`, kept
+   separate from the shared Dropdown on purpose. */
+.porto-navbar__dropdown {
+  position: relative;
+}
+
+/* Divider between the nav links and the "More" dropdown. */
+.porto-navbar__more-dropdown {
+  margin-inline-start: -7px;
+  border-inline-start: 1.5px solid var(--porto-color-hairline);
+  padding-inline-start: 0.5rem;
+}
+
+/* Mobile menu button (right side) — a plain icon button in the
+   navbar's right cluster. */
+.porto-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-1);
+  cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-menu-button:hover {
+  color: var(--porto-color-white);
+}
+
+/* Mobile only — the menu button hides at desktop widths. */
+@media (min-width: 50rem) {
+  .porto-menu-button {
+    display: none;
+  }
+}
+
+/* VitePress's hamburger icon (VPNavBarHamburger, MIT License),
+   ported from the source (vitepress 1.6.4): three 16px lines in a
+   16×14 box with overflow hidden. The stagger is NOT different
+   line widths — every line is 16px, and the default translateX
+   offsets (top 0, middle 8px, bottom 4px) clip the middle to 8px
+   and the bottom to 12px visible, all right-aligned. Hover shifts
+   the stagger (top 4px, middle 0, bottom 8px). While the menu
+   popover is open the lines animate into an X — top rotates 225°,
+   bottom 135°, middle slides fully out — and hovering the open
+   button dims the lines. The button and the popover are not
+   siblings (the button lives in the header, the popover in the
+   layout), so the open state reads off <body>. */
+.porto-hamburger {
+  position: relative;
+  width: 16px;
+  height: 14px;
+  overflow: hidden;
+}
+.porto-hamburger span {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 2px;
+  background-color: currentColor;
+  transition:
+    top 0.25s,
+    background-color 0.5s,
+    transform 0.25s;
+}
+.porto-hamburger__line--top {
+  top: 0;
+  transform: translateX(0);
+}
+.porto-hamburger__line--middle {
+  top: 6px;
+  transform: translateX(8px);
+}
+.porto-hamburger__line--bottom {
+  top: 12px;
+  transform: translateX(4px);
+}
+.porto-menu-button:hover .porto-hamburger__line--top {
+  transform: translateX(4px);
+}
+.porto-menu-button:hover .porto-hamburger__line--middle {
+  transform: translateX(0);
+}
+.porto-menu-button:hover .porto-hamburger__line--bottom {
+  transform: translateX(8px);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--top {
+  top: 6px;
+  transform: translateX(0) rotate(225deg);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--middle {
+  top: 6px;
+  transform: translateX(16px);
+}
+body:has(#porto__sidebar:popover-open) .porto-hamburger__line--bottom {
+  top: 6px;
+  transform: translateX(0) rotate(135deg);
+}
+body:has(#porto__sidebar:popover-open)
+  .porto-menu-button:hover
+  .porto-hamburger
+  span {
+  background-color: var(--porto-color-gray-2);
+  transition:
+    top 0.25s,
+    background-color 0.25s,
+    transform 0.25s;
+}
+
+@media (min-width: 50rem) {
+  /* Desktop only: the bottom border returns (same separator as
+     the TOC panel's left border). Home pages keep it transparent
+     — the override sits after the border rule (same specificity,
+     so source order decides). */
+  .porto-navbar {
+    border-bottom: 1px solid var(--porto-color-hairline);
+  }
+  .porto-navbar--home {
+    border-bottom-color: transparent;
+  }
+}

@@ -1,0 +1,17 @@
+/* Edit link. Rendered by EditLink. */
+
+.porto-edit-link {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  text-decoration: none;
+  color: var(--porto-color-gray-3);
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-edit-link:hover {
+  color: var(--porto-color-white);
+}
+.porto-edit-link svg {
+  width: 1.2em;
+  height: 1.2em;
+}

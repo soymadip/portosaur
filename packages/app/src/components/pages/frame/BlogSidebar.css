@@ -1,0 +1,49 @@
+/* Blog sidebar — "Recent posts". Rendered by BlogSidebar. */
+
+/* Sidebar ("Recent posts"). */
+.porto-blog-sidebar {
+  flex: 0 0 16rem;
+  min-width: 0;
+}
+
+.porto-blog-sidebar-title {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-sidebar-group {
+  margin-bottom: 1rem;
+}
+
+.porto-blog-sidebar-year {
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-blog-sidebar-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-blog-sidebar-list li {
+  margin-bottom: 0.35rem;
+}
+
+.porto-blog-sidebar-link {
+  color: var(--porto-color-text);
+  text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-blog-sidebar-link:hover {
+  color: var(--porto-color-text-accent);
+}
+
+.porto-blog-sidebar-link[aria-current="page"] {
+  font-weight: 700;
+  color: var(--porto-color-text-accent);
+}

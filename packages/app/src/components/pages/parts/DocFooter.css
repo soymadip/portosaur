@@ -1,0 +1,27 @@
+/* Doc footer — the meta row. Rendered by DocFooter. */
+
+/* OG (`theme-doc-footer`): the footer pushes itself to the bottom
+   of the article column with `margin-top: auto`, with 2rem above
+   it on long pages. The gap to the pagination below comes from the
+   pagination's own padding-top (1.5rem with meta, 2.9rem without),
+   not from a gap here. */
+.porto-doc-footer {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+}
+.porto-doc-footer__meta {
+  display: flex;
+  gap: 0.75rem 3rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  font-size: var(--porto-text-sm);
+  color: var(--porto-color-gray-3);
+}
+.porto-doc-footer__meta:empty {
+  display: none;
+}
+.porto-doc-footer__meta > p:only-child {
+  margin-inline-start: auto;
+}

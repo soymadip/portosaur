@@ -1,0 +1,83 @@
+/* Nav progress bar. Rendered by NavProgress. */
+
+/* The thin progress bar for client-side navigations
+ * (Docusaurus's NProgress mechanism: a 2px bar in the accent color,
+ * no spinner), docked under the navbar instead of the top edge so
+ * it reads as the navbar's loading underline. The bar appears only
+ * after a 200ms delay, so slow navigations show something and fast
+ * ones show nothing. The animation is pure CSS — the bar crawls to
+ * 80% while the navigation is in flight, completes to 100% on the
+ * swap, then fades out. */
+.porto-nav-progress {
+  position: fixed;
+  top: var(--porto-nav-height);
+  left: 0;
+  /* Above the navbar (z-index 10), below the skip link (20). */
+  z-index: 11;
+  width: 100%;
+  height: 1px;
+  background-color: var(--porto-color-text-accent);
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  /* The top transition matches the navbar's hide transition
+     (transform 0.2s ease-in-out) so the bar slides up glued to
+     the navbar's bottom edge instead of jumping to the top while
+     the navbar is still sliding. It rides on all three states —
+     each overrides `transition` wholesale. */
+  transition:
+    transform 0.2s ease,
+    opacity 0.3s ease,
+    top 0.2s ease-in-out;
+}
+
+/* In flight: crawl slowly toward 80% — the navigation finishes
+   the bar, so it never sits at 100% while still loading. */
+.porto-nav-progress--active {
+  transform: scaleX(0.8);
+  opacity: 1;
+  transition:
+    transform 2.5s ease-out,
+    opacity 0.2s ease,
+    top 0.2s ease-in-out;
+}
+
+/* Finished: complete the crawl, then fade out. */
+.porto-nav-progress--done {
+  transform: scaleX(1);
+  opacity: 0;
+  transition:
+    transform 0.2s ease,
+    opacity 0.3s ease 0.15s,
+    top 0.2s ease-in-out;
+}
+
+/* The navbar hides on scroll — the bar docks to the top edge with
+   it, like the mobile TOC bar, instead of floating mid-page. */
+html.porto-navbar-hidden .porto-nav-progress {
+  top: 0;
+}
+
+/* On desktop pages with a persistent sidebar (docs + notes
+   detail pages), the bar spans only the content area — it starts
+   at the sidebar's right edge instead of the viewport's. The bar
+   lives in the root layout, outside the frame, so the scope is
+   `body:has(...)`. The breakpoint matches the sidebar's. */
+@media (min-width: 50rem) {
+  body:has(.main-frame--sidebar) .porto-nav-progress {
+    inset-inline-start: var(--porto-sidebar-width);
+    width: calc(100% - var(--porto-sidebar-width));
+  }
+  /* With the sidebar collapsed the bar starts at the frame's
+     2.25rem rail instead (it jumps — the bar's transitions cover
+     transform and top only — but at 1px tall the jump is
+     invisible mid-slide). On TOC pages in the mobile-bar band
+     the rail is dropped — see the exception by the frame rule. */
+  html.porto-sidebar-collapsed
+    body:has(.main-frame--sidebar)
+    .porto-nav-progress {
+    inset-inline-start: 2.25rem;
+    width: calc(100% - 2.25rem);
+  }
+}

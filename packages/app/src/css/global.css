@@ -43,7 +43,60 @@
 @import "./callouts.css";
 @import "./code.css";
 @import "./content.css";
-@import "./components.css";
+/* Component styles — one file per component, colocated with its .tsx
+ * (fresh CSS in Portosaur's design language: the values come from the
+ * Astro design, the selectors are new — no Starlight classes or IDs).
+ * Import order is the old components.css order and load-bearing:
+ * later files win at equal specificity, and reduced-motion.css must
+ * stay last so its guard wins over the transitions above.
+ *
+ * Responsive notes: components use Tailwind utilities (`hidden`,
+ * `md:flex`, …) only on wrapper elements that carry no component
+ * class of their own — plain CSS beats Tailwind's layered utilities
+ * on the same property. Where a styled element itself needs
+ * responsive display, the rule lives in the component's own file. */
+@import "../components/pages/frame/SiteShell.css";
+@import "../components/layouts/docs-layout.css";
+@import "../components/pages/doc-page.css";
+@import "../components/pages/parts/ContentPanel.css";
+@import "../components/pages/frame/Navbar.css";
+@import "../components/pages/frame/SiteTitle.css";
+@import "../components/Dropdown.css";
+@import "../components/pages/frame/ThemeSelect.css";
+@import "../components/pages/frame/SearchDialog.css";
+@import "../components/pages/frame/Sidebar.css";
+@import "../components/pages/frame/MobileMenu.css";
+@import "../components/pages/frame/MobileMenuFooter.css";
+@import "../components/pages/frame/TableOfContents.css";
+@import "../components/pages/frame/MobileTableOfContents.css";
+@import "../components/pages/parts/PageTitle.css";
+@import "../components/pages/parts/DocFooter.css";
+@import "../components/pages/parts/EditLink.css";
+@import "../components/pages/parts/Pagination.css";
+@import "../components/pages/frame/SkipLink.css";
+@import "../components/pages/frame/NavProgress.css";
+@import "../components/pages/parts/Footer.css";
+/* Pages. */
+@import "../components/pages/docs-home-page.css";
+@import "../components/pages/notes-index-page.css";
+@import "../components/pages/blog-index-page.css";
+@import "../components/pages/frame/BlogSidebar.css";
+@import "../components/pages/blog-post-page.css";
+@import "../components/pages/blog-authors-page.css";
+@import "../components/pages/tasks-page.css";
+@import "../components/pages/TasksTable.css";
+@import "./empty-states.css";
+@import "../components/pages/SearchPageBody.css";
+/* Shared components + MDX components. */
+@import "../components/Button.css";
+@import "../components/mdx/Dropdown.css";
+@import "../components/mdx/Hint.css";
+@import "../components/mdx/Indent.css";
+@import "../components/mdx/Tabs.css";
+@import "../components/mdx/TopicList.css";
+@import "../components/mdx/Pv.css";
+@import "../components/mdx/IconSearch.css";
+@import "./reduced-motion.css";
 @import "./animations.css";
 @import "./print.css";
 

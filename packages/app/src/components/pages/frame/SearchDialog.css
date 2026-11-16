@@ -1,0 +1,163 @@
+/* Search — trigger, dialog, results, match highlights, scroll lock.
+ * Rendered by SearchDialog.
+ */
+
+/* A navbar button opens a native <dialog> modal; ZBSearch
+ * (Fumadocs' static search) renders results inside. The button is
+ * a bare magnifier icon at every width. The dialog is a floating
+ * panel at every width: 1rem from the top and sides on mobile,
+ * sized to its content like Fumadocs' search — the page stays
+ * visible behind it, blurred by the backdrop. */
+/* The trigger is the shared ghost icon Button — no rules of its
+   own. */
+.porto-search-dialog {
+  margin: 1rem auto auto;
+  padding: 0;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  width: calc(100% - 2rem);
+  max-width: 40rem;
+  height: max-content;
+  max-height: calc(100% - 2rem);
+  box-shadow: var(--porto-shadow-lg);
+}
+.porto-search-dialog[open] {
+  display: flex;
+}
+.porto-search-dialog::backdrop {
+  background-color: var(--porto-color-backdrop-overlay);
+  -webkit-backdrop-filter: blur(0.25rem);
+  backdrop-filter: blur(0.25rem);
+}
+
+.porto-search-dialog__frame {
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* The Cancel button sits over the input's right edge on mobile. */
+.porto-search-dialog__cancel {
+  position: absolute;
+  z-index: 1;
+  align-self: flex-end;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--porto-color-text-accent);
+}
+
+.porto-search-dialog__input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  padding-inline-end: 5rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-search-dialog__input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-search-dialog__input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}
+
+.porto-search-dialog__loading,
+.porto-search-dialog__empty {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-search-result {
+  display: block;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  background-color: var(--porto-color-black);
+  /* The keyboard-selected result fades its tint in as you arrow
+     through the list (the hover outline itself can't fade). */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-search-result:hover,
+.porto-search-result--active {
+  outline: 1px solid var(--porto-color-accent-high);
+}
+.porto-search-result--active {
+  background-color: var(--porto-color-accent-low);
+}
+
+.porto-search-result__title {
+  display: block;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+.porto-search-result__breadcrumbs {
+  display: block;
+  font-size: var(--porto-text-xs);
+  color: var(--porto-color-gray-3);
+}
+.porto-search-result__excerpt {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--porto-text-sm);
+  overflow-wrap: anywhere;
+}
+.porto-search-result__excerpt mark {
+  color: var(--porto-color-gray-2);
+  background-color: transparent;
+  font-weight: 600;
+}
+
+/* Match highlights from `useHighlightQuery` (CSS Custom Highlight
+ * API) — the search terms in result excerpts. */
+::highlight(fd-search) {
+  color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 35%,
+    transparent
+  );
+}
+
+/* Body scroll lock while the search modal is open. */
+[data-search-modal-open] {
+  overflow: hidden;
+}
+
+@media (min-width: 50rem) {
+  .porto-search-dialog {
+    margin: 4rem auto auto;
+    width: 90%;
+    max-width: 40rem;
+    min-height: 15rem;
+    max-height: calc(100% - 8rem);
+  }
+  .porto-search-dialog__frame {
+    padding: 1.5rem;
+  }
+  .porto-search-dialog__input {
+    padding-inline-end: 1rem;
+  }
+}

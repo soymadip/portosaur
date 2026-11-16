@@ -1,0 +1,92 @@
+/* Pagination — the prev/next cards. Rendered by Pagination. */
+
+/* Docusaurus `PaginationNav`, ported from OG
+ * (`theme/css/overrides/pagination.css` + Infima): a 2-column grid
+ * of links, each a muted sublabel over a 1.1rem title. No arrows —
+ * OG removes Infima's `«`/`»`. The link background is the raised
+ * surface, its border the page background (invisible until hover
+ * turns it primary). */
+.porto-pagination {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  /* OG: 2.9rem above the nav, 1.5rem when the article has a doc
+     footer above it. */
+  padding-top: 2.9rem;
+}
+.porto-doc-footer:has(.porto-doc-footer__meta > *) .porto-pagination {
+  padding-top: 1.5rem;
+}
+.porto-pagination__link {
+  display: block;
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid var(--porto-color-bg);
+  border-radius: 0.4rem;
+  background-color: var(--porto-color-gray-6);
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+  line-height: var(--porto-line-height-headings);
+  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-pagination__link:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
+}
+.porto-pagination__link--next {
+  grid-column: 2 / 3;
+  text-align: right;
+}
+.porto-pagination__sublabel {
+  color: var(--porto-color-gray-3);
+  font-size: var(--porto-text-sm);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.porto-pagination__label {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.porto-pagination__link--prev .porto-pagination__label {
+  justify-content: flex-start;
+  text-align: left;
+}
+.porto-pagination__link--next .porto-pagination__label {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+/* Stack the two links on narrow screens — OG stacks below 768px,
+ * both by viewport and by content-column width. */
+@media (max-width: 768px) {
+  .porto-pagination {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .porto-pagination__link--prev {
+    text-align: left;
+  }
+  .porto-pagination__link--next {
+    grid-column: 1;
+    text-align: right;
+  }
+}
+@container (max-width: 768px) {
+  .porto-pagination {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .porto-pagination__link--prev {
+    text-align: left;
+  }
+  .porto-pagination__link--next {
+    grid-column: 1;
+    text-align: right;
+  }
+}

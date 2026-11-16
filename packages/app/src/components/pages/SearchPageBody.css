@@ -1,0 +1,35 @@
+/* Search page — input + hints. Rendered by SearchPageBody (the
+ * .porto-search-page wrapper is rendered by search-page).
+ */
+
+.porto-search-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1.5rem var(--porto-content-pad-x);
+}
+
+.porto-search-page__input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-search-page__input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-search-page__input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}
+
+.porto-search-page__hint {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--porto-color-gray-3);
+}

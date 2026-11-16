@@ -1,0 +1,55 @@
+/* Site footer. Rendered by Footer. */
+
+/* Renders only when `theme.footer.enable` is set. No background of
+   its own: like the navbar and sidebar, the footer sits on the
+   content background, separated from the content by its top
+   border. */
+.porto-footer {
+  border-top: 1px solid var(--porto-color-hairline);
+  /* Keep horizontal padding so a wrapped line never touches the
+    edges, the footer itself stays compact. 
+  */
+  padding: 0 1rem;
+  text-align: center;
+}
+
+/* On desktop pages with a persistent sidebar (docs + notes
+   detail pages), the footer's top border spans only the content
+   column: it starts at the sidebar's right edge instead of the
+   viewport's, and stops at the TOC rail's left edge once the
+   three-column row appears. The footer lives in the shell,
+   outside the frame, so the scope is `body:has(...)`. The TOC
+   rail is exactly sidebar-width, so both offsets share the var. */
+@media (min-width: 50rem) {
+  body:has(.main-frame--sidebar) .porto-footer {
+    margin-inline-start: var(--porto-sidebar-width);
+    /* The border's left edge slides with the pane, on the shared
+       collapse duration — without the transition it jumped
+       while the sidebar animated. */
+    transition: margin-inline-start var(--porto-sidebar-collapse-duration) ease;
+  }
+  /* With the sidebar collapsed the border starts at the
+     frame's 2.25rem rail instead (the TOC-side margin at 72rem is
+     unaffected — that rail doesn't move). On TOC pages in the
+     mobile-bar band the rail is dropped — see the exception by
+     the frame rule. */
+  html.porto-sidebar-collapsed body:has(.main-frame--sidebar) .porto-footer {
+    margin-inline-start: 2.25rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  body:has(.main-frame--sidebar) .porto-footer {
+    margin-inline-end: var(--porto-sidebar-width);
+  }
+}
+
+.porto-footer__message {
+  font-size: 0.8rem;
+  color: var(--porto-color-gray-3);
+}
+
+/* The "Built with Portosaur" link is accent-colored. */
+.porto-footer a {
+  color: var(--porto-color-text-accent);
+}

@@ -1,0 +1,25 @@
+/* Document shell — the body/main flex column and the content wrapper.
+ * The wrapper is rendered by SiteShell; body/main serve the shell.
+ */
+
+/* The body is the flex column: navbar (fixed) + main + footer. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.porto-content-wrapper {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: row;
+}
+
+/* The navbar is fixed, so <main> reserves its height. */
+main {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: var(--porto-nav-height);
+}

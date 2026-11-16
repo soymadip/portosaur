@@ -1,0 +1,51 @@
+/* Empty states — shared by the 404, offline, and redirect pages
+ * (no single owner, so it stays a shared file).
+ */
+
+.porto-empty-state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.porto-empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--porto-color-gray-3);
+}
+.porto-empty-state__icon svg,
+.porto-empty-state__icon img {
+  width: 5rem;
+  height: 5rem;
+}
+.porto-empty-state__icon--sm svg,
+.porto-empty-state__icon--sm img {
+  width: 3rem;
+  height: 3rem;
+}
+
+.porto-empty-state__title {
+  font-size: var(--porto-text-h1);
+  line-height: var(--porto-line-height-headings);
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+
+.porto-empty-state__text {
+  max-width: 32rem;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-empty-state__link {
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-empty-state__link:hover {
+  text-decoration: underline;
+}

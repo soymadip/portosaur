@@ -1,0 +1,30 @@
+/* Site title — favicon logo + site title. Rendered by SiteTitle
+ * (navbar, and the brand copy in the sidebar).
+ */
+
+/* Site title: favicon logo + site title, linked to the root. */
+.porto-site-title {
+  display: flex;
+  align-items: center;
+  gap: var(--porto-nav-gap);
+  font-size: var(--porto-text-h4);
+  font-weight: 600;
+  color: var(--porto-color-white);
+  text-decoration: none;
+  white-space: nowrap;
+  min-width: 0;
+}
+.porto-navbar .porto-site-title,
+.porto-mobile-menu__brand .porto-site-title {
+  gap: 0.5rem;
+}
+.porto-site-title span {
+  overflow: hidden;
+}
+.porto-site-title img {
+  height: calc(var(--porto-nav-height) - 2 * var(--porto-nav-pad-y));
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: 0 50%;
+}
