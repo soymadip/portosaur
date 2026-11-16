@@ -2025,12 +2025,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-text-accent);
 }
 /* The page description under the title, Fumadocs-style (their
-   `DocsDescription` is text-lg and muted; Portosaur's runs at
-   body size with a tighter gap to the title). Renders only when
-   the page has a `desc` — no default text. */
+   `DocsDescription` is text-lg and muted; Portosaur's runs a
+   step smaller than body text with a tight gap to the title).
+   Renders only when the page has a `desc` — no default text. */
 .porto-page-desc {
-  margin-top: 0.5rem;
-  font-size: var(--porto-text-body);
+  margin-top: 0.125rem;
+  font-size: var(--porto-text-sm);
   color: var(--porto-color-gray-3);
 }
 
@@ -4550,11 +4550,15 @@ a.porto-blog-article-author-name:hover {
    description. Two columns above OG's 996px `col` breakpoint,
    one below it. The list carries no description line — the page
    description renders under the H1 instead. */
-/* The list follows the body content directly — no extra top
-   margin on top of the last paragraph's own bottom margin (and
-   none at all when the body is empty). */
-.porto-content-container > .porto-topic-list-wrapper {
-  margin-top: 0;
+/* The list gets the page's own block rhythm above it: the
+   prose spacing is margin-top-only (paragraphs carry no bottom
+   margin), so a zero top margin left the cards sitting flush
+   against whatever came before them. This covers both modes —
+   the automatic list under the body and a manual `<TopicList />`
+   inside the article — and also gives the list room under the
+   divider when the body is empty. */
+.porto-topic-list-wrapper {
+  margin-top: var(--porto-content-gap-y);
 }
 .porto-topic-list {
   display: grid;
