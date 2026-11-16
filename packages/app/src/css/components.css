@@ -2039,7 +2039,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 @media (min-width: 50rem) {
   .porto-page-desc {
-    font-size: calc(var(--porto-text-body) + 1px);
+    font-size: calc(var(--porto-text-body) + 1.1px);
     font-weight: 500;
   }
 }
