@@ -60,14 +60,39 @@ main {
        tracks the pane's edge through the whole animation. */
     transition: padding-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
-  /* Collapsed, the frame keeps a 3rem rail at the start — the
-     floating expand panel lives there (top-left), and without
-     the rail it hid the H1's first letters (its top edge
-     coincided with the title's, and the title's left edge sat
-     inside the panel's span at every desktop width). The rail
-     glides on the shared duration, like the 265px slide. */
+  /* Collapsed, the frame keeps a 2.25rem rail at the start — the
+     floating expand panel lives there (top-left, ending 2.625rem
+     in), and without the rail it hid the H1's first letters (its
+     top edge coincided with the title's, and the title's left
+     edge sat inside the panel's span at every desktop width).
+     The rail glides on the shared duration, like the 265px
+     slide. On TOC pages in the mobile-bar band the rail is
+     dropped (below) — the bar sits between the panel and the
+     title there, so nothing needs clearing. */
   html.porto-sidebar-collapsed .main-frame--sidebar {
-    padding-inline-start: 3rem;
+    padding-inline-start: 2.25rem;
+  }
+}
+@media (min-width: 50rem) and (max-width: 71.999rem) {
+  /* TOC pages in the mobile-bar band need no rail: the panel
+     docks into the bar's row, the title sits below the bar, and
+     the two can never meet — so the frame, the footer border,
+     and the progress bar all take the full width back. At
+     desktop widths the bar is hidden and the rail applies to
+     every page again (above). */
+  html.porto-sidebar-collapsed:has(.main-pane--toc) .main-frame--sidebar {
+    padding-inline-start: 0;
+  }
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    body:has(.main-frame--sidebar)
+    .porto-footer {
+    margin-inline-start: 0;
+  }
+  html.porto-sidebar-collapsed:has(.main-pane--toc)
+    body:has(.main-frame--sidebar)
+    .porto-nav-progress {
+    inset-inline-start: 0;
+    width: 100%;
   }
 }
 
@@ -1463,7 +1488,7 @@ body:has(#porto__sidebar:popover-open) {
       :has([data-porto-sidebar-default="expanded"])
     )
     .main-frame--sidebar {
-    padding-inline-start: 3rem;
+    padding-inline-start: 2.25rem;
   }
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
@@ -1475,7 +1500,7 @@ body:has(#porto__sidebar:popover-open) {
       :has([data-porto-sidebar-default="expanded"])
     )
     .porto-footer {
-    margin-inline-start: 3rem;
+    margin-inline-start: 2.25rem;
   }
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
@@ -1525,6 +1550,24 @@ body:has(#porto__sidebar:popover-open) {
       visibility 0s;
   }
 }
+@media (min-width: 50rem) and (max-width: 71.999rem) {
+  /* First-paint mirror of the band exception above: a
+     default-collapsed TOC page in the mobile-bar band starts
+     with no rail, so the first paint matches the state the
+     client takes over with (no 2.25rem flash-and-jump). */
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    ):has(.main-pane--toc)
+    .main-frame--sidebar {
+    padding-inline-start: 0;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    ):has(.main-pane--toc)
+    .porto-footer {
+    margin-inline-start: 0;
+  }
+}
 
 /* The collapse trigger: Fumadocs' sidebar glyph in a ghost icon
    button, muted at rest (white on hover, from the ghost rule).
@@ -1559,7 +1602,7 @@ body:has(#porto__sidebar:popover-open) {
 /* The floating expand panel: Fumadocs shows the same trigger in
    a small floating card at the content's top-left while the
    sidebar is collapsed (and not peeked — then the sidebar itself
-   is visible). The frame keeps a 3rem rail at the start when
+   is visible). The frame keeps a 2.25rem rail at the start when
    collapsed, so the panel never covers the H1 (without the rail
    it hid the title's first letters — 30px of overlap at 1600px,
    7px even at 1920px). Desktop only. */
@@ -1573,8 +1616,13 @@ body:has(#porto__sidebar:popover-open) {
   .porto-sidebar-collapse-panel {
     position: fixed;
     top: calc(var(--porto-nav-height) + 1rem);
-    inset-inline-start: 1rem;
-    z-index: var(--porto-z-index-menu);
+    inset-inline-start: 0.5rem;
+    /* Above the peek strip (below): the panel starts 0.5rem in,
+       so it overlaps the strip's 16px edge zone — at the strip's
+       z-index the strip would eat clicks on the button's left
+       edge and trigger a peek while clicking it. The panel never
+       meets the navbar vertically, so sharing its level is safe. */
+    z-index: var(--porto-z-index-navbar);
     display: flex;
     padding: 0.125rem;
     border: 1px solid var(--porto-color-hairline);
@@ -1590,6 +1638,12 @@ body:has(#porto__sidebar:popover-open) {
       opacity 0.2s ease,
       top 0.2s ease-in-out;
   }
+  /* The trigger inside the panel doesn't need the full
+     icon-button padding — the card is the frame, so the button's
+     own padding would just be dead space around the icon. */
+  .porto-sidebar-collapse-panel .porto-sidebar-collapse-trigger {
+    padding: 0.25rem;
+  }
   html.porto-sidebar-collapsed:not(.porto-sidebar-peeked)
     .porto-sidebar-collapse-panel {
     opacity: 1;
@@ -1600,18 +1654,18 @@ body:has(#porto__sidebar:popover-open) {
      floating 1rem below the navbar: the bar spans the full
      width once the sidebar is gone, so the panel's old spot
      would sit on top of the bar, over the "On this page" pill.
-     The panel is 38px tall in a 3rem bar, so navbar height +
-     0.3rem centers it; it follows the bar when the navbar
+     The panel is 34px tall in a 3rem bar, so navbar height +
+     0.375rem centers it; it follows the bar when the navbar
      hides (the bar docks to the viewport top). At desktop
      widths the bar is hidden and the panel goes back below
      the navbar (see the `lg` override after the strip). */
   html.porto-sidebar-collapsed:has(.main-pane--toc)
     .porto-sidebar-collapse-panel {
-    top: calc(var(--porto-nav-height) + 0.3rem);
+    top: calc(var(--porto-nav-height) + 0.375rem);
   }
   html.porto-navbar-hidden.porto-sidebar-collapsed:has(.main-pane--toc)
     .porto-sidebar-collapse-panel {
-    top: 0.3rem;
+    top: 0.375rem;
   }
   /* The hover-peek strip: Fumadocs' 16px edge zone. Hovering it
      while collapsed slides the sidebar back in as a card. */
@@ -1843,13 +1897,13 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   }
   /* Collapsed on a TOC page, the expand panel docks into this
      bar's row (see the panel rules below), so the summary's
-     start padding grows by the panel's width (2.375rem,
+     start padding clears the panel's right edge (2.625rem,
      measured) plus a 0.5rem gap — the pill clears the panel. */
   html.porto-sidebar-collapsed:has(.main-pane--toc)
     .main-frame--sidebar
     .porto-mobile-toc
     summary {
-    padding-inline-start: calc(1rem + 2.375rem + 0.5rem);
+    padding-inline-start: calc(2.625rem + 0.5rem);
   }
 }
 
@@ -2183,14 +2237,15 @@ html.porto-navbar-hidden .porto-nav-progress {
     width: calc(100% - var(--porto-sidebar-width));
   }
   /* With the sidebar collapsed the bar starts at the frame's
-     3rem rail instead (it jumps — the bar's transitions cover
+     2.25rem rail instead (it jumps — the bar's transitions cover
      transform and top only — but at 1px tall the jump is
-     invisible mid-slide). */
+     invisible mid-slide). On TOC pages in the mobile-bar band
+     the rail is dropped — see the exception by the frame rule. */
   html.porto-sidebar-collapsed
     body:has(.main-frame--sidebar)
     .porto-nav-progress {
-    inset-inline-start: 3rem;
-    width: calc(100% - 3rem);
+    inset-inline-start: 2.25rem;
+    width: calc(100% - 2.25rem);
   }
 }
 
@@ -2224,10 +2279,12 @@ html.porto-navbar-hidden .porto-nav-progress {
     transition: margin-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
   /* With the sidebar collapsed the border starts at the
-     frame's 3rem rail instead (the TOC-side margin at 72rem is
-     unaffected — that rail doesn't move). */
+     frame's 2.25rem rail instead (the TOC-side margin at 72rem is
+     unaffected — that rail doesn't move). On TOC pages in the
+     mobile-bar band the rail is dropped — see the exception by
+     the frame rule. */
   html.porto-sidebar-collapsed body:has(.main-frame--sidebar) .porto-footer {
-    margin-inline-start: 3rem;
+    margin-inline-start: 2.25rem;
   }
 }
 
