@@ -2026,10 +2026,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 /* The page description under the title, Fumadocs-style (their
    `DocsDescription` is text-lg and muted; Portosaur's runs at
-   body size with a tight gap to the title, a step larger and a
-   touch heavier on desktop and tablet — the same 50rem type
-   step the headings use). Renders only when the page has a
-   `desc` — no default text. */
+   body size with a tight gap to the title, 1px larger than the
+   body text and a touch heavier on desktop and tablet — the
+   same 50rem type step the headings use. 17px is no step in
+   the scale, so it stays tied to the body size with a calc
+   instead of a hardcoded value). Renders only when the page
+   has a `desc` — no default text. */
 .porto-page-desc {
   margin-top: 0.125rem;
   font-size: var(--porto-text-body);
@@ -2037,7 +2039,7 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
 }
 @media (min-width: 50rem) {
   .porto-page-desc {
-    font-size: var(--porto-text-lg);
+    font-size: calc(var(--porto-text-body) + 1px);
     font-weight: 500;
   }
 }
