@@ -70,7 +70,7 @@ main {
      dropped (below) — the bar sits between the panel and the
      title there, so nothing needs clearing. */
   html.porto-sidebar-collapsed .main-frame--sidebar {
-    padding-inline-start: 2.25rem;
+    padding-inline-start: 1.45rem;
   }
 }
 @media (min-width: 50rem) and (max-width: 71.999rem) {
@@ -1499,6 +1499,13 @@ body:has(#porto__sidebar:popover-open) {
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
     )
+    .main-frame--sidebar
+    .content-panel {
+    padding-inline-start: 0.5rem;
+  }
+  body:has([data-porto-sidebar-default="collapsed"]):not(
+      :has([data-porto-sidebar-default="expanded"])
+    )
     .porto-footer {
     margin-inline-start: 2.25rem;
   }
@@ -1616,8 +1623,8 @@ body:has(#porto__sidebar:popover-open) {
   .porto-sidebar-collapse-panel {
     position: fixed;
     top: calc(var(--porto-nav-height) + 1rem);
-    inset-inline-start: 0.5rem;
-    /* Above the peek strip (below): the panel starts 0.5rem in,
+    inset-inline-start: 0.22rem;
+    /* Above the peek strip (below): the panel starts 0.25rem in,
        so it overlaps the strip's 16px edge zone — at the strip's
        z-index the strip would eat clicks on the button's left
        edge and trigger a peek while clicking it. The panel never
