@@ -1829,13 +1829,17 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   .main-frame--sidebar .porto-mobile-toc nav {
     inset-inline-start: var(--porto-sidebar-width);
   }
-  /* Sidebar collapsed: the bar starts at the frame's 3rem rail
-     instead of the sidebar's offset — keeping the 265px would
-     leave a dead strip at the left with the pill stranded
-     mid-page. It glides on the collapse duration, in sync with
-     the content widening. */
+  /* Sidebar collapsed: the bar spans the full width — keeping
+     the sidebar's offset would leave a dead 265px strip at the
+     left with the pill stranded mid-page. It does NOT follow
+     the frame's 3rem rail: the expand panel docks into this
+     row at the viewport's left edge, and a bar starting at the
+     rail would leave the panel hanging half outside it while
+     the pill's panel-clearing padding pushed the pill 56px
+     away from it. It glides on the collapse duration, in sync
+     with the content widening. */
   html.porto-sidebar-collapsed .main-frame--sidebar .porto-mobile-toc nav {
-    inset-inline-start: 3rem;
+    inset-inline-start: 0;
   }
   /* Collapsed on a TOC page, the expand panel docks into this
      bar's row (see the panel rules below), so the summary's
