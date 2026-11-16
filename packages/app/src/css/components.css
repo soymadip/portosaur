@@ -1625,7 +1625,7 @@ body:has(#porto__sidebar:popover-open) {
     top: calc(var(--porto-nav-height) + 1rem);
     inset-inline-start: 0.22rem;
     /* Above the peek strip (below): the panel starts 0.25rem in,
-       so it overlaps the strip's 16px edge zone — at the strip's
+       so it overlaps the strip's 24px edge zone — at the strip's
        z-index the strip would eat clicks on the button's left
        edge and trigger a peek while clicking it. The panel never
        meets the navbar vertically, so sharing its level is safe. */
@@ -1674,14 +1674,17 @@ body:has(#porto__sidebar:popover-open) {
     .porto-sidebar-collapse-panel {
     top: 0.375rem;
   }
-  /* The hover-peek strip: Fumadocs' 16px edge zone. Hovering it
-     while collapsed slides the sidebar back in as a card. */
+  /* The hover-peek strip: the edge zone that slides the sidebar
+     back in as a card while collapsed. Fumadocs uses 16px;
+     Portosaur widens it to 24px so the trigger is easier to
+     hit without reaching into the content (which starts 36px
+     in, at the collapsed rail). */
   html.porto-sidebar-collapsed .porto-sidebar-collapse-strip {
     display: block;
     position: fixed;
     inset-inline-start: 0;
     inset-block: 0;
-    width: 1rem;
+    width: 1.5rem;
     z-index: var(--porto-z-index-menu);
   }
 }

@@ -473,7 +473,8 @@ export function MobileMenu({
                 onClick={toggleCollapsed}
               />
             </div>
-            {/* The hover-peek strip: Fumadocs' 16px edge zone. */}
+            {/* The hover-peek strip: the 24px edge zone (Fumadocs
+              uses 16px). */}
             <div
               className="porto-sidebar-collapse-strip"
               aria-hidden="true"
