@@ -53,11 +53,17 @@ import { SiteTitle } from "./SiteTitle.tsx";
  * space, and a floating panel with the same trigger offers the
  * way back. Hovering the viewport's left edge while collapsed
  * peeks the sidebar back in as a floating card. Cmd/Ctrl+B
- * toggles too. State only — Fumadocs doesn't persist it either,
- * so a reload reopens the sidebar. The collapse only exists on
- * desktop (`isDesktop` gates the `inert` attribute; the CSS
- * rules are all inside the 50rem block), and only on pages with
- * a sidebar — the menu-only variant has nothing to collapse.
+ * toggles too. Unlike Fumadocs (state only — a reload reopens
+ * the sidebar), the toggle is remembered for the session:
+ * `toggleCollapsed` writes it to `sessionStorage`, the
+ * pre-paint script in the root layout restores the collapsed
+ * class before first paint, and the marker effect below reads
+ * the stored choice before the page defaults — so a reload
+ * keeps the sidebar as the visitor left it until the tab
+ * closes. The collapse only exists on desktop (`isDesktop`
+ * gates the `inert` attribute; the CSS rules are all inside
+ * the 50rem block), and only on pages with a sidebar — the
+ * menu-only variant has nothing to collapse.
  *
  * Starting collapsed: `theme.navigation.sidebar_collapsed`
  * (global) or per-page `sidebar_collapsed` frontmatter (which
@@ -120,6 +126,12 @@ export function SidebarCollapseTrigger({
   );
 }
 
+/** The visitor's own collapse choice, remembered for the
+ * session (`"1"` collapsed, `"0"` expanded) — separate from
+ * the sidebar tree's `porto-sidebar-state` key in Sidebar.tsx.
+ * The pre-paint script in the root layout reads the same key. */
+const COLLAPSE_STORAGE_KEY = "porto-sidebar-collapsed";
+
 export function MobileMenu({
   hasSidebar = false,
   children,
@@ -130,6 +142,11 @@ export function MobileMenu({
   const paneRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef(0);
   const ownMarkerRef = useRef<HTMLDivElement>(null);
+  // The stored choice is read once, on the first takeover: on
+  // later navigations the page markers apply their own defaults
+  // instead (a stored choice that won on every navigation would
+  // defeat the per-page `sidebar_collapsed` frontmatter).
+  const restoredRef = useRef(false);
   const pathname = usePathname();
   const config = usePortoConfig();
   // OG Docusaurus renders the sidebar logo only when the navbar
@@ -259,7 +276,9 @@ export function MobileMenu({
   // the client takes over, then removes them so they can't fight
   // later toggles. It runs on every navigation: the new page's
   // markers apply its own default (a page with no marker leaves
-  // the state as the user left it).
+  // the state as the user left it). On the FIRST run only, a
+  // stored toggle choice wins over the markers — the visitor's
+  // own choice beats the configured default on a reload.
   useEffect(() => {
     if (!hasSidebar) {
       return;
@@ -270,7 +289,24 @@ export function MobileMenu({
     const expandedMarker = document.querySelector(
       '[data-porto-sidebar-default="expanded"]',
     );
-    if (expandedMarker) {
+    if (!restoredRef.current) {
+      restoredRef.current = true;
+      let stored: string | null = null;
+      try {
+        stored = sessionStorage.getItem(COLLAPSE_STORAGE_KEY);
+      } catch {
+        // Storage unavailable — fall through to the markers.
+      }
+      if (stored === "1") {
+        setCollapsed(true);
+      } else if (stored === "0") {
+        setCollapsed(false);
+      } else if (expandedMarker) {
+        setCollapsed(false);
+      } else if (collapsedMarker) {
+        setCollapsed(true);
+      }
+    } else if (expandedMarker) {
       setCollapsed(false);
     } else if (collapsedMarker) {
       setCollapsed(true);
@@ -299,6 +335,25 @@ export function MobileMenu({
       setHovered(false);
     }
   }, [collapsed]);
+
+  // The single write site for the session persistence — the
+  // button and the Cmd/Ctrl+B hotkey below both come through
+  // here; page defaults from markers never write. The write is
+  // idempotent, so StrictMode double-invoking the updater in
+  // dev is harmless. Declared before the hotkey effect: the
+  // effect lists it in its deps, and a later `const` would be
+  // a temporal-dead-zone error at render time.
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        sessionStorage.setItem(COLLAPSE_STORAGE_KEY, next ? "1" : "0");
+      } catch {
+        // Storage unavailable — persistence is best-effort.
+      }
+      return next;
+    });
+  }, []);
 
   // Cmd/Ctrl+B toggles the collapse on desktop, like Fumadocs —
   // except while typing (an input, textarea, select, or editable
@@ -330,13 +385,13 @@ export function MobileMenu({
         return;
       }
       event.preventDefault();
-      setCollapsed((prev) => !prev);
+      toggleCollapsed();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [hasSidebar]);
+  }, [hasSidebar, toggleCollapsed]);
 
   // When the collapse hides the trigger that had focus (the
   // brand-row button goes inert with the pane), hand focus to the
@@ -353,10 +408,6 @@ export function MobileMenu({
     return () => {
       window.clearTimeout(hoverTimerRef.current);
     };
-  }, []);
-
-  const toggleCollapsed = useCallback(() => {
-    setCollapsed((prev) => !prev);
   }, []);
 
   // Memoized on `collapsed` only, so hovering the peek strip

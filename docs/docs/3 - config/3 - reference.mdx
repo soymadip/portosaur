@@ -109,6 +109,8 @@ Visual appearance and user interface settings.
 | `auto_collapse`     | `boolean` | `true`  | Auto-collapse inactive sidebar categories. |
 | `sidebar_collapsed` | `boolean` | `false` | Start with the sidebar collapsed.          |
 
+The visitor's own collapse toggle is remembered for the session (until the tab closes) and wins over `sidebar_collapsed` on a reload — the configured default only applies on the first visit.
+
 ### `theme.footer`
 
 | Key            | Type     | Default     | Description                           |
