@@ -100,9 +100,12 @@
   }
 }
 
-/* Inline code. */
+/* Inline code. The 0.5rem radius matches the "On this page" pill
+   and the code blocks — the chips (like the `site` heading) used
+   to be square-cornered. */
 .porto-markdown-content code:not(:where(.not-content *)) {
   background-color: var(--porto-color-bg-inline-code);
+  border-radius: 0.5rem;
   margin-block: -0.125rem;
   padding: 0.125rem 0.375rem;
   font-size: var(--porto-text-code-sm);
@@ -112,9 +115,12 @@
   font-size: inherit;
 }
 
-/* Code blocks. */
+/* Code blocks. A touch less round than the inline code chips
+   (0.375rem vs their 0.5rem) — the bare `pre` used to be
+   square-cornered. */
 .porto-markdown-content pre:not(:where(.not-content *)) {
   border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
   padding: 0.75rem 1rem;
   font-size: var(--porto-text-code);
   tab-size: 2;
