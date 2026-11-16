@@ -131,7 +131,7 @@ export function TasksTable({
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span
-                  className={`porto-tasks-tab-icon${tab.spin ? " spin" : ""}`}
+                  className={`porto-tasks-tab-icon${tab.spin ? " porto-spin" : ""}`}
                   aria-hidden="true"
                   dangerouslySetInnerHTML={{ __html: tab.iconHtml }}
                 />
@@ -198,7 +198,7 @@ export function TasksTable({
                           {task.status === "active" && (
                             <>
                               <span
-                                className="porto-tasks-badge-icon spin"
+                                className="porto-tasks-badge-icon porto-spin"
                                 dangerouslySetInnerHTML={{
                                   __html: statusIcons.active ?? "",
                                 }}
