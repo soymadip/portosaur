@@ -117,13 +117,22 @@
 
 /* Code blocks. A touch less round than the inline code chips
    (0.375rem vs their 0.5rem) — the bare `pre` used to be
-   square-cornered. */
+   square-cornered. Vertical padding only: the Shiki lines
+   already carry 1rem of inline padding (code.css), so a
+   horizontal padding here would double it — the text used to
+   sit 33px from the border. The line padding also lets
+   highlighted lines span the full width of the block. */
 .porto-markdown-content pre:not(:where(.not-content *)) {
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.375rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0;
   font-size: var(--porto-text-code);
   tab-size: 2;
+}
+/* A `pre` without Shiki highlighting has no line spans to
+   provide the inset, so it keeps its own. */
+.porto-markdown-content pre:not(.shiki):not(:where(.not-content *)) {
+  padding-inline: 1rem;
 }
 .porto-markdown-content pre code:not(:where(.not-content *)) {
   all: unset;
