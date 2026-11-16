@@ -60,8 +60,14 @@ main {
        tracks the pane's edge through the whole animation. */
     transition: padding-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
+  /* Collapsed, the frame keeps a 3rem rail at the start — the
+     floating expand panel lives there (top-left), and without
+     the rail it hid the H1's first letters (its top edge
+     coincided with the title's, and the title's left edge sat
+     inside the panel's span at every desktop width). The rail
+     glides on the shared duration, like the 265px slide. */
   html.porto-sidebar-collapsed .main-frame--sidebar {
-    padding-inline-start: 0;
+    padding-inline-start: 3rem;
   }
 }
 
@@ -1457,7 +1463,7 @@ body:has(#porto__sidebar:popover-open) {
       :has([data-porto-sidebar-default="expanded"])
     )
     .main-frame--sidebar {
-    padding-inline-start: 0;
+    padding-inline-start: 3rem;
   }
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
@@ -1469,7 +1475,7 @@ body:has(#porto__sidebar:popover-open) {
       :has([data-porto-sidebar-default="expanded"])
     )
     .porto-footer {
-    margin-inline-start: 0;
+    margin-inline-start: 3rem;
   }
   body:has([data-porto-sidebar-default="collapsed"]):not(
       :has([data-porto-sidebar-default="expanded"])
@@ -1553,7 +1559,10 @@ body:has(#porto__sidebar:popover-open) {
 /* The floating expand panel: Fumadocs shows the same trigger in
    a small floating card at the content's top-left while the
    sidebar is collapsed (and not peeked — then the sidebar itself
-   is visible). Desktop only. */
+   is visible). The frame keeps a 3rem rail at the start when
+   collapsed, so the panel never covers the H1 (without the rail
+   it hid the title's first letters — 30px of overlap at 1600px,
+   7px even at 1920px). Desktop only. */
 .porto-sidebar-collapse-panel {
   display: none;
 }
@@ -1820,12 +1829,13 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   .main-frame--sidebar .porto-mobile-toc nav {
     inset-inline-start: var(--porto-sidebar-width);
   }
-  /* Sidebar collapsed: the bar spans the full width — keeping
-     the sidebar's offset would leave a dead 265px strip at the
-     left with the pill stranded mid-page. It glides on the
-     collapse duration, in sync with the content widening. */
+  /* Sidebar collapsed: the bar starts at the frame's 3rem rail
+     instead of the sidebar's offset — keeping the 265px would
+     leave a dead strip at the left with the pill stranded
+     mid-page. It glides on the collapse duration, in sync with
+     the content widening. */
   html.porto-sidebar-collapsed .main-frame--sidebar .porto-mobile-toc nav {
-    inset-inline-start: 0;
+    inset-inline-start: 3rem;
   }
   /* Collapsed on a TOC page, the expand panel docks into this
      bar's row (see the panel rules below), so the summary's
@@ -1924,11 +1934,12 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   color: var(--porto-color-text-accent);
 }
 /* The page description under the title, Fumadocs-style (their
-   `DocsDescription`: text-lg, muted). Renders only when the page
-   has a `desc` — no default text. */
+   `DocsDescription` is text-lg and muted; Portosaur's runs at
+   body size with a tighter gap to the title). Renders only when
+   the page has a `desc` — no default text. */
 .porto-page-desc {
-  margin-top: 0.75rem;
-  font-size: var(--porto-text-lg);
+  margin-top: 0.5rem;
+  font-size: var(--porto-text-body);
   color: var(--porto-color-gray-3);
 }
 
@@ -2167,14 +2178,15 @@ html.porto-navbar-hidden .porto-nav-progress {
     inset-inline-start: var(--porto-sidebar-width);
     width: calc(100% - var(--porto-sidebar-width));
   }
-  /* With the sidebar collapsed the bar spans the full width
-     again (it jumps — the bar's transitions cover transform and
-     top only — but at 1px tall the jump is invisible mid-slide). */
+  /* With the sidebar collapsed the bar starts at the frame's
+     3rem rail instead (it jumps — the bar's transitions cover
+     transform and top only — but at 1px tall the jump is
+     invisible mid-slide). */
   html.porto-sidebar-collapsed
     body:has(.main-frame--sidebar)
     .porto-nav-progress {
-    inset-inline-start: 0;
-    width: 100%;
+    inset-inline-start: 3rem;
+    width: calc(100% - 3rem);
   }
 }
 
@@ -2207,11 +2219,11 @@ html.porto-navbar-hidden .porto-nav-progress {
        while the sidebar animated. */
     transition: margin-inline-start var(--porto-sidebar-collapse-duration) ease;
   }
-  /* With the sidebar collapsed the border spans full-width
-     again (the TOC-side margin at 72rem is unaffected — that
-     rail doesn't move). */
+  /* With the sidebar collapsed the border starts at the
+     frame's 3rem rail instead (the TOC-side margin at 72rem is
+     unaffected — that rail doesn't move). */
   html.porto-sidebar-collapsed body:has(.main-frame--sidebar) .porto-footer {
-    margin-inline-start: 0;
+    margin-inline-start: 3rem;
   }
 }
 
