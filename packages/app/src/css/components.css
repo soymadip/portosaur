@@ -137,6 +137,15 @@ main {
     position: relative;
     margin-inline-start: auto;
     width: var(--porto-sidebar-width);
+    /* Never shrink: on a page without a TOC the main pane has no
+       width rule, so its 100% basis overflows the row and the
+       shrink used to come out of this container instead (it
+       squeezed to 233px, the fixed bar inside it overflowed past
+       the viewport edge, and the footer — which assumes a
+       sidebar-width TOC column — stopped 32px short of the
+       border). Pinned, the column is exactly sidebar-width on
+       every page and the main pane absorbs the shrink instead. */
+    flex-shrink: 0;
   }
 
   .porto-right-sidebar {
