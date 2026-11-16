@@ -222,37 +222,6 @@ function nodeToCard(node: PageTree.Node): TopicListItem | null {
   return null;
 }
 
-/** The topic-list description when no frontmatter provides one. */
-export const TOPIC_LIST_DEFAULT_DESC =
-  "Click on the links below to explore the topics.";
-
-/**
- * The description line above a topic list (the Docusaurus
- * resolution, minus the component-level props, which the
- * `TopicList` component resolves itself): the frontmatter
- * `topic_list.desc` wins (`null` disables the line entirely), then
- * the page's own `desc`, then the default. A `topic_list` boolean
- * carries no description.
- */
-export function topicListDesc(
-  topicListConfig: unknown,
-  pageDesc?: string,
-): string | null {
-  if (typeof topicListConfig === "object" && topicListConfig !== null) {
-    const desc = (topicListConfig as { desc?: unknown }).desc;
-    if (desc === null) {
-      return null;
-    }
-    if (typeof desc === "string" && desc !== "") {
-      return desc;
-    }
-  }
-  if (typeof pageDesc === "string" && pageDesc !== "") {
-    return pageDesc;
-  }
-  return TOPIC_LIST_DEFAULT_DESC;
-}
-
 /**
  * Maps tree nodes to topic-list cards (folders without an index
  * page are skipped — a card linking nowhere is worse than no

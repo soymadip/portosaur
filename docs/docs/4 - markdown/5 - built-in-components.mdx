@@ -136,12 +136,8 @@ Each card automatically inherits its document's `title`, `description`, and `ico
 
 ### Props Reference
 
-| Prop          | Type             | Default                                                              | Description                                                                           |
-| :------------ | :--------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
-| `children`    | `ReactNode`      | None                                                                 | Custom description content; takes precedence over `desc`.                             |
-| `desc`        | `string \| null` | Frontmatter description or fallback text                             | Description above the cards. `null` hides the description block.                      |
-| `className`   | `string`         | None                                                                 | Additional class on the card grid.                                                    |
-| `descClass`   | `string`         | None                                                                 | Additional class on the description wrapper.                                          |
-| `style`       | `object`         | `{ marginTop: "1rem", marginBottom: "1.9rem", textAlign: "center" }` | Inline styles for the description wrapper.                                            |
-| `items`       | `array`          | Current sidebar category items                                       | Explicit card items; overrides the current category items.                            |
-| `forceRender` | `boolean`        | `false`                                                              | Render outside the automatic category-index condition. Items must still be available. |
+| Prop          | Type      | Default                        | Description                                                                           |
+| :------------ | :-------- | :----------------------------- | :------------------------------------------------------------------------------------ |
+| `className`   | `string`  | None                           | Additional class on the card grid.                                                    |
+| `items`       | `array`   | Current sidebar category items | Explicit card items; overrides the current category items.                            |
+| `forceRender` | `boolean` | `false`                        | Render outside the automatic category-index condition. Items must still be available. |

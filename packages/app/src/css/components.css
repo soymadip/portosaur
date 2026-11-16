@@ -167,12 +167,6 @@ main {
   width: 100%;
   container-type: inline-size;
 }
-/* On pages with a topic list the description line is centered, so
-   the title centers with it. Regular doc pages keep the
-   left-aligned title. */
-.content-panel--centered .porto-page-title {
-  text-align: center;
-}
 .content-panel + .content-panel {
   border-top: 1px solid var(--porto-color-hairline);
 }
@@ -1928,6 +1922,14 @@ html.porto-navbar-hidden .porto-mobile-toc nav {
   line-height: var(--porto-line-height-headings);
   font-weight: 600;
   color: var(--porto-color-text-accent);
+}
+/* The page description under the title, Fumadocs-style (their
+   `DocsDescription`: text-lg, muted). Renders only when the page
+   has a `desc` — no default text. */
+.porto-page-desc {
+  margin-top: 0.75rem;
+  font-size: var(--porto-text-lg);
+  color: var(--porto-color-gray-3);
 }
 
 /* ----- Doc footer ----- */
@@ -4437,21 +4439,15 @@ a.porto-blog-article-author-name:hover {
   margin-top: 1rem;
 }
 
-/* TopicList — the Docusaurus `TopicCard` list: a centered
-   description line above a grid of cards, each with an icon, an
-   accent title, and a one-line muted description. Two columns
-   above OG's 996px `col` breakpoint, one below it. */
+/* TopicList — the Docusaurus `TopicCard` list: a grid of cards,
+   each with an icon, an accent title, and a one-line muted
+   description. Two columns above OG's 996px `col` breakpoint,
+   one below it. The list carries no description line — the page
+   description renders under the H1 instead. */
 /* The list follows the body content directly — no extra top
    margin on top of the last paragraph's own bottom margin (and
    none at all when the body is empty). */
 .porto-content-container > .porto-topic-list-wrapper {
-  margin-top: 0;
-}
-.porto-topic-list__desc {
-  margin: 1rem 0 1.9rem;
-  text-align: center;
-}
-.porto-topic-list__desc--auto {
   margin-top: 0;
 }
 .porto-topic-list {

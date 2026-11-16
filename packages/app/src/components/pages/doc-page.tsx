@@ -9,7 +9,6 @@ import {
   isEmojiIcon,
   tocToHeadings,
   topicListCards,
-  topicListDesc,
   topicListShouldRender,
   type SidebarLink,
   type TopicListItem,
@@ -169,8 +168,6 @@ export function DocPage({
       };
     },
   );
-  const topicDesc = topicListDesc(data.topic_list, data.desc);
-
   const MDXBody = data.body;
 
   return (
@@ -208,28 +205,25 @@ export function DocPage({
         </div>
         <div className={`main-pane${hasToc ? " main-pane--toc" : ""}`}>
           {heading && (
-            <ContentPanel
-              className={
-                shouldRenderTopicList
-                  ? "content-panel--header content-panel--centered"
-                  : "content-panel--header"
-              }
-            >
-              <PageTitle title={heading.text} id={heading.id} />
+            <ContentPanel className="content-panel--header">
+              <PageTitle
+                title={heading.text}
+                id={heading.id}
+                desc={data.desc}
+              />
             </ContentPanel>
           )}
           <ContentPanel className="content-panel--body">
             <TopicListProvider
               value={{
                 cards: topicCards,
-                desc: topicDesc,
                 shouldRender: shouldRenderTopicList,
               }}
             >
               <div className="porto-markdown-content">
                 <MDXBody components={getMDXComponents(components)} />
               </div>
-              <AutoTopicList items={topicCards} desc={topicDesc} />
+              <AutoTopicList items={topicCards} />
             </TopicListProvider>
             <DocFooter
               editUrl={editUrl}

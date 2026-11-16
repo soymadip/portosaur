@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { createContext, useContext, useRef, type ReactNode } from "react";
-import {
-  TOPIC_LIST_DEFAULT_DESC,
-  isEmojiIcon,
-  type TopicListItem,
-} from "../../lib/content.ts";
+import { isEmojiIcon, type TopicListItem } from "../../lib/content.ts";
 
 export type { TopicListItem } from "../../lib/content.ts";
 
@@ -18,8 +14,7 @@ export type { TopicListItem } from "../../lib/content.ts";
  *
  * - **Automatic**: the doc page renders `<AutoTopicList />` after
  *   the content on index pages, with cards resolved server-side
- *   (`topicListCards` + icon HTML). The description line above the
- *   cards comes from the context (resolved by the doc page).
+ *   (`topicListCards` + icon HTML).
  * - **Manual**: an explicit `<TopicList />` tag in MDX content
  *   renders the current category's cards from the context at the
  *   position where the tag appears. A manual list on a non-index
@@ -30,12 +25,12 @@ export type { TopicListItem } from "../../lib/content.ts";
  * a shared flag the manual list sets when it renders; the automatic
  * list reads it after the content has rendered.
  *
- * The description line resolves like the original: children, then
- * the `desc` prop, then the context (frontmatter `topic_list.desc`,
- * else the page `desc`), then the default — `null` disables it.
- * Categories show their child count as a badge beside the title;
- * the card description is the page text alone (OG prefixed the
- * count into it — "3 items • ...").
+ * The list carries no description line — the page description
+ * renders under the H1 instead (Fumadocs-style, see `PageTitle`),
+ * so a `topic_list.desc` frontmatter key would have nowhere to
+ * go. Categories show their child count as a badge beside the
+ * title; the card description is the page text alone (OG prefixed
+ * the count into it — "3 items • ...").
  *
  * The cards' icon HTML is resolved server-side by the doc page —
  * the icon packs are megabytes of JSON and must never load
@@ -50,7 +45,6 @@ export type { TopicListItem } from "../../lib/content.ts";
 
 export interface TopicListContextValue {
   cards: TopicListItem[];
-  desc: string | null;
   shouldRender: boolean;
   /* Set by a manual `<TopicList />` tag when it renders, so the
      automatic list below the content can stand down. The provider
@@ -147,27 +141,14 @@ function TopicCard({ card }: { card: TopicListItem }) {
 export function TopicList({
   forceRender = false,
   items: propItems,
-  desc,
-  children,
 }: {
   forceRender?: boolean;
   items?: TopicListItem[];
-  desc?: ReactNode | null;
-  children?: ReactNode;
 }) {
   const context = useContext(TopicListContext);
   const cards: TopicListItem[] = propItems ?? context?.cards ?? [];
   const shouldRender =
     propItems !== undefined || forceRender || (context?.shouldRender ?? false);
-  /* `null` disables the line, so the checks must tell "not
-     provided" (undefined) from "disabled" (null) — `??` alone
-     would treat null as missing and fall through to the default. */
-  const resolvedDesc =
-    children !== undefined
-      ? children
-      : desc !== undefined
-        ? desc
-        : (context?.desc ?? TOPIC_LIST_DEFAULT_DESC);
   if (!shouldRender || cards.length === 0) {
     return null;
   }
@@ -179,10 +160,6 @@ export function TopicList({
   if (!isAutoList && context) {
     context.manualRendered.current = true;
   }
-  /* The automatic list sits in the body panel, whose padding is
-     already the separation from the title panel above — its
-     description needs no top margin. A manual tag follows MDX
-     content, so it keeps the original top margin. */
   /* `not-content` opts the whole list out of the markdown prose
      rules (content.css): a manual list renders INSIDE the
      markdown content, where the link rule recolored the cards
@@ -192,17 +169,6 @@ export function TopicList({
      render from the card rules alone, identically. */
   return (
     <div className="porto-topic-list-wrapper not-content">
-      {resolvedDesc !== null && (
-        <div
-          className={
-            isAutoList
-              ? "porto-topic-list__desc porto-topic-list__desc--auto"
-              : "porto-topic-list__desc"
-          }
-        >
-          {resolvedDesc}
-        </div>
-      )}
       <section className="porto-topic-list">
         {cards.map((card) => (
           <TopicCard key={card.href} card={card} />
@@ -217,13 +183,7 @@ export function TopicList({
  * Stands down when the content already placed a manual list — the
  * author's placement wins.
  */
-export function AutoTopicList({
-  items,
-  desc,
-}: {
-  items: TopicListItem[];
-  desc: string | null;
-}) {
+export function AutoTopicList({ items }: { items: TopicListItem[] }) {
   const context = useContext(TopicListContext);
   const shouldRender = context?.shouldRender ?? false;
   if (!shouldRender || items.length === 0) {
@@ -232,5 +192,5 @@ export function AutoTopicList({
   if (context?.manualRendered.current) {
     return null;
   }
-  return <TopicList items={items} desc={desc} />;
+  return <TopicList items={items} />;
 }

@@ -1,11 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { createElement, Fragment } from "react";
-import {
-  TOPIC_LIST_DEFAULT_DESC,
-  tocToHeadings,
-  topicListCards,
-  topicListDesc,
-} from "../src/lib/content.ts";
+import { tocToHeadings, topicListCards } from "../src/lib/content.ts";
 
 /**
  * `tocToHeadings` converts Fumadocs TOC items to flat headings for
@@ -136,23 +131,5 @@ describe("topicListCards", () => {
       { type: "separator", name: "---" } as any,
     ]);
     expect(cards).toEqual([]);
-  });
-});
-
-describe("topicListDesc", () => {
-  test("frontmatter topic_list.desc wins", () => {
-    expect(topicListDesc({ desc: "Pick a topic." }, "Page desc.")).toBe(
-      "Pick a topic.",
-    );
-  });
-
-  test("topic_list.desc null disables the line", () => {
-    expect(topicListDesc({ desc: null }, "Page desc.")).toBeNull();
-  });
-
-  test("falls back to the page desc, then the default", () => {
-    expect(topicListDesc({ enable: true }, "Page desc.")).toBe("Page desc.");
-    expect(topicListDesc(undefined, undefined)).toBe(TOPIC_LIST_DEFAULT_DESC);
-    expect(topicListDesc(true, undefined)).toBe(TOPIC_LIST_DEFAULT_DESC);
   });
 });
