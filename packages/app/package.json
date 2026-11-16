@@ -21,8 +21,8 @@
       "default": "./src/plugins/*.ts"
     },
     "./components/*": {
-      "types": "./src/components/*.tsx",
-      "default": "./src/components/*.tsx"
+      "types": "./src/components/*/index.tsx",
+      "default": "./src/components/*/index.tsx"
     },
     "./config/*": {
       "types": "./src/config/*.ts",
