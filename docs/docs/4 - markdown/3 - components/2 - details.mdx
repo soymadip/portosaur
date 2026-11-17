@@ -1,0 +1,23 @@
+---
+title: "Details"
+desc: "Collapsible disclosure accordions for secondary content."
+icon: "lu:fold-vertical"
+---
+
+Create collapsible disclosure accordions to tuck away secondary or advanced information.
+
+```jsx
+<Details summary="Click to inspect advanced configurations">
+  This content is hidden by default until the user clicks the accordion header.
+  You can include Markdown, tables, and code blocks inside.
+</Details>
+```
+
+## Props Reference
+
+| Prop                         | Type                     | Default         | Description                                           |
+| :--------------------------- | :----------------------- | :-------------- | :---------------------------------------------------- |
+| `summary`                    | `string \| ReactElement` | `"Details"`     | Content shown in the disclosure header.               |
+| `open`                       | `boolean`                | `false`         | Opens the disclosure initially.                       |
+| `className`                  | `string`                 | None            | Additional class on the details element.              |
+| Other `<details>` attributes | Varies                   | Native defaults | Native details attributes such as `id` are forwarded. |

@@ -1,0 +1,20 @@
+---
+title: "TopicList"
+desc: "Card grids of links from the current category."
+icon: "lu:layout-grid"
+---
+
+Generates a responsive grid of card links from the current sidebar category. By default, the automatic topic list is rendered on category index pages. A manually added `<TopicList />` outside an enabled index page needs `forceRender`; it also needs category items or an explicit `items` list.
+
+```jsx
+<TopicList />
+```
+
+Each card automatically inherits its document's `title`, `description`, and `icon` from frontmatter.
+
+## Props Reference
+
+| Prop          | Type      | Default                        | Description                                                                           |
+| :------------ | :-------- | :----------------------------- | :------------------------------------------------------------------------------------ |
+| `items`       | `array`   | Current sidebar category items | Explicit card items; overrides the current category items.                            |
+| `forceRender` | `boolean` | `false`                        | Render outside the automatic category-index condition. Items must still be available. |

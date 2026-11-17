@@ -1,5 +1,5 @@
 {
-  "generated_from": "Astro build — new docs page: Markdown Alerts (6 - alerts.mdx)",
+  "generated_from": "Fumadocs build — component docs split into per-component pages under markdown/components/",
   "routes": [
     {
       "url": "/",
@@ -244,9 +244,7 @@
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
-        "Preview Window",
-        "UI Components",
-        "Built-in MDX Components",
+        "Components",
         "Alerts"
       ]
     },
@@ -254,18 +252,6 @@
       "url": "/docs/markdown/alerts/",
       "title": "Alerts | Portosaur",
       "headings": ["Alerts", "Docusaurus Admonitions", "GitHub Alerts"]
-    },
-    {
-      "url": "/docs/markdown/built-in-components/",
-      "title": "Built-in MDX Components | Portosaur",
-      "headings": [
-        "Built-in MDX Components",
-        "<Tabs> & <TabItem>",
-        "<Details>",
-        "<Hint>",
-        "<Indent>",
-        "<TopicList>"
-      ]
     },
     {
       "url": "/docs/markdown/code-blocks/",
@@ -280,15 +266,76 @@
       ]
     },
     {
-      "url": "/docs/markdown/frontmatter/",
-      "title": "Frontmatter | Portosaur",
-      "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
+      "url": "/docs/markdown/components/",
+      "title": "Components | Portosaur",
+      "headings": [
+        "Components",
+        "Tabs",
+        "Details",
+        "Hint",
+        "Indent",
+        "TopicList",
+        "Btn",
+        "Dropdown",
+        "Icon",
+        "DynamicIcon",
+        "IconSearch",
+        "Preview"
+      ]
     },
     {
-      "url": "/docs/markdown/interactive-previews/",
-      "title": "Preview Window | Portosaur",
+      "url": "/docs/markdown/components/btn/",
+      "title": "Btn | Portosaur",
       "headings": [
-        "Preview Window",
+        "Btn",
+        "Basic Usage",
+        "Color Variants",
+        "Sizes",
+        "Links & Navigation",
+        "Props Reference",
+        "Icons"
+      ]
+    },
+    {
+      "url": "/docs/markdown/components/details/",
+      "title": "Details | Portosaur",
+      "headings": ["Details", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/components/dropdown/",
+      "title": "Dropdown | Portosaur",
+      "headings": ["Dropdown", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/components/dynamic-icon/",
+      "title": "DynamicIcon | Portosaur",
+      "headings": ["DynamicIcon"]
+    },
+    {
+      "url": "/docs/markdown/components/hint/",
+      "title": "Hint | Portosaur",
+      "headings": ["Hint", "Positioning & Styles", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/components/icon-search/",
+      "title": "IconSearch | Portosaur",
+      "headings": ["IconSearch"]
+    },
+    {
+      "url": "/docs/markdown/components/icon/",
+      "title": "Icon | Portosaur",
+      "headings": ["Icon"]
+    },
+    {
+      "url": "/docs/markdown/components/indent/",
+      "title": "Indent | Portosaur",
+      "headings": ["Indent", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/components/preview/",
+      "title": "Preview | Portosaur",
+      "headings": [
+        "Preview",
         "Basic Usage",
         "Supported Formats & Automatic Detection",
         "Layout Modes",
@@ -296,15 +343,19 @@
       ]
     },
     {
-      "url": "/docs/markdown/ui-components/",
-      "title": "UI Components | Portosaur",
-      "headings": [
-        "UI Components",
-        "<Btn>",
-        "<Dropdown>",
-        "<Icon> & <DynamicIcon>",
-        "<IconSearch>"
-      ]
+      "url": "/docs/markdown/components/tabs/",
+      "title": "Tabs | Portosaur",
+      "headings": ["Tabs", "Behavior", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/components/topic-list/",
+      "title": "TopicList | Portosaur",
+      "headings": ["TopicList", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/frontmatter/",
+      "title": "Frontmatter | Portosaur",
+      "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
     },
     {
       "url": "/docs/progressive-web-app/",

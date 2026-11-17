@@ -1,0 +1,92 @@
+---
+title: "Btn"
+desc: "Styled action buttons with routing and icons."
+icon: "lu:mouse-pointer-click"
+---
+
+The `<Btn>` component provides styled action buttons with built-in client-side routing and icons.
+
+`<Btn>` is a thin MDX wrapper around the app's shared `Button` component — the same Button renders the page actions. Styling it in `custom_css` (`.porto-button`) styles every button on the site at once.
+
+## Basic Usage
+
+```jsx
+<Btn>Default Button</Btn>
+```
+
+## Color Variants
+
+Pick a variant with the `variant` prop, and add `outline` for the outlined form:
+
+```jsx
+<Btn variant="primary">Primary</Btn>
+<Btn variant="secondary">Secondary</Btn>
+<Btn variant="success">Success</Btn>
+<Btn variant="info">Info</Btn>
+<Btn variant="warning">Warning</Btn>
+<Btn variant="danger">Danger</Btn>
+<Btn variant="ghost">Ghost</Btn>
+<Btn variant="primary" outline>Outlined</Btn>
+```
+
+<Btn variant="primary">Primary</Btn> <Btn variant="secondary">Secondary</Btn>
+<Btn variant="success">Success</Btn> <Btn variant="info">Info</Btn>
+<Btn variant="warning">Warning</Btn> <Btn variant="danger">Danger</Btn>
+<Btn variant="ghost">Ghost</Btn>
+<Btn variant="primary" outline>
+  Outlined
+</Btn>
+
+## Sizes
+
+```jsx
+<Btn size="sm">Small</Btn>
+<Btn size="lg">Large</Btn>
+```
+
+## Links & Navigation
+
+Passing `to` renders a Next.js `<Link>`; passing `href` renders a plain anchor:
+
+- **Internal Links** (`to`): navigate client-side, without a full page reload.
+- **External Links** (`href`): automatically open securely in a new tab with `target="_blank"` and `rel="noopener noreferrer"`.
+- **`sameTab`**: Forces external links to open within the existing tab.
+
+```jsx
+<Btn variant="primary" to="/docs/getting-started/installation">
+  Install Now
+</Btn>
+
+<Btn variant="secondary" href="https://github.com/soymadip/portosaur">
+  GitHub Repo
+</Btn>
+```
+
+## Props Reference
+
+| Prop        | Type                                                                                  | Default     | Description                                                                        |
+| :---------- | :------------------------------------------------------------------------------------ | :---------- | :--------------------------------------------------------------------------------- |
+| `variant`   | `"primary" \| "secondary" \| "success" \| "info" \| "warning" \| "danger" \| "ghost"` | `"primary"` | Sets the button's color.                                                           |
+| `outline`   | `boolean`                                                                             | `false`     | Outlined form: a colored border with a transparent background that fills on hover. |
+| `size`      | `"sm" \| "lg"`                                                                        | None        | Small or large size.                                                               |
+| `to`        | `string`                                                                              | None        | Internal page path. Renders a Next.js `<Link>` with client-side navigation.        |
+| `href`      | `string`                                                                              | None        | Link destination. External URLs open in a new tab unless `sameTab` is set.         |
+| `sameTab`   | `boolean`                                                                             | `false`     | Keep an external `href` in the current tab.                                        |
+| `icon`      | `string`                                                                              | None        | Icon identifier (for example `"lucide:download"`), rendered before the label.      |
+| `className` | `string`                                                                              | `""`        | Additional class on the rendered element.                                          |
+| `disabled`  | `boolean`                                                                             | `false`     | Disables button interaction and applies disabled styling.                          |
+| `onClick`   | `function`                                                                            | None        | Click handler. Receives the click event.                                           |
+| `title`     | `string`                                                                              | None        | Native title attribute on the rendered element.                                    |
+| `ariaLabel` | `string`                                                                              | None        | Accessible label for the button.                                                   |
+
+## Icons
+
+```jsx
+<Btn icon="lucide:download" variant="primary">
+  Download
+</Btn>
+```
+
+<Btn icon="lucide:download" variant="primary">
+  Download
+</Btn>

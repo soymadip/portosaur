@@ -1,0 +1,77 @@
+---
+title: "Tabs"
+desc: "Tabbed switchers for alternatives and multi-language snippets."
+icon: "lu:panel-top"
+---
+
+Organize alternatives or multi-language code snippets into tabbed switchers.
+
+```jsx
+<Tabs groupId="package-manager">
+  <TabItem value="bun" label="Bun" default>
+    Install with `bun install @portosaur/cli`.
+  </TabItem>
+  <TabItem value="npm" label="npm">
+    Install with `npm install @portosaur/cli`.
+  </TabItem>
+</Tabs>
+```
+
+The example above, live — try switching between the tabs. Both groups
+below share the `package-manager` id, so switching one switches the
+other.
+
+<Tabs groupId="package-manager">
+  <TabItem value="bun" label="Bun" default>
+    Install with `bun install @portosaur/cli`.
+  </TabItem>
+  <TabItem value="npm" label="npm">
+    Install with `npm install @portosaur/cli`.
+  </TabItem>
+</Tabs>
+
+<Tabs groupId="package-manager">
+  <TabItem value="bun" label="Bun">
+    Start a project with `bunx portosaur init`.
+  </TabItem>
+  <TabItem value="npm" label="npm">
+    Start a project with `npx portosaur init`.
+  </TabItem>
+</Tabs>
+
+## Behavior
+
+- **Starting tab.** The first tab shown is picked in this order: the
+  value in the page address (`queryString`), the choice remembered
+  from your last visit (`groupId`), `defaultValue`, the tab marked
+  `default`, then the first tab.
+- **Syncing.** Groups with the same `groupId` switch together, on the
+  page and across open tabs of the site. The choice is remembered in
+  the browser, so it survives a reload and carries across pages.
+- **Keyboard.** Left and Right arrows move between tabs and switch to
+  them, Home and End jump to the first and last tab, and Tab moves
+  into and out of the tab row.
+
+## Props Reference
+
+### `<Tabs />`
+
+| Prop           | Type                                              | Default                                | Description                                                                                                                                         |
+| :------------- | :------------------------------------------------ | :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultValue` | `string \| null`                                  | First tab, or the tab marked `default` | Selects the initially active tab. A value that matches no tab logs a warning and falls back to the first tab. `null` behaves like omitting it.      |
+| `groupId`      | `string`                                          | None                                   | Persists and synchronizes the selected value across tab groups with the same ID.                                                                    |
+| `queryString`  | `boolean \| string`                               | `false`                                | Sync selection with the URL query string. `true` uses `groupId` as the key; a string uses that key directly. Requires `groupId` when set to `true`. |
+| `values`       | `Array<{ value, label?, default?, attributes? }>` | Derived from child `<TabItem>` props   | Explicitly defines tab values and labels, overriding values inferred from children.                                                                 |
+| `block`        | `boolean`                                         | `false`                                | Makes tab buttons fill the available width.                                                                                                         |
+| `lazy`         | `boolean`                                         | `false`                                | Renders only the selected tab panel.                                                                                                                |
+| `className`    | `string`                                          | None                                   | Additional class on the tab list.                                                                                                                   |
+
+### `<TabItem />`
+
+| Prop         | Type      | Default     | Description                                                           |
+| :----------- | :-------- | :---------- | :-------------------------------------------------------------------- |
+| **`value`**  | `string`  | Required    | Unique identifier for this tab.                                       |
+| `label`      | `string`  | The `value` | Display text for the tab button.                                      |
+| `default`    | `boolean` | `false`     | Sets this tab as open by default when `Tabs.defaultValue` is not set. |
+| `attributes` | `object`  | None        | Additional attributes applied to this tab's button.                   |
+| `className`  | `string`  | None        | Additional class on this tab panel.                                   |
