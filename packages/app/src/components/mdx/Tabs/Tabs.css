@@ -2,10 +2,10 @@
  *
  * The Fumadocs look: the whole switcher sits in a bordered box
  * (same radius as the code frame), the tab row at the top with a
- * divider under it, the active trigger in the accent color with an
- * accent underline. Code tabs (`porto-tabs--code`, rendered by
- * CodeBlockTabs) use the same box with a tighter tab row and no
- * panel padding — the code fills the box. */
+ * divider under it, the active trigger in the accent color with a
+ * sliding accent bar under it. Code tabs (`porto-tabs--code`,
+ * rendered by CodeBlockTabs) use the same box with a tighter tab
+ * row and no panel padding — the code fills the box. */
 
 .porto-tabs {
   display: block;
@@ -16,6 +16,7 @@
 }
 
 .porto-tabs [role="tablist"] {
+  position: relative;
   display: flex;
   gap: 0.5rem;
   list-style: none;
@@ -23,6 +24,22 @@
   padding: 0 1rem;
   margin: 0;
   overflow-x: auto;
+}
+
+/* The sliding underline: one bar under the active tab, sized and
+   placed by the Tabs component from the active button's box. It
+   sits on the tab row's divider line and glides to the next tab
+   when the active one changes. */
+.porto-tabs__indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--porto-color-text-accent);
+  transition:
+    left 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Block tabs stretch to fill the row, each trigger taking an
@@ -33,21 +50,13 @@
 }
 
 .porto-tabs__tab[role="tab"] {
-  /* Transparent until selected: an idle tab shows no underline,
-     only the tab row's divider runs underneath it. */
-  --porto-tab-color-border: transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   line-height: var(--porto-line-height-headings);
-  /* The 2px bottom border is the tab's underline — the bottom
-     padding gives back the same 2px so the tab row keeps its
-     height. No box-shadow: the underline is a border, not a
-     shadow. */
-  padding: 0.5rem 0.25rem calc(0.5rem - 2px);
+  padding: 0.5rem 0.25rem;
   text-decoration: none;
   border: 0;
-  border-bottom: 2px solid var(--porto-tab-color-border);
   color: var(--porto-color-gray-3);
   outline-offset: var(--porto-outline-offset-inside);
   overflow-wrap: initial;
@@ -56,15 +65,12 @@
   font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
-  /* The selected tab's underline is the bottom border, colored
-     by the border variable — fading both makes switching tabs
-     feel like the indicator slides over instead of jumping. */
-  transition:
-    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* The underline is the sliding bar (`.porto-tabs__indicator`),
+     not a border on the tab — the tab itself only fades its
+     text color when selected. */
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-tabs__tab[aria-selected="true"] {
-  --porto-tab-color-border: var(--porto-color-text-accent);
   color: var(--porto-color-text-accent);
 }
 

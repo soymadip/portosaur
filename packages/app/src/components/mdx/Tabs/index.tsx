@@ -8,6 +8,7 @@ import {
   useId,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ButtonHTMLAttributes,
   type KeyboardEvent,
@@ -170,6 +171,8 @@ export function Tabs({
   const instanceId = useId().replace(/:/g, "");
   const idPrefix = `porto-tab-${instanceId}`;
   const queryKey = resolveQueryKey(queryString, groupId);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
 
   const tabValues = useMemo(
     () => dedupeTabValues(valuesProp ?? extractChildrenTabValues(children)),
@@ -258,6 +261,38 @@ export function Tabs({
     };
   }, [groupId, isValidValue, queryKey, tabValues.length]);
 
+  /* The underline under the active tab is one bar that glides
+     between tabs: it is sized and placed from the active button's
+     box, and CSS animates the move when the active tab changes.
+     The first position is set in useLayoutEffect, before paint,
+     so the bar never visibly slides in on load; a resize observer
+     re-measures when the row's layout shifts (font load, window
+     resize). */
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const indicator = indicatorRef.current;
+    if (!list || !indicator) {
+      return;
+    }
+    const positionIndicator = () => {
+      const activeButton = list.querySelector<HTMLButtonElement>(
+        '[role="tab"][aria-selected="true"]',
+      );
+      if (!activeButton) {
+        return;
+      }
+      indicator.style.left = `${activeButton.offsetLeft}px`;
+      indicator.style.width = `${activeButton.offsetWidth}px`;
+    };
+    positionIndicator();
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(positionIndicator);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [active, tabValues]);
+
   /* Arrow keys move to the next or previous tab (wrapping around)
      and switch to it; Home and End jump to the first and last tab.
      Buttons already handle Enter and Space natively. */
@@ -323,6 +358,7 @@ export function Tabs({
         role="tablist"
         className={tabListClassName}
         onKeyDown={handleKeyDown}
+        ref={listRef}
       >
         {tabValues.map((tab) => {
           const { attributes } = tab;
@@ -349,6 +385,11 @@ export function Tabs({
             </button>
           );
         })}
+        <span
+          ref={indicatorRef}
+          className="porto-tabs__indicator"
+          aria-hidden="true"
+        />
       </div>
       <TabsContext.Provider value={{ active, lazy, idPrefix }}>
         {children}
