@@ -143,7 +143,7 @@ html[data-theme="dark"] code.shiki span {
  * markup renders correctly when they land. */
 .shiki .line {
   position: relative;
-  padding-inline: 1rem;
+  padding-inline: 0.75rem;
 }
 
 .shiki .line:empty {
