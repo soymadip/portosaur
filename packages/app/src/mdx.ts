@@ -7,10 +7,17 @@
  * `preset.ts`):
  *
  *   remark: remarkShow, remarkGfm, remarkHeading (generateToc: false),
- *     remarkImage, remarkCodeTab, remarkNpm, …Portosaur remarkPlugins…,
+ *     remarkImage, remarkCodeTab, …Portosaur remarkPlugins…,
  *     remarkStructure, valueToExport exporter
  *   rehype: rehypeCode, …Portosaur rehypePlugins…, rehypeToc,
  *     rehypeHeading
+ *
+ * Fumadocs' remarkNpm is OFF (`remarkNpmOptions: false` below):
+ * it only knows the JS managers, and Portosaur's remarkInstall
+ * replaces it — same JS behavior, plus other languages via the
+ * fence's `lang="..."` meta (python, ruby). remarkInstall runs
+ * after remarkVars, so `{vars.key}` substitution applies inside
+ * install fences too.
  *
  * Plugin order matters: remarkContentTitle runs first among
  * Portosaur's plugins — it hoists the page's first H1 into the title
@@ -46,6 +53,7 @@ import remarkContentTitle, {
 } from "./plugins/remarkContentTitle.ts";
 import remarkHasMath, { HAS_MATH_KEY } from "./plugins/remarkHasMath.ts";
 import remarkVars from "./plugins/remarkVars.ts";
+import remarkInstall from "./plugins/remarkInstall.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
 import remarkSpaceFormAdmonitions from "./plugins/remarkSpaceFormAdmonitions.ts";
@@ -81,6 +89,7 @@ export function portosaurMdxOptions({
       remarkMath,
       remarkHasMath,
       [remarkVars, userVars],
+      remarkInstall,
       remarkIcons,
       remarkDirective,
       remarkAdmonitions,
@@ -90,6 +99,9 @@ export function portosaurMdxOptions({
       remarkImageSrc,
     ],
     rehypePlugins: [rehypeKatex],
+    // Fumadocs' remarkNpm is replaced by Portosaur's remarkInstall
+    // (above) — same JS tabs, plus other languages via lang="...".
+    remarkNpmOptions: false,
     rehypeCodeOptions: {
       themes: getShikiThemes(colorScheme),
     },
