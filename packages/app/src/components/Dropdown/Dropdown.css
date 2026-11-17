@@ -98,6 +98,13 @@ details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
   transform: translateX(var(--porto-menu-offset, 0px));
 }
 
+/* Drop-up menus open above the trigger — used by IconSearch's
+   pack filter when the search sits near the bottom of a page. */
+.porto-dropdown__menu[data-drop-up="true"] {
+  top: auto;
+  bottom: calc(100% + 0.25rem);
+}
+
 .porto-dropdown__item {
   display: flex;
   align-items: center;

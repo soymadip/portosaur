@@ -22,6 +22,7 @@ export function Dropdown({
   children,
   align,
   noArrow = false,
+  dropUp = false,
   className = "",
   menuClassName = "",
   triggerClassName = "",
@@ -33,6 +34,7 @@ export function Dropdown({
   children?: React.ReactNode;
   align?: DropdownAlign;
   noArrow?: boolean;
+  dropUp?: boolean;
   className?: string;
   menuClassName?: string;
   triggerClassName?: string;
@@ -45,6 +47,7 @@ export function Dropdown({
       items={items}
       align={align}
       noArrow={noArrow}
+      dropUp={dropUp}
       className={className}
       menuClassName={menuClassName}
       triggerClassName={triggerClassName}

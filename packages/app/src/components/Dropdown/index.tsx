@@ -168,6 +168,7 @@ export function Dropdown({
   triggerClassName = "",
   align = "center",
   noArrow = false,
+  dropUp = false,
   size,
   ariaLabel,
   menuRole,
@@ -186,6 +187,8 @@ export function Dropdown({
   triggerClassName?: string;
   align?: DropdownAlign;
   noArrow?: boolean;
+  /** Open the menu above the trigger instead of below it. */
+  dropUp?: boolean;
   /** `"sm"` is the compact trigger for use inside content. */
   size?: "sm";
   ariaLabel?: string;
@@ -324,6 +327,7 @@ export function Dropdown({
         ref={menuRef}
         className={menuClasses}
         data-align={align}
+        data-drop-up={dropUp || undefined}
         role={menuRole}
         onClick={close}
       >

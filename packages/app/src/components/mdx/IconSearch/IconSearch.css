@@ -7,6 +7,32 @@
   gap: 1rem;
 }
 
+/* The search row: the input stretches, the match count and the
+   pack filter sit beside it. */
+.porto-icon-search__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.porto-icon-search__bar .porto-icon-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.porto-icon-search__count {
+  flex-shrink: 0;
+  color: var(--porto-color-gray-3);
+  font-size: var(--porto-text-sm);
+  white-space: nowrap;
+}
+
+/* With dropUp, the results (and the status lines) render above
+   the search row instead of below it. */
+.porto-icon-search--drop-up .porto-icon-search__results,
+.porto-icon-search--drop-up .porto-icon-search__status {
+  order: -1;
+}
+
 .porto-icon-search__input {
   width: 100%;
   border: 1px solid var(--porto-color-gray-5);
@@ -56,9 +82,14 @@
   border-color: var(--porto-color-text-accent);
   color: var(--porto-color-white);
 }
-.porto-icon-search__result img {
+.porto-icon-search__result img,
+.porto-icon-search__result svg {
   width: 2rem;
   height: 2rem;
+}
+.porto-icon-search__preview {
+  display: flex;
+  color: var(--porto-color-white);
 }
 
 .porto-icon-search__status {

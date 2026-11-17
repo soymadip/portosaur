@@ -152,6 +152,10 @@ details.porto-dropdown::details-content {
     visibility 0s 0.2s;
   transition-behavior: allow-discrete;
 }
+/* A drop-up menu slides in from below instead of above. */
+.porto-dropdown__menu[data-drop-up="true"] {
+  translate: 0 4px;
+}
 details.porto-dropdown[open] .porto-dropdown__menu {
   opacity: 1;
   visibility: visible;
