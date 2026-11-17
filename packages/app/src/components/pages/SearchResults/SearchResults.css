@@ -1,0 +1,176 @@
+/* Search results — Starlight-style grouped cards. Rendered by
+ * SearchResults, shared by the search dialog and the search page.
+ *
+ * One card per page: the page itself as the header row (document
+ * icon + title), its matching headings and text chunks as rows
+ * underneath, tied together with the tree-branch lines. The 1px
+ * gaps between a card's rows show the background through — the
+ * hairline separators. Matches are bold (`<mark>`), not
+ * highlighted. The paddings, icon, and branch sizes are
+ * Starlight's; the colors are Portosaur's tokens. */
+
+.porto-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.porto-search-group__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.porto-search-group__card > :first-child {
+  border-radius: 0.3125rem 0.3125rem 0 0;
+}
+.porto-search-group__card > :last-child {
+  border-radius: 0 0 0.3125rem 0.3125rem;
+}
+
+.porto-search-result {
+  position: relative;
+  display: block;
+  background-color: var(--porto-color-black);
+  text-decoration: none;
+  color: var(--porto-color-gray-2);
+  /* The keyboard-selected result fades its tint in as you arrow
+     through the list (the hover outline itself can't fade). */
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-search-result:hover,
+.porto-search-result--active {
+  outline: 1px solid var(--porto-color-accent-high);
+}
+.porto-search-result--active {
+  background-color: var(--porto-color-accent-low);
+}
+
+/* The page header row: roomy, with the document icon at the left. */
+.porto-search-result--page {
+  padding: 0.9375rem 1.25rem;
+  padding-inline-start: 3.75rem;
+}
+.porto-search-result--page::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0.9375rem;
+  width: 1.875rem;
+  background: var(--porto-color-gray-3);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 24 24'%3E%3Cpath d='M9 10h1a1 1 0 1 0 0-2H9a1 1 0 0 0 0 2Zm0 2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H9Zm11-3V8l-6-6a1 1 0 0 0-1 0H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9Zm-6-4 3 3h-2a1 1 0 0 1-1-1V5Zm4 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5v3a3 3 0 0 0 3 3h3v9Zm-3-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z'/%3E%3C/svg%3E")
+    center no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 24 24'%3E%3Cpath d='M9 10h1a1 1 0 1 0 0-2H9a1 1 0 0 0 0 2Zm0 2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H9Zm11-3V8l-6-6a1 1 0 0 0-1 0H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9Zm-6-4 3 3h-2a1 1 0 0 1-1-1V5Zm4 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5v3a3 3 0 0 0 3 3h3v9Zm-3-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Z'/%3E%3C/svg%3E")
+    center no-repeat;
+}
+
+/* A section row: tighter, with the tree branch at the left — a
+   full-height line with an elbow for middle rows, a short elbow
+   for the last row, so the branch ends with the card. */
+.porto-search-result--nested {
+  padding: 0.625rem 1.25rem;
+  padding-inline-start: 3.75rem;
+}
+.porto-search-result--nested::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0.625rem;
+  width: 2.5rem;
+  background: var(--porto-color-gray-4);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' viewBox='0 0 16 1000' preserveAspectRatio='xMinYMin slice'%3E%3Cpath d='M8 0v1000m6-988H8'/%3E%3C/svg%3E")
+    0% 0% / 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' viewBox='0 0 16 1000' preserveAspectRatio='xMinYMin slice'%3E%3Cpath d='M8 0v1000m6-988H8'/%3E%3C/svg%3E")
+    0% 0% / 100% no-repeat;
+}
+.porto-search-result--nested:last-child::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 16 16'%3E%3Cpath d='M8 0v12m6 0H8'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 16 16'%3E%3Cpath d='M8 0v12m6 0H8'/%3E%3C/svg%3E");
+}
+
+/* Flip the page and tree icons around the vertical axis in RTL. */
+[dir="rtl"] .porto-search-result--page::before,
+[dir="rtl"] .porto-search-result--nested::before {
+  transform: matrix(-1, 0, 0, 1, 0, 0);
+}
+
+.porto-search-result__title {
+  display: block;
+  font-weight: 600;
+  color: var(--porto-color-white);
+}
+.porto-search-result__excerpt {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+/* Matches are bold and in the primary (accent) color, not
+   highlighted with a background — Starlight bolds them, Portosaur
+   colors them too, so they stand out in titles and excerpts alike. */
+.porto-search-result__excerpt mark {
+  color: var(--porto-color-text-accent);
+  background-color: transparent;
+  font-weight: 600;
+}
+.porto-search-result__title mark {
+  color: var(--porto-color-text-accent);
+  background-color: transparent;
+}
+
+/* The "Filter [All ▾]" row — Fumadocs' tag filter, narrowing by
+   docs section here. The dropdown itself is the shared Dropdown. */
+.porto-search-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.porto-search-filter__label {
+  font-size: var(--porto-text-sm);
+  color: var(--porto-color-gray-3);
+}
+
+/* A table's rows as one grid — Fumadocs' table layout. The block
+   is a nested card row (padding + tree branch come from
+   `.porto-search-result--nested`), but not a link itself, so it
+   carries no hover outline; the rows inside are the links. The
+   grid's columns come from an inline style (Fumadocs' sizing:
+   every column but the last fits its content, the last takes the
+   rest); the header and the rows share those columns through
+   subgrid, so the cells line up. Where subgrid is missing, each
+   row's cells simply stack — still readable. */
+.porto-search-table {
+  position: relative;
+  background-color: var(--porto-color-black);
+}
+.porto-search-table__grid {
+  display: grid;
+  column-gap: 0.75rem;
+}
+.porto-search-table__header,
+.porto-search-table__row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+.porto-search-table__header {
+  padding-block-end: 0.375rem;
+  border-bottom: 1px solid var(--porto-color-gray-5);
+  font-size: var(--porto-text-xs);
+  color: var(--porto-color-gray-3);
+}
+.porto-search-table__row {
+  padding-block: 0.5rem;
+}
+.porto-search-table__cell,
+.porto-search-table__header-cell {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.porto-search-table__cell mark,
+.porto-search-table__header-cell mark {
+  color: var(--porto-color-text-accent);
+  background-color: transparent;
+  font-weight: 600;
+}

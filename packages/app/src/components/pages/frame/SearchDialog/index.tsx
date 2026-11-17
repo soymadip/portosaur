@@ -1,81 +1,57 @@
 "use client";
 
-import {
-  useHighlightQuery,
-  useStaticSearch,
-} from "fumadocs-core/search/client";
-import Link from "next/link";
+import { useStaticSearch } from "fumadocs-core/search/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
 import {
+  flattenGroups,
   flattenResults,
-  type FlatResult,
+  groupResults,
 } from "../../../../lib/search-results.ts";
 import { Button } from "../../../Button/index.tsx";
+import {
+  SearchResults,
+  SearchSectionFilter,
+} from "../../SearchResults/index.tsx";
 
 /**
  * Portosaur's own search dialog — a navbar magnifier button opens a
  * native `<dialog>` floating panel (at every width), with ZBSearch
  * (Fumadocs' static search) results inside.
  *
+ * The bar is Fumadocs' — a magnifier, a borderless input, and an
+ * ESC button — with a Filter row in the footer narrowing by docs
+ * section (the index carries no tags; every result is a docs page).
+ * Results are Starlight-style grouped cards, rendered by the shared
+ * `SearchResults` (the search page renders the same list).
+ *
  * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
  * - Arrow keys move the active result, Enter navigates to it.
- * - Matches highlight via the CSS Custom Highlight API
- *   (`useHighlightQuery` + `::highlight(fd-search)`).
+ * - Matches render bold (`<mark>`), Starlight-style.
  * - The search index downloads on the first keystroke (the hook
  *   only searches a non-empty query), never on page load.
  * - `from` is basePath-aware (contracts §6): the generated
  *   `/api/search` route serves the exported index under the base.
  */
 
-/**
- * One result entry. A separate component so each entry can call
- * `useHighlightQuery` itself — the hook returns a ref callback for
- * a single element, and every result's excerpt needs highlighting.
- */
-function SearchResultEntry({
-  result,
-  index,
-  active,
-  query,
-  onSelect,
-  onHover,
-}: {
-  result: FlatResult;
-  index: number;
-  active: boolean;
-  query: string;
-  onSelect: () => void;
-  onHover: () => void;
-}) {
-  const highlightRef = useHighlightQuery(query);
+function MagnifierIcon() {
   return (
-    <li role="option" aria-selected={active}>
-      <Link
-        href={result.url}
-        id={`porto-search-option-${result.id}`}
-        data-result-index={index}
-        className={
-          active
-            ? "porto-search-result porto-search-result--active"
-            : "porto-search-result"
-        }
-        onClick={onSelect}
-        onMouseEnter={onHover}
-      >
-        {result.breadcrumbs && result.breadcrumbs.length > 0 && (
-          <span className="porto-search-result__breadcrumbs">
-            {result.breadcrumbs.join(" › ")}
-          </span>
-        )}
-        <span className="porto-search-result__excerpt" ref={highlightRef}>
-          {result.type === "heading" ? "# " : ""}
-          {result.content}
-        </span>
-      </Link>
-    </li>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
   );
 }
 
@@ -91,14 +67,46 @@ export function SearchDialog() {
 
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [section, setSection] = useState("All");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
-  const results = useMemo(
-    () => (data ? flattenResults(data.items) : []),
+  const groups = useMemo(
+    () => (data ? groupResults(flattenResults(data.items)) : []),
     [data],
   );
+
+  // The sections the current results span, in first-seen order —
+  // the filter's options.
+  const sections = useMemo(() => {
+    const seen = new Set<string>();
+    for (const group of groups) {
+      if (group.section) {
+        seen.add(group.section);
+      }
+    }
+    return [...seen];
+  }, [groups]);
+
+  // A section that no longer has results (the query changed) falls
+  // back to All instead of filtering everything away.
+  useEffect(() => {
+    if (section !== "All" && !sections.includes(section)) {
+      setSection("All");
+    }
+  }, [sections, section]);
+
+  const filteredGroups = useMemo(
+    () =>
+      section === "All"
+        ? groups
+        : groups.filter((group) => group.section === section),
+    [groups, section],
+  );
+
+  // The flat entry list behind the cards — keyboard navigation walks this.
+  const navList = useMemo(() => flattenGroups(filteredGroups), [filteredGroups]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -128,11 +136,12 @@ export function SearchDialog() {
     }
   }, [open]);
 
-  // Reset the query + active result when the dialog closes.
+  // Reset the query + active result + filter when the dialog closes.
   useEffect(() => {
     if (!open) {
       onSearchChange("");
       setActiveIndex(-1);
+      setSection("All");
     }
   }, [open, onSearchChange]);
 
@@ -180,21 +189,21 @@ export function SearchDialog() {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setActiveIndex((index) =>
-        results.length === 0 ? -1 : (index + 1) % results.length,
+        navList.length === 0 ? -1 : (index + 1) % navList.length,
       );
       return;
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((index) =>
-        results.length === 0
+        navList.length === 0
           ? -1
-          : (index - 1 + results.length) % results.length,
+          : (index - 1 + navList.length) % navList.length,
       );
       return;
     }
     if (event.key === "Enter" && activeIndex >= 0) {
-      const result = results[activeIndex];
+      const result = navList[activeIndex];
       if (result) {
         event.preventDefault();
         close();
@@ -208,12 +217,15 @@ export function SearchDialog() {
     if (activeIndex < 0) {
       return;
     }
-    listRef.current
+    resultsRef.current
       ?.querySelector(`[data-result-index="${activeIndex}"]`)
       ?.scrollIntoView({ block: "nearest" });
   }, [activeIndex]);
 
-  const showEmpty = !isLoading && search.trim() !== "" && results.length === 0;
+  const hasQuery = search.trim() !== "";
+  const showEmpty = !isLoading && hasQuery && groups.length === 0;
+  const showFilteredEmpty =
+    !isLoading && hasQuery && groups.length > 0 && navList.length === 0;
 
   return (
     <>
@@ -224,20 +236,7 @@ export function SearchDialog() {
         ariaKeyshortcuts="Control+K"
         onClick={openDialog}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
+        <MagnifierIcon />
       </Button>
 
       <dialog
@@ -247,63 +246,81 @@ export function SearchDialog() {
         onClick={onDialogClick}
       >
         <div className="porto-search-dialog__frame">
-          <button
-            type="button"
-            className="porto-search-dialog__cancel md:hidden"
-            onClick={close}
-          >
-            Cancel
-          </button>
-          <input
-            ref={inputRef}
-            type="search"
-            className="porto-search-dialog__input"
-            placeholder="Search the documentation"
-            aria-label="Search the documentation"
-            value={search}
-            onChange={(event) => {
-              onSearchChange(event.target.value);
-              setActiveIndex(-1);
-            }}
-            onKeyDown={onInputKeyDown}
-            role="combobox"
-            aria-expanded={results.length > 0}
-            aria-controls="porto-search-results"
-            aria-activedescendant={
-              activeIndex >= 0
-                ? `porto-search-option-${results[activeIndex]?.id}`
-                : undefined
-            }
-          />
-          {isLoading && (
-            <p className="porto-search-dialog__loading">Loading search…</p>
-          )}
-          {showEmpty && (
-            <p className="porto-search-dialog__empty">
-              No results found for “{search.trim()}”.
-            </p>
-          )}
-          {results.length > 0 && (
-            <ul
-              ref={listRef}
-              id="porto-search-results"
-              className="porto-search-results"
-              role="listbox"
+          <div className="porto-search-dialog__header">
+            <span className="porto-search-dialog__icon" aria-hidden="true">
+              <MagnifierIcon />
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              className="porto-search-dialog__input"
+              placeholder="Search"
+              aria-label="Search"
+              value={search}
+              onChange={(event) => {
+                onSearchChange(event.target.value);
+                setActiveIndex(-1);
+              }}
+              onKeyDown={onInputKeyDown}
+              role="combobox"
+              aria-expanded={navList.length > 0}
+              aria-controls="porto-search-results"
+              aria-activedescendant={
+                activeIndex >= 0
+                  ? `porto-search-option-${navList[activeIndex]?.id}`
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              className="porto-search-dialog__esc"
+              aria-label="Close search"
+              onClick={close}
             >
-              {results.map((result, index) => (
-                <SearchResultEntry
-                  key={result.id}
-                  result={result}
-                  index={index}
-                  active={index === activeIndex}
-                  query={search}
-                  onSelect={close}
-                  onHover={() => {
-                    setActiveIndex(index);
-                  }}
-                />
-              ))}
-            </ul>
+              ESC
+            </button>
+          </div>
+          <div
+            ref={resultsRef}
+            className="porto-search-dialog__results"
+          >
+            {isLoading && (
+              <p className="porto-search-dialog__loading">Loading search…</p>
+            )}
+            {showEmpty && (
+              <p className="porto-search-dialog__empty">
+                No results found for “{search.trim()}”.
+              </p>
+            )}
+            {showFilteredEmpty && (
+              <p className="porto-search-dialog__empty">
+                No results in “{section}” for “{search.trim()}”.
+              </p>
+            )}
+            {navList.length > 0 && (
+              <SearchResults
+                groups={filteredGroups}
+                query={search}
+                activeIndex={activeIndex}
+                onHoverIndex={setActiveIndex}
+                onSelect={close}
+                listbox
+                listId="porto-search-results"
+              />
+            )}
+          </div>
+          {sections.length > 1 && (
+            <div className="porto-search-dialog__footer">
+              <SearchSectionFilter
+                sections={sections}
+                value={section}
+                onChange={(next) => {
+                  setSection(next);
+                  setActiveIndex(-1);
+                }}
+                dropUp
+              />
+            </div>
           )}
         </div>
       </dialog>

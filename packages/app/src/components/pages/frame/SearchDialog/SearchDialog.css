@@ -1,5 +1,6 @@
-/* Search — trigger, dialog, results, match highlights, scroll lock.
- * Rendered by SearchDialog.
+/* Search dialog — trigger, dialog, Fumadocs-style bar, scroll lock.
+ * Rendered by SearchDialog. The results list itself lives in
+ * SearchResults.css (shared with the search page).
  */
 
 /* A navbar button opens a native <dialog> modal; ZBSearch
@@ -8,8 +9,6 @@
  * panel at every width: 1rem from the top and sides on mobile,
  * sized to its content like Fumadocs' search — the page stays
  * visible behind it, blurred by the backdrop. */
-/* The trigger is the shared ghost icon Button — no rules of its
-   own. */
 .porto-search-dialog {
   margin: 1rem auto auto;
   padding: 0;
@@ -31,36 +30,40 @@
   backdrop-filter: blur(0.25rem);
 }
 
+/* Header, results, footer — only the results area scrolls, so the
+   bar and the filter stay put while the list moves. */
 .porto-search-dialog__frame {
   position: relative;
-  overflow: auto;
+  overflow: hidden;
+  border-radius: inherit;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: 1rem;
-  padding: 1rem;
+  min-height: 0;
 }
 
-/* The Cancel button sits over the input's right edge on mobile. */
-.porto-search-dialog__cancel {
-  position: absolute;
-  z-index: 1;
-  align-self: flex-end;
-  padding: 0.25rem;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  color: var(--porto-color-text-accent);
-}
-
-.porto-search-dialog__input {
-  width: 100%;
-  border: 1px solid var(--porto-color-gray-5);
-  border-radius: 0.375rem;
-  background-color: var(--porto-color-black);
+/* The bar, Fumadocs-style: a magnifier, a borderless input, and an
+   ESC button, divided from the results below. */
+.porto-search-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
-  padding-inline-end: 5rem;
-  font-size: 1rem;
+  border-bottom: 1px solid var(--porto-color-gray-5);
+  flex-shrink: 0;
+}
+.porto-search-dialog__icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--porto-color-gray-3);
+}
+.porto-search-dialog__input {
+  width: 0;
+  flex: 1;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  font-size: 1.125rem;
   color: var(--porto-color-white);
 }
 .porto-search-dialog__input::placeholder {
@@ -69,7 +72,28 @@
 }
 .porto-search-dialog__input:focus {
   outline: none;
-  border-color: var(--porto-color-accent);
+}
+.porto-search-dialog__esc {
+  flex-shrink: 0;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--porto-text-xs);
+  color: var(--porto-color-gray-3);
+  cursor: pointer;
+}
+.porto-search-dialog__esc:hover {
+  border-color: var(--porto-color-gray-3);
+  color: var(--porto-color-gray-2);
+}
+
+.porto-search-dialog__results {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem;
 }
 
 .porto-search-dialog__loading,
@@ -80,65 +104,11 @@
   color: var(--porto-color-gray-3);
 }
 
-.porto-search-results {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.porto-search-result {
-  display: block;
-  border-radius: 0.375rem;
+/* The footer carries the Filter row, divided from the results. */
+.porto-search-dialog__footer {
   padding: 0.75rem 1rem;
-  text-decoration: none;
-  color: var(--porto-color-gray-2);
-  background-color: var(--porto-color-black);
-  /* The keyboard-selected result fades its tint in as you arrow
-     through the list (the hover outline itself can't fade). */
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.porto-search-result:hover,
-.porto-search-result--active {
-  outline: 1px solid var(--porto-color-accent-high);
-}
-.porto-search-result--active {
-  background-color: var(--porto-color-accent-low);
-}
-
-.porto-search-result__title {
-  display: block;
-  font-weight: 600;
-  color: var(--porto-color-white);
-}
-.porto-search-result__breadcrumbs {
-  display: block;
-  font-size: var(--porto-text-xs);
-  color: var(--porto-color-gray-3);
-}
-.porto-search-result__excerpt {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: var(--porto-text-sm);
-  overflow-wrap: anywhere;
-}
-.porto-search-result__excerpt mark {
-  color: var(--porto-color-gray-2);
-  background-color: transparent;
-  font-weight: 600;
-}
-
-/* Match highlights from `useHighlightQuery` (CSS Custom Highlight
- * API) — the search terms in result excerpts. */
-::highlight(fd-search) {
-  color: var(--porto-color-white);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-text-accent) 35%,
-    transparent
-  );
+  border-top: 1px solid var(--porto-color-gray-5);
+  flex-shrink: 0;
 }
 
 /* Body scroll lock while the search modal is open. */
@@ -154,10 +124,9 @@
     min-height: 15rem;
     max-height: calc(100% - 8rem);
   }
-  .porto-search-dialog__frame {
-    padding: 1.5rem;
-  }
-  .porto-search-dialog__input {
-    padding-inline-end: 1rem;
+  .porto-search-dialog__header,
+  .porto-search-dialog__results,
+  .porto-search-dialog__footer {
+    padding-inline: 1.5rem;
   }
 }

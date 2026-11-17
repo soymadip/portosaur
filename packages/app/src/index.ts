@@ -149,7 +149,19 @@ export {
   THEME_LABELS,
 } from "./lib/theme.ts";
 export type { ThemeMode, ThemePreference } from "./lib/theme.ts";
-export { flattenResults } from "./lib/search-results.ts";
-export type { FlatResult } from "./lib/search-results.ts";
+export {
+  flattenGroups,
+  flattenResults,
+  groupResults,
+  parseTableRow,
+  sectionOf,
+  splitMatches,
+} from "./lib/search-results.ts";
+export type {
+  FlatResult,
+  MatchSegment,
+  ParsedTableRow,
+  SearchGroup,
+} from "./lib/search-results.ts";
 export { PortoIcons } from "./lib/porto-icons.ts";
 export type { PortoIcon as PortoIconName } from "./lib/porto-icons.ts";

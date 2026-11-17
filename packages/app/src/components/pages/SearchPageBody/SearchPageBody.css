@@ -33,3 +33,14 @@
   text-align: center;
   color: var(--porto-color-gray-3);
 }
+
+/* The Filter row sits under the input; the count line heads the
+   results, Starlight-style ("7 results for install"). */
+.porto-search-page__filter {
+  margin-top: 1rem;
+}
+.porto-search-page__count {
+  margin: 1rem 0;
+  font-size: var(--porto-text-sm);
+  color: var(--porto-color-gray-3);
+}
