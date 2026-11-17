@@ -1,5 +1,13 @@
 import type { MDXComponents } from "mdx/types";
+import type { HTMLAttributes } from "react";
 import { Btn } from "./mdx/Btn.tsx";
+import { CodeBlock } from "./mdx/CodeBlock.tsx";
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from "./mdx/CodeBlockTabs.tsx";
 import { Details } from "./mdx/Details.tsx";
 import { Dropdown } from "./mdx/Dropdown/index.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
@@ -27,6 +35,10 @@ import { TopicList } from "./mdx/TopicList/index.tsx";
 export function getMDXComponents(components?: MDXComponents) {
   return {
     Btn,
+    CodeBlockTab,
+    CodeBlockTabs,
+    CodeBlockTabsList,
+    CodeBlockTabsTrigger,
     Details,
     Dropdown,
     DynamicIcon,
@@ -39,6 +51,10 @@ export function getMDXComponents(components?: MDXComponents) {
     TabItem,
     Tabs,
     TopicList,
+    /* Every fenced code block renders in the CodeBlock frame; the
+       pre's props (title, icon, allowCopy, line numbers) come from
+       the fence meta via Fumadocs' rehype-code. */
+    pre: (props: HTMLAttributes<HTMLPreElement>) => <CodeBlock {...props} />,
     ...components,
   } satisfies MDXComponents;
 }
@@ -50,6 +66,13 @@ declare global {
 }
 
 export { Btn } from "./mdx/Btn.tsx";
+export { CodeBlock } from "./mdx/CodeBlock.tsx";
+export {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from "./mdx/CodeBlockTabs.tsx";
 export { Details } from "./mdx/Details.tsx";
 export { Dropdown } from "./mdx/Dropdown/index.tsx";
 export { DynamicIcon } from "./mdx/DynamicIcon.tsx";

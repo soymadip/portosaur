@@ -306,13 +306,19 @@ export function Tabs({
   const tabListClassName = [
     "porto-tabs__list",
     block ? "porto-tabs__list--block" : "",
-    className ?? "",
   ]
     .filter(Boolean)
     .join(" ");
 
+  /* The author's className lands on the container, so variants
+     like CodeBlockTabs' `porto-tabs--code` can restyle the whole
+     switcher (tab row and panels), not just the tab row. */
+  const containerClassName = ["porto-tabs", className ?? ""]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="porto-tabs">
+    <div className={containerClassName}>
       <div
         role="tablist"
         className={tabListClassName}

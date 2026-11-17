@@ -1,20 +1,27 @@
-/* Tabs — tablist, triggers, panels. Rendered by Tabs + TabItem. */
+/* Tabs — tablist, triggers, panels. Rendered by Tabs + TabItem.
+ *
+ * The Fumadocs look: the whole switcher sits in a bordered box
+ * (same radius as the code frame), the tab row at the top with a
+ * divider under it, the active trigger in the accent color with an
+ * accent underline. Code tabs (`porto-tabs--code`, rendered by
+ * CodeBlockTabs) use the same box with a tighter tab row and no
+ * panel padding — the code fills the box. */
 
 .porto-tabs {
   display: block;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--porto-color-gray-6);
 }
 
-/* Underline-style triggers — small medium text, a gap between
-   triggers instead of wide per-tab padding, the active trigger in
-   the accent color with an accent underline. The underline is a
-   box-shadow on the tablist's border track (it animates), and the
-   tablist scrolls sideways when the triggers overflow. */
 .porto-tabs [role="tablist"] {
   display: flex;
   gap: 0.875rem;
   list-style: none;
-  border-bottom: 2px solid var(--porto-color-gray-5);
-  padding: 0;
+  border-bottom: 1px solid var(--porto-color-gray-5);
+  padding: 0 1rem;
+  margin: 0;
   overflow-x: auto;
 }
 
@@ -55,6 +62,22 @@
   color: var(--porto-color-text-accent);
 }
 
-.porto-tabs__list ~ [role="tabpanel"] {
-  margin-top: 1rem;
+.porto-tabs [role="tabpanel"] {
+  padding: 1rem;
+}
+
+/* Code tabs: the tab row is tighter (like Fumadocs' code tabs),
+   the panel has no padding — the code block fills the box — and
+   the code frame inside drops its own border and top corners, so
+   the tabs box is the only frame. */
+.porto-tabs--code [role="tablist"] {
+  padding-inline: 0.5rem;
+}
+.porto-tabs--code [role="tabpanel"] {
+  padding: 0;
+}
+.porto-tabs--code .porto-code-frame {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }

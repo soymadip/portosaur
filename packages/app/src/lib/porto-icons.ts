@@ -7,12 +7,11 @@
  * because the same glyphs are part of Portosaur's own UI; only the
  * icons the React UI actually uses are included.
  *
- * One exception: `chevron-down` is Lucide's `ChevronDown` (ISC
- * License, Copyright (c) 2020 Lucide Contributors) — the chevron
- * Fumadocs' dropdown buttons use. Unlike the fill-based Starlight
- * paths, it is stroke-based, so the path carries its own
- * `fill="none"` + stroke attributes (they override the
- * `fill="currentColor"` PortoIcon sets on the `<svg>`).
+ * The Lucide exceptions (`chevron-down`, `sidebar`, `copy`,
+ * `check` — ISC License, Copyright (c) 2020 Lucide Contributors)
+ * are stroke-based, so each path carries its own `fill="none"` +
+ * stroke attributes (they override the `fill="currentColor"`
+ * PortoIcon sets on the `<svg>`).
  *
  * Content icons (frontmatter `icon`, note cards, feature icons) do
  * NOT come from here — those resolve through `lib/icons.ts` (Iconify
@@ -26,6 +25,10 @@ export const PortoIcons = {
   // `SidebarIcon`, the docs sidebar's collapse trigger glyph.
   sidebar:
     '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></g>',
+  // Lucide's `copy` / `check` — the code block's copy button.
+  copy: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></g>',
+  check:
+    '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>',
   "right-caret":
     '<path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/>',
   "left-arrow":

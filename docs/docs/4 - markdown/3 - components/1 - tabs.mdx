@@ -19,7 +19,8 @@ Organize alternatives or multi-language code snippets into tabbed switchers.
 
 The example above, live — try switching between the tabs. Both groups
 below share the `package-manager` id, so switching one switches the
-other.
+other. For tabs made of code blocks, mark fences with `tab="..."` instead
+— see [Code Blocks](/docs/markdown/code-blocks/).
 
 <Tabs groupId="package-manager">
   <TabItem value="bun" label="Bun" default>
@@ -64,7 +65,7 @@ other.
 | `values`       | `Array<{ value, label?, default?, attributes? }>` | Derived from child `<TabItem>` props   | Explicitly defines tab values and labels, overriding values inferred from children.                                                                 |
 | `block`        | `boolean`                                         | `false`                                | Makes tab buttons fill the available width.                                                                                                         |
 | `lazy`         | `boolean`                                         | `false`                                | Renders only the selected tab panel.                                                                                                                |
-| `className`    | `string`                                          | None                                   | Additional class on the tab list.                                                                                                                   |
+| `className`    | `string`                                          | None                                   | Additional class on the tabs container.                                                                                                             |
 
 ### `<TabItem />`
 
