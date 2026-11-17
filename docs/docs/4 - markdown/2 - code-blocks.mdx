@@ -1,10 +1,10 @@
 ---
 title: "Code Blocks"
-desc: "Syntax highlighting, magic comments, line numbers, and file titles."
+desc: "Syntax highlighting, file titles, line numbers, magic comments, and code tabs."
 icon: "md:code"
 ---
 
-{vars.project.title} includes built-in syntax highlighting powered by Prism.js, complete with line numbers, file titles, and magic comment annotations.
+{vars.project.title} includes built-in syntax highlighting powered by Shiki. Every code block renders in a frame with a copy button — no setup needed.
 
 ---
 
@@ -24,7 +24,7 @@ function greet(name) {
 
 ## File Titles
 
-Add a file path or title tab to the header of the code block using `title="..."`:
+Add a file path or title to the header of the code block using `title="..."`. The header shows the language's icon, the title, and the copy button:
 
 ````markdown
 ```javascript title="src/utils/math.js"
@@ -34,70 +34,157 @@ export function add(a, b) {
 ```
 ````
 
+Live:
+
+```javascript title="src/utils/math.js"
+export function add(a, b) {
+  return a + b;
+}
+```
+
 ---
 
 ## Line Numbers
 
-Display line numbers by appending `showLineNumbers` to the code fence:
+Display line numbers by appending `lineNumbers` to the code fence. Start from a number other than 1 with `lineNumbers=<start>`:
 
 ````markdown
-```typescript showLineNumbers
+```typescript lineNumbers
+interface User {
+  id: string;
+  name: string;
+}
+```
+````
+
+Live:
+
+```typescript lineNumbers
 interface User {
   id: string;
   name: string;
   email: string;
 }
 ```
-````
 
 ---
 
 ## Magic Comments
 
-Annotate specific lines in your code blocks using magic comments. Portosaur parses these comments and applies custom background styling while stripping the comment from view.
+Annotate lines inside a code block with `// [!code ...]` comments. The comment itself is stripped from view; the line it sits on gets the styling.
 
-### Highlight Next Line
+### Highlight a Line
 
-Use `// highlight-next-line` to draw attention to an important line:
+Use `// [!code highlight]` to draw attention to a line:
 
-````markdown
 ```javascript
 function connect() {
-  // highlight-next-line
-  const client = new DatabaseClient({ retries: 5 });
+  const client = new DatabaseClient(); // [!code highlight]
   return client.start();
 }
 ```
-````
 
-### Highlight Block
+### Diff Lines
 
-Wrap multiple lines between `// highlight-start` and `// highlight-end`:
+Mark a line as added or removed with `// [!code ++]` and `// [!code --]`:
+
+```javascript
+function processData(input) {
+  const result = eval(input); // [!code --]
+  const result = parse(input); // [!code ++]
+  return result;
+}
+```
+
+### Highlight a Word
+
+Use `// [!code word:<text>]` to highlight one word on the line:
+
+```javascript
+const client = new DatabaseClient(); // [!code word:client]
+```
+
+### Focus Lines
+
+Use `// [!code focus]` to keep some lines bright and dim the rest:
+
+```javascript
+function demo() {
+  const a = 1; // [!code focus]
+  const b = 2;
+  return a + b; // [!code focus]
+}
+```
+
+---
+
+## Code Tabs
+
+Group code blocks into tabs by marking each fence with `tab="..."`. Fences with the same tab name, one after another, become one tabbed block:
 
 ````markdown
-```javascript
-function bootstrap() {
-  // highlight-start
-  loadEnvironment();
-  initLogger();
-  validateConfig();
-  // highlight-end
-  runServer();
-}
+```bash tab="npm"
+npm install portosaur
+```
+
+```bash tab="bun"
+bun add portosaur
 ```
 ````
 
-### Error Highlighting
+Live:
 
-Indicate erroneous lines or anti-patterns using `// error-next-line` or `// error-start` / `// error-end`:
+```bash tab="npm"
+npm install portosaur
+```
+
+```bash tab="bun"
+bun add portosaur
+```
+
+Groups that share a `tab-group="..."` id switch together, and the choice is remembered between visits — the same syncing as [`<Tabs>`](/docs/markdown/components/tabs/):
+
+```bash tab="npm" tab-group="pm"
+npm run dev
+```
+
+```bash tab="bun" tab-group="pm"
+bun run dev
+```
+
+```bash tab="npm" tab-group="pm"
+npm run build
+```
+
+```bash tab="bun" tab-group="pm"
+bun run build
+```
+
+### Package Manager Tabs
+
+A fence tagged `package-install` (or `npm`) turns one npm command into tabs for every package manager:
 
 ````markdown
-```javascript
-function processData(input) {
-  // error-next-line
-  const result = eval(input); // Dangerous: avoid eval
-  return result;
-}
+```package-install
+portosaur
+```
+````
+
+Live:
+
+```package-install
+portosaur
+```
+
+---
+
+## Hiding the Copy Button
+
+Add `noCopy` to the fence to leave the copy button off:
+
+````markdown
+```javascript noCopy
+const token = "do-not-copy-me";
 ```
 ````
 

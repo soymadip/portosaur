@@ -1,5 +1,5 @@
 {
-  "generated_from": "Fumadocs build — component docs split into per-component pages under markdown/components/",
+  "generated_from": "Fumadocs build — code blocks + code tabs docs (code-blocks page rewritten)",
   "routes": [
     {
       "url": "/",
@@ -262,6 +262,8 @@
         "File Titles",
         "Line Numbers",
         "Magic Comments",
+        "Code Tabs",
+        "Hiding the Copy Button",
         "Dynamic Variables in Code Blocks"
       ]
     },
