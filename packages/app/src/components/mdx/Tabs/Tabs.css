@@ -33,7 +33,9 @@
 }
 
 .porto-tabs__tab[role="tab"] {
-  --porto-tab-color-border: var(--porto-color-gray-5);
+  /* Transparent until selected: an idle tab shows no underline,
+     only the tab row's divider runs underneath it. */
+  --porto-tab-color-border: transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
