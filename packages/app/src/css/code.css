@@ -26,7 +26,6 @@
   border-radius: 0.5rem;
   overflow: hidden;
   background-color: var(--porto-color-gray-6);
-  box-shadow: var(--porto-shadow-sm);
 }
 
 .porto-code-header {
