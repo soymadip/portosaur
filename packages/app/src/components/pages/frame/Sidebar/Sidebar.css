@@ -7,8 +7,9 @@
    (the label grows to fill the row). Vertical padding is 0.3em —
    0.5em felt too airy.
    Motion follows the Fumadocs docs sidebar (decision 26): 150ms
-   color fades on rows, instant on hover with the fade only on
-   the way out, and a 150ms height + opacity fold for categories. */
+   color fades on rows both ways, and a 150ms height + opacity
+   fold for categories. Hover brightens the row's text only —
+   there is no hover background box, like Fumadocs. */
 .porto-sidebar {
   /* Lets `block-size: 0 -> auto` interpolate for the
      `::details-content` fold below (Chrome 131+, Firefox 143+).
@@ -149,9 +150,8 @@
   /* The hover/active tint boxes are rounded; the radius lives
      on the base row so it doesn't snap when the tint fades in. */
   border-radius: 0.375rem;
-  /* Fumadocs `transition-colors`: the tint and text fade on the
-     way out; `:hover` below disables the transition so the hover
-     state lands instantly. */
+  /* Fumadocs `transition-colors`: the text fades both ways
+     over 150ms, on hover and on the way out. */
   transition:
     color 150ms cubic-bezier(0.4, 0, 0.2, 1),
     background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -231,10 +231,9 @@
   color: var(--porto-color-gray-2);
   padding: 0.3em var(--porto-sidebar-item-padding-inline);
   line-height: 1.4;
-  /* Fumadocs `transition-colors`: the hover tint fades out on
-     mouse-leave, and the active tint cross-fades when navigating
-     to another page. `:hover` below disables it so the hover
-     state lands instantly. */
+  /* Fumadocs `transition-colors`: the text fades both ways over
+     150ms, and the active tint cross-fades when navigating to
+     another page. */
   transition:
     color 150ms cubic-bezier(0.4, 0, 0.2, 1),
     background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -243,34 +242,12 @@
   min-width: 0;
 }
 
-/* A hovered leaf row gets the same full-width tint box as a
-   hovered category row (summary:hover below) — without the
-   background the leaf only changed text color. */
+/* A hovered leaf row only brightens its text — like Fumadocs,
+   there is no hover background box, so a hovered row never
+   clashes with the active row's tinted box next to it. */
 .porto-sidebar a:hover,
 .porto-sidebar a:focus {
   color: var(--porto-color-white);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-1) 10%,
-    transparent
-  );
-}
-/* Fumadocs `hover:transition-none`: the hover state applies
-   instantly; the 150ms fade runs only on the way out. Focus
-   keeps the transition (keyboard users get the fade both ways),
-   and the active row keeps it on hover too (its colors don't
-   change under the cursor, so the fade is what animates a
-   selection change while hovering). */
-.porto-sidebar a:hover,
-.porto-sidebar summary:hover {
-  transition: none;
-}
-.porto-sidebar [aria-current="page"]:hover,
-.porto-sidebar
-  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]):hover {
-  transition:
-    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* OG-style active item: accent text on a subtle 10% accent tint.
@@ -319,15 +296,20 @@
   color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 
-/* A hovered category row gets the same full-width box, in a
-   translucent foreground tint (lightens dark sidebars, darkens
-   light ones, in every scheme). */
+/* A hovered category row brightens its text like a leaf row —
+   no background box, like Fumadocs. The label link sets its own
+   color, so it needs its own rule; the active link is excluded,
+   so it keeps its accent text under the cursor. The summary's
+   own color rule can't whiten an active row: the active
+   summary's rule above is more specific. */
 .porto-sidebar summary:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-1) 10%,
-    transparent
-  );
+  color: var(--porto-color-white);
+}
+.porto-sidebar
+  summary:hover
+  .porto-sidebar__group-label
+  a:not([aria-current="page"]) {
+  color: var(--porto-color-white);
 }
 /* On devices with a mouse or trackpad, the caret keeps its own
    hover background in the same tint, stacking on top of the
@@ -348,16 +330,9 @@
   background-color: transparent;
 }
 
-/* Same for hover: the category label link sits inside the
-   <summary>, whose own hover box already covers the row — the
-   link must not paint a second tint box on top of it. */
-.porto-sidebar__group-label a:hover,
-.porto-sidebar__group-label a:focus {
-  background-color: transparent;
-}
-
-/* The category fold, Fumadocs `animate-fd-collapsible-down/up`:
-   150ms height + opacity, `cubic-bezier(0.45, 0, 0.55, 1)`.
+/* The category fold, Fumadocs Base UI `transition-[height,opacity]`:
+   150ms height + opacity, `cubic-bezier(0.4, 0, 0.2, 1)` — the
+   docs site's easing, not the Radix keyframe curve.
    `::details-content` is the content after the <summary>.
    The UA hides a closed details' content with
    `content-visibility: hidden` — but that flips instantly (the
@@ -381,8 +356,8 @@
   visibility: hidden;
   content-visibility: visible;
   transition:
-    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
-    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    block-size 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s 150ms;
   transition-behavior: allow-discrete;
 }
@@ -391,8 +366,8 @@
   opacity: 1;
   visibility: visible;
   transition:
-    block-size 150ms cubic-bezier(0.45, 0, 0.55, 1),
-    opacity 150ms cubic-bezier(0.45, 0, 0.55, 1),
+    block-size 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s;
 }
 
