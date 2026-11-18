@@ -67,7 +67,10 @@ function renderFetchedIcon(collection: unknown, name: string): string {
   const attributes = Object.entries(rendered.attributes)
     .map(([key, value]) => `${key}="${escapeAttr(value)}"`)
     .join(" ");
-  return `<svg ${attributes} aria-hidden="true">${rendered.body}</svg>`;
+  /* `fill="currentColor"` is the fallback color, same as the
+     server-side `renderIcon` — a bare path would otherwise render
+     black on a dark background. */
+  return `<svg ${attributes} fill="currentColor" aria-hidden="true">${rendered.body}</svg>`;
 }
 
 export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {

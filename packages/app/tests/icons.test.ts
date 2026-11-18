@@ -59,8 +59,18 @@ describe("sidebar icon sprite", () => {
 
   test("a use reference is the same 1em svg with the body replaced", () => {
     expect(renderIconUse("md:home")).toBe(
-      `<svg width="1em" height="1em" aria-hidden="true"><use href="#porto-icon-md:home"/></svg>`,
+      `<svg width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#porto-icon-md:home"/></svg>`,
     );
+  });
+
+  test("an icon with no color of its own follows the text color", () => {
+    // logos:500px is a bare path — no fill in its body — so without
+    // the fallback it renders black on a dark background.
+    const inline = renderIcon("lo:500px");
+    const body = inline.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
+    expect(body).not.toContain("fill=");
+    expect(inline).toContain('fill="currentColor"');
+    expect(renderIconUse("lo:500px")).toContain('fill="currentColor"');
   });
 
   test("collects repeated icons, ignores single-use ones", () => {

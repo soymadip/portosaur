@@ -277,7 +277,11 @@ export function renderIcon(
     .map(([key, value]) => `${key}="${escapeAttr(value)}"`)
     .join(" ");
 
-  const svg = `<svg ${attributes}${iconSvgExtraAttrs(options)} aria-hidden="true">${rendered.body}</svg>`;
+  /* `fill="currentColor"` is the fallback color: most icon bodies
+     carry their own fill or stroke, which wins over this, but a
+     bare path (a few brand marks) would otherwise render black
+     on a dark background. */
+  const svg = `<svg ${attributes} fill="currentColor"${iconSvgExtraAttrs(options)} aria-hidden="true">${rendered.body}</svg>`;
   renderCache.set(cacheKey, svg);
   return svg;
 }
@@ -490,7 +494,7 @@ export function renderIconUse(
   options: RenderIconOptions = {},
 ): string {
   return (
-    `<svg width="1em" height="1em"${iconSvgExtraAttrs(options)} aria-hidden="true">` +
+    `<svg width="1em" height="1em" fill="currentColor"${iconSvgExtraAttrs(options)} aria-hidden="true">` +
     `<use href="#${escapeAttr(spriteSymbolId(iconId))}"/></svg>`
   );
 }
