@@ -20,10 +20,6 @@
 .porto-sidebar {
   /* The gliding hover block positions against this box. */
   position: relative;
-  /* Lets `block-size: 0 -> auto` interpolate for the
-     `::details-content` fold below (Chrome 131+, Firefox 143+).
-     Older browsers ignore it and open/close instantly. */
-  interpolate-size: allow-keywords;
   --porto-sidebar-item-padding-inline: 0.5rem;
 }
 
@@ -141,10 +137,15 @@
    get it (deeper levels keep the hairline), and the line is the
    per-item borders, so it spans exactly the first child to the
    last and never past it. Both variants: collapsable categories
-   (details) and plain groups (a direct ul). A 2px line was too
-   heavy, first in gray-3 then in the tint; the width went back
-   to 1px and only the tint stayed. */
-.porto-sidebar__top-level > li > details:has(a[aria-current="page"]) > ul > li,
+   (a folder panel) and plain groups (a direct ul). A 2px line
+   was too heavy, first in gray-3 then in the tint; the width
+   went back to 1px and only the tint stayed. */
+.porto-sidebar__top-level
+  > li
+  > .porto-sidebar__folder:has(a[aria-current="page"])
+  > .porto-sidebar__folder-panel
+  > ul
+  > li,
 .porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
   --porto-sidebar-guide-color: color-mix(
     in srgb,
@@ -153,14 +154,19 @@
   );
 }
 
-.porto-sidebar__top-level > li > details[open] > ul > li,
+.porto-sidebar__top-level
+  > li
+  > .porto-sidebar__folder[data-open="true"]
+  > .porto-sidebar__folder-panel
+  > ul
+  > li,
 .porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
   margin-inline-start: calc(var(--porto-sidebar-item-padding-inline) + 0.3rem);
   padding-inline-start: calc(
     var(--porto-sidebar-item-padding-inline) - 0.15rem
   );
 }
-.porto-sidebar details[open] > ul {
+.porto-sidebar__folder-panel > ul {
   padding-block-start: 0.25rem;
 }
 
@@ -177,7 +183,7 @@
   margin-top: 0.5rem;
 }
 
-.porto-sidebar summary {
+.porto-sidebar__folder-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -185,7 +191,7 @@
      block behind it. */
   position: relative;
   /* Same font size as a leaf link, so the 0.3em padding below
-     resolves to the same pixels — without this the summary
+     resolves to the same pixels — without this the row
      inherits the 16px base size and category rows come out
      1.2px taller than leaf rows. */
   font-size: var(--porto-text-sm);
@@ -209,27 +215,23 @@
      over 150ms, on hover and on the way out. */
   transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-sidebar summary::marker,
-.porto-sidebar summary::-webkit-details-marker {
-  display: none;
-}
 
 .porto-sidebar__caret {
   /* A wide touch zone around the chevron: 44px across (the
      smallest comfortable tap target) by the full row height.
      The chevron stays pinned to the row's end edge — the extra
      width extends left into the label's space, and the negative
-     end margin cancels the summary's end padding so the zone
+     end margin cancels the row's end padding so the zone
      reaches the row's edge. The end padding (0.35rem) keeps the
-     chevron exactly where it was: 0.25rem summary padding +
+     chevron exactly where it was: 0.25rem row padding +
      0.1rem caret padding before, 0.35rem caret padding now.
      The negative block margins keep the 1.25rem chevron plus
      its padding from making the row taller than the 19.6px text
-     line sets it — with `stretch` they widen the span to the
+     line sets it — with `stretch` they widen the button to the
      full row height instead. Only the chevron itself rotates
-     when the group opens — the span and its hover background
+     when the group opens — the button and its hover background
      stay put, so the hover box never spins through a diamond
-     mid-animation. The span itself has no background: the
+     mid-animation. The button itself has no background: the
      hover box lives on the ::before below, so it can be
      narrower than the touch zone. */
   position: relative;
@@ -241,8 +243,17 @@
   min-width: 2.75rem;
   padding-block: 0.2rem;
   padding-inline-end: 0.35rem;
+  padding-inline-start: 0;
   margin-block: -0.25rem;
   margin-inline-end: -0.25rem;
+  /* A <button>: drop the native face, border, and font so only
+     the chevron shows. */
+  appearance: none;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 /* The caret's hover box: full row height, reaching the row's
    right edge, but starting 0.5rem in from the touch zone's
@@ -270,7 +281,7 @@
 [dir="rtl"] .porto-sidebar__caret svg {
   transform: rotateZ(180deg);
 }
-.porto-sidebar details[open] > summary .porto-sidebar__caret svg {
+.porto-sidebar__folder[data-open="true"] .porto-sidebar__caret svg {
   transform: rotateZ(90deg);
 }
 
@@ -336,16 +347,18 @@
 }
 
 /* The active category row highlights as one uniform box: the
-   background sits on the <summary>'s ::before, not the inner
+   background sits on the folder row's ::before, not the inner
    link, so the box spans the full row at full pitch height
    with the caret inside it. The link keeps only the accent
    text color — its own box is cleared below. */
-.porto-sidebar
-  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+.porto-sidebar__folder-row:has(
+  > .porto-sidebar__group-label > a[aria-current="page"]
+) {
   color: var(--porto-color-accent-high);
 }
-.porto-sidebar
-  summary:has(> .porto-sidebar__group-label > a[aria-current="page"])::before {
+.porto-sidebar__folder-row:has(
+    > .porto-sidebar__group-label > a[aria-current="page"]
+  )::before {
   content: "";
   position: absolute;
   inset-block: -1px;
@@ -368,8 +381,9 @@
 [data-theme="dark"] .porto-sidebar [aria-current="page"]:hover,
 [data-theme="dark"] .porto-sidebar [aria-current="page"]:focus,
 [data-theme="dark"]
-  .porto-sidebar
-  summary:has(> .porto-sidebar__group-label > a[aria-current="page"]) {
+  .porto-sidebar__folder-row:has(
+    > .porto-sidebar__group-label > a[aria-current="page"]
+  ) {
   color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 
@@ -377,14 +391,12 @@
    box behind it is the gliding hover block, not the row itself.
    The label link sets its own color, so it needs its own rule;
    the active link is excluded, so it keeps its accent text
-   under the cursor. The summary's own color rule can't whiten
-   an active row: the active summary's rule above is more
-   specific. */
-.porto-sidebar summary:hover {
+   under the cursor. The row's own color rule can't whiten an
+   active row: the active row's rule above is more specific. */
+.porto-sidebar__folder-row:hover {
   color: var(--porto-color-white);
 }
-.porto-sidebar
-  summary:hover
+.porto-sidebar__folder-row:hover
   .porto-sidebar__group-label
   a:not([aria-current="page"]) {
   color: var(--porto-color-white);
@@ -403,7 +415,7 @@
   }
 }
 /* The active category label link keeps only the accent text
-   color — its own box is cleared, the <summary> carries the
+   color — its own box is cleared, the folder row carries the
    row's box. */
 .porto-sidebar__group-label a[aria-current="page"]::before {
   content: none;
@@ -411,53 +423,33 @@
 
 /* The category fold, Fumadocs Base UI `transition-[height,opacity]`:
    150ms height + opacity, `cubic-bezier(0.4, 0, 0.2, 1)` — the
-   docs site's easing, not the Radix keyframe curve.
-   `::details-content` is the content after the <summary>.
-   The UA hides a closed details' content with
-   `content-visibility: hidden` — but that flips instantly (the
-   discrete transition doesn't delay it in Chrome), so a plain
-   `::details-content` fold only animates on open and snaps shut.
-   Instead we override the UA hiding with `content-visibility:
-   visible` and hide the content ourselves: `block-size: 0` +
-   `opacity: 0` + `visibility: hidden` (which also takes the
-   links out of the tab order while folded). `visibility` flips
-   immediately on open and only after the fade on close — the
-   delay lives on the closed rule, the instant flip on the open
-   rule, because a transition runs with the after-change style.
-   `interpolate-size` on `.porto-sidebar` lets `block-size: auto`
-   interpolate.
-   Browsers without `::details-content` support open/close
-   instantly, as before. */
-.porto-sidebar details::details-content {
+   docs site's easing, not the Radix keyframe curve. The height
+   is a pixel value measured from the content by the FolderPanel
+   in `index.tsx` (Base UI's mechanism): opening glides 0 to
+   the full height, closing captures the current height first
+   and glides to 0, and a settled-open panel releases to `auto`
+   so nested folds inside it grow it naturally. A plain pixel
+   height animates in every browser — the earlier
+   `::details-content` fold only animated where that
+   pseudo-element exists and snapped open and shut elsewhere.
+   The panel's height, opacity, and visibility are inline
+   styles from the component; this rule only clips the content
+   and carries the transition. */
+.porto-sidebar__folder-panel {
   overflow: hidden;
-  block-size: 0;
-  opacity: 0;
-  visibility: hidden;
-  content-visibility: visible;
   transition:
-    block-size 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 0s 150ms;
-  transition-behavior: allow-discrete;
-}
-.porto-sidebar details[open]::details-content {
-  block-size: auto;
-  opacity: 1;
-  visibility: visible;
-  transition:
-    block-size 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 0s;
+    height 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .porto-sidebar a,
-  .porto-sidebar summary,
+  .porto-sidebar__folder-row,
   .porto-sidebar a::before,
-  .porto-sidebar summary::before,
+  .porto-sidebar__folder-row::before,
   .porto-sidebar__caret::before,
   .porto-sidebar__caret svg,
-  .porto-sidebar details::details-content {
+  .porto-sidebar__folder-panel {
     transition: none;
   }
 }
@@ -493,15 +485,15 @@
   margin-inline-end: 0.25em;
 }
 
-/* The group label grows to fill the summary row, pinning the
+/* The group label grows to fill the folder row, pinning the
    caret to the right edge — inside the active highlight box
    when the category is the current page. */
 .porto-sidebar__group-label {
   flex: 1;
 }
 
-/* A category link inside a <summary> is the group label, not a
-   list link — no list-link padding (the summary provides it). */
+/* A category link inside a folder row is the group label, not
+   a list link — no list-link padding (the row provides it). */
 .porto-sidebar__group-label a {
   padding: 0;
 }

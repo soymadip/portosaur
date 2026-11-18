@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../../lib/sidebar.ts";
@@ -48,13 +49,22 @@ import {
  * and navigation leaves them as they are.
  *
  * When `theme.collapsable_sidebar` is false, categories render as
- * plain groups (label + list, no `<details>`).
+ * plain groups (label + list, no fold).
+ *
+ * The fold is Fumadocs' measured-height mechanism (their Base UI
+ * collapsible): the panel's height is a pixel value measured from
+ * its content, animated 0 to full and back, then released to
+ * `auto` once settled open so nested folds inside it grow it
+ * naturally. It works in every browser — the earlier
+ * `::details-content` fold only animated where that
+ * pseudo-element exists (Chrome, newer Firefox) and snapped
+ * open and shut everywhere else.
  *
  * Prefetch: Next.js `<Link>` prefetches on viewport by default.
- * Links inside closed categories are `display: none`, so they
- * never intersect and never prefetch until their category opens —
- * the same behavior the Astro build wired by hand. The current
- * page's link skips prefetching.
+ * Links inside closed categories sit in a 0-height clipped
+ * panel, so they never intersect and never prefetch until their
+ * category opens — the same behavior the Astro build wired by
+ * hand. The current page's link skips prefetching.
  */
 
 const STORAGE_KEY = "porto-sidebar-state";
@@ -124,11 +134,12 @@ function follow(area: HTMLElement | null) {
     // The active row has its own background.
     block.style.opacity = isActiveRow(item) ? "0" : "1";
   };
-  // A category row is its <summary>, not the label link inside
+  // A category row is its folder row, not the label link inside
   // it — the block spans the full row, caret included.
   const itemOf = (target: EventTarget | null) =>
     target instanceof Element
-      ? (target.closest("summary") ?? target.closest("a[href]"))
+      ? (target.closest(".porto-sidebar__folder-row") ??
+        target.closest("a[href]"))
       : null;
 
   const controller = new AbortController();
@@ -167,6 +178,118 @@ function follow(area: HTMLElement | null) {
     { signal },
   );
   return () => controller.abort();
+}
+
+// The category fold — Fumadocs' measured-height panel (their
+// Base UI collapsible, without the dependency). The height is a
+// pixel value measured from the content: opening glides 0 to
+// the full height, closing captures the current height first
+// (an interrupted open may be partway) and glides to 0. Once
+// settled open the height releases to `auto`, so a nested
+// category opening inside grows the panel without re-measuring.
+// Opacity rides the same 150ms (it reads the `open` prop, so it
+// flips with the toggle and the CSS transition fades it).
+// `visibility` hides a settled-closed panel, which takes its
+// links out of the tab order — it flips to visible the moment
+// the panel opens and only after the fade on close. When the
+// height doesn't animate (reduced motion turns the transition
+// off), both ends land immediately instead of waiting for a
+// transition that never fires.
+function FolderPanel({
+  open,
+  id,
+  children,
+}: {
+  open: boolean;
+  id: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  // The initial values match the server render, so there is no
+  // hydration mismatch.
+  const [height, setHeight] = useState<number | "auto">(open ? "auto" : 0);
+  const [hidden, setHidden] = useState(!open);
+  const openRef = useRef(open);
+  openRef.current = open;
+  const prevOpenRef = useRef(open);
+  const frameRef = useRef(0);
+
+  useEffect(() => {
+    // Mount only renders the initial state — the fold runs on
+    // changes after that.
+    if (prevOpenRef.current === open) {
+      return;
+    }
+    prevOpenRef.current = open;
+    const panel = ref.current;
+    if (!panel) {
+      return;
+    }
+    cancelAnimationFrame(frameRef.current);
+    const style = getComputedStyle(panel);
+    const animates =
+      style.transitionDuration !== "0s" &&
+      style.transitionProperty.includes("height");
+    if (open) {
+      setHidden(false);
+      if (!animates) {
+        setHeight("auto");
+        return;
+      }
+      // Glide from the current height (0 when closed, partway
+      // when reopening mid-close) to the full content height.
+      setHeight(panel.scrollHeight);
+      return;
+    }
+    if (!animates) {
+      setHeight(0);
+      setHidden(true);
+      return;
+    }
+    // Capture the current height first, then glide to 0 on a
+    // later frame so the browser registers the start value —
+    // going straight from `auto` to 0 would snap, `auto` does
+    // not interpolate.
+    const current = panel.getBoundingClientRect().height;
+    setHeight(current);
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = requestAnimationFrame(() => {
+        if (!openRef.current) {
+          setHeight(0);
+        }
+      });
+    });
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, [open]);
+
+  const onTransitionEnd = (event: React.TransitionEvent) => {
+    if (event.propertyName !== "height") {
+      return;
+    }
+    if (openRef.current) {
+      setHeight("auto");
+    } else {
+      setHidden(true);
+    }
+  };
+
+  return (
+    <div
+      id={id}
+      ref={ref}
+      className="porto-sidebar__folder-panel"
+      style={{
+        height: height === "auto" ? "auto" : `${height}px`,
+        opacity: open ? 1 : 0,
+        visibility: hidden ? "hidden" : "visible",
+      }}
+      onTransitionEnd={onTransitionEnd}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
@@ -305,12 +428,9 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash]);
 
-  // After every navigation, open the current page's ancestors in
-  // the DOM. React only writes the `open` attribute when the prop
-  // changes, so navigating between two pages in the same closed
-  // category (e.g. via search) would otherwise leave the active
-  // link hidden — the prop stays `true` throughout, and React
-  // never notices the browser closed the element natively.
+  // After every navigation, the current page's ancestors open
+  // on their own — `isOpen` returns true for them regardless of
+  // stored state, so the render already shows the active path.
   // Closing a category by hand doesn't change `current`, so a
   // deliberate close is left alone until the next navigation.
   // With auto-collapse, the navigation also closes the old tree:
@@ -318,16 +438,9 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   // top-level page closes every category. The collapse runs on
   // the navigation, not on expanding a tree — opening a category
   // to peek never closes anything. The stored state is updated
-  // too, so a later re-render keeps the DOM and the stored state
-  // in agreement.
+  // too, so a later re-render keeps the open state and the
+  // stored state in agreement.
   useEffect(() => {
-    const sidebar = document.querySelector(".porto-sidebar");
-    const active = sidebar?.querySelector('a[aria-current="page"]');
-    let details = active?.closest("details") ?? null;
-    while (details) {
-      details.open = true;
-      details = details.parentElement?.closest("details") ?? null;
-    }
     if (!autoCollapse) {
       return;
     }
@@ -447,22 +560,37 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
               </li>
             );
           }
+          const open = isOpen(item);
+          const panelId = `porto-sidebar-panel-${categoryIndex.get(item)}`;
           return (
             <li key={item.label}>
-              <details
-                open={isOpen(item)}
-                onToggle={(event) => {
-                  setCategoryOpen(item, event.currentTarget.open);
-                }}
+              <div
+                className="porto-sidebar__folder"
+                data-open={open ? "true" : undefined}
               >
-                <summary>
+                <div
+                  className="porto-sidebar__folder-row"
+                  onClick={() => setCategoryOpen(item, !open)}
+                >
                   <span className="porto-sidebar__group-label">{label}</span>
-                  <span className="porto-sidebar__caret">
+                  <button
+                    type="button"
+                    className="porto-sidebar__caret"
+                    aria-expanded={open}
+                    aria-controls={panelId}
+                    aria-label={`${open ? "Collapse" : "Expand"} ${item.label}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setCategoryOpen(item, !open);
+                    }}
+                  >
                     <PortoIcon name="right-caret" size="1.25rem" />
-                  </span>
-                </summary>
-                {item.items && renderItems(item.items, true)}
-              </details>
+                  </button>
+                </div>
+                <FolderPanel open={open} id={panelId}>
+                  {item.items && renderItems(item.items, true)}
+                </FolderPanel>
+              </div>
             </li>
           );
         }
