@@ -181,8 +181,12 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
     );
   };
 
+  /* `not-content` opts the whole picker out of the markdown prose
+     styles — without it the prose `ul` rules put bullets on the
+     results list. */
   const containerClassName = [
     "porto-icon-search",
+    "not-content",
     dropUp ? "porto-icon-search--drop-up" : "",
   ]
     .filter(Boolean)
@@ -220,8 +224,12 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
           ariaLabel="Filter icons by pack"
         />
       </div>
-      {loading && <p className="porto-icon-search__status">Searching…</p>}
-      {error && <p className="porto-icon-search__status">{error}</p>}
+      {loading && results.length === 0 && (
+        <p className="porto-icon-search__status">Searching…</p>
+      )}
+      {error && results.length === 0 && (
+        <p className="porto-icon-search__status">{error}</p>
+      )}
       {!loading && !error && query.trim() && results.length === 0 && (
         <p className="porto-icon-search__status">
           No icons found for “{query.trim()}”.
@@ -237,21 +245,20 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
                 onClick={() => copyId(iconId)}
                 title={`Copy ${shortId(iconId)}`}
               >
-                {svgs[iconId] ? (
-                  <span
-                    className="porto-icon-search__preview"
-                    dangerouslySetInnerHTML={{ __html: svgs[iconId] }}
-                  />
-                ) : (
-                  /* eslint-disable-next-line @next/next/no-img-element -- Iconify CDN SVGs, not Next-optimized images */
-                  <img
-                    src={`https://api.iconify.design/${iconId.replace(":", "/")}.svg`}
-                    alt=""
-                    width={24}
-                    height={24}
-                    loading="lazy"
-                  />
-                )}
+                <span className="porto-icon-search__preview">
+                  {svgs[iconId] ? (
+                    <span dangerouslySetInnerHTML={{ __html: svgs[iconId] }} />
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element -- Iconify CDN SVGs, not Next-optimized images */
+                    <img
+                      src={`https://api.iconify.design/${iconId.replace(":", "/")}.svg`}
+                      alt=""
+                      width={24}
+                      height={24}
+                      loading="lazy"
+                    />
+                  )}
+                </span>
                 <span>{copied === iconId ? "Copied!" : shortId(iconId)}</span>
               </button>
             </li>
