@@ -64,6 +64,8 @@ import { getShikiThemes } from "./config/shiki.ts";
 export interface PortosaurMdxArgs {
   userVars?: Record<string, unknown>;
   colorScheme?: string;
+  /** Render `:smile:`-style emoji shortcodes (default true). */
+  renderEmojiShortcodes?: boolean;
 }
 
 /**
@@ -73,10 +75,14 @@ export interface PortosaurMdxArgs {
  *   `{vars.key}` substitution).
  * @param args.colorScheme - The site's color scheme (for the Shiki
  *   light/dark themes).
+ * @param args.renderEmojiShortcodes - Whether `:smile:`-style emoji
+ *   shortcodes render (`site.markdown.render_emoji_shortcodes`,
+ *   default true).
  */
 export function portosaurMdxOptions({
   userVars = {},
   colorScheme,
+  renderEmojiShortcodes = true,
 }: PortosaurMdxArgs = {}): MDXPresetOptions {
   // NOTE: unified calls each plugin itself — pass the plugin functions
   // (and `[plugin, options]` tuples where options are needed), never
@@ -95,7 +101,9 @@ export function portosaurMdxOptions({
       remarkAdmonitions,
       remarkSpaceFormAdmonitions,
       remarkGithubAlerts,
-      remarkEmoji,
+      // Emoji shortcodes render only when the site enables them
+      // (`site.markdown.render_emoji_shortcodes`, default true).
+      ...(renderEmojiShortcodes ? [remarkEmoji] : []),
       remarkImageSrc,
     ],
     rehypePlugins: [rehypeKatex],

@@ -37,6 +37,12 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
       notesRoute: "docs",
       blogDir: "blog",
       blogRoute: "blog",
+      markdown: {
+        mermaid: true,
+        renderEmojiShortcodes: true,
+        onBrokenLinks: "throw",
+        onBrokenImages: "throw",
+      },
       build: { outputDir: "build" },
       ...(overrides.site ?? {}),
     },
@@ -127,6 +133,7 @@ describe("buildSourceConfigContent", () => {
     // userVars is pretty-printed with indent 2, like human-written code.
     expect(content).toContain('userVars: {\n  "project": "Test"\n}');
     expect(content).toContain('colorScheme: "portosaur"');
+    expect(content).toContain("renderEmojiShortcodes: true");
     // The npm plugins live inside the app package — the generated file
     // must not import them (directly or via @portosaur/app/plugins/*),
     // because they would not resolve from the generated root.
@@ -135,6 +142,23 @@ describe("buildSourceConfigContent", () => {
     expect(content).not.toContain("remark-emoji");
     expect(content).not.toContain("rehype-katex");
     expect(content).not.toContain("@portosaur/app/plugins/");
+  });
+
+  test("passes renderEmojiShortcodes: false through when the site disables it", () => {
+    const content = buildSourceConfigContent(
+      options({
+        site: {
+          markdown: {
+            mermaid: true,
+            renderEmojiShortcodes: false,
+            onBrokenLinks: "throw",
+            onBrokenImages: "throw",
+          },
+        },
+      }),
+      0,
+    );
+    expect(content).toContain("renderEmojiShortcodes: false");
   });
 });
 
