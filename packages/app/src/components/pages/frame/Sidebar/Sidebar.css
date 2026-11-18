@@ -176,7 +176,10 @@
      full row height instead. Only the chevron itself rotates
      when the group opens — the span and its hover background
      stay put, so the hover box never spins through a diamond
-     mid-animation. */
+     mid-animation. The span itself has no background: the
+     hover box lives on the ::before below, so it can be
+     narrower than the touch zone. */
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -187,7 +190,21 @@
   padding-inline-end: 0.35rem;
   margin-block: -0.25rem;
   margin-inline-end: -0.25rem;
+}
+/* The caret's hover box: full row height, reaching the row's
+   right edge, but starting 0.5rem in from the touch zone's
+   left edge — the box is 36px wide on the 44px zone. It always
+   exists (transparent at rest) so the tint fades in and out,
+   and it sits behind the chevron. */
+.porto-sidebar__caret::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0.5rem;
+  inset-inline-end: 0;
+  z-index: -1;
   border-radius: 0.375rem;
+  background-color: transparent;
   transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-sidebar__caret svg {
@@ -317,7 +334,7 @@
    row hover so the caret area goes slightly darker. Touch
    screens get no separate box — the row's box covers it. */
 @media (hover: hover) {
-  .porto-sidebar__caret:hover {
+  .porto-sidebar__caret:hover::before {
     background-color: color-mix(
       in srgb,
       var(--porto-color-gray-1) 10%,
@@ -382,7 +399,7 @@
 @media (prefers-reduced-motion: reduce) {
   .porto-sidebar a,
   .porto-sidebar summary,
-  .porto-sidebar__caret,
+  .porto-sidebar__caret::before,
   .porto-sidebar__caret svg,
   .porto-sidebar details::details-content {
     transition: none;
