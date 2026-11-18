@@ -8,8 +8,13 @@
    0.5em felt too airy.
    Motion follows the Fumadocs docs sidebar (decision 26): 150ms
    color fades on rows both ways, and a 150ms height + opacity
-   fold for categories. Hover brightens the row's text only —
-   there is no hover background box, like Fumadocs. */
+   fold for categories. Rows sit 2px apart — the tinted boxes
+   never touch, so a hovered box can't clash with the active
+   box next to it. Fumadocs separates its rows the same way
+   (a 2px list gap); here the gap is 1px of padding top and
+   bottom on each row's list item, which keeps the guide line
+   continuous, and the row gives back 1px of padding each side
+   so the row pitch stays 28px. */
 .porto-sidebar {
   /* Lets `block-size: 0 -> auto` interpolate for the
      `::details-content` fold below (Chrome 131+, Firefox 143+).
@@ -40,6 +45,11 @@
 
 .porto-sidebar li {
   overflow-wrap: anywhere;
+  /* 1px top and bottom: with the neighbor's 1px, the tinted
+     boxes of adjacent rows sit 2px apart. Padding, not margin,
+     so the gap can't collapse away — and the guide line (the
+     list item's own border) stays continuous across it. */
+  padding-block: 1px;
 }
 
 /* The inactive branches sit slightly dimmed so the branch holding
@@ -141,8 +151,10 @@
      (0.25rem vs the shared 0.5rem): the caret is pinned to the
      row's end edge, so the full 0.5rem read as dead space after
      the arrow. Leaf links keep the shared value — their text is
-     start-aligned, so their end padding is invisible. */
-  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+     start-aligned, so their end padding is invisible. The
+     vertical padding gives back the 1px the list item adds
+     above and below, so the row pitch stays 28px. */
+  padding: calc(0.3em - 1px) var(--porto-sidebar-item-padding-inline);
   padding-inline-end: 0.25rem;
   line-height: 1.4;
   cursor: pointer;
@@ -229,7 +241,9 @@
   border-radius: 0.375rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
-  padding: 0.3em var(--porto-sidebar-item-padding-inline);
+  /* The vertical padding gives back the 1px the list item adds
+     above and below, so the row pitch stays 28px. */
+  padding: calc(0.3em - 1px) var(--porto-sidebar-item-padding-inline);
   line-height: 1.4;
   /* Fumadocs `transition-colors`: the text fades both ways over
      150ms, and the active tint cross-fades when navigating to
@@ -242,12 +256,17 @@
   min-width: 0;
 }
 
-/* A hovered leaf row only brightens its text — like Fumadocs,
-   there is no hover background box, so a hovered row never
-   clashes with the active row's tinted box next to it. */
+/* A hovered leaf row gets a soft tinted box and brighter text,
+   like Fumadocs — and the 2px gap between rows keeps that box
+   from touching the active row's box next to it. */
 .porto-sidebar a:hover,
 .porto-sidebar a:focus {
   color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
 }
 
 /* OG-style active item: accent text on a subtle 10% accent tint.
@@ -296,14 +315,20 @@
   color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 
-/* A hovered category row brightens its text like a leaf row —
-   no background box, like Fumadocs. The label link sets its own
-   color, so it needs its own rule; the active link is excluded,
-   so it keeps its accent text under the cursor. The summary's
-   own color rule can't whiten an active row: the active
-   summary's rule above is more specific. */
+/* A hovered category row gets the same tinted box as a leaf
+   row, in a translucent foreground tint (lightens dark sidebars,
+   darkens light ones, in every scheme). The label link sets its
+   own color, so it needs its own rule; the active link is
+   excluded, so it keeps its accent text under the cursor. The
+   summary's own color rule can't whiten an active row: the
+   active summary's rule above is more specific. */
 .porto-sidebar summary:hover {
   color: var(--porto-color-white);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
 }
 .porto-sidebar
   summary:hover
@@ -327,6 +352,14 @@
 .porto-sidebar__group-label a[aria-current="page"],
 .porto-sidebar__group-label a[aria-current="page"]:hover,
 .porto-sidebar__group-label a[aria-current="page"]:focus {
+  background-color: transparent;
+}
+
+/* Same for hover: the category label link sits inside the
+   <summary>, whose own hover box already covers the row — the
+   link must not paint a second tint box on top of it. */
+.porto-sidebar__group-label a:hover,
+.porto-sidebar__group-label a:focus {
   background-color: transparent;
 }
 
