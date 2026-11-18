@@ -35,14 +35,14 @@ theme:
 
 ## Bundled schemes
 
-| Scheme       | Look                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------ |
+| Scheme       | Look                                                                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `portosaur`  | Default brand palette — dark green primary in light mode, neon green in dark. The default when no scheme is set. |
-| `catppuccin` | Latte (light) / Mocha (dark) from the Catppuccin palette.                     |
-| `dracula`    | Dracula palette, with a light Alucard-inspired mode.                          |
-| `github`     | GitHub light / GitHub dark.                                                   |
-| `gruvbox`    | Gruvbox light / dark.                                                         |
-| `nord`       | Nord arctic palette.                                                          |
+| `catppuccin` | Latte (light) / Mocha (dark) from the Catppuccin palette.                                                        |
+| `dracula`    | Dracula palette, with a light Alucard-inspired mode.                                                             |
+| `github`     | GitHub light / GitHub dark.                                                                                      |
+| `gruvbox`    | Gruvbox light / dark.                                                                                            |
+| `nord`       | Nord arctic palette.                                                                                             |
 
 The six Portosaur schemes keep the same colors as before — only the file format changed (overrides of the renamed `--porto-*` variables instead of the old short `--color-*` tokens).
 
@@ -80,25 +80,25 @@ There are no `-rgb` triplet tokens. Build translucent colors with `color-mix()` 
 
 ### Type scale
 
-| Variable                                                                        | Meaning                                               |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `--porto-text-2xs` … `--porto-text-6xl`                                         | Type scale, 12px to 64px                              |
-| `--porto-text-h1` … `--porto-text-h5`, `--porto-text-body`, `--porto-text-code` | Heading / body / code sizes                           |
-| `--porto-line-height`, `--porto-line-height-headings`                           | Base (1.75) and heading (1.2) line heights            |
+| Variable                                                                        | Meaning                                                                            |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `--porto-text-2xs` … `--porto-text-6xl`                                         | Type scale, 12px to 64px                                                           |
+| `--porto-text-h1` … `--porto-text-h5`, `--porto-text-body`, `--porto-text-code` | Heading / body / code sizes                                                        |
+| `--porto-line-height`, `--porto-line-height-headings`                           | Base (1.75) and heading (1.2) line heights                                         |
 | `--font-sans`, `--font-mono`                                                    | UI/body/prose (Geist Variable), code (Geist Mono Variable) — Tailwind theme tokens |
 
 To change the typefaces, set `--font-sans` / `--font-mono` in your `custom_css` — the system reads them before its own stacks.
 
 ### Layout & shadows
 
-| Variable                                                                                   | Default                              | Meaning               |
-| ------------------------------------------------------------------------------------------ | ------------------------------------ | --------------------- |
-| `--porto-nav-height`                                                                       | `3.5rem` (`3.4rem` ≥ 50em)                       | Navbar height         |
-| `--porto-sidebar-width`                                                                    | `16.5625rem`                                     | Sidebar width         |
-| `--porto-content-width`                                                                    | `45rem`                                          | Content column width  |
-| `--porto-mobile-toc-height`                                                                | `3rem` (`0` ≥ 72em)                              | Mobile TOC bar height |
-| `--porto-nav-pad-x`, `--porto-nav-pad-y`, `--porto-sidebar-pad-x`, `--porto-content-pad-x` | `0.55rem` / `0.75rem` / `1rem` / `1rem` (nav `0.5rem` ≥ 50em, content `1.5rem` ≥ 72em) | Layout padding |
-| `--porto-shadow-sm`, `--porto-shadow-md`, `--porto-shadow-lg`                              | —                                    | Elevation shadows     |
+| Variable                                                                                   | Default                                                                                | Meaning               |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | --------------------- |
+| `--porto-nav-height`                                                                       | `3.5rem` (`3.4rem` ≥ 50em)                                                             | Navbar height         |
+| `--porto-sidebar-width`                                                                    | `16.5625rem`                                                                           | Sidebar width         |
+| `--porto-content-width`                                                                    | `45rem`                                                                                | Content column width  |
+| `--porto-mobile-toc-height`                                                                | `3rem` (`0` ≥ 72em)                                                                    | Mobile TOC bar height |
+| `--porto-nav-pad-x`, `--porto-nav-pad-y`, `--porto-sidebar-pad-x`, `--porto-content-pad-x` | `0.55rem` / `0.75rem` / `1rem` / `1rem` (nav `0.5rem` ≥ 50em, content `1.5rem` ≥ 72em) | Layout padding        |
+| `--porto-shadow-sm`, `--porto-shadow-md`, `--porto-shadow-lg`                              | —                                                                                      | Elevation shadows     |
 
 **Dropped tokens:** the old short tokens (`--color-primary`, `--color-background`, `--color-surface`, `--color-foreground`, `--color-muted`, `--color-border`, `--color-gray-100`…`--color-gray-800`, `--color-secondary`, `--color-teal`, `--color-yellow`, `--color-pink`, and the semantic `--color-success` / `--color-warning` / `--color-danger` / `--color-info`) no longer exist — use the `--porto-*` names above. The old structural tokens (`--navbar-height`, `--radius-card`, `--font-body`, `--font-markdown`, `--scroll-margin-top`, `--pre-padding`, `--line-height`) are gone too; the layout values are the `--porto-*` names in the table above.
 
@@ -188,23 +188,23 @@ Make sure your scheme defines `--porto-color-bg` in each block: the asset genera
 
 These classes are part of the theme's styling contract — custom CSS can target them safely. The old Docusaurus classes (`.navbar*`, `.theme-doc-*`, `.markdown`, `.footer*`, `.pagination-nav*`) no longer exist, and neither do the previous Portosaur classes (`.porto-doc-layout`, `.porto-doc-sidebar`, `.porto-markdown`, `.porto-toc__link--active`, `.portosaur-generated-index`, `.porto-breadcrumbs*`, `.porto-doc-card`) — those components were renamed in the Fumadocs rebuild, and the current classes are in the table below.
 
-| Selector                                                                                                  | Element                                                                     |
-| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `.porto-markdown-content`                                                                                 | Wrapper around rendered MDX content                                         |
-| `.porto-navbar`, `.porto-nav-link`                                                                        | Top navigation bar and its links                                            |
-| `.porto-sidebar__*`                                                                                       | Sidebar rows (icons, carets, group labels)                                  |
-| `.porto-footer`                                                                                           | Site footer                                                                 |
-| `.porto-topic-list`, `.porto-topic-list__card`, `.porto-topic-list__title`, `.porto-topic-list__icon`, `.porto-topic-list__count` | Topic-list card grid and cards                        |
-| `.porto-code-frame`, `.porto-code-header`, `.porto-code-icon`, `.porto-code-title`, `.porto-code-copy`, `.porto-code-viewport` | Code-block frame, title bar, language icon, title, copy button, scroll area |
-| `.admonition`, `.admonition-<type>`, `.admonition-heading`, `.admonition-content`                         | Callouts (`note`, `tip`, `info`, `success`, `warning`, `caution`, `danger`) |
-| `.porto-button`, `.porto-button--<variant>`, `.porto-button--<size>`                                      | `<Btn>` component and every button on the site (style it in `custom_css`)   |
-| `.porto-dropdown`, `.porto-dropdown__trigger`, `.porto-dropdown__menu`, `.porto-dropdown__item`           | `<Dropdown>` component and every dropdown menu on the site                  |
-| `.porto-pagination`, `.porto-pagination__link`, `.porto-pagination__sublabel`, `.porto-pagination__label` | Prev/next page navigation                                                   |
-| `.porto-search-dialog`, `.porto-search-result`                                                            | Search dialog and its result rows                                           |
-| `.porto-empty-state`                                                                                      | Empty-state pages (no results, empty lists)                                 |
-| `.porto-doc-footer`                                                                                       | Per-page footer (edit link, last-updated)                                   |
-| `.porto-sidebar-collapse-trigger`, `.porto-sidebar-collapse-panel`                                        | Sidebar collapse button (title row + floating panel) and the floating panel |
-| `.porto-details`                                                                                          | `<Details>` component (unstyled hook — style it in `custom_css`)            |
+| Selector                                                                                                                          | Element                                                                     |
+| --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `.porto-markdown-content`                                                                                                         | Wrapper around rendered MDX content                                         |
+| `.porto-navbar`, `.porto-nav-link`                                                                                                | Top navigation bar and its links                                            |
+| `.porto-sidebar__*`                                                                                                               | Sidebar rows (icons, carets, group labels)                                  |
+| `.porto-footer`                                                                                                                   | Site footer                                                                 |
+| `.porto-topic-list`, `.porto-topic-list__card`, `.porto-topic-list__title`, `.porto-topic-list__icon`, `.porto-topic-list__count` | Topic-list card grid and cards                                              |
+| `.porto-code-frame`, `.porto-code-header`, `.porto-code-icon`, `.porto-code-title`, `.porto-code-copy`, `.porto-code-viewport`    | Code-block frame, title bar, language icon, title, copy button, scroll area |
+| `.admonition`, `.admonition-<type>`, `.admonition-heading`, `.admonition-content`                                                 | Callouts (`note`, `tip`, `info`, `success`, `warning`, `caution`, `danger`) |
+| `.porto-button`, `.porto-button--<variant>`, `.porto-button--<size>`                                                              | `<Btn>` component and every button on the site (style it in `custom_css`)   |
+| `.porto-dropdown`, `.porto-dropdown__trigger`, `.porto-dropdown__menu`, `.porto-dropdown__item`                                   | `<Dropdown>` component and every dropdown menu on the site                  |
+| `.porto-pagination`, `.porto-pagination__link`, `.porto-pagination__sublabel`, `.porto-pagination__label`                         | Prev/next page navigation                                                   |
+| `.porto-search-dialog`, `.porto-search-result`                                                                                    | Search dialog and its result rows                                           |
+| `.porto-empty-state`                                                                                                              | Empty-state pages (no results, empty lists)                                 |
+| `.porto-doc-footer`                                                                                                               | Per-page footer (edit link, last-updated)                                   |
+| `.porto-sidebar-collapse-trigger`, `.porto-sidebar-collapse-panel`                                                                | Sidebar collapse button (title row + floating panel) and the floating panel |
+| `.porto-details`                                                                                                                  | `<Details>` component (unstyled hook — style it in `custom_css`)            |
 
 ---
 

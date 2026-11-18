@@ -13,18 +13,18 @@ icon: "md:settings"
 
 Global identity, routing, SEO, and build settings.
 
-| Key                 | Type     | Default                  | Description                                                                                             |
-| :------------------ | :------- | :----------------------- | :------------------------------------------------------------------------------------------------------ |
-| `url`               | `string` | `"auto"`                 | Canonical site URL. Set to `"auto"` for automatic CI/CD platform detection.                             |
-| `base_url`          | `string` | `"auto"`                 | Base path for sub-directory deployments (e.g. `/my-project/`). Set to `"auto"` for automatic detection. |
-| `title`             | `string` | `(mode title)`           | Site title shown in browser tabs and header metadata.                                                   |
-| `tagline`           | `string` | `""`                     | Brief tagline used for SEO meta descriptions.                                                           |
-| `favicon`           | `string` | `""`                     | Path to the site favicon (relative to `static/` or theme defaults).                                     |
-| `social_card`       | `string` | `""`                     | Social sharing preview image (OpenGraph / Twitter card).                                                |
-| `edit_url`          | `string` | `null`                   | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).              |
-| `on_broken_links`   | `string` | `"throw"`                | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
-| `on_broken_anchors` | `string` | `"throw"`                | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
-| `head_tags`         | `array`  | `[]`                     | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).           |
+| Key                 | Type     | Default        | Description                                                                                                                 |
+| :------------------ | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | `string` | `"auto"`       | Canonical site URL. Set to `"auto"` for automatic CI/CD platform detection.                                                 |
+| `base_url`          | `string` | `"auto"`       | Base path for sub-directory deployments (e.g. `/my-project/`). Set to `"auto"` for automatic detection.                     |
+| `title`             | `string` | `(mode title)` | Site title shown in browser tabs and header metadata.                                                                       |
+| `tagline`           | `string` | `""`           | Brief tagline used for SEO meta descriptions.                                                                               |
+| `favicon`           | `string` | `""`           | Path to the site favicon (relative to `static/` or theme defaults).                                                         |
+| `social_card`       | `string` | `""`           | Social sharing preview image (OpenGraph / Twitter card).                                                                    |
+| `edit_url`          | `string` | `null`         | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).                                  |
+| `on_broken_links`   | `string` | `"throw"`      | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet.             |
+| `on_broken_anchors` | `string` | `"throw"`      | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
+| `head_tags`         | `array`  | `[]`           | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).                               |
 
 ### `site.build`
 
@@ -46,37 +46,37 @@ RSS feed generator for the blog. Coming soon — no feed is generated yet.
 
 Robots file generator for search engine crawlers.
 
-| Key            | Type      | Default                             | Description                                                  |
-| :------------- | :-------- | :---------------------------------- | :----------------------------------------------------------- |
-| `enable`       | `boolean` | `true`                              | Toggle automatic `robots.txt` generation in build directory. |
-| `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                          |
+| Key            | Type      | Default                             | Description                                                                        |
+| :------------- | :-------- | :---------------------------------- | :--------------------------------------------------------------------------------- |
+| `enable`       | `boolean` | `true`                              | Toggle automatic `robots.txt` generation in build directory.                       |
+| `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                                                |
 | `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`. Coming soon — not emitted yet. |
 
 ### `site.markdown`
 
 Configure the Markdown renderer behavior.
 
-| Key                       | Type   | Default   | Description                                                            |
-| :------------------------ | :----- | :-------- | :--------------------------------------------------------------------- |
-| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.       |
+| Key                       | Type   | Default   | Description                                                                                                    |
+| :------------------------ | :----- | :-------- | :------------------------------------------------------------------------------------------------------------- |
+| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                               |
 | `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
-| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                  |
-| `mermaid`                 | `bool` | `true`    | Render diagrams from Mermaid syntax. Coming soon — the diagram renderer isn't built yet. |
-| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                |
+| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
+| `mermaid`                 | `bool` | `true`    | Render diagrams from Mermaid syntax. Coming soon — the diagram renderer isn't built yet.                       |
+| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
 
 ### `site.pwa`
 
 Progressive Web App manifest and service worker.
 
-| Key             | Type      | Default | Description                                                                                   |
-| :-------------- | :-------- | :------ | :---------------------------------------------------------------------------------------------- |
-| `enable`        | `boolean` | `true`  | Enable PWA manifest generation (today) and the service worker (coming soon).                    |
-| `notifications` | `boolean` | `false` | Enable web push notification scaffolding. Coming soon.                                          |
+| Key             | Type      | Default | Description                                                                  |
+| :-------------- | :-------- | :------ | :--------------------------------------------------------------------------- |
+| `enable`        | `boolean` | `true`  | Enable PWA manifest generation (today) and the service worker (coming soon). |
+| `notifications` | `boolean` | `false` | Enable web push notification scaffolding. Coming soon.                       |
 
 ### `site.preview`
 
-| Key       | Type     | Default | Description                                                                             |
-| :-------- | :------- | :------ | :---------------------------------------------------------------------------------------- |
+| Key       | Type     | Default | Description                                                                                        |
+| :-------- | :------- | :------ | :------------------------------------------------------------------------------------------------- |
 | `timeout` | `number` | `15`    | Timeout in seconds for fetching preview content. Coming soon — the preview viewer isn't built yet. |
 
 ### Content Directories & Routing
@@ -104,30 +104,30 @@ Visual appearance and user interface settings.
 
 ### `theme.appearance`
 
-| Key                     | Type      | Default | Description                                                   |
-| :---------------------- | :-------- | :------ | :------------------------------------------------------------ |
-| `show_theme_switch`     | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
-| `disable_project_link`  | `boolean` | `false` | Hide the Project link in the navbar.                          |
+| Key                    | Type      | Default | Description                                                   |
+| :--------------------- | :-------- | :------ | :------------------------------------------------------------ |
+| `show_theme_switch`    | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
+| `disable_project_link` | `boolean` | `false` | Hide the Project link in the navbar.                          |
 
 ### `theme.navigation`
 
-| Key                    | Type      | Default | Description                                                                             |
-| :--------------------- | :-------- | :------ | :---------------------------------------------------------------------------------------- |
-| `auto_collapse`        | `boolean` | `true`  | Auto-collapse inactive sidebar categories.                                                |
-| `sidebar_collapsed`    | `boolean` | `false` | Start with the sidebar collapsed.                                                         |
-| `hide_navbar_on_scroll` | `boolean` | `true` | Automatically hide the navbar when scrolling down.                                        |
-| `navbar_items`         | `array`   | `[]`    | Custom navbar items — each with a `label` and a `to` (internal) or `href` (external) link. |
-| `collapsable_sidebar`  | `boolean` | `true`  | Enable the collapsible sidebar.                                                           |
+| Key                     | Type      | Default | Description                                                                                |
+| :---------------------- | :-------- | :------ | :----------------------------------------------------------------------------------------- |
+| `auto_collapse`         | `boolean` | `true`  | Auto-collapse inactive sidebar categories.                                                 |
+| `sidebar_collapsed`     | `boolean` | `false` | Start with the sidebar collapsed.                                                          |
+| `hide_navbar_on_scroll` | `boolean` | `true`  | Automatically hide the navbar when scrolling down.                                         |
+| `navbar_items`          | `array`   | `[]`    | Custom navbar items — each with a `label` and a `to` (internal) or `href` (external) link. |
+| `collapsable_sidebar`   | `boolean` | `true`  | Enable the collapsible sidebar.                                                            |
 
 The visitor's own collapse toggle is remembered for the session (until the tab closes) and wins over `sidebar_collapsed` on a reload — the configured default only applies on the first visit.
 
 ### `theme.footer`
 
-| Key                    | Type      | Default     | Description                                                                                |
-| :--------------------- | :-------- | :---------- | :----------------------------------------------------------------------------------------- |
-| `enable`               | `boolean` | `true`      | Toggle the footer section.                                                                 |
-| `message`              | `string`  | `(dynamic)` | Custom footer text — HTML allowed. Defaults to a copyright line with a Portosaur credit.   |
-| `disable_project_link` | `boolean` | `false`     | Hide the Project link in the footer.                                                       |
+| Key                    | Type      | Default     | Description                                                                              |
+| :--------------------- | :-------- | :---------- | :--------------------------------------------------------------------------------------- |
+| `enable`               | `boolean` | `true`      | Toggle the footer section.                                                               |
+| `message`              | `string`  | `(dynamic)` | Custom footer text — HTML allowed. Defaults to a copyright line with a Portosaur credit. |
+| `disable_project_link` | `boolean` | `false`     | Hide the Project link in the footer.                                                     |
 
 ---
 
@@ -193,16 +193,16 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 
 ### `home_page.hero`
 
-| Key                     | Type     | Default                  | Description                                            |
-| :---------------------- | :------- | :----------------------- | :----------------------------------------------------- |
-| `title`                 | `string` | `"Your Name"`            | Main title or name in the hero section.                |
+| Key                     | Type     | Default                                                        | Description                                           |
+| :---------------------- | :------- | :------------------------------------------------------------- | :---------------------------------------------------- |
+| `title`                 | `string` | `"Your Name"`                                                  | Main title or name in the hero section.               |
 | `desc`                  | `string` | `"Short description about you, your passion, your goals etc."` | Short description about you, your passion, goals etc. |
-| `intro`                 | `string` | `"Hello there, I'm"`     | Intro text before name.                                |
-| `subtitle`              | `string` | `"I am a"`               | Subtitle text after name.                              |
-| `profession`            | `string` | `"Your Profession"`      | Professional headline or role.                         |
-| `profile_pic`           | `string` | `""`                     | Path/URL to profile picture in the hero section.       |
-| `learn_more_button_txt` | `string` | `"Learn More"`           | Text for the call-to-action button.                    |
-| `social`                | `array`  | `[]`                     | List of social links.                                  |
+| `intro`                 | `string` | `"Hello there, I'm"`                                           | Intro text before name.                               |
+| `subtitle`              | `string` | `"I am a"`                                                     | Subtitle text after name.                             |
+| `profession`            | `string` | `"Your Profession"`                                            | Professional headline or role.                        |
+| `profile_pic`           | `string` | `""`                                                           | Path/URL to profile picture in the hero section.      |
+| `learn_more_button_txt` | `string` | `"Learn More"`                                                 | Text for the call-to-action button.                   |
+| `social`                | `array`  | `[]`                                                           | List of social links.                                 |
 
 ### `home_page.about`
 
@@ -237,12 +237,12 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 
 ### `home_page.social`
 
-| Key          | Type      | Default                                                                       | Description                               |
-| :----------- | :-------- | :---------------------------------------------------------------------------- | :---------------------------------------- |
-| `enable`     | `boolean` | `true`                                                                        | Toggle the Social Links section.          |
-| `heading`    | `string`  | `"Get In Touch"`                                                              | Heading for the social links section.     |
+| Key          | Type      | Default                                                                         | Description                              |
+| :----------- | :-------- | :------------------------------------------------------------------------------ | :--------------------------------------- |
+| `enable`     | `boolean` | `true`                                                                          | Toggle the Social Links section.         |
+| `heading`    | `string`  | `"Get In Touch"`                                                                | Heading for the social links section.    |
 | `subheading` | `string`  | `"Feel free to reach out for collaborations, questions, or just to say hello!"` | Subheading for the social links section. |
-| `links`      | `array`   | `[]`                                                                          | Array of social objects.                  |
+| `links`      | `array`   | `[]`                                                                            | Array of social objects.                 |
 
 ---
 
