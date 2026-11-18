@@ -653,7 +653,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
             `Failed to setup auto deployment: ${(e as Error).message}`,
           );
           logger.warn(
-            `Please setup later using ${colors.command("portosaur init-ci")}`,
+            `Please setup later using ${colors.command("porto init --ci-only")}`,
           );
         }
       }
