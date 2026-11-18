@@ -164,7 +164,7 @@
    * header tint without disappearing into it. */
   --porto-table-border: color-mix(
     in srgb,
-    var(--porto-color-gray-4) 60%,
+    var(--porto-color-gray-4) 40%,
     var(--porto-color-gray-5)
   );
   width: 100%;
