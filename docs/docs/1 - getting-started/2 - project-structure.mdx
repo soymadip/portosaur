@@ -85,6 +85,16 @@ bun run build
 
 Assets are written to the `build/` directory (or the custom directory configured in `site.build.output_dir`).
 
+The build also generates a few files for search engines and AI tools:
+
+- `sitemap.xml` — every page on your site: the home page, all docs (or notes) pages, all blog posts, and the `/blog`, `/notes`, `/tasks`, and `/search` pages.
+- `robots.txt` — follows your `site.robots_txt` settings, and points crawlers at the sitemap.
+- `llms.txt` — a list of your docs (or notes) pages for AI tools, with a short description of each.
+- `llms-full.txt` — your whole docs (or notes) section in a single file.
+- `llms.mdx/...` — every page as plain Markdown, one file per page, linked from `llms.txt`.
+
+The build also generates the app manifest and favicon set — see [Progressive Web App](/docs/progressive-web-app/).
+
 ### Local Production Preview
 
 Preview your built static files locally before deploying:
