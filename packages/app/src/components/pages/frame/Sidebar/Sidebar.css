@@ -8,19 +8,59 @@
    0.5em felt too airy.
    Motion follows the Fumadocs docs sidebar (decision 26): 150ms
    color fades on rows both ways, and a 150ms height + opacity
-   fold for categories. Rows sit 2px apart — the tinted boxes
-   never touch, so a hovered box can't clash with the active
-   box next to it. Fumadocs separates its rows the same way
-   (a 2px list gap); here the gap is 1px of padding top and
+   fold for categories. The hover fill is one soft block that
+   glides to the item under the mouse — the rows themselves
+   carry no hover background. Rows sit 2px apart — the tinted
+   boxes never touch, so the gliding block can't clash with the
+   active box next to it. Fumadocs separates its rows the same
+   way (a 2px list gap); here the gap is 1px of padding top and
    bottom on each row's list item, which keeps the guide line
    continuous, and the row gives back 1px of padding each side
    so the row pitch stays 28px. */
 .porto-sidebar {
+  /* The gliding hover block positions against this box. */
+  position: relative;
   /* Lets `block-size: 0 -> auto` interpolate for the
      `::details-content` fold below (Chrome 131+, Firefox 143+).
      Older browsers ignore it and open/close instantly. */
   interpolate-size: allow-keywords;
   --porto-sidebar-item-padding-inline: 0.5rem;
+}
+
+/* The hover fill — one soft block that glides to the item under
+   the mouse, like Fumadocs. The rows themselves carry no hover
+   background; this block is the only fill, moved by the `follow`
+   ref in `index.tsx`. It sits behind the rows (they are
+   positioned, it comes first in the tree) and never takes the
+   pointer itself. Its color is inset 1px top and bottom
+   (padding + content-box clip), so it never touches the active
+   box next to it. The glide runs 200ms on the ease Fumadocs
+   uses for it; with reduced motion only the fade runs, the
+   block appears in place. */
+.porto-sidebar__hover-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-block: 1px;
+  border-radius: 0.375rem;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+  background-clip: content-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .porto-sidebar__hover-block {
+    transition:
+      translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 
 /* The section title above the tree ("Docs" / "Notes") — the
@@ -141,6 +181,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Positioned, so the row paints above the gliding hover
+     block behind it. */
+  position: relative;
   /* Same font size as a leaf link, so the 0.3em padding below
      resolves to the same pixels — without this the summary
      inherits the 16px base size and category rows come out
@@ -159,8 +202,8 @@
   line-height: 1.4;
   cursor: pointer;
   user-select: none;
-  /* The hover/active tint boxes are rounded; the radius lives
-     on the base row so it doesn't snap when the tint fades in. */
+  /* The active tint box is rounded; the radius lives on the
+     base row so it doesn't snap when the tint fades in. */
   border-radius: 0.375rem;
   /* Fumadocs `transition-colors`: the text fades both ways
      over 150ms, on hover and on the way out. */
@@ -238,6 +281,9 @@
      over several lines instead of sitting on the first line. */
   display: flex;
   align-items: center;
+  /* Positioned, so the row paints above the gliding hover
+     block behind it. */
+  position: relative;
   border-radius: 0.375rem;
   text-decoration: none;
   color: var(--porto-color-gray-2);
@@ -256,17 +302,11 @@
   min-width: 0;
 }
 
-/* A hovered leaf row gets a soft tinted box and brighter text,
-   like Fumadocs — and the 2px gap between rows keeps that box
-   from touching the active row's box next to it. */
+/* A hovered leaf row only brightens its text — the soft box
+   behind it is the gliding hover block, not the row itself. */
 .porto-sidebar a:hover,
 .porto-sidebar a:focus {
   color: var(--porto-color-white);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-1) 10%,
-    transparent
-  );
 }
 
 /* OG-style active item: accent text on a subtle 10% accent tint.
@@ -315,20 +355,15 @@
   color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
 }
 
-/* A hovered category row gets the same tinted box as a leaf
-   row, in a translucent foreground tint (lightens dark sidebars,
-   darkens light ones, in every scheme). The label link sets its
-   own color, so it needs its own rule; the active link is
-   excluded, so it keeps its accent text under the cursor. The
-   summary's own color rule can't whiten an active row: the
-   active summary's rule above is more specific. */
+/* A hovered category row only brightens its text — the soft
+   box behind it is the gliding hover block, not the row itself.
+   The label link sets its own color, so it needs its own rule;
+   the active link is excluded, so it keeps its accent text
+   under the cursor. The summary's own color rule can't whiten
+   an active row: the active summary's rule above is more
+   specific. */
 .porto-sidebar summary:hover {
   color: var(--porto-color-white);
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-1) 10%,
-    transparent
-  );
 }
 .porto-sidebar
   summary:hover
@@ -337,9 +372,9 @@
   color: var(--porto-color-white);
 }
 /* On devices with a mouse or trackpad, the caret keeps its own
-   hover background in the same tint, stacking on top of the
-   row hover so the caret area goes slightly darker. Touch
-   screens get no separate box — the row's box covers it. */
+   hover background in the same tint. It sits under the gliding
+   hover block, so it only ever shows on the active row, where
+   the block hides. Touch screens get no separate box. */
 @media (hover: hover) {
   .porto-sidebar__caret:hover::before {
     background-color: color-mix(
@@ -352,14 +387,6 @@
 .porto-sidebar__group-label a[aria-current="page"],
 .porto-sidebar__group-label a[aria-current="page"]:hover,
 .porto-sidebar__group-label a[aria-current="page"]:focus {
-  background-color: transparent;
-}
-
-/* Same for hover: the category label link sits inside the
-   <summary>, whose own hover box already covers the row — the
-   link must not paint a second tint box on top of it. */
-.porto-sidebar__group-label a:hover,
-.porto-sidebar__group-label a:focus {
   background-color: transparent;
 }
 

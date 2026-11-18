@@ -81,6 +81,94 @@ function hasActiveDescendant(item: SidebarItem, current: string): boolean {
   return false;
 }
 
+// A soft block glides to the item under the mouse or keyboard
+// focus, like the Fumadocs docs sidebar. One block for the whole
+// tree — it slides between items instead of each row flashing
+// its own background on and off. The block is the only hover
+// fill, the rows themselves carry none.
+//
+// The block hides over the active row, which has its own
+// background, and holds its place over gaps and separators.
+// Touch never shows it, there is no hover to follow. With
+// reduced motion it fades in place instead of gliding (see
+// Sidebar.css).
+function follow(area: HTMLElement | null) {
+  const block = area?.querySelector(".porto-sidebar__hover-block");
+  if (!area || !(block instanceof HTMLElement)) {
+    return;
+  }
+  let current: Element | null = null;
+
+  const isActiveRow = (item: Element): boolean =>
+    item.matches('[aria-current="page"]') ||
+    item.querySelector('a[aria-current="page"]') !== null;
+
+  const show = (item: Element | null) => {
+    if (item === current) {
+      return;
+    }
+    // Glide between items, appear in place when coming from
+    // outside.
+    block.style.transitionProperty = current ? "" : "opacity";
+    current = item;
+    if (!item) {
+      block.style.opacity = "0";
+      return;
+    }
+
+    const rect = item.getBoundingClientRect();
+    const origin = area.getBoundingClientRect();
+    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
+    block.style.width = `${rect.width}px`;
+    block.style.height = `${rect.height}px`;
+    // The active row has its own background.
+    block.style.opacity = isActiveRow(item) ? "0" : "1";
+  };
+  // A category row is its <summary>, not the label link inside
+  // it — the block spans the full row, caret included.
+  const itemOf = (target: EventTarget | null) =>
+    target instanceof Element
+      ? (target.closest("summary") ?? target.closest("a[href]"))
+      : null;
+
+  const controller = new AbortController();
+  const { signal } = controller;
+  area.addEventListener(
+    "pointerover",
+    (event) => {
+      const item = itemOf(event.target);
+      // Hold the position over separators and gaps.
+      if (item && event.pointerType === "mouse") {
+        show(item);
+      }
+    },
+    { signal },
+  );
+  area.addEventListener("pointerleave", () => show(null), { signal });
+  area.addEventListener(
+    "focusin",
+    (event) => {
+      if (
+        event.target instanceof Element &&
+        event.target.matches(":focus-visible")
+      ) {
+        show(itemOf(event.target));
+      }
+    },
+    { signal },
+  );
+  area.addEventListener(
+    "focusout",
+    () => {
+      if (!area.matches(":hover")) {
+        show(null);
+      }
+    },
+    { signal },
+  );
+  return () => controller.abort();
+}
+
 export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   const config = usePortoConfig();
   const { collapsed, toggleCollapsed } = useSidebarCollapse();
@@ -396,8 +484,9 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   );
 
   return (
-    <nav className="porto-sidebar" aria-label="Docs sidebar">
+    <nav className="porto-sidebar" aria-label="Docs sidebar" ref={follow}>
       {spriteHtml && <span dangerouslySetInnerHTML={{ __html: spriteHtml }} />}
+      <div aria-hidden="true" className="porto-sidebar__hover-block" />
       <div className="porto-sidebar-title-row">
         <p className="porto-sidebar-title">{sectionTitle}</p>
         <SidebarCollapseTrigger
