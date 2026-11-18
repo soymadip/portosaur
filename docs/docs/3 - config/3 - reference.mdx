@@ -22,8 +22,8 @@ Global identity, routing, SEO, and build settings.
 | `favicon`           | `string` | `""`                     | Path to the site favicon (relative to `static/` or theme defaults).                                     |
 | `social_card`       | `string` | `""`                     | Social sharing preview image (OpenGraph / Twitter card).                                                |
 | `edit_url`          | `string` | `null`                   | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).              |
-| `on_broken_links`   | `string` | `"throw"`                | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`).                                 |
-| `on_broken_anchors` | `string` | `"throw"`                | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`).                     |
+| `on_broken_links`   | `string` | `"throw"`                | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
+| `on_broken_anchors` | `string` | `"throw"`                | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
 | `head_tags`         | `array`  | `[]`                     | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).           |
 
 ### `site.build`
@@ -34,7 +34,7 @@ Global identity, routing, SEO, and build settings.
 
 ### `site.rss`
 
-RSS feed generator for the blog.
+RSS feed generator for the blog. Coming soon — no feed is generated yet.
 
 | Key         | Type      | Default        | Description                                   |
 | :---------- | :-------- | :------------- | :-------------------------------------------- |
@@ -50,7 +50,7 @@ Robots file generator for search engine crawlers.
 | :------------- | :-------- | :---------------------------------- | :----------------------------------------------------------- |
 | `enable`       | `boolean` | `true`                              | Toggle automatic `robots.txt` generation in build directory. |
 | `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                          |
-| `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`.          |
+| `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`. Coming soon — not emitted yet. |
 
 ### `site.markdown`
 
@@ -59,9 +59,9 @@ Configure the Markdown renderer behavior.
 | Key                       | Type   | Default   | Description                                                            |
 | :------------------------ | :----- | :-------- | :--------------------------------------------------------------------- |
 | `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.       |
-| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. |
-| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above.                  |
-| `mermaid`                 | `bool` | `true`    | Render Mermaid.js diagrams.                                            |
+| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
+| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                  |
+| `mermaid`                 | `bool` | `true`    | Render diagrams from Mermaid syntax. Coming soon — the diagram renderer isn't built yet. |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                |
 
 ### `site.pwa`
@@ -187,48 +187,62 @@ features:
 
 Configures sections for portfolio sites (active when `home_page` is declared).
 
+:::info[Coming soon]
+The portfolio home sections aren't built yet — these keys are read but nothing renders them today.
+:::
+
 ### `home_page.hero`
 
-| Key       | Type     | Description                                                 |
-| :-------- | :------- | :---------------------------------------------------------- |
-| `name`    | `string` | Your full display name.                                     |
-| `title`   | `string` | Professional headline or role (e.g. "Full-Stack Engineer"). |
-| `desc`    | `string` | Introductory bio paragraph.                                 |
-| `avatar`  | `string` | Path to profile avatar image.                               |
-| `actions` | `array`  | Call-to-action buttons.                                     |
+| Key                     | Type     | Default                  | Description                                            |
+| :---------------------- | :------- | :----------------------- | :----------------------------------------------------- |
+| `title`                 | `string` | `"Your Name"`            | Main title or name in the hero section.                |
+| `desc`                  | `string` | `"Short description about you, your passion, your goals etc."` | Short description about you, your passion, goals etc. |
+| `intro`                 | `string` | `"Hello there, I'm"`     | Intro text before name.                                |
+| `subtitle`              | `string` | `"I am a"`               | Subtitle text after name.                              |
+| `profession`            | `string` | `"Your Profession"`      | Professional headline or role.                         |
+| `profile_pic`           | `string` | `""`                     | Path/URL to profile picture in the hero section.       |
+| `learn_more_button_txt` | `string` | `"Learn More"`           | Text for the call-to-action button.                    |
+| `social`                | `array`  | `[]`                     | List of social links.                                  |
 
 ### `home_page.about`
 
-| Key       | Type      | Description                                          |
-| :-------- | :-------- | :--------------------------------------------------- |
-| `enable`  | `boolean` | Toggle the About section.                            |
-| `title`   | `string`  | Section heading.                                     |
-| `content` | `string`  | Markdown text describing your background and skills. |
+| Key              | Type      | Default       | Description                       |
+| :--------------- | :-------- | :------------ | :-------------------------------- |
+| `enable`         | `boolean` | `true`        | Toggle the About Me section.      |
+| `heading`        | `string`  | `"About Me"`  | Heading for the About Me section. |
+| `bio`            | `array`   | `[]`          | Paragraphs for your biography.    |
+| `image`          | `string`  | `""`          | About-section image.              |
+| `skills`         | `array`   | `[]`          | Skills list.                      |
+| `skills_heading` | `string`  | `"My Skills"` | Heading for the skills list.      |
+| `resume`         | `string`  | `"none"`      | Path/URL to your resume file.     |
 
-### `home_page.projects`
+### `home_page.project_shelf`
 
-| Key      | Type      | Description                                                             |
-| :------- | :-------- | :---------------------------------------------------------------------- |
-| `enable` | `boolean` | Toggle the Projects showcase.                                           |
-| `title`  | `string`  | Section heading.                                                        |
-| `list`   | `array`   | Array of project items: `title`, `desc`, `icon`, `url`, `tags`, `repo`. |
+| Key          | Type      | Default                                                              | Description                          |
+| :----------- | :-------- | :------------------------------------------------------------------- | :----------------------------------- |
+| `enable`     | `boolean` | `true`                                                               | Toggle the Project Shelf section.    |
+| `heading`    | `string`  | `"My Projects"`                                                      | Heading for the projects section.    |
+| `subheading` | `string`  | `"A collection of all my works, with featured projects highlighted"` | Subheading for the projects section. |
+| `projects`   | `array`   | `[]`                                                                 | Array of project items.              |
+| `autoplay`   | `boolean` | `true`                                                               | Autoplay the project carousel.       |
 
 ### `home_page.experience`
 
-| Key      | Type      | Description                                                     |
-| :------- | :-------- | :-------------------------------------------------------------- |
-| `enable` | `boolean` | Toggle the Experience timeline.                                 |
-| `title`  | `string`  | Section heading.                                                |
-| `list`   | `array`   | Array of timeline items: `company`, `role`, `duration`, `desc`. |
+| Key          | Type      | Default                                  | Description                            |
+| :----------- | :-------- | :--------------------------------------- | :------------------------------------- |
+| `enable`     | `boolean` | `false`                                  | Toggle the Experience section.         |
+| `heading`    | `string`  | `"Experience"`                           | Heading for the experience section.    |
+| `subheading` | `string`  | `"My professional journey, in a glance"` | Subheading for the experience section. |
+| `list`       | `array`   | `[]`                                     | Array of timeline items.               |
 
 ### `home_page.social`
 
-| Key          | Type      | Description                                             |
-| :----------- | :-------- | :------------------------------------------------------ |
-| `enable`     | `boolean` | Toggle the contact & social section.                    |
-| `heading`    | `string`  | Section heading.                                        |
-| `subheading` | `string`  | Encouraging subtitle text.                              |
-| `links`      | `array`   | Array of social objects: `name`, `icon`, `url`, `desc`. |
+| Key          | Type      | Default                                                                       | Description                               |
+| :----------- | :-------- | :---------------------------------------------------------------------------- | :---------------------------------------- |
+| `enable`     | `boolean` | `true`                                                                        | Toggle the Social Links section.          |
+| `heading`    | `string`  | `"Get In Touch"`                                                              | Heading for the social links section.     |
+| `subheading` | `string`  | `"Feel free to reach out for collaborations, questions, or just to say hello!"` | Subheading for the social links section. |
+| `links`      | `array`   | `[]`                                                                          | Array of social objects.                  |
 
 ---
 
@@ -251,7 +265,7 @@ tasks:
 
 ## `tools.link_shortener`
 
-Built-in URL redirect utility.
+Built-in URL redirect utility. Coming soon — no redirects are generated yet.
 
 ```yaml
 tools:
