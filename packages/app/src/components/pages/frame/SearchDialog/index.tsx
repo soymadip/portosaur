@@ -20,8 +20,9 @@ import {
  * native `<dialog>` floating panel (at every width), with ZBSearch
  * (Fumadocs' static search) results inside.
  *
- * The bar is Fumadocs' — a magnifier, a borderless input, and an
- * ESC button — with a Filter row in the footer narrowing by docs
+ * The bar is Fumadocs' — a magnifier and a borderless input —
+ * except the section filter sits where Fumadocs puts its ESC
+ * button: just the dropdown, no "Filter" label, narrowing by docs
  * section (the index carries no tags; every result is a docs page).
  * Results are Starlight-style grouped cards, rendered by the shared
  * `SearchResults` (the search page renders the same list).
@@ -274,14 +275,17 @@ export function SearchDialog() {
                   : undefined
               }
             />
-            <button
-              type="button"
-              className="porto-search-dialog__esc"
-              aria-label="Close search"
-              onClick={close}
-            >
-              ESC
-            </button>
+            {sections.length > 1 && (
+              <SearchSectionFilter
+                sections={sections}
+                value={section}
+                onChange={(next) => {
+                  setSection(next);
+                  setActiveIndex(-1);
+                }}
+                showLabel={false}
+              />
+            )}
           </div>
           <div ref={resultsRef} className="porto-search-dialog__results">
             {isLoading && (
@@ -309,19 +313,6 @@ export function SearchDialog() {
               />
             )}
           </div>
-          {sections.length > 1 && (
-            <div className="porto-search-dialog__footer">
-              <SearchSectionFilter
-                sections={sections}
-                value={section}
-                onChange={(next) => {
-                  setSection(next);
-                  setActiveIndex(-1);
-                }}
-                dropUp
-              />
-            </div>
-          )}
         </div>
       </dialog>
     </>

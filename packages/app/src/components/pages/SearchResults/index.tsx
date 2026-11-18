@@ -290,6 +290,7 @@ export function SearchSectionFilter({
   value,
   onChange,
   dropUp = false,
+  showLabel = true,
 }: {
   /** The sections the current results span, in first-seen order. */
   sections: string[];
@@ -298,10 +299,15 @@ export function SearchSectionFilter({
   onChange: (section: string) => void;
   /** Open the menu above the trigger instead of below it. */
   dropUp?: boolean;
+  /** Show the "Filter" label before the dropdown; the dialog's
+   * bar shows the dropdown alone. */
+  showLabel?: boolean;
 }) {
   return (
     <div className="porto-search-filter">
-      <span className="porto-search-filter__label">Filter</span>
+      {showLabel && (
+        <span className="porto-search-filter__label">Filter</span>
+      )}
       <Dropdown
         trigger={value}
         items={[

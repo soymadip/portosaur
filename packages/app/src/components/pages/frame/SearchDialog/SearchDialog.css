@@ -30,8 +30,8 @@
   backdrop-filter: blur(0.25rem);
 }
 
-/* Header, results, footer — only the results area scrolls, so the
-   bar and the filter stay put while the list moves. */
+/* Header, results — only the results area scrolls, so the bar
+   stays put while the list moves. */
 .porto-search-dialog__frame {
   position: relative;
   overflow: hidden;
@@ -73,20 +73,11 @@
 .porto-search-dialog__input:focus {
   outline: none;
 }
-.porto-search-dialog__esc {
-  flex-shrink: 0;
-  border: 1px solid var(--porto-color-gray-5);
-  border-radius: 0.375rem;
-  background-color: transparent;
-  padding: 0.25rem 0.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--porto-text-xs);
-  color: var(--porto-color-gray-3);
-  cursor: pointer;
-}
-.porto-search-dialog__esc:hover {
-  border-color: var(--porto-color-gray-3);
-  color: var(--porto-color-gray-2);
+/* The section filter lives in the bar, where Fumadocs puts its
+   ESC button — just the dropdown, no label. Slim on mobile, the
+   full trigger height on desktop. */
+.porto-search-dialog__header .porto-dropdown__trigger--sm.porto-button {
+  padding-block: 0.25rem;
 }
 
 .porto-search-dialog__results {
@@ -104,19 +95,6 @@
   color: var(--porto-color-gray-3);
 }
 
-/* The footer carries the Filter row, divided from the results.
- * Slim on mobile — the bar sits at the bottom of a small dialog,
- * so it gets tighter padding and a shorter trigger; the desktop
- * sizes come back in the media query below. */
-.porto-search-dialog__footer {
-  padding: 0.5rem 1rem;
-  border-top: 1px solid var(--porto-color-gray-5);
-  flex-shrink: 0;
-}
-.porto-search-dialog__footer .porto-dropdown__trigger--sm.porto-button {
-  padding-block: 0.25rem;
-}
-
 /* Body scroll lock while the search modal is open. */
 [data-search-modal-open] {
   overflow: hidden;
@@ -131,14 +109,10 @@
     max-height: calc(100% - 8rem);
   }
   .porto-search-dialog__header,
-  .porto-search-dialog__results,
-  .porto-search-dialog__footer {
+  .porto-search-dialog__results {
     padding-inline: 1.5rem;
   }
-  .porto-search-dialog__footer {
-    padding-block: 0.75rem;
-  }
-  .porto-search-dialog__footer .porto-dropdown__trigger--sm.porto-button {
+  .porto-search-dialog__header .porto-dropdown__trigger--sm.porto-button {
     padding-block: 0.375rem;
   }
 }
