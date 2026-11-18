@@ -187,10 +187,8 @@
 /* Every row but the last gets a bottom divider; the header row
  * gets one from the thead rule below (its row is the last child of
  * the thead, so the `:not` rule skips it). */
-.porto-markdown-content
-  th:not(tr:last-child > th):not(:where(.not-content *)),
-.porto-markdown-content
-  td:not(tr:last-child > td):not(:where(.not-content *)) {
+.porto-markdown-content th:not(tr:last-child > th):not(:where(.not-content *)),
+.porto-markdown-content td:not(tr:last-child > td):not(:where(.not-content *)) {
   border-bottom: 1px solid var(--porto-table-border);
 }
 .porto-markdown-content thead :is(th, td):not(:where(.not-content *)) {
