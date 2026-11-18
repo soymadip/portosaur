@@ -305,9 +305,7 @@ export function SearchSectionFilter({
 }) {
   return (
     <div className="porto-search-filter">
-      {showLabel && (
-        <span className="porto-search-filter__label">Filter</span>
-      )}
+      {showLabel && <span className="porto-search-filter__label">Filter</span>}
       <Dropdown
         trigger={value}
         items={[
