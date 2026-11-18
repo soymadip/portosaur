@@ -12,7 +12,7 @@ import remarkSpaceFormAdmonitions from "../src/plugins/remarkSpaceFormAdmonition
  * `remarkAdmonitions` emits for the bracket form. Docusaurus
  * supports this form through a string preprocessor
  * (`admonitionTitleToDirectiveLabel`, rewriting the opener to
- * `:::note[Title]` before parsing); Fumadocs has no such hook, so this
+ * `:::note[Title]` before parsing). Fumadocs has no such hook, so this
  * plugin converts the plain paragraphs remark-directive leaves
  * behind (its tokenizer requires a line ending after the fence).
  *

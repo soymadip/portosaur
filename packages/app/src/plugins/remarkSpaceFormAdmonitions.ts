@@ -31,7 +31,7 @@
  * often indent it to match a list (`  :::` after the last item),
  * which parses as part of that item's paragraph. Docusaurus's
  * tokenizer claims the line at the line level, so the list is whole
- * inside the directive; this plugin finds the closer nested in the
+ * inside the directive. This plugin finds the closer nested in the
  * block and keeps the block whole. When a nested closer has further
  * content after it inside its block (a directive closed mid-list),
  * splitting the block is not attempted — the fence is left alone

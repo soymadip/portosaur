@@ -4,7 +4,7 @@
  * edit link). The path data comes from Starlight's icon set (MIT
  * License, Copyright (c) 2023 Astro contributors — see
  * packages/app/NOTICE.md on the `migrate/astro` branch), kept here
- * because the same glyphs are part of Portosaur's own UI; only the
+ * because the same glyphs are part of Portosaur's own UI. Only the
  * icons the React UI actually uses are included.
  *
  * The Lucide exceptions (`chevron-down`, `sidebar`, `copy`,

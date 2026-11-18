@@ -1,5 +1,5 @@
 /**
- * Details — native `<details>` element; the Docusaurus
+ * Details — native `<details>` element. The Docusaurus
  * `<Details summary="…">` shape maps directly onto it. Styled by
  * the prose rules in content.css.
  */

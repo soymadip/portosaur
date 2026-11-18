@@ -211,7 +211,7 @@ export async function runWizard({
         answer = await renderStep(step, state);
       }
 
-      // Special case: pause step can return its own escape marker; handle
+      // Special case: pause step can return its own escape marker. Handle
       // both that and the generic escape marker here.
       if (answer && (answer.__pauseEscape || answer.__escape)) {
         goBack();

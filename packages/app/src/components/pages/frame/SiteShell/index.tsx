@@ -11,7 +11,7 @@ import { Navbar } from "../Navbar/index.tsx";
  * know whether the page has a sidebar).
  *
  * `menuChildren` is the sidebar tree on docs pages (rendered
- * inside the MobileMenu popover); on other pages it is empty and
+ * inside the MobileMenu popover). On other pages it is empty and
  * the menu holds only the footer.
  */
 export function SiteShell({

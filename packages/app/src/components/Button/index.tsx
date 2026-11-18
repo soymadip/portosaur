@@ -21,7 +21,7 @@ import { pageHref } from "../../lib/pageUrl.ts";
  * a `<button>`.
  *
  * `to` is an internal page path (rendered with Next.js `<Link>`,
- * so it prefetches and navigates client-side); `href` is used
+ * so it prefetches and navigates client-side). `href` is used
  * as-is — external URLs open in a new tab unless `sameTab` is
  * set. With neither, the button renders a plain `<button>`.
  */

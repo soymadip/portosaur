@@ -21,7 +21,7 @@ import {
  *
  * Status is the string `"completed"` (not "Done"). Unknown
  * statuses sort after the known ones and get a neutral badge
- * with the raw status text; tasks without a priority get no
+ * with the raw status text. Tasks without a priority get no
  * priority badge.
  */
 
@@ -53,8 +53,8 @@ export function TasksPage({ config }: { config: PortosaurOptions }) {
   const percentComplete =
     total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
-  // Sort: status order (active, pending, completed; unknown
-  // last), then priority (high, medium, low; missing last —
+  // Sort: status order (active, pending, completed, unknown
+  // last), then priority (high, medium, low, missing last —
   // degrades to "as listed").
   const sorted = [...list].sort((a, b) => {
     const statusDiff =

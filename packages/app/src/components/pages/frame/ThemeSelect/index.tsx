@@ -16,12 +16,12 @@ import { PortoIcon } from "../../../PortoIcon.tsx";
  * moon/sun/laptop icons are Starlight's (MIT License) — see
  * `lib/porto-icons.ts`.
  *
- * Two instances render on a page (navbar + mobile menu footer);
- * they stay in sync through the shared theme store in
+ * Two instances render on a page (navbar + mobile menu footer).
+ * They stay in sync through the shared theme store in
  * `lib/theme.ts` (`useThemePreference`).
  *
  * The preference lives under the existing `"theme"` localStorage
- * key (stored `light`/`dark` choices stay valid; `auto` is the new
+ * key (stored `light`/`dark` choices stay valid. `auto` is the new
  * third value). When nothing is stored, the site's `defaultMode`
  * wins — the pre-paint script in the root layout already applied
  * it, and the store reads the effective mode back.

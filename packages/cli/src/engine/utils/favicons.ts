@@ -110,7 +110,7 @@ export function findLocalIcon(
 /**
  * Download a remote icon into the cache dir (keyed by URL hash),
  * returning the cached file's absolute path. A cached download is
- * reused; any failure returns `null` (the caller falls back to the
+ * reused. Any failure returns `null` (the caller falls back to the
  * default icon).
  */
 export async function downloadIcon(

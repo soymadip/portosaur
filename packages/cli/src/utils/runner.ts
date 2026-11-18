@@ -379,7 +379,7 @@ export interface RunNextOptions {
 /**
  * Executes a Next.js command via the user project's `next` binary, run
  * from the generated `.portosaur/` root (Next has no `--root` flag, so
- * the working directory IS the project root; Node resolves modules up
+ * the working directory IS the project root. Node resolves modules up
  * to the user project's `node_modules`).
  *
  * Next.js is tested on Node — it runs under `node`, falling back to

@@ -8,7 +8,7 @@
  *
  * - `techMap` — name -> { icon, color } (ported from the old Icon).
  * - `renderIcon(id, options)` — an inline SVG string for an Iconify id
- *   (`"md:home"`) or a techMap name (`"github"`); `""` when not found.
+ *   (`"md:home"`) or a techMap name (`"github"`). `""` when not found.
  * - `renderDynamicIcon(iconStr, options)` — the old DynamicIcon logic:
  *   raw SVG, image path, emoji, Iconify id, techMap/devicon guess by
  *   slug, then a fallback icon.
@@ -20,13 +20,13 @@
  *   once). The sprite only ever shrinks a page — see the section
  *   comment above `collectSidebarSprite`.
  * - `withBase(path, baseUrl)` — base-aware asset URL (the old
- *   `withBaseUrl`); absolute URLs, protocol-relative URLs, and hashes
+ *   `withBaseUrl`). Absolute URLs, protocol-relative URLs, and hashes
  *   pass through unchanged.
  *
  * Icons render at build time (frontmatter only — never import this
  * from a client component: the icon packs are megabytes of JSON).
- * Callers inject the returned HTML with `dangerouslySetInnerHTML`;
- * sizing goes on the wrapper (the SVG is `1em`, so the wrapper's
+ * Callers inject the returned HTML with `dangerouslySetInnerHTML`.
+ * Sizing goes on the wrapper (the SVG is `1em`, so the wrapper's
  * `font-size` scales it).
  */
 
@@ -66,7 +66,7 @@ export interface TechMapEntry {
 
 /**
  * Name -> icon id + brand color, ported verbatim from the old
- * `components/Icon/index.jsx`. Keys are lowercase; lookups lowercase
+ * `components/Icon/index.jsx`. Keys are lowercase. Lookups lowercase
  * their input. Used for icon guessing (a note titled "Python" gets the
  * Python icon) and for the hover/accent color of social and note cards.
  */
@@ -284,8 +284,8 @@ export function renderIcon(
 
 /**
  * Base-aware asset URL (the old `withBaseUrl`). Absolute URLs,
- * protocol-relative URLs, and hash links pass through unchanged;
- * anything else gets the site base prepended (and a leading slash).
+ * protocol-relative URLs, and hash links pass through unchanged.
+ * Anything else gets the site base prepended (and a leading slash).
  *
  * Use this for asset URLs (`<img src>`, favicon links) and plain
  * `<a href>`s — NOT for `<Link href>`s, where Next.js prepends
@@ -334,7 +334,7 @@ export interface RenderDynamicIconOptions {
  * 4. Anything else — an Iconify id or techMap name, via `renderIcon`.
  * 5. No `iconStr` but a `slug` — the techMap guess, then a `di:<slug>`
  *    devicon guess when that icon exists in the devicon pack.
- * 6. `fallbackIcon` — the last resort; `""` when nothing resolves.
+ * 6. `fallbackIcon` — the last resort. `""` when nothing resolves.
  *
  * @param iconStr - The raw icon value.
  * @param options.slug - Slug used for the techMap/devicon
@@ -408,7 +408,7 @@ export function renderDynamicIcon(
  * icon repeats across rows (the folder/notebook fallbacks most of
  * all) — every docs page re-downloads all of it on every
  * navigation. Rows whose icon repeats render as a `<use>` reference
- * into a per-page sprite instead; single-use icons keep rendering
+ * into a per-page sprite instead. Single-use icons keep rendering
  * inline, because a symbol + reference costs more bytes than the
  * inline SVG when the icon appears once.
  *
@@ -425,7 +425,7 @@ export function renderDynamicIcon(
  * The sprite's `<symbol>` id for an Iconify id. The `:` is kept —
  * it is legal in an HTML id and in a fragment reference (`<use
  * href="#...">` matches by string, not by CSS selector, so it needs
- * no escaping); keeping the id verbatim also makes collisions
+ * no escaping). Keeping the id verbatim also makes collisions
  * impossible, where replacing `:` with `-` could merge two ids.
  */
 export function spriteSymbolId(iconId: string): string {
@@ -583,7 +583,7 @@ const SPRITE_CLOSE = "</svg>";
  * tree with no repeated icons yields an empty sprite and the page
  * renders exactly as before.
  *
- * @param items - The sidebar tree (top-level items; children are
+ * @param items - The sidebar tree (top-level items. Children are
  *   walked recursively).
  * @returns The sprite markup ("" when no sprite is worthwhile) and
  *   the set of icon ids it contains, for `renderSidebarIcon`.

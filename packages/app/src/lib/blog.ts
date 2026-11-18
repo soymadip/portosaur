@@ -3,7 +3,7 @@
  * post dates. Ported from the Astro app (`pages/blog-index.astro`
  * + `utils/content.ts`).
  *
- * Dates resolve frontmatter `date` first; the Astro fallback chain
+ * Dates resolve frontmatter `date` first. The Astro fallback chain
  * (git commit date, then file mtime) is not ported — the generated
  * blog routes pass resolved dates in as props, and the CLI owns
  * file access. Undated posts sort last, by id.
@@ -94,7 +94,7 @@ export interface BlogPostSummary {
   tags?: string[];
 }
 
-/** Blog posts newest first; undated posts sort last, by id. */
+/** Blog posts newest first. Undated posts sort last, by id. */
 export function sortPostsByDateDesc<T extends BlogPostSummary>(
   posts: T[],
 ): T[] {

@@ -10,7 +10,7 @@ import remarkGithubAlerts from "../src/plugins/remarkGithubAlerts.ts";
  * GitHub alert marker (`[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`,
  * `[!WARNING]`, `[!CAUTION]`) into the same admonition `<div>`s the
  * Docusaurus admonitions plugin emits. Text after the marker on the
- * same line becomes the alert's title; with no text, the type's
+ * same line becomes the alert's title. With no text, the type's
  * default title is used.
  *
  * These tests parse real MDX (not hand-built trees): the marker line

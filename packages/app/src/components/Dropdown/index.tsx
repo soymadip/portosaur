@@ -32,7 +32,7 @@ import { PortoIcon } from "../PortoIcon.tsx";
  * edge-aware clamp shifts it back inside the viewport (or the
  * nearest clipping container, like the mobile menu popover)
  * when it would overflow. `align="left"` / `"right"` pin the
- * menu to the trigger's edge instead; the clamp still applies.
+ * menu to the trigger's edge instead. The clamp still applies.
  *
  * The trigger is the shared ghost Button (`buttonClass`) on a
  * `<summary>` — a `<button>` cannot toggle a `<details>`.

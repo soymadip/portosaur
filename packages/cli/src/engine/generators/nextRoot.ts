@@ -11,8 +11,8 @@ import type { PortosaurOptions } from "./siteConfig.ts";
  * `@portosaur/app` and is imported from there. The CLI never imports
  * `@portosaur/app` itself.
  *
- * The functions here only build the file *contents* (pure string builders);
- * the runner (`writeNextRoot`) resolves the options and writes the files.
+ * The functions here only build the file *contents* (pure string builders).
+ * The runner (`writeNextRoot`) resolves the options and writes the files.
  *
  * Two shapes are verified against the fumadocs-mdx source (15.6.2):
  *
@@ -352,7 +352,7 @@ export function buildTsConfigContent(args: NextRootArgs): string {
 
 /**
  * The contents of the generated `.portosaur/next-env.d.ts`. Next.js
- * regenerates this file on `next dev` / `next build`; writing it upfront
+ * regenerates this file on `next dev` / `next build`. Writing it upfront
  * matches the scaffold so the first run has it.
  */
 export function buildNextEnvContent(): string {
@@ -646,7 +646,7 @@ export default function Page() {
  * helpers shared by the blog routes (index, post, authors): the
  * authors file, the post summaries, the date sort, the sidebar
  * list. The generated root owns this wiring (which loader, which
- * paths); the pure pieces live in `@portosaur/app/lib/blog`.
+ * paths). The pure pieces live in `@portosaur/app/lib/blog`.
  */
 export function buildLibBlogContent(mtime: number): string {
   return `${header(mtime)}import path from "node:path";
@@ -867,7 +867,7 @@ export default function Page() {
  * (minimal tasks page from `config.tasks` — the full version lands in
  * Phase 3). The title follows the OG rule: the configured tasks
  * title when tasks are enabled, "Tasks are Disabled" when they are
- * not; the root layout's template appends `| {site title}`.
+ * not. The root layout's template appends `| {site title}`.
  */
 export function buildTasksPageContent(
   options: PortosaurOptions,
@@ -991,7 +991,7 @@ import { source, blogSource } from "@/lib/source";
 import { config } from "@/lib/config";
 import { pageHref } from "@portosaur/app/lib/pageUrl";
 
-// Metadata routes compile to route handlers; with
+// Metadata routes compile to route handlers. With
 // \`output: 'export'\` they must be marked static or the build
 // fails at page-data collection.
 export const dynamic = "force-static";
@@ -1029,7 +1029,7 @@ export function buildRobotsContent(mtime: number): string {
   return `${header(mtime)}import type { MetadataRoute } from "next";
 import { config } from "@/lib/config";
 
-// Metadata routes compile to route handlers; with
+// Metadata routes compile to route handlers. With
 // \`output: 'export'\` they must be marked static or the build
 // fails at page-data collection.
 export const dynamic = "force-static";
@@ -1126,13 +1126,13 @@ export async function generateStaticParams() {
  * The route files are mode-aware, matching the frozen URL inventory:
  * docs mode generates the `app/docs/` detail routes (the notes
  * collection IS the docs collection there, so the `app/notes/` detail
- * routes are skipped); portfolio mode generates the `app/notes/`
+ * routes are skipped). Portfolio mode generates the `app/notes/`
  * detail routes and no `app/docs/` routes at all. The notes index
  * (`app/notes/page.tsx`) exists in both modes, which is why the notes
  * detail route is a required catch-all (`[...slug]`) while the docs
  * one is optional (`[[...slug]]`) — see `buildDocPageContent`. The
  * blog index and
- * authors pages always exist; only the `/blog/[slug]` post route
+ * authors pages always exist. Only the `/blog/[slug]` post route
  * needs at least one post (see `NextRootArgs.hasBlogPosts`).
  */
 export function buildNextRootFiles(

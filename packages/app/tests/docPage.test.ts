@@ -9,7 +9,7 @@ import {
 /**
  * Doc page title tests (ported from the Astro `docPageTitles` rules):
  * the metadata title is the frontmatter title, else the content H1,
- * else the file base; the page `<h1>` is the hoisted content H1 when
+ * else the file base. The page `<h1>` is the hoisted content H1 when
  * the content has one, else the synthetic title (unless `hide_title`
  * is set).
  */

@@ -6,7 +6,7 @@ import { Button } from "../Button/index.tsx";
 /**
  * The redirect interstitial's client logic (a port of the old
  * `pages/redirect.jsx` `useEffect`, verbatim): no `?url=` param →
- * `location.replace("/")`; otherwise `window.open(url, "_blank",
+ * `location.replace("/")`. Otherwise `window.open(url, "_blank",
  * "noopener,noreferrer")` — on success `history.back()` (or `/`
  * when there is no history), on block the tap-to-open fallback
  * appears. The old code has no URL validation and neither does
@@ -30,7 +30,7 @@ export function RedirectBody() {
       return;
     }
     // Try to open in an external browser window.
-    // Works on Android standalone PWA; returns null on iOS standalone.
+    // Works on Android standalone PWA. Returns null on iOS standalone.
     const win = window.open(url, "_blank", "noopener,noreferrer");
     if (win) {
       // Opened successfully — navigate back inside the PWA.

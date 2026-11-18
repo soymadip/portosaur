@@ -4,7 +4,7 @@ import { pageHref } from "../../lib/pageUrl.ts";
 /**
  * Link — the explicit `<Link to="…">` MDX tag (distinct from
  * Markdown `[text](href)` links, which the route's `a` override
- * handles). `to` maps to `href`; internal links render through
+ * handles). `to` maps to `href`. Internal links render through
  * Next.js `<Link>` (trailing-slashed), external ones as plain
  * anchors opening in a new tab.
  */

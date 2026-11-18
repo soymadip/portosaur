@@ -12,7 +12,7 @@ import {
 /**
  * The mobile table of contents — a fixed bar below the navbar
  * (below the `lg` breakpoint) with a dropdown of the page's
- * headings. Shows the current heading's text; the current entry
+ * headings. Shows the current heading's text. The current entry
  * in the dropdown carries a check mark.
  *
  * The nav follows the hide-on-scroll navbar — when the navbar

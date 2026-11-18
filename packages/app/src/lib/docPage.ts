@@ -4,7 +4,7 @@
  * `docFileTitle`, `humanizeName`, `pageTitle`).
  *
  * Docusaurus title rules: the metadata title is the frontmatter
- * title, else the content H1, else the file base; the page `<h1>` is
+ * title, else the content H1, else the file base. The page `<h1>` is
  * the hoisted content H1 when the content has one, else the synthetic
  * title (unless `hide_title` is set) — otherwise the page would show
  * two. The hoisted title comes from the remark plugin's export

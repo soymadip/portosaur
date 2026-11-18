@@ -137,7 +137,7 @@ export async function devCommand(
       });
     }
 
-    // Next.js has no --open flag; Docusaurus opened a browser by default,
+    // Next.js has no --open flag. Docusaurus opened a browser by default,
     // so `porto dev` keeps opening one unless --no-browser is passed.
     // The runner waits for the server to answer before opening it.
     const openUrl =

@@ -491,7 +491,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
   //========================== Execution ==========================
 
   // By this point the repo name is always resolved (interactive wizard or
-  // non-interactive defaults); the casts below just tell the type checker.
+  // non-interactive defaults). The casts below just tell the type checker.
   const newProjDir = path.resolve(process.cwd(), state.repoName as string);
   let hadError = false;
 

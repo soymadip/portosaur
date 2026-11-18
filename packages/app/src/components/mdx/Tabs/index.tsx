@@ -19,7 +19,7 @@ import {
 /**
  * Tabs — interactive tab group (Docusaurus `<Tabs>` /
  * `<TabItem>` shape). The active tab's value is shared with the
- * `TabItem` children via context; each tab button is a real
+ * `TabItem` children via context. Each tab button is a real
  * `role="tab"` with `aria-selected` / `aria-controls`, arrow keys
  * move between tabs, and groups with the same `groupId` stay in
  * sync — the choice is remembered in the browser.
@@ -265,7 +265,7 @@ export function Tabs({
      between tabs: it is sized and placed from the active button's
      box, and CSS animates the move when the active tab changes.
      The first position is set in useLayoutEffect, before paint,
-     so the bar never visibly slides in on load; a resize observer
+     so the bar never visibly slides in on load. A resize observer
      re-measures when the row's layout shifts (font load, window
      resize). */
   useLayoutEffect(() => {
@@ -294,7 +294,7 @@ export function Tabs({
   }, [active, tabValues]);
 
   /* Arrow keys move to the next or previous tab (wrapping around)
-     and switch to it; Home and End jump to the first and last tab.
+     and switch to it. Home and End jump to the first and last tab.
      Buttons already handle Enter and Space natively. */
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (

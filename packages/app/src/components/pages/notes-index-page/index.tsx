@@ -7,7 +7,7 @@ import { SiteShell } from "../frame/SiteShell/index.tsx";
 /**
  * NotesIndexPage — the `/notes` grid (the Astro `notecards.astro`
  * page, which exists in both modes). Its own shell (SiteShell,
- * no sidebar). The h1 is always "My Notes"; the metadata title
+ * no sidebar). The h1 is always "My Notes". The metadata title
  * is the capitalized notes route ("Docs"/"Notes") — the route's
  * job, via `pageTitle`.
  *

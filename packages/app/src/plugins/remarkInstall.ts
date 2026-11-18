@@ -6,7 +6,7 @@
  * other languages. Fumadocs' own remarkNpm only knows the JS
  * managers (npm/pnpm/yarn/bun), so Portosaur disables it
  * (`remarkNpmOptions: false` in mdx.ts) and runs this plugin
- * instead; the JS behavior is a faithful copy of remark-npm's.
+ * instead. The JS behavior is a faithful copy of remark-npm's.
  *
  *   ```package-install
  *   portosaur
@@ -23,7 +23,7 @@
  * languages are a table of managers below — adding one is a few
  * lines: the manager names and the command each one uses to
  * install a package. The fence holds plain package names (one
- * line or several); each manager's tab fills in its own command.
+ * line or several). Each manager's tab fills in its own command.
  *
  * An unknown language is left alone (the fence renders as a plain
  * code block) with a build warning, rather than rendering the
@@ -189,7 +189,7 @@ export default function remarkInstall() {
         });
       }
 
-      // The tabs are generated; their Markdown is the authored code block.
+      // The tabs are generated. Their Markdown is the authored code block.
       replaceSource(file, node, (s) => s.stringify(node));
       parent.children[index] = generateCodeBlockTabs(options);
     });

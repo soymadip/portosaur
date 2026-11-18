@@ -4,7 +4,7 @@
  * Turns Docusaurus-style admonition directives (`:::tip[Title]` …
  * `:::`) into callout `<div>`s. Runs after `remark-directive`, which
  * parses the fence into a `containerDirective` node with `name` (the
- * type); the bracketed title is NOT a `label` property — it arrives
+ * type). The bracketed title is NOT a `label` property — it arrives
  * as a leading paragraph child with `data.directiveLabel: true`.
  * That paragraph becomes the heading (its inline children, so
  * formatting in the title survives) and is removed from the body.

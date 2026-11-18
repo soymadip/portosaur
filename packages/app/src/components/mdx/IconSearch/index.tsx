@@ -113,7 +113,7 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
           /* The icons themselves arrive separately, one request
              per pack — the search already told us which packs
              the results come from. A pack that fails to load
-             just shows its results without a preview; the label
+             just shows its results without a preview. The label
              and the copy still work. */
           const byPrefix = new Map<string, string[]>();
           for (const iconId of icons) {
@@ -176,7 +176,7 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
       },
       () => {
         /* Clipboard unavailable (permissions, insecure context) —
-           the copy silently fails; nothing to show for it. */
+           the copy silently fails. Nothing to show for it. */
       },
     );
   };

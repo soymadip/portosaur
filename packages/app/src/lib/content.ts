@@ -332,7 +332,7 @@ export function nestHeadings(headings: TocHeading[]): TocItem[] {
 /**
  * Whether the automatic topic list renders on a doc page — the
  * `TopicList` component's `shouldRender` rule: explicit frontmatter
- * `topic_list` (false / true / `{ enable }`) wins; otherwise the list
+ * `topic_list` (false / true / `{ enable }`) wins. Otherwise the list
  * renders on index/README pages when globally enabled.
  */
 export function topicListShouldRender(
@@ -361,7 +361,7 @@ export function topicListShouldRender(
 
 /**
  * A blog post's slug: the frontmatter `slug` wins (leading slash
- * stripped); otherwise the file base name with a leading `YYYY-MM-DD-`
+ * stripped). Otherwise the file base name with a leading `YYYY-MM-DD-`
  * date prefix stripped (the Docusaurus blog rule). Blog posts are flat —
  * subdirectories do not appear in the slug.
  */

@@ -9,7 +9,7 @@ import { PAGE_TITLE_ID } from "../../../../lib/docPage.ts";
  * colors the page title with the primary. The description
  * renders only when the page has a `desc` — no default text.
  * The title is left-aligned on every page, including topic-list
- * pages; the topic list itself carries no description line.
+ * pages. The topic list itself carries no description line.
  */
 export function PageTitle({
   title,

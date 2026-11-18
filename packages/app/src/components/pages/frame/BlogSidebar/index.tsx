@@ -7,7 +7,7 @@ import { pageHref } from "../../../../lib/pageUrl.ts";
  * under its year. Used on the blog list pages and on post pages
  * (left column). The current post (on post pages) is marked
  * `aria-current`. Undated posts gather under "Undated" at the
- * end; posts keep their input order within a year (routes pass
+ * end. Posts keep their input order within a year (routes pass
  * them newest first).
  */
 

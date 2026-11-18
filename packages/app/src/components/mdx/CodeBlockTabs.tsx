@@ -11,7 +11,7 @@ import { TabItem } from "./TabItem.tsx";
  * CodeBlockTabs — the tabs Fumadocs' `remark-code-tab` generates
  * from code fences with `tab="..."` meta (and `remark-npm` from
  * npm commands). The plugin emits a `CodeBlockTabsList` of
- * `CodeBlockTabsTrigger`s plus a `CodeBlockTab` per fence; this
+ * `CodeBlockTabsTrigger`s plus a `CodeBlockTab` per fence. This
  * component reads that shape and renders the plain `Tabs`
  * underneath, so code tabs share its switching, group sync,
  * persistence, and keyboard support. The `porto-tabs--code`
@@ -20,7 +20,7 @@ import { TabItem } from "./TabItem.tsx";
  * `CodeBlockTabsList`, `CodeBlockTabsTrigger`, and `CodeBlockTab`
  * are element descriptors only: `CodeBlockTabs` reads their props
  * and never renders them. They are mapped in `mdx.tsx` so MDX can
- * resolve the generated elements; rendered on their own, they
+ * resolve the generated elements. Rendered on their own, they
  * pass their children through.
  */
 export function CodeBlockTabsList({ children }: { children?: ReactNode }) {
@@ -60,7 +60,7 @@ export function CodeBlockTabs({
   children?: ReactNode;
   defaultValue?: string;
   groupId?: string;
-  /* The plugin passes `persist` with `groupId`; Portosaur always
+  /* The plugin passes `persist` with `groupId`. Portosaur always
      persists grouped tabs to localStorage, so there is nothing to
      do with it. */
   persist?: boolean;

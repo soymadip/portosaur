@@ -52,7 +52,7 @@ export function getMDXComponents(components?: MDXComponents) {
     TabItem,
     Tabs,
     TopicList,
-    /* Every fenced code block renders in the CodeBlock frame; the
+    /* Every fenced code block renders in the CodeBlock frame. The
        pre's props (title, icon, allowCopy, line numbers) come from
        the fence meta via Fumadocs' rehype-code. */
     pre: (props: HTMLAttributes<HTMLPreElement>) => <CodeBlock {...props} />,

@@ -9,7 +9,7 @@ import {
 } from "../src/lib/icons.ts";
 
 // Ported from the Astro app tests (migrate/astro
-// packages/app/tests/icons.test.ts); the `pageHref` tests moved
+// packages/app/tests/icons.test.ts). The `pageHref` tests moved
 // to pageUrl.test.ts with the helper itself.
 
 describe("resolveDynamicIconId", () => {

@@ -2,7 +2,7 @@
  * MDX options for a Portosaur site, as Fumadocs global preset options.
  *
  * The CLI-generated `source.config.ts` passes these to `defineConfig`
- * as `mdxOptions`; Fumadocs' preset merges Portosaur's plugins into
+ * as `mdxOptions`. Fumadocs' preset merges Portosaur's plugins into
  * the middle of its own pipeline (verified in fumadocs-mdx
  * `preset.ts`):
  *
@@ -25,7 +25,7 @@
  * transform sees it. remarkHasMath runs right after remarkMath — it
  * flags pages with math nodes, which only exist once remarkMath has
  * created them. remark-directive runs before remarkAdmonitions (which
- * consumes its nodes); remarkIcons runs before remark-emoji so icon
+ * consumes its nodes). RemarkIcons runs before remark-emoji so icon
  * shortcodes are claimed first. remarkGithubAlerts runs beside
  * remarkAdmonitions — both emit the same admonition `<div>`s, from
  * `:::` directives and GitHub `[!NOTE]` blockquotes respectively.

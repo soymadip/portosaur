@@ -17,7 +17,7 @@ import { ThemeSelect } from "../ThemeSelect/index.tsx";
 
 /**
  * Navbar — ONE navbar on every page (like OG Docusaurus): brand
- * left; right cluster is the search icon, the theme select
+ * left. Right cluster is the search icon, the theme select
  * (desktop only — on mobile it lives in the menu), the nav links
  * (desktop only), and the menu button (mobile only, right side,
  * VitePress-style). The menu button opens the MobileMenu popover
@@ -195,7 +195,7 @@ export function Navbar({
           {/* Mobile menu button (right side) — VitePress's hamburger
               icon: three staggered lines that animate into an X
               while the menu is open. Opens the MobileMenu popover
-              via the popover API, no JavaScript needed to open/close;
+              via the popover API, no JavaScript needed to open/close.
               MobileMenu's toggle handler syncs `aria-expanded` so
               the open state is announced. */}
           <button

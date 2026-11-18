@@ -23,7 +23,7 @@ import {
  * The bar is Fumadocs' — a magnifier and a borderless input —
  * except the section filter sits where Fumadocs puts its ESC
  * button: just the dropdown, no "Filter" label, narrowing by docs
- * section (the index carries no tags; every result is a docs page).
+ * section (the index carries no tags. Every result is a docs page).
  * Results are Starlight-style grouped cards, rendered by the shared
  * `SearchResults` (the search page renders the same list).
  *
@@ -149,8 +149,8 @@ export function SearchDialog() {
     }
   }, [open, onSearchChange]);
 
-  // Cmd/Ctrl+K toggles; Escape closes (the native dialog fires
-  // `close` on Escape, synced below); outside clicks close.
+  // Cmd/Ctrl+K toggles. Escape closes (the native dialog fires
+  // `close` on Escape, synced below). Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {

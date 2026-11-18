@@ -99,7 +99,7 @@ export interface ParsedTableRow {
  * and the row itself, one line each — into plain-text cells. The
  * search index stores every table row this way (header + separator
  * + the one row). Returns null when the content isn't shaped like
- * that; the caller falls back to plain text.
+ * that. The caller falls back to plain text.
  */
 export function parseTableRow(content: string): ParsedTableRow | null {
   const lines = content
@@ -132,7 +132,7 @@ function isSeparatorRow(line: string): boolean {
  * pipe inside a code span (`` `a|b` ``) — backtick runs open and
  * close spans, so double-backtick spans work too. The leading and
  * trailing pipes of the line itself produce empty edge cells, which
- * are dropped; an empty cell in the middle is kept.
+ * are dropped. An empty cell in the middle is kept.
  */
 function splitTableRow(line: string): string[] {
   const cells: string[] = [];
@@ -259,7 +259,7 @@ export function flattenGroups(groups: SearchGroup[]): FlatResult[] {
  * from the docs root down ("Portosaur Docs", "Getting Started"),
  * so the last one is the page's section — except for pages sitting
  * directly under the root, whose only breadcrumb is the root
- * itself; those are their own section, named by their title.
+ * itself. Those are their own section, named by their title.
  */
 export function sectionOf(header: FlatResult): string {
   const breadcrumbs = header.breadcrumbs;

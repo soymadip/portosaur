@@ -11,8 +11,8 @@ import { nestHeadings } from "../../../../lib/content.ts";
  *
  * The scroll-spy is a React port of the Astro `porto-toc.ts`
  * script: an IntersectionObserver watches a narrow band below
- * the navbar (nav height + mobile-TOC height + 2rem, 53px tall);
- * when an observed element enters the band, the nearest heading
+ * the navbar (nav height + mobile-TOC height + 2rem, 53px tall).
+ * When an observed element enters the band, the nearest heading
  * above it becomes current. React state (`activeSlug`) replaces
  * the script's DOM attribute manipulation.
  *

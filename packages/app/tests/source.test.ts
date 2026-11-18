@@ -227,7 +227,7 @@ describe("portoTreeTransformers", () => {
   });
 
   test("folder: promotes the README page to the folder index", () => {
-    // Fumadocs only treats `index` as an index page; the README's
+    // Fumadocs only treats `index` as an index page. The README's
     // URL is already the folder URL, so it is the child page whose
     // URL every sibling page URL starts with.
     const readme: any = {
@@ -292,7 +292,7 @@ describe("portoTreeTransformers", () => {
   });
 
   test("folder: sorts children into filename order, folders interleaved", () => {
-    // Fumadocs' builder groups pages before folders; Portosaur
+    // Fumadocs' builder groups pages before folders. Portosaur
     // orders by filename — the root's sections read 1 -, 2 -, 3 -,
     // 10 - in the sidebar and on the docs index alike. The sort is
     // numeric-aware: "10 - pwa" comes after "3 - config".

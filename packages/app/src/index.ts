@@ -1,18 +1,18 @@
 /**
  * @portosaur/app — the public barrel. The generated root imports
  * most things via deep paths (`@portosaur/app/components/pages/doc-page`,
- * …); this barrel re-exports the same surface for convenience.
+ * …). This barrel re-exports the same surface for convenience.
  *
  * NOT re-exported here (import via their deep paths):
- * - `lib/icons.ts` — the Iconify JSON packs are megabytes; a
+ * - `lib/icons.ts` — the Iconify JSON packs are megabytes. A
  *   barrel import from any client component would pull them into
  *   the client bundle.
- * - `lib/image-size.ts` — Node-only (`node:fs`); server code only.
- * - `lib/assets.ts` — Node-only (`node:fs`); server code only
+ * - `lib/image-size.ts` — Node-only (`node:fs`). Server code only.
+ * - `lib/assets.ts` — Node-only (`node:fs`). Server code only
  *   (sitemap/robots builders, used by the generated routes).
- * - `lib/source.ts` — Node-only (`node:path`) + loader setup;
- *   server code only, imported by the generated `lib/source.ts`.
- * - `lib/slug-server.ts` — Node-only; server code only.
+ * - `lib/source.ts` — Node-only (`node:path`) + loader setup.
+ *   Server code only, imported by the generated `lib/source.ts`.
+ * - `lib/slug-server.ts` — Node-only. Server code only.
  */
 
 // Layouts + route components

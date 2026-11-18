@@ -19,7 +19,7 @@ import { SiteShell } from "../frame/SiteShell/index.tsx";
  * `docsHome` shape: `{ title, tagline?, desc?, icon?: string |
  * { src, fallback? }, actions?: [{ label|text, link, icon? }],
  * features?: [{ title, details|desc, icon?, link? }] }`. The
- * first action is brand, the rest alt; feature titles stay `<h2>`
+ * first action is brand, the rest alt. Feature titles stay `<h2>`
  * (OG uses h2, and the heading list in the URL snapshots expects
  * it).
  *

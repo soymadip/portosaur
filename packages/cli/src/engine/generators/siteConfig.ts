@@ -115,7 +115,7 @@ export interface PortosaurOptions {
  * attached comment (inline, or the comment block directly above). The calls
  * are ordered to match the discovery order of the original
  * `docusaurusConfig.mjs`, so the generated schema keeps its key order. Keep
- * the calls and their comments intact when editing; a comment directly above
+ * the calls and their comments intact when editing. A comment directly above
  * a `get()` call becomes that key's schema description.
  *
  * The returned shape (`PortosaurOptions`, declared above):

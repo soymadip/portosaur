@@ -6,7 +6,7 @@
 //
 // Ported from the Astro app (`packages/app/src/plugins/
 // remarkContentTitle.ts`). The Astro version stashed the title at
-// `file.data.astro.frontmatter` for `remarkPluginFrontmatter`; here it
+// `file.data.astro.frontmatter` for `remarkPluginFrontmatter`. Here it
 // goes to `file.data[CONTENT_TITLE_KEY]` and reaches the page through
 // Fumadocs' `mdxOptions.valueToExport` (see `mdx.ts`), which exports
 // it from the compiled MDX module — the page reads it from
@@ -97,7 +97,7 @@ function frontmatterVariablePath(node: any): string[] | null {
 
 /**
  * The text an `{expression}` in a heading contributes: a
- * `frontmatter.*` path resolves against the frontmatter; anything else
+ * `frontmatter.*` path resolves against the frontmatter. Anything else
  * contributes its source, exactly as the collector does.
  */
 function expressionText(node: any, frontmatter: unknown): string {
@@ -133,7 +133,7 @@ function headingText(
   let text = "";
   const visit = (node: any) => {
     if (node.type === "text" || node.type === "inlineCode") {
-      // Non-MDX files escape `{` as `${` in heading text; code spans
+      // Non-MDX files escape `{` as `${` in heading text. Code spans
       // are never escaped.
       if (!isMdx && node.type === "text") {
         text += node.value.replace(/\{/g, "${");

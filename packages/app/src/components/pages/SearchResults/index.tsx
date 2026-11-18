@@ -20,7 +20,7 @@ import { Dropdown } from "../../Dropdown/index.tsx";
  * each row its own link.
  *
  * The dialog passes `listbox` + `activeIndex` for keyboard
- * navigation; the page renders a plain list.
+ * navigation. The page renders a plain list.
  */
 
 /** One run of text, bold when it matches the query. */
@@ -93,7 +93,7 @@ type EntryChunk =
   | { kind: "entry"; entry: FlatResult }
   | { kind: "table"; tableId: string; rows: FlatResult[] };
 
-/** Groups consecutive rows of the same table; everything else stays single. */
+/** Groups consecutive rows of the same table. Everything else stays single. */
 function chunkEntries(entries: FlatResult[]): EntryChunk[] {
   const chunks: EntryChunk[] = [];
   for (const entry of entries) {
@@ -114,7 +114,7 @@ function chunkEntries(entries: FlatResult[]): EntryChunk[] {
  * One table's rows as a grid: the header once, then each row as its
  * own link, all sharing the grid's columns (subgrid) — Fumadocs'
  * table layout. The block itself is a nested card row, so it
- * carries the tree branch; the rows inside are the keyboard-nav
+ * carries the tree branch. The rows inside are the keyboard-nav
  * entries, one flat index each.
  */
 function TableBlock({
@@ -216,7 +216,7 @@ export function SearchResults({
   onHoverIndex?: (index: number) => void;
   /** Called when an entry is clicked (the dialog closes). */
   onSelect?: () => void;
-  /** Listbox semantics for the dialog; a plain list on the page. */
+  /** Listbox semantics for the dialog. A plain list on the page. */
   listbox?: boolean;
   /** The list's id, for the dialog input's `aria-controls`. */
   listId?: string;
@@ -282,8 +282,8 @@ export function SearchResults({
 /**
  * The "Filter [All ▾]" row — Fumadocs' tag filter, Portosaur's
  * version narrowing by docs section instead (the index carries no
- * tags; every result is a docs page). The dialog renders it in its
- * footer, opening upward; the page renders it under its input.
+ * tags. Every result is a docs page). The dialog renders it in its
+ * footer, opening upward. The page renders it under its input.
  */
 export function SearchSectionFilter({
   sections,
@@ -299,7 +299,7 @@ export function SearchSectionFilter({
   onChange: (section: string) => void;
   /** Open the menu above the trigger instead of below it. */
   dropUp?: boolean;
-  /** Show the "Filter" label before the dropdown; the dialog's
+  /** Show the "Filter" label before the dropdown. The dialog's
    * bar shows the dropdown alone. */
   showLabel?: boolean;
 }) {

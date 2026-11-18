@@ -9,7 +9,7 @@ import { guessDocPermalink, type Frontmatter } from "./slug.ts";
  *
  * Split out of `slug.ts` because that module must stay free of Node
  * imports (client components reach it via `docPage.ts`). Nothing in
- * this file may be imported by a client component; the Fumadocs
+ * this file may be imported by a client component. The Fumadocs
  * loader (`lib/source.ts`) and build-time code use it.
  */
 

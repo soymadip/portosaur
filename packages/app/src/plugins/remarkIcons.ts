@@ -7,7 +7,7 @@
  * consumed so it does not double up with the icon's own spacing).
  *
  * Ported from the Astro app (`packages/app/src/plugins/remarkIcons.ts`):
- * logic verbatim; the `@astrojs/markdown-remark` type import is dropped
+ * logic verbatim. The `@astrojs/markdown-remark` type import is dropped
  * (no annotation — the tests invoke the plugin directly).
  */
 
@@ -56,7 +56,7 @@ export default function remarkIconsPlugin() {
       let lastIndex = 0;
 
       for (const match of matches) {
-        // `matchAll` always sets `index`; the `?? 0` is only for the type.
+        // `matchAll` always sets `index`. The `?? 0` is only for the type.
         const matchIndex = match.index ?? 0;
         if (matchIndex > lastIndex) {
           let betweenText = node.value.slice(lastIndex, matchIndex);

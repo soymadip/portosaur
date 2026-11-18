@@ -224,7 +224,7 @@ export function isValidCssColor(value: unknown): value is string {
     if (name.startsWith("rgb")) {
       return parts.every(isChannel);
     }
-    // Hue wraps in CSS, so any number is fine; saturation and
+    // Hue wraps in CSS, so any number is fine. Saturation and
     // lightness must be percentages.
     return (
       isNumberInRange(parts[0], -Infinity, Infinity) &&

@@ -35,7 +35,7 @@ import {
  * sidebar click can only land inside an already-open category,
  * so those two routes are exactly where a closed active category
  * strands the user. Closing a category while reading inside it
- * still works (the close is the user's choice); the next
+ * still works (the close is the user's choice). The next
  * navigation opens the new page's path again.
  *
  * Auto-collapse (`theme.navigation.auto_collapse`, default true)
@@ -43,7 +43,7 @@ import {
  * to another page leaves only the new page's path open, and
  * navigating to a top-level page closes every category.
  * Expanding a category never closes anything — opening a tree
- * to peek leaves the rest alone; only the navigation collapses.
+ * to peek leaves the rest alone. Only the navigation collapses.
  * With the option off, categories open and close independently
  * and navigation leaves them as they are.
  *

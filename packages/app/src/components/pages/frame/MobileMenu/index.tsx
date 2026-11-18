@@ -23,10 +23,10 @@ import { SiteTitle } from "../SiteTitle/index.tsx";
  *
  * On docs pages (`hasSidebar`) the popover also holds the sidebar
  * tree (the `children` slot) and becomes the persistent sidebar
- * from 50rem up; on other pages it holds only the footer (nav
+ * from 50rem up. On other pages it holds only the footer (nav
  * links, theme select, version link). The toggle lives in the
  * navbar (right cluster, mobile only) and opens this popover via
- * `popovertarget` — no JavaScript needed to open/close; this
+ * `popovertarget` — no JavaScript needed to open/close. This
  * component only resets the popover attribute on desktop
  * (persistent variant), traps focus while the menu is open, syncs
  * the navbar toggle button's `aria-expanded` on open/close, and
@@ -48,7 +48,7 @@ import { SiteTitle } from "../SiteTitle/index.tsx";
  * Desktop sidebar collapse — ported from Fumadocs' docs layout:
  * the tree's title row holds a collapse trigger (Lucide's
  * sidebar glyph — the brand row would hide it behind the navbar
- * until the navbar hides on scroll); clicking it slides the pane
+ * until the navbar hides on scroll). Clicking it slides the pane
  * out by its own width while the content expands into the freed
  * space, and a floating panel with the same trigger offers the
  * way back. Hovering the viewport's left edge while collapsed
@@ -61,7 +61,7 @@ import { SiteTitle } from "../SiteTitle/index.tsx";
  * the stored choice before the page defaults — so a reload
  * keeps the sidebar as the visitor left it until the tab
  * closes. The collapse only exists on desktop (`isDesktop`
- * gates the `inert` attribute; the CSS rules are all inside
+ * gates the `inert` attribute. The CSS rules are all inside
  * the 50rem block), and only on pages with a sidebar — the
  * menu-only variant has nothing to collapse.
  *
@@ -156,7 +156,7 @@ export function MobileMenu({
   // `--no-brand` content variant below).
   const showBrand = hasSidebar && config.theme.hideNavbarOnScroll;
   // The global default is known at render time (the config is
-  // static, so server and client agree — no hydration mismatch);
+  // static, so server and client agree — no hydration mismatch).
   // the per-page frontmatter default arrives via the marker
   // effect below.
   const [collapsed, setCollapsed] = useState(
@@ -338,7 +338,7 @@ export function MobileMenu({
 
   // The single write site for the session persistence — the
   // button and the Cmd/Ctrl+B hotkey below both come through
-  // here; page defaults from markers never write. The write is
+  // here. Page defaults from markers never write. The write is
   // idempotent, so StrictMode double-invoking the updater in
   // dev is harmless. Declared before the hotkey effect: the
   // effect lists it in its deps, and a later `const` would be

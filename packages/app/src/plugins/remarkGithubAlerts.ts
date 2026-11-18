@@ -17,7 +17,7 @@
  *   </div>
  *
  * Text after the marker on the same line becomes the alert's title
- * (plain text — inline formatting is flattened); with no text after
+ * (plain text — inline formatting is flattened). With no text after
  * the marker, the type's default title is used ("Note", "Tip",
  * "Important", "Warning", "Caution").
  *
@@ -30,7 +30,7 @@
  * different, exactly as they do on Docusaurus and GitHub.
  *
  * Only an uppercase marker on the blockquote's FIRST line converts
- * (GitHub's rule); a marker anywhere else, or lowercase, stays a
+ * (GitHub's rule). A marker anywhere else, or lowercase, stays a
  * plain blockquote.
  *
  * Ported from the Astro app (`packages/app/src/plugins/
@@ -95,7 +95,7 @@ function divElement(className: string, children: any[]): any {
   };
 }
 
-/** Plain text of an inline node (formatting flattened; links give their text). */
+/** Plain text of an inline node (formatting flattened. Links give their text). */
 function plainText(node: any): string {
   if (node.type === "text" || node.type === "inlineCode") {
     return node.value ?? "";
@@ -139,7 +139,7 @@ function extractAlert(paragraph: any): { type: string; title: string } | null {
   const newline = rest.indexOf("\n");
   if (newline !== -1) {
     title = rest.slice(0, newline);
-    // The body starts after the break; keep the rest of this node.
+    // The body starts after the break. Keep the rest of this node.
     first.value = rest.slice(newline + 1);
     if (first.value === "") {
       paragraph.children.splice(0, 1);
@@ -165,7 +165,7 @@ function extractAlert(paragraph: any): { type: string; title: string } | null {
         paragraph.children.splice(0, 1);
       } else {
         // Formatted inline node (strong, emphasis, link, …) — its
-        // text belongs to the title; it can't hold a line break.
+        // text belongs to the title. It can't hold a line break.
         title += plainText(next);
         paragraph.children.splice(0, 1);
       }

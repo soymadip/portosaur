@@ -7,14 +7,14 @@ import { pageHref } from "./pageUrl.ts";
  * resolution for MDX content.
  *
  * MDX authors link with relative file paths (`./guide/setup.mdx`)
- * or page pathnames (`/docs/guide`); the loader's `resolveHref`
+ * or page pathnames (`/docs/guide`). The loader's `resolveHref`
  * turns those into page URLs. The generated doc route passes the
  * result as the `a` override to `getMDXComponents` (the scaffold
  * pattern — `createRelativeLink` there came from `fumadocs-ui/mdx`,
  * which Portosaur does not depend on).
  *
  * Internal links render through Next.js `<Link>` (SPA navigation +
- * prefetch, trailing-slashed); external links and hash links render
+ * prefetch, trailing-slashed). External links and hash links render
  * as plain anchors.
  */
 

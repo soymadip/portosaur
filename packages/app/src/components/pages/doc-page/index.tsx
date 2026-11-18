@@ -46,7 +46,7 @@ import { PageTitle } from "../parts/PageTitle/index.tsx";
  * on lazy/async entries).
  *
  * - `page.data.body` — the MDX component
- * - `page.data.toc` — `TOCItemType[]` (H2+ only; the H1 was
+ * - `page.data.toc` — `TOCItemType[]` (H2+ only. The H1 was
  *   hoisted out by `remarkContentTitle`)
  * - `page.data._exports.__portoContentTitle` — the hoisted H1
  *   `{ text, slug }`, or undefined when the page has no content H1

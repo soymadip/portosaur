@@ -12,7 +12,7 @@ import {
  * content when no items are given. `className`, `menuClassName`,
  * and `triggerClassName` pass extra CSS classes through, like
  * OG's. A click opens the menu (no hover-open — click works on
- * touch too, where hover doesn't exist); clicking an item or
+ * touch too, where hover doesn't exist). Clicking an item or
  * elsewhere closes it.
  */
 export function Dropdown({

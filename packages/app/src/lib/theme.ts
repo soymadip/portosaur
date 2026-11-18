@@ -3,16 +3,16 @@
  * Astro `theme-mode.ts` module, plus the theme-color meta sync (old
  * `getThemeColorSyncScript`).
  *
- * Resolution order: a stored `localStorage` choice wins; otherwise
+ * Resolution order: a stored `localStorage` choice wins. Otherwise
  * the site's `defaultMode` wins (the mode the pre-paint script in the
  * root layout already applied). `auto` follows the OS
  * `prefers-color-scheme` preference, live — if the OS preference
  * changes while the page is open, an `auto` choice re-resolves.
  *
  * The preference lives under the existing `"theme"` localStorage key,
- * so stored `light`/`dark` choices stay valid; `auto` is the new
+ * so stored `light`/`dark` choices stay valid. `auto` is the new
  * third value. The inline script in the root layout applies the
- * resolved mode pre-paint (no flash); this module wires the theme
+ * resolved mode pre-paint (no flash). This module wires the theme
  * dropdowns (rendered by `Navbar` and `MobileMenuFooter`) and keeps
  * the `theme-color` meta tag in sync with the background token.
  *
@@ -183,7 +183,7 @@ export function setTheme(preference: ThemePreference): void {
 
 /**
  * The current theme preference, live across every ThemeSelect on the
- * page. The server snapshot is `"dark"`; the client corrects it from
+ * page. The server snapshot is `"dark"`. The client corrects it from
  * storage on first read (the pre-paint script already applied the
  * resolved mode, so only the dropdown label/icon can flicker).
  */

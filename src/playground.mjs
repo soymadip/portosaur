@@ -240,8 +240,8 @@ export function runPlayground({
 
   // A directory can exist without being an initialized site (e.g. an
   // empty dir left behind by a deleted or interrupted scaffold). Only
-  // skip initialization when the site actually looks initialized;
-  // otherwise clear the broken directory and initialize fresh.
+  // skip initialization when the site actually looks initialized.
+  // Otherwise clear the broken directory and initialize fresh.
   const dirExists = existsSync(SITE_DIR);
   const isInitialized =
     dirExists &&

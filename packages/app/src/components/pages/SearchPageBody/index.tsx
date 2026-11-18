@@ -17,7 +17,7 @@ import { SearchResults, SearchSectionFilter } from "../SearchResults/index.tsx";
  * renders SiteShell), and `useSearchParams` needs the Suspense
  * boundary the page wraps this in.
  *
- * Reads `?q=` as the initial query and runs it on mount; typing
+ * Reads `?q=` as the initial query and runs it on mount. Typing
  * debounces 200ms before searching. The search index downloads
  * on the first keystroke, never on page load. Results are the same
  * Starlight-style grouped cards the dialog shows, with a Filter

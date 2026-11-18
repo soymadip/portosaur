@@ -9,7 +9,7 @@ import { TabsContext, tabIdFor } from "./Tabs/index.tsx";
  * renders its children plainly.
  *
  * `label`, `default`, and `attributes` are read by the parent
- * `Tabs` (for the tab button); this component only renders the
+ * `Tabs` (for the tab button). This component only renders the
  * panel. With `lazy` on the parent, inactive panels aren't
  * rendered at all.
  */

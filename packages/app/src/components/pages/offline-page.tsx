@@ -5,7 +5,7 @@ import { SiteShell } from "./frame/SiteShell/index.tsx";
 
 /**
  * OfflinePage — the offline fallback page (served by the PWA
- * when there is no connection; the route's metadata title is
+ * when there is no connection. The route's metadata title is
  * "You're Offline | {site}").
  */
 export function OfflinePage({ config }: { config: PortosaurOptions }) {

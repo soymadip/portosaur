@@ -4,7 +4,7 @@
 //
 // Ported from the Astro app (`packages/app/src/plugins/
 // remarkHasMath.ts`). The Astro version stashed the flag at
-// `file.data.astro.frontmatter` for `remarkPluginFrontmatter`; here it
+// `file.data.astro.frontmatter` for `remarkPluginFrontmatter`. Here it
 // goes to `file.data[HAS_MATH_KEY]` and reaches the page through
 // Fumadocs' `mdxOptions.valueToExport` (see `mdx.ts`). Frontmatter
 // comes from `file.data.frontmatter`, which fumadocs-mdx sets on the

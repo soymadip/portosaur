@@ -5,7 +5,7 @@ import { SiteShell } from "./frame/SiteShell/index.tsx";
 
 /**
  * RedirectPage — the redirect interstitial (`/redirect?url=…`).
- * The client logic lives in `RedirectBody`; this page renders
+ * The client logic lives in `RedirectBody`. This page renders
  * the shell + icon around it. The route's metadata title is
  * "Opening in browser… | {site}".
  */

@@ -136,8 +136,8 @@ function jpegDimensions(header: Buffer): LocalImageDimensions | null {
 
 /**
  * WebP: three chunk layouts. VP8X stores width/height minus one as
- * 24-bit little-endian at bytes 24/27; lossy VP8 stores them as
- * 14-bit little-endian at bytes 26/28; lossless VP8L packs them into
+ * 24-bit little-endian at bytes 24/27. Lossy VP8 stores them as
+ * 14-bit little-endian at bytes 26/28. Lossless VP8L packs them into
  * 14-bit fields starting at byte 21.
  */
 function webpDimensions(header: Buffer): LocalImageDimensions | null {
@@ -259,7 +259,7 @@ export async function localImageDimensions(
   if (!src || REMOTE_OR_SPECIAL_RE.test(src)) {
     return null;
   }
-  // Config paths are static-root-relative (`img/icon.png`); absolute
+  // Config paths are static-root-relative (`img/icon.png`). Absolute
   // site-root paths (`/avatars/x.png`) resolve the same way.
   const relative = src.replace(/^\/+/, "");
   for (const dir of staticDirs) {

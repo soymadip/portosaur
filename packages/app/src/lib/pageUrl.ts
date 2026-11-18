@@ -93,13 +93,13 @@ const PAGE_EXCLUDED_EXTENSIONS = new Set([
  * A trailing-slash page URL. Pages are built as `path/index.html`, so
  * the canonical URL ends in `/` — a slash-less link makes the host
  * answer with a 301 redirect to the slashed URL (an extra round-trip
- * on every navigation; Netlify does this, and the sitemap already
+ * on every navigation. Netlify does this, and the sitemap already
  * emits the slashed form). Apply to internal page links only, after
  * `withBase` — never to assets.
  *
  * Absolute URLs, hash links, already-slashed paths, and asset URLs
  * (a known file extension on the last segment) pass through
- * unchanged; a `?query`/`#hash` suffix is preserved after the slash.
+ * unchanged. A `?query`/`#hash` suffix is preserved after the slash.
  */
 export function pageHref(path: string): string {
   if (!path) {

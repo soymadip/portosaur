@@ -22,14 +22,14 @@ export type { TopicListItem } from "../../../lib/content.ts";
  *
  * A manual tag suppresses the automatic list: the author's placement
  * wins, and the page never shows the list twice. The provider holds
- * a shared flag the manual list sets when it renders; the automatic
+ * a shared flag the manual list sets when it renders. The automatic
  * list reads it after the content has rendered.
  *
  * The list carries no description line — the page description
  * renders under the H1 instead (Fumadocs-style, see `PageTitle`),
  * so a `topic_list.desc` frontmatter key would have nowhere to
  * go. Categories show their child count as a badge beside the
- * title; the card description is the page text alone (OG prefixed
+ * title. The card description is the page text alone (OG prefixed
  * the count into it — "3 items • ...").
  *
  * The cards' icon HTML is resolved server-side by the doc page —

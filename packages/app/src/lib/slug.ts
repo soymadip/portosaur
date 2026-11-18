@@ -30,7 +30,7 @@
  * Notes on the unified behavior: a file whose name matches its parent
  * directory (e.g. `guide/guide.mdx`) is an ordinary file, not an
  * index — only `index`/`README` files are indexes. A frontmatter `id`
- * is ignored; the filename is always the base. A relative `slug` on
+ * is ignored. The filename is always the base. A relative `slug` on
  * an index file resolves against the site root, not its parent
  * directory.
  */

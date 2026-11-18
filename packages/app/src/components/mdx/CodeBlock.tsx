@@ -6,9 +6,9 @@ import { PortoIcon } from "../PortoIcon.tsx";
 /**
  * CodeBlock — the `pre:` MDX mapping: wraps a Shiki-highlighted
  * `pre` in the Fumadocs-style frame. A fence with `title="..."`
- * gets a title bar (language icon, title, copy button); without
+ * gets a title bar (language icon, title, copy button). Without
  * one, the copy button floats over the code's top-right corner.
- * `noCopy` in the fence meta hides the button; `lineNumbers`
+ * `noCopy` in the fence meta hides the button. `lineNumbers`
  * (and `lineNumbers=<start>`) turns on line numbers. Inside code
  * tabs the frame drops its border — the tabs box is the frame.
  */

@@ -34,7 +34,7 @@ export function htmlFileToUrl(buildDir: string, filePath: string): string {
 /**
  * Decode the HTML entities renderers emit in titles and headings, and strip
  * zero-width characters (Docusaurus appends a zero-width space inside
- * heading anchor links; Next.js does not). The snapshot compares *content*,
+ * heading anchor links. Next.js does not). The snapshot compares *content*,
  * not renderer artifacts — both sides are normalized the same way.
  */
 function decodeText(text: string): string {

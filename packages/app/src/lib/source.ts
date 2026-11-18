@@ -36,7 +36,7 @@ import { parseFileFrontmatter } from "./slug-server.ts";
 /**
  * Portosaur's frontmatter schema for doc/note/blog pages.
  *
- * Fumadocs' `pageSchema` requires `title` and carries `description`;
+ * Fumadocs' `pageSchema` requires `title` and carries `description`.
  * Portosaur keeps `title` optional (the content H1 is the fallback —
  * decision 11) and renames the description key to `desc` (decision
  * 25, matching Portosaur's `desc` convention). The remaining fields
@@ -47,7 +47,7 @@ import { parseFileFrontmatter } from "./slug-server.ts";
  * Unknown keys are stripped by zod.
  *
  * The `file` transformer maps `desc` onto the page-tree node's
- * `description`; page metadata reads `page.data.desc` directly.
+ * `description`. Page metadata reads `page.data.desc` directly.
  */
 export const portoDocSchema = pageSchema
   .omit({ title: true, description: true })
@@ -92,7 +92,7 @@ export type PortoPageFile = ContentStoragePageFile<
  * Runs the shared `guessDocPermalink` algorithm on the file's
  * content-relative path + frontmatter. Parent index slugs are
  * resolved from disk via the file's `absolutePath` (cached reads —
- * `parseFileFrontmatter`); when no absolute path is available the
+ * `parseFileFrontmatter`). When no absolute path is available the
  * parent lookup is empty and directories fall back to their cleaned
  * names. A root index file returns `[]` (the base URL itself).
  */
@@ -168,7 +168,7 @@ function cleanFolderName(name: string): string {
  *   promoted page leaves the children list, and its title becomes
  *   the folder name when the name is still the path fallback.
  *   Children are re-sorted into pure filename order (Fumadocs
- *   groups pages before folders); a meta.json `pages` list keeps
+ *   groups pages before folders). A meta.json `pages` list keeps
  *   its author-chosen order.
  *
  * The storage generic is `any` deliberately: the loader's storage
@@ -204,7 +204,7 @@ export const portoTreeTransformers: PageTreeTransformer<any>[] = [
     folder(node, folderPath, metaPath) {
       // Promote the README page to the folder index. Fumadocs only
       // treats a file named `index` as a folder index, but Portosaur
-      // content uses README.mdx; the slugs function already
+      // content uses README.mdx. The slugs function already
       // collapses its URL to the folder URL, so it is the child
       // page whose URL every sibling page URL starts with. The
       // root folder has no index page of its own and is skipped.
@@ -230,7 +230,7 @@ export const portoTreeTransformers: PageTreeTransformer<any>[] = [
       // it is a folder. Each child carries its original content
       // path on `$ref` (a string for pages, `{ folder }` for
       // folders), so the sort is numeric-aware over the real
-      // filenames; separators carry no path and keep their relative
+      // filenames. Separators carry no path and keep their relative
       // order at the end. A meta.json with an explicit `pages` list
       // is author-chosen order and is left alone.
       const meta = metaPath ? this.storage.read(metaPath) : undefined;
@@ -269,7 +269,7 @@ export const portoTreeTransformers: PageTreeTransformer<any>[] = [
       const base = folderPath.split("/").filter(Boolean).pop() ?? "";
       if (node.name === pathToName(base)) {
         // The index page's title wins over the folder name (it is
-        // author-chosen); otherwise strip the number prefix.
+        // author-chosen). Otherwise strip the number prefix.
         node.name = node.index ? node.index.name : cleanFolderName(base);
       }
       return node;

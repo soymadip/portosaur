@@ -27,7 +27,7 @@ import { SiteShell } from "../frame/SiteShell/index.tsx";
  * Phase 1 minimal: all posts on one page (no pagination — the
  * Docusaurus 10/page split is Phase 2), and excerpts are the
  * plain description (rendering truncated MDX excerpts through
- * the markdown processor is Phase 2; a post with
+ * the markdown processor is Phase 2. A post with
  * `truncated: true` still gets its "Read more" link).
  */
 

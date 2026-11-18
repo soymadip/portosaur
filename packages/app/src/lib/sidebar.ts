@@ -11,7 +11,7 @@
  * The row shape mirrors the Astro `porto:sidebar` nodes: doc items
  * with `href`, categories with an optional index `link` + `items`.
  * A folder's index page becomes the category link (index-as-category-
- * link); a folder without an index renders as a plain group label.
+ * link). A folder without an index renders as a plain group label.
  */
 
 import type * as PageTree from "fumadocs-core/page-tree";
@@ -27,7 +27,7 @@ export interface SidebarItem {
   /** "doc" for a page row, "category" for a folder row. */
   type: "doc" | "category";
   label: string;
-  /** The row's link (docs always; categories only with an index page). */
+  /** The row's link (docs always. Categories only with an index page). */
   href?: string;
   /** Pre-rendered icon HTML (empty string when nothing resolves). */
   iconHtml: string;
@@ -58,8 +58,8 @@ function nodeIcon(node: PageTree.Node | undefined): string | undefined {
 
 /**
  * The frontmatter `color` of a tree node. The loader's `file`
- * transformer copies `data.color` onto the node as an extra field;
- * it is not part of the Fumadocs node type, so it is read
+ * transformer copies `data.color` onto the node as an extra field.
+ * It is not part of the Fumadocs node type, so it is read
  * defensively.
  */
 function nodeColor(node: PageTree.Node): string | undefined {

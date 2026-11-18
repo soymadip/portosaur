@@ -98,7 +98,7 @@ export function NavProgress() {
         showTimer.current = undefined;
         // If the URL already moved, the navigation committed
         // before the delay elapsed — show nothing. (The pathname
-        // effect may still be pending; the URL is the authority
+        // effect may still be pending. The URL is the authority
         // here, not the rendered pathname.)
         if (
           pendingPathRef.current === null ||

@@ -9,7 +9,7 @@ import { pageHref } from "./pageUrl.ts";
  * generated `app/sitemap.ts` / `app/robots.ts` return.
  *
  * Ported from the Astro app (`packages/app/src/utils/assets.ts`):
- * `getAssetHeadTags` is the same function; the sitemap/robots
+ * `getAssetHeadTags` is the same function. The sitemap/robots
  * helpers are new, shaped for Next.js's `MetadataRoute` types.
  * Server-only (reads CSS files from disk for the theme color).
  */
@@ -118,7 +118,7 @@ export interface SitemapPage {
  * Builds the sitemap entries for the generated `app/sitemap.ts`:
  * every page URL, trailing-slashed and absolutized against the site
  * URL + base. Pages are the caller's list (loader pages + the static
- * routes); the home page is included by passing `"/"`.
+ * routes). The home page is included by passing `"/"`.
  */
 export function buildSitemapEntries(
   config: PortosaurOptions,
