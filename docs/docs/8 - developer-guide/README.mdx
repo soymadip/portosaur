@@ -16,15 +16,18 @@ Welcome to the **Portosaur Developer Guide**. This section is intended for devel
 
 ## Monorepo Architecture
 
-Portosaur is architected as an ESM-first monorepo using Bun Workspaces.
+Portosaur is architected as an ESM-first monorepo using Bun Workspaces, built on Fumadocs (headless core) + Next.js + React. The CLI generates a thin Next.js root in the user's `.portosaur/` directory; the real UI lives in `@portosaur/app`.
 
 ```txt
 packages/
-├── cli/       # CLI entry point, command orchestrator, scaffolding engine
-├── core/      # YAML configuration parser, variable resolver, validation, asset generator
-├── logger/    # Unified terminal logging and ANSI styling
-├── theme/     # Docusaurus plugins, React components, CSS themes, and assets
-└── wizard/    # Standalone interactive prompt engine with history replaying
+├── cli/       # CLI entry point, config engine, generators
+├── app/       # React UI (layouts, pages, MDX components, CSS, plugins)
+└── wizard/    # Interactive prompt library
+docs/          # Documentation site (dogfoods the CLI)
+src/
+└── cz/        # Commitizen versioning
+proxy/         # Cloudflare Worker CORS/file proxy
+tests/         # URL snapshots, goldens, smoke test
 ```
 
 ---
@@ -32,18 +35,19 @@ packages/
 ## Architectural Principles
 
 1. **Unidirectional Dependency Flow**:
-   - `cli` → `core` → `logger`
-   - `theme` depends on `core`
+   - `cli` → `wizard`
+   - The app package is NOT a CLI dependency — the generated Next.js root imports it, and user projects depend on it directly.
    - No circular dependencies are allowed.
 2. **Lightweight CLI**:
-   - `@portosaur/cli` MUST NOT depend on `@portosaur/theme`, React, or heavy Docusaurus packages.
-   - The theme is injected into the user project's local `package.json` to keep global CLI installations instantaneous.
-3. **Internal Workspace Imports**:
-   - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../logger`.
-4. **Strict Typing & Documentation**:
-   - Every library package maintains an explicit `index.d.ts` in `src/` linked via the `types` field in `package.json`.
-   - APIs are documented with complete JSDoc annotations in `.mjs` source files and synchronized in `index.d.ts`.
-5. **Runtime Compatibility**:
+   - `@portosaur/cli` MUST NOT depend on `@portosaur/app` or heavy frontend frameworks (Next.js/React).
+   - The app is injected into the user's local project `package.json` to keep global CLI installs fast.
+3. **Generated Root**:
+   - Never edit a site's `.portosaur/` directory by hand — it is regenerated on every build/dev run. Edit the generators in `packages/cli/src/engine/generators/` instead.
+4. **Internal Workspace Imports**:
+   - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../wizard`.
+5. **TypeScript**:
+   - Type stripping (erasable syntax only), explicit `.ts` extensions on relative imports, types live in the source files.
+6. **Runtime Compatibility**:
    - Package management and fast runs are powered by **Bun**, while keeping full **Node.js compatibility** across all packages.
 
 ---
@@ -59,5 +63,8 @@ cd portosaur
 bun install
 
 # Run the test suite
-bun test
+bun run test:all
+
+# Verify docs URL parity after a docs build
+bun tests/url-snapshot.ts --docs-only
 ```
