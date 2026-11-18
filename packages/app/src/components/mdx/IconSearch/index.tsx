@@ -81,9 +81,15 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  /* Escape dismisses the panel without clearing the query —
+     typing or focusing the input opens it again. */
+  const [dismissed, setDismissed] = useState(false);
   const requestId = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    /* A new query or filter reopens a dismissed panel. */
+    setDismissed(false);
     const trimmed = query.trim();
     if (!trimmed) {
       setResults([]);
@@ -169,6 +175,33 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
     };
   }, [query, filter]);
 
+  /* Escape closes the panel while it is open. A search input
+     clears itself on Escape, so the default is stopped — the
+     query survives and only the panel closes. The listener runs
+     in the capture phase, ahead of the filter menu's own Escape
+     handler, so the menu gets the first Escape and the panel
+     the next. */
+  const panelOpen = !dismissed && query.trim() !== "";
+  useEffect(() => {
+    if (!panelOpen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      if (containerRef.current?.querySelector("details[open]")) {
+        return;
+      }
+      setDismissed(true);
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [panelOpen]);
+
   const copyId = (iconId: string) => {
     void navigator.clipboard.writeText(shortId(iconId)).then(
       () => {
@@ -196,7 +229,7 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
     .join(" ");
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName} ref={containerRef}>
       <div className="porto-icon-search__bar">
         <input
           type="search"
@@ -204,6 +237,7 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
           placeholder="Search icons…"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          onFocus={() => setDismissed(false)}
           aria-label="Search icons"
         />
         {query.trim() && !loading && (
@@ -227,46 +261,54 @@ export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
           ariaLabel="Filter icons by pack"
         />
       </div>
-      {loading && results.length === 0 && (
-        <p className="porto-icon-search__status">Searching…</p>
-      )}
-      {error && results.length === 0 && (
-        <p className="porto-icon-search__status">{error}</p>
-      )}
-      {!loading && !error && query.trim() && results.length === 0 && (
-        <p className="porto-icon-search__status">
-          No icons found for “{query.trim()}”.
-        </p>
-      )}
-      {results.length > 0 && (
-        <ul className="porto-icon-search__results">
-          {results.map((iconId) => (
-            <li key={iconId}>
-              <button
-                type="button"
-                className="porto-icon-search__result"
-                onClick={() => copyId(iconId)}
-                title={`Copy ${shortId(iconId)}`}
-              >
-                <span className="porto-icon-search__preview">
-                  {svgs[iconId] ? (
-                    <span dangerouslySetInnerHTML={{ __html: svgs[iconId] }} />
-                  ) : (
-                    /* eslint-disable-next-line @next/next/no-img-element -- Iconify CDN SVGs, not Next-optimized images */
-                    <img
-                      src={`https://api.iconify.design/${iconId.replace(":", "/")}.svg`}
-                      alt=""
-                      width={24}
-                      height={24}
-                      loading="lazy"
-                    />
-                  )}
-                </span>
-                <span>{copied === iconId ? "Copied!" : shortId(iconId)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {!dismissed && (
+        <>
+          {loading && results.length === 0 && (
+            <p className="porto-icon-search__status">Searching…</p>
+          )}
+          {error && results.length === 0 && (
+            <p className="porto-icon-search__status">{error}</p>
+          )}
+          {!loading && !error && query.trim() && results.length === 0 && (
+            <p className="porto-icon-search__status">
+              No icons found for “{query.trim()}”.
+            </p>
+          )}
+          {results.length > 0 && (
+            <ul className="porto-icon-search__results">
+              {results.map((iconId) => (
+                <li key={iconId}>
+                  <button
+                    type="button"
+                    className="porto-icon-search__result"
+                    onClick={() => copyId(iconId)}
+                    title={`Copy ${shortId(iconId)}`}
+                  >
+                    <span className="porto-icon-search__preview">
+                      {svgs[iconId] ? (
+                        <span
+                          dangerouslySetInnerHTML={{ __html: svgs[iconId] }}
+                        />
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element -- Iconify CDN SVGs, not Next-optimized images */
+                        <img
+                          src={`https://api.iconify.design/${iconId.replace(":", "/")}.svg`}
+                          alt=""
+                          width={24}
+                          height={24}
+                          loading="lazy"
+                        />
+                      )}
+                    </span>
+                    <span>
+                      {copied === iconId ? "Copied!" : shortId(iconId)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );
