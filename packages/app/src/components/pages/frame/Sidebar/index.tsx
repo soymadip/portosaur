@@ -342,13 +342,6 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   openStateRef.current = openState;
 
   const isOpen = (item: SidebarItem): boolean => {
-    // The current page's ancestors open ahead of any stored
-    // state — a category the user closed earlier reopens the
-    // moment the current page lands inside it again. The stored
-    // value still applies once the user navigates away.
-    if (hasActiveDescendant(item, current)) {
-      return true;
-    }
     const index = categoryIndex.get(item);
     if (index === undefined) {
       return false;
@@ -357,7 +350,13 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     if (stored !== null && stored !== undefined) {
       return stored;
     }
-    return false;
+    // No stored state yet (the first render, before the mount
+    // effects run): the current page's ancestors start open, so
+    // the active link is never hidden on first paint. After
+    // that the stored value rules — a manual close of the
+    // active category sticks until the next navigation opens
+    // the new page's path again (see the effect below).
+    return openState === null && hasActiveDescendant(item, current);
   };
 
   const storeState = (open: Array<boolean | null>) => {
@@ -428,27 +427,48 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash]);
 
-  // After every navigation, the current page's ancestors open
-  // on their own — `isOpen` returns true for them regardless of
-  // stored state, so the render already shows the active path.
-  // Closing a category by hand doesn't change `current`, so a
-  // deliberate close is left alone until the next navigation.
-  // With auto-collapse, the navigation also closes the old tree:
-  // only the new page's path stays open, and navigating to a
-  // top-level page closes every category. The collapse runs on
-  // the navigation, not on expanding a tree — opening a category
-  // to peek never closes anything. The stored state is updated
-  // too, so a later re-render keeps the open state and the
-  // stored state in agreement.
+  // After every navigation, the current page's ancestors open:
+  // a category the user closed earlier reopens the moment the
+  // current page lands inside it again, so a search or
+  // direct-link landing never strands the active link inside a
+  // closed category. Closing a category by hand doesn't change
+  // `current`, so a deliberate close is left alone until the
+  // next navigation. With auto-collapse, the navigation also
+  // closes the old tree: only the new page's path stays open,
+  // and navigating to a top-level page closes every category.
+  // The collapse runs on the navigation, not on expanding a
+  // tree — opening a category to peek never closes anything.
+  // The stored state is updated too, so a later re-render keeps
+  // the open state and the stored state in agreement.
   useEffect(() => {
-    if (!autoCollapse) {
-      return;
-    }
     setOpenState((previous) => {
       const next: Array<boolean | null> = previous
         ? [...previous]
         : Array.from({ length: categoryCount }, () => null);
       let changed = false;
+      const openPath = (nodes: SidebarItem[]) => {
+        for (const node of nodes) {
+          if (node.type !== "category" || !hasActiveDescendant(node, current)) {
+            continue;
+          }
+          const index = categoryIndex.get(node);
+          if (index !== undefined && next[index] !== true) {
+            next[index] = true;
+            changed = true;
+          }
+          if (node.items) {
+            openPath(node.items);
+          }
+        }
+      };
+      openPath(items);
+      if (!autoCollapse) {
+        if (!changed) {
+          return previous;
+        }
+        storeState(next);
+        return next;
+      }
       const fixLevel = (nodes: SidebarItem[]) => {
         const activeNode = nodes.find(
           (node) =>
