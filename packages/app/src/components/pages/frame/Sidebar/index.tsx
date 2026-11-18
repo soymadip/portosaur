@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../../lib/pageUrl.ts";
@@ -214,7 +214,14 @@ function FolderPanel({
   const prevOpenRef = useRef(open);
   const frameRef = useRef(0);
 
-  useEffect(() => {
+  // A layout effect, not a passive one: the height must be set
+  // before the first paint after the toggle, so the shrink
+  // starts in step with the fade (both are set in the same
+  // frame). A passive effect runs after paint, which left the
+  // height standing still for two or three frames while the
+  // opacity faded — then the height plunged all at once, which
+  // read as a sudden jolt on close.
+  useLayoutEffect(() => {
     // Mount only renders the initial state — the fold runs on
     // changes after that.
     if (prevOpenRef.current === open) {
@@ -246,18 +253,18 @@ function FolderPanel({
       setHidden(true);
       return;
     }
-    // Capture the current height first, then glide to 0 on a
-    // later frame so the browser registers the start value —
+    // Capture the current height first, then glide to 0 on the
+    // next frame so the browser registers the start value —
     // going straight from `auto` to 0 would snap, `auto` does
-    // not interpolate.
+    // not interpolate. One frame is enough: the start height
+    // is set before paint (this is a layout effect), so it is
+    // committed by the time the frame callback runs.
     const current = panel.getBoundingClientRect().height;
     setHeight(current);
     frameRef.current = requestAnimationFrame(() => {
-      frameRef.current = requestAnimationFrame(() => {
-        if (!openRef.current) {
-          setHeight(0);
-        }
-      });
+      if (!openRef.current) {
+        setHeight(0);
+      }
     });
     return () => {
       cancelAnimationFrame(frameRef.current);
