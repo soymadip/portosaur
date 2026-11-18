@@ -154,9 +154,14 @@
   );
 }
 
+/* The indent is the same whether the folder is open or closed:
+   it used to be keyed on [data-open="true"], so every nested
+   row jumped 2.4px sideways the instant its category was
+   clicked — margin and padding have no transition, so the jump
+   landed before the fold even started. */
 .porto-sidebar__top-level
   > li
-  > .porto-sidebar__folder[data-open="true"]
+  > .porto-sidebar__folder
   > .porto-sidebar__folder-panel
   > ul
   > li,
