@@ -4,13 +4,17 @@ desc: "Turn your site into an installable application with app shortcuts and aut
 icon: "si:pwa"
 ---
 
-Portosaur turns both portfolio and documentation sites into fully compliant Progressive Web Apps (PWAs) out of the box. Users on mobile devices, ChromeOS, Windows, and macOS can install your site directly to their home screen or desktop like a native application.
+Portosaur generates the PWA manifest and app icons for both portfolio and documentation sites out of the box.
+
+:::info[Coming soon]
+The service worker, app shortcuts, automated screenshots, and push notifications described below aren't built yet — today the build generates the manifest (`manifest.webmanifest`) and the favicon set only. Full installability and offline support land with the service worker.
+:::
 
 ---
 
 ## Configuration
 
-PWA support is enabled by default in `config.yml`. You can customize or disable it under the `site.pwa` block:
+PWA support is enabled by default in `config.yml`. You can customize or disable it under the `site.pwa` block (the switch is read today; the service worker it will control is coming soon):
 
 ```yaml
 site:
@@ -22,6 +26,10 @@ site:
 ---
 
 ## App Shortcuts
+
+:::info[Coming soon]
+Shortcuts aren't written to the manifest yet.
+:::
 
 When a user installs your Portosaur site and long-presses (on mobile) or right-clicks (on desktop) the app icon, the operating system displays instant **App Shortcuts**.
 
@@ -40,6 +48,10 @@ Shortcut icons are dynamically extracted from theme assets and tinted to match y
 ---
 
 ## Automated Screenshots (Zero-Config)
+
+:::info[Coming soon]
+Screenshot scanning isn't built yet — screenshots you place in `static/` aren't picked up into the manifest today.
+:::
 
 When a user selects "Install App" in Chromium-based browsers, a rich installation prompt is displayed featuring device screenshots (similar to an app store carousel).
 
@@ -61,14 +73,18 @@ PWA installation prompts require widescreen landscape screenshots (desktop) and 
 
 ## Offline Support & Caching
 
-The generated Service Worker automatically caches static assets, fonts, icons, and visited documentation pages. If a user loses connectivity, previously visited pages continue to load instantly, and unvisited pages display a themed offline indicator.
+:::info[Coming soon]
+No service worker is generated yet, so there is no offline caching today.
+:::
+
+The generated Service Worker will automatically cache static assets, fonts, icons, and visited documentation pages. If a user loses connectivity, previously visited pages will continue to load instantly, and unvisited pages will display a themed offline indicator.
 
 ---
 
 ## Testing Your PWA
 
-You can verify your site's PWA compliance using [PWABuilder](https://www.pwabuilder.com/) or Chrome DevTools:
+You can verify the generated manifest using [PWABuilder](https://www.pwabuilder.com/) or Chrome DevTools:
 
 1. In Chrome, open **DevTools (F12) → Application → Manifest**.
-2. Verify that the manifest, theme colors, icons, shortcuts, and screenshots are recognized without errors.
-3. Test installation by clicking the install icon in the browser address bar.
+2. Verify that the manifest, theme colors, and icons are recognized without errors.
+3. Installation testing waits for the service worker (coming soon).
