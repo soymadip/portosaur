@@ -40,7 +40,7 @@ The generated template targets the `main` branch. If your default branch has a d
 
 ## 3. Enable and Run the Pipeline
 
-Make sure CI/CD is enabled and a runner is available for the project. Commit and push `.gitlab-ci.yml` and your Portosaur files to `main`. GitLab runs the `pages` job; view its status in **Build → Pipelines**.
+Make sure CI/CD is enabled and a runner is available for the project. Commit and push `.gitlab-ci.yml` and your Portosaur files to `main`. GitLab runs the `pages` job. View its status in **Build → Pipelines**.
 
 After the job succeeds, open **Deploy → Pages** to find the published URL. Pages can take a short time to become available after the pipeline completes.
 
@@ -54,4 +54,4 @@ site:
   base_url: "/"
 ```
 
-GitLab manages HTTPS certificates for configured custom domains; follow the Pages settings until the certificate is ready.
+GitLab manages HTTPS certificates for configured custom domains. Follow the Pages settings until the certificate is ready.
