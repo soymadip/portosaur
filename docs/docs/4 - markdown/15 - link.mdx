@@ -1,0 +1,39 @@
+---
+title: "Link"
+desc: "Explicit links with client-side routing."
+icon: "lu:link"
+---
+
+The `<Link>` component is the explicit way to write a link in MDX. Plain Markdown links (`[text](href)`) already get the same treatment automatically — use `<Link>` when you need a link inside another component, or want to pass extra attributes to the anchor.
+
+## Basic Usage
+
+```jsx
+<Link to="/docs/getting-started/installation">Install Portosaur</Link>
+```
+
+<Link to="/docs/getting-started/installation">Install Portosaur</Link>
+
+## Internal and external links
+
+- **Internal links** (`to` with a page path): navigate client-side, without a full page reload. The site's trailing slash is added automatically.
+- **External links** (a full URL): open in a new tab, safely (`target="_blank"` and `rel="noopener noreferrer"`).
+- **Same-page anchors** (`to` with a `#section`): plain anchors, no routing.
+
+```jsx
+<Link to="/docs/config/reference">Config Reference</Link>
+
+<Link href="https://github.com/soymadip/portosaur">GitHub Repo</Link>
+
+<Link to="#basic-usage">Back to the top</Link>
+```
+
+Any other props (like `className`) pass through to the anchor element.
+
+## Props Reference
+
+| Prop       | Type     | Default | Description                                                                                                     |
+| :--------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------- |
+| `to`       | `string` | None    | Link destination. Internal paths navigate client-side; full URLs open in a new tab; `#anchors` stay on the page. |
+| `href`     | `string` | None    | Same as `to`. When both are given, `to` wins.                                                                   |
+| `children` | `node`   | None    | The link text or content.                                                                                       |
