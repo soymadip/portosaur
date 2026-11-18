@@ -16,11 +16,7 @@ import {
  * belongs to and the `<mark>` segments that bold the query terms.
  */
 
-function page(
-  id: string,
-  content: string,
-  breadcrumbs?: string[],
-): FlatResult {
+function page(id: string, content: string, breadcrumbs?: string[]): FlatResult {
   return { id, url: id, type: "page", content, breadcrumbs };
 }
 
@@ -148,7 +144,9 @@ describe("splitMatches", () => {
   });
 
   test("prefers the longest term so whole words bold", () => {
-    expect(splitMatches("the installation guide", "install installation")).toEqual([
+    expect(
+      splitMatches("the installation guide", "install installation"),
+    ).toEqual([
       { text: "the ", matched: false },
       { text: "installation", matched: true },
       { text: " guide", matched: false },
@@ -180,46 +178,45 @@ describe("parseTableRow", () => {
     `| Option | Description |\n| ------ | ----------- |\n${row}`;
 
   test("parses the header and the row into cells", () => {
-    expect(
-      parseTableRow(table("| `-k` | Skip the install. |")),
-    ).toEqual({
+    expect(parseTableRow(table("| `-k` | Skip the install. |"))).toEqual({
       header: ["Option", "Description"],
       cells: ["-k", "Skip the install."],
     });
   });
 
   test("keeps an escaped pipe inside a cell", () => {
-    expect(
-      parseTableRow(table("| `a\\|b` | Piped. |"))?.cells,
-    ).toEqual(["a|b", "Piped."]);
+    expect(parseTableRow(table("| `a\\|b` | Piped. |"))?.cells).toEqual([
+      "a|b",
+      "Piped.",
+    ]);
   });
 
   test("keeps a pipe inside a code span", () => {
-    expect(
-      parseTableRow(table("| `a|b` | Piped. |"))?.cells,
-    ).toEqual(["a|b", "Piped."]);
+    expect(parseTableRow(table("| `a|b` | Piped. |"))?.cells).toEqual([
+      "a|b",
+      "Piped.",
+    ]);
   });
 
   test("keeps a pipe inside a double-backtick span", () => {
-    expect(
-      parseTableRow(table("| ``a|b`` | Piped. |"))?.cells,
-    ).toEqual(["a|b", "Piped."]);
+    expect(parseTableRow(table("| ``a|b`` | Piped. |"))?.cells).toEqual([
+      "a|b",
+      "Piped.",
+    ]);
   });
 
   test("strips bold and links, keeps snake_case", () => {
     expect(
-      parseTableRow(
-        table("| **bold** [docs](/docs) | use `my_option` here |"),
-      )?.cells,
+      parseTableRow(table("| **bold** [docs](/docs) | use `my_option` here |"))
+        ?.cells,
     ).toEqual(["bold docs", "use my_option here"]);
   });
 
   test("accepts alignment markers in the separator", () => {
-    expect(
-      parseTableRow(
-        "| A | B |\n| :--- | ---: |\n| 1 | 2 |",
-      ),
-    ).toEqual({ header: ["A", "B"], cells: ["1", "2"] });
+    expect(parseTableRow("| A | B |\n| :--- | ---: |\n| 1 | 2 |")).toEqual({
+      header: ["A", "B"],
+      cells: ["1", "2"],
+    });
   });
 
   test("returns null without a separator line", () => {

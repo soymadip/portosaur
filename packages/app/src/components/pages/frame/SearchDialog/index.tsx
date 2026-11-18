@@ -106,7 +106,10 @@ export function SearchDialog() {
   );
 
   // The flat entry list behind the cards — keyboard navigation walks this.
-  const navList = useMemo(() => flattenGroups(filteredGroups), [filteredGroups]);
+  const navList = useMemo(
+    () => flattenGroups(filteredGroups),
+    [filteredGroups],
+  );
 
   const close = useCallback(() => {
     setOpen(false);
@@ -280,10 +283,7 @@ export function SearchDialog() {
               ESC
             </button>
           </div>
-          <div
-            ref={resultsRef}
-            className="porto-search-dialog__results"
-          >
+          <div ref={resultsRef} className="porto-search-dialog__results">
             {isLoading && (
               <p className="porto-search-dialog__loading">Loading search…</p>
             )}

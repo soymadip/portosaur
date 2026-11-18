@@ -9,10 +9,7 @@ import {
   flattenResults,
   groupResults,
 } from "../../../lib/search-results.ts";
-import {
-  SearchResults,
-  SearchSectionFilter,
-} from "../SearchResults/index.tsx";
+import { SearchResults, SearchSectionFilter } from "../SearchResults/index.tsx";
 
 /**
  * The interactive search-page body (input + results). A separate
@@ -71,7 +68,10 @@ export function SearchPageBody() {
     [groups, section],
   );
 
-  const navList = useMemo(() => flattenGroups(filteredGroups), [filteredGroups]);
+  const navList = useMemo(
+    () => flattenGroups(filteredGroups),
+    [filteredGroups],
+  );
 
   // Run the initial `?q=` query on mount.
   useEffect(() => {
@@ -141,8 +141,8 @@ export function SearchPageBody() {
         {navList.length > 0 && (
           <>
             <p className="porto-search-page__count">
-              {navList.length} result{navList.length === 1 ? "" : "s"} for
-              “{query}”.
+              {navList.length} result{navList.length === 1 ? "" : "s"} for “
+              {query}”.
             </p>
             <SearchResults groups={filteredGroups} query={query} />
           </>

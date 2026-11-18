@@ -120,9 +120,7 @@ function isSeparatorRow(line: string): boolean {
     .split("|")
     .map((cell) => cell.trim())
     .filter((cell) => cell.length > 0);
-  return (
-    cells.length > 0 && cells.every((cell) => /^:?-+:?$/.test(cell))
-  );
+  return cells.length > 0 && cells.every((cell) => /^:?-+:?$/.test(cell));
 }
 
 /**

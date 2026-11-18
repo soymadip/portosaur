@@ -59,9 +59,7 @@ function ResultLink({
   const isPage = entry.type === "page";
   const className = [
     "porto-search-result",
-    isPage
-      ? "porto-search-result--page"
-      : "porto-search-result--nested",
+    isPage ? "porto-search-result--page" : "porto-search-result--nested",
     active ? "porto-search-result--active" : "",
   ]
     .filter(Boolean)
@@ -159,11 +157,7 @@ function TableBlock({
         style={{ gridTemplateColumns: template }}
       >
         {header.length > 0 && (
-          <div
-            id={headerId}
-            aria-hidden
-            className="porto-search-table__header"
-          >
+          <div id={headerId} aria-hidden className="porto-search-table__header">
             {header.map((cell, index) => (
               <span key={index} className="porto-search-table__header-cell">
                 <HighlightedText text={cell} query={query} />
