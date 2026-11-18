@@ -22,6 +22,7 @@
 /docs/getting-started/
 /docs/getting-started/installation/
 /docs/getting-started/project-structure/
+/docs/getting-started/search/
 /docs/markdown/
 /docs/markdown/alerts/
 /docs/markdown/btn/
@@ -34,6 +35,7 @@
 /docs/markdown/icon-search/
 /docs/markdown/icon/
 /docs/markdown/indent/
+/docs/markdown/link/
 /docs/markdown/preview/
 /docs/markdown/tabs/
 /docs/markdown/topic-list/
