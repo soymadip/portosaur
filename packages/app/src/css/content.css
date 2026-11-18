@@ -146,26 +146,58 @@
   color: var(--porto-color-gray-3);
 }
 
-/* Tables. */
-.porto-markdown-content table:not(:where(.not-content *)) {
-  display: block;
+/* Tables — Fumadocs' rounded table: a bordered card with rounded
+ * corners, a tinted header row, and dividers between the columns
+ * and rows (their `roundedTable` + `Table` wrapper, in Portosaur
+ * tokens; no shadow — Fumadocs' tables have none either). The
+ * wrapper scrolls sideways when the table is wider than the page;
+ * the table itself clips its corners. One deliberate difference:
+ * the table stays full-width, as it was before — Fumadocs lets
+ * narrow tables shrink, Portosaur keeps them filling the content
+ * column. */
+.porto-markdown-content .porto-table-wrapper:not(:where(.not-content *)) {
   overflow: auto;
+}
+.porto-markdown-content table:not(:where(.not-content *)) {
+  /* One border color for the frame and the dividers: gray-4
+   * softened toward gray-5 so the lines sit quietly against the
+   * header tint without disappearing into it. */
+  --porto-table-border: color-mix(
+    in srgb,
+    var(--porto-color-gray-4) 60%,
+    var(--porto-color-gray-5)
+  );
+  width: 100%;
+  border-collapse: separate;
   border-spacing: 0;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-table-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 .porto-markdown-content :is(th, td):not(:where(.not-content *)) {
-  border-bottom: 1px solid var(--porto-color-gray-5);
-  padding: 0.5rem 1rem;
+  padding: 0.625rem;
   vertical-align: baseline;
+  border-inline-start: 1px solid var(--porto-table-border);
 }
 .porto-markdown-content
   :is(th:first-child, td:first-child):not(:where(.not-content *)) {
-  padding-inline-start: 0;
+  border-inline-start: none;
 }
+/* Every row but the last gets a bottom divider; the header row
+ * gets one from the thead rule below (its row is the last child of
+ * the thead, so the `:not` rule skips it). */
 .porto-markdown-content
-  :is(th:last-child, td:last-child):not(:where(.not-content *)) {
-  padding-inline-end: 0;
+  th:not(tr:last-child > th):not(:where(.not-content *)),
+.porto-markdown-content
+  td:not(tr:last-child > td):not(:where(.not-content *)) {
+  border-bottom: 1px solid var(--porto-table-border);
+}
+.porto-markdown-content thead :is(th, td):not(:where(.not-content *)) {
+  border-bottom: 1px solid var(--porto-table-border);
 }
 .porto-markdown-content th:not(:where(.not-content *)) {
+  background-color: var(--porto-color-gray-5);
   color: var(--porto-color-white);
   font-weight: 600;
 }

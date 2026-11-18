@@ -18,6 +18,7 @@ import { Indent } from "./mdx/Indent/index.tsx";
 import { Link } from "./mdx/Link.tsx";
 import { Pv } from "./mdx/Pv/index.tsx";
 import { TabItem } from "./mdx/TabItem.tsx";
+import { Table } from "./mdx/Table.tsx";
 import { Tabs } from "./mdx/Tabs/index.tsx";
 import { TopicList } from "./mdx/TopicList/index.tsx";
 
@@ -55,6 +56,10 @@ export function getMDXComponents(components?: MDXComponents) {
        pre's props (title, icon, allowCopy, line numbers) come from
        the fence meta via Fumadocs' rehype-code. */
     pre: (props: HTMLAttributes<HTMLPreElement>) => <CodeBlock {...props} />,
+    /* Every markdown table renders in the scrolling Table wrapper,
+       Fumadocs-style — the wrapper scrolls, the table keeps its
+       rounded corners. */
+    table: Table,
     ...components,
   } satisfies MDXComponents;
 }
@@ -83,6 +88,7 @@ export { Indent } from "./mdx/Indent/index.tsx";
 export { Link } from "./mdx/Link.tsx";
 export { Pv } from "./mdx/Pv/index.tsx";
 export { TabItem } from "./mdx/TabItem.tsx";
+export { Table } from "./mdx/Table.tsx";
 export { Tabs } from "./mdx/Tabs/index.tsx";
 export {
   TopicList,
