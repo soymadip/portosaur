@@ -285,4 +285,45 @@ describe("flattenResults", () => {
     expect(flat[0].type).toBe("text");
     expect(flat[0].content).toBe("row one");
   });
+
+  test("strips inline Markdown from text and heading excerpts", () => {
+    const flat = flattenResults([
+      {
+        id: "h1",
+        url: "/docs/a#bun",
+        type: "heading",
+        content: "On-Demand with `bunx` (Recommended)",
+      },
+      {
+        id: "t1",
+        url: "/docs/a#bun",
+        type: "text",
+        content:
+          "**Bun**: the recommended runtime — see the [install guide](/docs/install) for `bun install`.",
+      },
+      {
+        id: "p1",
+        url: "/docs/a",
+        type: "page",
+        content: "The `porto` command",
+      },
+    ] as any);
+    expect(flat[0].content).toBe("On-Demand with bunx (Recommended)");
+    expect(flat[1].content).toBe(
+      "Bun: the recommended runtime — see the install guide for bun install.",
+    );
+    expect(flat[2].content).toBe("The porto command");
+  });
+
+  test("leaves snake_case and arithmetic alone in excerpts", () => {
+    const flat = flattenResults([
+      {
+        id: "t1",
+        url: "/docs/a#math",
+        type: "text",
+        content: "Set `max_count` to 2 * 3 for the job_queue.",
+      },
+    ] as any);
+    expect(flat[0].content).toBe("Set max_count to 2 * 3 for the job_queue.");
+  });
 });

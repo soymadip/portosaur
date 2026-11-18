@@ -78,7 +78,10 @@ export function flattenResults(items: SearchResultItem[]): FlatResult[] {
       id: item.id,
       url: item.url,
       type: item.type,
-      content: item.content,
+      // Page titles, headings, and text chunks carry inline
+      // Markdown too (532 indexed docs have backticks, 132 have
+      // bold) — strip it so excerpts read as plain text.
+      content: stripInlineMarkdown(item.content),
       breadcrumbs: item.breadcrumbs,
     });
   }
@@ -176,11 +179,12 @@ function splitTableRow(line: string): string[] {
 }
 
 /**
- * Strips the inline Markdown a table cell can carry — code spans,
- * bold, links — leaving plain text. Single `*` and `_` italics are
- * deliberately left alone: stripping them would mangle `snake_case`
- * names and `2 * 3` arithmetic, which are far more common in tables
- * than italics.
+ * Strips the inline Markdown search content can carry — code
+ * spans, bold, links — leaving plain text. Shared by table cells
+ * and by page, heading, and text excerpts. Single `*` and `_`
+ * italics are deliberately left alone: stripping them would mangle
+ * `snake_case` names and `2 * 3` arithmetic, which are far more
+ * common in docs than italics.
  */
 function stripInlineMarkdown(cell: string): string {
   return cell
