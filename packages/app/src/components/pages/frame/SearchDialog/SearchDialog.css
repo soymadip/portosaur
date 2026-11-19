@@ -104,33 +104,24 @@
 .porto-search-dialog__input:focus {
   outline: none;
 }
-/* The results area carries the bottom border (Fumadocs divides
-   its dialog children this way — every child but the last has a
-   bottom border), so the line between the results and the footer
-   is the same single line as the one under the bar. The footer
-   itself has no top border: with no results yet, the bar's bottom
-   border is the only line between bar and footer. */
+/* The section filter swaps in for the ESC button when results
+   span more than one section — just the dropdown, no label. The
+   trigger inherits its size from the wrapper, so the wrapper
+   carries the small size: 12px text and the small button's
+   padding, matching the ESC button exactly, so the swap never
+   moves the bar's height. */
+.porto-search-dialog__header .porto-search-filter {
+  font-size: 0.75rem;
+}
+.porto-search-dialog__header .porto-dropdown__trigger--sm.porto-button {
+  padding-block: 0.375rem;
+}
+
 .porto-search-dialog__results {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
   padding: 1rem;
-  border-bottom: 1px solid var(--porto-color-gray-5);
-}
-
-/* The footer — Fumadocs' `bg-secondary/50 p-3`, always rendered,
-   even with no results yet, so the dialog never shifts when
-   results land. It holds the section filter. */
-.porto-search-dialog__footer {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem;
-  background-color: color-mix(
-    in srgb,
-    var(--porto-color-gray-5) 50%,
-    transparent
-  );
-  flex-shrink: 0;
 }
 
 .porto-search-dialog__loading,

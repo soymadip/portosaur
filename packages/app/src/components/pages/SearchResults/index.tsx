@@ -368,13 +368,15 @@ export function SearchResults({
  * The "Filter [All ▾]" row — Fumadocs' tag filter, Portosaur's
  * version narrowing by docs section instead (the index carries no
  * tags. Every result is a docs page). The dialog renders it in its
- * footer. The page renders it under its input.
+ * bar, in place of the ESC button, without the label. The page
+ * renders it under its input, with the label.
  */
 export function SearchSectionFilter({
   sections,
   value,
   onChange,
   dropUp = false,
+  showLabel = true,
 }: {
   /** The sections the current results span, in first-seen order. */
   sections: string[];
@@ -383,10 +385,13 @@ export function SearchSectionFilter({
   onChange: (section: string) => void;
   /** Open the menu above the trigger instead of below it. */
   dropUp?: boolean;
+  /** Show the "Filter" label before the dropdown. The dialog's
+   * bar shows the dropdown alone. */
+  showLabel?: boolean;
 }) {
   return (
     <div className="porto-search-filter">
-      <span className="porto-search-filter__label">Filter</span>
+      {showLabel && <span className="porto-search-filter__label">Filter</span>}
       <Dropdown
         trigger={value}
         items={[

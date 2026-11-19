@@ -22,13 +22,14 @@ import {
  *
  * The bar is Fumadocs' wiki bar, copied whole: a magnifier (it
  * pulses while the index loads), a borderless input, and an ESC
- * button that closes the dialog. Below the results sits the
- * footer, always there — even before the first keystroke — with
- * the section filter in it, so the dialog never shifts when
- * results land. The filter narrows by docs section (the index
- * carries no tags. Every result is a docs page). Results are
- * Starlight-style grouped cards, rendered by the shared
- * `SearchResults` (the search page renders the same list).
+ * button that closes the dialog. One change from Fumadocs: when
+ * results span more than one section, the ESC button swaps for
+ * the section filter — just the dropdown, no label — so the
+ * dialog never grows a footer and never shifts. The filter
+ * narrows by docs section (the index carries no tags. Every
+ * result is a docs page). Results are Starlight-style grouped
+ * cards, rendered by the shared `SearchResults` (the search page
+ * renders the same list).
  *
  * The dialog opens and closes like Fumadocs' — a 300ms
  * scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
@@ -293,19 +294,31 @@ export function SearchDialog() {
                   : undefined
               }
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="porto-search-dialog__close"
-              ariaLabel="Close Search"
-              onClick={close}
-            >
-              ESC
-            </Button>
+            {sections.length > 1 ? (
+              <SearchSectionFilter
+                sections={sections}
+                value={section}
+                onChange={(next) => {
+                  setSection(next);
+                  setActiveIndex(-1);
+                }}
+                showLabel={false}
+              />
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="porto-search-dialog__close"
+                ariaLabel="Close Search"
+                onClick={close}
+              >
+                ESC
+              </Button>
+            )}
           </div>
           {/* The results area only exists when it has something to
-              show — with no query yet, the footer sits straight
-              under the bar, like Fumadocs' empty dialog. */}
+              show — with no query yet, the dialog is just the
+              bar. */}
           {(isLoading ||
             showEmpty ||
             showFilteredEmpty ||
@@ -337,18 +350,6 @@ export function SearchDialog() {
               )}
             </div>
           )}
-          {/* The footer is always here — even with no results yet —
-              so the dialog never shifts when results land. */}
-          <div className="porto-search-dialog__footer">
-            <SearchSectionFilter
-              sections={sections}
-              value={section}
-              onChange={(next) => {
-                setSection(next);
-                setActiveIndex(-1);
-              }}
-            />
-          </div>
         </div>
       </dialog>
     </>
