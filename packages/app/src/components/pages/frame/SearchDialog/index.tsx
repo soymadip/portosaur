@@ -238,7 +238,7 @@ export function SearchDialog() {
       const result = navList[activeIndex];
       if (result) {
         event.preventDefault();
-        markSearchNavigation(result.url);
+        markSearchNavigation(result);
         close();
         router.push(result.url);
       }

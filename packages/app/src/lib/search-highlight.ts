@@ -22,18 +22,29 @@ export interface SearchHighlightFlag {
   page: string;
   /** The section's id, or null for a page result (the page title flashes). */
   fragment: string | null;
+  /** The result kind: page, heading, text, or table-row. */
+  type: string;
+  /** The result's text — for text and table results, the line to
+   * find and flash on the page. */
+  content: string;
   /** When the result was clicked — flags older than 5s are stale. */
   at: number;
 }
 
 /** Stores a result's target for the destination page to flash,
  * and tells the highlight component the navigation started. */
-export function markSearchNavigation(url: string) {
+export function markSearchNavigation(entry: {
+  url: string;
+  type: string;
+  content: string;
+}) {
   try {
-    const [page, fragment] = url.split("#");
+    const [page, fragment] = entry.url.split("#");
     const flag: SearchHighlightFlag = {
       page,
       fragment: fragment ?? null,
+      type: entry.type,
+      content: entry.content,
       at: Date.now(),
     };
     sessionStorage.setItem(KEY, JSON.stringify(flag));
