@@ -1,5 +1,5 @@
 {
-  "generated_from": "docs-fix batch: new search + link pages",
+  "generated_from": "Components pages grouped under /docs/markdown/components/",
   "routes": [
     {
       "url": "/",
@@ -256,37 +256,7 @@
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
-        "Alerts",
-        "Tabs",
-        "Details",
-        "Hint",
-        "Indent",
-        "TopicList",
-        "Btn",
-        "Dropdown",
-        "Icon",
-        "DynamicIcon",
-        "IconSearch",
-        "Preview",
-        "Link"
-      ]
-    },
-    {
-      "url": "/docs/markdown/alerts/",
-      "title": "Alerts | Portosaur",
-      "headings": ["Alerts", "Docusaurus Admonitions", "GitHub Alerts"]
-    },
-    {
-      "url": "/docs/markdown/btn/",
-      "title": "Btn | Portosaur",
-      "headings": [
-        "Btn",
-        "Basic Usage",
-        "Color Variants",
-        "Sizes",
-        "Links & Navigation",
-        "Props Reference",
-        "Icons"
+        "Components"
       ]
     },
     {
@@ -304,47 +274,80 @@
       ]
     },
     {
-      "url": "/docs/markdown/details/",
+      "url": "/docs/markdown/components/",
+      "title": "Components | Portosaur",
+      "headings": [
+        "Components",
+        "Alerts",
+        "Tabs",
+        "Details",
+        "Hint",
+        "Indent",
+        "TopicList",
+        "Btn",
+        "Dropdown",
+        "Icon",
+        "DynamicIcon",
+        "IconSearch",
+        "Preview",
+        "Link"
+      ]
+    },
+    {
+      "url": "/docs/markdown/components/alerts/",
+      "title": "Alerts | Portosaur",
+      "headings": ["Alerts", "Docusaurus Admonitions", "GitHub Alerts"]
+    },
+    {
+      "url": "/docs/markdown/components/btn/",
+      "title": "Btn | Portosaur",
+      "headings": [
+        "Btn",
+        "Basic Usage",
+        "Color Variants",
+        "Sizes",
+        "Links & Navigation",
+        "Props Reference",
+        "Icons"
+      ]
+    },
+    {
+      "url": "/docs/markdown/components/details/",
       "title": "Details | Portosaur",
       "headings": ["Details", "Props Reference"]
     },
     {
-      "url": "/docs/markdown/dropdown/",
+      "url": "/docs/markdown/components/dropdown/",
       "title": "Dropdown | Portosaur",
       "headings": ["Dropdown", "Props Reference"]
     },
     {
-      "url": "/docs/markdown/dynamic-icon/",
+      "url": "/docs/markdown/components/dynamic-icon/",
       "title": "DynamicIcon | Portosaur",
       "headings": ["DynamicIcon"]
     },
     {
-      "url": "/docs/markdown/frontmatter/",
-      "title": "Frontmatter | Portosaur",
-      "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
-    },
-    {
-      "url": "/docs/markdown/hint/",
+      "url": "/docs/markdown/components/hint/",
       "title": "Hint | Portosaur",
       "headings": ["Hint", "Positioning & Styles", "Props Reference"]
     },
     {
-      "url": "/docs/markdown/icon-search/",
+      "url": "/docs/markdown/components/icon-search/",
       "title": "IconSearch | Portosaur",
       "headings": ["IconSearch"]
     },
     {
-      "url": "/docs/markdown/icon/",
+      "url": "/docs/markdown/components/icon/",
       "title": "Icon | Portosaur",
       "headings": ["Icon"]
     },
     {
-      "url": "/docs/markdown/indent/",
+      "url": "/docs/markdown/components/indent/",
       "title": "Indent | Portosaur",
       "headings": ["Indent", "Props Reference"]
     },
     {
-      "url": "/docs/markdown/link/",
+      "url": "/docs/markdown/components/link/",
       "title": "Link | Portosaur",
       "headings": [
         "Link",
@@ -354,7 +357,7 @@
       ]
     },
     {
-      "url": "/docs/markdown/preview/",
+      "url": "/docs/markdown/components/preview/",
       "title": "Preview | Portosaur",
       "headings": [
         "Preview",
@@ -365,14 +368,19 @@
       ]
     },
     {
-      "url": "/docs/markdown/tabs/",
+      "url": "/docs/markdown/components/tabs/",
       "title": "Tabs | Portosaur",
       "headings": ["Tabs", "Behavior", "Props Reference"]
     },
     {
-      "url": "/docs/markdown/topic-list/",
+      "url": "/docs/markdown/components/topic-list/",
       "title": "TopicList | Portosaur",
       "headings": ["TopicList", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/frontmatter/",
+      "title": "Frontmatter | Portosaur",
+      "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
     },
     {
       "url": "/docs/progressive-web-app/",
