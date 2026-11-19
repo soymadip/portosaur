@@ -1,0 +1,30 @@
+/* The flash on a search result's target: the matched section's
+   heading (or the page title) glows in the accent tint for two
+   seconds after landing, then fades back to nothing. The class
+   comes off by timer, so the `forwards` fill only holds the
+   transparent end state. */
+@keyframes porto-search-highlight-fade {
+  from {
+    background-color: color-mix(
+      in srgb,
+      var(--porto-color-text-accent) 25%,
+      transparent
+    );
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.porto-search-highlight {
+  animation: porto-search-highlight-fade 2s ease-out forwards;
+  border-radius: 0.375rem;
+}
+
+/* Reduced motion: no flash. The class still lands and lifts
+   harmlessly, it just has nothing to show. */
+@media (prefers-reduced-motion: reduce) {
+  .porto-search-highlight {
+    animation: none;
+  }
+}

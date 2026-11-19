@@ -4,6 +4,7 @@ import type { PortosaurOptions } from "../../../lib/config.ts";
 import { prepareSidebar } from "../../../lib/sidebar.ts";
 import { Sidebar } from "../../pages/frame/Sidebar/index.tsx";
 import { SiteShell } from "../../pages/frame/SiteShell/index.tsx";
+import { SearchHighlight } from "../../pages/SearchHighlight/index.tsx";
 
 /**
  * DocsLayout — the docs/notes page frame: SiteShell (navbar,
@@ -32,6 +33,7 @@ export function DocsLayout({
       hasSidebar
       menuChildren={<Sidebar prepared={prepared} />}
     >
+      <SearchHighlight />
       <div className="main-frame main-frame--sidebar">{children}</div>
     </SiteShell>
   );

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { markSearchNavigation } from "../../../lib/search-highlight.ts";
 import {
   flattenGroups,
   splitMatches,
@@ -90,6 +91,13 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   );
 }
 
+/** A result click: mark the target for the landing flash, then
+ * run the caller's select handler (the dialog closes). */
+function handleSelect(url: string, onSelect?: () => void) {
+  markSearchNavigation(url);
+  onSelect?.();
+}
+
 function ResultLink({
   entry,
   index,
@@ -126,7 +134,7 @@ function ResultLink({
       aria-selected={listbox ? active : undefined}
       data-result-index={index}
       className={className}
-      onClick={onSelect}
+      onClick={() => handleSelect(entry.url, onSelect)}
       onMouseEnter={onHover ? () => onHover(index) : undefined}
     >
       {breadcrumbs.length > 0 && (
@@ -246,7 +254,7 @@ function TableBlock({
               aria-selected={listbox ? active : undefined}
               data-result-index={index}
               className="porto-search-result porto-search-table__row"
-              onClick={onSelect}
+              onClick={() => handleSelect(row.url, onSelect)}
               onMouseEnter={onHover ? () => onHover(index) : undefined}
             >
               {(row.cells ?? []).map((cell, index) => (

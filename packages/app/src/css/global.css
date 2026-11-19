@@ -65,6 +65,7 @@
 @import "../components/pages/frame/ThemeSelect/ThemeSelect.css";
 @import "../components/pages/frame/SearchDialog/SearchDialog.css";
 @import "../components/pages/SearchResults/SearchResults.css";
+@import "../components/pages/SearchHighlight/SearchHighlight.css";
 @import "../components/pages/frame/Sidebar/Sidebar.css";
 @import "../components/pages/frame/MobileMenu/MobileMenu.css";
 @import "../components/pages/frame/MobileMenuFooter/MobileMenuFooter.css";

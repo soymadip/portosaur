@@ -4,6 +4,7 @@ import { useStaticSearch } from "fumadocs-core/search/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePortoConfig } from "../../../../lib/porto-context.tsx";
+import { markSearchNavigation } from "../../../../lib/search-highlight.ts";
 import {
   flattenGroups,
   flattenResults,
@@ -237,6 +238,7 @@ export function SearchDialog() {
       const result = navList[activeIndex];
       if (result) {
         event.preventDefault();
+        markSearchNavigation(result.url);
         close();
         router.push(result.url);
       }
