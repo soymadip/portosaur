@@ -7,17 +7,16 @@
 }
 /* The title panel sits flush under the navbar, like OG —
    Docusaurus puts no padding between the navbar and the page
-   title. Its bottom padding is small too: the title and the
-   body content flow together in OG, with no panel split between
-   them, so the two panels split a single small gap across the
-   hairline instead of each adding a full 1.5rem. */
+   title. Its bottom padding is 0.2rem: the separator sits close
+   under the description, and the breathing room is below the
+   line (the body panel's 1rem), not above it. */
 .content-panel--header {
   padding-top: 0;
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.2rem;
 }
-/* The body panel on doc pages: a touch more top padding than the
-   header's bottom padding, so the separator gets a bit more room
-   below the line than above it. It is also the last stretch link
+/* The body panel on doc pages: 1rem of top padding, so the
+   separator gets most of its room below the line (the header
+   leaves only 0.2rem above it). It is also the last stretch link
    before the article container: a flex column filling the main
    pane. */
 .content-panel--body {
