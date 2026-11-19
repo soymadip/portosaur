@@ -383,10 +383,13 @@
   }
 }
 
-/* Features grid */
+/* Features grid. The bottom padding is the breathing room
+   before the footer starts — the footer itself carries no
+   vertical padding, so without it the cards would sit right
+   against its top border. */
 .features-section {
   padding: 0.7rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 1.5rem;
   display: flex;
   justify-content: center;
 }
