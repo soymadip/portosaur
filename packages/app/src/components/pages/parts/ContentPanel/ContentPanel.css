@@ -49,14 +49,17 @@
    rules inside the article — instead of spanning the full panel
    edge to edge. A border always spans the whole element, so the
    line is a pseudo-element; the right end still runs to the
-   panel edge (and the TOC border beside it). */
+   panel edge (and the TOC border beside it). It uses the lighter
+   hairline, one step brighter than the standard one, so the
+   separator under the title reads as a line instead of fading
+   into the background. */
 .content-panel + .content-panel::before {
   content: "";
   position: absolute;
   top: 0;
   inset-inline-start: var(--porto-content-pad-x);
   inset-inline-end: 0;
-  border-top: 1px solid var(--porto-color-hairline);
+  border-top: 1px solid var(--porto-color-hairline-light);
 }
 /* The article is capped at 80rem and centered. Generous on
    purpose: at 1920px the middle column is ~1390px, so the cap
