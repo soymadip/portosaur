@@ -15,14 +15,16 @@
   padding-top: 0;
   padding-bottom: 0.75rem;
 }
-/* The body panel on doc pages: same small top padding, for the
-   same reason. It is also the last stretch link before the article
-   container: a flex column filling the main pane. */
+/* The body panel on doc pages: a touch more top padding than the
+   header's bottom padding, so the separator gets a bit more room
+   below the line than above it. It is also the last stretch link
+   before the article container: a flex column filling the main
+   pane. */
 .content-panel--body {
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
-  padding-top: 0.75rem;
+  padding-top: 1rem;
   padding-bottom: 0.5rem;
 }
 /* The article container is the last link in the stretch chain: a
