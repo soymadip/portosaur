@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   flattenGroups,
   splitMatches,
@@ -21,6 +21,14 @@ import { Dropdown } from "../../Dropdown/index.tsx";
  *
  * The dialog passes `listbox` + `activeIndex` for keyboard
  * navigation. The page renders a plain list.
+ *
+ * The hover fill is one gliding block, like the sidebar's — a
+ * single tinted box that slides between rows instead of each row
+ * flashing its own background on and off. It follows the hovered
+ * row, and the keyboard-active row when the mouse is elsewhere.
+ * The rows carry no hover fill of their own. The block sits in
+ * front of the rows (they are opaque), pointer-events off, so
+ * clicks still land on the link underneath.
  */
 
 /** One run of text, bold when it matches the query. */
@@ -60,10 +68,7 @@ function ResultLink({
   const className = [
     "porto-search-result",
     isPage ? "porto-search-result--page" : "porto-search-result--nested",
-    active ? "porto-search-result--active" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  ].join(" ");
   return (
     <Link
       href={entry.url}
@@ -176,13 +181,7 @@ function TableBlock({
               role={listbox ? "option" : undefined}
               aria-selected={listbox ? active : undefined}
               data-result-index={index}
-              className={[
-                "porto-search-result",
-                "porto-search-table__row",
-                active ? "porto-search-result--active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className="porto-search-result porto-search-table__row"
               onClick={onSelect}
               onMouseEnter={onHover ? () => onHover(index) : undefined}
             >
@@ -229,53 +228,139 @@ export function SearchResults({
     return map;
   }, [groups]);
 
+  // The hovered row, tracked here so the block works on the page
+  // too (the page passes no hover callback). Hover wins over the
+  // keyboard row while the mouse is over the list.
+  const [hoverIndex, setHoverIndex] = useState(-1);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const blockRef = useRef<HTMLDivElement>(null);
+  const currentRef = useRef<Element | null>(null);
+  const targetIndex = hoverIndex >= 0 ? hoverIndex : activeIndex;
+
+  const handleHover = (index: number) => {
+    setHoverIndex(index);
+    if (onHoverIndex) {
+      onHoverIndex(index);
+    }
+  };
+
+  // Glide the block to the target row. It appears in place when
+  // coming from outside, glides between rows, and fades out when
+  // there is no target. The block copies the row's corner radius,
+  // so it hugs the card's rounded first and last rows.
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const block = blockRef.current;
+    if (!wrap || !block) {
+      return;
+    }
+    const row =
+      targetIndex >= 0
+        ? wrap.querySelector(`[data-result-index="${targetIndex}"]`)
+        : null;
+    if (row === currentRef.current) {
+      return;
+    }
+    block.style.transitionProperty = currentRef.current ? "" : "opacity";
+    currentRef.current = row;
+    if (!row) {
+      block.style.opacity = "0";
+      return;
+    }
+    const rect = row.getBoundingClientRect();
+    const origin = wrap.getBoundingClientRect();
+    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
+    block.style.width = `${rect.width}px`;
+    block.style.height = `${rect.height}px`;
+    block.style.borderRadius = getComputedStyle(row).borderRadius;
+    block.style.opacity = "1";
+  }, [targetIndex, groups]);
+
+  // A resize (or a phone rotating) reflows the rows — snap the
+  // block to the current row's new box instead of leaving it over
+  // the old one. The snap sets the transition to opacity-only, so
+  // the reposition is instant; the next hover or arrow key
+  // restores the glide.
+  useEffect(() => {
+    const onResize = () => {
+      const wrap = wrapRef.current;
+      const block = blockRef.current;
+      const row = currentRef.current;
+      if (!wrap || !block || !row) {
+        return;
+      }
+      const rect = row.getBoundingClientRect();
+      const origin = wrap.getBoundingClientRect();
+      block.style.transitionProperty = "opacity";
+      block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
+      block.style.width = `${rect.width}px`;
+      block.style.height = `${rect.height}px`;
+      block.style.borderRadius = getComputedStyle(row).borderRadius;
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
   return (
-    <ul
-      id={listId}
-      className="porto-search-results"
-      role={listbox ? "listbox" : undefined}
+    <div
+      className="porto-search-results__wrap"
+      ref={wrapRef}
+      onMouseLeave={() => setHoverIndex(-1)}
     >
-      {groups.map((group) => (
-        <li key={group.pageUrl}>
-          <div className="porto-search-group__card">
-            <ResultLink
-              entry={group.header}
-              index={indexOf.get(group.header.id) ?? -1}
-              active={indexOf.get(group.header.id) === activeIndex}
-              query={query}
-              listbox={listbox}
-              onSelect={onSelect}
-              onHover={onHoverIndex}
-            />
-            {chunkEntries(group.entries).map((chunk) =>
-              chunk.kind === "entry" ? (
-                <ResultLink
-                  key={chunk.entry.id}
-                  entry={chunk.entry}
-                  index={indexOf.get(chunk.entry.id) ?? -1}
-                  active={indexOf.get(chunk.entry.id) === activeIndex}
-                  query={query}
-                  listbox={listbox}
-                  onSelect={onSelect}
-                  onHover={onHoverIndex}
-                />
-              ) : (
-                <TableBlock
-                  key={chunk.tableId}
-                  rows={chunk.rows}
-                  query={query}
-                  activeIndex={activeIndex}
-                  indexOf={indexOf}
-                  listbox={listbox}
-                  onSelect={onSelect}
-                  onHover={onHoverIndex}
-                />
-              ),
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
+      <div
+        aria-hidden="true"
+        className="porto-search-results__hover-block"
+        ref={blockRef}
+      />
+      <ul
+        id={listId}
+        className="porto-search-results"
+        role={listbox ? "listbox" : undefined}
+      >
+        {groups.map((group) => (
+          <li key={group.pageUrl}>
+            <div className="porto-search-group__card">
+              <ResultLink
+                entry={group.header}
+                index={indexOf.get(group.header.id) ?? -1}
+                active={indexOf.get(group.header.id) === activeIndex}
+                query={query}
+                listbox={listbox}
+                onSelect={onSelect}
+                onHover={handleHover}
+              />
+              {chunkEntries(group.entries).map((chunk) =>
+                chunk.kind === "entry" ? (
+                  <ResultLink
+                    key={chunk.entry.id}
+                    entry={chunk.entry}
+                    index={indexOf.get(chunk.entry.id) ?? -1}
+                    active={indexOf.get(chunk.entry.id) === activeIndex}
+                    query={query}
+                    listbox={listbox}
+                    onSelect={onSelect}
+                    onHover={handleHover}
+                  />
+                ) : (
+                  <TableBlock
+                    key={chunk.tableId}
+                    rows={chunk.rows}
+                    query={query}
+                    activeIndex={activeIndex}
+                    indexOf={indexOf}
+                    listbox={listbox}
+                    onSelect={onSelect}
+                    onHover={handleHover}
+                  />
+                ),
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -283,14 +368,13 @@ export function SearchResults({
  * The "Filter [All ▾]" row — Fumadocs' tag filter, Portosaur's
  * version narrowing by docs section instead (the index carries no
  * tags. Every result is a docs page). The dialog renders it in its
- * footer, opening upward. The page renders it under its input.
+ * footer. The page renders it under its input.
  */
 export function SearchSectionFilter({
   sections,
   value,
   onChange,
   dropUp = false,
-  showLabel = true,
 }: {
   /** The sections the current results span, in first-seen order. */
   sections: string[];
@@ -299,13 +383,10 @@ export function SearchSectionFilter({
   onChange: (section: string) => void;
   /** Open the menu above the trigger instead of below it. */
   dropUp?: boolean;
-  /** Show the "Filter" label before the dropdown. The dialog's
-   * bar shows the dropdown alone. */
-  showLabel?: boolean;
 }) {
   return (
     <div className="porto-search-filter">
-      {showLabel && <span className="porto-search-filter__label">Filter</span>}
+      <span className="porto-search-filter__label">Filter</span>
       <Dropdown
         trigger={value}
         items={[

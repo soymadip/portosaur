@@ -9,6 +9,13 @@
  * highlighted. The paddings, icon, and branch sizes are
  * Starlight's; the colors are Portosaur's tokens. */
 
+/* The wrapper positions the hover block and holds the list —
+   the block is a sibling of the list, so it never sits inside
+   the `<ul>` (only `<li>` belongs there). */
+.porto-search-results__wrap {
+  position: relative;
+}
+
 .porto-search-results {
   display: flex;
   flex-direction: column;
@@ -16,6 +23,37 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* The hover block, the sidebar's gliding block in the results:
+   one tinted box that slides between rows (200ms, the sidebar's
+   easing). The rows are opaque, so it sits in front of them with
+   pointer-events off — clicks still land on the link underneath.
+   Its size, position, and corner radius come from the row it
+   covers (see SearchResults). Reduced motion fades it in place
+   instead of gliding. */
+.porto-search-results__hover-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-1) 10%,
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .porto-search-results__hover-block {
+    transition:
+      translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 
 .porto-search-group__card {
@@ -30,22 +68,14 @@
   border-radius: 0 0 0.3125rem 0.3125rem;
 }
 
+/* Rows carry no hover fill of their own — the gliding block is
+   the only one. */
 .porto-search-result {
   position: relative;
   display: block;
   background-color: var(--porto-color-black);
   text-decoration: none;
   color: var(--porto-color-gray-2);
-  /* The keyboard-selected result fades its tint in as you arrow
-     through the list (the hover outline itself can't fade). */
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.porto-search-result:hover,
-.porto-search-result--active {
-  outline: 1px solid var(--porto-color-accent-high);
-}
-.porto-search-result--active {
-  background-color: var(--porto-color-accent-low);
 }
 
 /* The page header row: roomy, with the document icon at the left. */

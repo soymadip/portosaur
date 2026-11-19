@@ -20,12 +20,21 @@ import {
  * native `<dialog>` floating panel (at every width), with ZBSearch
  * (Fumadocs' static search) results inside.
  *
- * The bar is Fumadocs' — a magnifier and a borderless input —
- * except the section filter sits where Fumadocs puts its ESC
- * button: just the dropdown, no "Filter" label, narrowing by docs
- * section (the index carries no tags. Every result is a docs page).
- * Results are Starlight-style grouped cards, rendered by the shared
+ * The bar is Fumadocs' wiki bar, copied whole: a magnifier (it
+ * pulses while the index loads), a borderless input, and an ESC
+ * button that closes the dialog. Below the results sits the
+ * footer, always there — even before the first keystroke — with
+ * the section filter in it, so the dialog never shifts when
+ * results land. The filter narrows by docs section (the index
+ * carries no tags. Every result is a docs page). Results are
+ * Starlight-style grouped cards, rendered by the shared
  * `SearchResults` (the search page renders the same list).
+ *
+ * The dialog opens and closes like Fumadocs' — a 300ms
+ * scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
+ * fading with it. Pure CSS (`@starting-style` + `allow-discrete`
+ * in animations.css): the entry scales in from 1.06, and the exit
+ * fades back to it. No JS animation state.
  *
  * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
@@ -121,6 +130,8 @@ export function SearchDialog() {
   }, []);
 
   // Sync the native dialog with `open`, and lock body scroll.
+  // The open/close animation is pure CSS (`@starting-style` +
+  // `allow-discrete` in animations.css) — no JS animation state.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) {
@@ -251,7 +262,14 @@ export function SearchDialog() {
       >
         <div className="porto-search-dialog__frame">
           <div className="porto-search-dialog__header">
-            <span className="porto-search-dialog__icon" aria-hidden="true">
+            <span
+              className={
+                isLoading
+                  ? "porto-search-dialog__icon porto-search-dialog__icon--loading"
+                  : "porto-search-dialog__icon"
+              }
+              aria-hidden="true"
+            >
               <MagnifierIcon />
             </span>
             <input
@@ -275,43 +293,61 @@ export function SearchDialog() {
                   : undefined
               }
             />
-            {sections.length > 1 && (
-              <SearchSectionFilter
-                sections={sections}
-                value={section}
-                onChange={(next) => {
-                  setSection(next);
-                  setActiveIndex(-1);
-                }}
-                showLabel={false}
-              />
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="porto-search-dialog__close"
+              ariaLabel="Close Search"
+              onClick={close}
+            >
+              ESC
+            </Button>
           </div>
-          <div ref={resultsRef} className="porto-search-dialog__results">
-            {isLoading && (
-              <p className="porto-search-dialog__loading">Loading search…</p>
-            )}
-            {showEmpty && (
-              <p className="porto-search-dialog__empty">
-                No results found for “{search.trim()}”.
-              </p>
-            )}
-            {showFilteredEmpty && (
-              <p className="porto-search-dialog__empty">
-                No results in “{section}” for “{search.trim()}”.
-              </p>
-            )}
-            {navList.length > 0 && (
-              <SearchResults
-                groups={filteredGroups}
-                query={search}
-                activeIndex={activeIndex}
-                onHoverIndex={setActiveIndex}
-                onSelect={close}
-                listbox
-                listId="porto-search-results"
-              />
-            )}
+          {/* The results area only exists when it has something to
+              show — with no query yet, the footer sits straight
+              under the bar, like Fumadocs' empty dialog. */}
+          {(isLoading ||
+            showEmpty ||
+            showFilteredEmpty ||
+            navList.length > 0) && (
+            <div ref={resultsRef} className="porto-search-dialog__results">
+              {isLoading && (
+                <p className="porto-search-dialog__loading">Loading search…</p>
+              )}
+              {showEmpty && (
+                <p className="porto-search-dialog__empty">
+                  No results found for “{search.trim()}”.
+                </p>
+              )}
+              {showFilteredEmpty && (
+                <p className="porto-search-dialog__empty">
+                  No results in “{section}” for “{search.trim()}”.
+                </p>
+              )}
+              {navList.length > 0 && (
+                <SearchResults
+                  groups={filteredGroups}
+                  query={search}
+                  activeIndex={activeIndex}
+                  onHoverIndex={setActiveIndex}
+                  onSelect={close}
+                  listbox
+                  listId="porto-search-results"
+                />
+              )}
+            </div>
+          )}
+          {/* The footer is always here — even with no results yet —
+              so the dialog never shifts when results land. */}
+          <div className="porto-search-dialog__footer">
+            <SearchSectionFilter
+              sections={sections}
+              value={section}
+              onChange={(next) => {
+                setSection(next);
+                setActiveIndex(-1);
+              }}
+            />
           </div>
         </div>
       </dialog>

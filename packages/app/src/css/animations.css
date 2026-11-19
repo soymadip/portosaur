@@ -93,19 +93,34 @@
   }
 }
 
-/* Search dialog: fade + slight scale, 200ms. */
+/* Search dialog: Fumadocs' dialog animation — a 300ms
+   scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
+   fading with it (`fd-fade-in` / `fd-fade-out`). Pure CSS via
+   `@starting-style` + `allow-discrete`, like the mobile menu:
+   the entry scales in from 1.06, the exit fades back to it (one
+   starting state serves both directions, so the exit lands on
+   1.06 where Fumadocs' own exit lands on 1.04 — a 2% difference
+   no eye catches). */
 .porto-search-dialog {
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    display 0.2s ease allow-discrete;
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
 }
+/* The backdrop is Fumadocs' overlay (`bg-fd-overlay`): black at
+   20% with a 4px blur, so the page stays visible behind the
+   frosted glass instead of going dark. The shared overlay token
+   is a heavier 66% dim, kept for the other dialogs. This rule is
+   the backdrop's only owner — SearchDialog.css does not set it. */
 .porto-search-dialog::backdrop {
-  background-color: var(--porto-color-backdrop-overlay);
+  background-color: hsla(0, 0%, 0%, 0.2);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   transition:
-    opacity 0.2s ease,
-    display 0.2s ease allow-discrete;
+    opacity 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
 }
 @starting-style {
   .porto-search-dialog,
@@ -113,8 +128,18 @@
     opacity: 0;
   }
   .porto-search-dialog {
-    transform: translateY(-8px) scale(0.98);
+    transform: scale(1.06);
   }
+}
+/* The exit fades toward the closed state — `@starting-style`
+   alone only covers the entry, so without this the dialog would
+   sit at full opacity for 300ms and then vanish. */
+.porto-search-dialog:not([open]) {
+  opacity: 0;
+  transform: scale(1.06);
+}
+.porto-search-dialog:not([open])::backdrop {
+  opacity: 0;
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */
