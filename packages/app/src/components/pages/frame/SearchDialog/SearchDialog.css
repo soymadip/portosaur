@@ -18,7 +18,7 @@
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
   width: calc(100% - 2rem);
-  max-width: 40rem;
+  max-width: 48rem;
   height: max-content;
   max-height: calc(100% - 2rem);
   box-shadow: var(--porto-shadow-lg);
@@ -117,11 +117,13 @@
   padding-block: 0.375rem;
 }
 
+/* No padding of its own — the list's own inset is the only
+   space around the results, like Fumadocs'. */
 .porto-search-dialog__results {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 1rem;
+  padding: 0;
 }
 
 .porto-search-dialog__loading,
@@ -141,10 +143,7 @@
   .porto-search-dialog {
     margin: 4rem auto auto;
     width: 90%;
-    max-width: 40rem;
+    max-width: 48rem;
     max-height: calc(100% - 8rem);
-  }
-  .porto-search-dialog__results {
-    padding-inline: 1.5rem;
   }
 }

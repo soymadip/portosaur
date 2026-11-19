@@ -5,9 +5,9 @@ import type { SearchResultItem } from "fumadocs-core/search/client";
  * page: ZBSearch items flattened so table rows become one entry
  * each — their Markdown parsed into plain-text cells, so the
  * results show a table instead of raw `| pipes |` — then grouped
- * by page, Starlight-style: one card per page, the page itself as
- * the header, its matching headings and text chunks as rows
- * underneath.
+ * by page: the page itself as the header, its matching headings
+ * and text chunks as entries underneath, which the flat list
+ * renders in order.
  */
 
 export interface FlatResult {
@@ -24,11 +24,11 @@ export interface FlatResult {
   cells?: string[];
 }
 
-/** One page's card: its header plus its matching sections. */
+/** One page's results: its header plus its matching sections. */
 export interface SearchGroup {
   /** The page's URL without any `#anchor`. */
   pageUrl: string;
-  /** The card header — the page's own result, or a synthesized one. */
+  /** The page's own result, or a synthesized one. */
   header: FlatResult;
   /** The top-level docs section the page belongs to ("Getting Started"). */
   section: string;
@@ -36,7 +36,7 @@ export interface SearchGroup {
   entries: FlatResult[];
 }
 
-/** One run of text from `splitMatches` — matched runs render bold. */
+/** One run of text from `splitMatches` — matched runs render bold, in the accent color, and underlined. */
 export interface MatchSegment {
   text: string;
   matched: boolean;
@@ -297,11 +297,11 @@ function titleFromUrl(pageUrl: string): string {
 
 /**
  * Splits content into matched and unmatched runs for `<mark>`
- * highlighting, Starlight-style (bold, no background). Terms are
- * the query's whitespace-separated words, matched
- * case-insensitively, longest first so "installation" bolds whole
- * instead of matching "install" inside it. The escaping mirrors
- * Fumadocs' `buildRegexFromQuery`.
+ * highlighting (bold, in the accent color, and underlined — no
+ * background). Terms are the query's whitespace-separated words,
+ * matched case-insensitively, longest first so "installation"
+ * bolds whole instead of matching "install" inside it. The
+ * escaping mirrors Fumadocs' `buildRegexFromQuery`.
  */
 export function splitMatches(content: string, query: string): MatchSegment[] {
   const terms = query

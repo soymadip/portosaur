@@ -27,8 +27,8 @@ import {
  * the section filter — just the dropdown, no label — so the
  * dialog never grows a footer and never shifts. The filter
  * narrows by docs section (the index carries no tags. Every
- * result is a docs page). Results are Starlight-style grouped
- * cards, rendered by the shared `SearchResults` (the search page
+ * result is a docs page). Results are Fumadocs' flat list,
+ * rendered by the shared `SearchResults` (the search page
  * renders the same list).
  *
  * The dialog opens and closes like Fumadocs' — a 300ms
@@ -40,7 +40,8 @@ import {
  * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
  * - Arrow keys move the active result, Enter navigates to it.
- * - Matches render bold (`<mark>`), Starlight-style.
+ * - Matches render bold, in the accent color, and underlined
+ *   (`<mark>`), like Fumadocs'.
  * - The search index downloads on the first keystroke (the hook
  *   only searches a non-empty query), never on page load.
  * - `from` is basePath-aware (contracts §6): the generated
@@ -116,7 +117,7 @@ export function SearchDialog() {
     [groups, section],
   );
 
-  // The flat entry list behind the cards — keyboard navigation walks this.
+  // The flat entry list behind the groups — keyboard navigation walks this.
   const navList = useMemo(
     () => flattenGroups(filteredGroups),
     [filteredGroups],

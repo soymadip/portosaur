@@ -12,12 +12,13 @@ import { Dropdown } from "../../Dropdown/index.tsx";
 
 /**
  * The search results list, shared by the search dialog and the
- * search page: one Starlight-style card per page — the page itself
- * as the header row (document icon + title), its matching headings
- * and text chunks as rows underneath, tied together with the
- * tree-branch lines. Matches are bold (`<mark>`), not highlighted.
- * Rows from the same table render as one grid — the header once,
- * each row its own link.
+ * search page: Fumadocs' flat list — one row per match, no cards.
+ * A page row shows its path above its title; a heading row shows
+ * a `#` with its heading; a text row shows the excerpt. The rows
+ * under a page are tied together with a vertical line at the
+ * left. Matches are bold, in the accent color, and underlined
+ * (`<mark>`). Rows from the same table render as one grid — the
+ * header once, each row its own link.
  *
  * The dialog passes `listbox` + `activeIndex` for keyboard
  * navigation. The page renders a plain list.
@@ -27,9 +28,51 @@ import { Dropdown } from "../../Dropdown/index.tsx";
  * flashing its own background on and off. It follows the hovered
  * row, and the keyboard-active row when the mouse is elsewhere.
  * The rows carry no hover fill of their own. The block sits in
- * front of the rows (they are opaque), pointer-events off, so
- * clicks still land on the link underneath.
+ * front of the rows, pointer-events off, so clicks still land on
+ * the link underneath.
  */
+
+/** A right-pointing chevron, for the breadcrumb separators. */
+function ChevronRightIcon() {
+  return (
+    <svg
+      className="porto-search-result__chevron"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+/** A `#` mark, for heading rows. */
+function HashIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="4" x2="20" y1="9" y2="9" />
+      <line x1="4" x2="20" y1="15" y2="15" />
+      <line x1="10" x2="8" y1="3" y2="21" />
+      <line x1="16" x2="14" y1="3" y2="21" />
+    </svg>
+  );
+}
 
 /** One run of text, bold when it matches the query. */
 function HighlightedText({ text, query }: { text: string; query: string }) {
@@ -65,10 +108,16 @@ function ResultLink({
   onHover?: (index: number) => void;
 }) {
   const isPage = entry.type === "page";
+  const isHeading = entry.type === "heading";
   const className = [
     "porto-search-result",
-    isPage ? "porto-search-result--page" : "porto-search-result--nested",
+    isPage
+      ? "porto-search-result--page"
+      : isHeading
+        ? "porto-search-result--heading"
+        : "porto-search-result--text",
   ].join(" ");
+  const breadcrumbs = isPage ? (entry.breadcrumbs ?? []) : [];
   return (
     <Link
       href={entry.url}
@@ -80,7 +129,22 @@ function ResultLink({
       onClick={onSelect}
       onMouseEnter={onHover ? () => onHover(index) : undefined}
     >
-      {isPage || entry.type === "heading" ? (
+      {breadcrumbs.length > 0 && (
+        <span className="porto-search-result__breadcrumbs">
+          {breadcrumbs.map((crumb, i) => (
+            <Fragment key={i}>
+              {i > 0 && <ChevronRightIcon />}
+              {crumb}
+            </Fragment>
+          ))}
+        </span>
+      )}
+      {isHeading && (
+        <span className="porto-search-result__hash">
+          <HashIcon />
+        </span>
+      )}
+      {isPage || isHeading ? (
         <span className="porto-search-result__title">
           <HighlightedText text={entry.content} query={query} />
         </span>
@@ -118,9 +182,9 @@ function chunkEntries(entries: FlatResult[]): EntryChunk[] {
 /**
  * One table's rows as a grid: the header once, then each row as its
  * own link, all sharing the grid's columns (subgrid) — Fumadocs'
- * table layout. The block itself is a nested card row, so it
- * carries the tree branch. The rows inside are the keyboard-nav
- * entries, one flat index each.
+ * table layout. The block sits under its page with a left border,
+ * like Fumadocs'. The rows inside are the keyboard-nav entries,
+ * one flat index each.
  */
 function TableBlock({
   rows,
@@ -153,7 +217,7 @@ function TableBlock({
   const headerId = `porto-search-table-${rows[0].tableId}`;
   return (
     <div
-      className="porto-search-result--nested porto-search-table"
+      className="porto-search-table"
       role={header.length > 0 ? "group" : undefined}
       aria-labelledby={header.length > 0 ? headerId : undefined}
     >
@@ -247,7 +311,7 @@ export function SearchResults({
   // Glide the block to the target row. It appears in place when
   // coming from outside, glides between rows, and fades out when
   // there is no target. The block copies the row's corner radius,
-  // so it hugs the card's rounded first and last rows.
+  // so it hugs the row's rounded corners.
   useEffect(() => {
     const wrap = wrapRef.current;
     const block = blockRef.current;
@@ -320,8 +384,8 @@ export function SearchResults({
         role={listbox ? "listbox" : undefined}
       >
         {groups.map((group) => (
-          <li key={group.pageUrl}>
-            <div className="porto-search-group__card">
+          <Fragment key={group.pageUrl}>
+            <li>
               <ResultLink
                 entry={group.header}
                 index={indexOf.get(group.header.id) ?? -1}
@@ -331,10 +395,11 @@ export function SearchResults({
                 onSelect={onSelect}
                 onHover={handleHover}
               />
-              {chunkEntries(group.entries).map((chunk) =>
-                chunk.kind === "entry" ? (
+            </li>
+            {chunkEntries(group.entries).map((chunk) =>
+              chunk.kind === "entry" ? (
+                <li key={chunk.entry.id}>
                   <ResultLink
-                    key={chunk.entry.id}
                     entry={chunk.entry}
                     index={indexOf.get(chunk.entry.id) ?? -1}
                     active={indexOf.get(chunk.entry.id) === activeIndex}
@@ -343,9 +408,10 @@ export function SearchResults({
                     onSelect={onSelect}
                     onHover={handleHover}
                   />
-                ) : (
+                </li>
+              ) : (
+                <li key={chunk.tableId}>
                   <TableBlock
-                    key={chunk.tableId}
                     rows={chunk.rows}
                     query={query}
                     activeIndex={activeIndex}
@@ -354,10 +420,10 @@ export function SearchResults({
                     onSelect={onSelect}
                     onHover={handleHover}
                   />
-                ),
-              )}
-            </div>
-          </li>
+                </li>
+              ),
+            )}
+          </Fragment>
         ))}
       </ul>
     </div>

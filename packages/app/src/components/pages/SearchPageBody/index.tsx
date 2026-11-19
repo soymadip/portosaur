@@ -20,7 +20,7 @@ import { SearchResults, SearchSectionFilter } from "../SearchResults/index.tsx";
  * Reads `?q=` as the initial query and runs it on mount. Typing
  * debounces 200ms before searching. The search index downloads
  * on the first keystroke, never on page load. Results are the same
- * Starlight-style grouped cards the dialog shows, with a Filter
+ * Fumadocs-style flat list the dialog shows, with a Filter
  * row narrowing by docs section and a result count above them.
  */
 
