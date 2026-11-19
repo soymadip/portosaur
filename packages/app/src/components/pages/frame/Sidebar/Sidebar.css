@@ -271,7 +271,16 @@
 [dir="rtl"] .porto-sidebar__caret svg {
   transform: rotateZ(180deg);
 }
-.porto-sidebar__folder[data-open="true"] .porto-sidebar__caret svg {
+/* Only the open folder's OWN caret swings down: the selector
+   reaches the caret through the folder's direct row, not any
+   descendant. A plain descendant selector rotated every nested
+   folder's caret too, so a closed group inside an open one
+   (Components inside Markdown Features) pointed down even
+   though it was shut. */
+.porto-sidebar__folder[data-open="true"]
+  > .porto-sidebar__folder-row
+  .porto-sidebar__caret
+  svg {
   transform: rotateZ(90deg);
 }
 
