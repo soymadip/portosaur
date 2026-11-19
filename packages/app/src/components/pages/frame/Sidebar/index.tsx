@@ -521,6 +521,19 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, autoCollapse]);
 
+  // When the page changes, the hover block must not linger on
+  // the row that just became active: the mouse hasn't moved, so
+  // no pointerover fires to re-hide it, and the active box
+  // would land on top of the still-visible hover tint. Hiding
+  // it here is safe — the next pointerover shows it again on
+  // whatever row the mouse moves to.
+  useEffect(() => {
+    const block = document.querySelector(".porto-sidebar__hover-block");
+    if (block instanceof HTMLElement) {
+      block.style.opacity = "0";
+    }
+  }, [current]);
+
   const setCategoryOpen = (item: SidebarItem, open: boolean) => {
     const index = categoryIndex.get(item);
     if (index === undefined) {

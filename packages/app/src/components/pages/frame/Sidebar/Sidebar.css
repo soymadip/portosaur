@@ -234,11 +234,12 @@
      its padding from making the row taller than the 19.6px text
      line sets it — with `stretch` they widen the button to the
      full row height instead. Only the chevron itself rotates
-     when the group opens — the button and its hover background
-     stay put, so the hover box never spins through a diamond
-     mid-animation. The button itself has no background: the
-     hover box lives on the ::before below, so it can be
-     narrower than the touch zone. */
+     when the group opens. The button itself has no background:
+     the hover fill for the whole row, caret zone included, is
+     the gliding hover block behind the row — the caret used to
+     carry its own hover box, but it stacked on the block (two
+     layers of the same tint, and 2px taller than the block's
+     paint), so it read as a brighter, bigger box on the arrow. */
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -260,22 +261,6 @@
   font: inherit;
   cursor: pointer;
 }
-/* The caret's hover box: full row height, reaching the row's
-   right edge, but starting 0.5rem in from the touch zone's
-   left edge — the box is 36px wide on the 44px zone. It always
-   exists (transparent at rest) so the tint fades in and out,
-   and it sits behind the chevron. */
-.porto-sidebar__caret::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0.5rem;
-  inset-inline-end: 0;
-  z-index: -1;
-  border-radius: 0.375rem;
-  background-color: transparent;
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
 .porto-sidebar__caret svg {
   width: 1.25rem;
   height: 1.25rem;
@@ -288,6 +273,16 @@
 }
 .porto-sidebar__folder[data-open="true"] .porto-sidebar__caret svg {
   transform: rotateZ(90deg);
+}
+
+/* The keyboard focus ring draws inside the row here, not
+   outside it: the global ring sits 2px out with a 2px offset,
+   which is 4px past the row's edge — rows sit 2px apart, so
+   the ring overlapped the neighbors' boxes and read bigger
+   than the row's own tint. Inset by 2px it hugs the inside of
+   the row and never touches a neighbor. */
+.porto-sidebar :focus-visible {
+  outline-offset: -2px;
 }
 
 .porto-sidebar a {
@@ -406,19 +401,6 @@
   a:not([aria-current="page"]) {
   color: var(--porto-color-white);
 }
-/* On devices with a mouse or trackpad, the caret keeps its own
-   hover background in the same tint. It sits under the gliding
-   hover block, so it only ever shows on the active row, where
-   the block hides. Touch screens get no separate box. */
-@media (hover: hover) {
-  .porto-sidebar__caret:hover::before {
-    background-color: color-mix(
-      in srgb,
-      var(--porto-color-gray-1) 10%,
-      transparent
-    );
-  }
-}
 /* The active category label link keeps only the accent text
    color — its own box is cleared, the folder row carries the
    row's box. */
@@ -452,7 +434,6 @@
   .porto-sidebar__folder-row,
   .porto-sidebar a::before,
   .porto-sidebar__folder-row::before,
-  .porto-sidebar__caret::before,
   .porto-sidebar__caret svg,
   .porto-sidebar__folder-panel {
     transition: none;
@@ -492,14 +473,31 @@
 
 /* The group label grows to fill the folder row, pinning the
    caret to the right edge — inside the active highlight box
-   when the category is the current page. */
+   when the category is the current page. It also stretches
+   the full row height (negative block margins, like the
+   caret's) so the label link inside it covers the whole row:
+   the link used to be only the text height, leaving 3.2px
+   dead bands at the row's top and bottom edges where a click
+   hit the row and only folded the category instead of opening
+   the page. The min-height keeps the row at its 26px height:
+   the negative margins would otherwise shrink the label's
+   margin box and pull the row 1.2px shorter — the min-height
+   (one text line plus the two margins) puts the 19.6px back. */
 .porto-sidebar__group-label {
   flex: 1;
+  align-self: stretch;
+  display: flex;
+  margin-block: -0.25rem;
+  min-height: calc(1.4em + 0.5rem);
 }
 
 /* A category link inside a folder row is the group label, not
-   a list link — no list-link padding (the row provides it). */
+   a list link — no list-link padding (the row provides it).
+   It fills the label's full width and height, so the whole
+   label area opens the page. */
 .porto-sidebar__group-label a {
+  flex: 1;
+  align-self: stretch;
   padding: 0;
 }
 
