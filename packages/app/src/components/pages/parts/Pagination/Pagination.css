@@ -4,8 +4,8 @@
  * (`theme/css/overrides/pagination.css` + Infima): a 2-column grid
  * of links, each a muted sublabel over a 1.1rem title. No arrows —
  * OG removes Infima's `«`/`»`. The link background is the raised
- * surface, its border the page background (invisible until hover
- * turns it primary). */
+ * surface, its border the inline-code background (a visible edge
+ * at rest; hover turns it primary). */
 .porto-pagination {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -21,7 +21,7 @@
   display: block;
   height: 100%;
   padding: 1rem;
-  border: 1px solid var(--porto-color-bg);
+  border: 1px solid var(--porto-color-bg-inline-code);
   border-radius: 0.4rem;
   background-color: var(--porto-color-gray-6);
   color: var(--porto-color-text-accent);
