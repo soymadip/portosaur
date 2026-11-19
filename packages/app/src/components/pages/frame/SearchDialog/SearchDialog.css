@@ -118,11 +118,14 @@
 }
 
 /* No padding of its own — the list's own inset is the only
-   space around the results, like Fumadocs'. */
+   space around the results, like Fumadocs'. The list is capped
+   at 460px (Fumadocs' `max-h-[460px]`), so the dialog stays
+   compact instead of spanning to the bottom of the screen. */
 .porto-search-dialog__results {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
+  max-height: 28.75rem;
   padding: 0;
 }
 
