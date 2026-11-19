@@ -63,11 +63,13 @@
 }
 
 /* Stack the two links on narrow screens — OG stacks below 768px,
- * both by viewport and by content-column width. */
+ * both by viewport and by content-column width. The stacked gap
+ * is half the side-by-side gap: enough to separate the cards
+ * without pushing them far apart. */
 @media (max-width: 768px) {
   .porto-pagination {
     grid-template-columns: 1fr;
-    gap: 0.15rem;
+    gap: 0.5rem;
   }
   .porto-pagination__link--prev {
     text-align: left;
@@ -80,7 +82,7 @@
 @container (max-width: 768px) {
   .porto-pagination {
     grid-template-columns: 1fr;
-    gap: 0.15rem;
+    gap: 0.5rem;
   }
   .porto-pagination__link--prev {
     text-align: left;
