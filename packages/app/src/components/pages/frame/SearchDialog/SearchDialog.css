@@ -149,4 +149,9 @@
     max-width: 48rem;
     max-height: calc(100% - 8rem);
   }
+  /* A shorter bar on desktop — the vertical padding drops from
+     12px to 8px, the sides stay at 12px. */
+  .porto-search-dialog__header {
+    padding-block: 0.5rem;
+  }
 }
