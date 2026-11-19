@@ -1,11 +1,19 @@
 /* Tabs — tablist, triggers, panels. Rendered by Tabs + TabItem.
  *
  * The Fumadocs look: the whole switcher sits in a bordered box
- * (same radius as the code frame), the tab row at the top with a
- * divider under it, the active trigger in the accent color with a
- * sliding accent bar under it. Code tabs (`porto-tabs--code`,
- * rendered by CodeBlockTabs) use the same box with a tighter tab
- * row and no panel padding — the code fills the box. */
+ * (same radius as the code frame), the tab row at the top, the
+ * active trigger in the accent color with a sliding accent bar
+ * under it. The tab row and the panel are different shades: the
+ * panel is one step lighter than the tab row, so the headings
+ * read darker than the content — for plain tabs and code tabs
+ * alike. That matches Fumadocs' code tabs (their card vs
+ * secondary); their plain tabs put the panel on the page
+ * background instead, but the headings-darker step is the
+ * Portosaur call for both kinds. The shade step is the divider
+ * between the row and the panel, so the tab row carries no
+ * border. Code tabs (`porto-tabs--code`, rendered by
+ * CodeBlockTabs) use the same box with a tighter tab row and no
+ * panel padding — the code fills the box. */
 
 .porto-tabs {
   display: block;
@@ -20,7 +28,6 @@
   display: flex;
   gap: 0.5rem;
   list-style: none;
-  border-bottom: 1px solid var(--porto-color-gray-5);
   padding: 0 1rem;
   margin: 0;
   overflow-x: auto;
@@ -76,20 +83,26 @@
 
 .porto-tabs [role="tabpanel"] {
   padding: 1rem;
+  background-color: var(--porto-color-gray-5);
+}
+
+/* Inline code inside a panel takes the tab-row shade: its usual
+   chip color is the panel color, so without this the chips would
+   vanish into the panel. Code blocks are untouched — their `pre`
+   keeps its own frame. */
+.porto-tabs [role="tabpanel"] :not(pre) > code {
+  background-color: var(--porto-color-gray-6);
 }
 
 /* Code tabs: the tab row is tighter (like Fumadocs' code tabs),
    the panel has no padding — the code block fills the box — and
    the code frame inside drops its own border and top corners, so
-   the tabs box is the only frame. Like Fumadocs, the code area
-   is one step lighter than the tab row (their card vs secondary),
-   so the headings read darker than the code. The shade step is
-   the divider, so the tab row drops its border — and the floating
-   copy button takes the code shade too, so it doesn't show as a
-   darker patch over the code. */
+   the tabs box is the only frame. The panel already carries the
+   code shade from the base rule, and the floating copy button
+   takes it too, so it doesn't show as a darker patch over the
+   code. */
 .porto-tabs--code [role="tablist"] {
   padding-inline: 0.5rem;
-  border-bottom: 0;
 }
 .porto-tabs--code [role="tabpanel"] {
   padding: 0;
