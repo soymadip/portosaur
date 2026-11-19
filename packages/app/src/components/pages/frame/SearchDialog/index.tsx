@@ -124,6 +124,10 @@ export function SearchDialog() {
   );
 
   const close = useCallback(() => {
+    // Close the dialog itself first, directly — going through
+    // React state alone left the first press doing nothing in
+    // some browsers. The native `close` event syncs the state.
+    dialogRef.current?.close();
     setOpen(false);
   }, []);
 
@@ -162,8 +166,9 @@ export function SearchDialog() {
     }
   }, [open, onSearchChange]);
 
-  // Cmd/Ctrl+K toggles. Escape closes (the native dialog fires
-  // `close` on Escape, synced below). Outside clicks close.
+  // Cmd/Ctrl+K toggles. Escape closes the dialog directly
+  // (handled on the dialog itself, so it works wherever focus
+  // sits inside it). Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -197,6 +202,15 @@ export function SearchDialog() {
   // outside the frame, is a backdrop click).
   const onDialogClick = (event: React.MouseEvent<HTMLDialogElement>) => {
     if (event.target === dialogRef.current) {
+      close();
+    }
+  };
+
+  // Escape closes the dialog directly, wherever focus sits
+  // inside it. The native `cancel` path stays as a fallback —
+  // closing an already-closed dialog is a no-op.
+  const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key === "Escape") {
       close();
     }
   };
@@ -261,6 +275,7 @@ export function SearchDialog() {
         className="porto-search-dialog"
         aria-label="Search"
         onClick={onDialogClick}
+        onKeyDown={onDialogKeyDown}
       >
         <div className="porto-search-dialog__frame">
           <div className="porto-search-dialog__header">
