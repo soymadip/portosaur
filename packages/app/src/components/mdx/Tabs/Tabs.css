@@ -81,9 +81,15 @@
 /* Code tabs: the tab row is tighter (like Fumadocs' code tabs),
    the panel has no padding — the code block fills the box — and
    the code frame inside drops its own border and top corners, so
-   the tabs box is the only frame. */
+   the tabs box is the only frame. Like Fumadocs, the code area
+   is one step lighter than the tab row (their card vs secondary),
+   so the headings read darker than the code. The shade step is
+   the divider, so the tab row drops its border — and the floating
+   copy button takes the code shade too, so it doesn't show as a
+   darker patch over the code. */
 .porto-tabs--code [role="tablist"] {
   padding-inline: 0.5rem;
+  border-bottom: 0;
 }
 .porto-tabs--code [role="tabpanel"] {
   padding: 0;
@@ -91,4 +97,8 @@
 .porto-tabs--code .porto-code-frame {
   border: 0;
   border-radius: 0;
+  background-color: var(--porto-color-gray-5);
+}
+.porto-tabs--code .porto-code-copy--floating {
+  background-color: var(--porto-color-gray-5);
 }
