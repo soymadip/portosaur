@@ -16,8 +16,10 @@
   margin: 0 auto;
   /* Bottom-anchored while empty: the top edge sits one dialog
      height above the bottom edge, via `top` plus the standalone
-     `translate` property (not `transform`, which the open/close
-     scale owns). Both glide on the transition in animations.css.
+     `translate` property (not `transform`, which the desktop
+     open/close scale owns; on mobile the entry slides on this
+     same `translate`, from below the screen edge). Both glide on
+     the transition in animations.css.
      The bottom edge tracks the visual viewport (`--porto-vv-bottom`,
      set from JS while the dialog is open), not the layout
      viewport: the layout viewport does not shrink when the

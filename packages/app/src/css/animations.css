@@ -96,11 +96,17 @@
 /* Search dialog: Fumadocs' dialog animation — a 300ms
    scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
    fading with it (`fd-fade-in` / `fd-fade-out`). Pure CSS via
-   `@starting-style` + `allow-discrete`, like the mobile menu:
-   the entry scales in from 1.06, the exit fades back to it (one
-   starting state serves both directions, so the exit lands on
-   1.06 where Fumadocs' own exit lands on 1.04 — a 2% difference
-   no eye catches). `top`, `translate`, and `max-width` ride the
+   `@starting-style` + `allow-discrete`, like the mobile menu.
+   The fade is shared; the motion splits by width: on desktop
+   the entry scales in from 1.06 and the exit fades back to it
+   (one starting state serves both directions, so the exit lands
+   on 1.06 where Fumadocs' own exit lands on 1.04 — a 2%
+   difference no eye catches), while on mobile the entry slides
+   up from below the screen edge and the exit slides back down.
+   The scale and the slide live in separate rules on purpose:
+   the CSS build merges `transform` and `translate` in one rule
+   into a single `transform`, which would eat the slide. `top`,
+   `translate`, and `max-width` ride the
    same 300ms ease: on desktop the empty dialog sits above the
    middle, a little narrower, and slides up to the top and widens
    to its normal width once results appear; on mobile the empty
@@ -137,19 +143,40 @@
   .porto-search-dialog::backdrop {
     opacity: 0;
   }
-  .porto-search-dialog {
-    transform: scale(1.06);
-  }
 }
 /* The exit fades toward the closed state — `@starting-style`
    alone only covers the entry, so without this the dialog would
    sit at full opacity for 300ms and then vanish. */
 .porto-search-dialog:not([open]) {
   opacity: 0;
-  transform: scale(1.06);
 }
 .porto-search-dialog:not([open])::backdrop {
   opacity: 0;
+}
+/* Desktop: the scale. On mobile the entry slides up from below
+   the screen edge instead (`translate: 0 0` puts the whole
+   dialog under the viewport, since its top edge sits 1rem above
+   the bottom), and the exit slides it back down — no scale, so
+   the bar rises straight instead of growing out of the middle. */
+@media (min-width: 50rem) {
+  @starting-style {
+    .porto-search-dialog {
+      transform: scale(1.06);
+    }
+  }
+  .porto-search-dialog:not([open]) {
+    transform: scale(1.06);
+  }
+}
+@media (max-width: 49.99rem) {
+  @starting-style {
+    .porto-search-dialog {
+      translate: 0 0;
+    }
+  }
+  .porto-search-dialog:not([open]) {
+    translate: 0 0;
+  }
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */
