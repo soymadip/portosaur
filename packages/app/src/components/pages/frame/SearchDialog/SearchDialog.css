@@ -6,13 +6,23 @@
 /* A navbar button opens a native <dialog> modal; ZBSearch
  * (Fumadocs' static search) renders results inside. The button is
  * a bare magnifier icon at every width. The dialog is a floating
- * panel at every width: 1rem from the top and sides on mobile,
- * sized to its content like Fumadocs' search — the page stays
- * visible behind it, blurred by the backdrop. */
+ * panel at every width: on mobile it sticks to the bottom while
+ * empty (0.5rem from the bottom edge, like a bottom sheet) and
+ * flies to the top once results appear, like the desktop slide —
+ * the page stays visible behind it, blurred by the backdrop. */
 /* The open/close animation (Fumadocs' scale-and-fade) lives in
    animations.css, with the other dialog motion. */
 .porto-search-dialog {
-  margin: 0.5rem auto auto;
+  margin: 0 auto;
+  /* Bottom-anchored while empty: the top edge sits one dialog
+     height above the bottom edge, via `top` plus the standalone
+     `translate` property (not `transform`, which the open/close
+     scale owns). Both glide on the transition in animations.css.
+     `dvh` tracks the visible height as the browser chrome
+     shows and hides, so the bar stays 0.5rem above the
+     bottom edge. */
+  top: calc(100dvh - 0.5rem);
+  translate: 0 -100%;
   padding: 0;
   background-color: var(--porto-color-gray-6);
   border: 1px solid var(--porto-color-gray-5);
@@ -21,6 +31,10 @@
   max-width: 48rem;
   height: max-content;
   max-height: calc(100% - 1rem);
+}
+.porto-search-dialog--has-results {
+  top: 0.5rem;
+  translate: 0 0;
 }
 .porto-search-dialog[open] {
   display: flex;
@@ -156,11 +170,13 @@
      below it. The slide up and the widening run on the
      transition in animations.css, same 300ms ease as the
      open/close, and the bar's shrink glides on its own
-     padding transition. Mobile stays top-anchored — a centered
-     dialog would sit behind the keyboard there. */
+     padding transition. The mobile bottom shift is cancelled
+     here (`translate: 0 0`) — desktop positions with `top`
+     alone. */
   .porto-search-dialog {
     margin: 0 auto;
     top: calc(50% - 250px);
+    translate: 0 0;
     width: 90%;
     max-width: 44rem;
     max-height: calc(100% - 8rem);
