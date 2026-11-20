@@ -106,7 +106,7 @@ describe("remarkAdmonitions", () => {
       icon.attributes.map((attr: any) => [attr.name, attr.value]),
     );
     expect(attrs.className).toBe("admonition-icon");
-    expect(attrs.width).toBe("1.333em");
+    expect(attrs.width).toBe("1.25em");
     expect(attrs.fill).toBe("currentColor");
     expect(attrs.viewBox).toBe("0 0 24 24");
     expect(icon.children[0].name).toBe("path");
