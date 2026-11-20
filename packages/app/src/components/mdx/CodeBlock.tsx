@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PortoIcon } from "../PortoIcon.tsx";
 
 /**
@@ -15,7 +15,9 @@ import { PortoIcon } from "../PortoIcon.tsx";
  *
  * The wrap button toggles `porto-code-frame--wrapped` on this
  * block only: long lines wrap at the block's edge instead of
- * scrolling sideways. Off by default, per block.
+ * scrolling sideways. Off by default, per block — and the
+ * button only shows when a line actually runs past the edge
+ * (or while wrapping is on, so the reader can switch it off).
  */
 export function CodeBlock({
   title,
@@ -37,8 +39,32 @@ export function CodeBlock({
   "data-line-numbers-start"?: number;
 }) {
   const areaRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
   const [wrapped, setWrapped] = useState(false);
+  // Whether any line runs past the block's edge — the wrap
+  // button only shows when it would do something.
+  const [canWrap, setCanWrap] = useState(false);
+
+  useEffect(() => {
+    const pre = preRef.current;
+    if (!pre) {
+      return;
+    }
+    const measure = () => {
+      setCanWrap(pre.scrollWidth > pre.clientWidth);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(pre);
+    window.addEventListener("resize", measure);
+    // Code fonts can load after mount and change line widths.
+    document.fonts.ready.then(measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
 
   if (allowCopy === "true") {
     allowCopy = true;
@@ -103,9 +129,14 @@ export function CodeBlock({
     </button>
   );
 
+  // The wrap button only shows when a line actually runs past
+  // the block's edge — or while wrapping is on, so the reader
+  // can switch it back off.
+  const showWrap = allowWrap && (canWrap || wrapped);
+
   // Floating buttons (no title bar): the first line keeps room
   // for one (2.5rem) or two (4rem) — see code.css.
-  const floatingCount = title ? 0 : (allowCopy ? 1 : 0) + (allowWrap ? 1 : 0);
+  const floatingCount = title ? 0 : (allowCopy ? 1 : 0) + (showWrap ? 1 : 0);
 
   return (
     <figure
@@ -127,13 +158,17 @@ export function CodeBlock({
             />
           ) : null}
           <figcaption className="porto-code-title">{title}</figcaption>
-          {allowWrap && wrapButton()}
-          {allowCopy && copyButton()}
+          {(allowCopy || showWrap) && (
+            <div className="porto-code-actions">
+              {showWrap && wrapButton()}
+              {allowCopy && copyButton()}
+            </div>
+          )}
         </div>
       ) : (
         floatingCount > 0 && (
-          <div className="porto-code-actions">
-            {allowWrap && wrapButton()}
+          <div className="porto-code-actions porto-code-actions--floating">
+            {showWrap && wrapButton()}
             {allowCopy && copyButton()}
           </div>
         )
@@ -150,6 +185,7 @@ export function CodeBlock({
           .join(" ")}
       >
         <pre
+          ref={preRef}
           className={className}
           data-line-numbers={lineNumbers || undefined}
           data-line-numbers-start={lineNumbersStart}

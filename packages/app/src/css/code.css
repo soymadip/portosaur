@@ -92,19 +92,22 @@
   color: var(--porto-color-text-accent);
 }
 
-/* The floating actions — copy and wrap side by side over the
-   code's top-right corner when there is no title bar. The
-   buttons carry the frame's background so code never shows
-   through behind them. */
+/* The action buttons — copy and wrap side by side, in the
+   title bar or floating over the code's top-right corner when
+   there is no title. */
 .porto-code-actions {
+  display: flex;
+  gap: 0.125rem;
+}
+.porto-code-actions--floating {
   position: absolute;
   top: 0.5rem;
   inset-inline-end: 0.5rem;
   z-index: 2;
-  display: flex;
-  gap: 0.25rem;
 }
-.porto-code-actions :is(.porto-code-copy, .porto-code-wrap) {
+/* The floating buttons carry the frame's background so code
+   never shows through behind them. */
+.porto-code-actions--floating :is(.porto-code-copy, .porto-code-wrap) {
   background-color: var(--porto-color-gray-6);
 }
 

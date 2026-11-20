@@ -111,6 +111,8 @@
   border-radius: 0;
   background-color: var(--porto-color-gray-5);
 }
-.porto-tabs--code .porto-code-actions :is(.porto-code-copy, .porto-code-wrap) {
+.porto-tabs--code
+  .porto-code-actions--floating
+  :is(.porto-code-copy, .porto-code-wrap) {
   background-color: var(--porto-color-gray-5);
 }
