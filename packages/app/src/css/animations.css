@@ -124,6 +124,23 @@
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
 }
+/* While the keyboard moves, the bar tracks it with no lag: the
+   300ms `top` transition above is for the results glide, but
+   during a keyboard open it leaves the bar 300ms behind — the
+   keyboard covers it for the whole glide and the bar only pops
+   out above it at the end. This class drops `top` from the
+   transition while viewport events keep coming (SearchDialog
+   adds it on each update and removes it once the keyboard
+   settles), so the bar rides the keyboard's top edge. */
+.porto-search-dialog--keyboard-tracking {
+  transition:
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-width 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
 /* The backdrop is Fumadocs' overlay (`bg-fd-overlay`): black at
    20% with a 4px blur, so the page stays visible behind the
    frosted glass instead of going dark. The shared overlay token

@@ -167,6 +167,14 @@ export function SearchDialog() {
   // The value is a CSS variable the mobile empty state reads
   // (desktop positions with `top` alone and ignores it). It
   // updates as the keyboard slides, so the bar follows it up.
+  // While the keyboard moves, the bar must track it with no lag:
+  // the 300ms `top` transition is for the results glide, but
+  // during a keyboard open it leaves the bar 300ms behind — the
+  // keyboard covers it for the whole glide and the bar only pops
+  // out above it at the end (seen on a real phone). Each update
+  // adds a class that drops `top` from the transition; once the
+  // keyboard settles (no viewport event for 150ms) the class
+  // comes off and the glide is back for the results.
   useEffect(() => {
     if (!open) {
       return;
@@ -176,11 +184,17 @@ export function SearchDialog() {
     if (!dialog || !viewport) {
       return;
     }
+    let settleTimer: number | undefined;
     const update = () => {
+      dialog.classList.add("porto-search-dialog--keyboard-tracking");
       dialog.style.setProperty(
         "--porto-vv-bottom",
         `${viewport.offsetTop + viewport.height}px`,
       );
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        dialog.classList.remove("porto-search-dialog--keyboard-tracking");
+      }, 150);
     };
     update();
     viewport.addEventListener("resize", update);
@@ -188,6 +202,8 @@ export function SearchDialog() {
     return () => {
       viewport.removeEventListener("resize", update);
       viewport.removeEventListener("scroll", update);
+      window.clearTimeout(settleTimer);
+      dialog.classList.remove("porto-search-dialog--keyboard-tracking");
       dialog.style.removeProperty("--porto-vv-bottom");
     };
   }, [open]);
