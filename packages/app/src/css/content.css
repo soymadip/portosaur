@@ -36,6 +36,12 @@
 .porto-markdown-content li > :is(p, ul, ol):not(:where(.not-content *)) {
   margin-top: 0.5rem;
 }
+/* A code block inside a list item gets a 4px gap above it, half
+   the breathing room other list-item children get. The block is
+   heavy enough without the full 0.5rem. */
+.porto-markdown-content li > :is(figure, pre):not(:where(.not-content *)) {
+  margin-top: 0.25rem;
+}
 .porto-markdown-content dt:not(:where(.not-content *)) {
   font-weight: 700;
 }
