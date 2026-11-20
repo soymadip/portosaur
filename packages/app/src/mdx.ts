@@ -47,6 +47,7 @@ import rehypeKatex from "rehype-katex";
 import remarkDirective from "remark-directive";
 import remarkEmoji from "remark-emoji";
 import type { MDXPresetOptions } from "fumadocs-mdx/config";
+import { parseCodeBlockAttributes } from "fumadocs-core/mdx-plugins/codeblock-utils";
 
 import remarkContentTitle, {
   CONTENT_TITLE_KEY,
@@ -66,6 +67,48 @@ export interface PortosaurMdxArgs {
   colorScheme?: string;
   /** Render `:smile:`-style emoji shortcodes (default true). */
   renderEmojiShortcodes?: boolean;
+}
+
+/**
+ * Parse a code fence's meta string into `pre` props, as Fumadocs'
+ * `rehypeCode` `parseMetaString` option. This mirrors Fumadocs'
+ * default parser (`title`, `tab`, `noCopy`, `lineNumbers` —
+ * `noCopy` becomes `allowCopy: "false"`, `lineNumbers` becomes
+ * `data-line-numbers`) and adds Portosaur's `noWrap`, which
+ * becomes `allowWrap: "false"` for the CodeBlock's wrap button.
+ * Keep the shared half in sync with Fumadocs' `parseMeta`
+ * (fumadocs-core `rehype-code.core.ts`) on upgrades — this
+ * replaces their default wholesale, it does not extend it.
+ */
+export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
+  const parsed = parseCodeBlockAttributes(meta, [
+    "title",
+    "tab",
+    "noCopy",
+    "noWrap",
+    "lineNumbers",
+  ]);
+  const data: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(parsed.attributes)) {
+    if (k === "noCopy") {
+      data.allowCopy = "false";
+      continue;
+    }
+    if (k === "noWrap") {
+      data.allowWrap = "false";
+      continue;
+    }
+    if (k === "lineNumbers") {
+      data["data-line-numbers"] = true;
+      if (typeof v === "number") {
+        data["data-line-numbers-start"] = v;
+      }
+      continue;
+    }
+    data[k] = v;
+  }
+  data.__raw = parsed.rest;
+  return data;
 }
 
 /**
@@ -112,6 +155,9 @@ export function portosaurMdxOptions({
     remarkNpmOptions: false,
     rehypeCodeOptions: {
       themes: getShikiThemes(colorScheme),
+      // Portosaur's meta parser: Fumadocs' default plus `noWrap`
+      // (see parseCodeBlockMeta above).
+      parseMetaString: parseCodeBlockMeta,
     },
     valueToExport: [CONTENT_TITLE_KEY, HAS_MATH_KEY],
   };

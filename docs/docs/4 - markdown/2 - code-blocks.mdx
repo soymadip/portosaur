@@ -4,7 +4,7 @@ desc: "Syntax highlighting, file titles, line numbers, magic comments, and code 
 icon: "md:code"
 ---
 
-{vars.project.title} includes built-in syntax highlighting powered by Shiki. Every code block renders in a frame with a copy button — no setup needed.
+{vars.project.title} includes built-in syntax highlighting powered by Shiki. Every code block renders in a frame with copy and wrap buttons — no setup needed.
 
 ---
 
@@ -203,6 +203,33 @@ Add `noCopy` to the fence to leave the copy button off:
 const token = "do-not-copy-me";
 ```
 ````
+
+---
+
+## Wrapping Long Lines
+
+Long lines scroll sideways by default. The wrap button beside the copy button wraps them at the block's edge instead. Tap it again to go back to scrolling.
+
+Live — the line below is too long for the block:
+
+{/* prettier-ignore */}
+```javascript
+const docsUrl = "https://portosaur.dev/docs/markdown/code-blocks/#wrapping-long-lines";
+```
+
+Add `noWrap` to the fence to leave the wrap button off:
+
+````markdown
+```javascript noWrap
+const token = "do-not-wrap-me";
+```
+````
+
+Live:
+
+```javascript noWrap
+const token = "do-not-wrap-me";
+```
 
 ---
 

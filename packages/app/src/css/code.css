@@ -57,9 +57,11 @@
   color: var(--porto-color-gray-2);
 }
 
-/* Icon-only copy button — in the title bar, or floating over the
-   code's top-right corner when there is no title. */
-.porto-code-copy {
+/* Icon-only action buttons — copy and wrap. In the title bar,
+   or floating over the code's top-right corner when there is no
+   title (see `.porto-code-actions` below). */
+.porto-code-copy,
+.porto-code-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -70,13 +72,15 @@
   color: var(--porto-color-gray-3);
   cursor: pointer;
   flex-shrink: 0;
-  /* The copied state fades in (accent) and back out. */
+  /* The copied/active state fades in (accent) and back out. */
   transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.porto-code-copy:hover {
+.porto-code-copy:hover,
+.porto-code-wrap:hover {
   color: var(--porto-color-white);
 }
-.porto-code-copy svg {
+.porto-code-copy svg,
+.porto-code-wrap svg {
   width: 0.875rem;
   height: 0.875rem;
   flex-shrink: 0;
@@ -84,12 +88,32 @@
 .porto-code-copy[data-copied="true"] {
   color: var(--porto-color-text-accent);
 }
-.porto-code-copy--floating {
+.porto-code-wrap[data-active="true"] {
+  color: var(--porto-color-text-accent);
+}
+
+/* The floating actions — copy and wrap side by side over the
+   code's top-right corner when there is no title bar. The
+   buttons carry the frame's background so code never shows
+   through behind them. */
+.porto-code-actions {
   position: absolute;
   top: 0.5rem;
   inset-inline-end: 0.5rem;
   z-index: 2;
+  display: flex;
+  gap: 0.25rem;
+}
+.porto-code-actions :is(.porto-code-copy, .porto-code-wrap) {
   background-color: var(--porto-color-gray-6);
+}
+
+/* Wrapped lines — the wrap button's state, per block. Long
+   lines wrap at the block's edge instead of scrolling;
+   unbreakable tokens break only when they must. */
+.porto-code-frame--wrapped pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 /* The scrolling viewport — keyboard-reachable (tabIndex 0), capped
@@ -99,14 +123,18 @@
   max-height: 600px;
 }
 
-/* Without a title, the floating copy button sits over the code's
-   top-right corner — but it only covers the first line's row, so
-   only the first line keeps room for it. Reserving the room on
-   the whole viewport narrowed every line by 2.5rem and pushed
+/* Without a title, the floating buttons sit over the code's
+   top-right corner — but they only cover the first line's row,
+   so only the first line keeps room for them. Reserving the
+   room on the whole viewport narrowed every line and pushed
    medium lines over the edge on narrow screens, where the block
-   looked cut off with no scrollbar to hint it scrolled. */
+   looked cut off with no scrollbar to hint it scrolled. One
+   button needs 2.5rem, two need 4rem. */
 .porto-code-viewport--spaced .shiki .line:first-child {
   padding-inline-end: 2.5rem;
+}
+.porto-code-viewport--spaced-2 .shiki .line:first-child {
+  padding-inline-end: 4rem;
 }
 
 /* The frame owns the border — the `pre` inside drops its own.

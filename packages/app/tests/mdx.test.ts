@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import remarkEmoji from "remark-emoji";
-import { portosaurMdxOptions } from "../src/mdx.ts";
+import { portosaurMdxOptions, parseCodeBlockMeta } from "../src/mdx.ts";
 
 /**
  * `portosaurMdxOptions` builds the Fumadocs global MDX preset for a
@@ -19,5 +19,39 @@ describe("portosaurMdxOptions", () => {
       renderEmojiShortcodes: false,
     });
     expect(remarkPlugins).not.toContain(remarkEmoji);
+  });
+});
+
+/**
+ * `parseCodeBlockMeta` mirrors Fumadocs' default fence-meta
+ * parser and adds Portosaur's `noWrap` flag.
+ */
+describe("parseCodeBlockMeta", () => {
+  test("maps noCopy and noWrap to allow flags", () => {
+    expect(parseCodeBlockMeta("noCopy noWrap")).toEqual({
+      allowCopy: "false",
+      allowWrap: "false",
+      __raw: " ",
+    });
+  });
+
+  test("keeps Fumadocs' title, tab and lineNumbers behavior", () => {
+    expect(parseCodeBlockMeta('title="a.js" tab="Tab"')).toEqual({
+      title: "a.js",
+      tab: "Tab",
+      __raw: " ",
+    });
+    expect(parseCodeBlockMeta("lineNumbers=4")).toEqual({
+      "data-line-numbers": true,
+      "data-line-numbers-start": 4,
+      __raw: "",
+    });
+  });
+
+  test("leaves unknown meta in __raw", () => {
+    expect(parseCodeBlockMeta('noCopy lang="python"')).toEqual({
+      allowCopy: "false",
+      __raw: ' lang="python"',
+    });
   });
 });
