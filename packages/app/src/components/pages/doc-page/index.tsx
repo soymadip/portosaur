@@ -201,11 +201,18 @@ export function DocPage({
               : undefined
         }
       >
-        <div className="porto-right-sidebar-container">
-          <div className="porto-right-sidebar">
-            <PageSidebar headings={tocHeadings} pageTitleId={PAGE_TITLE_ID} />
+        {/* The TOC column only exists on pages with a TOC: without
+          headings there is nothing to show, so the column is not
+          rendered at all and the main pane fills the whole row —
+          the content re-centers under its cap instead of sitting
+          beside an empty 265px strip. */}
+        {hasToc && (
+          <div className="porto-right-sidebar-container">
+            <div className="porto-right-sidebar">
+              <PageSidebar headings={tocHeadings} pageTitleId={PAGE_TITLE_ID} />
+            </div>
           </div>
-        </div>
+        )}
         <div className={`main-pane${hasToc ? " main-pane--toc" : ""}`}>
           {heading && (
             <ContentPanel className="content-panel--header">

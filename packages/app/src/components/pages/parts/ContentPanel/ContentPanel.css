@@ -7,12 +7,12 @@
 }
 /* The title panel sits flush under the navbar, like OG —
    Docusaurus puts no padding between the navbar and the page
-   title. Its bottom padding is 0.2rem: the separator sits close
-   under the description, and the breathing room is below the
-   line (the body panel's 1rem), not above it. */
+   title. Its bottom padding is 0.2rem plus 1px: the separator
+   sits close under the description, and the breathing room is
+   below the line (the body panel's 1rem), not above it. */
 .content-panel--header {
   padding-top: 0;
-  padding-bottom: 0.2rem;
+  padding-bottom: calc(0.2rem + 1px);
 }
 /* The body panel on doc pages: 1rem of top padding, so the
    separator gets most of its room below the line (the header
@@ -61,6 +61,24 @@
   inset-inline-start: var(--porto-content-pad-x);
   inset-inline-end: 0;
   border-top: 1px solid var(--porto-color-hairline-light);
+}
+/* On pages without a TOC the panel is much wider than the text
+   column, so the panel-wide divider would stick out past the text
+   on both sides. There the line lives on the header's content
+   container instead, so it spans exactly the text column. The
+   0.2rem plus 1px below the description moves with it, so the
+   line sits at the same height as on TOC pages. */
+.main-pane:not(.main-pane--toc) .content-panel + .content-panel::before {
+  content: none;
+}
+.main-pane:not(.main-pane--toc) .content-panel--header {
+  padding-bottom: 0;
+}
+.main-pane:not(.main-pane--toc)
+  .content-panel--header
+  > .porto-content-container {
+  padding-bottom: calc(0.2rem + 1px);
+  border-bottom: 1px solid var(--porto-color-hairline-light);
 }
 /* The article is capped at 80rem and centered. Generous on
    purpose: at 1920px the middle column is ~1390px, so the cap

@@ -17,7 +17,9 @@
    detail pages), the footer's top border spans only the content
    column: it starts at the sidebar's right edge instead of the
    viewport's, and stops at the TOC rail's left edge once the
-   three-column row appears. The footer lives in the shell,
+   three-column row appears. On pages without a TOC there is no
+   rail — the column is not rendered — so the border runs to the
+   viewport's right edge instead. The footer lives in the shell,
    outside the frame, so the scope is `body:has(...)`. The TOC
    rail is exactly sidebar-width, so both offsets share the var. */
 @media (min-width: 50rem) {
@@ -39,7 +41,8 @@
 }
 
 @media (min-width: 72rem) {
-  body:has(.main-frame--sidebar) .porto-footer {
+  /* TOC pages only: without a TOC there is no rail to stop at. */
+  body:has(.main-frame--sidebar):has(.main-pane--toc) .porto-footer {
     margin-inline-end: var(--porto-sidebar-width);
   }
 }
