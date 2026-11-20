@@ -145,18 +145,40 @@ export function SearchDialog() {
     if (!dialog) {
       return;
     }
+    let entryTimer: number | undefined;
     if (open) {
+      // If the keyboard is already open (a quick reopen, before
+      // it finished closing), skip the entry slide: the bar
+      // would rise from below the screen while the keyboard is
+      // up, leaving the input behind it — Firefox pans the page
+      // to reveal it. Opening at rest instead puts the input
+      // above the keyboard from the first frame. The class comes
+      // off 50ms later, once the open has landed.
+      const viewport = window.visualViewport;
+      if (viewport && window.innerHeight - viewport.height > 100) {
+        dialog.classList.add("porto-search-dialog--no-entry");
+        entryTimer = window.setTimeout(() => {
+          dialog.classList.remove("porto-search-dialog--no-entry");
+        }, 50);
+      }
       if (!dialog.open) {
         dialog.showModal();
       }
       document.documentElement.setAttribute("data-search-modal-open", "");
-      inputRef.current?.focus();
+      // Never scroll on focus: the input lives in a top-layer
+      // dialog, so scrolling the document can never reveal it —
+      // it only shoves the page behind the dialog.
+      inputRef.current?.focus({ preventScroll: true });
     } else {
       if (dialog.open) {
         dialog.close();
       }
       document.documentElement.removeAttribute("data-search-modal-open");
     }
+    return () => {
+      window.clearTimeout(entryTimer);
+      dialog.classList.remove("porto-search-dialog--no-entry");
+    };
   }, [open]);
 
   // While the dialog is open, track the visual viewport's bottom

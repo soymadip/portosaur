@@ -176,6 +176,19 @@
 .porto-search-dialog:not([open])::backdrop {
   opacity: 0;
 }
+/* Opening while the keyboard is already up (a quick reopen)
+   skips the entry slide entirely: the bar appears at rest above
+   the keyboard instead of rising from below the screen, where
+   the input would sit behind the keyboard and Firefox would pan
+   the page to reveal it. SearchDialog adds this class when the
+   visual viewport is already shrunk at open time and removes it
+   50ms later, once the open has landed. It sits after the
+   tracking and backdrop rules so it wins over both while
+   present. */
+.porto-search-dialog--no-entry,
+.porto-search-dialog--no-entry::backdrop {
+  transition: none;
+}
 /* Desktop: the scale. On mobile the entry slides up from below
    the screen edge instead (`translate: 0 0` puts the whole
    dialog under the viewport, since its top edge sits 1rem above
