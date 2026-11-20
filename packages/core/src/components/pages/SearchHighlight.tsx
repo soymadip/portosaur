@@ -135,12 +135,20 @@ function tryHighlight(): boolean {
   // A page result flashes the page title. A heading result
   // flashes the heading itself. A text or table result flashes
   // the line it came from — the heading only when the line
-  // can't be found.
+  // can't be found. A matched line gets scrolled into view:
+  // the page lands on the section heading, and on a long
+  // section the line can sit below the fold, flashing unseen.
   let target: Element | null;
+  let scrollToLine = false;
   if (!flag.fragment || flag.type === "heading") {
     target = flag.fragment ? heading : document.querySelector("main h1");
   } else {
-    target = findContentBlock(heading, flag.content, flag.type) ?? heading;
+    target = findContentBlock(heading, flag.content, flag.type);
+    if (target) {
+      scrollToLine = true;
+    } else {
+      target = heading;
+    }
   }
   if (!target) {
     return false;
@@ -148,6 +156,12 @@ function tryHighlight(): boolean {
   const flash = target;
   clearSearchHighlight();
   flash.classList.add("porto-search-highlight");
+  if (scrollToLine) {
+    const rect = flash.getBoundingClientRect();
+    if (rect.top < 0 || rect.bottom > window.innerHeight) {
+      flash.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+  }
   window.setTimeout(() => {
     flash.classList.remove("porto-search-highlight");
   }, 2500);
