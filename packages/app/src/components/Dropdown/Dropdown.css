@@ -167,3 +167,38 @@ details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
   border: 0;
   border-top: 1px solid var(--porto-color-hairline-light);
 }
+
+/* Dropdown in content — overrides so the shared menu survives the
+ * markdown prose rules. Rendered by the MDX Dropdown tag.
+ */
+
+/* Dropdown (MDX) — the MDX `<Dropdown>` tag renders the shared
+   Dropdown. The markdown rules style every `details` / `summary`
+   / `ul` as content (the Details component's disclosure box and
+   triangle, list indentation) — the dropdown is not content, so
+   it takes its own borders, markers, and padding back. */
+.porto-markdown-content details.porto-dropdown {
+  border: 0;
+  padding: 0;
+}
+.porto-markdown-content details[open] > summary.porto-dropdown__trigger {
+  margin-bottom: 0;
+}
+.porto-markdown-content summary.porto-dropdown__trigger::before {
+  content: none;
+}
+.porto-markdown-content ul.porto-dropdown__menu {
+  padding: 0.5rem;
+  list-style: none;
+}
+/* Content links are accent-colored — menu items are not content
+   links, so they keep the menu's own text colors. */
+.porto-markdown-content a.porto-dropdown__item {
+  color: var(--porto-color-gray-2);
+}
+.porto-markdown-content a.porto-dropdown__item.active {
+  color: var(--porto-color-accent-high);
+}
+[data-theme="dark"] .porto-markdown-content a.porto-dropdown__item.active {
+  color: color-mix(in srgb, var(--porto-color-accent-high) 65%, white);
+}
