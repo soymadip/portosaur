@@ -150,7 +150,7 @@ function tryHighlight(): boolean {
   flash.classList.add("porto-search-highlight");
   window.setTimeout(() => {
     flash.classList.remove("porto-search-highlight");
-  }, 2000);
+  }, 2500);
   return true;
 }
 
