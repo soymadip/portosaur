@@ -139,6 +139,10 @@ export function SearchDialog() {
   // Sync the native dialog with `open`, and lock body scroll.
   // The open/close animation is pure CSS (`@starting-style` +
   // `allow-discrete` in animations.css) — no JS animation state.
+  // The lock lives on the root element, not the body: the CSS
+  // also reserves the scrollbar gutter there (`scrollbar-gutter:
+  // stable`), so hiding the scrollbar doesn't widen the page
+  // and shift the content sideways.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) {
@@ -148,13 +152,13 @@ export function SearchDialog() {
       if (!dialog.open) {
         dialog.showModal();
       }
-      document.body.setAttribute("data-search-modal-open", "");
+      document.documentElement.setAttribute("data-search-modal-open", "");
       inputRef.current?.focus();
     } else {
       if (dialog.open) {
         dialog.close();
       }
-      document.body.removeAttribute("data-search-modal-open");
+      document.documentElement.removeAttribute("data-search-modal-open");
     }
   }, [open]);
 
@@ -167,21 +171,29 @@ export function SearchDialog() {
     }
   }, [open, onSearchChange]);
 
-  // Cmd/Ctrl+K toggles. Escape closes the dialog directly
-  // (handled on the dialog itself, so it works wherever focus
-  // sits inside it). Outside clicks close.
+  // Cmd/Ctrl+K toggles. Escape closes — listened for on the
+  // window, like Radix does, instead of on the dialog element:
+  // a dialog-level handler needed two presses in Firefox (the
+  // first never reached it), a window listener closes on the
+  // first press wherever focus sits. The native `cancel` path
+  // stays as a fallback — closing an already-closed dialog is
+  // a no-op. Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         setOpen((wasOpen) => !wasOpen);
+        return;
+      }
+      if (event.key === "Escape" && dialogRef.current?.open) {
+        close();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, []);
+  }, [close]);
 
   // The native `close` event fires on Escape and on backdrop
   // dismissal — sync React state with it.
@@ -203,15 +215,6 @@ export function SearchDialog() {
   // outside the frame, is a backdrop click).
   const onDialogClick = (event: React.MouseEvent<HTMLDialogElement>) => {
     if (event.target === dialogRef.current) {
-      close();
-    }
-  };
-
-  // Escape closes the dialog directly, wherever focus sits
-  // inside it. The native `cancel` path stays as a fallback —
-  // closing an already-closed dialog is a no-op.
-  const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
-    if (event.key === "Escape") {
       close();
     }
   };
@@ -259,6 +262,11 @@ export function SearchDialog() {
   const showEmpty = !isLoading && hasQuery && groups.length === 0;
   const showFilteredEmpty =
     !isLoading && hasQuery && groups.length > 0 && navList.length === 0;
+  // Whether the results area is showing — the dialog sits in
+  // the middle of the screen while empty and slides up once
+  // results appear (the class drives the position in CSS).
+  const hasResults =
+    isLoading || showEmpty || showFilteredEmpty || navList.length > 0;
 
   return (
     <>
@@ -274,10 +282,13 @@ export function SearchDialog() {
 
       <dialog
         ref={dialogRef}
-        className="porto-search-dialog"
+        className={
+          hasResults
+            ? "porto-search-dialog porto-search-dialog--has-results"
+            : "porto-search-dialog"
+        }
         aria-label="Search"
         onClick={onDialogClick}
-        onKeyDown={onDialogKeyDown}
       >
         <div className="porto-search-dialog__frame">
           <div className="porto-search-dialog__header">
@@ -337,10 +348,7 @@ export function SearchDialog() {
           {/* The results area only exists when it has something to
               show — with no query yet, the dialog is just the
               bar. */}
-          {(isLoading ||
-            showEmpty ||
-            showFilteredEmpty ||
-            navList.length > 0) && (
+          {hasResults && (
             <div ref={resultsRef} className="porto-search-dialog__results">
               {isLoading && (
                 <p className="porto-search-dialog__loading">Loading search…</p>

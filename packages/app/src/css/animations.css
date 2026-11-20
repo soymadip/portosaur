@@ -100,11 +100,16 @@
    the entry scales in from 1.06, the exit fades back to it (one
    starting state serves both directions, so the exit lands on
    1.06 where Fumadocs' own exit lands on 1.04 — a 2% difference
-   no eye catches). */
+   no eye catches). `top` rides the same 300ms ease: on desktop
+   the empty dialog sits above the middle and slides up to the
+   top once results appear (SearchDialog.css owns the positions,
+   this transition owns the glide; the bar's own shrink glides
+   on its padding transition in SearchDialog.css). */
 .porto-search-dialog {
   transition:
     transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    top 300ms cubic-bezier(0.16, 1, 0.3, 1),
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
 }

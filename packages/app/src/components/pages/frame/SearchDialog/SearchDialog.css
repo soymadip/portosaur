@@ -118,13 +118,14 @@
 
 /* No padding of its own — the list's own inset is the only
    space around the results, like Fumadocs'. The list is capped
-   at 460px (Fumadocs' `max-h-[460px]`), so the dialog stays
-   compact instead of spanning to the bottom of the screen. */
+   at 640px (Fumadocs caps at 460px), so it uses more of the
+   screen below instead of ending halfway down. On short
+   screens the dialog's own max-height binds first. */
 .porto-search-dialog__results {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: 28.75rem;
+  max-height: 40rem;
   padding: 0;
 }
 
@@ -136,21 +137,41 @@
   color: var(--porto-color-gray-3);
 }
 
-/* Body scroll lock while the search modal is open. */
+/* Scroll lock while the search modal is open, on the root
+   element. `scrollbar-gutter: stable` reserves the scrollbar's
+   space while it is hidden, so the page doesn't widen and the
+   content doesn't shift sideways when the dialog opens. */
 [data-search-modal-open] {
   overflow: hidden;
+  scrollbar-gutter: stable;
 }
 
 @media (min-width: 50rem) {
+  /* On desktop the empty dialog sits above the middle of the
+     screen, like Fumadocs' wiki (`top: calc(50% - 250px)`).
+     The bar itself is taller while empty (16px vertical
+     padding), and shrinks to its normal height once results
+     appear — the extra height is in the bar, not empty space
+     below it. The slide up runs on the transition in
+     animations.css, same 300ms ease as the open/close, and the
+     bar's shrink glides on its own padding transition. Mobile
+     stays top-anchored — a centered dialog would sit behind
+     the keyboard there. */
   .porto-search-dialog {
-    margin: 4rem auto auto;
+    margin: 0 auto;
+    top: calc(50% - 250px);
     width: 90%;
     max-width: 48rem;
     max-height: calc(100% - 8rem);
   }
-  /* A shorter bar on desktop — the vertical padding drops from
-     12px to 8px, the sides stay at 12px. */
+  .porto-search-dialog--has-results {
+    top: 4rem;
+  }
   .porto-search-dialog__header {
+    padding-block: 1rem;
+    transition: padding-block 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .porto-search-dialog--has-results .porto-search-dialog__header {
     padding-block: 0.5rem;
   }
 }
