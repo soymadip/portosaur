@@ -1,6 +1,8 @@
 import type { MDXComponents } from "mdx/types";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 import { Children, isValidElement } from "react";
+import NextLink from "next/link";
+import { pageHref } from "../lib/pageUrl.ts";
 import {
   Dropdown as SharedDropdown,
   type DropdownAlign,
@@ -126,6 +128,49 @@ function Paragraph({
     );
   }
   return <p {...props}>{children}</p>;
+}
+
+/** The loader surface link resolution needs (a subset of `LoaderOutput`). */
+export interface HrefResolver {
+  // A method, not a property: methods are bivariant, so a typed
+  // loader stays assignable here.
+  resolveHref(href: string, page: unknown): string;
+}
+
+type AnchorProps = ComponentProps<"a">;
+
+/**
+ * The MDX `a` override — resolves relative links
+ * (`./guide/setup.mdx`) to page URLs through the loader, renders
+ * internal links via Next.js `<Link>`, and leaves external and
+ * hash links as plain anchors. The generated route passes the
+ * result in as `components` (Portosaur's own replacement for
+ * `fumadocs-ui/mdx`'s version, which it does not depend on).
+ */
+export function createRelativeLink(
+  source: HrefResolver,
+  page: unknown,
+): (props: AnchorProps) => ReactNode {
+  return function MdxLink({ href, ...props }: AnchorProps) {
+    if (!href) {
+      return <a {...props} />;
+    }
+    // Absolute URLs, protocol-relative URLs, and hash links pass
+    // through unchanged — never resolve or slash them.
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(href)) {
+      const external = /^https?:\/\//.test(href);
+      return (
+        <a
+          href={href}
+          target={external ? "_blank" : undefined}
+          rel={external ? "noopener noreferrer" : undefined}
+          {...props}
+        />
+      );
+    }
+    const resolved = pageHref(source.resolveHref(href, page));
+    return <NextLink href={resolved} {...props} />;
+  };
 }
 
 /**

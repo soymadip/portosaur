@@ -352,7 +352,7 @@ describe("buildDocPageContent", () => {
       "components={{ a: createRelativeLink(source, page) }}",
     );
     expect(content).toContain(
-      'import { createRelativeLink } from "@portosaur/core/lib/mdx-link"',
+      'import { createRelativeLink } from "@portosaur/core/components/mdx"',
     );
     expect(content).toContain("return source.generateParams();");
     // Metadata title is frontmatter ?? content H1 ?? file-base fallback

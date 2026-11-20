@@ -131,7 +131,7 @@ export type {
 } from "./lib/navbar.ts";
 export { prepareSidebar } from "./lib/sidebar.ts";
 export type { SidebarItem, PreparedSidebar } from "./lib/sidebar.ts";
-export { createRelativeLink } from "./lib/mdx-link.tsx";
+export { createRelativeLink } from "./components/mdx.tsx";
 export {
   resolveAuthor,
   formatPostDate,

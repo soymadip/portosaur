@@ -522,7 +522,7 @@ export function buildDocPageContent(
 import { config } from "@/lib/config";
 import { DocPage } from "@portosaur/core/components/pages/doc-page";
 import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
-import { createRelativeLink } from "@portosaur/core/lib/mdx-link";
+import { createRelativeLink } from "@portosaur/core/components/mdx";
 import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -770,7 +770,7 @@ import {
 } from "@/lib/blog";
 import { BlogPostPage } from "@portosaur/core/components/pages/blog-post-page";
 import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
-import { createRelativeLink } from "@portosaur/core/lib/mdx-link";
+import { createRelativeLink } from "@portosaur/core/components/mdx";
 import { pageHref } from "@portosaur/core/lib/pageUrl";
 import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
