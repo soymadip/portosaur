@@ -1,5 +1,5 @@
 {
-  "generated_from": "Components pages grouped under /docs/markdown/components/",
+  "generated_from": "Icons & Dynamic Variables moved under /docs/markdown/",
   "routes": [
     {
       "url": "/",
@@ -60,27 +60,7 @@
     {
       "url": "/docs/config/",
       "title": "Configuration Guide | Portosaur",
-      "headings": [
-        "Configuration Guide",
-        "Dynamic Variables",
-        "Icons & Emoji",
-        "Configuration Reference"
-      ]
-    },
-    {
-      "url": "/docs/config/dynamic-variables/",
-      "title": "Dynamic Variables | Portosaur",
-      "headings": [
-        "Dynamic Variables",
-        "Syntax Overview",
-        "Variable Sources",
-        "Escaping Variables"
-      ]
-    },
-    {
-      "url": "/docs/config/icons/",
-      "title": "Icons & Emoji | Portosaur",
-      "headings": ["Icons & Emoji", "Ways to Use Icons/Emojis"]
+      "headings": ["Configuration Guide", "Configuration Reference"]
     },
     {
       "url": "/docs/config/reference/",
@@ -238,25 +218,15 @@
       ]
     },
     {
-      "url": "/docs/getting-started/search/",
-      "title": "Search | Portosaur",
-      "headings": [
-        "Search",
-        "Opening search",
-        "Results",
-        "Keyboard",
-        "The search page",
-        "What search covers"
-      ]
-    },
-    {
       "url": "/docs/markdown/",
       "title": "Markdown Features | Portosaur",
       "headings": [
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
-        "Components"
+        "Components",
+        "Dynamic Variables",
+        "Icons & Emoji"
       ]
     },
     {
@@ -270,6 +240,7 @@
         "Magic Comments",
         "Code Tabs",
         "Hiding the Copy Button",
+        "Wrapping Long Lines",
         "Dynamic Variables in Code Blocks"
       ]
     },
@@ -378,9 +349,24 @@
       "headings": ["TopicList", "Props Reference"]
     },
     {
+      "url": "/docs/markdown/dynamic-variables/",
+      "title": "Dynamic Variables | Portosaur",
+      "headings": [
+        "Dynamic Variables",
+        "Syntax Overview",
+        "Variable Sources",
+        "Escaping Variables"
+      ]
+    },
+    {
       "url": "/docs/markdown/frontmatter/",
       "title": "Frontmatter | Portosaur",
       "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
+    },
+    {
+      "url": "/docs/markdown/icons/",
+      "title": "Icons & Emoji | Portosaur",
+      "headings": ["Icons & Emoji", "Ways to Use Icons/Emojis"]
     },
     {
       "url": "/docs/progressive-web-app/",
