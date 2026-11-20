@@ -15,6 +15,7 @@ import {
 import {
   PAGE_TITLE_ID,
   docFileTitle,
+  docPageDesc,
   docPageTitles,
 } from "../../lib/docPage.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
@@ -196,7 +197,7 @@ export function DocPage({
               <PageTitle
                 title={heading.text}
                 id={heading.id}
-                desc={data.desc}
+                desc={docPageDesc(data, config.site.markdown.addMdxDesc)}
               />
             </ContentPanel>
           )}

@@ -97,6 +97,21 @@ describe("buildSiteConfig", () => {
     expect(options.site.markdown.mermaid).toBe(false);
   });
 
+  test("add_mdx_desc defaults to true and can be turned off", () => {
+    const defaults = buildSiteConfig({}, process.cwd(), {
+      gitDate: "June 26, 2026",
+      portoPaths,
+    });
+    expect(defaults.site.markdown.addMdxDesc).toBe(true);
+
+    const off = buildSiteConfig(
+      { site: { markdown: { add_mdx_desc: false } } },
+      process.cwd(),
+      { gitDate: "June 26, 2026", portoPaths },
+    );
+    expect(off.site.markdown.addMdxDesc).toBe(false);
+  });
+
   test("passes custom_css through as string or array", () => {
     const single = buildSiteConfig(
       { theme: { custom_css: "static/custom.css" } },

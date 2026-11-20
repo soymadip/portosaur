@@ -79,3 +79,21 @@ export function docPageTitles(
   const heading = !hideTitle ? { text: frontmatterTitle ?? fallback } : null;
   return { heading, metaTitle };
 }
+
+/**
+ * The description to show under the page title, or undefined when
+ * hidden. Frontmatter `hide_desc` wins when set; otherwise the
+ * global `site.markdown.add_mdx_desc` decides.
+ */
+export function docPageDesc(
+  data: PortoDocData | undefined,
+  addMdxDesc: boolean,
+): string | undefined {
+  if (data?.hide_desc === true) {
+    return undefined;
+  }
+  if (data?.hide_desc === false) {
+    return data.desc;
+  }
+  return addMdxDesc ? data?.desc : undefined;
+}

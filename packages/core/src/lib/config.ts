@@ -42,6 +42,7 @@ export interface PortosaurOptions {
     onBrokenLinks: string;
     onBrokenAnchors: string;
     markdown: {
+      addMdxDesc: boolean;
       mermaid: boolean;
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;

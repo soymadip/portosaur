@@ -1,6 +1,7 @@
 import { expect, test, describe } from "bun:test";
 import {
   docFileTitle,
+  docPageDesc,
   docPageTitles,
   humanizeName,
   pageTitle,
@@ -88,5 +89,32 @@ describe("pageTitle", () => {
     expect(pageTitle("CLI Reference", "Portosaur")).toBe(
       "CLI Reference | Portosaur",
     );
+  });
+});
+
+describe("docPageDesc", () => {
+  test("shows the desc when the global is on and nothing is set", () => {
+    expect(docPageDesc({ desc: "A summary." }, true)).toBe("A summary.");
+  });
+
+  test("hides the desc when the global is off", () => {
+    expect(docPageDesc({ desc: "A summary." }, false)).toBeUndefined();
+  });
+
+  test("hide_desc hides the desc even when the global is on", () => {
+    expect(
+      docPageDesc({ desc: "A summary.", hide_desc: true }, true),
+    ).toBeUndefined();
+  });
+
+  test("hide_desc false shows the desc even when the global is off", () => {
+    expect(docPageDesc({ desc: "A summary.", hide_desc: false }, false)).toBe(
+      "A summary.",
+    );
+  });
+
+  test("returns undefined when the page has no desc", () => {
+    expect(docPageDesc({}, true)).toBeUndefined();
+    expect(docPageDesc({ hide_desc: false }, true)).toBeUndefined();
   });
 });

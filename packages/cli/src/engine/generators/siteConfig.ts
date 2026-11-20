@@ -58,6 +58,7 @@ export interface PortosaurOptions {
     onBrokenLinks: string;
     onBrokenAnchors: string;
     markdown: {
+      addMdxDesc: boolean;
       mermaid: boolean;
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;
@@ -237,6 +238,7 @@ export function buildSiteConfig(
   const pwaEnable = get("site.pwa.enable", true);
   const pwaNotifications = get("site.pwa.notifications", false);
 
+  const addMdxDesc = get("site.markdown.add_mdx_desc", true); // Show the page description under the title.
   const mermaid = get("site.markdown.mermaid", true); // Enable support for Mermaid.js diagrams.
   const renderEmojiShortcodes = get(
     "site.markdown.render_emoji_shortcodes",
@@ -461,6 +463,7 @@ export function buildSiteConfig(
       onBrokenLinks,
       onBrokenAnchors,
       markdown: {
+        addMdxDesc,
         mermaid,
         renderEmojiShortcodes,
         onBrokenLinks: markdownOnBrokenLinks,

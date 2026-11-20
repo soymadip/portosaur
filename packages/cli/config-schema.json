@@ -110,6 +110,11 @@
           "type": ["object", "null"],
           "additionalProperties": false,
           "properties": {
+            "add_mdx_desc": {
+              "type": ["boolean", "null"],
+              "description": "Show the page description under the title.",
+              "default": true
+            },
             "mermaid": {
               "type": ["boolean", "null"],
               "description": "Enable support for Mermaid.js diagrams.",

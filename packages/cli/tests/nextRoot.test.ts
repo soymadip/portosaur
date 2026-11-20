@@ -38,6 +38,7 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
       blogDir: "blog",
       blogRoute: "blog",
       markdown: {
+        addMdxDesc: true,
         mermaid: true,
         renderEmojiShortcodes: true,
         onBrokenLinks: "throw",
@@ -149,6 +150,7 @@ describe("buildSourceConfigContent", () => {
       options({
         site: {
           markdown: {
+            addMdxDesc: true,
             mermaid: true,
             renderEmojiShortcodes: false,
             onBrokenLinks: "throw",

@@ -55,6 +55,7 @@ export const portoDocSchema = pageSchema
     title: z.string().optional(),
     desc: z.string().optional(),
     hide_title: z.boolean().optional(),
+    hide_desc: z.boolean().optional(),
     color: z.string().optional(),
     sidebar_label: z.string().optional(),
     slug: z.string().optional(),
