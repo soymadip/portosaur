@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "bun-types": "^1.4.4",
+    "netlify-plugin-cache": "^1.0.3",
     "prettier": "^3.10.1",
     "typescript": "^7.0.2"
   }
