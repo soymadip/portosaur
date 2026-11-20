@@ -11,6 +11,7 @@ import {
   groupResults,
 } from "../../../lib/search-results.ts";
 import { Button } from "../../Button.tsx";
+import { PortoIcon } from "../../PortoIcon.tsx";
 import {
   PAGE_SCOPE,
   SearchResults,
@@ -55,43 +56,6 @@ import {
  * - `from` is basePath-aware (contracts §6): the generated
  *   `/api/search` route serves the exported index under the base.
  */
-
-function MagnifierIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  );
-}
 
 /** One page path for comparison: no base prefix, no trailing
  * slash, so `/docs/tabs/` and `/docs/tabs` are the same page. */
@@ -509,7 +473,7 @@ export function SearchDialog() {
         ariaKeyshortcuts="Control+K"
         onClick={openDialog}
       >
-        <MagnifierIcon />
+        <PortoIcon name="search" size="20px" strokeWidth={2.5} />
       </Button>
 
       <dialog
@@ -527,7 +491,7 @@ export function SearchDialog() {
               />
             ) : (
               <span className="porto-search-dialog__icon" aria-hidden="true">
-                <MagnifierIcon />
+                <PortoIcon name="search" size="20px" strokeWidth={2.5} />
               </span>
             )}
             <input
@@ -570,7 +534,7 @@ export function SearchDialog() {
               ariaLabel="Close Search"
               onClick={close}
             >
-              <CloseIcon />
+              <PortoIcon name="x" size="20px" strokeWidth={2.5} />
             </Button>
           </div>
           {/* The results area only exists when it has something to

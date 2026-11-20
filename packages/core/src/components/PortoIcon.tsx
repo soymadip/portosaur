@@ -18,11 +18,17 @@ export function PortoIcon({
   name,
   size = "1em",
   className,
+  strokeWidth,
 }: {
   name: PortoIconName;
   size?: string;
   className?: string;
+  /** Overrides the pack's stroke width (stroke icons only). */
+  strokeWidth?: number;
 }) {
+  const body = strokeWidth
+    ? PortoIcons[name].replaceAll('stroke-width="2"', `stroke-width="${strokeWidth}"`)
+    : PortoIcons[name];
   return (
     <svg
       width={size}
@@ -31,7 +37,7 @@ export function PortoIcon({
       fill="currentColor"
       aria-hidden="true"
       className={className}
-      dangerouslySetInnerHTML={{ __html: PortoIcons[name] }}
+      dangerouslySetInnerHTML={{ __html: body }}
     />
   );
 }

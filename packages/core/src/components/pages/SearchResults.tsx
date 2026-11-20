@@ -10,6 +10,7 @@ import {
   type SearchGroup,
 } from "../../lib/search-results.ts";
 import { Dropdown } from "../Dropdown.tsx";
+import { PortoIcon } from "../PortoIcon.tsx";
 
 /**
  * The search results list, shared by the search dialog and the
@@ -32,48 +33,6 @@ import { Dropdown } from "../Dropdown.tsx";
  * front of the rows, pointer-events off, so clicks still land on
  * the link underneath.
  */
-
-/** A right-pointing chevron, for the breadcrumb separators. */
-function ChevronRightIcon() {
-  return (
-    <svg
-      className="porto-search-result__chevron"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
-/** A `#` mark, for heading rows. */
-function HashIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="4" x2="20" y1="9" y2="9" />
-      <line x1="4" x2="20" y1="15" y2="15" />
-      <line x1="10" x2="8" y1="3" y2="21" />
-      <line x1="16" x2="14" y1="3" y2="21" />
-    </svg>
-  );
-}
 
 /** One run of text, bold when it matches the query. */
 function HighlightedText({ text, query }: { text: string; query: string }) {
@@ -139,7 +98,7 @@ function ResultLink({
     >
       {isHeading && (
         <span className="porto-search-result__hash">
-          <HashIcon />
+          <PortoIcon name="hash" size="16px" />
         </span>
       )}
       {isPage || isHeading ? (
@@ -155,7 +114,7 @@ function ResultLink({
         <span className="porto-search-result__breadcrumbs">
           {breadcrumbs.map((crumb, i) => (
             <Fragment key={i}>
-              {i > 0 && <ChevronRightIcon />}
+              {i > 0 && <PortoIcon name="chevron-right" size="16px" className="porto-search-result__chevron" />}
               {crumb}
             </Fragment>
           ))}

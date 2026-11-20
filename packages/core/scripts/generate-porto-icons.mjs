@@ -27,6 +27,10 @@ const ICONS = {
   pencil: "mdi:pencil-outline",
   moon: "mdi:moon-waning-crescent",
   laptop: "mdi:laptop",
+  search: "lucide:search",
+  x: "lucide:x",
+  "chevron-right": "lucide:chevron-right",
+  hash: "lucide:hash",
 };
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
