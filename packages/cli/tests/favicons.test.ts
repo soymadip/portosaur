@@ -30,7 +30,7 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
   } as PortosaurOptions;
 }
 
-const appStaticDir = path.resolve(import.meta.dirname, "../../app/static");
+const coreStaticDir = path.resolve(import.meta.dirname, "../../core/static");
 
 /** A small non-square test image (200x100, solid red). */
 async function makeTestImage(dir: string, name = "icon.png"): Promise<string> {
@@ -245,9 +245,9 @@ describe("ensurePublicUnion", () => {
 
   test("links the app static dir when the user has no static dir", () => {
     const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
-    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    const coreRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
     try {
-      const appDir = path.join(appRoot, "static");
+      const appDir = path.join(coreRoot, "static");
       fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
       fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app-icon");
       const publicDir = path.join(root, ".portosaur", "public");
@@ -255,7 +255,7 @@ describe("ensurePublicUnion", () => {
       const linked = ensurePublicUnion({
         projectDir: root,
         publicDir,
-        appStaticDir: appDir,
+        coreStaticDir: appDir,
       });
       expect(linked).toEqual([]);
       expect(fs.lstatSync(path.join(publicDir, "img")).isSymbolicLink()).toBe(
@@ -266,13 +266,13 @@ describe("ensurePublicUnion", () => {
       ).toBe("app-icon");
     } finally {
       rmSync(root, { recursive: true, force: true });
-      rmSync(appRoot, { recursive: true, force: true });
+      rmSync(coreRoot, { recursive: true, force: true });
     }
   });
 
   test("merges a directory both sides have, user files winning per name", () => {
     const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
-    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    const coreRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
     try {
       const staticDir = path.join(root, "static");
       fs.mkdirSync(path.join(staticDir, "img"), { recursive: true });
@@ -281,7 +281,7 @@ describe("ensurePublicUnion", () => {
         path.join(staticDir, "img", "custom.png"),
         "mine-custom",
       );
-      const appDir = path.join(appRoot, "static");
+      const appDir = path.join(coreRoot, "static");
       fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
       fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app");
       fs.writeFileSync(path.join(appDir, "img", "other.png"), "app-other");
@@ -291,7 +291,7 @@ describe("ensurePublicUnion", () => {
         ensurePublicUnion({
           projectDir: root,
           publicDir,
-          appStaticDir: appDir,
+          coreStaticDir: appDir,
         });
       union();
       // A second run rebuilds the merged dir — it must survive.
@@ -310,27 +310,27 @@ describe("ensurePublicUnion", () => {
       ).toBe("app-other");
     } finally {
       rmSync(root, { recursive: true, force: true });
-      rmSync(appRoot, { recursive: true, force: true });
+      rmSync(coreRoot, { recursive: true, force: true });
     }
   });
 
   test("prunes a stale app entry", () => {
     const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
-    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    const coreRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
     try {
-      const appDir = path.join(appRoot, "static");
+      const appDir = path.join(coreRoot, "static");
       fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
       fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app-icon");
       const publicDir = path.join(root, ".portosaur", "public");
-      ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+      ensurePublicUnion({ projectDir: root, publicDir, coreStaticDir: appDir });
       expect(fs.existsSync(path.join(publicDir, "img", "icon.png"))).toBe(true);
 
       fs.rmSync(path.join(appDir, "img"), { recursive: true, force: true });
-      ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+      ensurePublicUnion({ projectDir: root, publicDir, coreStaticDir: appDir });
       expect(fs.existsSync(path.join(publicDir, "img"))).toBe(false);
     } finally {
       rmSync(root, { recursive: true, force: true });
-      rmSync(appRoot, { recursive: true, force: true });
+      rmSync(coreRoot, { recursive: true, force: true });
     }
   });
 });
@@ -354,7 +354,7 @@ describe("generateFavicons", () => {
         }),
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
-        appStaticDir,
+        coreStaticDir,
         logger: silentLogger,
       });
       expect(result.skipped).toBe(false);
@@ -402,7 +402,7 @@ describe("generateFavicons", () => {
         options: options(),
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
-        appStaticDir,
+        coreStaticDir,
         logger: silentLogger,
       });
       expect(result.skipped).toBe(true);
@@ -429,7 +429,7 @@ describe("generateFavicons", () => {
         options: options({ docsHome: { icon: "img/icon.png" } }),
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
-        appStaticDir,
+        coreStaticDir,
         logger: silentLogger,
       };
       const first = await generateFavicons(params);
@@ -458,7 +458,7 @@ describe("generateFavicons", () => {
         options: options({ docsHome: { icon: "img/nope.png" } }),
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
-        appStaticDir,
+        coreStaticDir,
         logger: { ...silentLogger, warn: (m: string) => warnings.push(m) },
       });
       expect(result.skipped).toBe(false);

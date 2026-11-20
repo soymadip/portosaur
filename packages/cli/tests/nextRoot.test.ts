@@ -84,7 +84,7 @@ describe("buildNextConfigContent", () => {
       );
       expect(content).toContain('output: "export"');
       expect(content).toContain("trailingSlash: true");
-      expect(content).toContain('transpilePackages: ["@portosaur/app"]');
+      expect(content).toContain('transpilePackages: ["@portosaur/core"]');
       expect(content).toContain("images: { unoptimized: true }");
       // distDir is relative to the generated root — an absolute path
       // gets mangled by Next's path.join into a junk directory.
@@ -126,7 +126,7 @@ describe("buildSourceConfigContent", () => {
       'import { defineConfig } from "fumadocs-mdx/config"',
     );
     expect(content).toContain(
-      'import { portosaurMdxOptions } from "@portosaur/app/mdx"',
+      'import { portosaurMdxOptions } from "@portosaur/core/mdx"',
     );
     expect(content).toContain("export default defineConfig({");
     expect(content).toContain("mdxOptions: portosaurMdxOptions({");
@@ -134,14 +134,14 @@ describe("buildSourceConfigContent", () => {
     expect(content).toContain('userVars: {\n  "project": "Test"\n}');
     expect(content).toContain('colorScheme: "portosaur"');
     expect(content).toContain("renderEmojiShortcodes: true");
-    // The npm plugins live inside the app package — the generated file
-    // must not import them (directly or via @portosaur/app/plugins/*),
+    // The npm plugins live inside the core package — the generated file
+    // must not import them (directly or via @portosaur/core/plugins/*),
     // because they would not resolve from the generated root.
     expect(content).not.toContain("remark-math");
     expect(content).not.toContain("remark-directive");
     expect(content).not.toContain("remark-emoji");
     expect(content).not.toContain("rehype-katex");
-    expect(content).not.toContain("@portosaur/app/plugins/");
+    expect(content).not.toContain("@portosaur/core/plugins/");
   });
 
   test("passes renderEmojiShortcodes: false through when the site disables it", () => {
@@ -201,7 +201,7 @@ describe("buildLibConfigContent", () => {
   test("embeds the resolved options as typed JSON", () => {
     const content = buildLibConfigContent(options(), 0);
     expect(content).toContain(
-      'import type { PortosaurOptions } from "@portosaur/app/lib/config"',
+      'import type { PortosaurOptions } from "@portosaur/core/lib/config"',
     );
     expect(content).toContain("export const config: PortosaurOptions = {");
     expect(content).toContain('"title": "Test Site"');
@@ -209,12 +209,12 @@ describe("buildLibConfigContent", () => {
 });
 
 describe("buildTsConfigContent", () => {
-  test("allows importing .ts extensions (the app package uses them everywhere)", () => {
+  test("allows importing .ts extensions (the core package uses them everywhere)", () => {
     const projectDir = mkdtempSync(path.join(tmpdir(), "porto-tsconfig-"));
     try {
       const content = buildTsConfigContent(args(projectDir));
       // Without this flag Next's typecheck fails with TS5097 on every
-      // `@portosaur/app/*` import (explicit `.ts`/`.tsx` extensions).
+      // `@portosaur/core/*` import (explicit `.ts`/`.tsx` extensions).
       expect(content).toContain('"allowImportingTsExtensions": true');
       expect(content).toContain('"moduleResolution": "bundler"');
       // Type globs cover BOTH the export distDir (what `next dev`
@@ -253,9 +253,9 @@ describe("buildRootLayoutContent", () => {
     const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
     try {
       const content = buildRootLayoutContent(options(), args(projectDir));
-      expect(content).toContain('import "@portosaur/app/css/global.css"');
+      expect(content).toContain('import "@portosaur/core/css/global.css"');
       expect(content).toContain(
-        'import { RootLayout } from "@portosaur/app/components/layouts/root-layout"',
+        'import { RootLayout } from "@portosaur/core/components/layouts/root-layout"',
       );
       expect(content).toContain(
         "<RootLayout config={config}>{children}</RootLayout>",
@@ -283,7 +283,7 @@ describe("buildHomePageContent", () => {
   test("renders the docs home in docs mode", () => {
     const content = buildHomePageContent(options(), 0);
     expect(content).toContain(
-      'import { DocsHomePage } from "@portosaur/app/components/pages/docs-home-page"',
+      'import { DocsHomePage } from "@portosaur/core/components/pages/docs-home-page"',
     );
     expect(content).toContain("<DocsHomePage config={config} />");
   });
@@ -340,7 +340,7 @@ describe("buildDocPageContent", () => {
   test("renders the app DocPage with static params and metadata", () => {
     const content = buildDocPageContent("docs", 0);
     expect(content).toContain(
-      'import { DocPage } from "@portosaur/app/components/pages/doc-page"',
+      'import { DocPage } from "@portosaur/core/components/pages/doc-page"',
     );
     expect(content).toContain('PageProps<"/docs/[[...slug]]">');
     // The route passes the page tree (breadcrumbs/prev-next), the
@@ -352,17 +352,17 @@ describe("buildDocPageContent", () => {
       "components={{ a: createRelativeLink(source, page) }}",
     );
     expect(content).toContain(
-      'import { createRelativeLink } from "@portosaur/app/lib/mdx-link"',
+      'import { createRelativeLink } from "@portosaur/core/lib/mdx-link"',
     );
     expect(content).toContain("return source.generateParams();");
     // Metadata title is frontmatter ?? content H1 ?? file-base fallback
     // — never a bare page.data.title, which is undefined for title-less
     // pages.
     expect(content).toContain(
-      'import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage"',
+      'import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage"',
     );
     expect(content).toContain(
-      'import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle"',
+      'import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle"',
     );
     expect(content).toContain("docPageTitles(");
     expect(content).toContain("docFileTitle(page.path)");
@@ -387,7 +387,7 @@ describe("buildBlogPostContent", () => {
   test("uses the same metadata title rule as doc pages", () => {
     const content = buildBlogPostContent(0);
     expect(content).toContain(
-      'import { BlogPostPage } from "@portosaur/app/components/pages/blog-post-page"',
+      'import { BlogPostPage } from "@portosaur/core/components/pages/blog-post-page"',
     );
     expect(content).toContain('PageProps<"/blog/[slug]">');
     // The route passes the post (renamed prop), the sidebar list,
@@ -421,7 +421,7 @@ describe("buildNotesIndexContent", () => {
     expect(content).toContain("NotesIndexPage,");
     expect(content).toContain("type NoteCardPage,");
     expect(content).toContain(
-      '} from "@portosaur/app/components/pages/notes-index-page"',
+      '} from "@portosaur/core/components/pages/notes-index-page"',
     );
     expect(content).toContain(".filter((page) => page.slugs.length === 1)");
     expect(content).toContain("const pages: NoteCardPage[] = source");
@@ -441,7 +441,7 @@ describe("buildLibBlogContent", () => {
     expect(content).toContain("export function getBlogSidebarPosts()");
     expect(content).toContain("export function getBlogAuthorsWithCounts()");
     expect(content).toContain(
-      'import { loadBlogAuthors } from "@portosaur/app/lib/blog-server"',
+      'import { loadBlogAuthors } from "@portosaur/core/lib/blog-server"',
     );
     expect(content).toContain(
       'path.join(config.projectDir, config.site.blogDir, "authors.yml")',
@@ -603,7 +603,7 @@ describe("buildNextRootFiles", () => {
       const files = buildNextRootFiles(options(), args(projectDir));
       const sitemap = files["app/sitemap.ts"];
       expect(sitemap).toContain(
-        'import { pageHref } from "@portosaur/app/lib/pageUrl"',
+        'import { pageHref } from "@portosaur/core/lib/pageUrl"',
       );
       expect(sitemap).toContain("pageHref(url)");
       expect(sitemap).toContain("source.getPages()");

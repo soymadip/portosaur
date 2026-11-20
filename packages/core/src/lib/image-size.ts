@@ -6,7 +6,7 @@ import path from "node:path";
  *
  * Ported from the Astro app (`packages/app/src/utils/imageSize.ts`),
  * with one change: the Astro version read dimensions through `sharp`,
- * which is not a dependency of the Fumadocs app package — so this
+ * which is not a dependency of the Fumadocs core package — so this
  * version parses the width/height out of the image file's own header
  * (PNG, JPEG, GIF, WebP, BMP, AVIF). No image library needed, and the
  * only thing Portosaur ever asked sharp for was the metadata anyway.

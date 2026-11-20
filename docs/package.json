@@ -11,7 +11,7 @@
   },
   "version": "0.26.0",
   "dependencies": {
-    "@portosaur/app": "workspace:*",
+    "@portosaur/core": "workspace:*",
     "@portosaur/cli": "workspace:*",
     "fumadocs-core": "16.19.3",
     "fumadocs-mdx": "15.6.2",

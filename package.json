@@ -15,7 +15,7 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/app",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/core",
     "schema": "bun packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json && bun x prettier --write packages/cli/config-schema.json",
     "playground": "bun src/playground.mjs",
     "build": "bun run playground build",

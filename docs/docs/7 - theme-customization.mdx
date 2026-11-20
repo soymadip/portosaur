@@ -15,7 +15,7 @@ Two attributes on `<html>` select the look:
 - `data-scheme` — the color scheme (`portosaur`, `dracula`, …), from `theme.color_scheme`.
 - `data-theme` — `light` or `dark`, from `theme.default_mode` (or the visitor's toggle choice, which is remembered).
 
-Base values live in `global.css`: dark-mode values on `:root`, light-mode overrides under plain `[data-theme="light"]`. Each bundled scheme file (`packages/app/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the color variables as literals. The scheme selectors are more specific than the base rules, so they win. All six ship in the theme CSS and only the active scheme's block applies.
+Base values live in `global.css`: dark-mode values on `:root`, light-mode overrides under plain `[data-theme="light"]`. Each bundled scheme file (`packages/core/src/css/themes/<name>.css`) is a short override block — `[data-scheme="<name>"][data-theme="light"]` and `[data-theme="dark"]` — assigning the color variables as literals. The scheme selectors are more specific than the base rules, so they win. All six ship in the theme CSS and only the active scheme's block applies.
 
 Your `theme.custom_css` file(s) load after the theme CSS, so your values win.
 

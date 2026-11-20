@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@portosaur/app": "{{porto_version}}",
+    "@portosaur/core": "{{porto_version}}",
     "@portosaur/cli": "{{porto_version}}",
     "fumadocs-core": "16.19.3",
     "fumadocs-mdx": "15.6.2",

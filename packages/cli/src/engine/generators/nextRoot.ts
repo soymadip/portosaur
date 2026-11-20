@@ -8,8 +8,8 @@ import type { PortosaurOptions } from "./siteConfig.ts";
  * Phase 1 contracts, §3): `next.config.mjs`, `source.config.ts`,
  * `lib/source.ts`, `lib/config.ts`, and the `app/` route files. The
  * generated files are thin wrappers — every real implementation lives in
- * `@portosaur/app` and is imported from there. The CLI never imports
- * `@portosaur/app` itself.
+ * `@portosaur/core` and is imported from there. The CLI never imports
+ * `@portosaur/core` itself.
  *
  * The functions here only build the file *contents* (pure string builders).
  * The runner (`writeNextRoot`) resolves the options and writes the files.
@@ -144,7 +144,7 @@ const config = {
   trailingSlash: true,
   reactStrictMode: true,
   images: { unoptimized: true },
-  transpilePackages: ["@portosaur/app"],
+  transpilePackages: ["@portosaur/core"],
   distDir: ${JSON.stringify(distDir)},${basePath}
   allowedDevOrigins: ${JSON.stringify(devOrigins)},
 };
@@ -159,8 +159,8 @@ export default withMDX(config);
  * Global MDX options only — the collections live in `lib/source.ts`
  * (macro pattern). The whole preset (Portosaur's remark/rehype plugins
  * in their order, `valueToExport`, and the Shiki light/dark themes for
- * the site's color scheme) comes from the app's `portosaurMdxOptions`
- * builder: the npm plugins are imported inside the app package, where
+ * the site's color scheme) comes from the core's `portosaurMdxOptions`
+ * builder: the npm plugins are imported inside the core package, where
  * they are direct dependencies and resolve. Importing them here, from
  * the generated root, would NOT resolve — the user project's
  * `node_modules` only holds its direct dependencies.
@@ -170,7 +170,7 @@ export function buildSourceConfigContent(
   mtime: number,
 ): string {
   return `${header(mtime)}import { defineConfig } from "fumadocs-mdx/config";
-import { portosaurMdxOptions } from "@portosaur/app/mdx";
+import { portosaurMdxOptions } from "@portosaur/core/mdx";
 
 export default defineConfig({
   mdxOptions: portosaurMdxOptions({
@@ -188,7 +188,7 @@ export default defineConfig({
  * Macro pattern (official fumadocs-mdx shape): `defineDocs` +
  * `defineCollections` as top-level `const` initializers, with the schema,
  * slugs function, and page-tree transformers imported from
- * `@portosaur/app/lib/source`. The docs collection points at the notes
+ * `@portosaur/core/lib/source`. The docs collection points at the notes
  * dir in portfolio mode and the docs dir in docs mode —
  * `options.site.notesDir` is already mode-aware. `postprocess` includes
  * the processed Markdown so the llms routes can render each page.
@@ -205,7 +205,7 @@ import {
   portoBlogSchema,
   portoSlugs,
   portoTreeTransformers,
-} from "@portosaur/app/lib/source";
+} from "@portosaur/core/lib/source";
 
 const docs = defineDocs({
   dir: ${JSON.stringify(rootRelativeDir(options.site.notesDir))},
@@ -260,14 +260,14 @@ export const docsLlms = llms(source, {
  * Builds the contents of the generated `.portosaur/lib/config.ts`.
  *
  * The resolved `PortosaurOptions` object, embedded as JSON and checked
- * against the app package's type at `next build` time — that is the
- * drift alarm between the engine's shape and the app's copy.
+ * against the core package's type at `next build` time — that is the
+ * drift alarm between the engine's shape and the core's copy.
  */
 export function buildLibConfigContent(
   options: PortosaurOptions,
   mtime: number,
 ): string {
-  return `${header(mtime)}import type { PortosaurOptions } from "@portosaur/app/lib/config";
+  return `${header(mtime)}import type { PortosaurOptions } from "@portosaur/core/lib/config";
 
 export const config: PortosaurOptions = ${JSON.stringify(options, null, 2)};
 `;
@@ -367,8 +367,8 @@ export function buildNextEnvContent(): string {
 /**
  * Builds the contents of the generated `.portosaur/app/layout.tsx`.
  *
- * The root layout imports the app's global CSS (the import lives here,
- * not in the app package) and renders the app's `RootLayout`, which owns
+ * The root layout imports the core's global CSS (the import lives here,
+ * not in the core package) and renders the core's `RootLayout`, which owns
  * `<html>`/`<body>`, the theme pre-paint script, and the config context.
  * The user's `theme.custom_css` files are imported here too, resolved
  * relative to the generated root's `app/` directory.
@@ -396,8 +396,8 @@ export function buildRootLayoutContent(
   return `${header(mtime)}import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { config } from "@/lib/config";
-import { RootLayout } from "@portosaur/app/components/layouts/root-layout";
-import "@portosaur/app/css/global.css";
+import { RootLayout } from "@portosaur/core/components/layouts/root-layout";
+import "@portosaur/core/css/global.css";
 ${customImports ? `${customImports}\n` : ""}
 export const metadata: Metadata = {
   metadataBase: new URL(${JSON.stringify(siteOrigin(options))}),
@@ -417,7 +417,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 /**
  * Builds the contents of the generated `.portosaur/app/page.tsx`.
  *
- * Docs mode renders the app's docs home (hero + feature cards from
+ * Docs mode renders the core's docs home (hero + feature cards from
  * `config.docsHome`). Portfolio mode renders a minimal placeholder in
  * Phase 1 — the portfolio home sections land in Phase 3. The title
  * follows the OG rule (Astro `index.astro`): "Home" in docs mode,
@@ -439,7 +439,7 @@ export function buildHomePageContent(
   const absoluteTitle = `${title} | ${options.site.title}`;
   if (options.siteMode === "docs") {
     return `${header(mtime)}import { config } from "@/lib/config";
-import { DocsHomePage } from "@portosaur/app/components/pages/docs-home-page";
+import { DocsHomePage } from "@portosaur/core/components/pages/docs-home-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: { absolute: ${JSON.stringify(absoluteTitle)} } };
@@ -479,7 +479,7 @@ export function buildDocsLayoutContent(mtime: number): string {
   return `${header(mtime)}import type { ReactNode } from "react";
 import { source } from "@/lib/source";
 import { config } from "@/lib/config";
-import { DocsLayout } from "@portosaur/app/components/layouts/docs-layout";
+import { DocsLayout } from "@portosaur/core/components/layouts/docs-layout";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -495,7 +495,7 @@ export default function Layout({ children }: { children: ReactNode }) {
  * Builds the contents of a doc detail page
  * (`.portosaur/app/docs/[[...slug]]/page.tsx`, and
  * `app/notes/(with-sidebar)/[...slug]/page.tsx` in portfolio
- * mode). The loaded page goes to the app's `DocPage`, which
+ * mode). The loaded page goes to the core's `DocPage`, which
  * renders the hoisted H1 (from
  * `page.data._exports.__portoContentTitle`), the MDX body,
  * pagination, and the doc footer.
@@ -520,10 +520,10 @@ export function buildDocPageContent(
       : "return source.generateParams().filter((p) => p.slug.length > 0);";
   return `${header(mtime)}import { source } from "@/lib/source";
 import { config } from "@/lib/config";
-import { DocPage } from "@portosaur/app/components/pages/doc-page";
-import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
-import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
-import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+import { DocPage } from "@portosaur/core/components/pages/doc-page";
+import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
+import { createRelativeLink } from "@portosaur/core/lib/mdx-link";
+import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -595,10 +595,10 @@ import { config } from "@/lib/config";
 import {
   NotesIndexPage,
   type NoteCardPage,
-} from "@portosaur/app/components/pages/notes-index-page";
-import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
-import { pageHref } from "@portosaur/app/lib/pageUrl";
-import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+} from "@portosaur/core/components/pages/notes-index-page";
+import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
+import { pageHref } from "@portosaur/core/lib/pageUrl";
+import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import type { Metadata } from "next";
 
 export function generateMetadata(): Metadata {
@@ -646,23 +646,23 @@ export default function Page() {
  * helpers shared by the blog routes (index, post, authors): the
  * authors file, the post summaries, the date sort, the sidebar
  * list. The generated root owns this wiring (which loader, which
- * paths). The pure pieces live in `@portosaur/app/lib/blog`.
+ * paths). The pure pieces live in `@portosaur/core/lib/blog`.
  */
 export function buildLibBlogContent(mtime: number): string {
   return `${header(mtime)}import path from "node:path";
 import { blogSource } from "./source";
 import { config } from "./config";
-import { loadBlogAuthors } from "@portosaur/app/lib/blog-server";
-import { docFileTitle, docPageTitles } from "@portosaur/app/lib/docPage";
-import { pageHref } from "@portosaur/app/lib/pageUrl";
+import { loadBlogAuthors } from "@portosaur/core/lib/blog-server";
+import { docFileTitle, docPageTitles } from "@portosaur/core/lib/docPage";
+import { pageHref } from "@portosaur/core/lib/pageUrl";
 import {
   resolveAuthor,
   sortPostsByDateDesc,
   type BlogAuthor,
-} from "@portosaur/app/lib/blog";
-import type { BlogIndexPost } from "@portosaur/app/components/pages/blog-index-page";
-import type { BlogSidebarPost } from "@portosaur/app/components/pages/frame/BlogSidebar";
-import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+} from "@portosaur/core/lib/blog";
+import type { BlogIndexPost } from "@portosaur/core/components/pages/blog-index-page";
+import type { BlogSidebarPost } from "@portosaur/core/components/pages/frame/BlogSidebar";
+import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 
 /** The blog authors from \`blog/authors.yml\` ([] when absent). */
 export function getBlogAuthors(): BlogAuthor[] {
@@ -732,7 +732,7 @@ export function getBlogAuthorsWithCounts(): BlogAuthor[] {
 export function buildBlogIndexContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { getBlogAuthors, getBlogPosts } from "@/lib/blog";
-import { BlogIndexPage } from "@portosaur/app/components/pages/blog-index-page";
+import { BlogIndexPage } from "@portosaur/core/components/pages/blog-index-page";
 import type { Metadata } from "next";
 
 export function generateMetadata(): Metadata {
@@ -768,11 +768,11 @@ import {
   getBlogSidebarPosts,
   getSortedBlogPosts,
 } from "@/lib/blog";
-import { BlogPostPage } from "@portosaur/app/components/pages/blog-post-page";
-import { docPageTitles, docFileTitle } from "@portosaur/app/lib/docPage";
-import { createRelativeLink } from "@portosaur/app/lib/mdx-link";
-import { pageHref } from "@portosaur/app/lib/pageUrl";
-import { CONTENT_TITLE_KEY } from "@portosaur/app/plugins/remarkContentTitle";
+import { BlogPostPage } from "@portosaur/core/components/pages/blog-post-page";
+import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
+import { createRelativeLink } from "@portosaur/core/lib/mdx-link";
+import { pageHref } from "@portosaur/core/lib/pageUrl";
+import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -847,7 +847,7 @@ export async function generateMetadata(
 export function buildBlogAuthorsContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
 import { getBlogAuthorsWithCounts } from "@/lib/blog";
-import { BlogAuthorsPage } from "@portosaur/app/components/pages/blog-authors-page";
+import { BlogAuthorsPage } from "@portosaur/core/components/pages/blog-authors-page";
 import type { Metadata } from "next";
 
 export function generateMetadata(): Metadata {
@@ -877,7 +877,7 @@ export function buildTasksPageContent(
     ? options.tasks.title
     : "Tasks are Disabled";
   return `${header(mtime)}import { config } from "@/lib/config";
-import { TasksPage } from "@portosaur/app/components/pages/tasks-page";
+import { TasksPage } from "@portosaur/core/components/pages/tasks-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: ${JSON.stringify(title)} };
@@ -895,7 +895,7 @@ export default function Page() {
  */
 export function buildSearchPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { SearchPage } from "@portosaur/app/components/pages/search-page";
+import { SearchPage } from "@portosaur/core/components/pages/search-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -914,7 +914,7 @@ export default function Page() {
  */
 export function buildOfflinePageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { OfflinePage } from "@portosaur/app/components/pages/offline-page";
+import { OfflinePage } from "@portosaur/core/components/pages/offline-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "You're Offline" };
@@ -931,7 +931,7 @@ export default function Page() {
  */
 export function buildRedirectPageContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { RedirectPage } from "@portosaur/app/components/pages/redirect-page";
+import { RedirectPage } from "@portosaur/core/components/pages/redirect-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Opening in browser…" };
@@ -948,7 +948,7 @@ export default function Page() {
  */
 export function buildNotFoundContent(mtime: number): string {
   return `${header(mtime)}import { config } from "@/lib/config";
-import { NotFoundPage } from "@portosaur/app/components/pages/not-found-page";
+import { NotFoundPage } from "@portosaur/core/components/pages/not-found-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Page Not Found" };
@@ -981,7 +981,7 @@ export const { staticGET: GET } = createFromSource(source, {
 
 /**
  * Builds the contents of the generated `.portosaur/app/sitemap.ts`.
- * Every URL gets its trailing slash via the app's `pageHref` helper.
+ * Every URL gets its trailing slash via the core's `pageHref` helper.
  * The offline/redirect interstitials are not content, so they stay out
  * of the sitemap.
  */
@@ -989,7 +989,7 @@ export function buildSitemapContent(mtime: number): string {
   return `${header(mtime)}import type { MetadataRoute } from "next";
 import { source, blogSource } from "@/lib/source";
 import { config } from "@/lib/config";
-import { pageHref } from "@portosaur/app/lib/pageUrl";
+import { pageHref } from "@portosaur/core/lib/pageUrl";
 
 // Metadata routes compile to route handlers. With
 // \`output: 'export'\` they must be marked static or the build

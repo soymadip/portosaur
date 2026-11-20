@@ -8,7 +8,7 @@ see the spec in the migration goal for the full plan.
 
 ## Layout
 
-- `packages/app` — the application (Next.js App Router routes, React components, CSS).
+- `packages/core` — the site itself (Next.js App Router routes, React components, CSS).
   Started from the official `create-fumadocs-app` static template.
 - `packages/cli` — the `porto` binary, config engine, and Next.js root generator.
 - `packages/wizard` — interactive prompt library used by `porto init`.

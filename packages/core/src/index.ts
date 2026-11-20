@@ -1,6 +1,6 @@
 /**
- * @portosaur/app — the public barrel. The generated root imports
- * most things via deep paths (`@portosaur/app/components/pages/doc-page`,
+ * @portosaur/core — the public barrel. The generated root imports
+ * most things via deep paths (`@portosaur/core/components/pages/doc-page`,
  * …). This barrel re-exports the same surface for convenience.
  *
  * NOT re-exported here (import via their deep paths):

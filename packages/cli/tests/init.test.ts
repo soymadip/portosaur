@@ -264,9 +264,9 @@ describe("CLI: init", () => {
     expect(pkg.dependencies["react-dom"]).toBe("^19.3.1");
     expect(pkg.dependencies["fumadocs-core"]).toBe("16.19.3");
     expect(pkg.dependencies["fumadocs-mdx"]).toBe("15.6.2");
-    // User projects take @portosaur/app from the registry (a version
+    // User projects take @portosaur/core from the registry (a version
     // range), never a workspace link.
-    expect(pkg.dependencies["@portosaur/app"]).toMatch(/^\^0\.26\.0$/);
+    expect(pkg.dependencies["@portosaur/core"]).toMatch(/^\^0\.26\.0$/);
     expect(pkg.dependencies["@portosaur/cli"]).toMatch(/^\^0\.26\.0$/);
 
     // Tailwind v4 + TypeScript tooling.

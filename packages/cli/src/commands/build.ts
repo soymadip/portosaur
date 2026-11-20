@@ -30,7 +30,7 @@ export interface BuildCommandOptions {
 
 /**
  * Recursively copies a directory. With `overwrite: false`, files
- * already in the destination win (used for the app package's default
+ * already in the destination win (used for the core package's default
  * static files, so a user's own file of the same name takes
  * precedence). Ported from the Astro integration's `build:done` step.
  */
@@ -110,7 +110,7 @@ export async function buildCommand(
       });
     }
 
-    // Default static assets from the app package (img/icon.png,
+    // Default static assets from the core package (img/icon.png,
     // img/project-blank.png, img/social-card.jpeg). Non-overwriting:
     // Next already copied the project's own static/ via public/.
     copyDirRecursive(portoPaths.static, outDir, false);

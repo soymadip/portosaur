@@ -43,10 +43,10 @@ bun run build
 
 ## Library Usage
 
-If you want to use Portosaur programmatically, install `@portosaur/core`:
+If you want to use Portosaur programmatically, install `@portosaur/cli`:
 
 ```bash
-bun install -g @portosaur/core
+bun install -g @portosaur/cli
 ```
 
-See `@portosaur/core` for API documentation.
+See `@portosaur/cli` for API documentation.

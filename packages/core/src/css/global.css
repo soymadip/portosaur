@@ -7,7 +7,7 @@
  * Tailwind v4 notes:
  * - `@source` below tells Tailwind to scan this package's own
  *   `src/` for utility classes — without it, utilities used only
- *   inside `@portosaur/app` components would never be generated
+ *   inside `@portosaur/core` components would never be generated
  *   (contracts §5). Verified by the throwaway-app check (see the
  *   Phase 1 report).
  * - `@theme` maps Portosaur's `--porto-color-*` custom properties

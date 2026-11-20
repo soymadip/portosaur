@@ -16,7 +16,7 @@
   },
   "exclude": ["node_modules", "**/build", ".playground", "docs"],
   // The app package has its own tsconfig (bundler resolution — see
-  // packages/app/tsconfig.json) and is typechecked separately.
+  // packages/core/tsconfig.json) and is typechecked separately.
   "include": [
     "packages/cli/src",
     "packages/cli/bin",

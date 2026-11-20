@@ -31,17 +31,17 @@ export const Paths = {
   /** CLI's package.json file. */
   packageJson: path.join(pkgDir, "package.json"),
 
-  /** Absolute path to the engine directory (the former @portosaur/core, now inside cli). */
+  /** Absolute path to the engine directory (the former engine package, now inside cli). */
   get engine() {
     return path.join(srcDir, "engine");
   },
 
-  /** Absolute path to the app package. */
-  get app() {
+  /** Absolute path to the core package. */
+  get core() {
     try {
-      return path.dirname(require.resolve("@portosaur/app/package.json"));
+      return path.dirname(require.resolve("@portosaur/core/package.json"));
     } catch {
-      return path.resolve(pkgDir, "../app");
+      return path.resolve(pkgDir, "../core");
     }
   },
 
@@ -49,9 +49,9 @@ export const Paths = {
   get portoPaths() {
     return {
       root: this.root,
-      appRoot: this.app,
-      static: path.join(this.app, "static"),
-      assets: path.join(this.app, "assets"),
+      coreRoot: this.core,
+      static: path.join(this.core, "static"),
+      assets: path.join(this.core, "assets"),
     };
   },
 };
@@ -67,27 +67,27 @@ export function nextRoot(UserRoot: string): string {
 }
 
 /**
- * Resolve the Portosaur app paths from a user's installed app package.
+ * Resolve the Portosaur core paths from a user's installed core package.
  * Falls back to the local workspace package during Portosaur development.
  *
  * @param {string} UserRoot - The user's project directory.
- * @returns {Object} Resolved paths for the app package.
+ * @returns {Object} Resolved paths for the core package.
  */
 export function resolvePortoPaths(UserRoot: string) {
-  let appRoot: string;
+  let coreRoot: string;
 
   try {
     const userRequire = createRequire(path.join(UserRoot, "package.json"));
-    const appEntry = userRequire.resolve("@portosaur/app");
-    appRoot = path.resolve(path.dirname(appEntry), "..");
+    const coreEntry = userRequire.resolve("@portosaur/core");
+    coreRoot = path.resolve(path.dirname(coreEntry), "..");
   } catch {
-    appRoot = Paths.app;
+    coreRoot = Paths.core;
   }
 
   return {
     root: Paths.root,
-    appRoot,
-    static: path.join(appRoot, "static"),
-    assets: path.join(appRoot, "assets"),
+    coreRoot,
+    static: path.join(coreRoot, "static"),
+    assets: path.join(coreRoot, "assets"),
   };
 }

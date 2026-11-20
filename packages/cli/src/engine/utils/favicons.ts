@@ -315,7 +315,7 @@ function linkMergedDir(userDir: string, appDir: string, destDir: string): void {
  * Build the generated root's `public/` dir as a union: a real
  * directory holding a symlink per entry of the user's `static/`
  * (refreshed here — new entries linked, removed entries pruned),
- * plus the app package's default static files (`img/icon.png`,
+ * plus the core package's default static files (`img/icon.png`,
  * ...) where the user has no entry of the same name, plus the
  * generated files (`favicon/`, `manifest.webmanifest`). Next.js
  * follows symlinks when it copies `public/` (verified in its
@@ -340,12 +340,12 @@ function linkMergedDir(userDir: string, appDir: string, destDir: string): void {
 export function ensurePublicUnion({
   projectDir,
   publicDir,
-  appStaticDir,
+  coreStaticDir,
 }: {
   projectDir: string;
   publicDir: string;
-  /** The app package's default static dir — linked where the user has no entry of the same name. */
-  appStaticDir?: string;
+  /** The core package's default static dir — linked where the user has no entry of the same name. */
+  coreStaticDir?: string;
 }): string[] {
   try {
     if (fs.lstatSync(publicDir).isSymbolicLink()) {
@@ -359,8 +359,8 @@ export function ensurePublicUnion({
   const staticDir = path.join(projectDir, "static");
   const entries = fs.existsSync(staticDir) ? fs.readdirSync(staticDir) : [];
   const appEntries =
-    appStaticDir && fs.existsSync(appStaticDir)
-      ? fs.readdirSync(appStaticDir)
+    coreStaticDir && fs.existsSync(coreStaticDir)
+      ? fs.readdirSync(coreStaticDir)
       : [];
 
   // Link one top-level entry as a symlink, refreshed when its
@@ -397,7 +397,7 @@ export function ensurePublicUnion({
 
   for (const entry of entries) {
     const userPath = path.join(staticDir, entry);
-    const appPath = appStaticDir ? path.join(appStaticDir, entry) : "";
+    const appPath = coreStaticDir ? path.join(coreStaticDir, entry) : "";
     const linkPath = path.join(publicDir, entry);
     if (
       appEntries.includes(entry) &&
@@ -417,7 +417,7 @@ export function ensurePublicUnion({
     }
     linkEntry(
       path.join(publicDir, entry),
-      path.relative(publicDir, path.join(appStaticDir as string, entry)),
+      path.relative(publicDir, path.join(coreStaticDir as string, entry)),
       false,
     );
   }
@@ -449,10 +449,10 @@ export interface GenerateFaviconsParams {
   publicDir: string;
   /** Scratch dir for downloads + the reshaped source (`.portosaur/cache`). */
   cacheDir: string;
-  /** The app package's `static/` dir (default-icon fallback). */
-  appStaticDir: string;
-  /** The app package's `assets/` dir (last-resort icon search). */
-  appAssetsDir?: string;
+  /** The core package's `static/` dir (default-icon fallback). */
+  coreStaticDir: string;
+  /** The core package's `assets/` dir (last-resort icon search). */
+  coreAssetsDir?: string;
   logger?: FaviconLogger | null;
 }
 
@@ -480,8 +480,8 @@ export async function generateFavicons({
   options,
   publicDir,
   cacheDir,
-  appStaticDir,
-  appAssetsDir,
+  coreStaticDir,
+  coreAssetsDir,
   logger,
 }: GenerateFaviconsParams): Promise<{ skipped: boolean; files: string[] }> {
   const log = normalizeLogger(logger);
@@ -502,8 +502,8 @@ export async function generateFavicons({
   const fitMode = options.siteMode === "docs" ? "contain" : "cover";
   const searchDirs = [
     path.join(projectDir, "static"),
-    appStaticDir,
-    ...(appAssetsDir ? [appAssetsDir] : []),
+    coreStaticDir,
+    ...(coreAssetsDir ? [coreAssetsDir] : []),
   ];
 
   let sourcePath: string | null = null;

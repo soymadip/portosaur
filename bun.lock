@@ -16,8 +16,8 @@
       "name": "docs",
       "version": "0.26.0",
       "dependencies": {
-        "@portosaur/app": "workspace:*",
         "@portosaur/cli": "workspace:*",
+        "@portosaur/core": "workspace:*",
         "fumadocs-core": "16.19.3",
         "fumadocs-mdx": "15.6.2",
         "next": "^16.4.6",
@@ -34,8 +34,25 @@
         "typescript": "^7.0.2",
       },
     },
-    "packages/app": {
-      "name": "@portosaur/app",
+    "packages/cli": {
+      "name": "@portosaur/cli",
+      "version": "0.26.0",
+      "bin": {
+        "porto": "bin/porto.ts",
+      },
+      "dependencies": {
+        "@portosaur/wizard": "workspace:*",
+        "chalk": "^6.0.0",
+        "commander": "^15.0.0",
+        "consola": "^3.4.2",
+        "js-yaml": "^5.2.2",
+        "prettier": "^3.10.1",
+        "serve": "^14.2.7",
+        "sharp": "^0.35.5",
+      },
+    },
+    "packages/core": {
+      "name": "@portosaur/core",
       "version": "0.26.0",
       "dependencies": {
         "@fontsource-variable/geist": "^5.3.0",
@@ -82,23 +99,6 @@
         "tailwindcss": "^4.3.5",
         "typescript": "^7.0.2",
         "unified": "^11.0.5",
-      },
-    },
-    "packages/cli": {
-      "name": "@portosaur/cli",
-      "version": "0.26.0",
-      "bin": {
-        "porto": "bin/porto.ts",
-      },
-      "dependencies": {
-        "@portosaur/wizard": "workspace:*",
-        "chalk": "^6.0.0",
-        "commander": "^15.0.0",
-        "consola": "^3.4.2",
-        "js-yaml": "^5.2.2",
-        "prettier": "^3.10.1",
-        "serve": "^14.2.7",
-        "sharp": "^0.35.5",
       },
     },
     "packages/wizard": {
@@ -285,9 +285,9 @@
 
     "@next/swc-win32-x64-msvc": ["@next/swc-win32-x64-msvc@16.4.6", "", { "os": "win32", "cpu": "x64" }, "sha512-3ZG15/5WIdlTQsIEvc9sPTTSL5XFrlLklIKmfF4fwsDnoAhu6NcBDXsk3mbGxNyo6aVLEGex+fHCv2MahY7a9g=="],
 
-    "@portosaur/app": ["@portosaur/app@workspace:packages/app"],
-
     "@portosaur/cli": ["@portosaur/cli@workspace:packages/cli"],
+
+    "@portosaur/core": ["@portosaur/core@workspace:packages/core"],
 
     "@portosaur/wizard": ["@portosaur/wizard@workspace:packages/wizard"],
 

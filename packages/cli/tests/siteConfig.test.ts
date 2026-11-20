@@ -5,9 +5,9 @@ import { buildSiteConfig } from "../src/engine/generators/siteConfig.ts";
 const projectRoot = process.cwd();
 const portoPaths = {
   root: projectRoot,
-  assets: path.join(projectRoot, "packages/app/assets"),
-  appRoot: path.join(projectRoot, "packages/app"),
-  plugins: path.join(projectRoot, "packages/app/src/plugins"),
+  assets: path.join(projectRoot, "packages/core/assets"),
+  coreRoot: path.join(projectRoot, "packages/core"),
+  plugins: path.join(projectRoot, "packages/core/src/plugins"),
 };
 
 function userPagesEnv() {

@@ -142,7 +142,7 @@ export function buildSiteConfig(
 ): PortosaurOptions {
   const { portoPaths = {}, gitDate = null, env = process.env } = context;
 
-  const appRoot = portoPaths.appRoot ?? context.portoRoot ?? "";
+  const coreRoot = portoPaths.coreRoot ?? context.portoRoot ?? "";
 
   const rawGet = (key: string, ...fallbacks: any[]) =>
     getNestedValue(rawUserConfig, key, ...fallbacks);
@@ -440,7 +440,7 @@ export function buildSiteConfig(
     path.join(getPortoDotDir(projectDir), "static"),
   ].filter((dir) => dir && fs.existsSync(dir));
 
-  const cssFiles = resolveSiteCssFiles(projectDir, userConfig, appRoot);
+  const cssFiles = resolveSiteCssFiles(projectDir, userConfig, coreRoot);
 
   const extraHeadTags = context.extraHeadTags || [];
 

@@ -3,14 +3,14 @@
 Portosaur is a CLI-first portfolio/personal static site builder, built on
 Fumadocs (headless core) + Next.js + React. The CLI generates a thin
 Next.js root in the user's `.portosaur/` directory; the real UI lives in
-`@portosaur/app`.
+`@portosaur/core`.
 
 ## Directory Structure
 
 ```
 packages/
 ├── cli/       # CLI entry point, config engine, generators
-├── app/       # React UI (layouts, pages, MDX components, CSS, plugins)
+├── core/      # React UI (layouts, pages, MDX components, CSS, plugins)
 └── wizard/    # Interactive prompt library
 docs/          # Documentation site (dogfoods the CLI)
 src/
@@ -23,12 +23,12 @@ tests/         # URL snapshots, goldens, smoke test
 ## Architecture Rules
 
 - **Dependency Flow**: Flow MUST be unidirectional: `cli` -> `wizard`.
-  The app package is NOT a CLI dependency — the generated Next.js root
+  The core package is NOT a CLI dependency — the generated Next.js root
   imports it, and user projects depend on it directly. No circular
   dependencies.
 - **Lightweight CLI**: The `@portosaur/cli` package MUST NOT depend on
-  `@portosaur/app` or heavy frontend frameworks (Next.js/React). The app
-  is injected into the user's local project `package.json` to keep
+  `@portosaur/core` or heavy frontend frameworks (Next.js/React). The core
+  package is injected into the user's local project `package.json` to keep
   global CLI installs fast.
 - **Generated Root**: Never edit a site's `.portosaur/` directory by
   hand — it is regenerated on every build/dev run. Edit the generators

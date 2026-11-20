@@ -88,7 +88,7 @@ The hook receives an execution context object:
 - `source.config.ts` — the global MDX options (Portosaur's remark/rehype plugins).
 - `lib/source.ts` — the Fumadocs content collections for the docs/notes and blog directories, plus the loader.
 - `lib/config.ts` — the resolved `config.yml` as typed JSON for the app to read.
-- `app/` — thin route files (docs, notes, blog, search, tasks) that import the real pages from `@portosaur/app`.
+- `app/` — thin route files (docs, notes, blog, search, tasks) that import the real pages from `@portosaur/core`.
 
 All files are regenerated on every run (and whenever `config.yml` changes during `porto dev`), so they are never hand-edited. They live outside the template tree — the scaffolding engine only creates the user-facing project files.
 

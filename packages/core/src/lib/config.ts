@@ -1,5 +1,5 @@
 /**
- * The resolved site configuration — the app package's copy of the
+ * The resolved site configuration — the core package's copy of the
  * `PortosaurOptions` interface. The canonical shape lives in the CLI
  * engine (`packages/cli/src/engine/generators/siteConfig.ts`), which
  * RUNS `buildSiteConfig()`. This copy is type-only, for the UI. Keep

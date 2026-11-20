@@ -73,7 +73,7 @@ async function formatGeneratedFile(
  * Generates the thin Next.js project root in `.portosaur/` by resolving
  * the Portosaur config at CLI time and embedding the result as the
  * generated `lib/config.ts` module. The generated files are thin
- * wrappers — every real implementation lives in `@portosaur/app` and is
+ * wrappers — every real implementation lives in `@portosaur/core` and is
  * imported from there.
  *
  * The user's `static/` directory is exposed to Next.js as
@@ -170,7 +170,7 @@ export async function writeNextRoot(
   const rawConf = loadUserConfig(UserRoot);
   const options = buildSiteConfig(rawConf, UserRoot, {
     portoPaths,
-    portoRoot: portoPaths.appRoot,
+    portoRoot: portoPaths.coreRoot,
     ...context,
   });
 
@@ -202,7 +202,7 @@ export async function writeNextRoot(
 
   // Static passthrough: `.portosaur/public` is a real directory
   // that unions the user's `static/` (per-entry symlinks) and the
-  // app package's default static files with the generated
+  // core package's default static files with the generated
   // favicon set, so Next.js serves all of them in dev and copies
   // them into the static export at build time. The union runs
   // first so a user-provided `static/favicon/` wins over
@@ -211,15 +211,15 @@ export async function writeNextRoot(
   ensurePublicUnion({
     projectDir: UserRoot,
     publicDir,
-    appStaticDir: portoPaths.static ?? path.join(portoPaths.appRoot, "static"),
+    coreStaticDir: portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
   });
   await generateFavicons({
     projectDir: UserRoot,
     options,
     publicDir,
     cacheDir: path.join(nextRoot, "cache"),
-    appStaticDir: portoPaths.static ?? path.join(portoPaths.appRoot, "static"),
-    appAssetsDir: portoPaths.assets,
+    coreStaticDir: portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
+    coreAssetsDir: portoPaths.assets,
     logger,
   });
 
@@ -241,7 +241,7 @@ export function logResolvedSiteLocation(
   const rawConf = loadUserConfig(UserRoot);
   const options = buildSiteConfig(rawConf, UserRoot, {
     portoPaths,
-    portoRoot: portoPaths.appRoot,
+    portoRoot: portoPaths.coreRoot,
     ...context,
   });
 
@@ -423,7 +423,7 @@ export async function runNext(
     // field). Resolve the package root via its exported `./package.json`,
     // then join the bin path.
     const nextPkgJson = require.resolve("next/package.json", {
-      paths: [UserRoot, portoPaths.appRoot],
+      paths: [UserRoot, portoPaths.coreRoot],
     });
     nextBin = path.join(path.dirname(nextPkgJson), "dist", "bin", "next");
     if (!fs.existsSync(nextBin)) {
