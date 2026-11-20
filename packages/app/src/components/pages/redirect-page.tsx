@@ -1,7 +1,7 @@
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { renderIcon } from "../../lib/icons.ts";
 import { RedirectBody } from "./RedirectBody.tsx";
-import { SiteShell } from "./frame/SiteShell/index.tsx";
+import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**
  * RedirectPage — the redirect interstitial (`/redirect?url=…`).

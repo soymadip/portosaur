@@ -21,8 +21,8 @@
       "default": "./src/plugins/*.ts"
     },
     "./components/*": {
-      "types": "./src/components/*/index.tsx",
-      "default": "./src/components/*/index.tsx"
+      "types": "./src/components/*.tsx",
+      "default": "./src/components/*.tsx"
     },
     "./components/PortoIcon": {
       "types": "./src/components/PortoIcon.tsx",

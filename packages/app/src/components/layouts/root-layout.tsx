@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { PortoProvider } from "../../lib/porto-context.tsx";
-import { NavProgress } from "../pages/frame/NavProgress/index.tsx";
-import { SkipLink } from "../pages/frame/SkipLink/index.tsx";
+import { NavProgress } from "../pages/frame/NavProgress.tsx";
+import { SkipLink } from "../pages/frame/SkipLink.tsx";
 
 /**
  * RootLayout — the generated root's `app/layout.tsx` renders this.

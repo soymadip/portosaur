@@ -4,7 +4,7 @@ import {
   Dropdown as SharedDropdown,
   type DropdownAlign,
   type DropdownItem,
-} from "./Dropdown/index.tsx";
+} from "./Dropdown.tsx";
 import { Btn } from "./mdx/Btn.tsx";
 import { CodeBlock } from "./mdx/CodeBlock.tsx";
 import {
@@ -15,17 +15,17 @@ import {
 } from "./mdx/CodeBlockTabs.tsx";
 import { Details } from "./mdx/Details.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
-import { Heading } from "./mdx/Heading/index.tsx";
-import { Hint } from "./mdx/Hint/index.tsx";
+import { Heading } from "./mdx/Heading.tsx";
+import { Hint } from "./mdx/Hint.tsx";
 import { Icon } from "./mdx/Icon.tsx";
-import { IconSearch } from "./mdx/IconSearch/index.tsx";
-import { Indent } from "./mdx/Indent/index.tsx";
+import { IconSearch } from "./mdx/IconSearch.tsx";
+import { Indent } from "./mdx/Indent.tsx";
 import { Link } from "./mdx/Link.tsx";
-import { Pv } from "./mdx/Pv/index.tsx";
+import { Pv } from "./mdx/Pv.tsx";
 import { TabItem } from "./mdx/TabItem.tsx";
 import { Table } from "./mdx/Table.tsx";
-import { Tabs } from "./mdx/Tabs/index.tsx";
-import { TopicList } from "./mdx/TopicList/index.tsx";
+import { Tabs } from "./mdx/Tabs.tsx";
+import { TopicList } from "./mdx/TopicList.tsx";
 
 /**
  * Dropdown — the MDX `<Dropdown>` tag: a thin wrapper around the
@@ -157,22 +157,22 @@ export {
 } from "./mdx/CodeBlockTabs.tsx";
 export { Details } from "./mdx/Details.tsx";
 export { DynamicIcon } from "./mdx/DynamicIcon.tsx";
-export { Hint } from "./mdx/Hint/index.tsx";
+export { Hint } from "./mdx/Hint.tsx";
 export { Icon } from "./mdx/Icon.tsx";
-export { IconSearch } from "./mdx/IconSearch/index.tsx";
-export { Indent } from "./mdx/Indent/index.tsx";
+export { IconSearch } from "./mdx/IconSearch.tsx";
+export { Indent } from "./mdx/Indent.tsx";
 export { Link } from "./mdx/Link.tsx";
-export { Pv } from "./mdx/Pv/index.tsx";
+export { Pv } from "./mdx/Pv.tsx";
 export { TabItem } from "./mdx/TabItem.tsx";
 export { Table } from "./mdx/Table.tsx";
-export { Tabs } from "./mdx/Tabs/index.tsx";
+export { Tabs } from "./mdx/Tabs.tsx";
 export {
   TopicList,
   AutoTopicList,
   TopicListProvider,
   TopicListContext,
-} from "./mdx/TopicList/index.tsx";
+} from "./mdx/TopicList.tsx";
 export type {
   TopicListContextValue,
   TopicListItem,
-} from "./mdx/TopicList/index.tsx";
+} from "./mdx/TopicList.tsx";

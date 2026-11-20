@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "../Button/index.tsx";
+import { Button } from "../Button.tsx";
 
 /** The offline page's "Try again" button — reloads the page. */
 export function ReloadButton() {

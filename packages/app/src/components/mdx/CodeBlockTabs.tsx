@@ -4,7 +4,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { Tabs, type TabValue } from "./Tabs/index.tsx";
+import { Tabs, type TabValue } from "./Tabs.tsx";
 import { TabItem } from "./TabItem.tsx";
 
 /**
