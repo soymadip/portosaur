@@ -31,7 +31,15 @@
  *   start at `opacity: 0`, which would hide content for users who
  *   disable animation.
  */
+/* The docs home joins the shell's stretch chain (body →
+   wrapper → main, all flex): it fills <main>'s height, so the
+   features section's auto margins below have free space to
+   share out on tall screens. On short screens the content
+   overflows and the margins collapse to nothing. */
 .docs-home {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
   width: 100%;
 }
 
@@ -61,7 +69,13 @@
   /* Kept compact so the hero and the feature cards fit in the
      viewport together on a short laptop screen (768px tall):
      1.5rem above the hero, 0.75rem below it before the cards.
-     The footer is allowed below the fold. */
+     The footer is allowed below the fold. The auto top margin
+     pairs with the features section's auto bottom margin: on
+     tall screens the two split the leftover height equally, so
+     the hero and the cards center together as one block instead
+     of the hero hugging the navbar. On short screens there is
+     no leftover height and the margin collapses to nothing. */
+  margin-top: auto;
   padding: 1.5rem 2rem 0.75rem;
   display: flex;
   justify-content: center;
@@ -382,13 +396,20 @@
   }
 }
 
-/* Features grid. The bottom padding is the breathing room
-   before the footer starts — the footer itself carries no
-   vertical padding, so without it the cards would sit right
-   against its top border. */
+/* Features grid. The top padding matches the hero's 0.75rem
+   bottom padding, so the gap above the cards (0.75rem + 0.75rem)
+   equals the 1.5rem below them. The auto bottom margin pairs
+   with the hero's auto top margin: on tall screens the two
+   split the leftover height equally above the hero and below
+   the cards, so the hero and the cards center together as one
+   block; on short screens there is no leftover height and the
+   margin collapses to nothing. The bottom padding is the
+   breathing room before the footer starts — the footer itself
+   carries no vertical padding, so without it the cards would
+   sit right against its top border. */
 .features-section {
-  padding: 0.7rem;
-  padding-bottom: 1.5rem;
+  padding: 0.75rem 0.7rem 1.5rem;
+  margin-bottom: auto;
   display: flex;
   justify-content: center;
 }
