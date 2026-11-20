@@ -172,12 +172,18 @@ export function SearchDialog() {
   }, [open, onSearchChange]);
 
   // Cmd/Ctrl+K toggles. Escape closes — listened for on the
-  // window, like Radix does, instead of on the dialog element:
-  // a dialog-level handler needed two presses in Firefox (the
-  // first never reached it), a window listener closes on the
-  // first press wherever focus sits. The native `cancel` path
-  // stays as a fallback — closing an already-closed dialog is
-  // a no-op. Outside clicks close.
+  // window in the CAPTURE phase, like Radix does, instead of
+  // on the dialog element: a dialog-level handler needed two
+  // presses in Firefox (the first never reached it), and a
+  // bubble-phase window listener has the same problem — in
+  // Firefox the first Escape is swallowed at the focused input
+  // (it just blurs it, so the caret disappears) and never
+  // bubbles back up, so the dialog only closes on the second
+  // press. Fumadocs' own wiki dialog has the same two-press
+  // problem. Capture sees the key before it reaches the input,
+  // so the first press closes the dialog. The native `cancel`
+  // path stays as a fallback — closing an already-closed
+  // dialog is a no-op. Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -189,9 +195,9 @@ export function SearchDialog() {
         close();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKeyDown, true);
     };
   }, [close]);
 
