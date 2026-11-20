@@ -25,11 +25,11 @@
     var(--porto-color-gray-3) 25%,
     var(--porto-color-gray-6)
   );
-  padding: 1rem;
+  padding: 1rem 0.75rem;
   /* The start padding is tighter than the rest: the accent
      border already marks the edge, so the text sits closer
      to it. */
-  padding-inline-start: 0.75rem;
+  padding-inline-start: 0.5rem;
   border-inline-start: 0.25rem solid var(--porto-color-asides-border);
   border-radius: 0.5rem;
   margin-bottom: 1rem;
