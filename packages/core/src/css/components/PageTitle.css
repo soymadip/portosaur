@@ -17,7 +17,7 @@
    instead of a hardcoded value). Renders only when the page
    has a `desc` — no default text. */
 .porto-page-desc {
-  margin-top: 0.125rem;
+  margin-top: 0.1875rem;
   font-size: var(--porto-text-body);
   color: var(--porto-color-gray-3);
 }
