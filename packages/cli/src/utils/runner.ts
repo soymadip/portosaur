@@ -193,6 +193,7 @@ export async function writeNextRoot(
     coreStaticDir:
       portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
     coreAssetsDir: portoPaths.assets,
+    coreRoot: portoPaths.coreRoot,
     logger,
   });
 

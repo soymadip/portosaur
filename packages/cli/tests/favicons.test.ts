@@ -3,7 +3,6 @@ import fs from "node:fs";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import sharp from "sharp";
 import {
   resolveSiteIconSpec,
   findLocalIcon,
@@ -11,6 +10,7 @@ import {
   ensurePublicUnion,
   generateFavicons,
 } from "../src/engine/utils/favicons.ts";
+import { writeSolidPng, readPngSize, readPngPixels } from "./png.ts";
 import type { PortosaurOptions } from "../src/engine/generators/siteConfig.ts";
 
 /** Minimal options — the favicon pipeline only reads the fields listed here. */
@@ -31,21 +31,12 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
 }
 
 const coreStaticDir = path.resolve(import.meta.dirname, "../../core/static");
+const coreRoot = path.resolve(import.meta.dirname, "../../core");
 
 /** A small non-square test image (200x100, solid red). */
 async function makeTestImage(dir: string, name = "icon.png"): Promise<string> {
   const target = path.join(dir, name);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  await sharp({
-    create: {
-      width: 200,
-      height: 100,
-      channels: 4,
-      background: { r: 255, g: 0, b: 0, alpha: 1 },
-    },
-  })
-    .png()
-    .toFile(target);
+  writeSolidPng(target, 200, 100, 255, 0, 0, 255);
   return target;
 }
 
@@ -126,16 +117,16 @@ describe("reshapeToCircle", () => {
     try {
       const input = await makeTestImage(root);
       const coverOut = path.join(root, "cover.png");
-      await reshapeToCircle(input, coverOut, "cover");
-      const coverMeta = await sharp(coverOut).metadata();
-      expect(coverMeta.width).toBe(100);
-      expect(coverMeta.height).toBe(100);
+      await reshapeToCircle(input, coverOut, "cover", coreRoot);
+      const coverSize = readPngSize(coverOut);
+      expect(coverSize.width).toBe(100);
+      expect(coverSize.height).toBe(100);
 
       const containOut = path.join(root, "contain.png");
-      await reshapeToCircle(input, containOut, "contain");
-      const containMeta = await sharp(containOut).metadata();
-      expect(containMeta.width).toBe(200);
-      expect(containMeta.height).toBe(200);
+      await reshapeToCircle(input, containOut, "contain", coreRoot);
+      const containSize = readPngSize(containOut);
+      expect(containSize.width).toBe(200);
+      expect(containSize.height).toBe(200);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -146,10 +137,8 @@ describe("reshapeToCircle", () => {
     try {
       const input = await makeTestImage(root);
       const out = path.join(root, "circle.png");
-      await reshapeToCircle(input, out, "cover");
-      const { data } = await sharp(out)
-        .raw()
-        .toBuffer({ resolveWithObject: true });
+      await reshapeToCircle(input, out, "cover", coreRoot);
+      const { data } = readPngPixels(out);
       // Top-left corner pixel: alpha channel is the 4th byte.
       expect(data[3]).toBe(0);
       // Center pixel: fully opaque red.
@@ -355,6 +344,7 @@ describe("generateFavicons", () => {
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
         coreStaticDir,
+        coreRoot,
         logger: silentLogger,
       });
       expect(result.skipped).toBe(false);
@@ -366,15 +356,15 @@ describe("generateFavicons", () => {
       ]) {
         expect(fs.existsSync(path.join(publicDir, "favicon", name))).toBe(true);
       }
-      const icoMeta = await sharp(
+      const icoSize = readPngSize(
         path.join(publicDir, "favicon", "favicon.ico"),
-      ).metadata();
-      expect(icoMeta.width).toBe(32);
-      expect(icoMeta.height).toBe(32);
-      const icon192Meta = await sharp(
+      );
+      expect(icoSize.width).toBe(32);
+      expect(icoSize.height).toBe(32);
+      const icon192Size = readPngSize(
         path.join(publicDir, "favicon", "icon-192x192.png"),
-      ).metadata();
-      expect(icon192Meta.width).toBe(192);
+      );
+      expect(icon192Size.width).toBe(192);
 
       const manifest = JSON.parse(
         fs.readFileSync(path.join(publicDir, "manifest.webmanifest"), "utf-8"),
@@ -403,6 +393,7 @@ describe("generateFavicons", () => {
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
         coreStaticDir,
+        coreRoot,
         logger: silentLogger,
       });
       expect(result.skipped).toBe(true);
@@ -430,6 +421,7 @@ describe("generateFavicons", () => {
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
         coreStaticDir,
+        coreRoot,
         logger: silentLogger,
       };
       const first = await generateFavicons(params);
@@ -459,6 +451,7 @@ describe("generateFavicons", () => {
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
         coreStaticDir,
+        coreRoot,
         logger: { ...silentLogger, warn: (m: string) => warnings.push(m) },
       });
       expect(result.skipped).toBe(false);

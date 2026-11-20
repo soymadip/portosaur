@@ -1,7 +1,8 @@
+import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import sharp from "sharp";
 import type { PortosaurOptions } from "../generators/siteConfig.ts";
 
 /**
@@ -16,6 +17,14 @@ import type { PortosaurOptions } from "../generators/siteConfig.ts";
  * 15% padding for docs) and rendered at 32px (favicon.ico), 192px,
  * 512px, and 180px (apple-touch-icon), plus a `manifest.webmanifest`
  * with the icon entries.
+ *
+ * The CLI only orchestrates: finding the icon, the stamp check,
+ * the manifest. The pixel work runs in @portosaur/core's
+ * `scripts/make-favicons.mjs`, spawned as a child process — sharp
+ * lives in core, not the CLI, so a global CLI install stays light
+ * (sharp's platform binary is ~20MB). Every user project installs
+ * core anyway. The script path comes from `coreRoot`, resolved
+ * from the project's own core package (see `resolvePortoPaths`).
  *
  * Outputs land in the generated root's `public/` dir (see
  * `ensurePublicUnion`), so Next.js serves them in dev and copies
@@ -142,65 +151,92 @@ export async function downloadIcon(
   }
 }
 
+/** The pixel work for one favicon render: what the core script needs. */
+interface FaviconRenderSpec {
+  /** Absolute path to the source image. */
+  source: string;
+  fitMode: "cover" | "contain";
+  /** Where the circle-cropped source goes. */
+  reshapedPath: string;
+  /** The sized outputs, rendered from the reshaped source. */
+  outputs: { path: string; size: number }[];
+}
+
+/**
+ * Run the core package's favicon script (`scripts/make-favicons.mjs`)
+ * with a JSON spec. The script runs under the same runtime as the
+ * CLI itself (`process.execPath` — node or bun) and imports sharp
+ * from the project's own install. A missing script or a missing
+ * sharp means the project isn't installed — say so plainly instead
+ * of surfacing a bare module error.
+ */
+async function runFaviconScript(
+  spec: FaviconRenderSpec,
+  coreRoot: string,
+): Promise<void> {
+  const scriptPath = path.join(coreRoot, "scripts", "make-favicons.mjs");
+  if (!fs.existsSync(scriptPath)) {
+    throw new Error(
+      `Favicon script not found in @portosaur/core at ${scriptPath} — is the project's @portosaur/core install intact? Run bun install (or npm install) in your project and try again.`,
+    );
+  }
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "porto-favicon-"));
+  const specPath = path.join(tmpDir, "spec.json");
+  fs.writeFileSync(specPath, JSON.stringify(spec));
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(process.execPath, [scriptPath, specPath], {
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      let stderr = "";
+      child.stderr?.on("data", (chunk) => {
+        stderr += chunk;
+      });
+      child.on("error", reject);
+      child.on("close", (code) => {
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        let message = `Favicon rendering failed (exit ${code}): ${stderr.trim()}`;
+        if (/Cannot find package 'sharp'/.test(stderr)) {
+          message +=
+            "\nIs sharp installed? Run bun install (or npm install) in your project and try again.";
+        }
+        reject(new Error(message));
+      });
+    });
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
 /**
  * Circle-crop an image: resize to a square (cover crops to the
  * smaller side, contain fits the larger side with 15% padding so
  * the image doesn't touch the circle's edges), then mask with a
- * circle. Writes a PNG and returns its path.
+ * circle. Writes a PNG and returns its path. The pixel work runs
+ * in the core package's favicon script (see `runFaviconScript`).
  */
 export async function reshapeToCircle(
   inputPath: string,
   outputPath: string,
   fitMode: "cover" | "contain",
+  coreRoot: string,
 ): Promise<string> {
   if (!fs.existsSync(inputPath)) {
     throw new Error(`Input file not found: ${inputPath}`);
   }
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-
-  const image = sharp(inputPath);
-  const metadata = await image.metadata();
-  if (!metadata.width || !metadata.height) {
-    throw new Error("Could not extract image metadata (width/height)");
-  }
-
-  let finalSize: number;
-  let resizeSize: number;
-  let padding = 0;
-  if (fitMode === "contain") {
-    finalSize = Math.max(metadata.width, metadata.height);
-    // 15% padding so the image doesn't touch the edges of the
-    // circle (matches the Astro PWA logic).
-    padding = Math.floor(finalSize * 0.15);
-    resizeSize = finalSize - padding * 2;
-  } else {
-    finalSize = Math.min(metadata.width, metadata.height);
-    resizeSize = finalSize;
-  }
-
-  let pipeline = image.resize({
-    width: resizeSize,
-    height: resizeSize,
-    fit: fitMode,
-    background: { r: 0, g: 0, b: 0, alpha: 0 },
-  });
-  if (padding > 0) {
-    pipeline = pipeline.extend({
-      top: padding,
-      bottom: padding,
-      left: padding,
-      right: padding,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    });
-  }
-
-  const radius = finalSize / 2;
-  const circleSvg = Buffer.from(
-    `<svg><circle cx="${radius}" cy="${radius}" r="${radius}" /></svg>`,
+  await runFaviconScript(
+    {
+      source: inputPath,
+      fitMode,
+      reshapedPath: outputPath,
+      outputs: [],
+    },
+    coreRoot,
   );
-  pipeline = pipeline.composite([{ input: circleSvg, blend: "dest-in" }]);
-
-  await pipeline.png().toFile(outputPath);
   return outputPath;
 }
 
@@ -453,6 +489,8 @@ export interface GenerateFaviconsParams {
   coreStaticDir: string;
   /** The core package's `assets/` dir (last-resort icon search). */
   coreAssetsDir?: string;
+  /** The core package's root — locates the favicon script it ships. */
+  coreRoot: string;
   logger?: FaviconLogger | null;
 }
 
@@ -482,6 +520,7 @@ export async function generateFavicons({
   cacheDir,
   coreStaticDir,
   coreAssetsDir,
+  coreRoot,
   logger,
 }: GenerateFaviconsParams): Promise<{ skipped: boolean; files: string[] }> {
   const log = normalizeLogger(logger);
@@ -569,23 +608,26 @@ export async function generateFavicons({
   fs.mkdirSync(cacheDir, { recursive: true });
   // Legacy cleanup: the stamp used to live in the output dir.
   fs.rmSync(path.join(outputDir, STAMP_FILE), { force: true });
-  const reshaped = await reshapeToCircle(
-    sourcePath,
-    path.join(cacheDir, "reshaped-icon.png"),
-    fitMode,
-  );
-  const baseImage = await sharp(reshaped).png().toBuffer();
   const files = [
     { name: "favicon.ico", size: 32 },
     { name: "icon-192x192.png", size: 192 },
     { name: "icon-512x512.png", size: 512 },
     { name: "apple-touch-icon.png", size: 180 },
   ];
-  for (const file of files) {
-    await sharp(baseImage)
-      .resize(file.size, file.size)
-      .toFile(path.join(outputDir, file.name));
-  }
+  // One script run does the circle-crop and all four sizes — the
+  // pixel work lives in core (see `runFaviconScript`).
+  await runFaviconScript(
+    {
+      source: sourcePath,
+      fitMode,
+      reshapedPath: path.join(cacheDir, "reshaped-icon.png"),
+      outputs: files.map((file) => ({
+        path: path.join(outputDir, file.name),
+        size: file.size,
+      })),
+    },
+    coreRoot,
+  );
 
   const base = options.site.baseUrl;
   const cleanBase =
