@@ -11,10 +11,7 @@ import {
   groupResults,
 } from "../../../lib/search-results.ts";
 import { Button } from "../../Button.tsx";
-import {
-  SearchResults,
-  SearchSectionFilter,
-} from "../SearchResults.tsx";
+import { SearchResults, SearchSectionFilter } from "../SearchResults.tsx";
 
 /**
  * Portosaur's own search dialog — a navbar magnifier button opens a

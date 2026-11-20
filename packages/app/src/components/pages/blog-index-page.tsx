@@ -9,10 +9,7 @@ import {
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { renderIcon } from "../../lib/icons.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
-import {
-  BlogSidebar,
-  type BlogSidebarPost,
-} from "./frame/BlogSidebar.tsx";
+import { BlogSidebar, type BlogSidebarPost } from "./frame/BlogSidebar.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**

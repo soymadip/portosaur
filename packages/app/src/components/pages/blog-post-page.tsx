@@ -18,10 +18,7 @@ import {
   type ContentTitle,
 } from "../../plugins/remarkContentTitle.ts";
 import { HAS_MATH_KEY } from "../../plugins/remarkHasMath.ts";
-import {
-  BlogSidebar,
-  type BlogSidebarPost,
-} from "./frame/BlogSidebar.tsx";
+import { BlogSidebar, type BlogSidebarPost } from "./frame/BlogSidebar.tsx";
 import type { PortoDocPage } from "./doc-page.tsx";
 import { getMDXComponents } from "../mdx.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";

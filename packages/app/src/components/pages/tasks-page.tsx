@@ -1,11 +1,7 @@
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { renderIcon } from "../../lib/icons.ts";
 import { SiteShell } from "./frame/SiteShell.tsx";
-import {
-  TasksTable,
-  type TasksRow,
-  type TasksTab,
-} from "./TasksTable.tsx";
+import { TasksTable, type TasksRow, type TasksTab } from "./TasksTable.tsx";
 
 /**
  * TasksPage — the tasks page (`/tasks`).

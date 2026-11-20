@@ -4,10 +4,7 @@ import { useEffect, useRef } from "react";
 import type { TocHeading } from "../../../lib/content.ts";
 import { nestHeadings } from "../../../lib/content.ts";
 import { PortoIcon } from "../../PortoIcon.tsx";
-import {
-  TableOfContentsList,
-  useTocScrollSpy,
-} from "./TableOfContents.tsx";
+import { TableOfContentsList, useTocScrollSpy } from "./TableOfContents.tsx";
 
 /**
  * The mobile table of contents — a fixed bar below the navbar

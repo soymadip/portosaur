@@ -223,7 +223,4 @@ export {
   TopicListProvider,
   TopicListContext,
 } from "./mdx/TopicList.tsx";
-export type {
-  TopicListContextValue,
-  TopicListItem,
-} from "./mdx/TopicList.tsx";
+export type { TopicListContextValue, TopicListItem } from "./mdx/TopicList.tsx";

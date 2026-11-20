@@ -29,10 +29,7 @@ import { HAS_MATH_KEY } from "../../plugins/remarkHasMath.ts";
 import { ContentPanel } from "./parts/ContentPanel.tsx";
 import { DocFooter } from "./parts/DocFooter.tsx";
 import { getMDXComponents } from "../mdx.tsx";
-import {
-  AutoTopicList,
-  TopicListProvider,
-} from "../mdx/TopicList.tsx";
+import { AutoTopicList, TopicListProvider } from "../mdx/TopicList.tsx";
 import { PageSidebar } from "./frame/PageSidebar.tsx";
 import { PageTitle } from "./parts/PageTitle.tsx";
 
