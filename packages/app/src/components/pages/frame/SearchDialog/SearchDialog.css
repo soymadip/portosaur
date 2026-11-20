@@ -7,7 +7,7 @@
  * (Fumadocs' static search) renders results inside. The button is
  * a bare magnifier icon at every width. The dialog is a floating
  * panel at every width: on mobile it sticks to the bottom while
- * empty (0.5rem from the bottom edge, like a bottom sheet) and
+ * empty (1rem from the bottom edge, like a bottom sheet) and
  * flies to the top once results appear, like the desktop slide —
  * the page stays visible behind it, blurred by the backdrop. */
 /* The open/close animation (Fumadocs' scale-and-fade) lives in
@@ -18,10 +18,13 @@
      height above the bottom edge, via `top` plus the standalone
      `translate` property (not `transform`, which the open/close
      scale owns). Both glide on the transition in animations.css.
-     `dvh` tracks the visible height as the browser chrome
-     shows and hides, so the bar stays 0.5rem above the
-     bottom edge. */
-  top: calc(100dvh - 0.5rem);
+     The bottom edge tracks the visual viewport (`--porto-vv-bottom`,
+     set from JS while the dialog is open), not the layout
+     viewport: the layout viewport does not shrink when the
+     virtual keyboard opens, so `dvh` alone would leave the bar
+     behind it. `dvh` is the fallback for browsers without the
+     visual viewport API. */
+  top: calc(var(--porto-vv-bottom, 100dvh) - 1rem);
   translate: 0 -100%;
   padding: 0;
   background-color: var(--porto-color-gray-6);

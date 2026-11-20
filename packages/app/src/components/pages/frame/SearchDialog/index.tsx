@@ -162,6 +162,39 @@ export function SearchDialog() {
     }
   }, [open]);
 
+  // While the dialog is open, track the visual viewport's bottom
+  // edge so the empty bar rides above the virtual keyboard on
+  // mobile: the layout viewport does not shrink when the keyboard
+  // opens, so `dvh` alone leaves the bar behind it — sometimes
+  // fully, sometimes half, depending on how far the browser pans.
+  // The value is a CSS variable the mobile empty state reads
+  // (desktop positions with `top` alone and ignores it). It
+  // updates as the keyboard slides, so the bar follows it up.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const dialog = dialogRef.current;
+    const viewport = window.visualViewport;
+    if (!dialog || !viewport) {
+      return;
+    }
+    const update = () => {
+      dialog.style.setProperty(
+        "--porto-vv-bottom",
+        `${viewport.offsetTop + viewport.height}px`,
+      );
+    };
+    update();
+    viewport.addEventListener("resize", update);
+    viewport.addEventListener("scroll", update);
+    return () => {
+      viewport.removeEventListener("resize", update);
+      viewport.removeEventListener("scroll", update);
+      dialog.style.removeProperty("--porto-vv-bottom");
+    };
+  }, [open]);
+
   // Reset the query + active result + filter when the dialog closes.
   useEffect(() => {
     if (!open) {
