@@ -68,27 +68,7 @@
     {
       "url": "/notes/config/",
       "title": "Configuration Guide | Soumadip Das",
-      "headings": [
-        "Configuration Guide",
-        "Dynamic Variables",
-        "Icons & Emoji",
-        "Configuration Reference"
-      ]
-    },
-    {
-      "url": "/notes/config/dynamic-variables/",
-      "title": "Dynamic Variables | Soumadip Das",
-      "headings": [
-        "Dynamic Variables",
-        "Syntax Overview",
-        "Variable Sources",
-        "Escaping Variables"
-      ]
-    },
-    {
-      "url": "/notes/config/icons/",
-      "title": "Icons & Emoji | Soumadip Das",
-      "headings": ["Icons & Emoji", "Ways to Use Icons/Emojis"]
+      "headings": ["Configuration Guide", "Configuration Reference"]
     },
     {
       "url": "/notes/config/reference/",
@@ -258,7 +238,9 @@
         "Preview Window",
         "🧩UI Components",
         "Built-in MDX Components",
-        "Alerts"
+        "Alerts",
+        "Dynamic Variables",
+        "Icons & Emoji"
       ]
     },
     {
@@ -291,9 +273,24 @@
       ]
     },
     {
+      "url": "/notes/markdown/dynamic-variables/",
+      "title": "Dynamic Variables | Soumadip Das",
+      "headings": [
+        "Dynamic Variables",
+        "Syntax Overview",
+        "Variable Sources",
+        "Escaping Variables"
+      ]
+    },
+    {
       "url": "/notes/markdown/frontmatter/",
       "title": "Frontmatter | Soumadip Das",
       "headings": ["Frontmatter", "Frontmatter Reference", "Blog Frontmatter"]
+    },
+    {
+      "url": "/notes/markdown/icons/",
+      "title": "Icons & Emoji | Soumadip Das",
+      "headings": ["Icons & Emoji", "Ways to Use Icons/Emojis"]
     },
     {
       "url": "/notes/markdown/interactive-previews/",

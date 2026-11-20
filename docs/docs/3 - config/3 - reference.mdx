@@ -53,6 +53,7 @@ Configure the Markdown renderer behavior.
 
 | Key                       | Type   | Default   | Description                                                                                                    |
 | :------------------------ | :----- | :-------- | :------------------------------------------------------------------------------------------------------------- |
+| `add_mdx_desc`            | `bool` | `true`    | Show the page description under the title. Per-page `hide_desc` frontmatter overrides this.                    |
 | `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                               |
 | `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
@@ -310,4 +311,4 @@ Every `icon` key in `config.yml` (and Markdown frontmatter) accepts either:
 - **Unicode Emojis**: `"⚡"`, `"🚀"`, `"🛠️"`
 - **Icon Identifiers**: `<prefix>:<name>` syntax (e.g., `si:github`, `lucide:rocket`, `md:settings`, `di:nodejs`)
 
-For the full list of supported icon sets, shorthand prefixes, tree-shaking details, and the interactive icon browser, see the [Icons & Emoji Guide](/docs/config/icons/).
+For the full list of supported icon sets, shorthand prefixes, tree-shaking details, and the interactive icon browser, see the [Icons & Emoji Guide](/docs/markdown/icons/).

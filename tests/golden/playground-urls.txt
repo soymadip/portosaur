@@ -9,8 +9,6 @@
 /notes/
 /notes/cli-reference/
 /notes/config/
-/notes/config/dynamic-variables/
-/notes/config/icons/
 /notes/config/reference/
 /notes/deployment/
 /notes/deployment/codeberg-pages/
@@ -30,7 +28,9 @@
 /notes/markdown/alerts/
 /notes/markdown/built-in-components/
 /notes/markdown/code-blocks/
+/notes/markdown/dynamic-variables/
 /notes/markdown/frontmatter/
+/notes/markdown/icons/
 /notes/markdown/interactive-previews/
 /notes/markdown/ui-components/
 /notes/progressive-web-app/
