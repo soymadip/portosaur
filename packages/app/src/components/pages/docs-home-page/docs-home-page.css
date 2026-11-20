@@ -58,7 +58,11 @@
 }
 
 .hero-section {
-  padding: 3.5rem 2rem 3rem;
+  /* Kept compact so the hero and the feature cards fit in the
+     viewport together on a short laptop screen (768px tall):
+     1.5rem above the hero, 0.75rem below it before the cards.
+     The footer is allowed below the fold. */
+  padding: 1.5rem 2rem 0.75rem;
   display: flex;
   justify-content: center;
   /* Clip the glow's sideways overhang: the ::before extends 10%
@@ -238,15 +242,26 @@
   align-items: center;
 }
 
-/* Glow behind the hero image */
+/* Glow behind the hero image. The bright core sits a touch
+   below the icon's center (55%): with the compact hero padding
+   the icon sits close under the fixed navbar, and a centered
+   glow reaches up behind it and gets sliced by the navbar's
+   bottom edge — a hard line across the glow. Shifting the core
+   down pulls the glow's top edge below the navbar while the
+   glow itself stays round and soft. The size is pinned so
+   moving the center does not rescale the gradient — the
+   default farthest-corner sizing would grow it to reach the
+   now-further top corner and undo the shift. The glow is
+   kept dim (20% accent at the core) so it reads as a soft
+   halo, not a bright light. */
 .hero-icon::before {
   content: "";
   position: absolute;
   inset: -10%;
   border-radius: 50%;
   background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--porto-color-text-accent) 35%, transparent) 0%,
+    ellipse 50% 50% at 50% 55%,
+    color-mix(in srgb, var(--porto-color-text-accent) 20%, transparent) 0%,
     transparent 70%
   );
   filter: blur(40px);
@@ -276,22 +291,6 @@
    on touch that state sticks after tapping. */
 
 @media (max-width: 996px) {
-  /* Less space above the icon where the hero stacks (the icon
-     sits on top here). The glow still fades above the image —
-     it extends past the icon box and is transparent at the
-     edge, so nothing looks cut off. */
-  .hero-section {
-    padding-top: 2rem;
-  }
-
-  /* Less blur where the hero stacks: with the tighter top
-     padding the 40px blur spreads the glow up behind the
-     fixed navbar, and the navbar's bottom edge cuts it off
-     visibly. 20px keeps it fading out before the navbar. */
-  .hero-icon::before {
-    filter: blur(20px);
-  }
-
   .hero-container {
     flex-direction: column-reverse;
     text-align: center;
@@ -407,7 +406,9 @@
   background-color: var(--porto-color-gray-6);
   border: 1px solid var(--porto-color-bg-inline-code);
   border-radius: 12px;
-  padding: 1.5rem;
+  /* 1.25rem keeps the cards slim enough that two rows fit in a
+     768px-tall viewport with the hero above them. */
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   opacity: 0;
