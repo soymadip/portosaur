@@ -521,7 +521,10 @@ export function SearchDialog() {
         <div className="porto-search-dialog__frame">
           <div className="porto-search-dialog__header">
             {isLoading ? (
-              <span className="porto-search-dialog__spinner" aria-hidden="true" />
+              <span
+                className="porto-search-dialog__spinner"
+                aria-hidden="true"
+              />
             ) : (
               <span className="porto-search-dialog__icon" aria-hidden="true">
                 <MagnifierIcon />
