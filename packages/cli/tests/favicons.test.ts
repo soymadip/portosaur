@@ -277,7 +277,10 @@ describe("ensurePublicUnion", () => {
       const staticDir = path.join(root, "static");
       fs.mkdirSync(path.join(staticDir, "img"), { recursive: true });
       fs.writeFileSync(path.join(staticDir, "img", "icon.png"), "mine");
-      fs.writeFileSync(path.join(staticDir, "img", "custom.png"), "mine-custom");
+      fs.writeFileSync(
+        path.join(staticDir, "img", "custom.png"),
+        "mine-custom",
+      );
       const appDir = path.join(appRoot, "static");
       fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
       fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app");
@@ -285,7 +288,11 @@ describe("ensurePublicUnion", () => {
       const publicDir = path.join(root, ".portosaur", "public");
 
       const union = () =>
-        ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+        ensurePublicUnion({
+          projectDir: root,
+          publicDir,
+          appStaticDir: appDir,
+        });
       union();
       // A second run rebuilds the merged dir — it must survive.
       union();
