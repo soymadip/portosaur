@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import {
   clearSearchHighlight,
@@ -112,9 +113,11 @@ function tryHighlight(): boolean {
   if (!flag) {
     return true;
   }
-  // A flag older than 5s is stale (the navigation never
-  // landed) — drop it instead of flashing a wrong page.
-  if (Date.now() - flag.at > 5000) {
+  // A flag older than 15s is stale (the navigation never
+  // landed) — drop it instead of flashing a wrong page. The
+  // window is generous on purpose: on a slow connection the
+  // destination page can take seconds to arrive.
+  if (Date.now() - flag.at > 15000) {
     clearSearchHighlight();
     return true;
   }
@@ -151,12 +154,13 @@ function tryHighlight(): boolean {
   return true;
 }
 
-/** Retries the highlight every 100ms for up to 3s. */
+/** Retries the highlight every 100ms for up to 10s — a slow
+ * navigation needs longer than the old 3s window. */
 function startRetry(): number {
   let attempts = 0;
   const timer = window.setInterval(() => {
     attempts++;
-    if (tryHighlight() || attempts >= 30) {
+    if (tryHighlight() || attempts >= 100) {
       window.clearInterval(timer);
     }
   }, 100);
@@ -164,6 +168,7 @@ function startRetry(): number {
 }
 
 export function SearchHighlight() {
+  const pathname = usePathname();
   useEffect(() => {
     const mountTimer = startRetry();
     const onNavigate = () => {
@@ -175,5 +180,16 @@ export function SearchHighlight() {
       window.removeEventListener(SEARCH_NAVIGATE_EVENT, onNavigate);
     };
   }, []);
+  // A second trigger: when the route lands, retry too. The
+  // event is the primary path (the layout doesn't re-render on
+  // navigation), but if it was ever missed — the listener
+  // wasn't mounted yet when the click fired — the pathname
+  // change catches it. Harmless when there is no flag.
+  useEffect(() => {
+    const timer = startRetry();
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [pathname]);
   return null;
 }
