@@ -1,5 +1,6 @@
 import type { MDXComponents } from "mdx/types";
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
+import { Children, isValidElement } from "react";
 import {
   Dropdown as SharedDropdown,
   type DropdownAlign,
@@ -83,6 +84,51 @@ export function Dropdown({
 }
 
 /**
+ * Block-level MDX components: their root element is a div, details,
+ * or figure, which HTML forbids inside a <p>. A Dropdown mid-sentence
+ * (or any of these without blank lines around it) lands in a paragraph
+ * node, and React warns that <summary> or <div> cannot descend from
+ * <p> — a hydration error. So a paragraph holding one of these renders
+ * as a <div> instead. Inline components (Btn, Icon, Link, Pv) stay in
+ * a <p> — their roots are phrasing content.
+ */
+const BLOCK_COMPONENTS: Set<unknown> = new Set([
+  CodeBlock,
+  CodeBlockTabs,
+  Details,
+  Dropdown,
+  Hint,
+  IconSearch,
+  Indent,
+  Tabs,
+  TopicList,
+]);
+
+function hasBlockComponent(children: ReactNode): boolean {
+  return Children.toArray(children).some((child) => {
+    if (!isValidElement(child)) return false;
+    if (BLOCK_COMPONENTS.has(child.type)) return true;
+    return hasBlockComponent(
+      (child.props as { children?: ReactNode }).children,
+    );
+  });
+}
+
+function Paragraph({
+  children,
+  ...props
+}: HTMLAttributes<HTMLParagraphElement>) {
+  if (hasBlockComponent(children)) {
+    return (
+      <div className="porto-mdx-paragraph" {...props}>
+        {children}
+      </div>
+    );
+  }
+  return <p {...props}>{children}</p>;
+}
+
+/**
  * Portosaur's MDX components — the tags MDX content may use
  * (`<Btn>`, `<Tabs>`, `<Hint>`, …). Follows Fumadocs' canonical
  * pattern: the generated route passes its `a` override (the
@@ -112,6 +158,11 @@ export function getMDXComponents(components?: MDXComponents) {
     TabItem,
     Tabs,
     TopicList,
+    /* A paragraph holding a block-level component (a Dropdown
+       mid-sentence, a Tabs group without blank lines around it)
+       renders as a <div> — HTML forbids divs and details inside
+       a <p>, and React reports it as a hydration error. */
+    p: Paragraph,
     /* Every fenced code block renders in the CodeBlock frame. The
        pre's props (title, icon, allowCopy, line numbers) come from
        the fence meta via Fumadocs' rehype-code. */

@@ -33,7 +33,9 @@
 .porto-markdown-content li:not(:where(.not-content *)) {
   overflow-wrap: anywhere;
 }
-.porto-markdown-content li > :is(p, ul, ol):not(:where(.not-content *)) {
+.porto-markdown-content
+  li
+  > :is(p, ul, ol, .porto-mdx-paragraph):not(:where(.not-content *)) {
   margin-top: 0.5rem;
 }
 /* A code block inside a list item gets a 4px gap above it, half
