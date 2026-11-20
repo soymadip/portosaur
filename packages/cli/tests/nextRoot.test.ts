@@ -257,8 +257,9 @@ describe("buildRootLayoutContent", () => {
       expect(content).toContain(
         'import { RootLayout } from "@portosaur/core/components/layouts/root-layout"',
       );
+      expect(content).toContain('import { siteIcons } from "../site-icons";');
       expect(content).toContain(
-        "<RootLayout config={config}>{children}</RootLayout>",
+        "<RootLayout config={config} icons={siteIcons}>",
       );
     } finally {
       rmSync(projectDir, { recursive: true, force: true });

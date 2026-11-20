@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import type { PortosaurOptions } from "./config.ts";
+import type { SiteIcons } from "./site-icons.ts";
 
 /**
  * The resolved site config, available to every component below the
@@ -16,15 +17,27 @@ import type { PortosaurOptions } from "./config.ts";
 
 const PortoContext = createContext<PortosaurOptions | null>(null);
 
+/**
+ * The site's icon map, for `SiteIcon`. Empty outside the provider,
+ * so icons render nothing instead of crashing.
+ */
+const SiteIconsContext = createContext<SiteIcons>({});
+
 export function PortoProvider({
   config,
+  icons = {},
   children,
 }: {
   config: PortosaurOptions;
+  icons?: SiteIcons;
   children: ReactNode;
 }) {
   return (
-    <PortoContext.Provider value={config}>{children}</PortoContext.Provider>
+    <PortoContext.Provider value={config}>
+      <SiteIconsContext.Provider value={icons}>
+        {children}
+      </SiteIconsContext.Provider>
+    </PortoContext.Provider>
   );
 }
 
@@ -34,4 +47,8 @@ export function usePortoConfig(): PortosaurOptions {
     throw new Error("usePortoConfig must be used within PortoProvider");
   }
   return config;
+}
+
+export function useSiteIcons(): SiteIcons {
+  return useContext(SiteIconsContext);
 }

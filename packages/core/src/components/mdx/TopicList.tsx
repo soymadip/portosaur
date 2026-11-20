@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { createContext, useContext, useRef, type ReactNode } from "react";
 import { isEmojiIcon, type TopicListItem } from "../../lib/content.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 export type { TopicListItem } from "../../lib/content.ts";
 
@@ -13,8 +14,7 @@ export type { TopicListItem } from "../../lib/content.ts";
  * Two modes, like the original:
  *
  * - **Automatic**: the doc page renders `<AutoTopicList />` after
- *   the content on index pages, with cards resolved server-side
- *   (`topicListCards` + icon HTML).
+ *   the content on index pages, with cards from `topicListCards`.
  * - **Manual**: an explicit `<TopicList />` tag in MDX content
  *   renders the current category's cards from the context at the
  *   position where the tag appears. A manual list on a non-index
@@ -32,15 +32,11 @@ export type { TopicListItem } from "../../lib/content.ts";
  * title. The card description is the page text alone (OG prefixed
  * the count into it — "3 items • ...").
  *
- * The cards' icon HTML is resolved server-side by the doc page —
- * the icon packs are megabytes of JSON and must never load
- * client-side, so this component only injects the given HTML.
- * Items passed manually carry no icon HTML and render without an
- * icon. An emoji icon renders as text in the same icon span an
- * SVG icon uses — same span, same 0.5rem gap to the title — so
- * emoji and SVG cards space their icons identically. (It used
- * to be prepended to the title text with no separator at all,
- * which left emoji cards with a visibly tighter gap.)
+ * Each card's icon renders with `SiteIcon` from the site's
+ * generated icon map — the card's title is the guess slug,
+ * categories fall back to the folder icon, pages to the
+ * notebook. An emoji icon renders as text in the same span, so
+ * emoji and SVG cards space their icons identically.
  */
 
 export interface TopicListContextValue {
@@ -103,23 +99,21 @@ function TopicCard({ card }: { card: TopicListItem }) {
     >
       <div className="porto-topic-list__header">
         <h2 className="porto-topic-list__title" title={card.title}>
-          {card.iconHtml ? (
-            <span
-              className="porto-topic-list__icon"
-              style={card.color ? { color: card.color } : undefined}
-              dangerouslySetInnerHTML={{ __html: card.iconHtml }}
+          <span
+            className={
+              isEmojiIcon(card.icon)
+                ? "porto-topic-list__icon porto-topic-list__icon--emoji"
+                : "porto-topic-list__icon"
+            }
+            style={card.color ? { color: card.color } : undefined}
+          >
+            <SiteIcon
+              icon={card.icon}
+              slug={card.title}
+              fallbackIcon={card.isCategory ? "md:folder" : "md:notebook"}
+              size="23px"
             />
-          ) : isEmojiIcon(card.icon) ? (
-            /* Rendered as a React text child, not injected HTML —
-               the emoji comes from frontmatter, so it must never
-               reach `dangerouslySetInnerHTML` unescaped. */
-            <span
-              className="porto-topic-list__icon porto-topic-list__icon--emoji"
-              style={card.color ? { color: card.color } : undefined}
-            >
-              {card.icon}
-            </span>
-          ) : null}
+          </span>
           <span className="porto-topic-list__title-text">{card.title}</span>
         </h2>
         {count !== null ? (

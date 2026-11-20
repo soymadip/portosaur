@@ -94,4 +94,21 @@ describe("remarkAdmonitions", () => {
     expect(classOf(admonition)).toBe("admonition admonition-foo");
     expect(headingText(admonition)).toBe("Foo");
   });
+
+  test("injects the type's icon as the heading's first child", () => {
+    const tree = parse(":::tip[Pro tip]\nUse bun instead.\n:::\n");
+    remarkAdmonitions()(tree);
+    const heading = findAdmonition(tree).children[0];
+    const icon = heading.children[0];
+    expect(icon.type).toBe("mdxJsxTextElement");
+    expect(icon.name).toBe("svg");
+    const attrs = Object.fromEntries(
+      icon.attributes.map((attr: any) => [attr.name, attr.value]),
+    );
+    expect(attrs.className).toBe("admonition-icon");
+    expect(attrs.width).toBe("1.333em");
+    expect(attrs.fill).toBe("currentColor");
+    expect(attrs.viewBox).toBe("0 0 24 24");
+    expect(icon.children[0].name).toBe("path");
+  });
 });

@@ -7,8 +7,8 @@ import {
   type BlogPostSummary,
 } from "../../lib/blog.ts";
 import type { PortosaurOptions } from "../../lib/config.ts";
-import { renderIcon } from "../../lib/icons.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { BlogSidebar, type BlogSidebarPost } from "./frame/BlogSidebar.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
@@ -53,11 +53,9 @@ export function BlogIndexPage({
       {sorted.length === 0 ? (
         <div className="porto-empty-state">
           <div className="porto-empty-state__icon porto-empty-state__icon--sm">
-            <span
-              dangerouslySetInnerHTML={{
-                __html: renderIcon("md:fountain-pen-tip", { size: "3rem" }),
-              }}
-            />
+            <span>
+              <SiteIcon icon="md:fountain-pen-tip" size="3rem" />
+            </span>
           </div>
           <h2 className="porto-empty-state__title">No posts yet</h2>
           <p className="porto-empty-state__text">

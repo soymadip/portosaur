@@ -1,5 +1,5 @@
 import type { PortosaurOptions } from "../../lib/config.ts";
-import { renderIcon } from "../../lib/icons.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 import { TasksTable, type TasksRow, type TasksTab } from "./TasksTable.tsx";
 
@@ -10,10 +10,9 @@ import { TasksTable, type TasksRow, type TasksTab } from "./TasksTable.tsx";
  * the resolved engine shape). Stats, status tabs with counts,
  * and one table sorted by status order then priority.
  *
- * Server component: it computes the stats/sorted list and
- * pre-renders the icon HTML (the icon packs can't ship to the
- * client) for the `TasksTable` client component, which owns the
- * tab-filter state.
+ * Server component: it computes the stats/sorted list for the
+ * `TasksTable` client component, which owns the tab-filter
+ * state and renders its own icons.
  *
  * Status is the string `"completed"` (not "Done"). Unknown
  * statuses sort after the known ones and get a neutral badge
@@ -69,26 +68,26 @@ export function TasksPage({ config }: { config: PortosaurOptions }) {
     {
       id: "all",
       label: "All Tasks",
-      iconHtml: renderIcon("md:clipboard-text"),
+      icon: "md:clipboard-text",
       count: total,
     },
     {
       id: "active",
       label: "In Progress",
-      iconHtml: renderIcon("md:loading"),
+      icon: "md:loading",
       spin: true,
       count: activeCount,
     },
     {
       id: "pending",
       label: "Planned",
-      iconHtml: renderIcon("md:clock-outline"),
+      icon: "md:clock-outline",
       count: pendingCount,
     },
     {
       id: "completed",
       label: "Completed",
-      iconHtml: renderIcon("md:check-circle"),
+      icon: "md:check-circle",
       count: completedCount,
     },
   ];
@@ -100,11 +99,9 @@ export function TasksPage({ config }: { config: PortosaurOptions }) {
           <div className="porto-tasks-inner">
             <div className="porto-tasks-disabled">
               <div className="porto-tasks-disabled-icon">
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: renderIcon("ml:alert"),
-                  }}
-                />
+                <span>
+                  <SiteIcon icon="ml:alert" />
+                </span>
               </div>
               <h2 className="porto-tasks-disabled-title">
                 Tasks are currently disabled
@@ -128,17 +125,6 @@ export function TasksPage({ config }: { config: PortosaurOptions }) {
             }}
             tabs={tabs}
             tasks={sorted}
-            statusIcons={{
-              completed: renderIcon("md:check-circle"),
-              active: renderIcon("md:loading"),
-              pending: renderIcon("md:clock-outline"),
-            }}
-            priorityIcons={{
-              high: renderIcon("md:fire"),
-              medium: renderIcon("md:thermometer"),
-              low: renderIcon("md:snowflake"),
-            }}
-            emptyIconHtml={renderIcon("md:format-list-checks")}
           />
         )}
       </div>

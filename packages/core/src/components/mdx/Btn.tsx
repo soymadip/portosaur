@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import { renderDynamicIcon } from "../../lib/icons.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { Button, type ButtonVariant } from "../Button.tsx";
 
 /**
@@ -55,11 +55,9 @@ export function Btn({
       ariaLabel={ariaLabel}
       icon={
         icon ? (
-          <span
-            dangerouslySetInnerHTML={{
-              __html: renderDynamicIcon(icon, {}),
-            }}
-          />
+          <span>
+            <SiteIcon icon={icon} />
+          </span>
         ) : undefined
       }
     >

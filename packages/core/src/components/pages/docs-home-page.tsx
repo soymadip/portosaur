@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { PAGE_TITLE_ID } from "../../lib/docPage.ts";
-import { renderDynamicIcon, withBase } from "../../lib/icons.ts";
 import {
   localImageDimensions,
   staticDirsForConfig,
 } from "../../lib/image-size.ts";
-import { pageHref } from "../../lib/pageUrl.ts";
+import { pageHref, withBase } from "../../lib/pageUrl.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { HeroImage } from "./HeroImage.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
@@ -70,12 +70,9 @@ export async function DocsHomePage({ config }: { config: PortosaurOptions }) {
                     const inner = (
                       <>
                         {action.icon && (
-                          <span
-                            className="action-img"
-                            dangerouslySetInnerHTML={{
-                              __html: renderDynamicIcon(action.icon, { base }),
-                            }}
-                          />
+                          <span className="action-img">
+                            <SiteIcon icon={action.icon} base={base} />
+                          </span>
                         )}
                         {action.label || action.text}
                       </>
@@ -128,10 +125,9 @@ export async function DocsHomePage({ config }: { config: PortosaurOptions }) {
                         style={
                           feature.color ? { color: feature.color } : undefined
                         }
-                        dangerouslySetInnerHTML={{
-                          __html: renderDynamicIcon(feature.icon, { base }),
-                        }}
-                      />
+                      >
+                        <SiteIcon icon={feature.icon} base={base} />
+                      </div>
                     )}
                     <div className="feature-content">
                       <h2 className="feature-title">{feature.title}</h2>

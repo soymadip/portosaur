@@ -1,127 +1,131 @@
 import { describe, expect, test } from "bun:test";
 import {
-  renderIcon,
-  renderIconSymbol,
-  renderIconUse,
-  renderSidebarIcon,
-  collectSidebarSprite,
-  resolveDynamicIconId,
-} from "../src/lib/icons.ts";
+  normalizeIconId,
+  resolveSiteIcon,
+  type SiteIcons,
+} from "../src/lib/site-icons.ts";
 
-// Ported from the Astro app tests (migrate/astro
-// packages/app/tests/icons.test.ts). The `pageHref` tests moved
-// to pageUrl.test.ts with the helper itself.
+// A small hand-built icon map — the resolver only ever reads the
+// map, so no packs are needed here.
+const icons: SiteIcons = {
+  "mdi:home": { viewBox: "0 0 24 24", body: "<path d='home'/>" },
+  "mdi:notebook": { viewBox: "0 0 24 24", body: "<path d='notebook'/>" },
+  "mdi:folder": { viewBox: "0 0 24 24", body: "<path d='folder'/>" },
+  "mdi:github": { viewBox: "0 0 24 24", body: "<path d='github'/>" },
+  "simple-icons:python": {
+    viewBox: "0 0 24 24",
+    body: "<path d='python'/>",
+  },
+  "devicon:rust": { viewBox: "0 0 128 128", body: "<path d='rust'/>" },
+};
 
-describe("resolveDynamicIconId", () => {
-  test("returns the Iconify id for an explicit id or techMap name", () => {
-    expect(resolveDynamicIconId("md:home")).toBe("md:home");
-    expect(resolveDynamicIconId("github")).toBe("md:github");
+describe("normalizeIconId", () => {
+  test("maps shorthand prefixes to their canonical pack", () => {
+    expect(normalizeIconId("md:home")).toBe("mdi:home");
+    expect(normalizeIconId("mdi:home")).toBe("mdi:home");
+    expect(normalizeIconId("si:python")).toBe("simple-icons:python");
+    expect(normalizeIconId("di:rust")).toBe("devicon:rust");
   });
 
-  test("returns null for emoji, images and raw SVG", () => {
-    expect(resolveDynamicIconId("📁")).toBeNull();
-    expect(resolveDynamicIconId("img/logo.png")).toBeNull();
-    expect(resolveDynamicIconId("<svg></svg>")).toBeNull();
+  test("returns null for malformed ids and unknown prefixes", () => {
+    expect(normalizeIconId("home")).toBeNull();
+    expect(normalizeIconId("md:")).toBeNull();
+    expect(normalizeIconId("xx:home")).toBeNull();
+    expect(normalizeIconId("md:home:extra")).toBeNull();
+  });
+});
+
+describe("resolveSiteIcon", () => {
+  test("returns the canonical id for an explicit id or techMap name", () => {
+    expect(resolveSiteIcon("md:home", {}, icons)).toEqual({
+      kind: "icon",
+      id: "mdi:home",
+    });
+    expect(resolveSiteIcon("github", {}, icons)).toEqual({
+      kind: "icon",
+      id: "mdi:github",
+    });
+  });
+
+  test("returns null for an unknown explicit id", () => {
+    expect(resolveSiteIcon("md:definitely-not-an-icon", {}, icons)).toBeNull();
+  });
+
+  test("passes raw SVG through", () => {
+    expect(resolveSiteIcon("<svg></svg>", {}, icons)).toEqual({
+      kind: "svg",
+      html: "<svg></svg>",
+    });
+  });
+
+  test("resolves images with the site base", () => {
+    expect(resolveSiteIcon("img/logo.png", { base: "/" }, icons)).toEqual({
+      kind: "image",
+      src: "/img/logo.png",
+      fallback: undefined,
+    });
+    expect(resolveSiteIcon("img/logo.png", { base: "/docs/" }, icons)).toEqual({
+      kind: "image",
+      src: "/docs/img/logo.png",
+      fallback: undefined,
+    });
+    expect(
+      resolveSiteIcon(
+        { src: "img/a.png", fallback: "img/b.png" },
+        { base: "/docs/" },
+        icons,
+      ),
+    ).toEqual({
+      kind: "image",
+      src: "/docs/img/a.png",
+      fallback: "/docs/img/b.png",
+    });
+    expect(resolveSiteIcon("https://example.com/x.png", {}, icons)).toEqual({
+      kind: "image",
+      src: "https://example.com/x.png",
+      fallback: undefined,
+    });
+  });
+
+  test("resolves emoji", () => {
+    expect(resolveSiteIcon("📁", {}, icons)).toEqual({
+      kind: "emoji",
+      value: "📁",
+    });
   });
 
   test("guesses from the slug, then the fallback", () => {
     expect(
-      resolveDynamicIconId(undefined, {
-        slug: "python",
-        fallbackIcon: "md:notebook",
-      }),
-    ).toBe("si:python");
+      resolveSiteIcon(
+        undefined,
+        { slug: "python", fallbackIcon: "md:notebook" },
+        icons,
+      ),
+    ).toEqual({ kind: "icon", id: "simple-icons:python" });
     expect(
-      resolveDynamicIconId(undefined, {
-        slug: "some-unknown-topic",
-        fallbackIcon: "md:notebook",
-      }),
-    ).toBe("md:notebook");
+      resolveSiteIcon(
+        undefined,
+        { slug: "rust", fallbackIcon: "md:notebook" },
+        icons,
+      ),
+    ).toEqual({ kind: "icon", id: "devicon:rust" });
+    expect(
+      resolveSiteIcon(
+        undefined,
+        { slug: "some-unknown-topic", fallbackIcon: "md:notebook" },
+        icons,
+      ),
+    ).toEqual({ kind: "icon", id: "mdi:notebook" });
   });
 
   test("returns null when nothing resolves", () => {
-    expect(resolveDynamicIconId("md:definitely-not-an-icon")).toBeNull();
-    expect(resolveDynamicIconId(undefined, {})).toBeNull();
-  });
-});
-
-describe("sidebar icon sprite", () => {
-  test("a symbol carries the icon's viewBox and body verbatim", () => {
-    const inline = renderIcon("md:home");
-    const symbol = renderIconSymbol("md:home");
-    const viewBox = inline.match(/viewBox="([^"]+)"/)?.[1];
-    const body = inline.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
-    expect(viewBox).toBe("0 0 24 24");
-    expect(symbol).toBe(
-      `<symbol id="porto-icon-md:home" viewBox="${viewBox}">${body}</symbol>`,
-    );
-  });
-
-  test("a use reference is the same 1em svg with the body replaced", () => {
-    expect(renderIconUse("md:home")).toBe(
-      `<svg width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#porto-icon-md:home"/></svg>`,
-    );
-  });
-
-  test("an icon with no color of its own follows the text color", () => {
-    // logos:500px is a bare path — no fill in its body — so without
-    // the fallback it renders black on a dark background.
-    const inline = renderIcon("lo:500px");
-    const body = inline.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
-    expect(body).not.toContain("fill=");
-    expect(inline).toContain('fill="currentColor"');
-    expect(renderIconUse("lo:500px")).toContain('fill="currentColor"');
-  });
-
-  test("collects repeated icons, ignores single-use ones", () => {
-    const tree = [
-      {
-        label: "Alpha Guide",
-        type: "category",
-        items: [
-          { label: "First Doc", type: "doc" },
-          { label: "Second Doc", type: "doc" },
-        ],
-      },
-      {
-        label: "Beta Guide",
-        type: "category",
-        items: [{ label: "Third Doc", type: "doc" }],
-      },
-    ];
-    const sprite = collectSidebarSprite(tree);
-    // Both fallbacks repeat (two categories, three docs).
-    expect([...sprite.ids].sort()).toEqual(["md:folder", "md:notebook"]);
-    expect(sprite.html).toContain("<symbol");
-    expect(sprite.html).toContain("data-porto-sprite");
-    // The sprite + references must be smaller than the inline SVGs.
-    const rows = 5;
-    const inlineTotal =
-      2 * renderIcon("md:folder").length + 3 * renderIcon("md:notebook").length;
-    const spriteTotal =
-      sprite.html.length +
-      2 * renderIconUse("md:folder").length +
-      3 * renderIconUse("md:notebook").length;
-    expect(spriteTotal).toBeLessThan(inlineTotal);
-    expect(rows).toBe(5);
-  });
-
-  test("emits no sprite when no icon repeats", () => {
-    const sprite = collectSidebarSprite([{ label: "Only Doc", type: "doc" }]);
-    expect(sprite.html).toBe("");
-    expect(sprite.ids.size).toBe(0);
-  });
-
-  test("renderSidebarIcon uses the sprite only for member icons", () => {
-    const ids = new Set(["md:notebook"]);
-    const opts = { slug: "some-unknown-topic", fallbackIcon: "md:notebook" };
-    expect(renderSidebarIcon(undefined, opts, ids)).toBe(
-      renderIconUse("md:notebook"),
-    );
-    expect(renderSidebarIcon(undefined, opts, new Set())).toBe(
-      renderIcon("md:notebook"),
-    );
-    // Emoji rows never use the sprite, even when the id set is passed.
-    expect(renderSidebarIcon("📁", {}, ids)).toContain("📁");
+    expect(resolveSiteIcon(undefined, {}, icons)).toBeNull();
+    expect(
+      resolveSiteIcon(undefined, { fallbackIcon: "md:not-here" }, icons),
+    ).toBeNull();
+    // An explicit id never falls through to the slug or fallback.
+    expect(
+      resolveSiteIcon("md:not-here", { slug: "python" }, icons),
+    ).toBeNull();
   });
 });

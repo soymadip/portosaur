@@ -49,9 +49,9 @@ function escapeAttr(value: unknown): string {
     .replace(/>/g, "&gt;");
 }
 
-/* Renders one fetched icon as an inline SVG string, the way the
-   server-side `renderIcon` does — same `iconToSVG` call, same
-   attributes. Returns "" when the data doesn't resolve. */
+/* Renders one fetched icon as an inline SVG string, the way
+   `SiteIcon` does — same `iconToSVG` call, same attributes.
+   Returns "" when the data doesn't resolve. */
 function renderFetchedIcon(collection: unknown, name: string): string {
   const iconData = getIconData(
     collection as Parameters<typeof getIconData>[0],
@@ -67,9 +67,9 @@ function renderFetchedIcon(collection: unknown, name: string): string {
   const attributes = Object.entries(rendered.attributes)
     .map(([key, value]) => `${key}="${escapeAttr(value)}"`)
     .join(" ");
-  /* `fill="currentColor"` is the fallback color, same as the
-     server-side `renderIcon` — a bare path would otherwise render
-     black on a dark background. */
+  /* `fill="currentColor"` is the fallback color, same as
+     `SiteIcon` — a bare path would otherwise render black on a
+     dark background. */
   return `<svg ${attributes} fill="currentColor" aria-hidden="true">${rendered.body}</svg>`;
 }
 

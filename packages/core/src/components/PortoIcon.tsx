@@ -10,8 +10,9 @@ import {
  * Iconify packs.
  *
  * Content icons (frontmatter `icon`, note cards, feature icons) do
- * NOT come from here — those resolve through `lib/icons.ts`
- * (Iconify packs) at build time. See the `Icon` MDX component.
+ * NOT come from here — those resolve through the generated site
+ * icon map (`lib/site-icons.ts`) at build time. See the `Icon`
+ * MDX component.
  */
 export function PortoIcon({
   name,

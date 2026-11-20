@@ -1,6 +1,6 @@
 import type { PortosaurOptions } from "../../lib/config.ts";
-import { renderIcon } from "../../lib/icons.ts";
 import { ReloadButton } from "./ReloadButton.tsx";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**
@@ -13,13 +13,9 @@ export function OfflinePage({ config }: { config: PortosaurOptions }) {
     <SiteShell config={config}>
       <div className="porto-empty-state">
         <div className="porto-empty-state__icon">
-          <span
-            dangerouslySetInnerHTML={{
-              __html: renderIcon("line-md:cloud-alt-off-loop", {
-                size: "5rem",
-              }),
-            }}
-          />
+          <span>
+            <SiteIcon icon="line-md:cloud-alt-off-loop" size="5rem" />
+          </span>
         </div>
         <h2 className="porto-empty-state__title">You&apos;re Offline</h2>
         <p className="porto-empty-state__text">

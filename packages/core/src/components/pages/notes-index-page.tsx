@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { PortosaurOptions } from "../../lib/config.ts";
-import { renderDynamicIcon, renderIcon, techMap } from "../../lib/icons.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
+import { techMap } from "../../lib/techmap.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**
@@ -83,28 +84,23 @@ export function NotesIndexPage({
                     title={note.description || undefined}
                   >
                     <div className="porto-note-icon-wrap">
-                      <span
-                        className="noteIcon"
-                        dangerouslySetInnerHTML={{
-                          __html: renderDynamicIcon(note.icon ?? undefined, {
-                            slug: note.slug,
-                            fallbackIcon: "md:book",
-                            base,
-                          }),
-                        }}
-                      />
+                      <span className="noteIcon">
+                        <SiteIcon
+                          icon={note.icon ?? undefined}
+                          slug={note.slug}
+                          fallbackIcon="md:book"
+                          base={base}
+                        />
+                      </span>
                     </div>
                     <div className="porto-note-text">
                       <h3 className="porto-note-title" title={note.title}>
                         {note.title}
                       </h3>
                     </div>
-                    <span
-                      className="mobileChevron"
-                      dangerouslySetInnerHTML={{
-                        __html: renderIcon("md:chevron-right"),
-                      }}
-                    />
+                    <span className="mobileChevron">
+                      <SiteIcon icon="md:chevron-right" />
+                    </span>
                   </Link>
                 );
               })}

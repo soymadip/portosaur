@@ -44,6 +44,8 @@
  * lost.
  */
 
+import { admonitionIcon } from "./admonitionIcon.ts";
+
 /** GitHub alert keyword → [admonition class suffix, default title]. */
 const ALERT_TYPES: Record<string, [string, string]> = {
   NOTE: ["info", "Note"],
@@ -201,7 +203,9 @@ export default function remarkGithubAlertsPlugin() {
         node.children.splice(0, 1);
       }
 
+      const icon = admonitionIcon(alert.type);
       const heading = divElement("admonition-heading", [
+        ...(icon ? [icon] : []),
         { type: "text", value: alert.title },
       ]);
       const content = divElement("admonition-content", node.children || []);

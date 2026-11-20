@@ -1,6 +1,6 @@
 import type { PortosaurOptions } from "../../lib/config.ts";
-import { renderIcon } from "../../lib/icons.ts";
 import { RedirectBody } from "./RedirectBody.tsx";
+import { SiteIcon } from "../SiteIcon.tsx";
 import { SiteShell } from "./frame/SiteShell.tsx";
 
 /**
@@ -14,11 +14,9 @@ export function RedirectPage({ config }: { config: PortosaurOptions }) {
     <SiteShell config={config}>
       <div className="porto-empty-state">
         <div className="porto-empty-state__icon porto-empty-state__icon--sm">
-          <span
-            dangerouslySetInnerHTML={{
-              __html: renderIcon("md:open-in-new", { size: "3rem" }),
-            }}
-          />
+          <span>
+            <SiteIcon icon="md:open-in-new" size="3rem" />
+          </span>
         </div>
         <RedirectBody />
       </div>

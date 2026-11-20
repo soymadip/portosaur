@@ -151,13 +151,6 @@ export interface TopicListItem {
   color?: string;
   isCategory?: boolean;
   itemsCount?: number;
-  /**
-   * The icon as resolved HTML, filled in server-side (the icon packs
-   * are megabytes of JSON and must never load client-side). Items
-   * passed manually — without a server resolution step — carry no
-   * icon HTML and render without an icon.
-   */
-  iconHtml?: string;
 }
 
 function nodeColor(node: PageTree.Node | undefined): string | undefined {

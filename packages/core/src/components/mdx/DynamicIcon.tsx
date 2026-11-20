@@ -1,10 +1,9 @@
-import { renderDynamicIcon } from "../../lib/icons.ts";
-import type { DynamicIconValue } from "../../lib/icons.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
+import type { DynamicIconValue } from "../../lib/site-icons.ts";
 
 /**
  * DynamicIcon — renders a frontmatter `icon` value, which may be
  * an Iconify id, a local image path, a remote URL, or an emoji.
- * Server component (see `Icon` for why).
  */
 export function DynamicIcon({
   icon,
@@ -18,10 +17,13 @@ export function DynamicIcon({
   size?: string;
 }) {
   return (
-    <span
-      dangerouslySetInnerHTML={{
-        __html: renderDynamicIcon(icon, { slug, fallbackIcon, size }),
-      }}
-    />
+    <span>
+      <SiteIcon
+        icon={icon}
+        slug={slug}
+        fallbackIcon={fallbackIcon}
+        size={size}
+      />
+    </span>
   );
 }

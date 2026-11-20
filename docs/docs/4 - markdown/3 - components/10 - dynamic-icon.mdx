@@ -7,8 +7,8 @@ icon: "lu:sparkles"
 `<DynamicIcon>` resolves a frontmatter-style icon value, a slug, or a fallback icon:
 
 ```jsx
-<DynamicIcon iconStr="🚀" />
+<DynamicIcon icon="🚀" />
 <DynamicIcon slug="react" fallbackIcon="md:code" />
 ```
 
-`iconStr` accepts an icon identifier, emoji, image path/URL, inline SVG string, or `{ src, fallback }` object. Without `iconStr`, `slug` is checked against Portosaur's technology map and bundled devicons before `fallbackIcon` is used. It also accepts `className` and `style`.
+`icon` accepts an icon identifier, emoji, image path/URL, inline SVG string, or `{ src, fallback }` object. Without `icon`, `slug` is checked against Portosaur's technology map and bundled devicons before `fallbackIcon` is used. It also accepts `size`.

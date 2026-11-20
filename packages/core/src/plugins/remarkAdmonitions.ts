@@ -30,6 +30,8 @@
  * into an `any[]` list, so nothing is lost.
  */
 
+import { admonitionIcon } from "./admonitionIcon.ts";
+
 const DEFAULT_TITLES: Record<string, string> = {
   note: "Note",
   tip: "Tip",
@@ -101,7 +103,11 @@ export default function remarkAdmonitionsPlugin() {
         headingChildren = [{ type: "text", value: title }];
       }
 
-      const heading = divElement("admonition-heading", headingChildren);
+      const icon = admonitionIcon(type);
+      const heading = divElement("admonition-heading", [
+        ...(icon ? [icon] : []),
+        ...headingChildren,
+      ]);
       const content = divElement("admonition-content", bodyChildren);
 
       const admonition = divElement(`admonition admonition-${type}`, [

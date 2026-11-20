@@ -1,12 +1,10 @@
 /**
  * Sidebar tree preparation — server-side.
  *
- * The client `Sidebar` component cannot import `lib/icons.ts` (the
- * Iconify packs are megabytes of JSON), so the tree is prepared on
- * the server: each row's icon is pre-rendered to an HTML string
- * (with the deduplicated sprite, see `collectSidebarSprite`) and the
- * Fumadocs tree is flattened into plain serializable items the
- * client component can receive as props.
+ * The tree is flattened into plain serializable items the client
+ * component can receive as props. Each row carries its raw icon
+ * value, its slug, and its fallback icon — the client `Sidebar`
+ * renders the icon itself (`SiteIcon`).
  *
  * The row shape mirrors the Astro `porto:sidebar` nodes: doc items
  * with `href`, categories with an optional index `link` + `items`.
@@ -15,11 +13,7 @@
  */
 
 import type * as PageTree from "fumadocs-core/page-tree";
-import {
-  collectSidebarSprite,
-  renderSidebarIcon,
-  type SidebarSpriteItem,
-} from "./icons.ts";
+import type { DynamicIconValue } from "./site-icons.ts";
 import { nodeName } from "./content.ts";
 
 /** One sidebar row, serializable across the server/client boundary. */
@@ -29,8 +23,12 @@ export interface SidebarItem {
   label: string;
   /** The row's link (docs always. Categories only with an index page). */
   href?: string;
-  /** Pre-rendered icon HTML (empty string when nothing resolves). */
-  iconHtml: string;
+  /** The raw frontmatter `icon` value, when declared. */
+  icon?: DynamicIconValue;
+  /** The slug the icon guess falls back to (the row's name). */
+  slug: string;
+  /** The fallback icon id when nothing else resolves. */
+  fallbackIcon: string;
   /** The frontmatter `color`, when declared — colors the icon. */
   color?: string;
   /** Category children (categories only). */
@@ -39,11 +37,9 @@ export interface SidebarItem {
   active?: boolean;
 }
 
-/** The prepared sidebar: its rows plus the icon sprite markup. */
+/** The prepared sidebar: its rows plus the state key. */
 export interface PreparedSidebar {
   items: SidebarItem[];
-  /** The sprite markup (`""` when no sprite is worthwhile). */
-  spriteHtml: string;
   /** A hash of the tree's URLs — the scroll/expand state key. */
   hash: string;
 }
@@ -67,32 +63,8 @@ function nodeColor(node: PageTree.Node): string | undefined {
   return typeof color === "string" ? color : undefined;
 }
 
-/** Adapts a Fumadocs tree to the sprite collector's shape. */
-function toSpriteItems(nodes: PageTree.Node[]): SidebarSpriteItem[] {
-  const items: SidebarSpriteItem[] = [];
-  for (const node of nodes) {
-    if (node.type === "separator") {
-      continue;
-    }
-    if (node.type === "page") {
-      items.push({ icon: nodeIcon(node), label: nodeName(node) });
-      continue;
-    }
-    items.push({
-      icon: nodeIcon(node) ?? nodeIcon(node.index),
-      label: nodeName(node),
-      type: "category",
-      items: toSpriteItems(node.children),
-    });
-  }
-  return items;
-}
-
 /** Converts one tree node to a serializable sidebar item. */
-function toSidebarItem(
-  node: PageTree.Node,
-  spriteIds: Set<string>,
-): SidebarItem | null {
+function toSidebarItem(node: PageTree.Node): SidebarItem | null {
   if (node.type === "separator") {
     return null;
   }
@@ -101,17 +73,15 @@ function toSidebarItem(
       type: "doc",
       label: nodeName(node),
       href: node.url,
-      iconHtml: renderSidebarIcon(
-        nodeIcon(node),
-        { slug: nodeName(node), fallbackIcon: "md:notebook" },
-        spriteIds,
-      ),
+      icon: nodeIcon(node),
+      slug: nodeName(node),
+      fallbackIcon: "md:notebook",
       color: nodeColor(node),
     };
   }
   const children: SidebarItem[] = [];
   for (const child of node.children) {
-    const item = toSidebarItem(child, spriteIds);
+    const item = toSidebarItem(child);
     if (item) {
       children.push(item);
     }
@@ -120,27 +90,22 @@ function toSidebarItem(
     type: "category",
     label: nodeName(node),
     href: node.index?.url,
-    iconHtml: renderSidebarIcon(
-      nodeIcon(node) ?? nodeIcon(node.index),
-      { slug: nodeName(node), fallbackIcon: "md:folder" },
-      spriteIds,
-    ),
+    icon: nodeIcon(node) ?? nodeIcon(node.index),
+    slug: nodeName(node),
+    fallbackIcon: "md:folder",
     color: nodeColor(node),
     items: children,
   };
 }
 
 /**
- * Prepares a Fumadocs page tree for the client sidebar: collects
- * the icon sprite once from the whole tree (so an icon repeated
- * across branches is still deduped), renders every row's icon, and
- * flattens the tree into serializable items.
+ * Prepares a Fumadocs page tree for the client sidebar: flattens
+ * the tree into serializable items (see `SidebarItem`).
  */
 export function prepareSidebar(tree: PageTree.Root): PreparedSidebar {
-  const sprite = collectSidebarSprite(toSpriteItems(tree.children));
   const items: SidebarItem[] = [];
   for (const node of tree.children) {
-    const item = toSidebarItem(node, sprite.ids);
+    const item = toSidebarItem(node);
     if (item) {
       items.push(item);
     }
@@ -159,7 +124,6 @@ export function prepareSidebar(tree: PageTree.Root): PreparedSidebar {
   collectUrls(items);
   return {
     items,
-    spriteHtml: sprite.html,
     hash: urls.join("|"),
   };
 }

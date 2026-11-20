@@ -1,0 +1,162 @@
+import { describe, expect, test } from "bun:test";
+import fs from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
+  collectSiteIcons,
+  generateSiteIcons,
+  renderSiteIconsModule,
+} from "../src/lib/icon-scan.ts";
+
+const coreRoot = path.resolve(import.meta.dirname, "..");
+
+/** A tiny fixture site: content with icons + a config file. */
+function fixtureSite(): { projectDir: string; contentDir: string } {
+  const projectDir = mkdtempSync(path.join(tmpdir(), "porto-icons-"));
+  const contentDir = path.join(projectDir, "docs");
+  fs.mkdirSync(path.join(contentDir, "1 - python"), { recursive: true });
+  fs.writeFileSync(
+    path.join(contentDir, "1 - python", "guide.md"),
+    `---
+title: Python Guide
+icon: md:home
+---
+
+A shortcode :si:react: in prose.
+
+<Btn icon="md:settings">Go</Btn>
+
+<DynamicIcon slug="kotlin" />
+
+\`\`\`yaml
+# A code sample — never scanned.
+icon: md:not-real
+\`\`\`
+`,
+  );
+  fs.writeFileSync(
+    path.join(contentDir, "bad.md"),
+    `---
+title: Bad Icons
+icon: md:definitely-not-an-icon
+---
+
+<Icon id="notanicon" />
+`,
+  );
+  fs.writeFileSync(
+    path.join(projectDir, "config.yml"),
+    `site:
+  title: Test
+docsHome:
+  features:
+    - title: Books
+      icon: md:book
+`,
+  );
+  return { projectDir, contentDir };
+}
+
+describe("collectSiteIcons", () => {
+  test("collects frontmatter, props, shortcodes, slugs, and config icons", () => {
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      const { icons, warnings } = collectSiteIcons({
+        projectDir,
+        contentDirs: [contentDir],
+        configFile: path.join(projectDir, "config.yml"),
+        coreRoot,
+      });
+      // Frontmatter `icon:`, the shortcode, the Btn prop.
+      expect(icons.has("mdi:home")).toBe(true);
+      expect(icons.has("simple-icons:react")).toBe(true);
+      expect(icons.has("mdi:settings")).toBe(true);
+      // The `1 - python` dir slug guesses the Python icon, and the
+      // DynamicIcon slug guesses devicon (kotlin is not in techMap).
+      expect(icons.has("simple-icons:python")).toBe(true);
+      expect(icons.has("devicon:kotlin")).toBe(true);
+      // The config feature icon.
+      expect(icons.has("mdi:book")).toBe(true);
+      // The fixed icons the core's own pages render.
+      expect(icons.has("mdi:folder")).toBe(true);
+      expect(icons.has("mdi:notebook")).toBe(true);
+      // The code sample's icon is never scanned.
+      expect(icons.has("mdi:not-real")).toBe(false);
+      // Unknown and malformed ids warn once each.
+      expect(warnings).toContain(
+        "[Icons] Icon not found: md:definitely-not-an-icon",
+      );
+      expect(warnings).toContain("[Icons] Malformed icon id: notanicon");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("an icon entry carries the pack's viewBox and body", () => {
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      const { icons } = collectSiteIcons({
+        projectDir,
+        contentDirs: [contentDir],
+        coreRoot,
+      });
+      const home = icons.get("mdi:home");
+      expect(home).toBeDefined();
+      expect(home?.viewBox).toBe("0 0 24 24");
+      expect(home?.body).toContain("<path");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("renderSiteIconsModule", () => {
+  test("emits a typed module with sorted entries", () => {
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      const { icons } = collectSiteIcons({
+        projectDir,
+        contentDirs: [contentDir],
+        coreRoot,
+      });
+      const module = renderSiteIconsModule(icons);
+      expect(module).toContain(
+        'import type { SiteIcons } from "@portosaur/core/lib/site-icons";',
+      );
+      expect(module).toContain("export const siteIcons: SiteIcons = {");
+      expect(module).toContain('"mdi:home": { viewBox: "0 0 24 24"');
+      const homeIndex = module.indexOf('"mdi:home"');
+      const pythonIndex = module.indexOf('"simple-icons:python"');
+      expect(homeIndex).toBeLessThan(pythonIndex);
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("generateSiteIcons", () => {
+  test("writes the module, and rewrites only when it changed", () => {
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      const outFile = path.join(projectDir, ".portosaur", "site-icons.ts");
+      const spec = {
+        projectDir,
+        contentDirs: [contentDir],
+        configFile: path.join(projectDir, "config.yml"),
+        coreRoot,
+        outFile,
+      };
+      const first = generateSiteIcons(spec);
+      expect(first.changed).toBe(true);
+      expect(first.count).toBeGreaterThan(0);
+      expect(fs.existsSync(outFile)).toBe(true);
+      const mtime = fs.statSync(outFile).mtimeMs;
+      const second = generateSiteIcons(spec);
+      expect(second.changed).toBe(false);
+      expect(fs.statSync(outFile).mtimeMs).toBe(mtime);
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+});

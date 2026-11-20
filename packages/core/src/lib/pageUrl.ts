@@ -1,7 +1,7 @@
 /**
  * Page-URL helpers shared by the navbar, the sidebar, and the mobile
  * menu — dependency-free, so importing this from a client component
- * stays cheap (unlike `icons.ts`, which drags the Iconify packs in).
+ * stays cheap.
  *
  * Ported from the Astro tree (`utils/pageUrl.ts` + the `pageHref`
  * half of `utils/icons.ts`): `pageHref` lives here now, next to the
@@ -131,4 +131,33 @@ export function pageHref(path: string): string {
     }
   }
   return `${pathname}/${suffix}`;
+}
+
+/**
+ * Base-aware asset URL (the old `withBaseUrl`). Absolute URLs,
+ * protocol-relative URLs, and hash links pass through unchanged.
+ * Anything else gets the site base prepended (and a leading slash).
+ *
+ * Use this for asset URLs (`<img src>`, favicon links) and plain
+ * `<a href>`s — NOT for `<Link href>`s, where Next.js prepends
+ * `basePath` itself.
+ *
+ * @param path - The asset path (`"img/icon.png"`, `"/img/x.png"`,
+ *   or an absolute URL).
+ * @param baseUrl - The site base (`config.site.baseUrl`).
+ * @returns The base-prefixed URL.
+ */
+export function withBase(path: string, baseUrl = "/"): string {
+  if (!path) {
+    return path;
+  }
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(path)) {
+    return path;
+  }
+  const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  if (base && clean.startsWith(`${base}/`)) {
+    return clean;
+  }
+  return `${base}${clean}`;
 }

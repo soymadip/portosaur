@@ -1,5 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
+import { generateSiteIcons } from "../engine/index.ts";
+import type { PortosaurOptions } from "../engine/index.ts";
 import {
   Paths,
   resolvePortoPaths,
@@ -57,7 +59,7 @@ export async function devCommand(
   const portoPaths = resolvePortoPaths(UserRoot);
 
   try {
-    const { nextRoot } = await writeNextRoot(
+    const { nextRoot, options: siteOptions } = await writeNextRoot(
       UserRoot,
       portoPaths,
       {},
@@ -66,6 +68,84 @@ export async function devCommand(
     );
 
     logResolvedSiteLocation(UserRoot, portoPaths);
+
+    // Updated whenever the config changes (a renamed docs dir moves the watch).
+    let currentOptions: PortosaurOptions = siteOptions;
+    let contentWatchers: fs.FSWatcher[] = [];
+    let rescanTimer: NodeJS.Timeout | undefined;
+    let rescanRunning = false;
+    let rescanQueued = false;
+
+    // Re-runs the icon scan alone — the generated root does not
+    // change when content changes. The module is rewritten only
+    // when the icon set changed, so a plain text edit costs nothing.
+    const rescanIcons = async () => {
+      if (rescanRunning) {
+        rescanQueued = true;
+        return;
+      }
+      rescanRunning = true;
+      try {
+        const result = await generateSiteIcons({
+          projectDir: UserRoot,
+          options: currentOptions,
+          nextRoot,
+          coreRoot: portoPaths.coreRoot,
+          logger,
+        });
+        if (result.changed) {
+          logger.info(`Icons updated (${result.count} icons)`);
+        }
+      } catch (err) {
+        logger.warn(`Failed to rescan icons: ${(err as Error).message}`);
+      } finally {
+        rescanRunning = false;
+        if (rescanQueued) {
+          rescanQueued = false;
+          void rescanIcons();
+        }
+      }
+    };
+
+    const watchContentDirs = () => {
+      for (const watcher of contentWatchers) {
+        watcher.close();
+      }
+      contentWatchers = [];
+      for (const dir of [
+        path.join(UserRoot, currentOptions.site.notesDir),
+        path.join(UserRoot, currentOptions.site.blogDir),
+      ]) {
+        if (!fs.existsSync(dir)) {
+          continue;
+        }
+        const watcher = fs.watch(
+          dir,
+          { recursive: true },
+          (_eventType, filename) => {
+            // Only markdown changes can change the icon set — and
+            // a null filename (some platforms) counts as one.
+            if (
+              filename !== null &&
+              typeof filename === "string" &&
+              !/\.mdx?$/.test(filename)
+            ) {
+              return;
+            }
+            clearTimeout(rescanTimer);
+            rescanTimer = setTimeout(() => void rescanIcons(), 300);
+          },
+        );
+        contentWatchers.push(watcher);
+      }
+    };
+    watchContentDirs();
+
+    process.on("SIGINT", () => {
+      for (const watcher of contentWatchers) {
+        watcher.close();
+      }
+    });
 
     // Watch for config.yml changes to regenerate the Next.js root.
     // Next restarts the dev server when next.config.mjs changes, and
@@ -77,7 +157,15 @@ export async function devCommand(
           logger.info(`Detected change in ${configYaml}, reloading...`);
 
           try {
-            await writeNextRoot(UserRoot, portoPaths, {}, false, {});
+            const regenerated = await writeNextRoot(
+              UserRoot,
+              portoPaths,
+              {},
+              false,
+              {},
+            );
+            currentOptions = regenerated.options;
+            watchContentDirs();
             logResolvedSiteLocation(UserRoot, portoPaths);
           } catch (err) {
             logger.warn(

@@ -6,6 +6,8 @@ icon: "md:emoji"
 
 You can use emojis, SVGs, Icon Packs across your site in `config.yml`, Markdown/MDX frontmatter, and content.
 
+At build time, the CLI scans your content and config for the icons you actually use and ships only those — the packs themselves never reach the browser. An unknown icon id warns during the build instead of rendering nothing silently. In dev, saving a file re-scans, so a new icon shows up without restarting.
+
 <details>
 <summary>Where Icons/Emojis Can Be Used?</summary>
 

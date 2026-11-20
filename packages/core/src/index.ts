@@ -4,9 +4,9 @@
  * …). This barrel re-exports the same surface for convenience.
  *
  * NOT re-exported here (import via their deep paths):
- * - `lib/icons.ts` — the Iconify JSON packs are megabytes. A
- *   barrel import from any client component would pull them into
- *   the client bundle.
+ * - `lib/icon-data.ts` — the Iconify JSON packs are megabytes.
+ *   Build time only (the icon scan + remark plugins).
+ * - `lib/icon-scan.ts` — Node-only (`node:fs`). Build time only.
  * - `lib/image-size.ts` — Node-only (`node:fs`). Server code only.
  * - `lib/assets.ts` — Node-only (`node:fs`). Server code only
  *   (sitemap/robots builders, used by the generated routes).

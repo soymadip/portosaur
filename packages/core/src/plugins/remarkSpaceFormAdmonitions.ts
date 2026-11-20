@@ -50,6 +50,8 @@
  * No `: RemarkPlugin` annotation — see remarkAdmonitions for why.
  */
 
+import { admonitionIcon } from "./admonitionIcon.ts";
+
 /** Docusaurus's default admonition keywords (its preprocessor only rewrites these). */
 const KEYWORDS = [
   "secondary",
@@ -245,8 +247,12 @@ function buildAdmonition(
     title.length > 0
       ? title
       : [{ type: "text", value: DEFAULT_TITLES[type] || type }];
+  const icon = admonitionIcon(type);
   return divElement(`admonition admonition-${type}`, [
-    divElement("admonition-heading", headingChildren),
+    divElement("admonition-heading", [
+      ...(icon ? [icon] : []),
+      ...headingChildren,
+    ]),
     divElement("admonition-content", bodyParagraphs),
   ]);
 }

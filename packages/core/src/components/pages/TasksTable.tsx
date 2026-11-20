@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 /**
  * TasksTable — the interactive tasks table (stats, status tabs
  * with counts, the sorted table). Tab filtering is React state,
  * replacing the Astro `tasks-filter` module.
  *
- * Client component, so it cannot import `lib/icons.ts` (the icon
- * packs are megabytes of JSON) — the server page pre-renders the
- * icon HTML and passes it in as strings.
+ * Client component. Its icons render with `SiteIcon` from the
+ * site's generated icon map.
  */
 
 export interface TasksTab {
   id: string;
   label: string;
-  iconHtml: string;
+  icon: string;
   spin?: boolean;
   count: number;
 }
@@ -49,20 +49,12 @@ export function TasksTable({
   stats,
   tabs,
   tasks,
-  statusIcons,
-  priorityIcons,
-  emptyIconHtml,
 }: {
   heading: string;
   subheading: string;
   stats: TasksStats;
   tabs: TasksTab[];
   tasks: TasksRow[];
-  /** Pre-rendered status badge icons, keyed by status. */
-  statusIcons: Record<string, string>;
-  /** Pre-rendered priority badge icons, keyed by priority. */
-  priorityIcons: Record<string, string>;
-  emptyIconHtml: string;
 }) {
   const [activeTab, setActiveTab] = useState("all");
   const visible =
@@ -133,8 +125,9 @@ export function TasksTable({
                 <span
                   className={`porto-tasks-tab-icon${tab.spin ? " porto-spin" : ""}`}
                   aria-hidden="true"
-                  dangerouslySetInnerHTML={{ __html: tab.iconHtml }}
-                />
+                >
+                  <SiteIcon icon={tab.icon} />
+                </span>
                 <span className="porto-tasks-tab-label">{tab.label}</span>
                 <span className="porto-tasks-tab-count">{tab.count}</span>
               </button>
@@ -149,18 +142,16 @@ export function TasksTable({
           >
             {tasks.length === 0 ? (
               <div className="porto-tasks-empty">
-                <span
-                  className="porto-tasks-empty-icon"
-                  dangerouslySetInnerHTML={{ __html: emptyIconHtml }}
-                />
+                <span className="porto-tasks-empty-icon">
+                  <SiteIcon icon="md:format-list-checks" />
+                </span>
                 <p>No tasks available</p>
               </div>
             ) : visible.length === 0 ? (
               <div className="porto-tasks-empty">
-                <span
-                  className="porto-tasks-empty-icon"
-                  dangerouslySetInnerHTML={{ __html: emptyIconHtml }}
-                />
+                <span className="porto-tasks-empty-icon">
+                  <SiteIcon icon="md:format-list-checks" />
+                </span>
                 <p>No tasks in this category</p>
               </div>
             ) : (
@@ -186,34 +177,25 @@ export function TasksTable({
                         >
                           {task.status === "completed" && (
                             <>
-                              <span
-                                className="porto-tasks-badge-icon"
-                                dangerouslySetInnerHTML={{
-                                  __html: statusIcons.completed ?? "",
-                                }}
-                              />{" "}
+                              <span className="porto-tasks-badge-icon">
+                                <SiteIcon icon="md:check-circle" />
+                              </span>{" "}
                               Done
                             </>
                           )}
                           {task.status === "active" && (
                             <>
-                              <span
-                                className="porto-tasks-badge-icon porto-spin"
-                                dangerouslySetInnerHTML={{
-                                  __html: statusIcons.active ?? "",
-                                }}
-                              />{" "}
+                              <span className="porto-tasks-badge-icon porto-spin">
+                                <SiteIcon icon="md:loading" />
+                              </span>{" "}
                               In Progress
                             </>
                           )}
                           {task.status === "pending" && (
                             <>
-                              <span
-                                className="porto-tasks-badge-icon"
-                                dangerouslySetInnerHTML={{
-                                  __html: statusIcons.pending ?? "",
-                                }}
-                              />{" "}
+                              <span className="porto-tasks-badge-icon">
+                                <SiteIcon icon="md:clock-outline" />
+                              </span>{" "}
                               Planned
                             </>
                           )}
@@ -248,34 +230,25 @@ export function TasksTable({
                       <div className="porto-tasks-cell">
                         {task.priority === "high" && (
                           <span className="porto-tasks-badge porto-tasks-badge--high">
-                            <span
-                              className="porto-tasks-badge-icon"
-                              dangerouslySetInnerHTML={{
-                                __html: priorityIcons.high ?? "",
-                              }}
-                            />{" "}
+                            <span className="porto-tasks-badge-icon">
+                              <SiteIcon icon="md:fire" />
+                            </span>{" "}
                             High
                           </span>
                         )}
                         {task.priority === "medium" && (
                           <span className="porto-tasks-badge porto-tasks-badge--high porto-tasks-badge--bold">
-                            <span
-                              className="porto-tasks-badge-icon"
-                              dangerouslySetInnerHTML={{
-                                __html: priorityIcons.medium ?? "",
-                              }}
-                            />{" "}
+                            <span className="porto-tasks-badge-icon">
+                              <SiteIcon icon="md:thermometer" />
+                            </span>{" "}
                             Medium
                           </span>
                         )}
                         {task.priority === "low" && (
                           <span className="porto-tasks-badge porto-tasks-badge--low">
-                            <span
-                              className="porto-tasks-badge-icon"
-                              dangerouslySetInnerHTML={{
-                                __html: priorityIcons.low ?? "",
-                              }}
-                            />{" "}
+                            <span className="porto-tasks-badge-icon">
+                              <SiteIcon icon="md:snowflake" />
+                            </span>{" "}
                             Low
                           </span>
                         )}

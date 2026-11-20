@@ -396,6 +396,7 @@ export function buildRootLayoutContent(
   return `${header(mtime)}import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { config } from "@/lib/config";
+import { siteIcons } from "../site-icons";
 import { RootLayout } from "@portosaur/core/components/layouts/root-layout";
 import "@portosaur/core/css/global.css";
 ${customImports ? `${customImports}\n` : ""}
@@ -409,7 +410,11 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return <RootLayout config={config}>{children}</RootLayout>;
+  return (
+    <RootLayout config={config} icons={siteIcons}>
+      {children}
+    </RootLayout>
+  );
 }
 `;
 }

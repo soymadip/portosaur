@@ -40,6 +40,12 @@ export type {
   FaviconLogger,
   GenerateFaviconsParams,
 } from "./utils/favicons.ts";
+export { generateSiteIcons } from "./utils/siteIcons.ts";
+export type {
+  GenerateSiteIconsParams,
+  SiteIconsLogger,
+  SiteIconsResult,
+} from "./utils/siteIcons.ts";
 export { getDefaultColorScheme, resolveSiteCssFiles } from "./utils/css.ts";
 
 export { resolveVars, getNestedValue } from "./utils/config.ts";

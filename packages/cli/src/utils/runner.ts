@@ -12,8 +12,13 @@ import {
   loadUserConfig,
   ensurePublicUnion,
   generateFavicons,
+  generateSiteIcons,
 } from "../engine/index.ts";
-import type { PortoPaths, SiteConfigContext } from "../engine/index.ts";
+import type {
+  PortosaurOptions,
+  PortoPaths,
+  SiteConfigContext,
+} from "../engine/index.ts";
 import { logger } from "../logger/index.ts";
 import type { Logger } from "../logger/index.ts";
 import { resolvePortoPaths } from "./paths.ts";
@@ -37,6 +42,7 @@ const GENERATED_ROOT_FILES = [
   "postcss.config.mjs",
   "tsconfig.json",
   "next-env.d.ts",
+  "site-icons.ts",
 ];
 
 /**
@@ -122,6 +128,7 @@ export async function writeNextRoot(
 ): Promise<{
   nextRoot: string;
   outDir: string;
+  options: PortosaurOptions;
 }> {
   const nextRoot = getPortoDotDir(UserRoot);
 
@@ -197,7 +204,16 @@ export async function writeNextRoot(
     logger,
   });
 
-  return { nextRoot, outDir };
+  // Writes the generated `site-icons.ts` module (rewritten only when the icon set changed).
+  await generateSiteIcons({
+    projectDir: UserRoot,
+    options,
+    nextRoot,
+    coreRoot: portoPaths.coreRoot,
+    logger,
+  });
+
+  return { nextRoot, outDir, options };
 }
 
 /**

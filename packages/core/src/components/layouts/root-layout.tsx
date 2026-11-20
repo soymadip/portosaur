@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { PortosaurOptions } from "../../lib/config.ts";
 import { PortoProvider } from "../../lib/porto-context.tsx";
+import type { SiteIcons } from "../../lib/site-icons.ts";
 import { NavProgress } from "../pages/frame/NavProgress.tsx";
 import { SkipLink } from "../pages/frame/SkipLink.tsx";
 
@@ -28,9 +29,11 @@ import { SkipLink } from "../pages/frame/SkipLink.tsx";
  */
 export function RootLayout({
   config,
+  icons,
   children,
 }: {
   config: PortosaurOptions;
+  icons: SiteIcons;
   children: ReactNode;
 }) {
   const defaultMode = config.theme.defaultMode ?? "dark";
@@ -57,7 +60,7 @@ export function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script dangerouslySetInnerHTML={{ __html: sidebarScript }} />
-        <PortoProvider config={config}>
+        <PortoProvider config={config} icons={icons}>
           <SkipLink />
           <NavProgress />
           {children}

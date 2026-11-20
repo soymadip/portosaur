@@ -8,16 +8,17 @@ import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../lib/sidebar.ts";
 import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 import { SidebarCollapseTrigger, useSidebarCollapse } from "./MobileMenu.tsx";
 
 /**
  * The docs sidebar — nested categories, icons, carets, 265px.
  *
  * The tree arrives prepared from the server (`lib/sidebar.ts`):
- * each row's icon is pre-rendered HTML (the Iconify packs are too
- * big to ship to the client) and repeated icons dedupe into a
- * per-page sprite. This component only handles expand state,
- * active state, and persistence.
+ * each row carries its raw icon value, and this component renders
+ * it with `SiteIcon` from the site's generated icon map. This
+ * component only handles expand state, active state, and
+ * persistence.
  *
  * Expand state + scroll position persist in `sessionStorage`
  * across navigations (the Astro `sidebar-persist.ts` port): the
@@ -311,7 +312,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   // link in `doc-page.tsx`.
   const sectionTitle = config.siteMode === "docs" ? "Docs" : "Notes";
 
-  const { items, spriteHtml, hash } = prepared;
+  const { items, hash } = prepared;
 
   // Categories in pre-order traversal — the stored `open` array is
   // positional over this list. The list (same order) seeds the
@@ -557,8 +558,13 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
       className="porto-sidebar__icon"
       aria-hidden="true"
       style={item.color ? { color: item.color } : undefined}
-      dangerouslySetInnerHTML={{ __html: item.iconHtml }}
-    />
+    >
+      <SiteIcon
+        icon={item.icon}
+        slug={item.slug}
+        fallbackIcon={item.fallbackIcon}
+      />
+    </span>
   );
 
   const renderItems = (nodes: SidebarItem[], nested: boolean) => (
@@ -650,7 +656,6 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
 
   return (
     <nav className="porto-sidebar" aria-label="Docs sidebar" ref={follow}>
-      {spriteHtml && <span dangerouslySetInnerHTML={{ __html: spriteHtml }} />}
       <div aria-hidden="true" className="porto-sidebar__hover-block" />
       <div className="porto-sidebar-title-row">
         <p className="porto-sidebar-title">{sectionTitle}</p>

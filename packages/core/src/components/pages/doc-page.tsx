@@ -6,7 +6,6 @@ import type { PortosaurOptions } from "../../lib/config.ts";
 import {
   findCategoryItems,
   findPrevNext,
-  isEmojiIcon,
   tocToHeadings,
   topicListCards,
   topicListShouldRender,
@@ -18,7 +17,6 @@ import {
   docFileTitle,
   docPageTitles,
 } from "../../lib/docPage.ts";
-import { renderDynamicIcon } from "../../lib/icons.ts";
 import { pageHref } from "../../lib/pageUrl.ts";
 import { isIndexFile, type PortoDocData } from "../../lib/source.ts";
 import {
@@ -148,26 +146,8 @@ export function DocPage({
   const categoryItems = shouldRenderTopicList
     ? findCategoryItems(tree.children, page.url, `/${config.site.notesRoute}`)
     : [];
-  /* The topic-list cards, with their icons resolved to HTML here
-     on the server — the icon packs must never load client-side.
-     An emoji icon gets no icon HTML: the card renders it as text
-     in its own icon span (same span, same gap as an SVG icon). */
-  const topicCards: TopicListItem[] = topicListCards(categoryItems).map(
-    (card) => {
-      if (isEmojiIcon(card.icon)) {
-        return card;
-      }
-      return {
-        ...card,
-        iconHtml: renderDynamicIcon(card.icon ?? undefined, {
-          slug: card.title,
-          fallbackIcon: card.isCategory ? "md:folder" : "md:notebook",
-          base: config.site.baseUrl,
-          size: "23px",
-        }),
-      };
-    },
-  );
+  /* The topic-list cards — their icons render in the list itself. */
+  const topicCards: TopicListItem[] = topicListCards(categoryItems);
   const MDXBody = data.body;
 
   return (

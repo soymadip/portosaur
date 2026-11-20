@@ -57,6 +57,7 @@ import remarkVars from "./plugins/remarkVars.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
+import remarkDetailsMarker from "./plugins/remarkDetailsMarker.ts";
 import remarkSpaceFormAdmonitions from "./plugins/remarkSpaceFormAdmonitions.ts";
 import remarkGithubAlerts from "./plugins/remarkGithubAlerts.ts";
 import remarkImageSrc from "./plugins/remarkImageSrc.ts";
@@ -144,6 +145,7 @@ export function portosaurMdxOptions({
       remarkAdmonitions,
       remarkSpaceFormAdmonitions,
       remarkGithubAlerts,
+      remarkDetailsMarker,
       // Emoji shortcodes render only when the site enables them
       // (`site.markdown.render_emoji_shortcodes`, default true).
       ...(renderEmojiShortcodes ? [remarkEmoji] : []),

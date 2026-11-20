@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { TocHeading, TocItem } from "../../../lib/content.ts";
 import { nestHeadings } from "../../../lib/content.ts";
+import { SiteIcon } from "../../SiteIcon.tsx";
 
 /**
  * The desktop table of contents (right sidebar, ≥72rem) + the
@@ -196,6 +197,11 @@ export function TableOfContentsList({
             aria-current={activeSlug === heading.slug ? "true" : undefined}
           >
             <span>{heading.text}</span>
+            {isMobile && activeSlug === heading.slug && (
+              <span className="porto-toc-check" aria-hidden="true">
+                <SiteIcon icon="md:check" size="1rem" />
+              </span>
+            )}
           </a>
           {heading.children.length > 0 && (
             <TableOfContentsList

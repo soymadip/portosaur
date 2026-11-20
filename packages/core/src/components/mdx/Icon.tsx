@@ -1,10 +1,10 @@
-import { renderIcon } from "../../lib/icons.ts";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 /**
  * Icon — renders a single Iconify icon by id (`md:book`,
- * `fa7-solid:font`, …) as inline SVG. Server component: the icon
- * packs are megabytes of JSON and must never be imported from a
- * client component.
+ * `fa7-solid:font`, …) as inline SVG, from the site's generated
+ * icon map. The `:prefix:name:` shortcode in prose becomes this
+ * element (`remarkIcons`).
  */
 export function Icon({
   id,
@@ -18,10 +18,8 @@ export function Icon({
   className?: string;
 }) {
   return (
-    <span
-      dangerouslySetInnerHTML={{
-        __html: renderIcon(id, { size, color, className }),
-      }}
-    />
+    <span>
+      <SiteIcon icon={id} size={size} color={color} className={className} />
+    </span>
   );
 }
