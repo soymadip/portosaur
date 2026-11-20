@@ -201,12 +201,18 @@ export async function writeNextRoot(
   }
 
   // Static passthrough: `.portosaur/public` is a real directory
-  // that unions the user's `static/` (per-entry symlinks) with the
-  // generated favicon set, so Next.js serves both in dev and copies
-  // both into the static export at build time. The union runs first
-  // so a user-provided `static/favicon/` wins over generation.
+  // that unions the user's `static/` (per-entry symlinks) and the
+  // app package's default static files with the generated
+  // favicon set, so Next.js serves all of them in dev and copies
+  // them into the static export at build time. The union runs
+  // first so a user-provided `static/favicon/` wins over
+  // generation.
   const publicDir = path.join(nextRoot, "public");
-  ensurePublicUnion({ projectDir: UserRoot, publicDir });
+  ensurePublicUnion({
+    projectDir: UserRoot,
+    publicDir,
+    appStaticDir: portoPaths.static ?? path.join(portoPaths.appRoot, "static"),
+  });
   await generateFavicons({
     projectDir: UserRoot,
     options,

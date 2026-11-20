@@ -222,28 +222,130 @@ function readCssVar(varName: string, cssFiles: string[]): string | null {
   return null;
 }
 
+/** True when `dir` holds only symlinks (or is empty) — the mark of a dir the union built. */
+function dirHoldsOnlySymlinks(dir: string): boolean {
+  for (const name of fs.readdirSync(dir)) {
+    try {
+      if (!fs.lstatSync(path.join(dir, name)).isSymbolicLink()) {
+        return false;
+      }
+    } catch {
+      // Gone already — treat as a link.
+    }
+  }
+  return true;
+}
+
+/** True when `target` exists and is a directory (following symlinks). */
+function isDirectory(target: string): boolean {
+  try {
+    return fs.statSync(target).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Build a merged directory: a real dir holding a symlink per file
+ * of the union of a user dir and an app dir, the user's files
+ * winning per name, with nested directory collisions merged the
+ * same way. Rebuilt from scratch on every run — it only ever
+ * holds symlinks the union created, so a rebuild is safe; a real
+ * file inside means something else owns the dir and it is left
+ * alone.
+ */
+function linkMergedDir(userDir: string, appDir: string, destDir: string): void {
+  let existing: fs.Stats | null = null;
+  try {
+    existing = fs.lstatSync(destDir);
+  } catch {
+    // Missing — created below.
+  }
+  if (existing?.isSymbolicLink()) {
+    fs.rmSync(destDir, { force: true });
+    existing = null;
+  } else if (existing?.isDirectory()) {
+    if (dirHoldsOnlySymlinks(destDir)) {
+      fs.rmSync(destDir, { recursive: true, force: true });
+      existing = null;
+    } else {
+      // Real files inside — something else owns this dir.
+      return;
+    }
+  } else if (existing) {
+    // A real file is in the way — the user dir wins.
+    fs.rmSync(destDir, { force: true });
+    existing = null;
+  }
+  fs.mkdirSync(destDir, { recursive: true });
+  const userNames = fs.readdirSync(userDir);
+  const appNames = fs.readdirSync(appDir);
+  for (const name of userNames) {
+    const userPath = path.join(userDir, name);
+    const appPath = path.join(appDir, name);
+    const linkPath = path.join(destDir, name);
+    if (
+      appNames.includes(name) &&
+      isDirectory(userPath) &&
+      isDirectory(appPath)
+    ) {
+      linkMergedDir(userPath, appPath, linkPath);
+    } else {
+      fs.symlinkSync(
+        path.relative(destDir, userPath),
+        linkPath,
+        isDirectory(userPath) ? "dir" : "file",
+      );
+    }
+  }
+  for (const name of appNames) {
+    if (userNames.includes(name)) {
+      continue;
+    }
+    const appPath = path.join(appDir, name);
+    fs.symlinkSync(
+      path.relative(destDir, appPath),
+      path.join(destDir, name),
+      isDirectory(appPath) ? "dir" : "file",
+    );
+  }
+}
+
 /**
  * Build the generated root's `public/` dir as a union: a real
  * directory holding a symlink per entry of the user's `static/`
- * (refreshed here — new entries linked, removed entries pruned)
- * plus the generated files (`favicon/`, `manifest.webmanifest`).
- * Next.js follows symlinks when it copies `public/` (verified in
- * its `recursive-copy.js`), so dev and the static export serve
- * the same files.
+ * (refreshed here — new entries linked, removed entries pruned),
+ * plus the app package's default static files (`img/icon.png`,
+ * ...) where the user has no entry of the same name, plus the
+ * generated files (`favicon/`, `manifest.webmanifest`). Next.js
+ * follows symlinks when it copies `public/` (verified in its
+ * `recursive-copy.js`), so dev and the static export serve the
+ * same files.
+ *
+ * Where both sides have a directory of the same name (the user
+ * has `static/img/` and the app ships `img/`), the two merge
+ * per file into a real dir, the user's files winning per name —
+ * the same precedence the build's post-copy uses, so a user
+ * image never hides the app's other images. A file collision
+ * keeps the user's file whole.
  *
  * A legacy whole-dir `public` symlink (the pre-union wiring) is
  * replaced. A real file/dir in the way of a user entry is removed
  * — the user's own files always win over generated ones. Stale
- * pruning only ever removes symlinks, never real files.
+ * pruning only ever removes symlinks and merged dirs, never real
+ * files.
  *
  * Returns the linked user entries.
  */
 export function ensurePublicUnion({
   projectDir,
   publicDir,
+  appStaticDir,
 }: {
   projectDir: string;
   publicDir: string;
+  /** The app package's default static dir — linked where the user has no entry of the same name. */
+  appStaticDir?: string;
 }): string[] {
   try {
     if (fs.lstatSync(publicDir).isSymbolicLink()) {
@@ -255,13 +357,18 @@ export function ensurePublicUnion({
   fs.mkdirSync(publicDir, { recursive: true });
 
   const staticDir = path.join(projectDir, "static");
-  if (!fs.existsSync(staticDir)) {
-    return [];
-  }
-  const entries = fs.readdirSync(staticDir);
-  for (const entry of entries) {
-    const linkPath = path.join(publicDir, entry);
-    const target = `../../static/${entry}`;
+  const entries = fs.existsSync(staticDir) ? fs.readdirSync(staticDir) : [];
+  const appEntries =
+    appStaticDir && fs.existsSync(appStaticDir)
+      ? fs.readdirSync(appStaticDir)
+      : [];
+
+  // Link one top-level entry as a symlink, refreshed when its
+  // target moved. A real file/dir in the way is removed for a
+  // user entry (user wins); for an app entry only an
+  // all-symlink dir is replaced — real content is never deleted
+  // for a default file.
+  const linkEntry = (linkPath: string, target: string, userEntry: boolean) => {
     let existing: fs.Stats | null = null;
     try {
       existing = fs.lstatSync(linkPath);
@@ -274,19 +381,59 @@ export function ensurePublicUnion({
         fs.symlinkSync(target, linkPath);
       }
     } else if (existing) {
-      // A real file/dir is in the way: the user added this entry
-      // after generation created it — user wins.
-      fs.rmSync(linkPath, { recursive: true, force: true });
-      fs.symlinkSync(target, linkPath);
+      if (
+        userEntry ||
+        (existing.isDirectory() && dirHoldsOnlySymlinks(linkPath))
+      ) {
+        fs.rmSync(linkPath, { recursive: true, force: true });
+        fs.symlinkSync(target, linkPath);
+      }
+      // Otherwise a real file/dir stands in the way of an app
+      // entry — it stays, the default file is skipped.
     } else {
       fs.symlinkSync(target, linkPath);
     }
+  };
+
+  for (const entry of entries) {
+    const userPath = path.join(staticDir, entry);
+    const appPath = appStaticDir ? path.join(appStaticDir, entry) : "";
+    const linkPath = path.join(publicDir, entry);
+    if (
+      appEntries.includes(entry) &&
+      isDirectory(userPath) &&
+      isDirectory(appPath)
+    ) {
+      // Both sides have this directory — merge per file.
+      linkMergedDir(userPath, appPath, linkPath);
+    } else {
+      // User-only, or a file collision — the user entry wins whole.
+      linkEntry(linkPath, `../../static/${entry}`, true);
+    }
   }
+  for (const entry of appEntries) {
+    if (entries.includes(entry)) {
+      continue;
+    }
+    linkEntry(
+      path.join(publicDir, entry),
+      path.relative(publicDir, path.join(appStaticDir as string, entry)),
+      false,
+    );
+  }
+  const keep = new Set([...entries, ...appEntries]);
   for (const name of fs.readdirSync(publicDir)) {
+    if (keep.has(name)) {
+      continue;
+    }
     const entryPath = path.join(publicDir, name);
     try {
-      if (fs.lstatSync(entryPath).isSymbolicLink() && !entries.includes(name)) {
+      const st = fs.lstatSync(entryPath);
+      if (st.isSymbolicLink()) {
         fs.rmSync(entryPath, { force: true });
+      } else if (st.isDirectory() && dirHoldsOnlySymlinks(entryPath)) {
+        // A merged dir whose name left both static dirs.
+        fs.rmSync(entryPath, { recursive: true, force: true });
       }
     } catch {
       // Gone already.

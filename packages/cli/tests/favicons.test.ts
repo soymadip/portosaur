@@ -242,6 +242,90 @@ describe("ensurePublicUnion", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  test("links the app static dir when the user has no static dir", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    try {
+      const appDir = path.join(appRoot, "static");
+      fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
+      fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app-icon");
+      const publicDir = path.join(root, ".portosaur", "public");
+
+      const linked = ensurePublicUnion({
+        projectDir: root,
+        publicDir,
+        appStaticDir: appDir,
+      });
+      expect(linked).toEqual([]);
+      expect(fs.lstatSync(path.join(publicDir, "img")).isSymbolicLink()).toBe(
+        true,
+      );
+      expect(
+        fs.readFileSync(path.join(publicDir, "img", "icon.png"), "utf-8"),
+      ).toBe("app-icon");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      rmSync(appRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("merges a directory both sides have, user files winning per name", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    try {
+      const staticDir = path.join(root, "static");
+      fs.mkdirSync(path.join(staticDir, "img"), { recursive: true });
+      fs.writeFileSync(path.join(staticDir, "img", "icon.png"), "mine");
+      fs.writeFileSync(path.join(staticDir, "img", "custom.png"), "mine-custom");
+      const appDir = path.join(appRoot, "static");
+      fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
+      fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app");
+      fs.writeFileSync(path.join(appDir, "img", "other.png"), "app-other");
+      const publicDir = path.join(root, ".portosaur", "public");
+
+      const union = () =>
+        ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+      union();
+      // A second run rebuilds the merged dir — it must survive.
+      union();
+      expect(fs.lstatSync(path.join(publicDir, "img")).isSymbolicLink()).toBe(
+        false,
+      );
+      expect(
+        fs.readFileSync(path.join(publicDir, "img", "icon.png"), "utf-8"),
+      ).toBe("mine");
+      expect(
+        fs.readFileSync(path.join(publicDir, "img", "custom.png"), "utf-8"),
+      ).toBe("mine-custom");
+      expect(
+        fs.readFileSync(path.join(publicDir, "img", "other.png"), "utf-8"),
+      ).toBe("app-other");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      rmSync(appRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("prunes a stale app entry", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+    const appRoot = mkdtempSync(path.join(tmpdir(), "porto-app-static-"));
+    try {
+      const appDir = path.join(appRoot, "static");
+      fs.mkdirSync(path.join(appDir, "img"), { recursive: true });
+      fs.writeFileSync(path.join(appDir, "img", "icon.png"), "app-icon");
+      const publicDir = path.join(root, ".portosaur", "public");
+      ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+      expect(fs.existsSync(path.join(publicDir, "img", "icon.png"))).toBe(true);
+
+      fs.rmSync(path.join(appDir, "img"), { recursive: true, force: true });
+      ensurePublicUnion({ projectDir: root, publicDir, appStaticDir: appDir });
+      expect(fs.existsSync(path.join(publicDir, "img"))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      rmSync(appRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("generateFavicons", () => {
