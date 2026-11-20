@@ -3,7 +3,6 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import * as prettier from "prettier";
 import {
   buildSiteConfig,
   buildNextRootFiles,
@@ -41,35 +40,6 @@ const GENERATED_ROOT_FILES = [
 ];
 
 /**
- * Formats one generated file with prettier (defaults — the repo has
- * no prettier config, so generated files match the hand-written
- * code's formatting). Generated files must read like human-written
- * code: the builders emit reasonable templates, but embedded JSON
- * and long literals only get proper line breaks from a real
- * formatter. `tsconfig.json` carries `//` header comments, so it
- * formats as JSONC, not JSON. On a formatting failure the file is
- * written unformatted with a warning — a formatter quirk must not
- * break a user's build (Next will still fail loudly on a real
- * syntax error).
- */
-async function formatGeneratedFile(
-  target: string,
-  content: string,
-): Promise<string> {
-  try {
-    return await prettier.format(content, {
-      filepath: target,
-      parser: target.endsWith(".json") ? "jsonc" : undefined,
-    });
-  } catch (error) {
-    logger.warn(
-      `Could not format generated file ${path.basename(target)}: ${(error as Error).message}`,
-    );
-    return content;
-  }
-}
-
-/**
  * Generates the thin Next.js project root in `.portosaur/` by resolving
  * the Portosaur config at CLI time and embedding the result as the
  * generated `lib/config.ts` module. The generated files are thin
@@ -81,9 +51,10 @@ async function formatGeneratedFile(
  * static assets resolve from the user's directory in both dev and
  * build, with no copying step to go stale.
  *
- * Every generated file is formatted with prettier before writing
- * (async — prettier 3 has no sync API), so the generated root reads
- * like hand-written code.
+ * The generated files are written as the builders emit them — no
+ * formatter pass. The builders own their templates' spacing, and
+ * embedded JSON is pretty-printed at the source, so the root still
+ * reads like hand-written code.
  *
  * @param {string} UserRoot - The user's project directory.
  * @param {Object} portoPaths - Paths to Portosaur assets and theme.
@@ -197,7 +168,7 @@ export async function writeNextRoot(
   for (const [relPath, content] of Object.entries(files)) {
     const target = path.join(nextRoot, relPath);
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, await formatGeneratedFile(target, content));
+    fs.writeFileSync(target, content);
   }
 
   // Static passthrough: `.portosaur/public` is a real directory
