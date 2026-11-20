@@ -93,13 +93,19 @@
 }
 
 /* The scrolling viewport — keyboard-reachable (tabIndex 0), capped
-   in height like Fumadocs'. Without a title, the right edge keeps
-   room for the floating copy button. */
+   in height like Fumadocs'. */
 .porto-code-viewport {
   overflow: auto;
   max-height: 600px;
 }
-.porto-code-viewport--spaced {
+
+/* Without a title, the floating copy button sits over the code's
+   top-right corner — but it only covers the first line's row, so
+   only the first line keeps room for it. Reserving the room on
+   the whole viewport narrowed every line by 2.5rem and pushed
+   medium lines over the edge on narrow screens, where the block
+   looked cut off with no scrollbar to hint it scrolled. */
+.porto-code-viewport--spaced .shiki .line:first-child {
   padding-inline-end: 2.5rem;
 }
 
