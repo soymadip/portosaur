@@ -1,0 +1,63 @@
+/* MDX headings with an anchor link button, Fumadocs wiki style:
+   the heading text links to its own anchor, and a link button
+   appears beside it on hover. Clicking the button copies the
+   page URL with the heading's hash. */
+
+/* The heading is a flex row so the button sits beside the text.
+   scroll-margin-top keeps the heading clear of the fixed navbar
+   when jumping to its anchor. */
+.porto-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  scroll-margin-top: calc(var(--porto-nav-height) + 1rem);
+}
+/* The text link keeps the heading's own color — prose links are
+   accent, which would turn h3-h6 green. The anchor shrinks so
+   long headings still wrap. */
+.porto-markdown-content .porto-heading > a,
+.porto-markdown-content .porto-heading > a:hover {
+  color: inherit;
+}
+.porto-heading > a {
+  min-width: 0;
+}
+/* The anchor button: a ghost icon button like the code block's
+   copy button. Hidden until the heading is hovered or the
+   button itself is focused, and while it shows the copied tick. */
+.porto-heading__anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-3);
+  opacity: 0;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-heading:hover .porto-heading__anchor,
+.porto-heading__anchor:focus-visible,
+.porto-heading__anchor[data-copied="true"] {
+  opacity: 1;
+}
+.porto-heading__anchor:hover {
+  color: var(--porto-color-white);
+}
+.porto-heading__anchor svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+.porto-heading__anchor[data-copied="true"] {
+  color: var(--porto-color-text-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .porto-heading__anchor {
+    transition: none;
+  }
+}

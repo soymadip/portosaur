@@ -11,6 +11,7 @@ import {
 import { Details } from "./mdx/Details.tsx";
 import { Dropdown } from "./mdx/Dropdown/index.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
+import { Heading } from "./mdx/Heading/index.tsx";
 import { Hint } from "./mdx/Hint/index.tsx";
 import { Icon } from "./mdx/Icon.tsx";
 import { IconSearch } from "./mdx/IconSearch/index.tsx";
@@ -60,6 +61,23 @@ export function getMDXComponents(components?: MDXComponents) {
        Fumadocs-style — the wrapper scrolls, the table keeps its
        rounded corners. */
     table: Table,
+    /* Headings carry an anchor link button, Fumadocs wiki style:
+       the text links to its own anchor, the button copies it. */
+    h2: (props: HTMLAttributes<HTMLHeadingElement>) => (
+      <Heading as="h2" {...props} />
+    ),
+    h3: (props: HTMLAttributes<HTMLHeadingElement>) => (
+      <Heading as="h3" {...props} />
+    ),
+    h4: (props: HTMLAttributes<HTMLHeadingElement>) => (
+      <Heading as="h4" {...props} />
+    ),
+    h5: (props: HTMLAttributes<HTMLHeadingElement>) => (
+      <Heading as="h5" {...props} />
+    ),
+    h6: (props: HTMLAttributes<HTMLHeadingElement>) => (
+      <Heading as="h6" {...props} />
+    ),
     ...components,
   } satisfies MDXComponents;
 }

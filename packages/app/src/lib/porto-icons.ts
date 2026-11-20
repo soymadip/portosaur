@@ -8,7 +8,7 @@
  * icons the React UI actually uses are included.
  *
  * The Lucide exceptions (`chevron-down`, `sidebar`, `copy`,
- * `check` — ISC License, Copyright (c) 2020 Lucide Contributors)
+ * `check`, `link` — ISC License, Copyright (c) 2020 Lucide Contributors)
  * are stroke-based, so each path carries its own `fill="none"` +
  * stroke attributes (they override the `fill="currentColor"`
  * PortoIcon sets on the `<svg>`).
@@ -29,6 +29,8 @@ export const PortoIcons = {
   copy: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></g>',
   check:
     '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>',
+  // Lucide's `link` — the heading anchor button.
+  link: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></g>',
   "right-caret":
     '<path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/>',
   "left-arrow":
