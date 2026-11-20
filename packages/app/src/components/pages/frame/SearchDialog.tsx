@@ -167,14 +167,19 @@ export function SearchDialog() {
   // The value is a CSS variable the mobile empty state reads
   // (desktop positions with `top` alone and ignores it). It
   // updates as the keyboard slides, so the bar follows it up.
-  // While the keyboard moves, the bar must track it with no lag:
-  // the 300ms `top` transition is for the results glide, but
-  // during a keyboard open it leaves the bar 300ms behind — the
-  // keyboard covers it for the whole glide and the bar only pops
-  // out above it at the end (seen on a real phone). Each update
-  // adds a class that drops `top` from the transition; once the
-  // keyboard settles (no viewport event for 150ms) the class
-  // comes off and the glide is back for the results.
+  // While the keyboard moves, the bar must track it with almost
+  // no lag: the 300ms `top` transition is for the results glide,
+  // but during a keyboard open it leaves the bar 300ms behind —
+  // the keyboard covers it for the whole glide and the bar only
+  // pops out above it at the end (seen on a real phone). No
+  // transition at all was worse in Firefox: its resize events
+  // arrive in coarse steps, and instant tracking turned each
+  // step into a visible jump. So each update adds a class that
+  // shortens the `top` transition to a 100ms LINEAR glide —
+  // linear spreads every step evenly, so the bar moves at one
+  // steady speed behind the keyboard instead of jumping step by
+  // step. Once the keyboard settles (no viewport event for
+  // 150ms) the class comes off and the glide is back.
   useEffect(() => {
     if (!open) {
       return;
