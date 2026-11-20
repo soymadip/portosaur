@@ -48,7 +48,7 @@
   margin-top: 0.25rem;
 }
 
-/* Headings: h1/h2 carry the primary color (the OG Docusaurus rule);
+/* Headings: h1/h2 carry the primary color;
  * h3–h6 stay the text color. */
 .porto-markdown-content
   :is(h1, h2, h3, h4, h5, h6):not(:where(.not-content *)) {
