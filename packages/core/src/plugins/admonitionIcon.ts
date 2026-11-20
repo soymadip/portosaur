@@ -19,12 +19,12 @@ const ADMONITION_ICONS: Record<string, string> = {
 };
 
 /** The heading icon for an admonition type, as an inline `<svg>`
- * (1.333em). Null when the icon is missing. */
+ * (1.25em). Null when the icon is missing. */
 export function admonitionIcon(type: string): any | null {
   return getIconJsx(ADMONITION_ICONS[type] ?? ADMONITION_ICONS.note, {
     className: "admonition-icon",
-    width: "1.333em",
-    height: "1.333em",
+    width: "1.25em",
+    height: "1.25em",
     fill: "currentColor",
     "aria-hidden": "true",
   });
