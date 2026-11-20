@@ -111,6 +111,7 @@
     }
   },
   "scripts": {
+    "generate:icons": "node ./scripts/generate-porto-icons.mjs && bun x prettier --write src/lib/porto-icons.ts",
     "test": "bun test tests",
     "types:check": "tsc --noEmit"
   },

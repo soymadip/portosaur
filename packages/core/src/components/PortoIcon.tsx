@@ -4,9 +4,10 @@ import {
 } from "../lib/porto-icons.ts";
 
 /**
- * A built-in Portosaur icon — the small SVG paths the chrome itself
- * needs (theme select, sidebar carets, pagination arrows, edit
- * link). Renders an inline `<svg>` from `lib/porto-icons.ts`.
+ * A built-in Portosaur icon — the small icons the chrome itself
+ * needs (theme select, sidebar carets, edit link). Renders an
+ * inline `<svg>` from `lib/porto-icons.ts`, generated from the
+ * Iconify packs.
  *
  * Content icons (frontmatter `icon`, note cards, feature icons) do
  * NOT come from here — those resolve through `lib/icons.ts`

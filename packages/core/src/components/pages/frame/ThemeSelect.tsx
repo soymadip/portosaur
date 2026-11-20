@@ -13,7 +13,7 @@ import { PortoIcon } from "../../PortoIcon.tsx";
  * Portosaur's own theme control — a Light / Dark / Auto dropdown
  * rendered with the shared Dropdown, so its option list is our
  * own markup instead of the browser-native `<select>` popup. The
- * moon/sun/laptop icons are Starlight's (MIT License) — see
+ * moon/sun/laptop icons come from the Iconify packs — see
  * `lib/porto-icons.ts`.
  *
  * Two instances render on a page (navbar + mobile menu footer).
