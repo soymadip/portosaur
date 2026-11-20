@@ -37,6 +37,9 @@
   background-color: transparent;
   color: var(--porto-color-gray-3);
   opacity: 0;
+  /* Nudged 1px down — flex centering sits it a hair high
+     against the heading text. */
+  translate: 0 1px;
   transition:
     color 150ms cubic-bezier(0.4, 0, 0.2, 1),
     opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
