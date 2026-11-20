@@ -1,12 +1,13 @@
 /* Search results — Fumadocs' flat list. Rendered by
  * SearchResults, shared by the search dialog and the search page.
  *
- * One row per match, no cards: a page row shows its path above
- * its title, a heading row shows a `#` with its heading, a text
- * row shows the excerpt. The rows under a page are tied together
- * with a vertical line at the left. Matches are bold, in the
- * accent color, and underlined (`<mark>`). The paddings and sizes
- * are Fumadocs'; the colors are Portosaur's tokens. */
+ * One row per match, no cards: a page row shows its title first,
+ * then its path below it; a heading row shows a `#` with its
+ * heading, a text row shows the excerpt. The rows under a page
+ * are tied together with a vertical line at the left. Matches
+ * are bold, in the accent color, and underlined (`<mark>`). The
+ * paddings and sizes are Fumadocs'; the colors are Portosaur's
+ * tokens. */
 
 /* The wrapper positions the hover block and holds the list —
    the block is a sibling of the list, so it never sits inside
@@ -21,6 +22,17 @@
   margin: 0;
   padding: 0.25rem;
   list-style: none;
+}
+
+/* Space + a hairline between result groups: each page row starts
+   a group, and the rows under it belong to it (tied by the
+   vertical line), so the separation goes between groups, not
+   between every row. The first group needs neither. The divider
+   is the panel's border gray, the same faint line as the table
+   row dividers. */
+.porto-search-results li:has(> .porto-search-result--page):not(:first-child) {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--porto-color-gray-5);
 }
 
 /* The hover block, the sidebar's gliding block in the results:
@@ -90,6 +102,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  margin-top: 0.125rem;
   font-size: var(--porto-text-xs);
   color: var(--porto-color-gray-3);
 }

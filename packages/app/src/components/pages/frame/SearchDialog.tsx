@@ -11,35 +11,43 @@ import {
   groupResults,
 } from "../../../lib/search-results.ts";
 import { Button } from "../../Button.tsx";
-import { SearchResults, SearchSectionFilter } from "../SearchResults.tsx";
+import {
+  PAGE_SCOPE,
+  SearchResults,
+  SearchSectionFilter,
+} from "../SearchResults.tsx";
 
 /**
  * Portosaur's own search dialog — a navbar magnifier button opens a
  * native `<dialog>` floating panel (at every width), with ZBSearch
  * (Fumadocs' static search) results inside.
  *
- * The bar is Fumadocs' wiki bar, copied whole: a magnifier (it
- * pulses while the index loads), a borderless input, and an ESC
- * button that closes the dialog. One change from Fumadocs: when
- * results span more than one section, the ESC button swaps for
- * the section filter — just the dropdown, no label — so the
- * dialog never grows a footer and never shifts. The filter
- * narrows by docs section (the index carries no tags. Every
- * result is a docs page). Results are Fumadocs' flat list,
- * rendered by the shared `SearchResults` (the search page
- * renders the same list).
+ * The bar is Fumadocs' wiki bar, copied whole: a magnifier (a
+ * spinning ring takes its place while a search is running), a
+ * borderless input, and a close icon that closes the dialog.
+ * One change from Fumadocs: when results span more than one
+ * section, a section filter appears next to the close icon —
+ * just the dropdown, no label — so the dialog never grows a
+ * footer and never shifts. The filter narrows by docs section
+ * (the index carries no tags. Every result is a docs page).
+ * Results are Fumadocs' flat list, rendered by the shared
+ * `SearchResults` (the search page renders the same list).
  *
  * The dialog slides down from the top edge on open, fading in
  * as it drops, and slides back up on close. The entry is pure
  * CSS (`@starting-style` + `allow-discrete` in animations.css);
  * the exit runs on a `closing` class while the dialog is still
- * open, and the dialog closes for real 300ms later — the
+ * open, and the dialog closes for real 450ms later — the
  * pure-CSS exit never ran on some phones, where the dialog just
  * blinked out. No JS animation state besides the closing flag.
  *
  * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
  * - Arrow keys move the active result, Enter navigates to it.
+ *   Ctrl+N / Ctrl+J move down and Ctrl+P moves up, vim-style.
+ * - `?search=query` in the address opens the dialog with that
+ *   query, scoped to the current page — the section filter gains
+ *   a "This page" choice, and "All" (or a section) lifts it.
  * - Matches render bold, in the accent color, and underlined
  *   (`<mark>`), like Fumadocs'.
  * - The search index downloads on the first keystroke (the hook
@@ -67,6 +75,35 @@ function MagnifierIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+/** One page path for comparison: no base prefix, no trailing
+ * slash, so `/docs/tabs/` and `/docs/tabs` are the same page. */
+function normalizePagePath(path: string, basePrefix: string): string {
+  const stripped =
+    basePrefix && path.startsWith(basePrefix)
+      ? path.slice(basePrefix.length)
+      : path;
+  const clean = stripped.replace(/\/+$/, "");
+  return clean === "" ? "/" : clean;
+}
+
 export function SearchDialog() {
   const config = usePortoConfig();
   const router = useRouter();
@@ -80,6 +117,14 @@ export function SearchDialog() {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [section, setSection] = useState("All");
+  // The `?search=` scope: the current page's path, set only when
+  // the address carried a search query. While set, the section
+  // filter offers "This page", which limits results to this page.
+  const [pageScope, setPageScope] = useState<string | null>(null);
+  // Latched once results have landed — the bar stays up while
+  // the query is non-empty even while a new query is loading
+  // (see the effect below `hasSettledResults`).
+  const [resultsShown, setResultsShown] = useState(false);
   // True while the exit animation runs: the dialog is still open
   // (and still focused), it just wears the `closing` class until
   // the timer below closes it for real. The ref mirrors the state
@@ -109,20 +154,29 @@ export function SearchDialog() {
   }, [groups]);
 
   // A section that no longer has results (the query changed) falls
-  // back to All instead of filtering everything away.
+  // back to All instead of filtering everything away. "This page"
+  // never falls back — it is about the page the address points
+  // at, not the results, so it stays valid whatever the query is.
   useEffect(() => {
-    if (section !== "All" && !sections.includes(section)) {
+    if (
+      section !== "All" &&
+      section !== PAGE_SCOPE &&
+      !sections.includes(section)
+    ) {
       setSection("All");
     }
   }, [sections, section]);
 
-  const filteredGroups = useMemo(
-    () =>
-      section === "All"
-        ? groups
-        : groups.filter((group) => group.section === section),
-    [groups, section],
-  );
+  const filteredGroups = useMemo(() => {
+    if (section === PAGE_SCOPE && pageScope) {
+      return groups.filter(
+        (group) => normalizePagePath(group.pageUrl, basePrefix) === pageScope,
+      );
+    }
+    return section === "All"
+      ? groups
+      : groups.filter((group) => group.section === section);
+  }, [groups, section, pageScope, basePrefix]);
 
   // The flat entry list behind the groups — keyboard navigation walks this.
   const navList = useMemo(
@@ -147,7 +201,7 @@ export function SearchDialog() {
     // the pure-CSS exit (display/overlay allow-discrete) never
     // ran on some phones — the dialog just blinked out. The input
     // blurs at once so the keyboard drops with the dialog instead
-    // of after it. The 300ms matches the transition in
+    // of after it. The 450ms matches the exit transition in
     // animations.css; the real close is invisible by then, since
     // the dialog and the backdrop have both faded out. The query
     // reset waits too (it runs on `open` going false), so the
@@ -163,7 +217,7 @@ export function SearchDialog() {
       dialog.close();
       setClosing(false);
       setOpen(false);
-    }, 300);
+    }, 450);
   }, []);
 
   const openDialog = useCallback(() => {
@@ -227,26 +281,41 @@ export function SearchDialog() {
     }
   }, [open]);
 
-  // Reset the query + active result + filter once the dialog has
-  // finished closing, 300ms after it starts (the exit length in
-  // animations.css). Clearing them at once makes the results area
-  // unmount and the bar drop back down while the dialog is still
-  // fading out, so the exit flickers instead of fading cleanly.
-  // Reopening before the timer fires cancels it, so a quick
-  // reopen keeps the last results on screen.
+  // Reset the query + active result + filter the moment the
+  // dialog has finished closing, so every close starts the next
+  // search fresh. `open` only goes false after the exit has
+  // already run (close() sets it once the exit timer fires), so
+  // clearing here never flickers the exit — the results unmount
+  // after the dialog is already gone. Reopening mid-exit cancels
+  // the close instead, so `open` never flips and the query is
+  // kept for that reopen.
   useEffect(() => {
     if (open) {
       return;
     }
-    const timer = window.setTimeout(() => {
-      onSearchChange("");
-      setActiveIndex(-1);
-      setSection("All");
-    }, 300);
-    return () => {
-      window.clearTimeout(timer);
-    };
+    onSearchChange("");
+    setActiveIndex(-1);
+    setSection("All");
   }, [open, onSearchChange]);
+
+  // A `?search=` address opens the dialog with that query,
+  // scoped to the page the address points at. Read from
+  // `window.location` in an effect, not `useSearchParams` — the
+  // site is statically exported and `useSearchParams` needs a
+  // Suspense boundary to build. This runs after the reset effect
+  // above, so the query it sets isn't cleared again on mount.
+  // The scope itself survives closing: reopening by hand offers
+  // "This page" in the filter again, it just doesn't auto-open.
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search).get("search");
+    if (!query || !query.trim()) {
+      return;
+    }
+    setPageScope(normalizePagePath(window.location.pathname, basePrefix));
+    setSection(PAGE_SCOPE);
+    onSearchChange(query.trim());
+    setOpen(true);
+  }, [basePrefix, onSearchChange]);
 
   // Cmd/Ctrl+K toggles. Escape closes — listened for on the
   // window in the CAPTURE phase, like Radix does, instead of
@@ -287,7 +356,7 @@ export function SearchDialog() {
 
   // The native `cancel` event (Android Back, or Escape reaching
   // the dialog) must not close the dialog itself — the exit
-  // animation runs first, and the dialog closes for real 300ms
+  // animation runs first, and the dialog closes for real 450ms
   // later. Preventing the default keeps the dialog open for it.
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -329,7 +398,33 @@ export function SearchDialog() {
   };
 
   // Arrow-key navigation + Enter to navigate to the active result.
+  // Vim-style too: Ctrl+N / Ctrl+J move down, Ctrl+P moves up.
+  // Firefox and Chrome both reserve Ctrl+N for a new window and
+  // never deliver the key to the page, so Ctrl+J is the forward
+  // key that actually works in those browsers; Ctrl+P reaches
+  // the page fine once its default (the print dialog) is
+  // prevented. The handler still covers Ctrl+N for browsers
+  // that do deliver it.
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.ctrlKey && !event.metaKey && !event.altKey) {
+      const key = event.key.toLowerCase();
+      if (key === "n" || key === "j") {
+        event.preventDefault();
+        setActiveIndex((index) =>
+          navList.length === 0 ? -1 : (index + 1) % navList.length,
+        );
+        return;
+      }
+      if (key === "p") {
+        event.preventDefault();
+        setActiveIndex((index) =>
+          navList.length === 0
+            ? -1
+            : (index - 1 + navList.length) % navList.length,
+        );
+        return;
+      }
+    }
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setActiveIndex((index) =>
@@ -371,23 +466,37 @@ export function SearchDialog() {
   const showEmpty = !isLoading && hasQuery && groups.length === 0;
   const showFilteredEmpty =
     !isLoading && hasQuery && groups.length > 0 && navList.length === 0;
-  // Whether the results area is showing — it renders while a
-  // search is loading too, so the "Loading search…" line has
-  // somewhere to live on slow connections.
-  const hasResults =
-    isLoading || showEmpty || showFilteredEmpty || navList.length > 0;
+  // Whether the results area is showing — only when it has
+  // something to show. While a search runs, the spinner in the
+  // icon slot says so; the old results stay on screen until
+  // the new ones land (the hook keeps the last data).
+  const hasResults = showEmpty || showFilteredEmpty || navList.length > 0;
   // Whether results have actually landed — the dialog only
   // slides up (and shrinks and widens) once they have, never
   // while the search is still running. The class drives the
-  // position and size in CSS. Old results stay on screen
-  // while a new query loads (the hook keeps the last data),
-  // so retyping never drops the dialog back down mid-search.
+  // position and size in CSS.
   const hasSettledResults =
     showEmpty || showFilteredEmpty || navList.length > 0;
+  // Once results have landed, the bar stays up while the query
+  // is non-empty — even while a new query is still loading.
+  // Without the latch, retyping dropped the bar back to the
+  // middle on every slow search: a no-results query clears
+  // `hasSettledResults` the moment loading starts (the empty
+  // states only count once loading finishes). The latch
+  // releases when the query is emptied, so clearing the input
+  // still drops the bar back down.
+  useEffect(() => {
+    if (hasSettledResults) {
+      setResultsShown(true);
+    } else if (!hasQuery) {
+      setResultsShown(false);
+    }
+  }, [hasSettledResults, hasQuery]);
+  const barUp = hasSettledResults || (resultsShown && hasQuery);
 
   const dialogClassName = [
     "porto-search-dialog",
-    ...(hasSettledResults ? ["porto-search-dialog--has-results"] : []),
+    ...(barUp ? ["porto-search-dialog--has-results"] : []),
     ...(closing ? ["porto-search-dialog--closing"] : []),
   ].join(" ");
 
@@ -411,16 +520,13 @@ export function SearchDialog() {
       >
         <div className="porto-search-dialog__frame">
           <div className="porto-search-dialog__header">
-            <span
-              className={
-                isLoading
-                  ? "porto-search-dialog__icon porto-search-dialog__icon--loading"
-                  : "porto-search-dialog__icon"
-              }
-              aria-hidden="true"
-            >
-              <MagnifierIcon />
-            </span>
+            {isLoading ? (
+              <span className="porto-search-dialog__spinner" aria-hidden="true" />
+            ) : (
+              <span className="porto-search-dialog__icon" aria-hidden="true">
+                <MagnifierIcon />
+              </span>
+            )}
             <input
               ref={inputRef}
               type="text"
@@ -442,7 +548,7 @@ export function SearchDialog() {
                   : undefined
               }
             />
-            {sections.length > 1 ? (
+            {(sections.length > 1 || pageScope !== null) && (
               <SearchSectionFilter
                 sections={sections}
                 value={section}
@@ -451,27 +557,24 @@ export function SearchDialog() {
                   setActiveIndex(-1);
                 }}
                 showLabel={false}
+                showPageOption={pageScope !== null}
               />
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="porto-search-dialog__close"
-                ariaLabel="Close Search"
-                onClick={close}
-              >
-                ESC
-              </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="porto-search-dialog__close"
+              ariaLabel="Close Search"
+              onClick={close}
+            >
+              <CloseIcon />
+            </Button>
           </div>
           {/* The results area only exists when it has something to
               show — with no query yet, the dialog is just the
               bar. */}
           {hasResults && (
             <div ref={resultsRef} className="porto-search-dialog__results">
-              {isLoading && (
-                <p className="porto-search-dialog__loading">Loading search…</p>
-              )}
               {showEmpty && (
                 <p className="porto-search-dialog__empty">
                   No results found for “{search.trim()}”.

@@ -98,21 +98,28 @@
    via `@starting-style` + `allow-discrete`, like the mobile menu,
    the same at every width: the dialog starts a viewport height
    above the top edge and slides down to its resting position.
-   The exit runs on the `closing` class instead (SearchDialog
-   closes for real 300ms later) — the pure-CSS exit never ran on
-   some phones, where the dialog just blinked out. `top` and
-   `max-width` ride the same 300ms ease: the empty dialog sits
-   above the middle, a little narrower, and slides up to the top
-   and widens to its normal width once results appear
-   (SearchDialog.css owns the positions, this transition owns the
-   glide; the bar's own shrink glides on its padding transition
-   in SearchDialog.css). */
+   The exit runs on the `closing` class instead, over 450ms
+   (SearchDialog closes for real 450ms later) — the pure-CSS
+   exit never ran on some phones, where the dialog just blinked
+   out. `top`, `max-width`, and `height` ride the same 300ms
+   ease: the empty dialog sits above the middle, a little
+   narrower, and slides up to the top and widens to its normal
+   width once results appear — on mobile it grows to the full
+   viewport instead (SearchDialog.css owns the positions, this
+   transition owns the glide; the bar's own shrink glides on its
+   padding transition in SearchDialog.css). */
 .porto-search-dialog {
+  /* Lets the height glide between `max-content` (the empty bar)
+     and `100dvh` (the full viewport on mobile) instead of
+     snapping halfway; browsers without it flip at the midpoint,
+     still in step with the slide. */
+  interpolate-size: allow-keywords;
   transition:
     translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
     top 300ms cubic-bezier(0.16, 1, 0.3, 1),
     max-width 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    height 300ms cubic-bezier(0.16, 1, 0.3, 1),
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
 }
@@ -159,17 +166,25 @@
   translate: 0 -100vh;
 }
 /* Closing: the exit runs on this class while the dialog is
-   still open (SearchDialog closes for real 300ms later) — the
+   still open (SearchDialog closes for real 450ms later) — the
    pure-CSS exit never ran on some phones, so the dialog just
    blinked out. The dialog slides back up past the top edge and
    fades; the backdrop fades with it, so by the time the dialog
-   closes for real there is nothing left to snap away. */
+   closes for real there is nothing left to snap away. The exit
+   is slower than the 300ms entry, on a steady ease instead of
+   the entry's fast-start one — at 300ms the bar was most of the
+   way up before the eye caught it, and the close read as a
+   vanish. */
 .porto-search-dialog--closing {
   opacity: 0;
   translate: 0 -100vh;
+  transition:
+    translate 450ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 450ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .porto-search-dialog--closing::backdrop {
   opacity: 0;
+  transition: opacity 450ms ease;
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */

@@ -14,12 +14,12 @@ import { Dropdown } from "../Dropdown.tsx";
 /**
  * The search results list, shared by the search dialog and the
  * search page: Fumadocs' flat list — one row per match, no cards.
- * A page row shows its path above its title; a heading row shows
- * a `#` with its heading; a text row shows the excerpt. The rows
- * under a page are tied together with a vertical line at the
- * left. Matches are bold, in the accent color, and underlined
- * (`<mark>`). Rows from the same table render as one grid — the
- * header once, each row its own link.
+ * A page row shows its title first, then its path below it; a
+ * heading row shows a `#` with its heading; a text row shows the
+ * excerpt. The rows under a page are tied together with a
+ * vertical line at the left. Matches are bold, in the accent
+ * color, and underlined (`<mark>`). Rows from the same table
+ * render as one grid — the header once, each row its own link.
  *
  * The dialog passes `listbox` + `activeIndex` for keyboard
  * navigation. The page renders a plain list.
@@ -137,16 +137,6 @@ function ResultLink({
       onClick={() => handleSelect(entry, onSelect)}
       onMouseEnter={onHover ? () => onHover(index) : undefined}
     >
-      {breadcrumbs.length > 0 && (
-        <span className="porto-search-result__breadcrumbs">
-          {breadcrumbs.map((crumb, i) => (
-            <Fragment key={i}>
-              {i > 0 && <ChevronRightIcon />}
-              {crumb}
-            </Fragment>
-          ))}
-        </span>
-      )}
       {isHeading && (
         <span className="porto-search-result__hash">
           <HashIcon />
@@ -159,6 +149,16 @@ function ResultLink({
       ) : (
         <span className="porto-search-result__excerpt">
           <HighlightedText text={entry.content} query={query} />
+        </span>
+      )}
+      {breadcrumbs.length > 0 && (
+        <span className="porto-search-result__breadcrumbs">
+          {breadcrumbs.map((crumb, i) => (
+            <Fragment key={i}>
+              {i > 0 && <ChevronRightIcon />}
+              {crumb}
+            </Fragment>
+          ))}
         </span>
       )}
     </Link>
@@ -438,11 +438,18 @@ export function SearchResults({
   );
 }
 
+/** The section filter's "This page" choice — the `?search=`
+ * scope, limiting results to the page the address points at.
+ * It is the display text as well as the value, like the section
+ * names. The dialog owns the scope; the filter only offers the
+ * choice when the dialog says so. */
+export const PAGE_SCOPE = "This page";
+
 /**
  * The "Filter [All ▾]" row — Fumadocs' tag filter, Portosaur's
  * version narrowing by docs section instead (the index carries no
  * tags. Every result is a docs page). The dialog renders it in its
- * bar, in place of the ESC button, without the label. The page
+ * bar, next to the close icon, without the label. The page
  * renders it under its input, with the label.
  */
 export function SearchSectionFilter({
@@ -451,6 +458,7 @@ export function SearchSectionFilter({
   onChange,
   dropUp = false,
   showLabel = true,
+  showPageOption = false,
 }: {
   /** The sections the current results span, in first-seen order. */
   sections: string[];
@@ -462,6 +470,10 @@ export function SearchSectionFilter({
   /** Show the "Filter" label before the dropdown. The dialog's
    * bar shows the dropdown alone. */
   showLabel?: boolean;
+  /** Offer the "This page" choice under "All" — the
+   * `?search=` scope. The dialog passes it when the address
+   * scoped the search to the current page. */
+  showPageOption?: boolean;
 }) {
   return (
     <div className="porto-search-filter">
@@ -474,6 +486,15 @@ export function SearchSectionFilter({
             active: value === "All",
             onClick: () => onChange("All"),
           },
+          ...(showPageOption
+            ? [
+                {
+                  label: PAGE_SCOPE,
+                  active: value === PAGE_SCOPE,
+                  onClick: () => onChange(PAGE_SCOPE),
+                },
+              ]
+            : []),
           ...sections.map((section) => ({
             label: section,
             active: value === section,

@@ -6,10 +6,12 @@
 /* A navbar button opens a native <dialog> modal; ZBSearch
  * (Fumadocs' static search) renders results inside. The button is
  * a bare magnifier icon at every width. The dialog is a floating
- * panel at every width: it sits above the middle while empty and
- * slides to the top once results appear — the page stays visible
- * behind it, blurred by the backdrop. The bar stays up, clear of
- * the virtual keyboard, so no keyboard tracking is needed. */
+ * panel: it sits above the middle while empty and slides to the
+ * top once results appear — on mobile it takes the whole
+ * viewport then, so the list uses the full screen. The page
+ * stays visible behind it, blurred by the backdrop. The bar
+ * stays up, clear of the virtual keyboard, so no keyboard
+ * tracking is needed. */
 /* The open/close animation (a slide from the top edge, fading
    in as it drops) lives in animations.css, with the other dialog
    motion. */
@@ -32,8 +34,19 @@
   max-height: calc(100% - 1rem);
 }
 .porto-search-dialog--has-results {
-  top: 0.5rem;
-  max-width: 48rem;
+  /* On mobile the dialog takes the whole viewport once results
+     arrive: full width and height, no border or radius, the bar
+     flush with the top edge. The desktop block below restores
+     the floating panel. */
+  top: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100%;
+  max-height: 100dvh;
+  border: 0;
+  border-radius: 0;
 }
 .porto-search-dialog[open] {
   display: flex;
@@ -54,11 +67,12 @@
 }
 
 /* The bar, Fumadocs' wiki bar copied whole: `flex items-center
-   gap-2 p-3` — a magnifier, a borderless input, and an ESC button,
+   gap-2 p-3` — a magnifier, a borderless input, and a close icon,
    divided from the results below by the bottom border. The bar is
    taller while empty (16px vertical padding) and shrinks to its
    normal height once results appear, gliding on its own padding
-   transition. */
+   transition; on mobile the side padding tightens with it, since
+   the dialog is edge to edge then. */
 .porto-search-dialog__header {
   display: flex;
   align-items: center;
@@ -66,43 +80,47 @@
   padding: 1rem 0.75rem;
   border-bottom: 1px solid var(--porto-color-gray-5);
   flex-shrink: 0;
-  transition: padding-block 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    padding-block 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding-inline 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .porto-search-dialog--has-results .porto-search-dialog__header {
   padding-block: 0.5rem;
+  padding-inline: 0.5rem;
 }
 .porto-search-dialog__icon {
   display: flex;
   flex-shrink: 0;
   color: var(--porto-color-gray-3);
 }
-/* Fumadocs pulses the magnifier while the index loads
-   (`animate-pulse duration-400`): opacity 1 to 0.5 and back
-   over 400ms, until the results land. */
-@keyframes porto-search-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* While a search is running, a spinning ring takes the
+   magnifier's place in the same 20px slot, so the bar never
+   shifts: a ring in the panel's border gray with a bright arc
+   on top, one turn every 700ms. */
+.porto-search-dialog__spinner {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--porto-color-gray-5);
+  border-top-color: var(--porto-color-white);
+  animation: porto-search-spin 700ms linear infinite;
 }
-.porto-search-dialog__icon--loading {
-  animation: porto-search-pulse 400ms cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes porto-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .porto-search-dialog__icon--loading {
+  .porto-search-dialog__spinner {
     animation: none;
   }
 }
-/* The ESC button: Fumadocs' outline small button, mono, muted —
-   a ghost button with the neutral border drawn on (there is no
-   outline ghost in the shared Button). The doubled class beats
-   the base button's `font-family: inherit` and transparent
-   border, which load later in the bundle. */
+/* The close icon: a ghost button with the neutral border drawn
+   on (there is no outline ghost in the shared Button). The
+   doubled class beats the base button's transparent border,
+   which loads later in the bundle. */
 .porto-search-dialog__close.porto-button {
-  font-family: var(--font-mono);
   color: var(--porto-color-gray-3);
   border-color: var(--porto-color-gray-5);
   flex-shrink: 0;
@@ -123,12 +141,12 @@
 .porto-search-dialog__input:focus {
   outline: none;
 }
-/* The section filter swaps in for the ESC button when results
+/* The section filter sits next to the close icon when results
    span more than one section — just the dropdown, no label. The
    trigger inherits its size from the wrapper, so the wrapper
    carries the small size: 12px text and the small button's
-   padding, matching the ESC button exactly, so the swap never
-   moves the bar's height. */
+   padding, matching the close icon's height, so it never moves
+   the bar's height. */
 .porto-search-dialog__header .porto-search-filter {
   font-size: 0.75rem;
 }
@@ -149,7 +167,6 @@
   padding: 0;
 }
 
-.porto-search-dialog__loading,
 .porto-search-dialog__empty {
   margin: 0;
   padding: 2rem 0;
@@ -167,12 +184,12 @@
 }
 
 @media (min-width: 50rem) {
-  /* On desktop the dialog is 90% wide instead of full-width
-     minus the side gaps, and the empty dialog's max-height
-     leaves 8rem of room instead of 1rem. With results it slides
-     to 4rem from the top instead of 0.5rem. Everything else —
-     the above-middle empty position, the widening to 48rem, the
-     bar's shrink — is shared with mobile. */
+  /* On desktop the dialog stays a floating panel: 90% wide, the
+     empty dialog's max-height leaves 8rem of room instead of
+     1rem, and with results it slides to 4rem from the top and
+     widens to 48rem instead of taking the viewport. The
+     above-middle empty position and the bar's shrink are shared
+     with mobile; only the tightened side padding is mobile-only. */
   .porto-search-dialog {
     margin: 0 auto;
     width: 90%;
@@ -180,5 +197,14 @@
   }
   .porto-search-dialog--has-results {
     top: 4rem;
+    width: 90%;
+    max-width: 48rem;
+    height: max-content;
+    max-height: calc(100% - 8rem);
+    border: 1px solid var(--porto-color-gray-5);
+    border-radius: 0.5rem;
+  }
+  .porto-search-dialog--has-results .porto-search-dialog__header {
+    padding-inline: 0.75rem;
   }
 }
