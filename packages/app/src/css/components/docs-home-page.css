@@ -254,14 +254,20 @@
      column and centering it inside left it ~140px short of the
      cards' right edge. Hugging the image, the column docks at
      the row's end (space-between) with the image's right edge
-     on the cards' right edge — and the glow behind it, sized
-     to the column, stays centered on the image. Where the hero
-     stacks the column goes full width again (below). */
+     1rem in from the cards' right edge (the end margin below)
+     — and the glow behind it, sized to the column, stays
+     centered on the image. Where the hero stacks the column
+     goes full width again (below). */
   flex: 0 0 auto;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  /* A little breathing room at the end: flush against the
+     cards' right edge the icon looked cramped, so it sits
+     1rem in from it. Where the hero stacks the margin goes
+     away again (below) so the icon stays centered. */
+  margin-inline-end: 1rem;
 }
 
 /* Glow behind the hero image. The bright core sits a touch
@@ -347,6 +353,10 @@
   .hero-icon {
     width: 100%;
     margin-bottom: 0;
+    /* No end margin where the hero stacks: the icon sits
+       centered above the text, and the margin would shove
+       it off-center. */
+    margin-inline-end: 0;
   }
 
   .hero-icon > img {
