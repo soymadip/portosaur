@@ -56,10 +56,6 @@ summary.porto-dropdown__trigger--sm.porto-button {
    when the dropdown opens (Fumadocs rotates its chevrons the
    same way). */
 .porto-dropdown__chevron {
-  /* Nudged 1px down so it sits level with the label text. A
-     standalone translate, not transform, so the open state's
-     rotate(180deg) does not undo it. */
-  translate: 0 1px;
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 details[open] > .porto-dropdown__trigger .porto-dropdown__chevron {
