@@ -43,7 +43,7 @@
 @import "./callouts.css";
 @import "./code.css";
 @import "./content.css";
-/* Component styles — one file per component, colocated with its .tsx
+/* Component styles — one file per component, kept in css/components/
  * (fresh CSS in Portosaur's design language: the values come from the
  * Astro design, the selectors are new — no Starlight classes or IDs).
  * Import order is the old components.css order and load-bearing:
@@ -55,49 +55,49 @@
  * class of their own — plain CSS beats Tailwind's layered utilities
  * on the same property. Where a styled element itself needs
  * responsive display, the rule lives in the component's own file. */
-@import "../components/pages/frame/SiteShell/SiteShell.css";
-@import "../components/layouts/docs-layout/docs-layout.css";
-@import "../components/pages/doc-page/doc-page.css";
-@import "../components/pages/parts/ContentPanel/ContentPanel.css";
-@import "../components/pages/frame/Navbar/Navbar.css";
-@import "../components/pages/frame/SiteTitle/SiteTitle.css";
-@import "../components/Dropdown/Dropdown.css";
-@import "../components/pages/frame/ThemeSelect/ThemeSelect.css";
-@import "../components/pages/frame/SearchDialog/SearchDialog.css";
-@import "../components/pages/SearchResults/SearchResults.css";
-@import "../components/pages/SearchHighlight/SearchHighlight.css";
-@import "../components/pages/frame/Sidebar/Sidebar.css";
-@import "../components/pages/frame/MobileMenu/MobileMenu.css";
-@import "../components/pages/frame/MobileMenuFooter/MobileMenuFooter.css";
-@import "../components/pages/frame/TableOfContents/TableOfContents.css";
-@import "../components/pages/frame/MobileTableOfContents/MobileTableOfContents.css";
-@import "../components/pages/parts/PageTitle/PageTitle.css";
-@import "../components/pages/parts/DocFooter/DocFooter.css";
-@import "../components/pages/parts/EditLink/EditLink.css";
-@import "../components/pages/parts/Pagination/Pagination.css";
-@import "../components/pages/frame/SkipLink/SkipLink.css";
-@import "../components/pages/frame/NavProgress/NavProgress.css";
-@import "../components/pages/parts/Footer/Footer.css";
+@import "./components/SiteShell.css";
+@import "./components/docs-layout.css";
+@import "./components/doc-page.css";
+@import "./components/ContentPanel.css";
+@import "./components/Navbar.css";
+@import "./components/SiteTitle.css";
+@import "./components/Dropdown.css";
+@import "./components/ThemeSelect.css";
+@import "./components/SearchDialog.css";
+@import "./components/SearchResults.css";
+@import "./components/SearchHighlight.css";
+@import "./components/Sidebar.css";
+@import "./components/MobileMenu.css";
+@import "./components/MobileMenuFooter.css";
+@import "./components/TableOfContents.css";
+@import "./components/MobileTableOfContents.css";
+@import "./components/PageTitle.css";
+@import "./components/DocFooter.css";
+@import "./components/EditLink.css";
+@import "./components/Pagination.css";
+@import "./components/SkipLink.css";
+@import "./components/NavProgress.css";
+@import "./components/Footer.css";
 /* Pages. */
-@import "../components/pages/docs-home-page/docs-home-page.css";
-@import "../components/pages/notes-index-page/notes-index-page.css";
-@import "../components/pages/blog-index-page/blog-index-page.css";
-@import "../components/pages/frame/BlogSidebar/BlogSidebar.css";
-@import "../components/pages/blog-post-page/blog-post-page.css";
-@import "../components/pages/blog-authors-page/blog-authors-page.css";
-@import "../components/pages/tasks-page/tasks-page.css";
-@import "../components/pages/TasksTable/TasksTable.css";
+@import "./components/docs-home-page.css";
+@import "./components/notes-index-page.css";
+@import "./components/blog-index-page.css";
+@import "./components/BlogSidebar.css";
+@import "./components/blog-post-page.css";
+@import "./components/blog-authors-page.css";
+@import "./components/tasks-page.css";
+@import "./components/TasksTable.css";
 @import "./empty-states.css";
-@import "../components/pages/SearchPageBody/SearchPageBody.css";
+@import "./components/SearchPageBody.css";
 /* Shared components + MDX components. */
-@import "../components/Button/Button.css";
-@import "../components/mdx/Heading/Heading.css";
-@import "../components/mdx/Hint/Hint.css";
-@import "../components/mdx/Indent/Indent.css";
-@import "../components/mdx/Tabs/Tabs.css";
-@import "../components/mdx/TopicList/TopicList.css";
-@import "../components/mdx/Pv/Pv.css";
-@import "../components/mdx/IconSearch/IconSearch.css";
+@import "./components/Button.css";
+@import "./components/Heading.css";
+@import "./components/Hint.css";
+@import "./components/Indent.css";
+@import "./components/Tabs.css";
+@import "./components/TopicList.css";
+@import "./components/Pv.css";
+@import "./components/IconSearch.css";
 @import "./reduced-motion.css";
 @import "./animations.css";
 @import "./print.css";
