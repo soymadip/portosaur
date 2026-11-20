@@ -211,14 +211,16 @@ export async function writeNextRoot(
   ensurePublicUnion({
     projectDir: UserRoot,
     publicDir,
-    coreStaticDir: portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
+    coreStaticDir:
+      portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
   });
   await generateFavicons({
     projectDir: UserRoot,
     options,
     publicDir,
     cacheDir: path.join(nextRoot, "cache"),
-    coreStaticDir: portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
+    coreStaticDir:
+      portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
     coreAssetsDir: portoPaths.assets,
     logger,
   });
