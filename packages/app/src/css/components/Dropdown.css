@@ -13,6 +13,12 @@
 .porto-dropdown {
   position: relative;
   display: inline-block;
+  /* The trigger is taller than a line of text — without this the
+     box sits on the text baseline and its label floats above the
+     surrounding words. Middle alignment centers it on the line.
+     Flex and grid parents ignore this, so the navbar, theme
+     select, and search filters are unaffected. */
+  vertical-align: middle;
 }
 /* An open dropdown rises above the content that follows it, so
    its menu paints over the next heading instead of under it. */
