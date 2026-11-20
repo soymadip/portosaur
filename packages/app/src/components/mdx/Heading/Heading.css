@@ -24,7 +24,8 @@
 }
 /* The anchor button: a ghost icon button like the code block's
    copy button. Hidden until the heading is hovered or the
-   button itself is focused, and while it shows the copied tick. */
+   button itself is focused, and while it shows the copied tick.
+   Touch screens have no hover, so it stays visible there. */
 .porto-heading__anchor {
   display: inline-flex;
   align-items: center;
@@ -55,6 +56,11 @@
 }
 .porto-heading__anchor[data-copied="true"] {
   color: var(--porto-color-text-accent);
+}
+@media (hover: none) {
+  .porto-heading__anchor {
+    opacity: 1;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .porto-heading__anchor {
