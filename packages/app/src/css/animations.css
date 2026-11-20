@@ -96,21 +96,14 @@
 /* Search dialog: Fumadocs' dialog animation — a 300ms
    scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
    fading with it (`fd-fade-in` / `fd-fade-out`). Pure CSS via
-   `@starting-style` + `allow-discrete`, like the mobile menu.
-   The fade is shared; the motion splits by width: on desktop
-   the entry scales in from 1.06 and the exit fades back to it
-   (one starting state serves both directions, so the exit lands
-   on 1.06 where Fumadocs' own exit lands on 1.04 — a 2%
-   difference no eye catches), while on mobile the entry slides
-   up from below the screen edge and the exit slides back down.
-   The scale and the slide live in separate rules on purpose:
-   the CSS build merges `transform` and `translate` in one rule
-   into a single `transform`, which would eat the slide. `top`,
-   `translate`, and `max-width` ride the
-   same 300ms ease: on desktop the empty dialog sits above the
-   middle, a little narrower, and slides up to the top and widens
-   to its normal width once results appear; on mobile the empty
-   dialog sticks to the bottom and flies to the top the same way
+   `@starting-style` + `allow-discrete`, like the mobile menu,
+   the same at every width: the entry scales in from 1.06 and the
+   exit fades back to it (one starting state serves both
+   directions, so the exit lands on 1.06 where Fumadocs' own exit
+   lands on 1.04 — a 2% difference no eye catches). `top` and
+   `max-width` ride the same 300ms ease: the empty dialog sits
+   above the middle, a little narrower, and slides up to the top
+   and widens to its normal width once results appear
    (SearchDialog.css owns the positions, this transition owns the
    glide; the bar's own shrink glides on its padding transition
    in SearchDialog.css). */
@@ -119,30 +112,6 @@
     transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
     top 300ms cubic-bezier(0.16, 1, 0.3, 1),
-    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 300ms cubic-bezier(0.16, 1, 0.3, 1),
-    display 300ms allow-discrete,
-    overlay 300ms allow-discrete;
-}
-/* While the keyboard moves, the bar tracks it on a short 100ms
-   LINEAR glide: the 300ms `top` transition above is for the
-   results glide, but during a keyboard open it leaves the bar
-   300ms behind — the keyboard covers it for the whole glide and
-   the bar only pops out above it at the end. No transition at
-   all was worse in Firefox: its resize events arrive in coarse
-   steps, and instant tracking turned each step into a visible
-   jump. Linear, not the usual ease-out: ease-out front-loads
-   each step into a fast jump plus a pause, still steppy, while
-   linear spreads every step evenly so the bar moves at one
-   steady speed behind the keyboard. SearchDialog adds this
-   class on each viewport update and removes it once the
-   keyboard settles. */
-.porto-search-dialog--keyboard-tracking {
-  transition:
-    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
-    top 100ms linear,
-    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
     max-width 300ms cubic-bezier(0.16, 1, 0.3, 1),
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
@@ -176,43 +145,15 @@
 .porto-search-dialog:not([open])::backdrop {
   opacity: 0;
 }
-/* Opening while the keyboard is already up (a quick reopen)
-   skips the entry slide entirely: the bar appears at rest above
-   the keyboard instead of rising from below the screen, where
-   the input would sit behind the keyboard and Firefox would pan
-   the page to reveal it. SearchDialog adds this class when the
-   visual viewport is already shrunk at open time and removes it
-   50ms later, once the open has landed. It sits after the
-   tracking and backdrop rules so it wins over both while
-   present. */
-.porto-search-dialog--no-entry,
-.porto-search-dialog--no-entry::backdrop {
-  transition: none;
-}
-/* Desktop: the scale. On mobile the entry slides up from below
-   the screen edge instead (`translate: 0 0` puts the whole
-   dialog under the viewport, since its top edge sits 1rem above
-   the bottom), and the exit slides it back down — no scale, so
-   the bar rises straight instead of growing out of the middle. */
-@media (min-width: 50rem) {
-  @starting-style {
-    .porto-search-dialog {
-      transform: scale(1.06);
-    }
-  }
-  .porto-search-dialog:not([open]) {
+/* The scale, at every width: the entry scales in from 1.06 and
+   the exit scales back out to it. */
+@starting-style {
+  .porto-search-dialog {
     transform: scale(1.06);
   }
 }
-@media (max-width: 49.99rem) {
-  @starting-style {
-    .porto-search-dialog {
-      translate: 0 0;
-    }
-  }
-  .porto-search-dialog:not([open]) {
-    translate: 0 0;
-  }
+.porto-search-dialog:not([open]) {
+  transform: scale(1.06);
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */

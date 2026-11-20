@@ -145,22 +145,7 @@ export function SearchDialog() {
     if (!dialog) {
       return;
     }
-    let entryTimer: number | undefined;
     if (open) {
-      // If the keyboard is already open (a quick reopen, before
-      // it finished closing), skip the entry slide: the bar
-      // would rise from below the screen while the keyboard is
-      // up, leaving the input behind it — Firefox pans the page
-      // to reveal it. Opening at rest instead puts the input
-      // above the keyboard from the first frame. The class comes
-      // off 50ms later, once the open has landed.
-      const viewport = window.visualViewport;
-      if (viewport && window.innerHeight - viewport.height > 100) {
-        dialog.classList.add("porto-search-dialog--no-entry");
-        entryTimer = window.setTimeout(() => {
-          dialog.classList.remove("porto-search-dialog--no-entry");
-        }, 50);
-      }
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -175,64 +160,6 @@ export function SearchDialog() {
       }
       document.documentElement.removeAttribute("data-search-modal-open");
     }
-    return () => {
-      window.clearTimeout(entryTimer);
-      dialog.classList.remove("porto-search-dialog--no-entry");
-    };
-  }, [open]);
-
-  // While the dialog is open, track the visual viewport's bottom
-  // edge so the empty bar rides above the virtual keyboard on
-  // mobile: the layout viewport does not shrink when the keyboard
-  // opens, so `dvh` alone leaves the bar behind it — sometimes
-  // fully, sometimes half, depending on how far the browser pans.
-  // The value is a CSS variable the mobile empty state reads
-  // (desktop positions with `top` alone and ignores it). It
-  // updates as the keyboard slides, so the bar follows it up.
-  // While the keyboard moves, the bar must track it with almost
-  // no lag: the 300ms `top` transition is for the results glide,
-  // but during a keyboard open it leaves the bar 300ms behind —
-  // the keyboard covers it for the whole glide and the bar only
-  // pops out above it at the end (seen on a real phone). No
-  // transition at all was worse in Firefox: its resize events
-  // arrive in coarse steps, and instant tracking turned each
-  // step into a visible jump. So each update adds a class that
-  // shortens the `top` transition to a 100ms LINEAR glide —
-  // linear spreads every step evenly, so the bar moves at one
-  // steady speed behind the keyboard instead of jumping step by
-  // step. Once the keyboard settles (no viewport event for
-  // 150ms) the class comes off and the glide is back.
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const dialog = dialogRef.current;
-    const viewport = window.visualViewport;
-    if (!dialog || !viewport) {
-      return;
-    }
-    let settleTimer: number | undefined;
-    const update = () => {
-      dialog.classList.add("porto-search-dialog--keyboard-tracking");
-      dialog.style.setProperty(
-        "--porto-vv-bottom",
-        `${viewport.offsetTop + viewport.height}px`,
-      );
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
-        dialog.classList.remove("porto-search-dialog--keyboard-tracking");
-      }, 150);
-    };
-    update();
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-    return () => {
-      viewport.removeEventListener("resize", update);
-      viewport.removeEventListener("scroll", update);
-      window.clearTimeout(settleTimer);
-      dialog.classList.remove("porto-search-dialog--keyboard-tracking");
-      dialog.style.removeProperty("--porto-vv-bottom");
-    };
   }, [open]);
 
   // Reset the query + active result + filter when the dialog closes.
