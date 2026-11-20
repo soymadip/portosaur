@@ -14,7 +14,7 @@ import {
 } from "react";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { buttonClass } from "../../Button.tsx";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
 import { SiteTitle } from "./SiteTitle.tsx";
 
@@ -121,7 +121,7 @@ export function SidebarCollapseTrigger({
       data-collapsed={collapsed}
       onClick={onClick}
     >
-      <PortoIcon name="sidebar" />
+      <SiteIcon icon="lu:panel-left" />
     </button>
   );
 }

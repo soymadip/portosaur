@@ -18,6 +18,7 @@ export function SiteIcon({
   size,
   color,
   className,
+  strokeWidth,
 }: {
   icon?: DynamicIconValue;
   slug?: string;
@@ -26,6 +27,8 @@ export function SiteIcon({
   size?: string;
   color?: string;
   className?: string;
+  /** Overrides the pack's stroke width (stroke icons only). */
+  strokeWidth?: number;
 }) {
   const icons = useSiteIcons();
   const resolved = resolveSiteIcon(icon, { slug, fallbackIcon, base }, icons);
@@ -37,6 +40,12 @@ export function SiteIcon({
     if (!data) {
       return null;
     }
+    const body = strokeWidth
+      ? data.body.replaceAll(
+          'stroke-width="2"',
+          `stroke-width="${strokeWidth}"`,
+        )
+      : data.body;
     const style: React.CSSProperties = {};
     if (size) {
       style.fontSize = size;
@@ -53,7 +62,7 @@ export function SiteIcon({
         aria-hidden="true"
         className={className}
         style={Object.keys(style).length > 0 ? style : undefined}
-        dangerouslySetInnerHTML={{ __html: data.body }}
+        dangerouslySetInnerHTML={{ __html: body }}
       />
     );
   }

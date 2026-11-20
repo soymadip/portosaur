@@ -10,7 +10,7 @@ import {
 } from "react";
 import { pageHref } from "../lib/pageUrl.ts";
 import { buttonClass } from "./Button.tsx";
-import { PortoIcon } from "./PortoIcon.tsx";
+import { SiteIcon } from "./SiteIcon.tsx";
 
 /**
  * Dropdown — the one shared dropdown for the whole app: the
@@ -316,8 +316,8 @@ export function Dropdown({
       <summary className={triggerClasses} aria-label={ariaLabel}>
         {trigger ?? label ?? "Menu"}
         {!noArrow && (
-          <PortoIcon
-            name="chevron-down"
+          <SiteIcon
+            icon="lu:chevron-down"
             size="0.875rem"
             className="porto-dropdown__chevron"
           />

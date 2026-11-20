@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { isSamePage, stripBase } from "../../../lib/pageUrl.ts";
 import type { PreparedSidebar, SidebarItem } from "../../../lib/sidebar.ts";
-import { PortoIcon } from "../../PortoIcon.tsx";
 import { SiteIcon } from "../../SiteIcon.tsx";
 import { SidebarCollapseTrigger, useSidebarCollapse } from "./MobileMenu.tsx";
 
@@ -627,7 +626,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
                       setCategoryOpen(item, !open);
                     }}
                   >
-                    <PortoIcon name="right-caret" size="1.25rem" />
+                    <SiteIcon icon="mdi:chevron-right" size="1.25rem" />
                   </button>
                 </div>
                 <FolderPanel open={open} id={panelId}>

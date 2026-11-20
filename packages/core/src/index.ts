@@ -61,7 +61,7 @@ export { PageTitle } from "./components/pages/parts/PageTitle.tsx";
 export { ContentPanel } from "./components/pages/parts/ContentPanel.tsx";
 export { DocFooter } from "./components/pages/parts/DocFooter.tsx";
 export { SiteTitle } from "./components/pages/frame/SiteTitle.tsx";
-export { PortoIcon } from "./components/PortoIcon.tsx";
+export { SiteIcon } from "./components/SiteIcon.tsx";
 export { HeroImage } from "./components/pages/HeroImage.tsx";
 export { KaTeXStyles } from "./components/pages/parts/KaTeXStyles.tsx";
 export { BlogSidebar } from "./components/pages/frame/BlogSidebar.tsx";
@@ -163,5 +163,3 @@ export type {
   ParsedTableRow,
   SearchGroup,
 } from "./lib/search-results.ts";
-export { PortoIcons } from "./lib/porto-icons.ts";
-export type { PortoIcon as PortoIconName } from "./lib/porto-icons.ts";

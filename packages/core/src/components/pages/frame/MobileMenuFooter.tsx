@@ -11,7 +11,7 @@ import {
   type NavEntry,
 } from "../../../lib/navbar.ts";
 import { stripBase } from "../../../lib/pageUrl.ts";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
 
 /**
@@ -39,8 +39,8 @@ export function MobileMenuFooter() {
         <details key={key} className="porto-navbar__dropdown">
           <summary>
             {entry.label}
-            <PortoIcon
-              name="chevron-down"
+            <SiteIcon
+              icon="lu:chevron-down"
               size="0.875rem"
               className="porto-mobile-nav__chevron"
             />
@@ -106,8 +106,8 @@ export function MobileMenuFooter() {
         <details className="porto-navbar__dropdown">
           <summary>
             More
-            <PortoIcon
-              name="chevron-down"
+            <SiteIcon
+              icon="lu:chevron-down"
               size="0.875rem"
               className="porto-mobile-nav__chevron"
             />

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { TocHeading } from "../../../lib/content.ts";
 import { nestHeadings } from "../../../lib/content.ts";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 import { TableOfContentsList, useTocScrollSpy } from "./TableOfContents.tsx";
 
 /**
@@ -81,7 +81,7 @@ export function MobileTableOfContents({
           <summary id="porto__on-this-page--mobile">
             <span className="porto-mobile-toc__toggle">
               On this page
-              <PortoIcon name="right-caret" size="1rem" />
+              <SiteIcon icon="mdi:chevron-right" size="1rem" />
             </span>
             <span className="porto-mobile-toc__current">{currentText}</span>
           </summary>

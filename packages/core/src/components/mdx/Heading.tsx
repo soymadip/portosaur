@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ComponentPropsWithoutRef } from "react";
-import { PortoIcon } from "../PortoIcon.tsx";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 type Types = "h2" | "h3" | "h4" | "h5" | "h6";
 type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, "as"> & {
@@ -56,7 +56,11 @@ export function Heading<T extends Types = "h2">({
         aria-label={copied ? "Copied anchor link" : "Copy anchor link"}
         title={copied ? "Copied anchor link" : "Copy anchor link"}
       >
-        <PortoIcon name={copied ? "check" : "link"} size="0.875rem" />
+        {copied ? (
+          <SiteIcon icon="lu:check" size="0.875rem" />
+        ) : (
+          <SiteIcon icon="lu:link" size="0.875rem" />
+        )}
       </button>
     </As>
   );

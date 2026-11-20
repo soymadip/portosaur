@@ -24,10 +24,6 @@
       "types": "./src/components/*.tsx",
       "default": "./src/components/*.tsx"
     },
-    "./components/PortoIcon": {
-      "types": "./src/components/PortoIcon.tsx",
-      "default": "./src/components/PortoIcon.tsx"
-    },
     "./components/layouts/root-layout": {
       "types": "./src/components/layouts/root-layout.tsx",
       "default": "./src/components/layouts/root-layout.tsx"
@@ -111,7 +107,6 @@
     }
   },
   "scripts": {
-    "generate:icons": "node ./scripts/generate-porto-icons.mjs && bun x prettier --write src/lib/porto-icons.ts",
     "test": "bun test tests",
     "types:check": "tsc --noEmit"
   },

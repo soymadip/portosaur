@@ -10,7 +10,7 @@ import {
   type SearchGroup,
 } from "../../lib/search-results.ts";
 import { Dropdown } from "../Dropdown.tsx";
-import { PortoIcon } from "../PortoIcon.tsx";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 /**
  * The search results list, shared by the search dialog and the
@@ -98,7 +98,7 @@ function ResultLink({
     >
       {isHeading && (
         <span className="porto-search-result__hash">
-          <PortoIcon name="hash" size="16px" />
+          <SiteIcon icon="lu:hash" size="16px" />
         </span>
       )}
       {isPage || isHeading ? (
@@ -114,7 +114,13 @@ function ResultLink({
         <span className="porto-search-result__breadcrumbs">
           {breadcrumbs.map((crumb, i) => (
             <Fragment key={i}>
-              {i > 0 && <PortoIcon name="chevron-right" size="16px" className="porto-search-result__chevron" />}
+              {i > 0 && (
+                <SiteIcon
+                  icon="lu:chevron-right"
+                  size="16px"
+                  className="porto-search-result__chevron"
+                />
+              )}
               {crumb}
             </Fragment>
           ))}
@@ -397,8 +403,8 @@ export function SearchResults({
   );
 }
 
-/** The section filter's "This page" choice — the `?search=`
- * scope, limiting results to the page the address points at.
+/** The section filter's "This page" choice — the page-scope
+ * filter, limiting results to the page the dialog opened from.
  * It is the display text as well as the value, like the section
  * names. The dialog owns the scope; the filter only offers the
  * choice when the dialog says so. */
@@ -429,9 +435,9 @@ export function SearchSectionFilter({
   /** Show the "Filter" label before the dropdown. The dialog's
    * bar shows the dropdown alone. */
   showLabel?: boolean;
-  /** Offer the "This page" choice under "All" — the
-   * `?search=` scope. The dialog passes it when the address
-   * scoped the search to the current page. */
+  /** Offer the "This page" choice under "All". The dialog
+   * passes it whenever a page scope is set — every open sets
+   * one, to the page the dialog opened from. */
   showPageOption?: boolean;
 }) {
   return (

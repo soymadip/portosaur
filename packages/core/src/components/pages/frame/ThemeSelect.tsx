@@ -7,14 +7,13 @@ import {
   type ThemePreference,
 } from "../../../lib/theme.ts";
 import { Dropdown } from "../../Dropdown.tsx";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 
 /**
  * Portosaur's own theme control — a Light / Dark / Auto dropdown
  * rendered with the shared Dropdown, so its option list is our
  * own markup instead of the browser-native `<select>` popup. The
- * moon/sun/laptop icons come from the Iconify packs — see
- * `lib/porto-icons.ts`.
+ * moon/sun/laptop icons render from the site's icon map.
  *
  * Two instances render on a page (navbar + mobile menu footer).
  * They stay in sync through the shared theme store in
@@ -30,21 +29,18 @@ import { PortoIcon } from "../../PortoIcon.tsx";
 const OPTIONS: {
   label: string;
   value: ThemePreference;
-  icon: "moon" | "sun" | "laptop";
+  icon: string;
 }[] = [
-  { label: "Dark", value: "dark", icon: "moon" },
-  { label: "Light", value: "light", icon: "sun" },
-  { label: "Auto", value: "auto", icon: "laptop" },
+  { label: "Dark", value: "dark", icon: "mdi:moon-waning-crescent" },
+  { label: "Light", value: "light", icon: "lu:sun" },
+  { label: "Auto", value: "auto", icon: "mdi:laptop" },
 ];
-
-const ICONS: Record<ThemePreference, "moon" | "sun" | "laptop"> = {
-  dark: "moon",
-  light: "sun",
-  auto: "laptop",
-};
 
 export function ThemeSelect() {
   const preference = useThemePreference();
+  const currentIcon =
+    OPTIONS.find((option) => option.value === preference)?.icon ??
+    "mdi:moon-waning-crescent";
 
   return (
     <Dropdown
@@ -52,7 +48,7 @@ export function ThemeSelect() {
       menuRole="menu"
       trigger={
         <span className="porto-theme-select__current">
-          <PortoIcon name={ICONS[preference]} size="0.875rem" />
+          <SiteIcon icon={currentIcon} size="0.875rem" />
           <span>{THEME_LABELS[preference]}</span>
         </span>
       }
@@ -68,7 +64,7 @@ export function ThemeSelect() {
               setTheme(option.value);
             }}
           >
-            <PortoIcon name={option.icon} size="0.875rem" />
+            <SiteIcon icon={option.icon} size="0.875rem" />
             {option.label}
           </button>
         </li>

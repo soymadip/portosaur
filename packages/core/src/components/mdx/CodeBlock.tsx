@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { PortoIcon } from "../PortoIcon.tsx";
+import { SiteIcon } from "../SiteIcon.tsx";
 
 /**
  * CodeBlock — the `pre:` MDX mapping: wraps a Shiki-highlighted
@@ -109,7 +109,11 @@ export function CodeBlock({
       aria-label={copied ? "Copied" : "Copy code"}
       title={copied ? "Copied" : "Copy code"}
     >
-      <PortoIcon name={copied ? "check" : "copy"} size="0.875rem" />
+      {copied ? (
+        <SiteIcon icon="lu:check" size="0.875rem" />
+      ) : (
+        <SiteIcon icon="lu:copy" size="0.875rem" />
+      )}
     </button>
   );
 
@@ -125,7 +129,7 @@ export function CodeBlock({
       aria-pressed={wrapped}
       title={wrapped ? "Unwrap lines" : "Wrap lines"}
     >
-      <PortoIcon name="wrap-text" size="0.875rem" />
+      <SiteIcon icon="lu:wrap-text" size="0.875rem" />
     </button>
   );
 

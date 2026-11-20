@@ -11,7 +11,7 @@ import {
   groupResults,
 } from "../../../lib/search-results.ts";
 import { Button } from "../../Button.tsx";
-import { PortoIcon } from "../../PortoIcon.tsx";
+import { SiteIcon } from "../../SiteIcon.tsx";
 import {
   PAGE_SCOPE,
   SearchResults,
@@ -46,9 +46,10 @@ import {
  *   body scroll locks while open (`data-search-modal-open`).
  * - Arrow keys move the active result, Enter navigates to it.
  *   Ctrl+N / Ctrl+J move down and Ctrl+P moves up, vim-style.
- * - `?search=query` in the address opens the dialog with that
- *   query, scoped to the current page — the section filter gains
- *   a "This page" choice, and "All" (or a section) lifts it.
+ * - The section filter offers a "This page" choice (the page
+ *   the dialog opened from); "All" (or a section) lifts it.
+ *   `?search=query` in the address opens the dialog with that
+ *   query and pre-selects "This page".
  * - Matches render bold, in the accent color, and underlined
  *   (`<mark>`), like Fumadocs'.
  * - The search index downloads on the first keystroke (the hook
@@ -81,9 +82,9 @@ export function SearchDialog() {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [section, setSection] = useState("All");
-  // The `?search=` scope: the current page's path, set only when
-  // the address carried a search query. While set, the section
-  // filter offers "This page", which limits results to this page.
+  // The page the dialog opened from: set on every open, so the
+  // section filter offers "This page", which limits results to
+  // this page. `?search=` sets it too, and pre-selects it.
   const [pageScope, setPageScope] = useState<string | null>(null);
   // Latched once results have landed — the bar stays up while
   // the query is non-empty even while a new query is loading
@@ -189,12 +190,16 @@ export function SearchDialog() {
     // never closed, so it just slides back in from mid-exit. The
     // input needs focusing again — the close blurred it, and the
     // sync effect below does not re-run (`open` never changed).
+    // Scope to the page the dialog opened from, so the section
+    // filter offers "This page" on every open — not only when
+    // the address carried `?search=`.
     window.clearTimeout(closeTimerRef.current);
     closingRef.current = false;
     setClosing(false);
+    setPageScope(normalizePagePath(window.location.pathname, basePrefix));
     setOpen(true);
     inputRef.current?.focus({ preventScroll: true });
-  }, []);
+  }, [basePrefix]);
 
   const toggleDialog = useCallback(() => {
     if (closingRef.current) {
@@ -263,13 +268,12 @@ export function SearchDialog() {
   }, [open, onSearchChange]);
 
   // A `?search=` address opens the dialog with that query,
-  // scoped to the page the address points at. Read from
-  // `window.location` in an effect, not `useSearchParams` — the
-  // site is statically exported and `useSearchParams` needs a
-  // Suspense boundary to build. This runs after the reset effect
-  // above, so the query it sets isn't cleared again on mount.
-  // The scope itself survives closing: reopening by hand offers
-  // "This page" in the filter again, it just doesn't auto-open.
+  // scoped to the page the address points at, with "This page"
+  // pre-selected. Read from `window.location` in an effect, not
+  // `useSearchParams` — the site is statically exported and
+  // `useSearchParams` needs a Suspense boundary to build. This
+  // runs after the reset effect above, so the query it sets
+  // isn't cleared again on mount.
   useEffect(() => {
     const query = new URLSearchParams(window.location.search).get("search");
     if (!query || !query.trim()) {
@@ -473,7 +477,7 @@ export function SearchDialog() {
         ariaKeyshortcuts="Control+K"
         onClick={openDialog}
       >
-        <PortoIcon name="search" size="20px" strokeWidth={2.5} />
+        <SiteIcon icon="lu:search" size="20px" strokeWidth={2.5} />
       </Button>
 
       <dialog
@@ -491,7 +495,7 @@ export function SearchDialog() {
               />
             ) : (
               <span className="porto-search-dialog__icon" aria-hidden="true">
-                <PortoIcon name="search" size="20px" strokeWidth={2.5} />
+                <SiteIcon icon="lu:search" size="20px" strokeWidth={2.5} />
               </span>
             )}
             <input
@@ -534,7 +538,7 @@ export function SearchDialog() {
               ariaLabel="Close Search"
               onClick={close}
             >
-              <PortoIcon name="x" size="20px" strokeWidth={2.5} />
+              <SiteIcon icon="lu:x" size="20px" strokeWidth={2.5} />
             </Button>
           </div>
           {/* The results area only exists when it has something to
