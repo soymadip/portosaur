@@ -10,8 +10,9 @@
  * slides to the top once results appear — the page stays visible
  * behind it, blurred by the backdrop. The bar stays up, clear of
  * the virtual keyboard, so no keyboard tracking is needed. */
-/* The open/close animation (Fumadocs' scale-and-fade) lives in
-   animations.css, with the other dialog motion. */
+/* The open/close animation (a slide from the top edge, fading
+   in as it drops) lives in animations.css, with the other dialog
+   motion. */
 .porto-search-dialog {
   margin: 0 auto;
   /* Above the middle while empty, like Fumadocs' wiki

@@ -29,11 +29,13 @@ import { SearchResults, SearchSectionFilter } from "../SearchResults.tsx";
  * rendered by the shared `SearchResults` (the search page
  * renders the same list).
  *
- * The dialog opens and closes like Fumadocs' — a 300ms
- * scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
- * fading with it. Pure CSS (`@starting-style` + `allow-discrete`
- * in animations.css): the entry scales in from 1.06, and the exit
- * fades back to it. No JS animation state.
+ * The dialog slides down from the top edge on open, fading in
+ * as it drops, and slides back up on close. The entry is pure
+ * CSS (`@starting-style` + `allow-discrete` in animations.css);
+ * the exit runs on a `closing` class while the dialog is still
+ * open, and the dialog closes for real 300ms later — the
+ * pure-CSS exit never ran on some phones, where the dialog just
+ * blinked out. No JS animation state besides the closing flag.
  *
  * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
@@ -78,6 +80,13 @@ export function SearchDialog() {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [section, setSection] = useState("All");
+  // True while the exit animation runs: the dialog is still open
+  // (and still focused), it just wears the `closing` class until
+  // the timer below closes it for real. The ref mirrors the state
+  // for the event handlers, which must not read stale state.
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
+  const closeTimerRef = useRef<number | undefined>(undefined);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -122,24 +131,80 @@ export function SearchDialog() {
   );
 
   const close = useCallback(() => {
-    // Close the dialog itself first, directly — going through
-    // React state alone left the first press doing nothing in
-    // some browsers. The native `close` event syncs the state.
-    dialogRef.current?.close();
-    setOpen(false);
+    const dialog = dialogRef.current;
+    if (!dialog?.open || closingRef.current) {
+      return;
+    }
+    // With reduced motion there is no exit animation to wait for
+    // (the guard strips the transition), so close at once.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      dialog.close();
+      setOpen(false);
+      return;
+    }
+    // Animate out first, then close for real: the exit runs on
+    // the `closing` class while the dialog is still open, because
+    // the pure-CSS exit (display/overlay allow-discrete) never
+    // ran on some phones — the dialog just blinked out. The input
+    // blurs at once so the keyboard drops with the dialog instead
+    // of after it. The 300ms matches the transition in
+    // animations.css; the real close is invisible by then, since
+    // the dialog and the backdrop have both faded out. The query
+    // reset waits too (it runs on `open` going false), so the
+    // results stay put during the exit instead of dropping the
+    // dialog back down mid-slide.
+    closingRef.current = true;
+    setClosing(true);
+    inputRef.current?.blur();
+    closeTimerRef.current = window.setTimeout(() => {
+      closingRef.current = false;
+      // Close first, then drop the class: the `:not([open])`
+      // rules hold the same faded-out values, so nothing flashes.
+      dialog.close();
+      setClosing(false);
+      setOpen(false);
+    }, 300);
   }, []);
 
   const openDialog = useCallback(() => {
+    // Reopening mid-exit cancels the pending close: the dialog
+    // never closed, so it just slides back in from mid-exit. The
+    // input needs focusing again — the close blurred it, and the
+    // sync effect below does not re-run (`open` never changed).
+    window.clearTimeout(closeTimerRef.current);
+    closingRef.current = false;
+    setClosing(false);
     setOpen(true);
+    inputRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  const toggleDialog = useCallback(() => {
+    if (closingRef.current) {
+      openDialog();
+    } else if (dialogRef.current?.open) {
+      close();
+    } else {
+      openDialog();
+    }
+  }, [close, openDialog]);
+
+  // Clear a pending close on unmount (navigating away mid-exit
+  // unmounts the dialog before the timer fires).
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(closeTimerRef.current);
+    };
   }, []);
 
   // Sync the native dialog with `open`, and lock body scroll.
-  // The open/close animation is pure CSS (`@starting-style` +
-  // `allow-discrete` in animations.css) — no JS animation state.
-  // The lock lives on the root element, not the body: the CSS
-  // also reserves the scrollbar gutter there (`scrollbar-gutter:
-  // stable`), so hiding the scrollbar doesn't widen the page
-  // and shift the content sideways.
+  // The entry is pure CSS (`@starting-style` + `allow-discrete`
+  // in animations.css); the exit runs on the `closing` class and
+  // `close()` calls the real close after it — no JS animation
+  // state besides the closing flag. The lock lives on the root
+  // element, not the body: the CSS also reserves the scrollbar
+  // gutter there (`scrollbar-gutter: stable`), so hiding the
+  // scrollbar doesn't widen the page and shift the content
+  // sideways.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) {
@@ -162,13 +227,25 @@ export function SearchDialog() {
     }
   }, [open]);
 
-  // Reset the query + active result + filter when the dialog closes.
+  // Reset the query + active result + filter once the dialog has
+  // finished closing, 300ms after it starts (the exit length in
+  // animations.css). Clearing them at once makes the results area
+  // unmount and the bar drop back down while the dialog is still
+  // fading out, so the exit flickers instead of fading cleanly.
+  // Reopening before the timer fires cancels it, so a quick
+  // reopen keeps the last results on screen.
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
       onSearchChange("");
       setActiveIndex(-1);
       setSection("All");
-    }
+    }, 300);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [open, onSearchChange]);
 
   // Cmd/Ctrl+K toggles. Escape closes — listened for on the
@@ -182,16 +259,23 @@ export function SearchDialog() {
   // press. Fumadocs' own wiki dialog has the same two-press
   // problem. Capture sees the key before it reaches the input,
   // so the first press closes the dialog. The native `cancel`
-  // path stays as a fallback — closing an already-closed
-  // dialog is a no-op. Outside clicks close.
+  // event is prevented below and routed through the same close,
+  // so the exit animation runs for Back-button closes too.
+  // Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
-        setOpen((wasOpen) => !wasOpen);
+        toggleDialog();
         return;
       }
       if (event.key === "Escape" && dialogRef.current?.open) {
+        // Swallow the key: its default action fires the dialog's
+        // `cancel` event, and in Chrome that event is NOT
+        // cancelable — preventing it does nothing and the dialog
+        // closes natively, skipping the exit animation. Stopping
+        // the key itself keeps the close on the JS path below.
+        event.preventDefault();
         close();
       }
     };
@@ -199,10 +283,29 @@ export function SearchDialog() {
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
     };
+  }, [close, toggleDialog]);
+
+  // The native `cancel` event (Android Back, or Escape reaching
+  // the dialog) must not close the dialog itself — the exit
+  // animation runs first, and the dialog closes for real 300ms
+  // later. Preventing the default keeps the dialog open for it.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    const onCancel = (event: Event) => {
+      event.preventDefault();
+      close();
+    };
+    dialog.addEventListener("cancel", onCancel);
+    return () => {
+      dialog.removeEventListener("cancel", onCancel);
+    };
   }, [close]);
 
-  // The native `close` event fires on Escape and on backdrop
-  // dismissal — sync React state with it.
+  // The native `close` event syncs React state with the dialog —
+  // a safety net for any close that bypasses `close()` above.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) {
@@ -282,6 +385,12 @@ export function SearchDialog() {
   const hasSettledResults =
     showEmpty || showFilteredEmpty || navList.length > 0;
 
+  const dialogClassName = [
+    "porto-search-dialog",
+    ...(hasSettledResults ? ["porto-search-dialog--has-results"] : []),
+    ...(closing ? ["porto-search-dialog--closing"] : []),
+  ].join(" ");
+
   return (
     <>
       <Button
@@ -296,11 +405,7 @@ export function SearchDialog() {
 
       <dialog
         ref={dialogRef}
-        className={
-          hasSettledResults
-            ? "porto-search-dialog porto-search-dialog--has-results"
-            : "porto-search-dialog"
-        }
+        className={dialogClassName}
         aria-label="Search"
         onClick={onDialogClick}
       >

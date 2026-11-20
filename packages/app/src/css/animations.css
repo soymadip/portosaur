@@ -93,14 +93,14 @@
   }
 }
 
-/* Search dialog: Fumadocs' dialog animation — a 300ms
-   scale-and-fade (`fd-dialog-in` / `fd-dialog-out`), the backdrop
-   fading with it (`fd-fade-in` / `fd-fade-out`). Pure CSS via
-   `@starting-style` + `allow-discrete`, like the mobile menu,
-   the same at every width: the entry scales in from 1.06 and the
-   exit fades back to it (one starting state serves both
-   directions, so the exit lands on 1.06 where Fumadocs' own exit
-   lands on 1.04 — a 2% difference no eye catches). `top` and
+/* Search dialog: a 300ms slide from the top edge, fading in as
+   it drops, the backdrop fading with it. The entry is pure CSS
+   via `@starting-style` + `allow-discrete`, like the mobile menu,
+   the same at every width: the dialog starts a viewport height
+   above the top edge and slides down to its resting position.
+   The exit runs on the `closing` class instead (SearchDialog
+   closes for real 300ms later) — the pure-CSS exit never ran on
+   some phones, where the dialog just blinked out. `top` and
    `max-width` ride the same 300ms ease: the empty dialog sits
    above the middle, a little narrower, and slides up to the top
    and widens to its normal width once results appear
@@ -109,7 +109,7 @@
    in SearchDialog.css). */
 .porto-search-dialog {
   transition:
-    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
     top 300ms cubic-bezier(0.16, 1, 0.3, 1),
     max-width 300ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -145,15 +145,31 @@
 .porto-search-dialog:not([open])::backdrop {
   opacity: 0;
 }
-/* The scale, at every width: the entry scales in from 1.06 and
-   the exit scales back out to it. */
+/* The slide, at every width: the entry drops from a viewport
+   height above the top edge, and the exit returns there. The
+   `:not([open])` rule is the fallback for a native close — the
+   normal exit runs on the `closing` class below, while the
+   dialog is still open. */
 @starting-style {
   .porto-search-dialog {
-    transform: scale(1.06);
+    translate: 0 -100vh;
   }
 }
 .porto-search-dialog:not([open]) {
-  transform: scale(1.06);
+  translate: 0 -100vh;
+}
+/* Closing: the exit runs on this class while the dialog is
+   still open (SearchDialog closes for real 300ms later) — the
+   pure-CSS exit never ran on some phones, so the dialog just
+   blinked out. The dialog slides back up past the top edge and
+   fades; the backdrop fades with it, so by the time the dialog
+   closes for real there is nothing left to snap away. */
+.porto-search-dialog--closing {
+  opacity: 0;
+  translate: 0 -100vh;
+}
+.porto-search-dialog--closing::backdrop {
+  opacity: 0;
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */
