@@ -150,22 +150,24 @@
   /* On desktop the empty dialog sits above the middle of the
      screen, like Fumadocs' wiki (`top: calc(50% - 250px)`).
      The bar itself is taller while empty (16px vertical
-     padding), and shrinks to its normal height once results
+     padding) and a little narrower (44rem instead of 48rem),
+     and grows to its normal height and width once results
      appear — the extra height is in the bar, not empty space
-     below it. The slide up runs on the transition in
-     animations.css, same 300ms ease as the open/close, and the
-     bar's shrink glides on its own padding transition. Mobile
-     stays top-anchored — a centered dialog would sit behind
-     the keyboard there. */
+     below it. The slide up and the widening run on the
+     transition in animations.css, same 300ms ease as the
+     open/close, and the bar's shrink glides on its own
+     padding transition. Mobile stays top-anchored — a centered
+     dialog would sit behind the keyboard there. */
   .porto-search-dialog {
     margin: 0 auto;
     top: calc(50% - 250px);
     width: 90%;
-    max-width: 48rem;
+    max-width: 44rem;
     max-height: calc(100% - 8rem);
   }
   .porto-search-dialog--has-results {
     top: 4rem;
+    max-width: 48rem;
   }
   .porto-search-dialog__header {
     padding-block: 1rem;

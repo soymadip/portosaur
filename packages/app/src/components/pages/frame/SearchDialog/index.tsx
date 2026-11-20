@@ -262,11 +262,19 @@ export function SearchDialog() {
   const showEmpty = !isLoading && hasQuery && groups.length === 0;
   const showFilteredEmpty =
     !isLoading && hasQuery && groups.length > 0 && navList.length === 0;
-  // Whether the results area is showing — the dialog sits in
-  // the middle of the screen while empty and slides up once
-  // results appear (the class drives the position in CSS).
+  // Whether the results area is showing — it renders while a
+  // search is loading too, so the "Loading search…" line has
+  // somewhere to live on slow connections.
   const hasResults =
     isLoading || showEmpty || showFilteredEmpty || navList.length > 0;
+  // Whether results have actually landed — the dialog only
+  // slides up (and shrinks and widens) once they have, never
+  // while the search is still running. The class drives the
+  // position and size in CSS. Old results stay on screen
+  // while a new query loads (the hook keeps the last data),
+  // so retyping never drops the dialog back down mid-search.
+  const hasSettledResults =
+    showEmpty || showFilteredEmpty || navList.length > 0;
 
   return (
     <>
@@ -283,7 +291,7 @@ export function SearchDialog() {
       <dialog
         ref={dialogRef}
         className={
-          hasResults
+          hasSettledResults
             ? "porto-search-dialog porto-search-dialog--has-results"
             : "porto-search-dialog"
         }
