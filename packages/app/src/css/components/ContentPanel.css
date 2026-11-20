@@ -7,12 +7,12 @@
 }
 /* The title panel sits flush under the navbar, like OG —
    Docusaurus puts no padding between the navbar and the page
-   title. Its bottom padding is 0.2rem plus 1px: the separator
-   sits close under the description, and the breathing room is
-   below the line (the body panel's 1rem), not above it. */
+   title. It carries no bottom padding of its own: the separator
+   lives on its content container (below), so the line spans
+   exactly the text column on every page. */
 .content-panel--header {
   padding-top: 0;
-  padding-bottom: calc(0.2rem + 1px);
+  padding-bottom: 0;
 }
 /* The body panel on doc pages: 1rem of top padding, so the
    separator gets most of its room below the line (the header
@@ -42,41 +42,17 @@
   width: 100%;
   container-type: inline-size;
 }
-.content-panel + .content-panel {
-  position: relative;
-}
-/* The divider between the header and body panels starts where
-   the text starts — at the panel's inline padding, like the
-   rules inside the article — instead of spanning the full panel
-   edge to edge. A border always spans the whole element, so the
-   line is a pseudo-element; the right end still runs to the
-   panel edge (and the TOC border beside it). It uses the lighter
+/* The divider between the header and body panels lives on the
+   header's content container, so it spans exactly the text
+   column — never out to the panel edge (and the TOC border
+   beside it). The 0.2rem plus 1px below the description is the
+   container's bottom padding, so the line sits close under the
+   description, and the breathing room is below the line (the
+   body panel's 1rem), not above it. It uses the lighter
    hairline, one step brighter than the standard one, so the
    separator under the title reads as a line instead of fading
    into the background. */
-.content-panel + .content-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  inset-inline-start: var(--porto-content-pad-x);
-  inset-inline-end: 0;
-  border-top: 1px solid var(--porto-color-hairline-light);
-}
-/* On pages without a TOC the panel is much wider than the text
-   column, so the panel-wide divider would stick out past the text
-   on both sides. There the line lives on the header's content
-   container instead, so it spans exactly the text column. The
-   0.2rem plus 1px below the description moves with it, so the
-   line sits at the same height as on TOC pages. */
-.main-pane:not(.main-pane--toc) .content-panel + .content-panel::before {
-  content: none;
-}
-.main-pane:not(.main-pane--toc) .content-panel--header {
-  padding-bottom: 0;
-}
-.main-pane:not(.main-pane--toc)
-  .content-panel--header
-  > .porto-content-container {
+.content-panel--header > .porto-content-container {
   padding-bottom: calc(0.2rem + 1px);
   border-bottom: 1px solid var(--porto-color-hairline-light);
 }
