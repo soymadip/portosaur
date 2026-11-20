@@ -62,7 +62,7 @@ docs_home:
 
   actions:
     - text: "Get Started"
-      link: "/docs"
+      link: "/docs/getting-started"
       icon: "si:rocket"
 
     - text: "Configuration"
