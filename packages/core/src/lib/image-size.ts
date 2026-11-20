@@ -5,11 +5,11 @@ import path from "node:path";
  * Dimensions of a local (public-dir) image, for sized `<img>` tags.
  *
  * Ported from the Astro app (`packages/app/src/utils/imageSize.ts`),
- * with one change: the Astro version read dimensions through `sharp`,
- * which is not a dependency of the Fumadocs core package — so this
- * version parses the width/height out of the image file's own header
- * (PNG, JPEG, GIF, WebP, BMP, AVIF). No image library needed, and the
- * only thing Portosaur ever asked sharp for was the metadata anyway.
+ * with one change: the Astro version read dimensions through `sharp`.
+ * This version parses the width/height out of the image file's own
+ * header (PNG, JPEG, GIF, WebP, BMP, AVIF) instead — no need to
+ * load a native library for metadata alone, and the only thing
+ * Portosaur ever asked sharp for was the metadata anyway.
  *
  * This runs in server components at build time, never in the browser.
  *

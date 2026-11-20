@@ -30,7 +30,8 @@ tests/         # URL snapshots, goldens, smoke test
   `@portosaur/core` or heavy frontend frameworks (Next.js/React). The core
   package is injected into the user's local project `package.json` to keep
   global CLI installs fast. Heavy native tooling (sharp, ~20MB) lives in
-  core too — the CLI spawns core's scripts for it (see `favicons.ts` and
+  core too — the CLI spawns core's scripts for it (see `favicons.ts`,
+  `packages/core/src/lib/favicon-render.ts`, and its thin runner
   `packages/core/scripts/make-favicons.mjs`) and never imports it.
 - **Generated Root**: Never edit a site's `.portosaur/` directory by
   hand — it is regenerated on every build/dev run. Edit the generators

@@ -1,11 +1,7 @@
-// Minimal PNG read/write for the favicon tests — no image dependency.
-// The CLI must not depend on sharp (it lives in @portosaur/core), so
-// the tests make their own fixtures and read dimensions/pixels here.
-//
-// Writer: solid-color RGBA, color type 6, bit depth 8, one filter-0
-// row per scanline. Reader: color types 6 (RGBA) and 2 (RGB), bit
-// depth 8, non-interlaced, all five row filters. Enough for what
-// sharp writes and what these tests assert.
+// Minimal PNG read/write for the favicon tests — no image
+// dependency, since the CLI must not depend on sharp.
+// Writer: solid-color RGBA. Reader: 8-bit RGB/RGBA,
+// non-interlaced, all five row filters.
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";

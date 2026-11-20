@@ -19,12 +19,10 @@ import type { PortosaurOptions } from "../generators/siteConfig.ts";
  * with the icon entries.
  *
  * The CLI only orchestrates: finding the icon, the stamp check,
- * the manifest. The pixel work runs in @portosaur/core's
- * `scripts/make-favicons.mjs`, spawned as a child process — sharp
- * lives in core, not the CLI, so a global CLI install stays light
- * (sharp's platform binary is ~20MB). Every user project installs
- * core anyway. The script path comes from `coreRoot`, resolved
- * from the project's own core package (see `resolvePortoPaths`).
+ * the manifest. The pixel work runs in core
+ * (`src/lib/favicon-render.ts`, via the `scripts/make-favicons.mjs`
+ * runner) — sharp lives there, not the CLI, so a global CLI
+ * install stays light.
  *
  * Outputs land in the generated root's `public/` dir (see
  * `ensurePublicUnion`), so Next.js serves them in dev and copies
@@ -151,24 +149,17 @@ export async function downloadIcon(
   }
 }
 
-/** The pixel work for one favicon render: what the core script needs. */
+/** What the core favicon script needs for one render. */
 interface FaviconRenderSpec {
-  /** Absolute path to the source image. */
   source: string;
   fitMode: "cover" | "contain";
-  /** Where the circle-cropped source goes. */
   reshapedPath: string;
-  /** The sized outputs, rendered from the reshaped source. */
   outputs: { path: string; size: number }[];
 }
 
 /**
- * Run the core package's favicon script (`scripts/make-favicons.mjs`)
- * with a JSON spec. The script runs under the same runtime as the
- * CLI itself (`process.execPath` — node or bun) and imports sharp
- * from the project's own install. A missing script or a missing
- * sharp means the project isn't installed — say so plainly instead
- * of surfacing a bare module error.
+ * Run the core favicon script with a JSON spec, under the same
+ * runtime as the CLI itself (`process.execPath` — node or bun).
  */
 async function runFaviconScript(
   spec: FaviconRenderSpec,
@@ -215,8 +206,7 @@ async function runFaviconScript(
  * Circle-crop an image: resize to a square (cover crops to the
  * smaller side, contain fits the larger side with 15% padding so
  * the image doesn't touch the circle's edges), then mask with a
- * circle. Writes a PNG and returns its path. The pixel work runs
- * in the core package's favicon script (see `runFaviconScript`).
+ * circle. Writes a PNG and returns its path.
  */
 export async function reshapeToCircle(
   inputPath: string,
@@ -614,8 +604,6 @@ export async function generateFavicons({
     { name: "icon-512x512.png", size: 512 },
     { name: "apple-touch-icon.png", size: 180 },
   ];
-  // One script run does the circle-crop and all four sizes — the
-  // pixel work lives in core (see `runFaviconScript`).
   await runFaviconScript(
     {
       source: sourcePath,
