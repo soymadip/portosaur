@@ -10,6 +10,16 @@
   # The docs site is a static export (output: 'export') served from
   # docs/build — Netlify's Next.js Runtime plugin (auto-installed when
   # it detects Next.js) is for SSR and fails its onBuild check looking
-  # for .next in the publish dir. Skip it; the plugin still handles
-  # build caching.
+  # for .next in the publish dir. Skip it. Skipping it also skips the
+  # plugin's cache restore and save, so Next.js finds no build cache
+  # on every deploy. The cache plugin below restores that part.
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
+# Next.js keeps its build cache in the generated root's .next/cache.
+# Cache it between deploys so rebuilds reuse it instead of starting
+# cold. The first build after this saves the cache and later builds
+# restore it.
+[[plugins]]
+  package = "netlify-plugin-cache"
+  [plugins.inputs]
+    paths = ["docs/.portosaur/.next/cache"]
