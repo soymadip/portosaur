@@ -1,10 +1,16 @@
 ---
-title: "Configuration Reference"
-desc: "An exhaustive reference for every available optins in config files."
+title: "Configuration"
+desc: "Learn how to configure your site to suit your preference & needs."
 icon: "md:settings"
 ---
 
-## `site`
+{vars.project.title} allows you to customize the look & behaviour of your site through a single `config.yml` in your project's root.
+
+## Config Reference
+
+Below is a reference of all the configuration keys available in `config.yml`.
+
+### `site`
 
 Global identity, routing, SEO, and build settings.
 
@@ -21,13 +27,13 @@ Global identity, routing, SEO, and build settings.
 | `on_broken_anchors` | `string` | `"throw"`      | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
 | `head_tags`         | `array`  | `[]`           | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).                               |
 
-### `site.build`
+#### `site.build`
 
 | Key          | Type     | Default   | Description                                    |
 | :----------- | :------- | :-------- | :--------------------------------------------- |
 | `output_dir` | `string` | `"build"` | Directory name for compiled production assets. |
 
-### `site.rss`
+#### `site.rss`
 
 RSS feed generator for the blog. Coming soon — no feed is generated yet.
 
@@ -37,7 +43,7 @@ RSS feed generator for the blog. Coming soon — no feed is generated yet.
 | `copyright` | `string`  | `(dynamic)`    | Custom copyright notice for the RSS XML feed. |
 | `desc`      | `string`  | `site.tagline` | Description tag inside the RSS feed.          |
 
-### `site.robots_txt`
+#### `site.robots_txt`
 
 Robots file generator for search engine crawlers.
 
@@ -47,7 +53,7 @@ Robots file generator for search engine crawlers.
 | `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                                                |
 | `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`. Coming soon — not emitted yet. |
 
-### `site.markdown`
+#### `site.markdown`
 
 Configure the Markdown renderer behavior.
 
@@ -57,10 +63,10 @@ Configure the Markdown renderer behavior.
 | `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                               |
 | `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
-| `mermaid`                 | `bool` | `true`    | Render ```mermaid fences as diagrams (Pele renders them at build time, no client JS).                          |
+| `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                      |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
 
-### `site.pwa`
+#### `site.pwa`
 
 Progressive Web App manifest and service worker.
 
@@ -69,13 +75,13 @@ Progressive Web App manifest and service worker.
 | `enable`        | `boolean` | `true`  | Enable PWA manifest generation (today) and the service worker (coming soon). |
 | `notifications` | `boolean` | `false` | Enable web push notification scaffolding. Coming soon.                       |
 
-### `site.preview`
+#### `site.preview`
 
 | Key       | Type     | Default | Description                                                                                        |
 | :-------- | :------- | :------ | :------------------------------------------------------------------------------------------------- |
 | `timeout` | `number` | `15`    | Timeout in seconds for fetching preview content. Coming soon — the preview viewer isn't built yet. |
 
-### Content Directories & Routing
+#### Content Directories & Routing
 
 | Key                     | Type      | Default   | Description                                                     |
 | :---------------------- | :-------- | :-------- | :-------------------------------------------------------------- |
@@ -89,7 +95,7 @@ Progressive Web App manifest and service worker.
 
 ---
 
-## `theme`
+### `theme`
 
 Visual appearance and user interface settings.
 
@@ -98,14 +104,14 @@ Visual appearance and user interface settings.
 | `color_scheme` | `string` | `"portosaur"` | Name of a bundled scheme or relative path to a custom CSS file. |
 | `default_mode` | `string` | `"dark"`      | Initial color mode (`light` or `dark`).                         |
 
-### `theme.appearance`
+#### `theme.appearance`
 
 | Key                    | Type      | Default | Description                                                   |
 | :--------------------- | :-------- | :------ | :------------------------------------------------------------ |
 | `show_theme_switch`    | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
 | `disable_project_link` | `boolean` | `false` | Hide the Project link in the navbar.                          |
 
-### `theme.navigation`
+#### `theme.navigation`
 
 | Key                     | Type      | Default | Description                                                                                |
 | :---------------------- | :-------- | :------ | :----------------------------------------------------------------------------------------- |
@@ -117,7 +123,7 @@ Visual appearance and user interface settings.
 
 The visitor's own collapse toggle is remembered for the session (until the tab closes) and wins over `sidebar_collapsed` on a reload — the configured default only applies on the first visit.
 
-### `theme.footer`
+#### `theme.footer`
 
 | Key                    | Type      | Default     | Description                                                                              |
 | :--------------------- | :-------- | :---------- | :--------------------------------------------------------------------------------------- |
@@ -127,7 +133,7 @@ The visitor's own collapse toggle is remembered for the session (until the tab c
 
 ---
 
-## `docs_home`
+### `docs_home`
 
 Configures the documentation homepage (active when `docs_home` is declared).
 
@@ -140,7 +146,7 @@ Configures the documentation homepage (active when `docs_home` is declared).
 | `actions`  | `array`  | `[]`             | Call-to-action buttons (see schema below).  |
 | `features` | `array`  | `[]`             | Feature highlight cards (see schema below). |
 
-### `docs_home.actions`
+#### `docs_home.actions`
 
 ```yaml
 actions:
@@ -158,7 +164,7 @@ actions:
 | `link` | `string` | Internal route or external URL.                    |
 | `icon` | `string` | Icon identifier (e.g. `si:rocket`, `md:settings`). |
 
-### `docs_home.features`
+#### `docs_home.features`
 
 ```yaml
 features:
@@ -179,7 +185,7 @@ features:
 
 ---
 
-## `home_page`
+### `home_page`
 
 Configures sections for portfolio sites (active when `home_page` is declared).
 
@@ -187,7 +193,7 @@ Configures sections for portfolio sites (active when `home_page` is declared).
 The portfolio home sections aren't built yet — these keys are read but nothing renders them today.
 :::
 
-### `home_page.hero`
+#### `home_page.hero`
 
 | Key                     | Type     | Default                                                        | Description                                           |
 | :---------------------- | :------- | :------------------------------------------------------------- | :---------------------------------------------------- |
@@ -200,7 +206,7 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 | `learn_more_button_txt` | `string` | `"Learn More"`                                                 | Text for the call-to-action button.                   |
 | `social`                | `array`  | `[]`                                                           | List of social links.                                 |
 
-### `home_page.about`
+#### `home_page.about`
 
 | Key              | Type      | Default       | Description                       |
 | :--------------- | :-------- | :------------ | :-------------------------------- |
@@ -212,7 +218,7 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 | `skills_heading` | `string`  | `"My Skills"` | Heading for the skills list.      |
 | `resume`         | `string`  | `"none"`      | Path/URL to your resume file.     |
 
-### `home_page.project_shelf`
+#### `home_page.project_shelf`
 
 | Key          | Type      | Default                                                              | Description                          |
 | :----------- | :-------- | :------------------------------------------------------------------- | :----------------------------------- |
@@ -222,7 +228,7 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 | `projects`   | `array`   | `[]`                                                                 | Array of project items.              |
 | `autoplay`   | `boolean` | `true`                                                               | Autoplay the project carousel.       |
 
-### `home_page.experience`
+#### `home_page.experience`
 
 | Key          | Type      | Default                                  | Description                            |
 | :----------- | :-------- | :--------------------------------------- | :------------------------------------- |
@@ -231,7 +237,7 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 | `subheading` | `string`  | `"My professional journey, in a glance"` | Subheading for the experience section. |
 | `list`       | `array`   | `[]`                                     | Array of timeline items.               |
 
-### `home_page.social`
+#### `home_page.social`
 
 | Key          | Type      | Default                                                                         | Description                              |
 | :----------- | :-------- | :------------------------------------------------------------------------------ | :--------------------------------------- |
@@ -242,7 +248,7 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 
 ---
 
-## `tasks`
+### `tasks`
 
 Public roadmap and task tracking (portfolio mode).
 
@@ -259,7 +265,7 @@ tasks:
 
 ---
 
-## `vars`
+### `vars`
 
 Free-form key-value store for variables referenced via `{vars.<key>}` in Markdown and `{{vars.<key>}}` in configuration.
 
@@ -271,7 +277,7 @@ vars:
 
 ---
 
-## Custom Head Tags
+### Custom Head Tags
 
 Inject custom meta, link, or script tags into `<head>`:
 
@@ -288,7 +294,7 @@ site:
 
 ---
 
-## Icon Values
+### Icon Values
 
 Every `icon` key in `config.yml` (and Markdown frontmatter) accepts either:
 
