@@ -7,14 +7,8 @@
  * here would enter every doc page's heading list. */
 .porto-toc-panel {
   padding: 1rem var(--porto-sidebar-pad-x);
-  /* The end padding is tighter than the start (0.5rem); the
-     container width below accounts for both sides. */
+  /* The end padding is tighter than the start (0.5rem). */
   padding-inline-end: 0.5rem;
-}
-.porto-toc-container {
-  width: calc(
-    var(--porto-sidebar-width) - var(--porto-sidebar-pad-x) - 0.5rem
-  );
 }
 .porto-toc-title {
   color: var(--porto-color-white);

@@ -226,6 +226,32 @@ export function TableOfContents({
 }) {
   const toc = nestHeadings(headings);
   const activeSlug = useTocScrollSpy(pageTitleId);
+  /* The TOC rail is content-sized, and the site footer (in the
+     shell, outside the columns) stops its top border at the
+     rail's edge — so the rail's rendered width is reported up
+     as --porto-toc-width for the footer's margin. Re-measured
+     when the headings change, when the viewport resizes, and
+     once the fonts arrive (they can reflow the headings). */
+  useEffect(() => {
+    const report = () => {
+      const container = document.querySelector(
+        ".porto-right-sidebar-container",
+      );
+      if (!container) {
+        return;
+      }
+      document.documentElement.style.setProperty(
+        "--porto-toc-width",
+        `${container.getBoundingClientRect().width}px`,
+      );
+    };
+    report();
+    window.addEventListener("resize", report);
+    document.fonts.ready.then(report);
+    return () => {
+      window.removeEventListener("resize", report);
+    };
+  }, [headings]);
   if (toc.length === 0) {
     return null;
   }

@@ -20,8 +20,9 @@
    three-column row appears. On pages without a TOC there is no
    rail — the column is not rendered — so the border runs to the
    viewport's right edge instead. The footer lives in the shell,
-   outside the frame, so the scope is `body:has(...)`. The TOC
-   rail is exactly sidebar-width, so both offsets share the var. */
+   outside the frame, so the scope is `body:has(...)`. The left
+   offset follows the sidebar width; the right one follows the
+   TOC rail's reported width (see the 72rem rule). */
 @media (min-width: 50rem) {
   body:has(.main-frame--sidebar) .porto-footer {
     margin-inline-start: var(--porto-sidebar-width);
@@ -41,9 +42,13 @@
 }
 
 @media (min-width: 72rem) {
-  /* TOC pages only: without a TOC there is no rail to stop at. */
+  /* TOC pages only: without a TOC there is no rail to stop at.
+     The rail is content-sized now, so the margin follows the
+     width the table of contents reports (`--porto-toc-width`,
+     set by TableOfContents) and falls back to the full sidebar
+     width before that runs. */
   body:has(.main-frame--sidebar):has(.main-pane--toc) .porto-footer {
-    margin-inline-end: var(--porto-sidebar-width);
+    margin-inline-end: var(--porto-toc-width, var(--porto-sidebar-width));
   }
 }
 

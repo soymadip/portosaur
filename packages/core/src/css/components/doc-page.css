@@ -40,28 +40,28 @@
     order: 2;
     position: relative;
     margin-inline-start: auto;
-    width: var(--porto-sidebar-width);
-    /* Never shrink: the main pane has no width rule of its own
-       on TOC pages besides the calc below, so its 100% basis
-       overflows the row and the shrink used to come out of this
-       container instead (it squeezed to 233px, the fixed bar
-       inside it overflowed past the viewport edge, and the
-       footer — which assumes a sidebar-width TOC column —
-       stopped 32px short of the border). Pinned, the column is
-       exactly sidebar-width on TOC pages and the main pane
-       absorbs the shrink instead. Pages without a TOC do not
-       render this container at all. */
+    /* Content-sized: the column fits the page's headings
+       instead of always taking the full sidebar width, with a
+       floor so a page with one short heading doesn't get a
+       sliver, and the sidebar width as the cap. Never shrink:
+       the main pane's zero basis (below) takes all the growing
+       and shrinking, so the column keeps its fitted width.
+       Pages without a TOC do not render this container at all. */
+    width: fit-content;
+    min-width: 11rem;
+    max-width: var(--porto-sidebar-width);
     flex-shrink: 0;
   }
 
   .porto-right-sidebar {
-    position: fixed;
+    /* Sticky, not fixed: a fixed bar sizes against the viewport
+       and couldn't follow the content-sized container, while a
+       sticky bar fills it and still stays put while the page
+       scrolls. */
+    position: sticky;
     top: 0;
     border-inline-start: 1px solid var(--porto-color-hairline);
     padding-top: var(--porto-nav-height);
-    /* Exactly the container width: `width: 100%` on a fixed
-       element resolves against the viewport, not the container. */
-    width: var(--porto-sidebar-width);
     height: 100vh;
     overflow-y: auto;
     scrollbar-width: none;
@@ -69,6 +69,12 @@
 
   .main-pane--toc {
     order: 1;
-    width: calc(100% - var(--porto-sidebar-width));
+    /* Zero basis: the pane takes whatever room is left after
+       the fitted TOC column, instead of reserving the full
+       sidebar width. The zero basis (not the 100% width the
+       pane has by default) keeps the row from overflowing. */
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
   }
 }
