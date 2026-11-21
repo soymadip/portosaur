@@ -112,7 +112,8 @@
   .porto-markdown-content .admonition {
     break-inside: avoid;
   }
-  .porto-code-copy {
+  .porto-code-copy,
+  .porto-table-copy {
     display: none;
   }
   .porto-markdown-content code:not(:where(.not-content *)) {

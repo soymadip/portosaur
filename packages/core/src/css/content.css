@@ -240,6 +240,49 @@
 .porto-markdown-content .porto-table-wrapper:not(:where(.not-content *)) {
   overflow: auto;
 }
+/* The frame holds the copy button, which floats over the
+ * table's top-right corner. It sits outside the scrolling
+ * wrapper so it never scrolls away on a wide table. The
+ * first row's last cell keeps room for it, the way the
+ * first code line keeps room for the floating copy button. */
+.porto-markdown-content .porto-table-frame:not(:where(.not-content *)) {
+  position: relative;
+}
+.porto-markdown-content .porto-table-copy:not(:where(.not-content *)) {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline-end: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-gray-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-markdown-content .porto-table-copy:hover:not(:where(.not-content *)) {
+  color: var(--porto-color-white);
+}
+.porto-markdown-content .porto-table-copy svg:not(:where(.not-content *)) {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+.porto-markdown-content
+  .porto-table-copy[data-copied="true"]:not(:where(.not-content *)) {
+  color: var(--porto-color-text-accent);
+}
+.porto-markdown-content
+  .porto-table-frame
+  tr:first-child
+  > :last-child:not(:where(.not-content *)) {
+  padding-inline-end: 2.5rem;
+}
 .porto-markdown-content table:not(:where(.not-content *)) {
   /* One border color for the frame and the dividers: gray-4
    * softened toward gray-5 so the lines sit quietly against the
