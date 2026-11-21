@@ -25,6 +25,12 @@
      transition in animations.css. */
   top: max(0.5rem, calc(50% - 250px));
   padding: 0;
+  /* Visible, not the browser's auto: a <dialog> scrolls by
+     default, and that clipped the section filter's menu to the
+     dialog's box whenever the dialog was short. The results
+     list scrolls on its own, so nothing needs the dialog to
+     scroll. */
+  overflow: visible;
   background-color: var(--porto-color-gray-6);
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
@@ -58,7 +64,13 @@
    stays put while the list moves. */
 .porto-search-dialog__frame {
   position: relative;
-  overflow: hidden;
+  /* Visible, not hidden: the section filter's menu hangs below
+     the bar, and the empty dialog is only as tall as the bar —
+     hidden clipped the menu to a sliver under it. Nothing
+     needs the clip: the header has no background, and the
+     results rows are inset with their own radius, so nothing
+     paints past the dialog's rounded corners. */
+  overflow: visible;
   border-radius: inherit;
   display: flex;
   flex-direction: column;
