@@ -57,12 +57,15 @@
     /* Sticky, not fixed: a fixed bar sizes against the viewport
        and couldn't follow the content-sized container, while a
        sticky bar fills it and still stays put while the page
-       scrolls. */
+       scrolls. It sticks at the navbar's bottom edge — its
+       in-flow top is already there, so it never rides with the
+       content — and needs no top padding: the fixed bar's
+       navbar-height padding only cleared the navbar from
+       viewport top. */
     position: sticky;
-    top: 0;
+    top: var(--porto-nav-height);
     border-inline-start: 1px solid var(--porto-color-hairline);
-    padding-top: var(--porto-nav-height);
-    height: 100vh;
+    height: calc(100vh - var(--porto-nav-height));
     overflow-y: auto;
     scrollbar-width: none;
   }
