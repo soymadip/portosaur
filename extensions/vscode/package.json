@@ -1,5 +1,7 @@
 {
   "activationEvents": [
+    "onCommand:portosaur.preview",
+    "onCommand:portosaur.stopPreviewServer",
     "onLanguage:mdx",
     "workspaceContains:**/porto.yml",
     "workspaceContains:**/porto.yaml"
@@ -13,12 +15,25 @@
   "contributes": {
     "commands": [
       {
+        "command": "portosaur.preview",
+        "title": "Portosaur: Preview Page"
+      },
+      {
         "command": "portosaur.restartServer",
         "title": "Portosaur: Restart Language Server"
+      },
+      {
+        "command": "portosaur.stopPreviewServer",
+        "title": "Portosaur: Stop Preview Server"
       }
     ],
     "configuration": {
       "properties": {
+        "portosaur.preview.port": {
+          "default": 3000,
+          "description": "Port for the preview's dev server. When something already answers on this port, the preview reuses it instead of starting a server.",
+          "type": "number"
+        },
         "portosaur.server.path": {
           "default": null,
           "description": "Path to a local porto-lsp build. When set, the extension uses it instead of downloading the server from the GitHub release.",
@@ -39,12 +54,21 @@
         }
       },
       "title": "Portosaur"
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "portosaur.preview",
+          "group": "navigation",
+          "when": "resourceLangId == mdx"
+        }
+      ]
     }
   },
   "dependencies": {
     "vscode-languageclient": "^11.0.0"
   },
-  "description": "Language support for Portosaur sites: completions, hover and diagnostics for MDX frontmatter and components.",
+  "description": "Language support for Portosaur sites: completions, hover and diagnostics for MDX frontmatter and components, plus a live preview of MDX pages.",
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/vscode": "^1.91.0",

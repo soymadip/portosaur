@@ -12,12 +12,14 @@ import type {
   ServerOptions,
 } from "vscode-languageclient/node";
 import { ensureServer } from "./download.ts";
+import { PreviewManager } from "./preview.ts";
 
 type TraceLevel = "off" | "messages" | "verbose";
 
 let client: LanguageClient | undefined;
 let starting = false;
 let restartTimer: ReturnType<typeof setTimeout> | undefined;
+let preview: PreviewManager | undefined;
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -37,6 +39,15 @@ export async function activate(
     vscode.commands.registerCommand("portosaur.restartServer", () => {
       void restartClient(context);
     }),
+    vscode.commands.registerCommand("portosaur.preview", () => {
+      void previewManager().showPreview();
+    }),
+    vscode.commands.registerCommand("portosaur.stopPreviewServer", () => {
+      previewManager().stopServer();
+    }),
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      previewManager().followActiveEditor(editor);
+    }),
     vscode.workspace.onDidChangeWorkspaceFolders(() => {
       void startClient(context);
     }),
@@ -55,12 +66,23 @@ export async function activate(
 
 export async function deactivate(): Promise<void> {
   clearTimeout(restartTimer);
+  preview?.dispose();
+  preview = undefined;
   // A client whose start failed is not running: stopping it
   // throws.
   if (client?.needsStop()) {
     await client.stop();
   }
   client = undefined;
+}
+
+// previewManager is the one preview panel and dev server, created
+// on first use.
+function previewManager(): PreviewManager {
+  if (!preview) {
+    preview = new PreviewManager();
+  }
+  return preview;
 }
 
 // hasPortosaurProject checks the whole workspace (a glob, not

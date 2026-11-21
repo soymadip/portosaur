@@ -27,6 +27,12 @@ Two settings are available:
 
 If the server stops responding, run **Portosaur: Restart Language Server** from the Command Palette.
 
+### Preview
+
+Open an MDX page and run **Portosaur: Preview Page** from the Command Palette, or press the preview button in the editor toolbar. The extension starts the dev server for the project if it is not running yet, then shows the page beside the editor. The panel follows the file you are editing, so switching to another page moves the preview to it.
+
+If a server is already answering on the preview port, the extension reuses it instead of starting its own. Stop a server the extension started with **Portosaur: Stop Preview Server**. The port is `portosaur.preview.port` (3000 by default).
+
 ---
 
 ## Zed
