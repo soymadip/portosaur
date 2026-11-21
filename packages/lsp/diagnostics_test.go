@@ -726,3 +726,150 @@ func TestFrontmatterSlugDiagnosticsNoAlphanumeric(t *testing.T) {
 		t.Fatalf("diagnostics = %v, want the schema pattern error", diagnosticMessages(diags))
 	}
 }
+
+// duplicateSlugFixture is a docs-mode project with the given
+// content files on disk.
+func duplicateSlugFixture(t *testing.T, files map[string]string) string {
+	t.Helper()
+	return contentFixture(t, "docs_home:\n  title: Docs\n", files)
+}
+
+func TestDuplicateSlugDiagnosticsNumericPrefix(t *testing.T) {
+	root := duplicateSlugFixture(t, map[string]string{
+		"docs/1 - intro.mdx": "# Intro\n",
+		"docs/2 - intro.mdx": "# Intro again\n",
+	})
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "# Intro\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "Duplicate slug") {
+		t.Fatalf("diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
+	}
+	if !hasDiagnostic(diags, "docs/2 - intro.mdx") || !hasDiagnostic(diags, "/docs/intro/") {
+		t.Fatalf("diagnostics = %v, want the other file and the shared URL named", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityWarning {
+		t.Fatalf("severity = %v, want warning", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 0 {
+		t.Fatalf("diagnostic line = %d, want 0 (the first line, no slug key)", diags[0].Range.Start.Line)
+	}
+	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "2 - intro.mdx"), "# Intro again\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/1 - intro.mdx") {
+		t.Fatalf("diagnostics = %v, want the warning on the other side too", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateSlugDiagnosticsSlugOverride(t *testing.T) {
+	root := duplicateSlugFixture(t, map[string]string{
+		"docs/apple.mdx":  "# Apple\n",
+		"docs/orange.mdx": "---\nslug: apple\n---\n# Orange\n",
+	})
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "orange.mdx"), "---\nslug: apple\n---\n# Orange\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/apple.mdx") || !hasDiagnostic(diags, "/docs/apple/") {
+		t.Fatalf("diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
+	}
+	if diags[0].Range.Start.Line != 1 || diags[0].Range.Start.Character != 6 || diags[0].Range.End.Character != 11 {
+		t.Fatalf("diagnostic range = %+v, want the slug value", diags[0].Range)
+	}
+	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "apple.mdx"), "# Apple\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/orange.mdx") {
+		t.Fatalf("diagnostics = %v, want the warning on the other side too", diagnosticMessages(diags))
+	}
+	if diags[0].Range.Start.Line != 0 {
+		t.Fatalf("diagnostic line = %d, want 0 (the first line, no slug key)", diags[0].Range.Start.Line)
+	}
+}
+
+func TestDuplicateSlugDiagnosticsReadmeVsIndex(t *testing.T) {
+	root := duplicateSlugFixture(t, map[string]string{
+		"docs/guide/README.mdx": "# Guide\n",
+		"docs/guide/index.mdx":  "# Guide index\n",
+	})
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "# Guide\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/guide/index.mdx") || !hasDiagnostic(diags, "/docs/guide/") {
+		t.Fatalf("diagnostics = %v, want the readme/index collision warning", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateSlugDiagnosticsReadmeVsSibling(t *testing.T) {
+	root := duplicateSlugFixture(t, map[string]string{
+		"docs/guide/README.mdx": "# Guide\n",
+		"docs/guide.mdx":        "# Guide page\n",
+	})
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "# Guide\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/guide.mdx") || !hasDiagnostic(diags, "/docs/guide/") {
+		t.Fatalf("diagnostics = %v, want the readme/sibling collision warning", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateSlugDiagnosticsStrippedFolders(t *testing.T) {
+	root := duplicateSlugFixture(t, map[string]string{
+		"docs/1 - guide/setup.mdx": "# Setup\n",
+		"docs/2 - guide/setup.mdx": "# Setup again\n",
+	})
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - guide", "setup.mdx"), "# Setup\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/2 - guide/setup.mdx") || !hasDiagnostic(diags, "/docs/guide/setup/") {
+		t.Fatalf("diagnostics = %v, want the stripped-folder collision warning", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateSlugDiagnosticsDistinctPagesAreQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "sibling.mdx"), "# Sibling\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for distinct pages", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateSlugDiagnosticsOutsideContentDirIsQuiet(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Page\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for a file outside the content dirs", diagnosticMessages(diags))
+	}
+}
+
+// The duplicate check reads the project files directly, so it
+// runs in lenient mode too, where the schema path never runs.
+func TestDuplicateSlugDiagnosticsLenientMode(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte("docs_home:\n  title: Docs\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for rel, content := range map[string]string{
+		"docs/1 - intro.mdx": "# Intro\n",
+		"docs/2 - intro.mdx": "# Intro again\n",
+	} {
+		path := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	frontmatter := realSchema(t, schemaFrontmatter)
+	components := realSchema(t, schemaComponents)
+	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/frontmatter.json":
+			_, _ = w.Write(frontmatter)
+		case "/components.json":
+			_, _ = w.Write(components)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer website.Close()
+
+	s := startTestServer(t, root)
+	s.local.resolver.website = website.URL
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "# Intro\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "docs/2 - intro.mdx") {
+		t.Fatalf("lenient diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
+	}
+}

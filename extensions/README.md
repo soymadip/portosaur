@@ -15,6 +15,7 @@ how `porto.yml` is handled.
 | Broken-link warnings                               |   Yes   | Yes | Severity follows `site.content.on_broken_links`                                         |
 | Broken-image warnings                              |   Yes   | Yes | Severity follows `site.content.on_broken_images`                                        |
 | Multi-segment `slug:` errors                       |   Yes   | Yes | A slug only renames the file itself                                                     |
+| Duplicate-slug warnings                            |   Yes   | Yes | Always a warning: the build throws on duplicate slugs                                   |
 | `{vars.}` completion                               |   Yes   | Yes |                                                                                         |
 | Unknown `{vars.}` warnings                         |   Yes   | Yes | Severity follows `site.content.on_missing_var`                                          |
 | `{vars.}` values inline and on hover               |   Yes   | Yes |                                                                                         |

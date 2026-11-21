@@ -13,10 +13,12 @@ import (
 // built lazily and invalidated when an MDX file in the project
 // is opened, changed, or closed.
 
-// pageIndex maps clean URLs (with a trailing slash) to absolute
-// file paths.
+// pageIndex maps clean URLs (with a trailing slash) to the
+// files serving them — a URL can hold more than one file when
+// two pages share a slug — and each file back to its URL.
 type pageIndex struct {
-	byURL map[string]string
+	byURL  map[string][]string
+	byFile map[string]string
 }
 
 // pageIndexCache holds one index per project root.
@@ -59,7 +61,7 @@ func isContentFile(path string) bool {
 // buildPageIndex walks the project's content dirs and computes
 // each file's URL with the site's slug rules.
 func buildPageIndex(root string) *pageIndex {
-	index := &pageIndex{byURL: map[string]string{}}
+	index := &pageIndex{byURL: map[string][]string{}, byFile: map[string]string{}}
 	cfg := loadProjectConfig(root)
 	for _, content := range projectContentDirs(root, cfg) {
 		_ = filepath.WalkDir(content.dir, func(path string, entry fs.DirEntry, err error) error {
@@ -86,17 +88,35 @@ func buildPageIndex(root string) *pageIndex {
 			if slug == "" {
 				url = "/" + content.route + "/"
 			}
-			index.byURL[url] = path
+			index.byURL[url] = append(index.byURL[url], path)
+			index.byFile[path] = url
 			return nil
 		})
 	}
 	return index
 }
 
-// lookup resolves a clean URL to the file it serves, accepting
-// the URL with or without a trailing slash.
+// lookup resolves a clean URL to a file it serves — the first
+// one when several pages share the URL — accepting the URL
+// with or without a trailing slash.
 func (index *pageIndex) lookup(url string) (string, bool) {
+	files := index.filesAt(url)
+	if len(files) == 0 {
+		return "", false
+	}
+	return files[0], true
+}
+
+// filesAt returns every file serving a clean URL, accepting
+// the URL with or without a trailing slash.
+func (index *pageIndex) filesAt(url string) []string {
 	url = strings.TrimSuffix(url, "/") + "/"
-	file, ok := index.byURL[url]
-	return file, ok
+	return index.byURL[url]
+}
+
+// urlFor returns the clean URL a file serves, or false when
+// the file is not a page in the index.
+func (index *pageIndex) urlFor(file string) (string, bool) {
+	url, ok := index.byFile[file]
+	return url, ok
 }

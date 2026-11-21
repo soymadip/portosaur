@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -14,13 +15,14 @@ import (
 
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
-// checks, `{vars.}` and `{env.}` reference checks, and
-// broken-link and broken-image checks over the page body. The schema-based component checks
+// checks, `{vars.}` and `{env.}` reference checks, broken-link
+// and broken-image checks over the page body, and duplicate-slug
+// checks against the project's pages. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
-// cannot be tied to the project's version. The icon and slug
-// checks are static rules, not schema-based, so they run in both
-// modes. An unclosed frontmatter block gets no frontmatter diagnostics:
+// cannot be tied to the project's version. The icon, slug, and
+// duplicate-slug checks are static rules, not schema-based, so
+// they run in both modes. An unclosed frontmatter block gets no frontmatter diagnostics:
 // the YAML cannot be told apart from the prose below it.
 // porto.yml is not diagnosed here — the YAML extension handles
 // it through the $schema line at the top of the file.
@@ -56,6 +58,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, diag)
 	}
 	for _, diag := range s.imageIssues(text, root, uriPath(documentURI)) {
+		diags = append(diags, diag)
+	}
+	for _, diag := range s.duplicateSlugIssues(text, root, uriPath(documentURI)) {
 		diags = append(diags, diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
@@ -477,6 +482,66 @@ func (s *Server) imageIssues(text string, root string, currentFile string) []pro
 // missing.
 func imageBrokenMessage(value string) string {
 	return "Broken image \"" + value + "\" (no such file)"
+}
+
+// duplicateSlugIssues warns when another page in the project
+// serves the same URL as this document. The build throws on
+// duplicate slugs, so this is early editor feedback, always a
+// warning — no porto.yml setting governs it. The check reads
+// the project files directly, not a schema, so it runs in both
+// modes. The page index is built from disk, so an unsaved
+// change to another file's slug does not show up until that
+// file is saved.
+func (s *Server) duplicateSlugIssues(text string, root string, currentFile string) []protocol.Diagnostic {
+	index := s.pages.forRoot(root)
+	url, ok := index.urlFor(currentFile)
+	if !ok {
+		return nil
+	}
+	var other string
+	for _, file := range index.filesAt(url) {
+		if file != currentFile {
+			other = file
+			break
+		}
+	}
+	if other == "" {
+		return nil
+	}
+	rel, err := filepath.Rel(root, other)
+	if err != nil {
+		rel = other
+	}
+	return []protocol.Diagnostic{{
+		Range:    duplicateSlugRange(text),
+		Severity: protocol.DiagnosticSeverityWarning,
+		Source:   protocol.NewOptional("porto-lsp"),
+		Message:  protocol.String("Duplicate slug: this page and " + filepath.ToSlash(rel) + " both serve " + url),
+	}}
+}
+
+// duplicateSlugRange points at the frontmatter `slug:` value
+// when the document has one — that is what the user changes to
+// fix the collision — and at the first line otherwise.
+func duplicateSlugRange(text string) protocol.Range {
+	lines := strings.Split(text, "\n")
+	firstLine := protocol.Range{
+		Start: protocol.Position{Line: 0, Character: 0},
+		End:   protocol.Position{Line: 0, Character: utf16Len(lines[0])},
+	}
+	block, ok := extractFrontmatter(text)
+	if !ok || !block.closed {
+		return firstLine
+	}
+	rootNode, err := parseYAML(block.yaml)
+	if err != nil || rootNode == nil {
+		return firstLine
+	}
+	_, value := yamlLookup(rootNode, []string{"slug"})
+	if value == nil || value.Kind != yaml.ScalarNode {
+		return firstLine
+	}
+	return shiftRange(nodeRange(value, strings.Split(block.yaml, "\n")), block.startLine)
 }
 
 func (s *Server) sendDiagnostics(documentURI uri.URI, diags []protocol.Diagnostic) {

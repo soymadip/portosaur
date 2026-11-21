@@ -44,7 +44,7 @@ func (s *Server) linkCompletion(params *protocol.CompletionParams, text string, 
 func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, link linkContext, partial string) *protocol.CompletionList {
 	index := s.pages.forRoot(root)
 	var items []protocol.CompletionItem
-	for pageURL, file := range index.byURL {
+	for pageURL, files := range index.byURL {
 		if !strings.HasPrefix(pageURL, partial) {
 			continue
 		}
@@ -53,7 +53,7 @@ func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, 
 			Kind:     protocol.CompletionItemKindFile,
 			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: pageURL},
 		}
-		if rel, err := filepath.Rel(root, file); err == nil {
+		if rel, err := filepath.Rel(root, files[0]); err == nil {
 			item.Detail = protocol.NewOptional(filepath.ToSlash(rel))
 		}
 		items = append(items, item)
@@ -178,8 +178,10 @@ type pageFileSet map[string]bool
 
 func (index *pageIndex) fileSet() pageFileSet {
 	files := pageFileSet{}
-	for _, file := range index.byURL {
-		files[file] = true
+	for _, atURL := range index.byURL {
+		for _, file := range atURL {
+			files[file] = true
+		}
 	}
 	return files
 }
