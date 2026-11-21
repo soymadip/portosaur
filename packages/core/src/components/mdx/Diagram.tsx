@@ -144,10 +144,12 @@ export function Diagram({ svg }: { svg: string }) {
   // Expanding fits the diagram to the popup's width: the
   // diagram keeps its natural size otherwise, so a narrow one
   // floats in the middle of the bigger view with gaps at the
-  // sides. The zoom waits out the 300ms size transition — Pele
-  // resets the zoom whenever the viewer resizes, so zooming
-  // mid-transition would be undone. Shrinking back resets to
-  // the whole diagram.
+  // sides. Pele leaves about 8px of space inside the svg around
+  // the drawing, so the fit is measured on the drawing itself,
+  // not the svg — fitting the svg would leave those gaps. The
+  // zoom waits out the 300ms size transition — Pele resets the
+  // zoom whenever the viewer resizes, so zooming mid-transition
+  // would be undone. Shrinking back resets to the whole diagram.
   useEffect(() => {
     if (!open) {
       return;
@@ -161,14 +163,24 @@ export function Diagram({ svg }: { svg: string }) {
       const zoom = zoomRef.current;
       const svg = viewer?.querySelector("svg");
       const naturalWidth = Number(svg?.getAttribute("width"));
-      if (!viewer || !zoom || !naturalWidth) {
+      if (!viewer || !zoom || !svg || !naturalWidth) {
         return;
+      }
+      let contentWidth = naturalWidth;
+      try {
+        const bbox = svg.getBBox();
+        if (bbox.width > 0) {
+          contentWidth = bbox.width;
+        }
+      } catch {
+        // getBBox throws when the svg isn't rendered — the svg
+        // width is close enough.
       }
       const style = window.getComputedStyle(viewer);
       const paddingX =
         (parseFloat(style.paddingLeft) || 0) +
         (parseFloat(style.paddingRight) || 0);
-      zoom.zoomTo((viewer.clientWidth - paddingX) / naturalWidth);
+      zoom.zoomTo((viewer.clientWidth - paddingX) / contentWidth);
     }, 350);
     return () => {
       window.clearTimeout(timer);
