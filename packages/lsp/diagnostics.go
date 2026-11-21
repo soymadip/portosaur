@@ -14,7 +14,8 @@ import (
 
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
-// checks and `{vars.}` reference checks over the page body. The schema-based component checks
+// checks and `{vars.}` and `{env.}` reference checks over the
+// page body. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
 // cannot be tied to the project's version. The icon checks are
@@ -46,6 +47,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, issue.diag)
 	}
 	for _, diag := range s.varsIssues(text, root) {
+		diags = append(diags, diag)
+	}
+	for _, diag := range s.envIssues(text, root) {
 		diags = append(diags, diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
@@ -279,6 +283,41 @@ func (s *Server) varsIssues(text string, root string) []protocol.Diagnostic {
 			Severity: severity,
 			Source:   protocol.NewOptional("porto-lsp"),
 			Message:  protocol.String("Unknown vars key \"{vars." + ref.path + "}\" (not defined under 'vars:' in porto.yml)"),
+		})
+	}
+	return diags
+}
+
+// envIssues checks every `{env.VAR}` reference in the document
+// body against the environment the build can see: the server
+// process environment plus the project's `.env` files. The
+// severity follows site.content.on_missing_env: throw is an
+// error, warn is a warning, ignore reports nothing. The default
+// is warn, and an unrecognized value falls back to it. The check
+// reads porto.yml directly, not a schema, so it runs in both
+// modes.
+func (s *Server) envIssues(text string, root string) []protocol.Diagnostic {
+	cfg := loadProjectConfig(root)
+	behavior := configString(cfg, []string{"site", "content", "on_missing_env"}, "warn")
+	if behavior == "ignore" {
+		return nil
+	}
+	severity := protocol.DiagnosticSeverityWarning
+	if behavior == "throw" {
+		severity = protocol.DiagnosticSeverityError
+	}
+	defined := definedEnvNames(root)
+	lines := strings.Split(text, "\n")
+	var diags []protocol.Diagnostic
+	for _, ref := range scanEnvRefs(text) {
+		if defined[ref.name] {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, ref.start, ref.end),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String("Unset env var \"{env." + ref.name + "}\" (not set in the environment or the project's .env files)"),
 		})
 	}
 	return diags

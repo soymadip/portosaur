@@ -278,6 +278,117 @@ func TestVarsDiagnosticsNoVarsSection(t *testing.T) {
 	}
 }
 
+func TestEnvDiagnosticsMissingVarDefault(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\nSee {env.PORTO_LSP_TEST_NOPE} here.\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Unset env var "{env.PORTO_LSP_TEST_NOPE}"`) {
+		t.Fatalf("diagnostics = %v, want the unset-env-var warning", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityWarning {
+		t.Fatalf("severity = %v, want warning", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 4 || diags[0].Range.End.Character != 29 {
+		t.Fatalf("diagnostic range = %+v, want the {env.PORTO_LSP_TEST_NOPE} occurrence", diags[0].Range)
+	}
+}
+
+func TestEnvDiagnosticsSeverityFollowsSetting(t *testing.T) {
+	for _, tc := range []struct {
+		setting  string
+		severity protocol.DiagnosticSeverity
+		want     int
+	}{
+		{"throw", protocol.DiagnosticSeverityError, 1},
+		{"ignore", 0, 0},
+		{"bogus", protocol.DiagnosticSeverityWarning, 1},
+	} {
+		config := "site:\n  content:\n    on_missing_env: " + tc.setting + "\n"
+		s := startTestServer(t, fixtureProjectWithConfig(t, config))
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {env.PORTO_LSP_TEST_NOPE}.\n")
+		if len(diags) != tc.want {
+			t.Fatalf("on_missing_env %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+		}
+		if tc.want == 1 && diags[0].Severity != tc.severity {
+			t.Fatalf("on_missing_env %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+		}
+	}
+}
+
+func TestEnvDiagnosticsDefinedInProcessEnvIsQuiet(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_DEFINED", "from-process")
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {env.PORTO_LSP_TEST_DEFINED}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for a var set in the process environment", diagnosticMessages(diags))
+	}
+}
+
+func TestEnvDiagnosticsDefinedInDotenvIsQuiet(t *testing.T) {
+	root := fixtureProject(t)
+	if err := os.WriteFile(filepath.Join(root, ".env"), []byte("PORTO_LSP_TEST_IN_DOTENV=from-dotenv\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".env.local"), []byte("PORTO_LSP_TEST_IN_LOCAL=from-local\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "See {env.PORTO_LSP_TEST_IN_DOTENV} and {env.PORTO_LSP_TEST_IN_LOCAL} but not {env.PORTO_LSP_TEST_NOPE}.\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Unset env var "{env.PORTO_LSP_TEST_NOPE}"`) {
+		t.Fatalf("diagnostics = %v, want only the missing-var warning", diagnosticMessages(diags))
+	}
+}
+
+func TestEnvDiagnosticsSetButEmptyIsQuiet(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_EMPTY_PROC", "")
+	root := fixtureProject(t)
+	if err := os.WriteFile(filepath.Join(root, ".env"), []byte("PORTO_LSP_TEST_EMPTY_FILE=\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "See {env.PORTO_LSP_TEST_EMPTY_PROC} and {env.PORTO_LSP_TEST_EMPTY_FILE}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for vars set to an empty value", diagnosticMessages(diags))
+	}
+}
+
+func TestEnvDiagnosticsEscapeIsQuiet(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "Write {{env.PORTO_LSP_TEST_NOPE}} literally, even {{{env.PORTO_LSP_TEST_NOPE}}}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for the escape form", diagnosticMessages(diags))
+	}
+}
+
+func TestEnvDiagnosticsAllPositions(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "# Hello\n\nText {env.PORTO_LSP_TEST_A} here.\n\nUse `{env.PORTO_LSP_TEST_B}` inline.\n\n```sh\nrun {env.PORTO_LSP_TEST_C}\n```\n\n[link]({env.PORTO_LSP_TEST_D})\n\n![img]({env.PORTO_LSP_TEST_E})\n\n{env.PORTO_LSP_TEST_F}\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 6 {
+		t.Fatalf("diagnostics = %v, want one per position", diagnosticMessages(diags))
+	}
+	for _, key := range []string{"A", "B", "C", "D", "E", "F"} {
+		if !hasDiagnostic(diags, `Unset env var "{env.PORTO_LSP_TEST_`+key+`}"`) {
+			t.Fatalf("diagnostics = %v, want the {env.PORTO_LSP_TEST_%s} warning", diagnosticMessages(diags), key)
+		}
+	}
+}
+
+func TestEnvDiagnosticsFrontmatterSkipped(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: \"See {env.PORTO_LSP_TEST_NOPE}\"\n---\n\nBody text.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for a reference in frontmatter", diagnosticMessages(diags))
+	}
+}
+
+func TestEnvDiagnosticsUnclosedFrontmatterSkipped(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: x\n\nSee {env.PORTO_LSP_TEST_NOPE}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none when the frontmatter never closes", diagnosticMessages(diags))
+	}
+}
+
 // The schema-based component checks are strict-only: in lenient
 // mode an unknown component draws no warning. The static icon
 // checks still run.

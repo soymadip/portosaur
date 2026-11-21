@@ -183,6 +183,61 @@ func varsDetail(value any) string {
 	return preview
 }
 
+// braceRef is one `{kind.name}` occurrence in the MDX body:
+// the captured name and the byte offsets of the whole `{...}`
+// form, so the range can cover the occurrence.
+type braceRef struct {
+	name  string
+	start int
+	end   int
+}
+
+// scanBraceRefs finds every reference matching braceRe in the
+// MDX body. Text, inline code, fenced code blocks, link and
+// image URLs, and MDX expressions are all plain `{...}` in the
+// source, so one raw-text scan covers every position the build
+// substitutes. Frontmatter is skipped (the definitions live
+// there), and so is the `{{...}}` escape form, which renders
+// literally. An unclosed frontmatter block cannot be told apart
+// from the prose below it, so nothing is scanned.
+func scanBraceRefs(text string, braceRe, escapeRe *regexp.Regexp) []braceRef {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return nil
+		}
+		for i := 0; i <= block.endLine; i++ {
+			contentStart += len(lines[i]) + 1
+		}
+	}
+	if contentStart > len(text) {
+		return nil
+	}
+	body := text[contentStart:]
+	escapes := escapeRe.FindAllStringIndex(body, -1)
+	var refs []braceRef
+	for _, match := range braceRe.FindAllStringSubmatchIndex(body, -1) {
+		start, end := match[0], match[1]
+		escaped := false
+		for _, esc := range escapes {
+			if start < esc[1] && end > esc[0] {
+				escaped = true
+				break
+			}
+		}
+		if escaped {
+			continue
+		}
+		refs = append(refs, braceRef{
+			name:  body[match[2]:match[3]],
+			start: contentStart + start,
+			end:   contentStart + end,
+		})
+	}
+	return refs
+}
+
 // varsRef is one `{vars.path}` occurrence in the MDX body: the
 // dot path after `vars.` and the byte offsets of the whole
 // `{...}` form, so the range can cover the occurrence.
@@ -198,47 +253,35 @@ var varsBraceRe = regexp.MustCompile(`\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}`)
 var varsEscapeRe = regexp.MustCompile(`\{\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}\}`)
 
 // scanVarsRefs finds every `{vars.path}` reference in the MDX
-// body. Text, inline code, fenced code blocks, link and image
-// URLs, and MDX expressions are all plain `{vars.path}` in the
-// source, so one raw-text scan covers every position the build
-// substitutes. Frontmatter is skipped (the `vars:` definitions
-// live there), and so is the `{{vars.path}}` escape form, which
-// renders literally. An unclosed frontmatter block cannot be
-// told apart from the prose below it, so nothing is scanned.
+// body.
 func scanVarsRefs(text string) []varsRef {
-	lines := strings.Split(text, "\n")
-	contentStart := 0
-	if block, ok := extractFrontmatter(text); ok {
-		if !block.closed {
-			return nil
-		}
-		for i := 0; i <= block.endLine; i++ {
-			contentStart += len(lines[i]) + 1
-		}
-	}
-	if contentStart > len(text) {
-		return nil
-	}
-	body := text[contentStart:]
-	escapes := varsEscapeRe.FindAllStringIndex(body, -1)
 	var refs []varsRef
-	for _, match := range varsBraceRe.FindAllStringSubmatchIndex(body, -1) {
-		start, end := match[0], match[1]
-		escaped := false
-		for _, esc := range escapes {
-			if start < esc[1] && end > esc[0] {
-				escaped = true
-				break
-			}
-		}
-		if escaped {
-			continue
-		}
-		refs = append(refs, varsRef{
-			path:  body[match[2]:match[3]],
-			start: contentStart + start,
-			end:   contentStart + end,
-		})
+	for _, ref := range scanBraceRefs(text, varsBraceRe, varsEscapeRe) {
+		refs = append(refs, varsRef{path: ref.name, start: ref.start, end: ref.end})
+	}
+	return refs
+}
+
+// envRef is one `{env.VAR}` occurrence in the MDX body: the var
+// name after `env.` and the byte offsets of the whole `{...}`
+// form, so the range can cover the occurrence.
+type envRef struct {
+	name  string
+	start int
+	end   int
+}
+
+// The build's patterns from remarkVars.ts: a reference, and the
+// double-brace escape form that renders literally. Env names
+// have no dots.
+var envBraceRe = regexp.MustCompile(`\{env\.([a-zA-Z_][a-zA-Z0-9_]*)\}`)
+var envEscapeRe = regexp.MustCompile(`\{\{env\.([a-zA-Z_][a-zA-Z0-9_]*)\}\}`)
+
+// scanEnvRefs finds every `{env.VAR}` reference in the MDX body.
+func scanEnvRefs(text string) []envRef {
+	var refs []envRef
+	for _, ref := range scanBraceRefs(text, envBraceRe, envEscapeRe) {
+		refs = append(refs, envRef{name: ref.name, start: ref.start, end: ref.end})
 	}
 	return refs
 }
