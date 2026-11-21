@@ -151,6 +151,17 @@ func (s *testServer) onTypeFormatting(t *testing.T, documentURI uri.URI, line, c
 	return result
 }
 
+// willRenameFiles sends a workspace/willRenameFiles request and
+// returns the edit, or nil when the server returns nothing.
+func (s *testServer) willRenameFiles(t *testing.T, files ...protocol.FileRename) *protocol.WorkspaceEdit {
+	t.Helper()
+	edit, err := s.server.WillRenameFiles(context.Background(), &protocol.RenameFilesParams{Files: files})
+	if err != nil {
+		t.Fatalf("willRenameFiles: %v", err)
+	}
+	return edit
+}
+
 func hasLabel(items []protocol.CompletionItem, label string) bool {
 	for _, item := range items {
 		if item.Label == label {
@@ -219,6 +230,20 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	}
 	if trigger := result.Capabilities.DocumentOnTypeFormattingProvider.FirstTriggerCharacter; trigger != "\n" {
 		t.Fatalf("on type formatting trigger = %q, want newline", trigger)
+	}
+	ops := result.Capabilities.Workspace
+	if ops == nil || ops.FileOperations == nil {
+		t.Fatal("no file operations advertised")
+	}
+	filters := ops.FileOperations.WillRename.Filters
+	if len(filters) != 2 {
+		t.Fatalf("willRename filters = %d, want 2 (content files and folders)", len(filters))
+	}
+	if filters[0].Pattern.Glob != "**/*.{md,mdx}" || filters[0].Pattern.Matches != protocol.FileOperationPatternKindFile {
+		t.Fatalf("willRename file filter = %+v, want **/*.{md,mdx} matching files", filters[0].Pattern)
+	}
+	if filters[1].Pattern.Glob != "**/*" || filters[1].Pattern.Matches != protocol.FileOperationPatternKindFolder {
+		t.Fatalf("willRename folder filter = %+v, want **/* matching folders", filters[1].Pattern)
 	}
 	if result.Capabilities.TextDocumentSync != protocol.TextDocumentSyncKindFull {
 		t.Fatalf("sync = %v, want full", result.Capabilities.TextDocumentSync)

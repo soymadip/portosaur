@@ -65,6 +65,10 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 	// Document links are computed fully up front, so there is
 	// no resolve step.
 	resolveProvider := false
+	// File renames update links: the server wants willRenameFiles
+	// for content files and for folders (a folder rename moves
+	// every page under it).
+	fileScheme := "file"
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncKindFull,
@@ -83,6 +87,16 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			DocumentSymbolProvider: protocol.Boolean(true),
 			DocumentOnTypeFormattingProvider: protocol.DocumentOnTypeFormattingOptions{
 				FirstTriggerCharacter: "\n",
+			},
+			Workspace: &protocol.WorkspaceOptions{
+				FileOperations: &protocol.FileOperationOptions{
+					WillRename: protocol.FileOperationRegistrationOptions{
+						Filters: []protocol.FileOperationFilter{
+							{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*.{md,mdx}", Matches: protocol.FileOperationPatternKindFile}},
+							{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*", Matches: protocol.FileOperationPatternKindFolder}},
+						},
+					},
+				},
 			},
 		},
 		ServerInfo: protocol.ServerInfo{

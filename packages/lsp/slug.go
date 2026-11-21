@@ -190,6 +190,14 @@ func readFileFrontmatter(filePath string) map[string]any {
 // on disk; contentPath is its content-relative path with `/`
 // separators.
 func collectParentSlugs(absolutePath, contentPath string) map[string]string {
+	return collectParentSlugsWithReader(absolutePath, contentPath, readFileFrontmatter)
+}
+
+// collectParentSlugsWithReader is collectParentSlugs with the
+// frontmatter source supplied by the caller: the rename handler
+// reads through the rename, since the file still sits at its
+// old path on disk.
+func collectParentSlugsWithReader(absolutePath, contentPath string, read func(string) map[string]any) map[string]string {
 	parentSlugs := map[string]string{}
 	var dirSegments []string
 	for _, segment := range strings.Split(contentPath, "/") {
@@ -209,7 +217,7 @@ func collectParentSlugs(absolutePath, contentPath string) map[string]string {
 			dirPath = filepath.Dir(dirPath)
 		}
 		for _, name := range indexNames {
-			fm := readFileFrontmatter(filepath.Join(dirPath, name))
+			fm := read(filepath.Join(dirPath, name))
 			if fm == nil {
 				continue
 			}
