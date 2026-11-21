@@ -56,17 +56,16 @@ tests/         # URL snapshots, goldens, smoke test
 
 ## Testing
 
-Always verify all tests pass with `bun run test:all` before finishing
+Always verify all tests pass with `bun run test:all` before pushing only
 (bare `bun test` also scans `backup/` and shows expected failures from
-the 0.26.0 reference code). Run `bun run test:smoke` before merge.
-Verify URL parity with `bun tests/url-snapshot.ts --docs-only` after a
-docs build.
+the 0.26.0 reference code).
 
 ## Housekeeping
 
 - `bun run test:all` regenerates `packages/cli/config-schema.json` raw —
   reformat it with `bun x prettier --write packages/cli/config-schema.json`
   before committing.
+
 - The playground (`.playground/`) is gitignored. Rebuild it with
   `bun run playground build`.
 
