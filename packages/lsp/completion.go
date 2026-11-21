@@ -65,6 +65,9 @@ func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (
 	if block, ok := extractFrontmatter(text); ok && block.contains(params.Position.Line) {
 		return s.frontmatterCompletion(params, block, s.resolver.resolve(root, schemaFrontmatter)), nil
 	}
+	if list, handled := s.varsCompletion(params, text, root); handled {
+		return list, nil
+	}
 	return s.componentCompletion(params, text, s.resolver.resolve(root, schemaComponents)), nil
 }
 
