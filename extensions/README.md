@@ -28,6 +28,7 @@ how `porto.yml` is handled.
 | Shortcode suggestions                             |   Yes   | Yes | Icon packs and emoji after `:`. Emoji need `site.content.render_emoji_shortcodes`       |
 | Code fence suggestions                            |   Yes   | Yes | Languages after the fence, meta params after the language                               |
 | Icon prefix suggestions                            |   Yes   | Yes | Pack prefixes in icon values, before the colon                                          |
+| List auto-insert on Enter                          |   Yes   | Yes | Enter continues numbered, bullet, and task lists                                        |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |

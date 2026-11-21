@@ -134,6 +134,23 @@ func labels(items []protocol.CompletionItem) []string {
 	return out
 }
 
+// onTypeFormatting asks the server what to insert after the
+// trigger character ch was typed at the cursor. The document
+// already holds the typed character when the request is made.
+func (s *testServer) onTypeFormatting(t *testing.T, documentURI uri.URI, line, character uint32, ch string) []protocol.TextEdit {
+	t.Helper()
+	result, err := s.server.OnTypeFormatting(context.Background(), &protocol.DocumentOnTypeFormattingParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
+		Position:     protocol.Position{Line: line, Character: character},
+		Ch:           ch,
+		Options:      protocol.FormattingOptions{TabSize: 2, InsertSpaces: true},
+	})
+	if err != nil {
+		t.Fatalf("onTypeFormatting: %v", err)
+	}
+	return result
+}
+
 func hasLabel(items []protocol.CompletionItem, label string) bool {
 	for _, item := range items {
 		if item.Label == label {
@@ -199,6 +216,9 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	}
 	if result.Capabilities.DocumentSymbolProvider == nil {
 		t.Fatal("no document symbol provider advertised")
+	}
+	if trigger := result.Capabilities.DocumentOnTypeFormattingProvider.FirstTriggerCharacter; trigger != "\n" {
+		t.Fatalf("on type formatting trigger = %q, want newline", trigger)
 	}
 	if result.Capabilities.TextDocumentSync != protocol.TextDocumentSyncKindFull {
 		t.Fatalf("sync = %v, want full", result.Capabilities.TextDocumentSync)

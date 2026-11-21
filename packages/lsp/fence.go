@@ -167,6 +167,31 @@ func fenceMarker(line string) (char byte, length int, after int, ok bool) {
 	return char, length, end, true
 }
 
+// inFenceBefore reports whether lines[lineNo] sits inside a
+// fenced code block: it walks the lines from `from` up to (not
+// including) lineNo tracking fence state. A closer needs the
+// opener's character, at least the opener's length, and nothing
+// but whitespace after it.
+func inFenceBefore(lines []string, from, lineNo int) bool {
+	inFence := false
+	var fenceChar byte
+	fenceLen := 0
+	for i := from; i < lineNo; i++ {
+		char, length, after, ok := fenceMarker(lines[i])
+		if !ok {
+			continue
+		}
+		if !inFence {
+			inFence, fenceChar, fenceLen = true, char, length
+			continue
+		}
+		if char == fenceChar && length >= fenceLen && strings.TrimSpace(lines[i][after:]) == "" {
+			inFence = false
+		}
+	}
+	return inFence
+}
+
 // scanFence finds the opening fence line the cursor sits on,
 // when there is one. It walks the lines above the cursor
 // tracking fence state, so a line inside a block (or a closing
@@ -186,23 +211,7 @@ func scanFence(text string, pos protocol.Position) fenceContext {
 	if lineNo < contentStart || lineNo >= len(lines) {
 		return fenceContext{}
 	}
-	inFence := false
-	var fenceChar byte
-	fenceLen := 0
-	for i := contentStart; i < lineNo; i++ {
-		char, length, after, ok := fenceMarker(lines[i])
-		if !ok {
-			continue
-		}
-		if !inFence {
-			inFence, fenceChar, fenceLen = true, char, length
-			continue
-		}
-		if char == fenceChar && length >= fenceLen && strings.TrimSpace(lines[i][after:]) == "" {
-			inFence = false
-		}
-	}
-	if inFence {
+	if inFenceBefore(lines, contentStart, lineNo) {
 		return fenceContext{}
 	}
 	line := lines[lineNo]

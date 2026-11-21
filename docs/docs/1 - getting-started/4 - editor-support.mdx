@@ -35,6 +35,7 @@ Beyond completion and hover, the server also:
 - **Suggests icon pack prefixes.** While typing an icon value, in frontmatter `icon:` or an `Icon`, `DynamicIcon`, or `Btn` prop, it offers the pack prefixes (`si:`, `lu:`, and the rest) with the pack name beside each. After the colon, icon names stay free text.
 - **Completes tags.** After `<` it offers the built-in components, the components the file imports, and HTML tags. An imported name wins over a built-in with the same name, and each import names the file it comes from. Picking a tag inserts the whole tag: a pair with the cursor inside for tags that take content, self-closing for the rest.
 - **Pops up prop values.** Accepting a prop that takes a value opens the value list on its own in VS Code, so the values follow right after `name=`. In Zed the values appear when you type the quote instead.
+- **Continues lists.** Pressing Enter at the end of a list item starts the next one: the next number, the same bullet, or a fresh unchecked task box. Enter on an empty item leaves the list.
 - **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
 - **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.
 
