@@ -18,9 +18,9 @@ import (
 // broken-link and broken-image checks over the page body. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
-// cannot be tied to the project's version. The icon checks are
-// static rules, not schema-based, so they run in both modes. An
-// unclosed frontmatter block gets no frontmatter diagnostics:
+// cannot be tied to the project's version. The icon and slug
+// checks are static rules, not schema-based, so they run in both
+// modes. An unclosed frontmatter block gets no frontmatter diagnostics:
 // the YAML cannot be told apart from the prose below it.
 // porto.yml is not diagnosed here — the YAML extension handles
 // it through the $schema line at the top of the file.
@@ -88,6 +88,9 @@ func (s *Server) frontmatterIssues(block frontmatterBlock, root string) []frontm
 	for _, diag := range frontmatterIconDiagnostics(rootNode, lines, block.startLine) {
 		issues = append(issues, frontmatterIssue{diag: diag})
 	}
+	for _, diag := range frontmatterSlugDiagnostics(rootNode, lines, block.startLine) {
+		issues = append(issues, frontmatterIssue{diag: diag})
+	}
 	if !schema.strict {
 		return issues
 	}
@@ -148,6 +151,28 @@ func frontmatterIconDiagnostics(rootNode *yaml.Node, lines []string, lineOffset 
 		}}, lineOffset)
 	}
 	return nil
+}
+
+// frontmatterSlugDiagnostics checks the frontmatter `slug` key,
+// if it holds a plain string. A slug only renames the file's own
+// segment, so a value containing a slash fails the build. The
+// check is static, so it runs in both modes; the schema's own
+// pattern error for the same value is skipped in
+// validationIssues, so the slug is flagged exactly once.
+func frontmatterSlugDiagnostics(rootNode *yaml.Node, lines []string, lineOffset int) []protocol.Diagnostic {
+	_, value := yamlLookup(rootNode, []string{"slug"})
+	if value == nil || value.Kind != yaml.ScalarNode {
+		return nil
+	}
+	if !strings.Contains(value.Value, "/") {
+		return nil
+	}
+	return shiftDiagnostics([]protocol.Diagnostic{{
+		Range:    nodeRange(value, lines),
+		Severity: protocol.DiagnosticSeverityError,
+		Source:   protocol.NewOptional("porto-lsp"),
+		Message:  protocol.String("Slug \"" + value.Value + "\" must be a single segment with no \"/\": it only renames the file"),
+	}}, lineOffset)
 }
 
 // componentIssue is one problem with a component use: the
@@ -486,6 +511,17 @@ func validationIssues(verr *jsonschema.ValidationError, root *yaml.Node, lines [
 				walk(cause)
 			}
 			return
+		}
+		if _, ok := e.ErrorKind.(*kind.Pattern); ok && len(e.InstanceLocation) == 1 && e.InstanceLocation[0] == "slug" {
+			// A slug with a slash is already flagged by
+			// frontmatterSlugDiagnostics with a clearer
+			// message, in both modes, so the schema's
+			// pattern error for the same value is skipped.
+			// Other pattern failures (a slug with no letter
+			// or digit) still come through here.
+			if _, value := yamlLookup(root, e.InstanceLocation); value != nil && strings.Contains(value.Value, "/") {
+				return
+			}
 		}
 		message := e.Error()
 		if match := validationMessageRe.FindStringSubmatch(message); match != nil {

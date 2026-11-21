@@ -646,3 +646,83 @@ func TestLinkDiagnosticsHashNotValidated(t *testing.T) {
 		t.Fatalf("diagnostics = %v, want none for unknown hashes on existing pages", diagnosticMessages(diags))
 	}
 }
+
+func TestFrontmatterSlugDiagnosticsMultiSegment(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\nslug: a/b\n---\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Slug "a/b" must be a single segment`) {
+		t.Fatalf("diagnostics = %v, want exactly one multi-segment slug error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 1 || diags[0].Range.Start.Character != 6 || diags[0].Range.End.Character != 9 {
+		t.Fatalf("diagnostic range = %+v, want the slug value", diags[0].Range)
+	}
+}
+
+func TestFrontmatterSlugDiagnosticsQuoted(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\nslug: \"a/b\"\n---\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Slug "a/b" must be a single segment`) {
+		t.Fatalf("diagnostics = %v, want exactly one multi-segment slug error", diagnosticMessages(diags))
+	}
+	if diags[0].Range.Start.Line != 1 || diags[0].Range.Start.Character != 6 || diags[0].Range.End.Character != 11 {
+		t.Fatalf("diagnostic range = %+v, want the quoted slug value", diags[0].Range)
+	}
+}
+
+func TestFrontmatterSlugDiagnosticsValid(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	for _, doc := range []string{"---\nslug: apple\n---\n", "---\ntitle: Hello\n---\n"} {
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+		if len(diags) != 0 {
+			t.Fatalf("diagnostics for %q = %v, want none", doc, diagnosticMessages(diags))
+		}
+	}
+}
+
+// The slug check is static, so it runs in lenient mode too,
+// where the schema path never runs.
+func TestFrontmatterSlugDiagnosticsLenientMode(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	frontmatter := realSchema(t, schemaFrontmatter)
+	components := realSchema(t, schemaComponents)
+	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/frontmatter.json":
+			_, _ = w.Write(frontmatter)
+		case "/components.json":
+			_, _ = w.Write(components)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer website.Close()
+
+	s := startTestServer(t, root)
+	s.local.resolver.website = website.URL
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "---\nslug: a/b\n---\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Slug "a/b" must be a single segment`) {
+		t.Fatalf("lenient diagnostics = %v, want the multi-segment slug error", diagnosticMessages(diags))
+	}
+	diags = s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "---\nslug: apple\n---\n")
+	if len(diags) != 0 {
+		t.Fatalf("lenient diagnostics for a single segment = %v, want none", diagnosticMessages(diags))
+	}
+}
+
+// The schema's pattern also rejects a slug with no letter or
+// digit. That failure is not a slash, so the schema error still
+// comes through (strict mode only) — the dedup skips only
+// pattern errors the slug check already covers.
+func TestFrontmatterSlugDiagnosticsNoAlphanumeric(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\nslug: ---\n---\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "does not match pattern") {
+		t.Fatalf("diagnostics = %v, want the schema pattern error", diagnosticMessages(diags))
+	}
+}
