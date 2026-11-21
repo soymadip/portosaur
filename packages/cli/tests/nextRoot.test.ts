@@ -43,6 +43,8 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
         renderEmojiShortcodes: true,
         onBrokenLinks: "throw",
         onBrokenImages: "throw",
+        onMissingVar: "throw",
+        onMissingEnv: "warn",
         toc: { enabled: true, minLevel: 2, maxLevel: 5 },
       },
       build: { outputDir: "build" },
@@ -136,6 +138,8 @@ describe("buildSourceConfigContent", () => {
     // userVars is pretty-printed with indent 2, like human-written code.
     expect(content).toContain('userVars: {\n  "project": "Test"\n}');
     expect(content).toContain('colorScheme: "portosaur"');
+    expect(content).toContain('onMissingVar: "throw"');
+    expect(content).toContain('onMissingEnv: "warn"');
     expect(content).toContain("renderEmojiShortcodes: true");
     // The npm plugins live inside the core package — the generated file
     // must not import them (directly or via @portosaur/core/plugins/*),
@@ -157,6 +161,8 @@ describe("buildSourceConfigContent", () => {
             renderEmojiShortcodes: false,
             onBrokenLinks: "throw",
             onBrokenImages: "throw",
+            onMissingVar: "throw",
+            onMissingEnv: "warn",
             toc: { enabled: true, minLevel: 2, maxLevel: 5 },
           },
         },
@@ -164,6 +170,28 @@ describe("buildSourceConfigContent", () => {
       0,
     );
     expect(content).toContain("renderEmojiShortcodes: false");
+  });
+
+  test("passes the missing var and env behaviors through", () => {
+    const content = buildSourceConfigContent(
+      options({
+        site: {
+          content: {
+            addMdxDesc: true,
+            mermaid: true,
+            renderEmojiShortcodes: true,
+            onBrokenLinks: "throw",
+            onBrokenImages: "throw",
+            onMissingVar: "ignore",
+            onMissingEnv: "throw",
+            toc: { enabled: true, minLevel: 2, maxLevel: 5 },
+          },
+        },
+      }),
+      0,
+    );
+    expect(content).toContain('onMissingVar: "ignore"');
+    expect(content).toContain('onMissingEnv: "throw"');
   });
 
   test("passes the content dirs and routes for file links", () => {

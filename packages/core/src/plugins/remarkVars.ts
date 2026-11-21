@@ -20,8 +20,14 @@
  *   - MDX expressions:    {vars.project.title}  or  {vars.tools.bun}
  *
  * Env names match [a-zA-Z_][a-zA-Z0-9_]* (no dots, unlike vars paths).
- * An unset env var resolves to an empty string, matching {{env.VAR}}
- * in porto.yml, while an unknown vars key fails the build.
+ *
+ * What happens when a reference cannot be resolved is configurable,
+ * mirroring the `on_broken_links` behavior values ("throw", "warn",
+ * "ignore"): `site.content.on_missing_var` (default "throw", so an
+ * unknown vars key fails the build) and `site.content.on_missing_env`
+ * (default "warn", so an unset env var warns and renders empty, like
+ * {{env.VAR}} in porto.yml). In "warn" and "ignore" modes the
+ * reference renders as an empty string.
  *
  * Escape (render the literal token without replacement):
  *   - In text / code:     use double braces: {{vars.key}} → {vars.key}, {{env.VAR}} → {env.VAR}
@@ -78,19 +84,52 @@ function resolveVarPath(
 }
 
 /**
- * @param vars - The resolved vars map from porto.yml.
- * @param env - Environment variables to resolve {env.VAR} from,
- *   defaults to the build process environment. A separate parameter
- *   so tests can pass a fixed map.
+ * What happens when a `{vars.key}` or `{env.VAR}` reference cannot
+ * be resolved: fail the build ("throw"), warn and render empty
+ * ("warn"), or silently render empty ("ignore").
+ */
+export type MissingBehavior = "throw" | "warn" | "ignore";
+
+export interface RemarkVarsOptions {
+  /** The resolved vars map from porto.yml. */
+  vars?: Record<string, unknown>;
+  /**
+   * Environment variables to resolve {env.VAR} from, defaults to
+   * the build process environment. A separate option so tests can
+   * pass a fixed map.
+   */
+  env?: Record<string, string | undefined>;
+  /** Behavior for an unknown {vars.key} (default "throw"). */
+  onMissingVar?: MissingBehavior;
+  /** Behavior for an unset {env.VAR} (default "warn"). */
+  onMissingEnv?: MissingBehavior;
+}
+
+const MISSING_BEHAVIORS: MissingBehavior[] = ["throw", "warn", "ignore"];
+
+/**
  * @returns The transformer. Vars replacement only runs when vars are
  *   defined, so a project without a vars section keeps the old
  *   behavior of leaving {vars.key} untouched. Env replacement always
  *   runs.
  */
-export default function remarkVarsPlugin(
-  vars: Record<string, unknown> = {},
-  env: Record<string, string | undefined> = process.env,
-) {
+export default function remarkVarsPlugin({
+  vars = {},
+  env = process.env,
+  onMissingVar = "throw",
+  onMissingEnv = "warn",
+}: RemarkVarsOptions = {}) {
+  if (!MISSING_BEHAVIORS.includes(onMissingVar)) {
+    throw new Error(
+      `[Portosaur] Invalid site.content.on_missing_var "${onMissingVar}" — expected "throw", "warn", or "ignore".`,
+    );
+  }
+  if (!MISSING_BEHAVIORS.includes(onMissingEnv)) {
+    throw new Error(
+      `[Portosaur] Invalid site.content.on_missing_env "${onMissingEnv}" — expected "throw", "warn", or "ignore".`,
+    );
+  }
+
   const hasVars = !!vars && Object.keys(vars).length > 0;
 
   // Matches {vars.key} or {vars.nested.key} in plain text / URLs
@@ -118,12 +157,64 @@ export default function remarkVarsPlugin(
   }
 
   /**
-   * Replace {vars.key} occurrences in a string, throwing on unknown keys.
+   * Throw a descriptive build error so the build fails on the offending file.
+   * @param name - The env var name that was not set, e.g. "PORTO_DEPLOY_URL".
+   * @param filePath - Source file path for error context.
+   */
+  function unsetEnvError(name: string, filePath: string): Error {
+    return new Error(
+      `[Portosaur] Unset env var "{env.${name}}" in "${filePath || "unknown file"}".\n` +
+        `  Make sure "${name}" is set in your environment.`,
+    );
+  }
+
+  /**
+   * Handle a reference that could not be resolved, per its behavior
+   * setting: throw in "throw" mode, warn and render empty in "warn"
+   * mode, silently render empty in "ignore" mode. Returns the
+   * replacement text (always "" unless it throws).
+   */
+  function handleMissing(
+    kind: "vars" | "env",
+    name: string,
+    filePath: string,
+    file: any,
+    node: any,
+  ): string {
+    const mode = kind === "vars" ? onMissingVar : onMissingEnv;
+    if (mode === "throw") {
+      throw kind === "vars"
+        ? unknownKeyError(name, filePath)
+        : unsetEnvError(name, filePath);
+    }
+    if (mode === "warn") {
+      const message =
+        kind === "vars"
+          ? `[Portosaur] Unknown vars key "{vars.${name}}" in "${filePath || "unknown file"}" — rendering empty. Make sure "${name}" is defined under 'vars:' in your porto.yml.`
+          : `[Portosaur] Unset env var "{env.${name}}" in "${filePath || "unknown file"}" — rendering empty.`;
+      file.message(message, node);
+      // fumadocs-mdx never reads the vfile messages (its build step
+      // returns only code and map), so a file.message alone would
+      // never reach the build log. Print it too, so the warning is
+      // actually seen at build time.
+      console.warn(message);
+    }
+    return "";
+  }
+
+  /**
+   * Replace {vars.key} occurrences in a string. Unknown keys follow
+   * the onMissingVar behavior (throw, warn, or ignore).
    * Double-brace form {{vars.key}} is an escape — it renders as {vars.key} literally.
    * @param str
    * @param filePath - Source file path for error context.
    */
-  function replaceVarsBraces(str: string, filePath: string): string {
+  function replaceVarsBraces(
+    str: string,
+    filePath: string,
+    file: any,
+    node: any,
+  ): string {
     // Step 1: protect escaped {{vars.key}} with a null-byte placeholder
     //         so the single-brace replacer never sees them.
     const ESCAPE_PLACEHOLDER = "\x00VARS_LITERAL\x00";
@@ -136,7 +227,7 @@ export default function remarkVarsPlugin(
     const replaced = escaped.replace(bracePattern, (_, path) => {
       const resolved = resolveVarPath(path, vars);
       if (resolved === undefined) {
-        throw unknownKeyError(path, filePath);
+        return handleMissing("vars", path, filePath, file, node);
       }
       return resolved;
     });
@@ -152,11 +243,16 @@ export default function remarkVarsPlugin(
   }
 
   /**
-   * Replace {env.VAR} occurrences in a string. An unset variable
-   * resolves to an empty string, matching {{env.VAR}} in porto.yml.
+   * Replace {env.VAR} occurrences in a string. Unset variables
+   * follow the onMissingEnv behavior (throw, warn, or ignore).
    * Double-brace form {{env.VAR}} is an escape — it renders as {env.VAR} literally.
    */
-  function replaceEnvBraces(str: string): string {
+  function replaceEnvBraces(
+    str: string,
+    filePath: string,
+    file: any,
+    node: any,
+  ): string {
     // Protect escaped {{env.VAR}} with a null-byte placeholder
     // so the single-brace replacer never sees them.
     const ESCAPE_PLACEHOLDER = "\x00ENV_LITERAL\x00";
@@ -166,10 +262,14 @@ export default function remarkVarsPlugin(
     );
 
     // Replace {env.VAR} — any remaining single-brace form is a real reference.
-    const replaced = escaped.replace(
-      envBracePattern,
-      (_, name) => env[name] ?? "",
-    );
+    // An env var set to "" is defined (renders ""), only an unset one is missing.
+    const replaced = escaped.replace(envBracePattern, (_, name) => {
+      const value = env[name];
+      if (value === undefined) {
+        return handleMissing("env", name, filePath, file, node);
+      }
+      return value;
+    });
 
     // Restore escaped tokens as literal {env.VAR}
     return replaced.replace(
@@ -181,9 +281,16 @@ export default function remarkVarsPlugin(
     );
   }
 
-  function replaceBraces(str: string, filePath: string): string {
-    const afterVars = hasVars ? replaceVarsBraces(str, filePath) : str;
-    return replaceEnvBraces(afterVars);
+  function replaceBraces(
+    str: string,
+    filePath: string,
+    file: any,
+    node: any,
+  ): string {
+    const afterVars = hasVars
+      ? replaceVarsBraces(str, filePath, file, node)
+      : str;
+    return replaceEnvBraces(afterVars, filePath, file, node);
   }
 
   // The transformer receives (tree, file) — `file.path` is the source file path
@@ -192,27 +299,27 @@ export default function remarkVarsPlugin(
 
     // Text nodes: replace {vars.key} in plain text
     visit(tree, "text", (node) => {
-      node.value = replaceBraces(node.value, filePath);
+      node.value = replaceBraces(node.value, filePath, file, node);
     });
 
     // Inline code: `{vars.key}`
     visit(tree, "inlineCode", (node) => {
-      node.value = replaceBraces(node.value, filePath);
+      node.value = replaceBraces(node.value, filePath, file, node);
     });
 
     // Fenced code blocks
     visit(tree, "code", (node) => {
-      node.value = replaceBraces(node.value, filePath);
+      node.value = replaceBraces(node.value, filePath, file, node);
     });
 
     // Links: [text]({vars.key}) or [text]({vars.key}/subpath)
     visit(tree, "link", (node) => {
-      node.url = replaceBraces(node.url, filePath);
+      node.url = replaceBraces(node.url, filePath, file, node);
     });
 
     // Images: ![alt]({vars.key})
     visit(tree, "image", (node) => {
-      node.url = replaceBraces(node.url, filePath);
+      node.url = replaceBraces(node.url, filePath, file, node);
     });
 
     // --- .mdx expression nodes: {vars.key} and {env.VAR} are parsed as JSX expressions ---
@@ -231,13 +338,18 @@ export default function remarkVarsPlugin(
         if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
           return;
         }
-        resolved = env[name] ?? "";
+        const value = env[name];
+        resolved =
+          value === undefined
+            ? handleMissing("env", name, filePath, file, node)
+            : value;
       } else if (hasVars && expr.startsWith("vars.")) {
         const varPath = expr.replace(/^vars\./, "");
-        resolved = resolveVarPath(varPath, vars);
-        if (resolved === undefined) {
-          throw unknownKeyError(varPath, filePath);
-        }
+        const value = resolveVarPath(varPath, vars);
+        resolved =
+          value === undefined
+            ? handleMissing("vars", varPath, filePath, file, node)
+            : value;
       } else {
         return;
       }

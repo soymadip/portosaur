@@ -112,6 +112,27 @@ describe("buildSiteConfig", () => {
     expect(off.site.content.addMdxDesc).toBe(false);
   });
 
+  test("on_missing_var defaults to throw, on_missing_env to warn", () => {
+    const defaults = buildSiteConfig({}, process.cwd(), {
+      gitDate: "June 26, 2026",
+      portoPaths,
+    });
+    expect(defaults.site.content.onMissingVar).toBe("throw");
+    expect(defaults.site.content.onMissingEnv).toBe("warn");
+
+    const custom = buildSiteConfig(
+      {
+        site: {
+          content: { on_missing_var: "ignore", on_missing_env: "throw" },
+        },
+      },
+      process.cwd(),
+      { gitDate: "June 26, 2026", portoPaths },
+    );
+    expect(custom.site.content.onMissingVar).toBe("ignore");
+    expect(custom.site.content.onMissingEnv).toBe("throw");
+  });
+
   test("toc defaults to on, levels 2 to 5, and can be narrowed", () => {
     const defaults = buildSiteConfig({}, process.cwd(), {
       gitDate: "June 26, 2026",

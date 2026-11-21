@@ -55,7 +55,7 @@ import remarkContentTitle, {
   CONTENT_TITLE_KEY,
 } from "./plugins/remarkContentTitle.ts";
 import remarkHasMath, { HAS_MATH_KEY } from "./plugins/remarkHasMath.ts";
-import remarkVars from "./plugins/remarkVars.ts";
+import remarkVars, { type MissingBehavior } from "./plugins/remarkVars.ts";
 import remarkFileLinks, { type ContentDir } from "./plugins/remarkFileLinks.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
 import remarkMermaid from "./plugins/remarkMermaid.ts";
@@ -69,6 +69,10 @@ import { getShikiThemes } from "./config/shiki.ts";
 
 export interface PortosaurMdxArgs {
   userVars?: Record<string, unknown>;
+  /** Behavior for an unknown `{vars.key}` (default "throw"). */
+  onMissingVar?: MissingBehavior;
+  /** Behavior for an unset `{env.VAR}` (default "warn"). */
+  onMissingEnv?: MissingBehavior;
   colorScheme?: string;
   /** Render `:smile:`-style emoji shortcodes (default true). */
   renderEmojiShortcodes?: boolean;
@@ -130,6 +134,10 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  *
  * @param args.userVars - The `vars` map from porto.yml (for
  *   `{vars.key}` substitution).
+ * @param args.onMissingVar - Behavior for an unknown `{vars.key}`
+ *   (`site.content.on_missing_var`, default "throw").
+ * @param args.onMissingEnv - Behavior for an unset `{env.VAR}`
+ *   (`site.content.on_missing_env`, default "warn").
  * @param args.colorScheme - The site's color scheme (for the Shiki
  *   light/dark themes).
  * @param args.renderEmojiShortcodes - Whether `:smile:`-style emoji
@@ -143,6 +151,8 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  */
 export function portosaurMdxOptions({
   userVars = {},
+  onMissingVar = "throw",
+  onMissingEnv = "warn",
   colorScheme,
   renderEmojiShortcodes = true,
   mermaid = true,
@@ -158,7 +168,7 @@ export function portosaurMdxOptions({
       remarkContentTitle,
       remarkMath,
       remarkHasMath,
-      [remarkVars, userVars],
+      [remarkVars, { vars: userVars, onMissingVar, onMissingEnv }],
       // Relative file links (`./sibling.mdx`) resolve to page URLs.
       // After remarkVars so `{vars.key}` substitution applies inside
       // link URLs first.

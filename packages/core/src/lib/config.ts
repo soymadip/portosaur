@@ -47,6 +47,8 @@ export interface PortosaurOptions {
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;
       onBrokenImages: string;
+      onMissingVar: string;
+      onMissingEnv: string;
       toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };

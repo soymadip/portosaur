@@ -51,6 +51,8 @@ vars:
   company: "Acme Corp"
 ```
 
+An unknown key fails the build by default. Change that with `site.content.on_missing_var` (`throw`, `warn`, or `ignore`). With `warn` the build prints a warning and renders the missing key as empty, with `ignore` it renders empty silently.
+
 ### 2. Environment Variables (`env`)
 
 Access environment variables during development and CI/CD builds:
@@ -68,7 +70,7 @@ In MDX files, use `{env.<VAR_NAME>}` the same way you use `{vars.<key>}`:
 Deploys go to {{env.PORTOSAUR_DEPLOY_URL}}.
 ```
 
-An unset variable resolves to an empty string here too.
+An unset variable resolves to an empty string here too, and the build prints a warning about it by default. Change that with `site.content.on_missing_env` (`throw`, `warn`, or `ignore`).
 
 **Never put secrets in MDX.** Env values used in MDX end up in the built public HTML, so anyone can read them. Use `{env.}` for public values like deploy URLs, never for tokens or passwords.
 

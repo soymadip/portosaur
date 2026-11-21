@@ -135,6 +135,16 @@
               "description": "Broken image behavior.",
               "default": "throw"
             },
+            "on_missing_var": {
+              "type": ["string", "null"],
+              "description": "Behavior when a {vars.key} reference is missing.",
+              "default": "throw"
+            },
+            "on_missing_env": {
+              "type": ["string", "null"],
+              "description": "Behavior when an {env.VAR} reference is unset.",
+              "default": "warn"
+            },
             "toc": {
               "type": ["object", "null"],
               "additionalProperties": false,

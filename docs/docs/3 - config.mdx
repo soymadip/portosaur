@@ -59,17 +59,19 @@ Robots file generator for search engine crawlers.
 
 Configure how content renders.
 
-| Key                       | Type   | Default   | Description                                                                                                    |
-| :------------------------ | :----- | :-------- | :------------------------------------------------------------------------------------------------------------- |
-| `add_mdx_desc`            | `bool` | `true`    | Show the page description under the title. Per-page `hide_desc` frontmatter overrides this.                    |
-| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                               |
-| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
-| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
-| `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                      |
-| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
-| `toc.enable`              | `bool` | `true`    | Show the table of contents. Per-page `toc` frontmatter overrides this.                                         |
-| `toc.min_level`           | `num`  | `2`       | Shallowest heading level in the table of contents.                                                             |
-| `toc.max_level`           | `num`  | `5`       | Deepest heading level in the table of contents.                                                                |
+| Key                       | Type   | Default   | Description                                                                                                                         |
+| :------------------------ | :----- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `add_mdx_desc`            | `bool` | `true`    | Show the page description under the title. Per-page `hide_desc` frontmatter overrides this.                                         |
+| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                                                    |
+| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet.                      |
+| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                                      |
+| `on_missing_var`          | `str`  | `"throw"` | Missing `{vars.<key>}` behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. `warn` and `ignore` render the missing key as empty. |
+| `on_missing_env`          | `str`  | `"warn"`  | Missing `{env.<VAR_NAME>}` behavior.<br/>Options: same as above.                                                                    |
+| `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                                           |
+| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                                             |
+| `toc.enable`              | `bool` | `true`    | Show the table of contents. Per-page `toc` frontmatter overrides this.                                                              |
+| `toc.min_level`           | `num`  | `2`       | Shallowest heading level in the table of contents.                                                                                  |
+| `toc.max_level`           | `num`  | `5`       | Deepest heading level in the table of contents.                                                                                     |
 
 #### `site.pwa`
 
