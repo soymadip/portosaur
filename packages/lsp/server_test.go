@@ -167,6 +167,9 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.DefinitionProvider == nil {
 		t.Fatal("no definition provider advertised")
 	}
+	if result.Capabilities.CodeActionProvider == nil {
+		t.Fatal("no code action provider advertised")
+	}
 	if result.Capabilities.TextDocumentSync != protocol.TextDocumentSyncKindFull {
 		t.Fatalf("sync = %v, want full", result.Capabilities.TextDocumentSync)
 	}

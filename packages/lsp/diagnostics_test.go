@@ -117,6 +117,17 @@ func TestComponentDiagnosticsBadIcon(t *testing.T) {
 	}
 }
 
+func TestComponentDiagnosticsBadEnumValue(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=\"bogus\">\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, "Invalid value 'bogus' for prop 'variant'") {
+		t.Fatalf("diagnostics = %v, want the invalid-enum warning", diagnosticMessages(diags))
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 14 {
+		t.Fatalf("diagnostic range = %+v, want the value inside the quotes", diags[0].Range)
+	}
+}
+
 func TestComponentDiagnosticsValidIcons(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"lu:star\">\n\n<DynamicIcon icon=\"🚀\">\n\n<DynamicIcon icon=\"/img/logo.png\">\n\n<Icon id=\"react\">\n")

@@ -70,6 +70,9 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			},
 			HoverProvider:      protocol.Boolean(true),
 			DefinitionProvider: protocol.Boolean(true),
+			CodeActionProvider: &protocol.CodeActionOptions{
+				CodeActionKinds: []protocol.CodeActionKind{protocol.CodeActionKindQuickFix},
+			},
 		},
 		ServerInfo: protocol.ServerInfo{
 			Name:    "porto-lsp",

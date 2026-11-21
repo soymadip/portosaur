@@ -38,7 +38,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	}
 	var diags []protocol.Diagnostic
 	if block, ok := extractFrontmatter(text); ok && block.closed {
-		diags = append(diags, s.frontmatterIssues(block, root)...)
+		for _, issue := range s.frontmatterIssues(block, root) {
+			diags = append(diags, issue.diag)
+		}
 	}
 	for _, issue := range s.componentIssues(text, root) {
 		diags = append(diags, issue.diag)
@@ -46,24 +48,40 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	s.sendDiagnostics(documentURI, diags)
 }
 
+// frontmatterIssue is one frontmatter problem: the diagnostic
+// plus what a quick fix needs. enum holds the valid values when
+// the problem is an enum mismatch; unknownKey names the key when
+// the problem is an unknown key, and unknownScalar reports
+// whether its value is a single-line scalar, so the whole line
+// can be deleted safely. Diagnostics publish diag; code actions
+// reuse the rest.
+type frontmatterIssue struct {
+	diag          protocol.Diagnostic
+	enum          []string
+	unknownKey    string
+	unknownScalar bool
+}
+
 // frontmatterIssues validates one frontmatter block and returns
-// its diagnostics, shifted down into the document.
-func (s *Server) frontmatterIssues(block frontmatterBlock, root string) []protocol.Diagnostic {
+// its issues, shifted down into the document.
+func (s *Server) frontmatterIssues(block frontmatterBlock, root string) []frontmatterIssue {
 	lines := strings.Split(block.yaml, "\n")
 	rootNode, err := parseYAML(block.yaml)
 	if err != nil {
-		return shiftDiagnostics(yamlParseDiagnostics(err, lines), block.startLine)
+		return wrapIssues(shiftDiagnostics(yamlParseDiagnostics(err, lines), block.startLine))
 	}
 	schema := s.resolver.resolve(root, schemaFrontmatter)
-	var diags []protocol.Diagnostic
-	diags = append(diags, frontmatterIconDiagnostics(rootNode, lines, block.startLine)...)
+	var issues []frontmatterIssue
+	for _, diag := range frontmatterIconDiagnostics(rootNode, lines, block.startLine) {
+		issues = append(issues, frontmatterIssue{diag: diag})
+	}
 	if !schema.strict {
-		return diags
+		return issues
 	}
 	var value any
 	if rootNode != nil {
 		if err := rootNode.Decode(&value); err != nil {
-			diags = append(diags, shiftDiagnostics([]protocol.Diagnostic{{
+			issues = append(issues, frontmatterIssue{diag: shiftDiagnostics([]protocol.Diagnostic{{
 				Range: protocol.Range{
 					Start: protocol.Position{Line: 0, Character: 0},
 					End:   protocol.Position{Line: 0, Character: 1},
@@ -71,22 +89,33 @@ func (s *Server) frontmatterIssues(block frontmatterBlock, root string) []protoc
 				Severity: protocol.DiagnosticSeverityError,
 				Source:   protocol.NewOptional("porto-lsp"),
 				Message:  protocol.String(err.Error()),
-			}}, block.startLine)...)
-			return diags
+			}}, block.startLine)[0]})
+			return issues
 		}
 	}
 	// An empty file is all defaults, not an error.
 	if value == nil {
-		return diags
+		return issues
 	}
 	if err := schema.compiled.Validate(value); err != nil {
 		verr, ok := err.(*jsonschema.ValidationError)
 		if !ok {
-			return diags
+			return issues
 		}
-		diags = append(diags, shiftDiagnostics(validationDiagnostics(verr, rootNode, lines), block.startLine)...)
+		for _, issue := range validationIssues(verr, rootNode, lines) {
+			issue.diag = shiftDiagnostics([]protocol.Diagnostic{issue.diag}, block.startLine)[0]
+			issues = append(issues, issue)
+		}
 	}
-	return diags
+	return issues
+}
+
+func wrapIssues(diags []protocol.Diagnostic) []frontmatterIssue {
+	issues := make([]frontmatterIssue, 0, len(diags))
+	for _, diag := range diags {
+		issues = append(issues, frontmatterIssue{diag: diag})
+	}
+	return issues
 }
 
 // frontmatterIconDiagnostics checks the frontmatter `icon` key,
@@ -110,12 +139,14 @@ func frontmatterIconDiagnostics(rootNode *yaml.Node, lines []string, lineOffset 
 
 // componentIssue is one problem with a component use: the
 // diagnostic the editor shows, plus what a quick fix needs (the
-// missing prop and where to insert it). Diagnostics publish
-// diag; code actions reuse the rest.
+// missing prop and where to insert it, or the valid values for a
+// bad enum value). Diagnostics publish diag; code actions reuse
+// the rest.
 type componentIssue struct {
 	diag        protocol.Diagnostic
 	missingProp string
 	insert      protocol.Position
+	enum        []string
 }
 
 // The props that hold icon values, per component.
@@ -164,6 +195,38 @@ func (s *Server) componentIssues(text string, root string) []componentIssue {
 					})
 				}
 			}
+			for _, prop := range tag.props {
+				if !prop.hasValue || prop.expr {
+					continue
+				}
+				propSchema, ok := asMap(schemaProperties(def)[prop.name])
+				if !ok {
+					continue
+				}
+				enums := schemaEnum(propSchema)
+				if enums == nil {
+					continue
+				}
+				value := text[prop.valueStart:prop.valueEnd]
+				valid := false
+				for _, allowed := range enums {
+					if value == allowed {
+						valid = true
+						break
+					}
+				}
+				if !valid {
+					issues = append(issues, componentIssue{
+						diag: protocol.Diagnostic{
+							Range:    rangeFromOffsets(lines, prop.valueStart, prop.valueEnd),
+							Severity: protocol.DiagnosticSeverityWarning,
+							Source:   protocol.NewOptional("porto-lsp"),
+							Message:  protocol.String("Invalid value '" + value + "' for prop '" + prop.name + "' of <" + tag.name + ">: expected one of " + strings.Join(enums, ", ")),
+						},
+						enum: enums,
+					})
+				}
+			}
 		}
 		for _, propName := range iconProps[tag.name] {
 			for _, prop := range tag.props {
@@ -203,8 +266,13 @@ func (s *Server) sendDiagnostics(documentURI uri.URI, diags []protocol.Diagnosti
 // range already says where, so the prefix is dropped.
 var validationMessageRe = regexp.MustCompile(`^at '[^']*': (.*)$`)
 
-func validationDiagnostics(verr *jsonschema.ValidationError, root *yaml.Node, lines []string) []protocol.Diagnostic {
-	var diags []protocol.Diagnostic
+// validationIssues turns a schema validation failure into
+// structured issues: the diagnostic, plus the valid values for
+// an enum mismatch and the unknown key for an unknown key. The
+// ranges are in frontmatter-slice coordinates; the caller shifts
+// them into the document.
+func validationIssues(verr *jsonschema.ValidationError, root *yaml.Node, lines []string) []frontmatterIssue {
+	var issues []frontmatterIssue
 	var walk func(e *jsonschema.ValidationError)
 	walk = func(e *jsonschema.ValidationError) {
 		if len(e.Causes) > 0 {
@@ -217,22 +285,33 @@ func validationDiagnostics(verr *jsonschema.ValidationError, root *yaml.Node, li
 		if match := validationMessageRe.FindStringSubmatch(message); match != nil {
 			message = match[1]
 		}
+		issue := frontmatterIssue{}
 		var node *yaml.Node
 		if additional, ok := e.ErrorKind.(*kind.AdditionalProperties); ok && len(additional.Properties) > 0 {
 			// An unknown key: point at the key itself.
-			key, _ := yamlLookup(root, append(append([]string{}, e.InstanceLocation...), additional.Properties[0]))
+			key, value := yamlLookup(root, append(append([]string{}, e.InstanceLocation...), additional.Properties[0]))
 			node = key
+			issue.unknownKey = additional.Properties[0]
+			issue.unknownScalar = value == nil || value.Kind == yaml.ScalarNode
 		} else {
 			// Anything else: point at the value.
 			_, node = yamlLookup(root, e.InstanceLocation)
+			if enumErr, ok := e.ErrorKind.(*kind.Enum); ok {
+				for _, want := range enumErr.Want {
+					if s, ok := want.(string); ok {
+						issue.enum = append(issue.enum, s)
+					}
+				}
+			}
 		}
-		diags = append(diags, protocol.Diagnostic{
+		issue.diag = protocol.Diagnostic{
 			Range:    nodeRange(node, lines),
 			Severity: protocol.DiagnosticSeverityError,
 			Source:   protocol.NewOptional("porto-lsp"),
 			Message:  protocol.String(message),
-		})
+		}
+		issues = append(issues, issue)
 	}
 	walk(verr)
-	return diags
+	return issues
 }

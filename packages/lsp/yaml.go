@@ -313,6 +313,13 @@ func nodeRange(node *yaml.Node, lines []string) protocol.Range {
 	start := protocol.Position{Line: uint32(node.Line - 1), Character: startChar}
 	if node.Kind == yaml.ScalarNode {
 		endChar := startChar + utf16Len(node.Value)
+		if node.Style == yaml.DoubleQuotedStyle || node.Style == yaml.SingleQuotedStyle {
+			// The column points at the opening quote, so
+			// the value's span is two short: the opening
+			// quote before the value and the closing quote
+			// after it.
+			endChar += 2
+		}
 		return protocol.Range{Start: start, End: protocol.Position{Line: start.Line, Character: endChar}}
 	}
 	return protocol.Range{Start: start, End: protocol.Position{Line: start.Line, Character: byteToUTF16(line, len(line))}}
