@@ -205,6 +205,9 @@ func propValueCompletions(schema *resolvedSchema, context tagContext) *protocol.
 	if def == nil {
 		return &protocol.CompletionList{}
 	}
+	if isIconProp(context.name, context.prop) {
+		return iconPrefixCompletions(context.partial, context.partialRange, !context.quoted)
+	}
 	prop, ok := asMap(schemaProperties(def)[context.prop])
 	if !ok {
 		return &protocol.CompletionList{}
@@ -326,6 +329,17 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 }
 
 func valueCompletions(schema *resolvedSchema, context cursorContext) *protocol.CompletionList {
+	if len(context.path) == 0 && context.key == "icon" {
+		// The frontmatter icon key takes pack prefixes, not
+		// the schema's values. A leading quote stays put: the
+		// prefix replaces only the text after it.
+		partial, partialRange := context.partial, context.partialRange
+		if len(partial) > 0 && (partial[0] == '"' || partial[0] == '\'') {
+			partial = partial[1:]
+			partialRange.Start.Character++
+		}
+		return iconPrefixCompletions(partial, partialRange, false)
+	}
 	node, ok := schemaAt(schema.raw, append(context.path, context.key))
 	if !ok {
 		return &protocol.CompletionList{}

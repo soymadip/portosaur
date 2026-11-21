@@ -238,6 +238,18 @@ func editText(items []protocol.CompletionItem, label string) (string, bool) {
 	return "", false
 }
 
+// detailText returns the detail of the completion item with the
+// given label.
+func detailText(items []protocol.CompletionItem, label string) (string, bool) {
+	for _, item := range items {
+		if item.Label != label {
+			continue
+		}
+		return item.Detail.Get()
+	}
+	return "", false
+}
+
 func (s *testServer) hover(t *testing.T, documentURI uri.URI, line, character uint32) *protocol.MarkupContent {
 	t.Helper()
 	hover, err := s.server.Hover(context.Background(), &protocol.HoverParams{
@@ -541,6 +553,122 @@ func TestComponentCompletionUnknownComponentIsEmpty(t *testing.T) {
 	items := s.complete(t, documentURI, 2, 5)
 	if len(items) != 0 {
 		t.Fatalf("completions for <Foo = %v, want none", labels(items))
+	}
+}
+
+func TestFrontmatterIconCompletionOffersPrefixes(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nicon: \n---\n")
+	items := s.complete(t, documentURI, 1, 6)
+	if len(items) != len(iconPackNames) {
+		t.Fatalf("icon completions = %d, want %d (every pack prefix)", len(items), len(iconPackNames))
+	}
+	for _, want := range []string{"si:", "lu:", "fa:", "lucide:"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("icon completions %v missing %q", labels(items), want)
+		}
+	}
+	if text, ok := editText(items, "si:"); !ok || text != "si:" {
+		t.Fatalf("si: edit = %q, want %q", text, "si:")
+	}
+	if detail, ok := detailText(items, "si:"); !ok || detail != "Simple Icons" {
+		t.Fatalf("si: detail = %q, want %q", detail, "Simple Icons")
+	}
+}
+
+func TestFrontmatterIconCompletionFiltersByPartial(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nicon: si\n---\n")
+	items := s.complete(t, documentURI, 1, 8)
+	if len(items) != 2 || !hasLabel(items, "si:") || !hasLabel(items, "simple-icons:") {
+		t.Fatalf("completions = %v, want only si: and simple-icons:", labels(items))
+	}
+}
+
+func TestFrontmatterIconCompletionAfterColonIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nicon: si:g\n---\n")
+	items := s.complete(t, documentURI, 1, 10)
+	if len(items) != 0 {
+		t.Fatalf("completions after the colon = %v, want none (icon names stay free text)", labels(items))
+	}
+}
+
+func TestFrontmatterIconCompletionQuotedValue(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nicon: \"si\n---\n")
+	items := s.complete(t, documentURI, 1, 9)
+	if len(items) != 2 || !hasLabel(items, "si:") || !hasLabel(items, "simple-icons:") {
+		t.Fatalf("completions = %v, want only si: and simple-icons:", labels(items))
+	}
+	for _, item := range items {
+		if item.Label != "si:" {
+			continue
+		}
+		edit, ok := item.TextEdit.(*protocol.TextEdit)
+		if !ok {
+			t.Fatalf("si: TextEdit is %T, want *protocol.TextEdit", item.TextEdit)
+		}
+		if edit.NewText != "si:" {
+			t.Fatalf("si: edit = %q, want %q", edit.NewText, "si:")
+		}
+		if edit.Range.Start.Character != 7 {
+			t.Fatalf("si: edit starts at character %d, want 7 (after the opening quote)", edit.Range.Start.Character)
+		}
+	}
+}
+
+func TestComponentIconCompletionOffersPrefixes(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"")
+	items := s.complete(t, documentURI, 2, 10)
+	if len(items) != len(iconPackNames) {
+		t.Fatalf("icon completions = %d, want %d (every pack prefix)", len(items), len(iconPackNames))
+	}
+	if !hasLabel(items, "si:") {
+		t.Fatalf("icon completions %v missing si:", labels(items))
+	}
+	if text, ok := editText(items, "si:"); !ok || text != "si:" {
+		t.Fatalf("si: edit = %q, want %q (bare, the quotes are there)", text, "si:")
+	}
+	if detail, ok := detailText(items, "si:"); !ok || detail != "Simple Icons" {
+		t.Fatalf("si: detail = %q, want %q", detail, "Simple Icons")
+	}
+}
+
+func TestComponentIconCompletionFiltersByPartial(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"lu")
+	items := s.complete(t, documentURI, 2, 12)
+	if len(items) != 2 || !hasLabel(items, "lu:") || !hasLabel(items, "lucide:") {
+		t.Fatalf("completions = %v, want only lu: and lucide:", labels(items))
+	}
+}
+
+func TestComponentIconCompletionAfterColonIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"si:star")
+	items := s.complete(t, documentURI, 2, 17)
+	if len(items) != 0 {
+		t.Fatalf("completions after the colon = %v, want none (icon names stay free text)", labels(items))
+	}
+}
+
+func TestComponentIconCompletionBtnIconProp(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn icon=\"")
+	items := s.complete(t, documentURI, 2, 11)
+	if !hasLabel(items, "si:") {
+		t.Fatalf("Btn icon completions %v missing si:", labels(items))
+	}
+}
+
+func TestComponentIconCompletionNonIconPropIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn href=\"")
+	items := s.complete(t, documentURI, 2, 11)
+	if len(items) != 0 {
+		t.Fatalf("href completions = %v, want none (href is not an icon prop)", labels(items))
 	}
 }
 

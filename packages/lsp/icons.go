@@ -1,7 +1,10 @@
 package main
 
 import (
+	"sort"
 	"strings"
+
+	"go.lsp.dev/protocol"
 )
 
 // Icon id validation, mirroring the build-time icon scan
@@ -77,6 +80,50 @@ var techMapNames = map[string]bool{
 	"pinterest": true, "snapchat": true, "whatsapp": true,
 	"spotify": true, "medium": true, "dribbble": true,
 	"behance": true,
+}
+
+// isIconProp reports whether the prop of a component holds an
+// icon value, per the iconProps table the diagnostics use.
+func isIconProp(component, prop string) bool {
+	for _, name := range iconProps[component] {
+		if name == prop {
+			return true
+		}
+	}
+	return false
+}
+
+// iconPrefixCompletions offers the icon pack prefixes for the
+// prefix the cursor is typing in an icon value. A colon in the
+// partial means the cursor is past the prefix, so there is
+// nothing to offer: icon names stay free text. Picking a prefix
+// inserts it with the colon, ready for the icon name. quote
+// wraps the insert in quotes for a JSX value that has none yet
+// (a bare `prefix:` is not valid there); the frontmatter path
+// passes false, so the cursor lands right after the colon and
+// the value parses again as soon as the icon name starts.
+func iconPrefixCompletions(partial string, partialRange protocol.Range, quote bool) *protocol.CompletionList {
+	if strings.Contains(partial, ":") {
+		return &protocol.CompletionList{}
+	}
+	var items []protocol.CompletionItem
+	for prefix, pack := range iconPackNames {
+		if !strings.HasPrefix(prefix, partial) {
+			continue
+		}
+		text := prefix + ":"
+		if quote {
+			text = `"` + text + `"`
+		}
+		items = append(items, protocol.CompletionItem{
+			Label:    prefix + ":",
+			Kind:     protocol.CompletionItemKindValue,
+			Detail:   protocol.NewOptional(pack),
+			TextEdit: &protocol.TextEdit{Range: partialRange, NewText: text},
+		})
+	}
+	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
+	return &protocol.CompletionList{IsIncomplete: false, Items: items}
 }
 
 // validateIconID checks one icon value the way the icon scan
