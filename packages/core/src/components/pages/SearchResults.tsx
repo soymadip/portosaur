@@ -269,17 +269,35 @@ export function SearchResults({
   // too (the page passes no hover callback). Hover wins over the
   // keyboard row while the mouse is over the list.
   const [hoverIndex, setHoverIndex] = useState(-1);
+  // Whether the last active-index change came from a hover: the
+  // dialog syncs hover into activeIndex too, so a bare
+  // activeIndex change can't tell hover from keyboard. The flag
+  // marks hover-driven changes; anything else is keyboard nav.
+  const hoveredRef = useRef(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const blockRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<Element | null>(null);
   const targetIndex = hoverIndex >= 0 ? hoverIndex : activeIndex;
 
   const handleHover = (index: number) => {
+    hoveredRef.current = true;
     setHoverIndex(index);
     if (onHoverIndex) {
       onHoverIndex(index);
     }
   };
+
+  // Keyboard nav releases the hover override: without this, a
+  // mouse resting on a row pins the block there and Ctrl+P /
+  // Ctrl+J (and the arrows) change the active row invisibly.
+  // The next hover takes over again.
+  useEffect(() => {
+    if (hoveredRef.current) {
+      hoveredRef.current = false;
+      return;
+    }
+    setHoverIndex(-1);
+  }, [activeIndex]);
 
   // Glide the block to the target row. It appears in place when
   // coming from outside, glides between rows, and fades out when
