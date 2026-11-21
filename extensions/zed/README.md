@@ -2,6 +2,8 @@
 
 Language support for [Portosaur](https://github.com/soymadip/portosaur) sites: suggestions, hover help, and error checking in the frontmatter and components of MDX pages. `porto.yml` is handled by Zed's built-in YAML support, which reads the `$schema` line at the top of the file.
 
+See the [feature comparison](../README.md) for how the VS Code and Zed extensions compare.
+
 ## Requirements
 
 Install the [MDX](https://zed.dev/extensions/mdx) extension as well. It provides the MDX language itself (syntax highlighting and the file type); this extension only adds the Portosaur language server.

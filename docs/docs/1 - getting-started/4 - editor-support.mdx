@@ -12,6 +12,19 @@ The server only activates inside a Portosaur project, so it stays quiet in other
 
 ---
 
+## What the server does
+
+Beyond completion and hover, the server also:
+
+- **Warns about components.** An unknown component name, a missing required prop, a bad icon name, or a prop value outside its allowed list gets a warning. Icon names are checked the way the build checks them: the prefix must be a known icon pack and the value must be `prefix:name`.
+- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` `to`/`href` value opens the target page, landing on the heading after a `#hash`.
+- **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`.
+- **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
+- **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
+- **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.
+
+---
+
 ## VS Code
 
 Install the [Portosaur extension](https://marketplace.visualstudio.com/items?itemName=soymadip.portosaur) from the Marketplace (also on [Open VSX](https://open-vsx.org/extension/soymadip/portosaur)). You also need the [MDX extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx), which provides the MDX language itself, and the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), which handles `porto.yml` through the `$schema` line. Both are installed automatically along with the Portosaur extension.
