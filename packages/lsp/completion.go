@@ -149,11 +149,11 @@ type tagCandidate struct {
 // insert writes self-closing. The components schema does not
 // mark leaf-ness, so the list is explicit.
 var leafComponents = map[string]bool{
-	"Diagram":    true,
-	"Icon":       true,
-	"IconSearch": true,
-	"Pv":         true,
-	"TopicList":  true,
+	"Diagram":     true,
+	"DynamicIcon": true,
+	"Icon":        true,
+	"IconSearch":  true,
+	"TopicList":   true,
 }
 
 // tagInsert returns the snippet inserted when a tag is picked:

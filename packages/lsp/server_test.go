@@ -582,18 +582,19 @@ func TestComponentCompletionInsertsFullTag(t *testing.T) {
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
 	items := s.complete(t, documentURI, 2, 1)
 	want := map[string]string{
-		"Hint":       "<Hint>$0</Hint>",
-		"Details":    "<Details>$0</Details>",
-		"Tabs":       "<Tabs>$0</Tabs>",
-		"Icon":       "<Icon />",
-		"Diagram":    "<Diagram />",
-		"TopicList":  "<TopicList />",
-		"IconSearch": "<IconSearch />",
-		"Pv":         "<Pv />",
-		"div":        "<div>$0</div>",
-		"br":         "<br>",
-		"hr":         "<hr>",
-		"img":        "<img>",
+		"Hint":        "<Hint>$0</Hint>",
+		"Details":     "<Details>$0</Details>",
+		"Tabs":        "<Tabs>$0</Tabs>",
+		"Icon":        "<Icon />",
+		"Diagram":     "<Diagram />",
+		"DynamicIcon": "<DynamicIcon />",
+		"TopicList":   "<TopicList />",
+		"IconSearch":  "<IconSearch />",
+		"Pv":          "<Pv>$0</Pv>",
+		"div":         "<div>$0</div>",
+		"br":          "<br>",
+		"hr":          "<hr>",
+		"img":         "<img>",
 	}
 	for label, text := range want {
 		if got, ok := editText(items, label); !ok || got != text {
