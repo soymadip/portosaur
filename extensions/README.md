@@ -15,6 +15,7 @@ how `porto.yml` is handled.
 | Missing-required-prop warnings                     |   Yes   | Yes |                                                                                         |
 | Go-to-definition for links                         |   Yes   | Yes |                                                                                         |
 | Clickable links                                    |   Yes   | Yes | Ctrl/Cmd+click opens pages, files, and external URLs                                    |
+| Rename updates links                               |   Yes   | Yes | Clean-URL links rewritten, relative markdown links are the MDX server's job             |
 | Broken-link warnings                               |   Yes   | Yes | Severity follows `site.content.on_broken_links`                                         |
 | Broken-image warnings                              |   Yes   | Yes | Severity follows `site.content.on_broken_images`                                        |
 | Multi-segment `slug:` errors                       |   Yes   | Yes | A slug only renames the file itself                                                     |
