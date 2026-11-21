@@ -53,10 +53,16 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	server := &Server{}
+	server := newServer()
 	stream := jsonrpc2.NewStream(stdioConn{})
 	ctx := context.Background()
-	ctx, conn, _ := protocol.NewServer(ctx, server, stream)
-	conn.Go(ctx, protocol.ServerHandler(server, jsonrpc2.MethodNotFoundHandler))
+	// NewServer starts the connection's read loop itself; calling
+	// conn.Go again would start a second reader on the same
+	// stream and corrupt the framing.
+	ctx, conn, client := protocol.NewServer(ctx, server, stream)
+	server.setClient(client)
 	<-conn.Done()
+	if err := conn.Err(); err != nil {
+		log.Printf("porto-lsp: connection ended: %v", err)
+	}
 }
