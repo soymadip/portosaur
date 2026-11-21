@@ -1,0 +1,85 @@
+/* Diagram viewer — the expand popup, GitHub-style: a
+ * near-fullscreen native <dialog> with the diagram large and
+ * Pele's zoom inside. Rendered by Diagram. The open/close fade
+ * lives in animations.css, with the other dialog motion. */
+
+.porto-diagram-dialog {
+  margin: auto;
+  padding: 0;
+  /* Nothing needs the dialog to scroll: the viewer sizes the
+     diagram to the frame, and zoom pans through the viewBox. */
+  overflow: hidden;
+  /* The page background, not the panel gray: the diagram's own
+     background is the same token, so it blends into the frame. */
+  background-color: var(--porto-color-bg);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  width: calc(100% - 2rem);
+  height: calc(100% - 2rem);
+  max-width: 90rem;
+}
+.porto-diagram-dialog[open] {
+  display: flex;
+}
+
+.porto-diagram-dialog__frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* The close button floats top-right, above the diagram. */
+.porto-diagram-dialog__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+}
+
+/* The viewer fills the frame and centers the diagram. The zoom
+   buttons sit bottom-right, GitHub-style, clear of the close
+   button up top (Pele reads these variables for the button
+   position). */
+.porto-diagram-dialog__viewer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  --pele-zoom-top: auto;
+  --pele-zoom-bottom: 0.5rem;
+  --pele-zoom-right: 0.5rem;
+}
+.porto-diagram-dialog__viewer > svg.pele {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* Scroll lock while the viewer is open, on the root element.
+   `scrollbar-gutter: stable` reserves the scrollbar's space
+   while it is hidden, so the page doesn't widen and the content
+   doesn't shift sideways when the dialog opens. */
+[data-diagram-modal-open] {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 50rem) {
+  /* On mobile the viewer takes the whole viewport: full width
+     and height, no border or radius — diagrams need the space. */
+  .porto-diagram-dialog {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+}
