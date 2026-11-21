@@ -112,7 +112,7 @@ func (s *Server) componentCompletion(params *protocol.CompletionParams, text str
 	}
 	switch context.kind {
 	case tagName:
-		return componentNameCompletions(schema, context)
+		return componentNameCompletions(schema, context, text)
 	case tagProp:
 		return propNameCompletions(schema, context)
 	case tagValue:
@@ -122,31 +122,57 @@ func (s *Server) componentCompletion(params *protocol.CompletionParams, text str
 	}
 }
 
-// componentNameCompletions offers the component names from the
-// schema's definitions, filtered by the typed prefix. The
-// description lists the component's props, required ones marked.
-func componentNameCompletions(schema *resolvedSchema, context tagContext) *protocol.CompletionList {
-	definitions, _ := asMap(schema.raw["definitions"])
-	if definitions == nil {
-		return &protocol.CompletionList{}
+// tagCandidate is one name offered after `<`, with the detail
+// and doc the editor shows beside it.
+type tagCandidate struct {
+	name   string
+	detail string
+	doc    string
+}
+
+// componentNameCompletions offers the tag names from three
+// sources, merged and sorted: the built-in components from the
+// schema's definitions, the document's own imports, and the
+// HTML tags. A name offered twice appears once: an import
+// shadows a built-in component with the same name (an import
+// shadows the components map in MDX), and a built-in shadows
+// an HTML tag. The description lists the component's props,
+// required ones marked; imports name their source, HTML tags
+// say so.
+func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
+	candidates := map[string]tagCandidate{}
+	for _, tag := range htmlTags {
+		candidates[tag.name] = tagCandidate{name: tag.name, detail: "HTML tag"}
+	}
+	if definitions, ok := asMap(schema.raw["definitions"]); ok {
+		for name, raw := range definitions {
+			def, _ := asMap(raw)
+			cand := tagCandidate{name: name, doc: componentDoc(def)}
+			if required := schemaRequired(def); len(required) > 0 {
+				cand.detail = "required: " + strings.Join(required, ", ")
+			}
+			candidates[name] = cand
+		}
+	}
+	for _, imp := range scanImports(text) {
+		candidates[imp.name] = tagCandidate{name: imp.name, detail: "from '" + imp.source + "'"}
 	}
 	var items []protocol.CompletionItem
-	for name, raw := range definitions {
-		if !strings.HasPrefix(name, context.partial) {
+	for _, cand := range candidates {
+		if !strings.HasPrefix(cand.name, context.partial) {
 			continue
 		}
-		def, _ := asMap(raw)
 		item := protocol.CompletionItem{
-			Label: name,
+			Label: cand.name,
 			Kind:  protocol.CompletionItemKindClass,
 		}
-		if required := schemaRequired(def); len(required) > 0 {
-			item.Detail = protocol.NewOptional("required: " + strings.Join(required, ", "))
+		if cand.detail != "" {
+			item.Detail = protocol.NewOptional(cand.detail)
 		}
-		if doc := componentDoc(def); doc != "" {
-			item.Documentation = &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: doc}
+		if cand.doc != "" {
+			item.Documentation = &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: cand.doc}
 		}
-		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: name}
+		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: cand.name}
 		items = append(items, item)
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })

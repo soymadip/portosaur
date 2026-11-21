@@ -458,13 +458,91 @@ func TestComponentCompletionNames(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
 	items := s.complete(t, documentURI, 2, 1)
-	if len(items) != 18 {
-		t.Fatalf("component completions = %d, want 18", len(items))
+	if len(items) != 18+len(htmlTags) {
+		t.Fatalf("component completions = %d, want %d (18 built-ins plus the HTML tags)", len(items), 18+len(htmlTags))
 	}
 	for _, want := range []string{"Btn", "Details", "Hint", "Tabs", "TabItem"} {
 		if !hasLabel(items, want) {
 			t.Fatalf("component completions %v missing %q", labels(items), want)
 		}
+	}
+	for _, want := range []string{"div", "span", "section"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("component completions %v missing HTML tag %q", labels(items), want)
+		}
+	}
+	if detail, ok := detailText(items, "div"); !ok || detail != "HTML tag" {
+		t.Fatalf("div detail = %q, want %q", detail, "HTML tag")
+	}
+}
+
+func TestComponentCompletionNamesIncludeImports(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Foo from './Foo'\nimport { Bar, Baz } from './parts'\nimport Qux, { Quux } from './mix'\n\n<")
+	items := s.complete(t, documentURI, 4, 1)
+	if len(items) != 18+len(htmlTags)+5 {
+		t.Fatalf("component completions = %d, want %d (18 built-ins, the HTML tags, and 5 imports)", len(items), 18+len(htmlTags)+5)
+	}
+	for _, want := range []string{"Foo", "Bar", "Baz", "Qux", "Quux"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("component completions %v missing imported %q", labels(items), want)
+		}
+	}
+	if detail, ok := detailText(items, "Foo"); !ok || detail != "from './Foo'" {
+		t.Fatalf("Foo detail = %q, want %q", detail, "from './Foo'")
+	}
+	if detail, ok := detailText(items, "Bar"); !ok || detail != "from './parts'" {
+		t.Fatalf("Bar detail = %q, want %q", detail, "from './parts'")
+	}
+	if text, ok := editText(items, "Foo"); !ok || text != "Foo" {
+		t.Fatalf("Foo edit = %q, want %q (the bare name only)", text, "Foo")
+	}
+}
+
+func TestComponentCompletionImportedShadowsBuiltin(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Btn from './CustomBtn'\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	if len(items) != 18+len(htmlTags) {
+		t.Fatalf("component completions = %d, want %d (the imported Btn replaces the built-in)", len(items), 18+len(htmlTags))
+	}
+	count := 0
+	for _, item := range items {
+		if item.Label == "Btn" {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Fatalf("Btn appears %d times, want once", count)
+	}
+	if detail, ok := detailText(items, "Btn"); !ok || detail != "from './CustomBtn'" {
+		t.Fatalf("Btn detail = %q, want %q (the import wins)", detail, "from './CustomBtn'")
+	}
+}
+
+func TestComponentCompletionSkipsTypeAndNamespaceImports(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import type { Widget } from './types'\nimport * as Lib from './lib'\nimport type Gadget from './types'\n\n<")
+	items := s.complete(t, documentURI, 4, 1)
+	if len(items) != 18+len(htmlTags) {
+		t.Fatalf("component completions = %d, want %d (type and namespace imports offer nothing)", len(items), 18+len(htmlTags))
+	}
+	for _, want := range []string{"Widget", "Lib", "Gadget"} {
+		if hasLabel(items, want) {
+			t.Fatalf("component completions %v include %q, want it skipped", labels(items), want)
+		}
+	}
+}
+
+func TestComponentCompletionHTMLFiltersByPartial(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<di")
+	items := s.complete(t, documentURI, 2, 3)
+	if len(items) != 2 || !hasLabel(items, "dialog") || !hasLabel(items, "div") {
+		t.Fatalf("completions = %v, want only dialog and div", labels(items))
+	}
+	if text, ok := editText(items, "div"); !ok || text != "div" {
+		t.Fatalf("div edit = %q, want %q (the bare name only)", text, "div")
 	}
 }
 
