@@ -181,13 +181,13 @@ func tagInsert(cand tagCandidate) string {
 // shadows the components map in MDX), and a built-in shadows
 // an HTML tag. The description lists the component's props,
 // required ones marked; imports name their source, HTML tags
-// say so. Picking a tag inserts the whole tag as a snippet:
-// containers pair with the cursor inside, leaf components close
-// themselves, and void HTML tags self-close.
+// describe what they do. Picking a tag inserts the whole tag
+// as a snippet: containers pair with the cursor inside, leaf
+// components close themselves, and void HTML tags self-close.
 func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
 	candidates := map[string]tagCandidate{}
 	for _, tag := range htmlTags {
-		candidates[tag.name] = tagCandidate{name: tag.name, detail: "HTML tag", source: tagHTML, void: tag.void}
+		candidates[tag.name] = tagCandidate{name: tag.name, detail: tag.desc, source: tagHTML, void: tag.void}
 	}
 	if definitions, ok := asMap(schema.raw["definitions"]); ok {
 		for name, raw := range definitions {

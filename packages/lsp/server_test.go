@@ -800,8 +800,14 @@ func TestComponentCompletionNames(t *testing.T) {
 			t.Fatalf("component completions %v missing HTML tag %q", labels(items), want)
 		}
 	}
-	if detail, ok := detailText(items, "div"); !ok || detail != "HTML tag" {
-		t.Fatalf("div detail = %q, want %q", detail, "HTML tag")
+	if detail, ok := detailText(items, "div"); !ok || detail != "Generic container" {
+		t.Fatalf("div detail = %q, want %q", detail, "Generic container")
+	}
+	if detail, ok := detailText(items, "br"); !ok || detail != "Line break" {
+		t.Fatalf("br detail = %q, want %q", detail, "Line break")
+	}
+	if detail, ok := detailText(items, "button"); !ok || detail != "Clickable button" {
+		t.Fatalf("button detail = %q, want %q", detail, "Clickable button")
 	}
 }
 

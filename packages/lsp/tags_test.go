@@ -119,6 +119,9 @@ func TestHTMLTags(t *testing.T) {
 		if tag.void {
 			void[tag.name] = true
 		}
+		if tag.desc == "" {
+			t.Fatalf("htmlTags gives %q no description", tag.name)
+		}
 	}
 	for _, want := range []string{"div", "span", "p", "a", "ul", "ol", "li", "table", "h1", "h2", "h3", "h4", "h5", "h6", "section", "article", "header", "footer", "nav", "main", "img", "video", "button", "input", "form", "pre", "code", "blockquote", "hr", "br", "em", "strong", "details", "summary", "svg"} {
 		if !seen[want] {
