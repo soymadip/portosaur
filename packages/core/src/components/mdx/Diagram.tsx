@@ -17,8 +17,8 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * at the bottom-right). On a phone, tapping the diagram itself
  * opens the popup too. A second expand button beside the close
  * button grows the popup to near-fullscreen, and back — expanding
- * zooms the diagram in, shrinking back resets it to the whole
- * diagram. On a
+ * fits the diagram to the popup's width, shrinking back resets
+ * it to the whole diagram. On a
  * phone the popup is a bottom sheet: it slides up from the
  * bottom, and the expand button takes it full screen. The bar
  * at the top of the sheet is a drag handle: pull up to expand,
@@ -141,9 +141,10 @@ export function Diagram({ svg }: { svg: string }) {
     };
   }, [open]);
 
-  // Expanding zooms the diagram in: the expanded viewer is
-  // mostly empty otherwise, since the diagram keeps its natural
-  // size. The zoom waits out the 300ms size transition — Pele
+  // Expanding fits the diagram to the popup's width: the
+  // diagram keeps its natural size otherwise, so a narrow one
+  // floats in the middle of the bigger view with gaps at the
+  // sides. The zoom waits out the 300ms size transition — Pele
   // resets the zoom whenever the viewer resizes, so zooming
   // mid-transition would be undone. Shrinking back resets to
   // the whole diagram.
@@ -156,7 +157,18 @@ export function Diagram({ svg }: { svg: string }) {
       return;
     }
     const timer = window.setTimeout(() => {
-      zoomRef.current?.zoomTo(2);
+      const viewer = viewerRef.current;
+      const zoom = zoomRef.current;
+      const svg = viewer?.querySelector("svg");
+      const naturalWidth = Number(svg?.getAttribute("width"));
+      if (!viewer || !zoom || !naturalWidth) {
+        return;
+      }
+      const style = window.getComputedStyle(viewer);
+      const paddingX =
+        (parseFloat(style.paddingLeft) || 0) +
+        (parseFloat(style.paddingRight) || 0);
+      zoom.zoomTo((viewer.clientWidth - paddingX) / naturalWidth);
     }, 350);
     return () => {
       window.clearTimeout(timer);
