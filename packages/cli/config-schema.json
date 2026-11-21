@@ -106,7 +106,7 @@
             }
           }
         },
-        "markdown": {
+        "content": {
           "type": ["object", "null"],
           "additionalProperties": false,
           "properties": {

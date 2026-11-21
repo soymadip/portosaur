@@ -41,7 +41,7 @@ export interface PortosaurOptions {
     blogRoute: string;
     onBrokenLinks: string;
     onBrokenAnchors: string;
-    markdown: {
+    content: {
       addMdxDesc: boolean;
       mermaid: boolean;
       renderEmojiShortcodes: boolean;

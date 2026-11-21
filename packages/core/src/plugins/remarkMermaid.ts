@@ -5,7 +5,7 @@
  * (decision 27: Pele renders Mermaid syntax, NOT mermaid.js — zero
  * client JS, the SVG is in the HTML). Each fence becomes a
  * `<Diagram svg="..."/>` element — a real JSX node, since the MDX
- * compiler rejects raw HTML nodes. Gated on `site.markdown.mermaid`
+ * compiler rejects raw HTML nodes. Gated on `site.content.mermaid`
  * via the plugin list in mdx.ts.
  *
  * A fence whose diagram type Pele doesn't know (ZenUML, external

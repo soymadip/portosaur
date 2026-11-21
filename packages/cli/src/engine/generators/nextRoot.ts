@@ -176,8 +176,8 @@ export default defineConfig({
   mdxOptions: portosaurMdxOptions({
     userVars: ${JSON.stringify(options.userVars ?? {}, null, 2)},
     colorScheme: ${JSON.stringify(options.theme.colorScheme)},
-    renderEmojiShortcodes: ${JSON.stringify(options.site.markdown.renderEmojiShortcodes)},
-    mermaid: ${JSON.stringify(options.site.markdown.mermaid)},
+    renderEmojiShortcodes: ${JSON.stringify(options.site.content.renderEmojiShortcodes)},
+    mermaid: ${JSON.stringify(options.site.content.mermaid)},
   }),
 });
 `;

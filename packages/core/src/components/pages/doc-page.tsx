@@ -197,7 +197,7 @@ export function DocPage({
               <PageTitle
                 title={heading.text}
                 id={heading.id}
-                desc={docPageDesc(data, config.site.markdown.addMdxDesc)}
+                desc={docPageDesc(data, config.site.content.addMdxDesc)}
               />
             </ContentPanel>
           )}

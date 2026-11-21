@@ -83,7 +83,7 @@ export function docPageTitles(
 /**
  * The description to show under the page title, or undefined when
  * hidden. Frontmatter `hide_desc` wins when set; otherwise the
- * global `site.markdown.add_mdx_desc` decides.
+ * global `site.content.add_mdx_desc` decides.
  */
 export function docPageDesc(
   data: PortoDocData | undefined,
