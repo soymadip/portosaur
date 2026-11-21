@@ -56,6 +56,29 @@ func configString(cfg map[string]any, path []string, fallback string) string {
 	return fallback
 }
 
+// configBool reads a dotted key from the config, falling back
+// to the default when the key is missing or not a boolean.
+func configBool(cfg map[string]any, path []string, fallback bool) bool {
+	node := cfg
+	for i, segment := range path {
+		if node == nil {
+			return fallback
+		}
+		value, ok := node[segment]
+		if !ok {
+			return fallback
+		}
+		if i == len(path)-1 {
+			if b, ok := value.(bool); ok {
+				return b
+			}
+			return fallback
+		}
+		node, _ = value.(map[string]any)
+	}
+	return fallback
+}
+
 // configDocsMode reports whether the site is in docs mode: the
 // CLI treats a project as docs mode when porto.yml has a
 // `docs_home` key (siteConfig.ts).

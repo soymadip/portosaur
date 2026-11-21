@@ -34,6 +34,22 @@ var validIconPrefixes = map[string]bool{
 	"fa7-solid": true, "fa": true, "fas": true,
 }
 
+// iconPackNames maps every usable icon prefix (the canonical
+// names and shorthands in validIconPrefixes) to its pack's
+// display name from core `lib/iconPrefixes.ts`, for the detail
+// of shortcode completions.
+var iconPackNames = map[string]string{
+	"lucide": "Lucide", "lu": "Lucide",
+	"octicon": "Octicons", "oc": "Octicons",
+	"simple-icons": "Simple Icons", "si": "Simple Icons",
+	"logos": "Logos", "lo": "Logos",
+	"mdi": "Material Design", "md": "Material Design",
+	"line-md": "Line MD", "ml": "Line MD",
+	"devicon": "Devicon", "di": "Devicon",
+	"streamline-sharp": "Streamline", "sl": "Streamline",
+	"fa7-solid": "FontAwesome", "fa": "FontAwesome", "fas": "FontAwesome",
+}
+
 // The bare words the site maps to icons (core
 // `lib/techmap.ts`, keys lowercased). A snapshot: keep it in
 // sync with that file when names are added or removed.
