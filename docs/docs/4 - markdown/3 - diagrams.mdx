@@ -1,10 +1,10 @@
 ---
 title: "Diagrams"
-desc: "Mermaid diagrams rendered at build time, with zero client JavaScript."
+desc: "Mermaid diagrams rendered at build time, zoomable in the browser."
 icon: "lu:workflow"
 ---
 
-Write a diagram in Mermaid syntax inside a `mermaid` fence and {vars.project.title} renders it as an inline SVG at build time. No JavaScript ships to the browser for it, and the diagram follows the active light or dark scheme automatically.
+Write a diagram in Mermaid syntax inside a `mermaid` fence and {vars.project.title} renders it as an inline SVG at build time. No JavaScript is needed to display it, and the diagram follows the active light or dark scheme automatically.
 
 ````markdown
 ```mermaid
@@ -57,6 +57,12 @@ flowchart LR
 flowchart LR
   A[fa:fa-car Drive] --> B[fa:fa-flag Arrive]
 ```
+
+---
+
+## Zooming
+
+Every diagram can be enlarged: pinch on a phone, Ctrl or Cmd plus scroll on a desktop, or the buttons at the top-right of the diagram. Drag to move around a zoomed diagram, double-click to zoom in or reset. The zoom code only loads on pages that have a diagram.
 
 ---
 

@@ -98,11 +98,15 @@
    (Pele — see remarkMermaid). The `.pele` variables map Pele's
    theme onto the scheme tokens, so diagrams follow light/dark and
    the active scheme with no re-render. The wrapper centers the
-   diagram; the SVG scales down to fit narrow containers. */
+   diagram and anchors the zoom buttons; the SVG scales down to fit
+   narrow containers, and zoom (Diagram.tsx) enlarges it on demand. */
 .porto-markdown-content .porto-diagram:not(:where(.not-content *)) {
-  overflow-x: auto;
+  position: relative;
 }
 .porto-markdown-content .porto-diagram > svg.pele:not(:where(.not-content *)) {
+  display: block;
+  max-width: 100%;
+  height: auto;
   margin-inline: auto;
 }
 .pele {

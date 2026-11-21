@@ -1,5 +1,5 @@
 {
-  "generated_from": "Mermaid diagrams implemented (Diagrams page added)",
+  "generated_from": "Diagram zoom added (Zooming section)",
   "routes": [
     {
       "url": "/",
@@ -355,6 +355,7 @@
         "Diagrams",
         "Sequence Diagrams",
         "Icons in Labels",
+        "Zooming",
         "What Isn't Supported",
         "Theming",
         "Turning Diagrams Off"
