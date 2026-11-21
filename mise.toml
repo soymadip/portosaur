@@ -5,6 +5,8 @@ uv = "latest"
 # 1.3.12, which cannot parse it and silently ignores the lockfile —
 # an exact pin makes mise install a bun that reads it.
 bun = "1.4.4"
+# Pinned to the version porto-lsp (packages/lsp) builds with.
+go = "1.27.4"
 node = "24"
 prettier = "latest"
 
