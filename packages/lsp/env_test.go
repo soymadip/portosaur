@@ -61,6 +61,33 @@ func TestLoadDotenv(t *testing.T) {
 	}
 }
 
+func TestResolveEnv(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_PROC", "from-process")
+	root := t.TempDir()
+	write := func(name, content string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(root, name), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write(".env", "PORTO_LSP_TEST_PROC=from-env\nPORTO_LSP_TEST_SHARED=from-env\nPORTO_LSP_TEST_ONLY_ENV=yes\n")
+	write(".env.local", "PORTO_LSP_TEST_SHARED=from-local\n")
+	resolved := resolveEnv(root)
+	for name, want := range map[string]envValue{
+		"PORTO_LSP_TEST_PROC":     {value: "from-process", source: ""},
+		"PORTO_LSP_TEST_SHARED":   {value: "from-local", source: ".env.local"},
+		"PORTO_LSP_TEST_ONLY_ENV": {value: "yes", source: ".env"},
+	} {
+		got, ok := resolved[name]
+		if !ok || got != want {
+			t.Fatalf("resolveEnv[%q] = %+v, %v; want %+v, true", name, got, ok, want)
+		}
+	}
+	if _, ok := resolved["PORTO_LSP_TEST_NOPE"]; ok {
+		t.Fatal("resolveEnv has PORTO_LSP_TEST_NOPE, want it absent")
+	}
+}
+
 func TestDefinedEnvNames(t *testing.T) {
 	t.Setenv("PORTO_LSP_TEST_PROC", "x")
 	t.Setenv("PORTO_LSP_TEST_EMPTY", "")

@@ -23,10 +23,10 @@ var dotenvFiles = []string{".env", ".env.development", ".env.production", ".env.
 // envNameRe matches a valid env var name: no dots.
 var envNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 
-// loadDotenv reads the project's `.env` files into one
-// name-to-value map. Missing or unreadable files are skipped.
-func loadDotenv(root string) map[string]string {
-	values := map[string]string{}
+// eachDotenvEntry calls fn for every KEY=VALUE line in the
+// project's `.env` files, in increasing precedence order, so
+// later files override earlier ones.
+func eachDotenvEntry(root string, fn func(file, key, value string)) {
 	for _, name := range dotenvFiles {
 		raw, err := os.ReadFile(filepath.Join(root, name))
 		if err != nil {
@@ -34,11 +34,46 @@ func loadDotenv(root string) map[string]string {
 		}
 		for _, line := range strings.Split(string(raw), "\n") {
 			if key, value, ok := parseDotenvLine(line); ok {
-				values[key] = value
+				fn(name, key, value)
 			}
 		}
 	}
+}
+
+// loadDotenv reads the project's `.env` files into one
+// name-to-value map. Missing or unreadable files are skipped.
+func loadDotenv(root string) map[string]string {
+	values := map[string]string{}
+	eachDotenvEntry(root, func(_, key, value string) {
+		values[key] = value
+	})
 	return values
+}
+
+// envValue is one env var the build can see: its value, and
+// where it came from. source is empty for the system
+// environment, otherwise the `.env` file name.
+type envValue struct {
+	value  string
+	source string
+}
+
+// resolveEnv returns every env var the build can see, with its
+// value and where it came from. A var set in the process
+// environment wins over the `.env` files, matching Next; among
+// the `.env` files the last in precedence order wins. A var set
+// to "" counts as resolved.
+func resolveEnv(root string) map[string]envValue {
+	resolved := map[string]envValue{}
+	eachDotenvEntry(root, func(file, key, value string) {
+		resolved[key] = envValue{value: value, source: file}
+	})
+	for _, entry := range os.Environ() {
+		if key, value, ok := strings.Cut(entry, "="); ok {
+			resolved[key] = envValue{value: value}
+		}
+	}
+	return resolved
 }
 
 // parseDotenvLine parses one `KEY=VALUE` line: blank lines and

@@ -38,6 +38,9 @@ func (s *Server) mdxHover(params *protocol.HoverParams, text string) (*protocol.
 	if hover := varsHover(text, params.Position, vars); hover != nil {
 		return hover, nil
 	}
+	if hover := envHover(text, params.Position, resolveEnv(root)); hover != nil {
+		return hover, nil
+	}
 	schema := s.resolver.resolve(root, schemaComponents)
 	return componentHover(schema, text, params.Position), nil
 }
@@ -62,6 +65,37 @@ func varsHover(text string, pos protocol.Position, vars map[string]any) *protoco
 		rng := rangeFromOffsets(lines, ref.start, ref.end)
 		return &protocol.Hover{
 			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: value},
+			Range:    &rng,
+		}
+	}
+	return nil
+}
+
+// envHover describes a `{env.VAR}` reference: where the value
+// comes from and that the build replaces the reference with it.
+// The value itself stays out of the hover — it already shows
+// inline as an inlay hint — and so does any type. Only
+// references that resolve get a hover; unknown vars already get
+// a diagnostic.
+func envHover(text string, pos protocol.Position, env map[string]envValue) *protocol.Hover {
+	lines := strings.Split(text, "\n")
+	offset := positionToOffset(lines, pos)
+	for _, ref := range scanEnvRefs(text) {
+		if offset < ref.start || offset >= ref.end {
+			continue
+		}
+		value, ok := env[ref.name]
+		if !ok {
+			return nil
+		}
+		source := "Set in the system environment."
+		if value.source != "" {
+			source = "Defined in `" + value.source + "`."
+		}
+		body := "**{env." + ref.name + "}**\n\n" + source + " The build replaces this reference with its value."
+		rng := rangeFromOffsets(lines, ref.start, ref.end)
+		return &protocol.Hover{
+			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: body},
 			Range:    &rng,
 		}
 	}

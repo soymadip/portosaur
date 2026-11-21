@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -125,5 +126,117 @@ func TestVarsHoverPlainTextIsEmpty(t *testing.T) {
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nJust some words.\n")
 	if content := s.hover(t, documentURI, 2, 5); content != nil {
 		t.Fatalf("hover on plain text = %q, want nil", content.Value)
+	}
+}
+
+func TestEnvInlayHintShowsProcessEnvValue(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_PROC", "from-process")
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nWelcome to {env.PORTO_LSP_TEST_PROC}.\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-process" {
+		t.Fatalf("inlay hints = %v, want [from-process]", labels)
+	}
+	if hints[0].Position != (protocol.Position{Line: 2, Character: 36}) {
+		t.Fatalf("hint position = %+v, want line 2 character 36 (right after the reference)", hints[0].Position)
+	}
+	if hints[0].PaddingLeft == nil || !*hints[0].PaddingLeft {
+		t.Fatal("hint has no left padding")
+	}
+}
+
+func TestEnvInlayHintShowsDotenvValue(t *testing.T) {
+	root := fixtureProject(t)
+	if err := os.WriteFile(filepath.Join(root, ".env"), []byte("PORTO_LSP_TEST_FILE=from-dotenv\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSite is {env.PORTO_LSP_TEST_FILE}.\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-dotenv" {
+		t.Fatalf("inlay hints = %v, want [from-dotenv]", labels)
+	}
+}
+
+func TestEnvInlayHintProcessEnvWins(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_SHARED", "from-process")
+	root := fixtureProject(t)
+	if err := os.WriteFile(filepath.Join(root, ".env"), []byte("PORTO_LSP_TEST_SHARED=from-dotenv\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSite is {env.PORTO_LSP_TEST_SHARED}.\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-process" {
+		t.Fatalf("inlay hints = %v, want [from-process]", labels)
+	}
+}
+
+func TestEnvInlayHintSkipsUnknownAndEmpty(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_EMPTY", "")
+	t.Setenv("PORTO_LSP_TEST_DEFINED", "shown")
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_NOPE} and {env.PORTO_LSP_TEST_EMPTY} and {env.PORTO_LSP_TEST_DEFINED}\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "shown" {
+		t.Fatalf("inlay hints = %v, want only shown", labels)
+	}
+}
+
+func TestEnvInlayHintSkipsEscape(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_DEFINED", "shown")
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{{env.PORTO_LSP_TEST_DEFINED}}\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if len(hints) != 0 {
+		t.Fatalf("inlay hints = %v, want none for the escape form", hintLabels(hints))
+	}
+}
+
+func TestEnvHoverDescription(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_PROC", "from-process")
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nWelcome to {env.PORTO_LSP_TEST_PROC}.\n")
+	content := s.hover(t, documentURI, 2, 15)
+	if content == nil {
+		t.Fatal("no hover for a {env.} reference")
+	}
+	for _, want := range []string{"{env.PORTO_LSP_TEST_PROC}", "system environment", "replaces"} {
+		if !strings.Contains(content.Value, want) {
+			t.Fatalf("hover = %q, want it to mention %q", content.Value, want)
+		}
+	}
+	if strings.Contains(content.Value, "from-process") {
+		t.Fatalf("hover = %q, want no value in the hover (it shows inline)", content.Value)
+	}
+	if strings.Contains(content.Value, "string") {
+		t.Fatalf("hover = %q, want no type in the hover", content.Value)
+	}
+}
+
+func TestEnvHoverNamesDotenvFile(t *testing.T) {
+	root := fixtureProject(t)
+	if err := os.WriteFile(filepath.Join(root, ".env.local"), []byte("PORTO_LSP_TEST_IN_LOCAL=from-local\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nWelcome to {env.PORTO_LSP_TEST_IN_LOCAL}.\n")
+	content := s.hover(t, documentURI, 2, 15)
+	if content == nil {
+		t.Fatal("no hover for a {env.} reference from a .env file")
+	}
+	if !strings.Contains(content.Value, ".env.local") {
+		t.Fatalf("hover = %q, want it to name .env.local", content.Value)
+	}
+	if strings.Contains(content.Value, "from-local") {
+		t.Fatalf("hover = %q, want no value in the hover (it shows inline)", content.Value)
+	}
+}
+
+func TestEnvHoverUnknownVarIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_NOPE} here.\n")
+	if content := s.hover(t, documentURI, 2, 4); content != nil {
+		t.Fatalf("hover for an unknown var = %q, want nil", content.Value)
 	}
 }
