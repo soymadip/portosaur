@@ -4,7 +4,7 @@ desc: "Use emojis, open-source icon sets, and tree-shaken SVGs across your site.
 icon: "md:emoji"
 ---
 
-You can use emojis, SVGs, Icon Packs across your site in `config.yml`, Markdown/MDX frontmatter, and content.
+You can use emojis, SVGs, Icon Packs across your site in `porto.yml`, Markdown/MDX frontmatter, and content.
 
 At build time, the CLI scans your content and config for the icons you actually use and ships only those — the packs themselves never reach the browser. An unknown icon id warns during the build instead of rendering nothing silently. In dev, saving a file re-scans, so a new icon shows up without restarting.
 
@@ -13,9 +13,9 @@ At build time, the CLI scans your content and config for the icons you actually 
 
 Icons and emojis can be used in the following places:
 
-1. `config.yml`
+1. `porto.yml`
 
-```yaml title="config.yml"
+```yaml title="porto.yml"
 docs_home:
   features:
     - title: "Fast Performance"
@@ -68,7 +68,7 @@ Any GitHub-style shortcode is rendered as emoji without including any extra icon
 :::tip[Resources]
 
 - Find the full list of supported shortcodes [here]({vars.icons.gh_emoji_codes}).
-- You can Disable this via `site.content.render_emoji_shortcodes: false` in `config.yml`
+- You can Disable this via `site.content.render_emoji_shortcodes: false` in `porto.yml`
 
 :::
 
@@ -78,7 +78,7 @@ Any GitHub-style shortcode is rendered as emoji without including any extra icon
 
 You can reference thousands of vector icons using the **`<pack-code>:<icon-name>`** syntax:
 
-```yaml title="config.yml"
+```yaml title="porto.yml"
 docs_home:
   features:
     - text: "Get Started"

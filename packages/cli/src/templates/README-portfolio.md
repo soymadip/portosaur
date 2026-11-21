@@ -17,7 +17,7 @@ It serves as my:
 
 ## Repository Structure
 
-- `config.yml` — The configuration for my site.
+- `porto.yml` — The configuration for my site.
 - `notes/` — Markdown/MDX files for my digital Notebook.
 - `blog/` — Articles and blog posts.
 - `static/` — Static assets like images and my resume.

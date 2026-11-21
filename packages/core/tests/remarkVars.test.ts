@@ -7,7 +7,7 @@ import remarkVarsPlugin from "../src/plugins/remarkVars.ts";
 
 /**
  * `remarkVarsPlugin` replaces `{vars.key}` references from
- * config.yml's `vars` section. These tests run it through the real
+ * porto.yml's `vars` section. These tests run it through the real
  * unified pipeline, the way the MDX compiler calls it: the factory
  * is invoked with its options, and the returned transformer runs on
  * the parsed tree.

@@ -416,7 +416,7 @@ export async function schemaCommand(
   } = {
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "Portosaur Project Configuration",
-    description: "Schema for config.yml — validated at build time by porto.",
+    description: "Schema for porto.yml — validated at build time by porto.",
     type: "object",
     properties: {},
     required: [],

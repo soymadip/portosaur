@@ -13,7 +13,7 @@ Codeberg Pages supports user/organization sites and per-repository sites:
 - **User or organization site**: use a public repository named `pages`. Its site is served at `https://<owner>.codeberg.page/`.
 - **Repository site**: use a public repository with your project name. Its site is served at `https://<owner>.codeberg.page/<repository>/`.
 
-For a repository site, set the path prefix explicitly in `config.yml`:
+For a repository site, set the path prefix explicitly in `porto.yml`:
 
 ```yaml
 site:
@@ -63,4 +63,4 @@ This creates `.woodpecker/deploy.yml`. Activate the repository at [ci.codeberg.o
 
 ## 5. Use a Custom Domain
 
-Configure the custom domain through Codeberg Pages and set the matching origin and path in `config.yml`. Use `/` for a root-domain site or the repository path for a repository site. Follow [Codeberg's custom-domain instructions](https://docs.codeberg.org/codeberg-pages/using-custom-domain/) for DNS and HTTPS setup.
+Configure the custom domain through Codeberg Pages and set the matching origin and path in `porto.yml`. Use `/` for a root-domain site or the repository path for a repository site. Follow [Codeberg's custom-domain instructions](https://docs.codeberg.org/codeberg-pages/using-custom-domain/) for DNS and HTTPS setup.

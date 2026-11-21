@@ -12,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import type { PortosaurOptions } from "../generators/siteConfig.ts";
+import { resolveConfigFile } from "./loadUserConfig.ts";
 
 /** The logger surface the icon scan needs (warnings only). */
 export interface SiteIconsLogger {
@@ -101,9 +102,10 @@ export async function generateSiteIcons({
   coreRoot,
   logger,
 }: GenerateSiteIconsParams): Promise<SiteIconsResult> {
-  const configFile = ["config.yaml", "config.yml"]
-    .map((file) => path.join(projectDir, file))
-    .find((file) => fs.existsSync(file));
+  const configFileName = resolveConfigFile(projectDir);
+  const configFile = configFileName
+    ? path.join(projectDir, configFileName)
+    : undefined;
   const result = await runSiteIconsScript(
     {
       projectDir,

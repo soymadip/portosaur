@@ -86,7 +86,7 @@ describe("CLI: init", () => {
 
     const projectPath = path.join(testRoot, projectName);
     expect(fs.existsSync(projectPath)).toBe(true);
-    expect(fs.existsSync(path.join(projectPath, "config.yml"))).toBe(true);
+    expect(fs.existsSync(path.join(projectPath, "porto.yml"))).toBe(true);
     // Should have GitHub workflow
     expect(fs.existsSync(path.join(projectPath, ".github"))).toBe(true);
   });
@@ -114,10 +114,7 @@ describe("CLI: init", () => {
     }
 
     expect(fs.existsSync(projectPath)).toBe(true);
-    const config = fs.readFileSync(
-      path.join(projectPath, "config.yml"),
-      "utf8",
-    );
+    const config = fs.readFileSync(path.join(projectPath, "porto.yml"), "utf8");
     expect(config).toContain('title: "Prompted Person"');
   });
 
@@ -155,10 +152,7 @@ describe("CLI: init", () => {
     });
 
     expect(fs.existsSync(projectPath)).toBe(true);
-    const config = fs.readFileSync(
-      path.join(projectPath, "config.yml"),
-      "utf8",
-    );
+    const config = fs.readFileSync(path.join(projectPath, "porto.yml"), "utf8");
     expect(config).toContain('title: "Test User"');
   });
 

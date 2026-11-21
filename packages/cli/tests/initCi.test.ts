@@ -113,7 +113,7 @@ describe("CLI: init-ci", () => {
 
     // Create a fake project structure
     fs.writeFileSync(
-      path.join(testRoot, "config.yml"),
+      path.join(testRoot, "porto.yml"),
       "site: { title: 'Test' }",
     );
   });

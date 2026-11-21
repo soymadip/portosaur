@@ -15,7 +15,7 @@ my-site/
 ├── notes/               # Portfolio sites only: Markdown/MDX digital notebook
 ├── docs/                # Documentation sites only: Markdown/MDX technical documentation
 ├── static/              # Static assets served at the root (images, icons, PDFs)
-├── config.yml           # Primary configuration file (single source of truth)
+├── porto.yml           # Primary configuration file (single source of truth)
 ├── package.json         # Local project dependencies and build scripts
 └── README.md            # Project overview and instructions
 ```
@@ -23,7 +23,7 @@ my-site/
 <details>
   <summary>Site Modes: Portfolio vs Documentation</summary>
 
-Portosaur automatically determines the mode based on your `config.yml`:
+Portosaur automatically determines the mode based on your `porto.yml`:
 
 - **Documentation Mode** (`docs_home` block defined):
   - Renders a project documentation homepage configured via `docs_home`.
@@ -35,13 +35,13 @@ Portosaur automatically determines the mode based on your `config.yml`:
   - Serves a digital knowledge vault from the `notes/` folder (URL route `/notes` by default).
   - Supports public task tracking (`tasks` block).
 
-Both site modes share the `blog/` platform, `static/` asset directory, and `config.yml`.
+Both site modes share the `blog/` platform, `static/` asset directory, and `porto.yml`.
 
 </details>
 
 ## Key Files & Directories
 
-### `config.yml`
+### `porto.yml`
 
 The single configuration file for your entire site. It handles site metadata, theming, navigation, and section content. Portosaur validates this file against a strict schema during development and builds, ensuring syntax and property errors are caught immediately.
 

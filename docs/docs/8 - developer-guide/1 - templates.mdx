@@ -84,13 +84,13 @@ The hook receives an execution context object:
 
 `porto dev` and `porto build` generate the files that wire a project to the Next.js engine, inside the project's `.portosaur/` directory:
 
-- `next.config.mjs` — the Next.js configuration, generated from the resolved `config.yml` (static export, base path, output directory, the Fumadocs MDX plugin).
+- `next.config.mjs` — the Next.js configuration, generated from the resolved `porto.yml` (static export, base path, output directory, the Fumadocs MDX plugin).
 - `source.config.ts` — the global MDX options (Portosaur's remark/rehype plugins).
 - `lib/source.ts` — the Fumadocs content collections for the docs/notes and blog directories, plus the loader.
-- `lib/config.ts` — the resolved `config.yml` as typed JSON for the app to read.
+- `lib/config.ts` — the resolved `porto.yml` as typed JSON for the app to read.
 - `app/` — thin route files (docs, notes, blog, search, tasks) that import the real pages from `@portosaur/core`.
 
-All files are regenerated on every run (and whenever `config.yml` changes during `porto dev`), so they are never hand-edited. They live outside the template tree — the scaffolding engine only creates the user-facing project files.
+All files are regenerated on every run (and whenever `porto.yml` changes during `porto dev`), so they are never hand-edited. They live outside the template tree — the scaffolding engine only creates the user-facing project files.
 
 ---
 

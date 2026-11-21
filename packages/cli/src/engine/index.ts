@@ -46,4 +46,4 @@ export { resolveVars, getNestedValue } from "./utils/config.ts";
 export type { ResolveVarsContext } from "./utils/config.ts";
 export { validateUserConfig } from "./utils/validate.ts";
 
-export { loadUserConfig } from "./utils/loadUserConfig.ts";
+export { loadUserConfig, resolveConfigFile } from "./utils/loadUserConfig.ts";

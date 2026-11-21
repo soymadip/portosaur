@@ -1,7 +1,7 @@
 /**
  * remarkVarsPlugin
  *
- * Replaces {vars.key} and {vars.nested.key} references from config.yml's `vars` section.
+ * Replaces {vars.key} and {vars.nested.key} references from porto.yml's `vars` section.
  *
  * Ported from the Astro app (`packages/app/src/plugins/remarkVars.ts`):
  * logic verbatim. The `{{vars.key}}` escape is kept — the docs
@@ -45,7 +45,7 @@ function visit(
  * Resolve a dot-notation path inside the vars object.
  * e.g. resolveVarPath("project.title", { project: { title: "Portosaur" } }) → "Portosaur"
  * @param path - Dot-separated key path.
- * @param vars - The vars object from config.yml.
+ * @param vars - The vars object from porto.yml.
  * @returns The resolved value, or undefined if not found.
  */
 function resolveVarPath(
@@ -73,7 +73,7 @@ function resolveVarPath(
 }
 
 /**
- * @param vars - The resolved vars map from config.yml.
+ * @param vars - The resolved vars map from porto.yml.
  * @returns The transformer. With no vars defined it returns the
  *   identity transformer directly — NOT a thunk yielding one: unified
  *   treats the factory's return value as the transformer, and a thunk
@@ -100,7 +100,7 @@ export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
   function unknownKeyError(path: string, filePath: string): Error {
     return new Error(
       `[Portosaur] Unknown vars key "{vars.${path}}" in "${filePath || "unknown file"}".\n` +
-        `  Make sure "${path}" is defined under 'vars:' in your config.yml.`,
+        `  Make sure "${path}" is defined under 'vars:' in your porto.yml.`,
     );
   }
 

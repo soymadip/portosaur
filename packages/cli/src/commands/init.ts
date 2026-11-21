@@ -602,7 +602,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
     mirrorSync(Paths.templates, newProjDir, templateVars, mirrorIgnores);
 
     // Strip the site-type suffix from any copied entry so it lands with its canonical name.
-    // e.g. config-docs.yml → config.yml, README-docs.md → README.md, docs-docs/ → docs/
+    // e.g. porto-docs.yml → porto.yml, README-docs.md → README.md, docs-docs/ → docs/
     const matchSuffix = `-${state.siteType}`;
 
     for (const entry of readdirSync(newProjDir)) {
@@ -737,7 +737,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
   logger.newLine();
   logger.info(
     `Next Steps:\n    ${colors.command(
-      `cd ${state.repoName} & Edit ${colors.cyan("config.yml")} & ${pm.name} run dev`,
+      `cd ${state.repoName} & Edit ${colors.cyan("porto.yml")} & ${pm.name} run dev`,
     )}`,
   );
 

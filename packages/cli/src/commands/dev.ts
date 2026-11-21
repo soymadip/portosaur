@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
-import { generateSiteIcons } from "../engine/index.ts";
+import { generateSiteIcons, resolveConfigFile } from "../engine/index.ts";
 import type { PortosaurOptions } from "../engine/index.ts";
 import {
   Paths,
@@ -48,9 +48,7 @@ export async function devCommand(
   validateProject(UserRoot);
   ensureContentDirs(UserRoot);
 
-  const configYaml = ["config.yaml", "config.yml"].find((file) =>
-    fs.existsSync(path.join(UserRoot, file)),
-  );
+  const configFile = resolveConfigFile(UserRoot);
 
   /*
    * ====================== Path Resolution ======================
@@ -147,14 +145,14 @@ export async function devCommand(
       }
     });
 
-    // Watch for config.yml changes to regenerate the Next.js root.
+    // Watch for porto.yml changes to regenerate the Next.js root.
     // Next restarts the dev server when next.config.mjs changes, and
     // re-reads lib/config.ts on the next request either way.
-    if (configYaml) {
-      const configYamlPath = path.join(UserRoot, configYaml);
-      const watcher = fs.watch(configYamlPath, async (eventType) => {
+    if (configFile) {
+      const configFilePath = path.join(UserRoot, configFile);
+      const watcher = fs.watch(configFilePath, async (eventType) => {
         if (eventType === "change") {
-          logger.info(`Detected change in ${configYaml}, reloading...`);
+          logger.info(`Detected change in ${configFile}, reloading...`);
 
           try {
             const regenerated = await writeNextRoot(

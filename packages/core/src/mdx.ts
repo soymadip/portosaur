@@ -118,7 +118,7 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
 /**
  * Builds the Fumadocs global MDX preset options for a site.
  *
- * @param args.userVars - The `vars` map from config.yml (for
+ * @param args.userVars - The `vars` map from porto.yml (for
  *   `{vars.key}` substitution).
  * @param args.colorScheme - The site's color scheme (for the Shiki
  *   light/dark themes).

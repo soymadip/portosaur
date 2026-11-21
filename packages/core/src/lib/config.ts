@@ -22,7 +22,7 @@ export interface PortoPaths {
 
 /**
  * The resolved site configuration returned by `buildSiteConfig` — the
- * integration's options object. All `config.yml` values are resolved here
+ * integration's options object. All `porto.yml` values are resolved here
  * (vars substituted, URLs auto-resolved, defaults applied).
  */
 export interface PortosaurOptions {

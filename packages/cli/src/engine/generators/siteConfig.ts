@@ -36,7 +36,7 @@ export interface SiteConfigContext {
 
 /**
  * The resolved site configuration returned by `buildSiteConfig` — the
- * integration's options object. All `config.yml` values are resolved here
+ * integration's options object. All `porto.yml` values are resolved here
  * (vars substituted, URLs auto-resolved, defaults applied).
  */
 export interface PortosaurOptions {
@@ -102,7 +102,7 @@ export interface PortosaurOptions {
 }
 
 /**
- * Resolves a raw user config (`config.yml`) into a `PortosaurOptions` object.
+ * Resolves a raw user config (`porto.yml`) into a `PortosaurOptions` object.
  *
  * This is the engine's single config-resolution entry point (D13): it loads
  * the raw config, resolves vars/URLs, and returns plain resolved data. It
@@ -127,7 +127,7 @@ export interface PortosaurOptions {
  *   `cssFiles`, `extraHeadTags`, `userVars` — build context the
  *   adapter (Phase 1) and the integration (Phase 2) consume.
  *
- * @param {Object} rawUserConfig - The parsed `config.yml` (vars unresolved).
+ * @param {Object} rawUserConfig - The parsed `porto.yml` (vars unresolved).
  * @param {string} projectDir - The user's project directory.
  * @param {Object} [context={}] - Build context: `portoPaths`, `gitDate`,
  *   `env`, `projectVersion`, `extraHeadTags` (generated asset head tags).
