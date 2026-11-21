@@ -67,8 +67,13 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 	resolveProvider := false
 	// File renames update links: the server wants willRenameFiles
 	// for content files and for folders (a folder rename moves
-	// every page under it).
+	// every page under it), and didRenameFiles with the same
+	// filters to refresh the page index after the rename.
 	fileScheme := "file"
+	renameFilters := []protocol.FileOperationFilter{
+		{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*.{md,mdx}", Matches: protocol.FileOperationPatternKindFile}},
+		{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*", Matches: protocol.FileOperationPatternKindFolder}},
+	}
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncKindFull,
@@ -90,12 +95,8 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			},
 			Workspace: &protocol.WorkspaceOptions{
 				FileOperations: &protocol.FileOperationOptions{
-					WillRename: protocol.FileOperationRegistrationOptions{
-						Filters: []protocol.FileOperationFilter{
-							{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*.{md,mdx}", Matches: protocol.FileOperationPatternKindFile}},
-							{Scheme: &fileScheme, Pattern: protocol.FileOperationPattern{Glob: "**/*", Matches: protocol.FileOperationPatternKindFolder}},
-						},
-					},
+					WillRename: protocol.FileOperationRegistrationOptions{Filters: renameFilters},
+					DidRename:  protocol.FileOperationRegistrationOptions{Filters: renameFilters},
 				},
 			},
 		},

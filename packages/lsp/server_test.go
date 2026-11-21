@@ -162,6 +162,18 @@ func (s *testServer) willRenameFiles(t *testing.T, files ...protocol.FileRename)
 	return edit
 }
 
+// didRenameFiles sends a workspace/didRenameFiles
+// notification. It calls the handler on the local server
+// directly: a notification has no acknowledgment to wait on,
+// and handlers run unordered, so going through the wire could
+// race the completion that follows it.
+func (s *testServer) didRenameFiles(t *testing.T, files ...protocol.FileRename) {
+	t.Helper()
+	if err := s.local.DidRenameFiles(context.Background(), &protocol.RenameFilesParams{Files: files}); err != nil {
+		t.Fatalf("didRenameFiles: %v", err)
+	}
+}
+
 func hasLabel(items []protocol.CompletionItem, label string) bool {
 	for _, item := range items {
 		if item.Label == label {
@@ -244,6 +256,16 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	}
 	if filters[1].Pattern.Glob != "**/*" || filters[1].Pattern.Matches != protocol.FileOperationPatternKindFolder {
 		t.Fatalf("willRename folder filter = %+v, want **/* matching folders", filters[1].Pattern)
+	}
+	didFilters := ops.FileOperations.DidRename.Filters
+	if len(didFilters) != 2 {
+		t.Fatalf("didRename filters = %d, want 2 (content files and folders, same as willRename)", len(didFilters))
+	}
+	if didFilters[0].Pattern.Glob != "**/*.{md,mdx}" || didFilters[0].Pattern.Matches != protocol.FileOperationPatternKindFile {
+		t.Fatalf("didRename file filter = %+v, want **/*.{md,mdx} matching files", didFilters[0].Pattern)
+	}
+	if didFilters[1].Pattern.Glob != "**/*" || didFilters[1].Pattern.Matches != protocol.FileOperationPatternKindFolder {
+		t.Fatalf("didRename folder filter = %+v, want **/* matching folders", didFilters[1].Pattern)
 	}
 	if result.Capabilities.TextDocumentSync != protocol.TextDocumentSyncKindFull {
 		t.Fatalf("sync = %v, want full", result.Capabilities.TextDocumentSync)

@@ -58,6 +58,39 @@ func (s *Server) WillRenameFiles(_ context.Context, params *protocol.RenameFiles
 	return &protocol.WorkspaceEdit{Changes: changes}, nil
 }
 
+// DidRenameFiles answers workspace/didRenameFiles: the rename
+// has happened, so the cached page index is stale — drop it and
+// let the next lookup rebuild from the new tree. Invalidating
+// in WillRenameFiles would be useless: that request arrives
+// before the rename, so the rebuild would read the same old
+// tree. The old URI names the project when the file moved
+// within it or out of it; the new URI covers a file moved into
+// a project from outside. The content-file gate in
+// invalidatePages does not fit here — a folder rename names no
+// content file — so the handler resolves the root and drops the
+// index through the same pages.invalidate call. A rename
+// outside any known project is a no-op.
+func (s *Server) DidRenameFiles(_ context.Context, params *protocol.RenameFilesParams) error {
+	for _, file := range params.Files {
+		oldURI, err := uri.Parse(file.OldURI)
+		if err != nil {
+			continue
+		}
+		if root, ok := s.projectFor(oldURI); ok {
+			s.pages.invalidate(root)
+			continue
+		}
+		newURI, err := uri.Parse(file.NewURI)
+		if err != nil {
+			continue
+		}
+		if root, ok := s.projectFor(newURI); ok {
+			s.pages.invalidate(root)
+		}
+	}
+	return nil
+}
+
 // fileRename is one rename in the request, as filesystem paths.
 type fileRename struct {
 	oldPath string
