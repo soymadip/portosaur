@@ -209,7 +209,7 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.CompletionProvider == nil {
 		t.Fatal("no completion provider advertised")
 	}
-	wantTriggers := []string{":", "<", "=", ".", "(", "/"}
+	wantTriggers := []string{":", "<", "=", ".", "(", "/", "'", "\""}
 	triggers := result.Capabilities.CompletionProvider.TriggerCharacters
 	if len(triggers) != len(wantTriggers) {
 		t.Fatalf("trigger characters = %v, want %v", triggers, wantTriggers)
@@ -1042,6 +1042,53 @@ func TestComponentCompletionEnumValueInQuotes(t *testing.T) {
 	}
 	if text, ok := editText(items, "primary"); !ok || text != "primary" {
 		t.Fatalf("primary edit = %q, want %q (bare, the quotes are there)", text, "primary")
+	}
+}
+
+// The cursor right after the opening quote, with no value typed
+// yet, offers every enum value: the quote is a trigger
+// character, so the list pops up as soon as it is typed.
+func TestComponentCompletionEnumValueAfterSingleQuote(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=''>")
+	items := s.complete(t, documentURI, 2, 14)
+	want := []string{"primary", "secondary", "success", "warning", "danger", "info", "ghost"}
+	if len(items) != len(want) {
+		t.Fatalf("completions = %v, want the %d variant values", labels(items), len(want))
+	}
+	for _, value := range want {
+		if !hasLabel(items, value) {
+			t.Fatalf("completions = %v, missing %q", labels(items), value)
+		}
+	}
+	if text, ok := editText(items, "primary"); !ok || text != "primary" {
+		t.Fatalf("primary edit = %q, want %q (bare, the quotes are there)", text, "primary")
+	}
+}
+
+func TestComponentCompletionEnumValueAfterDoubleQuote(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=\"\">")
+	items := s.complete(t, documentURI, 2, 14)
+	want := []string{"primary", "secondary", "success", "warning", "danger", "info", "ghost"}
+	if len(items) != len(want) {
+		t.Fatalf("completions = %v, want the %d variant values", labels(items), len(want))
+	}
+	for _, value := range want {
+		if !hasLabel(items, value) {
+			t.Fatalf("completions = %v, missing %q", labels(items), value)
+		}
+	}
+}
+
+// A quote in plain prose asks for nothing: every quote is a
+// trigger now, so the empty path has to stay quiet.
+func TestComponentCompletionQuoteInProseIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\nIt's a test")
+	items := s.complete(t, documentURI, 2, 3)
+	if len(items) != 0 {
+		t.Fatalf("completions after an apostrophe = %v, want none", labels(items))
 	}
 }
 
