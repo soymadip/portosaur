@@ -157,3 +157,44 @@ func TestScanTagNameRange(t *testing.T) {
 		t.Fatalf("name range end = %+v, want (0, 4)", ctx.nameRange.End)
 	}
 }
+
+func TestScanAllTags(t *testing.T) {
+	text := "---\ntitle: x\n---\n# Hello\n\n<Btn variant=\"primary\">Click</Btn>\n\n<Icon id=\"lu:star\">\n"
+	tags := scanAllTags(text)
+	if len(tags) != 2 {
+		t.Fatalf("scanAllTags found %d tags, want 2", len(tags))
+	}
+	if tags[0].name != "Btn" || tags[1].name != "Icon" {
+		t.Fatalf("tag names = %q, %q, want Btn, Icon", tags[0].name, tags[1].name)
+	}
+	if len(tags[0].props) != 1 || tags[0].props[0].name != "variant" {
+		t.Fatalf("Btn props = %+v, want variant", tags[0].props)
+	}
+	if tags[0].nameRange.Start.Line != 5 {
+		t.Fatalf("Btn name line = %d, want 5", tags[0].nameRange.Start.Line)
+	}
+}
+
+func TestScanAllTagsSkipsCodeAndFrontmatter(t *testing.T) {
+	text := "---\ntitle: <Foo>\n---\n# Hello\n\n```mdx\n<Bar>\n```\n\nUse `<Baz>` here.\n\n<Qux>\n"
+	tags := scanAllTags(text)
+	if len(tags) != 1 || tags[0].name != "Qux" {
+		names := []string{}
+		for _, tag := range tags {
+			names = append(names, tag.name)
+		}
+		t.Fatalf("scanAllTags found %v, want only Qux", names)
+	}
+}
+
+func TestScanAllTagsSkipsUnclosedTag(t *testing.T) {
+	text := "# Hello\n\n<Foo>\n\n<Btn"
+	tags := scanAllTags(text)
+	if len(tags) != 1 || tags[0].name != "Foo" {
+		names := []string{}
+		for _, tag := range tags {
+			names = append(names, tag.name)
+		}
+		t.Fatalf("scanAllTags found %v, want only Foo", names)
+	}
+}

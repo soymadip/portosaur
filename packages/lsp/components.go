@@ -52,6 +52,8 @@ type tagContext struct {
 	partialRange  protocol.Range
 	quoted        bool // tagValue inside quotes
 	existingProps map[string]bool
+	props         []scannedProp // every prop in the tag, in order
+	end           int           // byte offset of the closing `>` (or end of text)
 }
 
 // positionToOffset converts an LSP position to a byte offset in
@@ -225,6 +227,7 @@ type scannedProp struct {
 	valueStart int // inside the quotes when quoted
 	valueEnd   int
 	quoted     bool
+	expr       bool // an expression value ({...}): not a plain string
 }
 
 // parseTag parses the tag starting at tagStart: its name and
@@ -252,7 +255,7 @@ func parseTag(text string, lines []string, tagStart, cursor int, inQuote byte) t
 		}
 	}
 
-	ctx := tagContext{found: true, existingProps: map[string]bool{}}
+	ctx := tagContext{found: true, existingProps: map[string]bool{}, end: tagEnd}
 	i := tagStart + 1
 	if i < tagEnd && text[i] == '/' {
 		ctx.closing = true
@@ -316,6 +319,7 @@ func parseTag(text string, lines []string, tagStart, cursor int, inQuote byte) t
 					}
 				case '{':
 					// An expression value: skip the braces.
+					prop.expr = true
 					depth := 0
 					for i < tagEnd {
 						if text[i] == '{' {
@@ -340,6 +344,7 @@ func parseTag(text string, lines []string, tagStart, cursor int, inQuote byte) t
 		}
 		props = append(props, prop)
 	}
+	ctx.props = props
 	for _, prop := range props {
 		ctx.existingProps[prop.name] = true
 	}
@@ -428,4 +433,114 @@ func parseTag(text string, lines []string, tagStart, cursor int, inQuote byte) t
 	ctx.partial = ""
 	ctx.partialRange = protocol.Range{Start: offsetToPosition(lines, cursor), End: offsetToPosition(lines, cursor)}
 	return ctx
+}
+
+// scanAllTags finds every opening JSX tag in the document's
+// content (past the frontmatter, outside fenced code blocks and
+// inline code spans), in document order. Diagnostics walk the
+// result; closing tags are skipped. A `<` with no `>` after it
+// is not a tag: accepting it would swallow the rest of the
+// document into one tag. A `<Name` in prose with a `>` later on
+// the line still reads as a tag — the same heuristic the
+// cursor scanner uses, and harmless in practice (a known
+// component with no bad props draws no diagnostic).
+func scanAllTags(text string) []tagContext {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return nil
+		}
+		contentStart = block.endLine + 1
+	}
+	fences := fenceLines(lines, contentStart)
+	spans := make([][][2]int, len(lines))
+	for i := contentStart; i < len(lines); i++ {
+		spans[i] = codeSpanRanges(lines[i])
+	}
+	contentOffset := 0
+	for i := 0; i < contentStart; i++ {
+		contentOffset += len(lines[i]) + 1
+	}
+
+	var tags []tagContext
+	line := contentStart
+	lineStart := contentOffset
+	for i := contentOffset; i < len(text); {
+		c := text[i]
+		if c == '\n' {
+			line++
+			lineStart = i + 1
+			i++
+			continue
+		}
+		if !fences[line] && c == '<' && i+1 < len(text) && isTagNameStart(text[i+1]) && !inCodeSpan(spans[line], i-lineStart) {
+			ctx := parseTag(text, lines, i, i+1, 0)
+			if ctx.found && ctx.end < len(text) {
+				tags = append(tags, ctx)
+				next := ctx.end + 1
+				for i < next && i < len(text) {
+					if text[i] == '\n' {
+						line++
+						lineStart = i + 1
+					}
+					i++
+				}
+				continue
+			}
+		}
+		i++
+	}
+	return tags
+}
+
+// codeSpanRanges returns the byte ranges of the inline code
+// spans on one line: a run of n backticks opens a span, the
+// next run of exactly n backticks closes it. Single-line spans
+// only — a span that never closes on its line is ignored.
+func codeSpanRanges(line string) [][2]int {
+	var spans [][2]int
+	i := 0
+	for i < len(line) {
+		if line[i] != '`' {
+			i++
+			continue
+		}
+		start := i
+		for i < len(line) && line[i] == '`' {
+			i++
+		}
+		n := i - start
+		closed := false
+		for j := i; j < len(line); {
+			if line[j] != '`' {
+				j++
+				continue
+			}
+			k := j
+			for k < len(line) && line[k] == '`' {
+				k++
+			}
+			if k-j == n {
+				spans = append(spans, [2]int{start, k})
+				i = k
+				closed = true
+				break
+			}
+			j = k
+		}
+		if !closed {
+			break
+		}
+	}
+	return spans
+}
+
+func inCodeSpan(spans [][2]int, col int) bool {
+	for _, span := range spans {
+		if col >= span[0] && col < span[1] {
+			return true
+		}
+	}
+	return false
 }
