@@ -64,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1rem 0.25rem;
   --pele-zoom-top: auto;
   --pele-zoom-bottom: 0.5rem;
   --pele-zoom-right: 0.5rem;
