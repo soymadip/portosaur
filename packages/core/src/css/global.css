@@ -300,7 +300,7 @@
      on this one duration, so the pane's edge and the content's
      edge move together through the whole animation. */
   --porto-sidebar-collapse-duration: 0.35s;
-  --porto-sidebar-pad-x: 1rem;
+  --porto-sidebar-pad-x: 0.875rem;
   --porto-content-width: 45rem;
   --porto-content-pad-x: 1rem;
   --porto-content-gap-y: 1rem;
