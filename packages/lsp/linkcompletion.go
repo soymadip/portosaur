@@ -15,10 +15,11 @@ import (
 // from the page index as clean URLs with a trailing slash. After
 // a `#` it offers the target page's heading ids, and when the
 // typed text starts with `.` it offers relative `.md`/`.mdx`
-// file paths instead, `%20`-encoded the way the file-links
-// plugin accepts them. Relative candidates are limited to files
-// inside the content dirs: a link anywhere else would be broken
-// on the site.
+// file paths instead. The inserted name is `%20`-encoded in a
+// plain destination, where a space would end it, and written
+// as-is in an angle-bracket destination or a Link/Btn prop
+// value. Relative candidates are limited to files inside the
+// content dirs: a link anywhere else would be broken on the site.
 
 // linkCompletion offers link destinations at the cursor. The
 // second return value reports whether the cursor is on a link
@@ -114,6 +115,13 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 	}
 	dirPart := partial[:slash+1]
 	filePartial := partial[slash+1:]
+	// The inserted segment follows the destination form: a plain
+	// markdown destination needs %20, while an angle-bracket
+	// destination or a Link/Btn prop value takes the name as-is.
+	encode := encodePathSegment
+	if link.angled || link.jsx {
+		encode = func(segment string) string { return segment }
+	}
 	// The typed path may already be percent-encoded: decode it
 	// for the disk lookup and the prefix match, and keep the
 	// typed form as the insert prefix.
@@ -143,7 +151,7 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 			if !files.hasBelow(full) {
 				continue
 			}
-			insert := dirPart + encodePathSegment(name) + "/"
+			insert := dirPart + encode(name) + "/"
 			items = append(items, protocol.CompletionItem{
 				Label:    insert,
 				Kind:     protocol.CompletionItemKindFolder,
@@ -154,7 +162,7 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 		if !isContentFile(name) || !files.has(full) {
 			continue
 		}
-		insert := dirPart + encodePathSegment(name)
+		insert := dirPart + encode(name)
 		items = append(items, protocol.CompletionItem{
 			Label:    insert,
 			Kind:     protocol.CompletionItemKindFile,

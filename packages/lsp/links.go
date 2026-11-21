@@ -19,6 +19,8 @@ type linkContext struct {
 	valueRange   protocol.Range // the destination's range in the document
 	partial      string         // the destination text before the cursor
 	partialRange protocol.Range // value start to the cursor
+	angled       bool           // a bracketed markdown destination `](<...>)`
+	jsx          bool           // a Link/Btn `to`/`href` prop value
 }
 
 // linkProps are the JSX props that hold link destinations.
@@ -61,6 +63,7 @@ func jsxLinkAtCursor(text string, pos protocol.Position) linkContext {
 		valueRange:   ctx.partialRange,
 		partial:      ctx.partial,
 		partialRange: protocol.Range{Start: ctx.partialRange.Start, End: pos},
+		jsx:          true,
 	}
 }
 
@@ -100,10 +103,12 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 		destEnd += destStart
 		if cursor >= destStart && cursor <= destEnd && !inCodeSpan(spans, destStart) {
 			valueStart, valueEnd := destStart, destEnd
+			angled := false
 			if valueStart < valueEnd && line[valueStart] == '<' {
 				if close := strings.IndexByte(line[valueStart:], '>'); close >= 0 && valueStart+close < valueEnd {
 					valueStart++
 					valueEnd = valueStart + close - 1
+					angled = true
 				}
 			}
 			lineStart := 0
@@ -124,6 +129,7 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 				valueRange:   rangeFromOffsets(lines, lineStart+valueStart, lineStart+valueEnd),
 				partial:      partial,
 				partialRange: rangeFromOffsets(lines, lineStart+valueStart, lineStart+partialEnd),
+				angled:       angled,
 			}
 		}
 		search = destStart

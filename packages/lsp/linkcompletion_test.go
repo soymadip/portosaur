@@ -143,3 +143,48 @@ func TestLinkCompletionRelativeSkipsNonContent(t *testing.T) {
 		t.Fatalf("completions = %v, include ../other/ (not a content dir)", labels(items))
 	}
 }
+
+func TestLinkCompletionRelativeAngledIsLiteral(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./>)")
+	items := s.complete(t, documentURI, 2, 7)
+	if !hasLabel(items, "./my page.mdx") {
+		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	}
+	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+		t.Fatalf("my page edit = %q, want the literal insert", text)
+	}
+	if !hasLabel(items, "./1 - getting-started/") {
+		t.Fatalf("completions = %v, want ./1 - getting-started/ (literal, with trailing /)", labels(items))
+	}
+	if hasLabel(items, "./my%20page.mdx") {
+		t.Fatalf("completions = %v, include the %%20 form in an angled destination", labels(items))
+	}
+}
+
+func TestLinkCompletionRelativeJSXIsLiteral(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link to=\"./")
+	items := s.complete(t, documentURI, 2, 12)
+	if !hasLabel(items, "./my page.mdx") {
+		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	}
+	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+		t.Fatalf("my page edit = %q, want the literal insert", text)
+	}
+	if hasLabel(items, "./my%20page.mdx") {
+		t.Fatalf("completions = %v, include the %%20 form in a Link prop", labels(items))
+	}
+}
+
+func TestLinkCompletionRelativePlainIsEncoded(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](./")
+	items := s.complete(t, documentURI, 2, 6)
+	if text, ok := editText(items, "./my%20page.mdx"); !ok || text != "./my%20page.mdx" {
+		t.Fatalf("my page edit = %q, want the %%20-encoded insert", text)
+	}
+	if hasLabel(items, "./my page.mdx") {
+		t.Fatalf("completions = %v, include the literal form in a plain destination", labels(items))
+	}
+}
