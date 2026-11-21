@@ -12,6 +12,7 @@ how `porto.yml` is handled.
 | Unknown-component and icon warnings                |   Yes   | Yes |                                                                                         |
 | Missing-required-prop warnings                     |   Yes   | Yes |                                                                                         |
 | Go-to-definition for links                         |   Yes   | Yes |                                                                                         |
+| Broken-link warnings                               |   Yes   | Yes | Severity follows `site.content.on_broken_links`                                         |
 | `{vars.}` completion                               |   Yes   | Yes |                                                                                         |
 | Unknown `{vars.}` warnings                         |   Yes   | Yes | Severity follows `site.content.on_missing_var`                                          |
 | `{vars.}` values inline and on hover               |   Yes   | Yes |                                                                                         |

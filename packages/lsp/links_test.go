@@ -68,3 +68,20 @@ func TestLinkAtCursorNotALink(t *testing.T) {
 		}
 	}
 }
+
+func TestScanMarkdownLinks(t *testing.T) {
+	text := "---\ntitle: [fm](/docs/fm/)\n---\n\n[a](/docs/one/)\n\n![img](/images/two.png)\n\n[b](<./my page.mdx>) and [c](./three.mdx)\n\n```md\n[d](/docs/four/)\n```\n\nUse `[e](/docs/five/)` inline.\n"
+	dests := scanMarkdownLinks(text)
+	want := []string{"/docs/one/", "./my page.mdx", "./three.mdx"}
+	if len(dests) != len(want) {
+		t.Fatalf("destinations = %+v, want %v", dests, want)
+	}
+	for i, w := range want {
+		if dests[i].value != w {
+			t.Fatalf("destination %d = %q, want %q", i, dests[i].value, w)
+		}
+		if text[dests[i].start:dests[i].end] != w {
+			t.Fatalf("destination %d offsets cover %q, want %q", i, text[dests[i].start:dests[i].end], w)
+		}
+	}
+}

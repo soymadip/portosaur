@@ -99,6 +99,45 @@ func (s *Server) resolveLink(root, currentFile, value string) (linkTarget, bool)
 	return linkTarget{file: file, line: line}, true
 }
 
+// linkBroken reports whether a link destination points
+// nowhere: a clean URL no page serves, or a relative file path
+// with no file behind it. It mirrors resolveLink's branches:
+// the `#hash` is stripped and never validated, external URLs,
+// protocol-relative URLs, and bare words are not checked, and
+// a destination holding a `{vars.}` or `{env.}` expression
+// resolves at build time, so it cannot be checked statically.
+// The site root `/` always exists. Unlike resolveLink, a
+// relative path only needs to exist on disk — a link to an
+// asset like `./file.pdf` is fine, it just has no definition to
+// jump to.
+func (s *Server) linkBroken(root, currentFile, value string) bool {
+	if strings.Contains(value, "{vars.") || strings.Contains(value, "{env.") {
+		return false
+	}
+	path, _, _ := strings.Cut(value, "#")
+	switch {
+	case path == "":
+		return false
+	case strings.HasPrefix(path, "//"):
+		return false
+	case strings.HasPrefix(path, "."):
+		decoded, err := url.PathUnescape(path)
+		if err != nil {
+			decoded = path
+		}
+		_, err = os.Stat(filepath.Join(filepath.Dir(currentFile), decoded))
+		return err != nil
+	case strings.HasPrefix(path, "/"):
+		if path == "/" {
+			return false
+		}
+		_, ok := s.pages.forRoot(root).lookup(path)
+		return !ok
+	default:
+		return false
+	}
+}
+
 // targetText reads a link target's text, preferring the open
 // document when the file is open in the editor (so unsaved edits
 // count for the heading lookup).

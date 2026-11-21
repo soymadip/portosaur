@@ -422,3 +422,123 @@ func TestComponentDiagnosticsLenientMode(t *testing.T) {
 		t.Fatalf("lenient icon diagnostics = %v, want the bad-prefix warning", diagnosticMessages(diags))
 	}
 }
+
+func TestLinkDiagnosticsBrokenCleanURL(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install](/docs/missing/)\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "/docs/missing/"`) {
+		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 10 || diags[0].Range.End.Character != 24 {
+		t.Fatalf("diagnostic range = %+v, want the destination", diags[0].Range)
+	}
+}
+
+func TestLinkDiagnosticsBrokenRelativePath(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[sib](./missing.mdx)\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "./missing.mdx"`) {
+		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+}
+
+func TestLinkDiagnosticsValidLinksAreQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
+	}
+}
+
+func TestLinkDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[x](https://example.com/page)\n\n[y](http://example.com)\n\n[z](mailto:me@example.com)\n\n[w](//cdn.example.com/x.js)\n\n[v](#details)\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for external and anchor-only links", diagnosticMessages(diags))
+	}
+}
+
+func TestLinkDiagnosticsVarsDestinationIsQuiet(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_DOCS_URL", "/docs/getting-started/")
+	root := contentFixture(t, "docs_home:\n  title: Docs\nvars:\n  page: /docs/getting-started/\n  slug: getting-started\n", map[string]string{
+		"docs/1 - getting-started/index.mdx": "# Getting Started\n",
+	})
+	s := startTestServer(t, root)
+	doc := "# Page\n\n[x]({vars.page})\n\n[y](/docs/{vars.slug}/)\n\n[z]({env.PORTO_LSP_TEST_DOCS_URL})\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for destinations that resolve at build time", diagnosticMessages(diags))
+	}
+}
+
+func TestLinkDiagnosticsSeverityFollowsSetting(t *testing.T) {
+	for _, tc := range []struct {
+		setting  string
+		severity protocol.DiagnosticSeverity
+		want     int
+	}{
+		{"warn", protocol.DiagnosticSeverityWarning, 1},
+		{"ignore", 0, 0},
+		{"bogus", protocol.DiagnosticSeverityError, 1},
+	} {
+		config := "site:\n  content:\n    on_broken_links: " + tc.setting + "\n"
+		s := startTestServer(t, fixtureProjectWithConfig(t, config))
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "[x](/docs/missing/)\n")
+		if len(diags) != tc.want {
+			t.Fatalf("on_broken_links %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+		}
+		if tc.want == 1 && diags[0].Severity != tc.severity {
+			t.Fatalf("on_broken_links %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+		}
+	}
+}
+
+func TestLinkDiagnosticsJSXProps(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n<Link to=\"/docs/missing/\">x</Link>\n\n<Btn href=\"./missing.mdx\">x</Btn>\n\n<Link to=\"/docs/getting-started/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n\n<Link to={dynamic}>x</Link>\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 2 {
+		t.Fatalf("diagnostics = %v, want one per broken JSX link", diagnosticMessages(diags))
+	}
+	if !hasDiagnostic(diags, `Broken link "/docs/missing/"`) || !hasDiagnostic(diags, `Broken link "./missing.mdx"`) {
+		t.Fatalf("diagnostics = %v, want both broken JSX destinations", diagnosticMessages(diags))
+	}
+}
+
+// Image destinations are the broken-image check's job: a
+// missing image file must not draw a broken-link diagnostic.
+func TestLinkDiagnosticsImageLinksSkipped(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n![img](/images/missing.png)\n\n![img](./missing.png)\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for image links", diagnosticMessages(diags))
+	}
+}
+
+func TestLinkDiagnosticsCodeSkipped(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n```md\n[x](/docs/missing/)\n```\n\nUse `[y](/docs/missing/)` inline.\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for links in code", diagnosticMessages(diags))
+	}
+}
+
+// A link is fine as long as its page exists: the #hash is
+// never validated against the page's headings.
+func TestLinkDiagnosticsHashNotValidated(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[setup](/docs/getting-started/installation/#nope)\n\n[sib](./sibling.mdx#nope)\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for unknown hashes on existing pages", diagnosticMessages(diags))
+	}
+}

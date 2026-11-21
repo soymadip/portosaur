@@ -129,3 +129,80 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 		search = destStart
 	}
 }
+
+// linkDest is one markdown link destination in the document:
+// the value and the byte offsets of the destination text.
+type linkDest struct {
+	value string
+	start int
+	end   int
+}
+
+// scanMarkdownLinks finds every markdown link destination
+// `](...)` in the MDX body, in document order. Destinations in
+// fenced code blocks, the frontmatter, or an inline code span
+// are ignored, and so are image links (`![alt](...)` — images
+// are the broken-image check's job, not the link check's).
+// Single-line links only, and reference-style links
+// (`[text][ref]`) are not covered in v1.
+func scanMarkdownLinks(text string) []linkDest {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return nil
+		}
+		contentStart = block.endLine + 1
+	}
+	fences := fenceLines(lines, contentStart)
+	var dests []linkDest
+	lineStart := 0
+	for i := 0; i < contentStart; i++ {
+		lineStart += len(lines[i]) + 1
+	}
+	for lineNo := contentStart; lineNo < len(lines); lineNo++ {
+		line := lines[lineNo]
+		if !fences[lineNo] {
+			spans := codeSpanRanges(line)
+			search := 0
+			for {
+				open := strings.Index(line[search:], "](")
+				if open < 0 {
+					break
+				}
+				bracket := search + open
+				destStart := bracket + 2
+				destEnd := strings.IndexByte(line[destStart:], ')')
+				if destEnd < 0 {
+					destEnd = len(line) - destStart
+				}
+				destEnd += destStart
+				if !inCodeSpan(spans, destStart) && !isImageLink(line, bracket) {
+					valueStart, valueEnd := destStart, destEnd
+					if valueStart < valueEnd && line[valueStart] == '<' {
+						if close := strings.IndexByte(line[valueStart:], '>'); close >= 0 && valueStart+close < valueEnd {
+							valueStart++
+							valueEnd = valueStart + close - 1
+						}
+					}
+					dests = append(dests, linkDest{
+						value: line[valueStart:valueEnd],
+						start: lineStart + valueStart,
+						end:   lineStart + valueEnd,
+					})
+				}
+				search = destStart
+			}
+		}
+		lineStart += len(line) + 1
+	}
+	return dests
+}
+
+// isImageLink reports whether the `](` whose `]` sits at
+// bracket on the line belongs to an image `![alt](...)`: the
+// nearest `[` before it is preceded by `!`.
+func isImageLink(line string, bracket int) bool {
+	open := strings.LastIndex(line[:bracket], "[")
+	return open > 0 && line[open-1] == '!'
+}

@@ -14,8 +14,8 @@ import (
 
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
-// checks and `{vars.}` and `{env.}` reference checks over the
-// page body. The schema-based component checks
+// checks, `{vars.}` and `{env.}` reference checks, and
+// broken-link checks over the page body. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
 // cannot be tied to the project's version. The icon checks are
@@ -50,6 +50,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, diag)
 	}
 	for _, diag := range s.envIssues(text, root) {
+		diags = append(diags, diag)
+	}
+	for _, diag := range s.linkIssues(text, root, uriPath(documentURI)) {
 		diags = append(diags, diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
@@ -321,6 +324,71 @@ func (s *Server) envIssues(text string, root string) []protocol.Diagnostic {
 		})
 	}
 	return diags
+}
+
+// linkIssues checks every internal link in the document body:
+// markdown links and Link/Btn `to`/`href` values. A clean URL
+// no page serves, or a relative path with no file behind it, is
+// broken. The severity follows site.content.on_broken_links:
+// throw is an error, warn is a warning, ignore reports nothing.
+// The default is throw, and an unrecognized value falls back to
+// it. The check reads porto.yml directly, not a schema, so it
+// runs in both modes.
+func (s *Server) linkIssues(text string, root string, currentFile string) []protocol.Diagnostic {
+	cfg := loadProjectConfig(root)
+	behavior := configString(cfg, []string{"site", "content", "on_broken_links"}, "throw")
+	if behavior == "ignore" {
+		return nil
+	}
+	severity := protocol.DiagnosticSeverityError
+	if behavior == "warn" {
+		severity = protocol.DiagnosticSeverityWarning
+	}
+	lines := strings.Split(text, "\n")
+	var diags []protocol.Diagnostic
+	for _, dest := range scanMarkdownLinks(text) {
+		if !s.linkBroken(root, currentFile, dest.value) {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, dest.start, dest.end),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String(linkBrokenMessage(dest.value)),
+		})
+	}
+	for _, tag := range scanAllTags(text) {
+		if tag.name != "Link" && tag.name != "Btn" {
+			continue
+		}
+		for _, prop := range tag.props {
+			if !linkProps[prop.name] || !prop.hasValue || prop.expr {
+				continue
+			}
+			value := text[prop.valueStart:prop.valueEnd]
+			if !s.linkBroken(root, currentFile, value) {
+				continue
+			}
+			diags = append(diags, protocol.Diagnostic{
+				Range:    rangeFromOffsets(lines, prop.valueStart, prop.valueEnd),
+				Severity: severity,
+				Source:   protocol.NewOptional("porto-lsp"),
+				Message:  protocol.String(linkBrokenMessage(value)),
+			})
+		}
+	}
+	return diags
+}
+
+// linkBrokenMessage names the destination and says why it is
+// broken: a clean URL no page serves, or a relative path with
+// no file behind it.
+func linkBrokenMessage(value string) string {
+	path, _, _ := strings.Cut(value, "#")
+	if strings.HasPrefix(path, "/") {
+		return "Broken link \"" + value + "\" (no page serves this URL)"
+	}
+	return "Broken link \"" + value + "\" (no such file)"
 }
 
 func (s *Server) sendDiagnostics(documentURI uri.URI, diags []protocol.Diagnostic) {
