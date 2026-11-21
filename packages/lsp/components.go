@@ -166,18 +166,22 @@ func scanTag(text string, pos protocol.Position) tagContext {
 		}
 		if !inTag {
 			if c == '<' {
-				if i+1 < len(text) {
+				if i+1 == cursor {
+					// `<` is the last character before
+					// the cursor: the user just typed it
+					// and the name follows. What comes
+					// after the cursor (a newline, a
+					// space) must not disqualify it, so
+					// this fires anywhere in the file,
+					// not only at its end.
+					inTag = true
+					tagStart = i
+				} else if i+1 < len(text) {
 					next := text[i+1]
 					if isTagNameStart(next) || (next == '/' && i+2 < len(text) && isTagNameStart(text[i+2])) {
 						inTag = true
 						tagStart = i
 					}
-				} else {
-					// `<` is the last character before
-					// the cursor: the user just typed it
-					// and the name follows.
-					inTag = true
-					tagStart = i
 				}
 			}
 			continue
@@ -354,12 +358,22 @@ func parseTag(text string, lines []string, tagStart, cursor int, inQuote byte) t
 	if cursor >= nameStart && cursor <= nameStart+len(ctx.name) {
 		// On the name, or just past it with the tag still
 		// open: completing the name. Past the name with a
-		// space after it means the name is done.
+		// space or tab after it means the name is done —
+		// unless the name is empty, which is the user
+		// having just typed `<` with nothing after it yet:
+		// then there is no name to be done, whatever
+		// follows in the document. A newline after the
+		// name is not a separator either: the line just
+		// ends there, and the user is still typing the
+		// name on it. (A cursor parked after a finished
+		// name in a multi-line tag now offers name
+		// completions instead of prop names. That position
+		// is rare, and the typing flow matters more.)
 		after := byte(0)
 		if nameStart+len(ctx.name) < tagEnd {
 			after = text[nameStart+len(ctx.name)]
 		}
-		if cursor < nameStart+len(ctx.name) || after == 0 || after == '>' || after == '/' {
+		if cursor < nameStart+len(ctx.name) || len(ctx.name) == 0 || after == 0 || after == '>' || after == '/' || after == '\n' || after == '\r' {
 			ctx.kind = tagName
 			ctx.partial = text[nameStart:cursor]
 			ctx.partialRange = rangeFromOffsets(lines, nameStart, nameStart+len(ctx.name))

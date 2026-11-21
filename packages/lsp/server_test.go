@@ -805,6 +805,55 @@ func TestComponentCompletionNames(t *testing.T) {
 	}
 }
 
+// A bare `<` offers tag names anywhere in the file, not only
+// at its end: what follows the cursor (a newline, more prose)
+// must not disqualify the tag the user just started.
+func TestComponentCompletionBareAngleMidFile(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<\n\nMore text\n")
+	items := s.complete(t, documentURI, 2, 1)
+	if len(items) != 18+len(htmlTags) {
+		t.Fatalf("component completions = %d, want %d (18 built-ins plus the HTML tags)", len(items), 18+len(htmlTags))
+	}
+	for _, want := range []string{"Btn", "Hint", "div", "span"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("component completions %v missing %q", labels(items), want)
+		}
+	}
+	if text, ok := editText(items, "Hint"); !ok || text != "<Hint>$0</Hint>" {
+		t.Fatalf("Hint edit = %q, want %q (the whole tag, swallowing the `<`)", text, "<Hint>$0</Hint>")
+	}
+}
+
+// A partial name mid-file still filters: only Hint starts with
+// a capital H (HTML tag names are lowercase).
+func TestComponentCompletionPartialNameMidFile(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<H\n\nMore text\n")
+	items := s.complete(t, documentURI, 2, 2)
+	if len(items) != 1 || items[0].Label != "Hint" {
+		t.Fatalf("completions = %v, want only Hint", labels(items))
+	}
+}
+
+func TestComponentCompletionBareAngleInFenceIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n```\n<\n```\n\nMore\n")
+	items := s.complete(t, documentURI, 3, 1)
+	if len(items) != 0 {
+		t.Fatalf("completions inside a fence = %v, want none", labels(items))
+	}
+}
+
+func TestComponentCompletionBareAngleInFrontmatterIsEmpty(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: Test\n<\n---\n\nBody\n")
+	items := s.complete(t, documentURI, 2, 1)
+	if len(items) != 0 {
+		t.Fatalf("completions in frontmatter = %v, want none (no tag names there)", labels(items))
+	}
+}
+
 func TestComponentCompletionNamesIncludeImports(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Foo from './Foo'\nimport { Bar, Baz } from './parts'\nimport Qux, { Quux } from './mix'\n\n<")
