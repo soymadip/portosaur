@@ -1,6 +1,6 @@
 id = "portosaur"
 name = "Portosaur"
-description = "Language support for Portosaur sites: porto.yml config files and MDX pages."
+description = "Language support for Portosaur sites: MDX frontmatter and components."
 version = "0.1.0"
 schema_version = 1
 authors = ["Soumadip Das"]
@@ -8,4 +8,4 @@ repository = "https://github.com/soymadip/portosaur"
 
 [language_servers.porto-lsp]
 name = "Portosaur Language Server"
-languages = ["MDX", "YAML"]
+languages = ["MDX"]

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -30,15 +29,10 @@ func fsPath(parsed uri.URI) string {
 	return uri.FsPathFor(parsed, platform, false)
 }
 
-// isConfigFile reports whether the document is a Portosaur
-// config file.
-func isConfigFile(documentURI uri.URI) bool {
-	base := filepath.Base(uriPath(documentURI))
-	return base == "porto.yml" || base == "porto.yaml"
-}
-
 // isMDXFile reports whether the document is an MDX file: the
-// frontmatter and component features serve it.
+// frontmatter and component features serve it. porto.yml is not
+// served here at all — the YAML extension handles it through the
+// $schema line at the top of the file.
 func isMDXFile(documentURI uri.URI) bool {
 	return strings.HasSuffix(uriPath(documentURI), ".mdx")
 }
@@ -48,40 +42,19 @@ func (s *Server) projectFor(documentURI uri.URI) (string, bool) {
 	return s.detector.findProjectRoot(uriPath(documentURI))
 }
 
-// Completion answers key and value completion for porto.yml
-// from the config schema, frontmatter keys and values in MDX
-// from the frontmatter schema, and component names, prop names
-// and prop values in MDX from the components schema. A document
+// Completion answers frontmatter keys and values in MDX from
+// the frontmatter schema, and component names, prop names and
+// prop values in MDX from the components schema. A document
 // outside a Portosaur project gets an empty list, not an error.
 func (s *Server) Completion(ctx context.Context, params *protocol.CompletionParams) (protocol.CompletionResult, error) {
 	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
 	if !ok {
 		return &protocol.CompletionList{}, nil
 	}
-	if isConfigFile(params.TextDocument.URI) {
-		return s.configCompletion(params, text)
-	}
 	if isMDXFile(params.TextDocument.URI) {
 		return s.mdxCompletion(params, text)
 	}
 	return &protocol.CompletionList{}, nil
-}
-
-func (s *Server) configCompletion(params *protocol.CompletionParams, text string) (protocol.CompletionResult, error) {
-	root, ok := s.projectFor(params.TextDocument.URI)
-	if !ok {
-		return &protocol.CompletionList{}, nil
-	}
-	schema := s.resolver.resolve(root, schemaConfig)
-	context := analyzeCursor(text, params.Position)
-	switch context.kind {
-	case cursorKey:
-		return keyCompletions(schema, context), nil
-	case cursorValue:
-		return valueCompletions(schema, context), nil
-	default:
-		return &protocol.CompletionList{}, nil
-	}
 }
 
 func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (protocol.CompletionResult, error) {

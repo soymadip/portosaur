@@ -152,13 +152,11 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       transport: TransportKind.stdio,
     };
     const clientOptions: LanguageClientOptions = {
-      // MDX files, plus porto.yml wherever it sits. Which
-      // documents the server serves is its own per-document
-      // decision; the selector only decides what reaches it.
+      // MDX files only. porto.yml is left to the YAML extension,
+      // which reads the $schema line at the top of the file.
       documentSelector: [
         { scheme: "file", language: "mdx" },
         { scheme: "untitled", language: "mdx" },
-        { scheme: "file", pattern: "**/porto.{yml,yaml}" },
       ],
     };
     client = new LanguageClient(

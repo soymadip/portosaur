@@ -19,11 +19,6 @@ func realSchema(t *testing.T, kind schemaKind) []byte {
 	return raw
 }
 
-func realConfigSchema(t *testing.T) []byte {
-	t.Helper()
-	return realSchema(t, schemaConfig)
-}
-
 func installSchema(t *testing.T, root string, kind schemaKind, raw []byte) {
 	t.Helper()
 	dir := filepath.Join(root, "node_modules", "@portosaur", "cli", "schema")
@@ -37,9 +32,9 @@ func installSchema(t *testing.T, root string, kind schemaKind, raw []byte) {
 
 func TestResolveInstalledSchemaIsStrict(t *testing.T) {
 	root := t.TempDir()
-	installSchema(t, root, schemaConfig, realConfigSchema(t))
+	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))
 	resolver := newSchemaResolver(func(string) { t.Fatal("onFatal called for an installed schema") })
-	schema := resolver.resolve(root, schemaConfig)
+	schema := resolver.resolve(root, schemaFrontmatter)
 	if !schema.strict {
 		t.Fatal("installed schema is not strict")
 	}
@@ -53,22 +48,22 @@ func TestResolveInstalledSchemaIsStrict(t *testing.T) {
 
 func TestResolveFindsHoistedSchema(t *testing.T) {
 	parent := t.TempDir()
-	installSchema(t, parent, schemaConfig, realConfigSchema(t))
+	installSchema(t, parent, schemaFrontmatter, realSchema(t, schemaFrontmatter))
 	child := filepath.Join(parent, "packages", "site")
 	if err := os.MkdirAll(child, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	resolver := newSchemaResolver(func(string) { t.Fatal("onFatal called for a hoisted schema") })
-	schema := resolver.resolve(child, schemaConfig)
+	schema := resolver.resolve(child, schemaFrontmatter)
 	if !schema.strict {
 		t.Fatal("hoisted schema is not strict")
 	}
 }
 
 func TestResolveFallsBackToWebsite(t *testing.T) {
-	raw := realConfigSchema(t)
+	raw := realSchema(t, schemaFrontmatter)
 	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/config.json" {
+		if r.URL.Path != "/frontmatter.json" {
 			http.NotFound(w, r)
 			return
 		}
@@ -79,7 +74,7 @@ func TestResolveFallsBackToWebsite(t *testing.T) {
 
 	resolver := newSchemaResolver(func(string) { t.Fatal("onFatal called when the website answered") })
 	resolver.website = website.URL
-	schema := resolver.resolve(t.TempDir(), schemaConfig)
+	schema := resolver.resolve(t.TempDir(), schemaFrontmatter)
 	if schema.strict {
 		t.Fatal("website schema is strict")
 	}
@@ -92,7 +87,7 @@ func TestResolveFatalWhenNothingWorks(t *testing.T) {
 	called := ""
 	resolver := newSchemaResolver(func(message string) { called = message })
 	resolver.website = "http://127.0.0.1:1"
-	schema := resolver.resolve(t.TempDir(), schemaConfig)
+	schema := resolver.resolve(t.TempDir(), schemaFrontmatter)
 	if called == "" {
 		t.Fatal("onFatal was not called")
 	}
@@ -103,8 +98,8 @@ func TestResolveFatalWhenNothingWorks(t *testing.T) {
 
 func TestResolveSkipsUnparseableInstalledSchema(t *testing.T) {
 	root := t.TempDir()
-	installSchema(t, root, schemaConfig, []byte("{not json"))
-	raw := realConfigSchema(t)
+	installSchema(t, root, schemaFrontmatter, []byte("{not json"))
+	raw := realSchema(t, schemaFrontmatter)
 	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(raw)
 	}))
@@ -112,7 +107,7 @@ func TestResolveSkipsUnparseableInstalledSchema(t *testing.T) {
 
 	resolver := newSchemaResolver(func(string) { t.Fatal("onFatal called when the website answered") })
 	resolver.website = website.URL
-	schema := resolver.resolve(root, schemaConfig)
+	schema := resolver.resolve(root, schemaFrontmatter)
 	if schema.strict {
 		t.Fatal("an unparseable installed schema beat the website fallback")
 	}

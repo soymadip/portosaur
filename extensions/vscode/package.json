@@ -1,7 +1,6 @@
 {
   "activationEvents": [
     "onLanguage:mdx",
-    "onLanguage:yaml",
     "workspaceContains:**/porto.yml",
     "workspaceContains:**/porto.yaml"
   ],
@@ -45,7 +44,7 @@
   "dependencies": {
     "vscode-languageclient": "^11.0.0"
   },
-  "description": "Language support for Portosaur sites: completions, hover and diagnostics for porto.yml and MDX frontmatter.",
+  "description": "Language support for Portosaur sites: completions, hover and diagnostics for MDX frontmatter and components.",
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/vscode": "^1.91.0",
@@ -58,6 +57,7 @@
     "vscode": "^1.91.0"
   },
   "extensionDependencies": [
+    "redhat.vscode-yaml",
     "unifiedjs.vscode-mdx"
   ],
   "homepage": "https://github.com/soymadip/portosaur",

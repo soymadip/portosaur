@@ -1,6 +1,7 @@
 // Command porto-lsp is the Portosaur language server. It speaks LSP
 // over stdio and serves completions, hover and diagnostics for
-// porto.yml files and Portosaur MDX frontmatter.
+// MDX frontmatter and components. porto.yml is left to the YAML
+// extension, which reads the $schema line at the top of the file.
 package main
 
 import (

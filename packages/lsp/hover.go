@@ -17,22 +17,10 @@ func (s *Server) Hover(ctx context.Context, params *protocol.HoverParams) (*prot
 	if !ok {
 		return nil, nil
 	}
-	if isConfigFile(params.TextDocument.URI) {
-		return s.configHover(params, text)
-	}
 	if isMDXFile(params.TextDocument.URI) {
 		return s.mdxHover(params, text)
 	}
 	return nil, nil
-}
-
-func (s *Server) configHover(params *protocol.HoverParams, text string) (*protocol.Hover, error) {
-	root, ok := s.projectFor(params.TextDocument.URI)
-	if !ok {
-		return nil, nil
-	}
-	schema := s.resolver.resolve(root, schemaConfig)
-	return yamlHover(schema, text, params.Position, 0), nil
 }
 
 func (s *Server) mdxHover(params *protocol.HoverParams, text string) (*protocol.Hover, error) {

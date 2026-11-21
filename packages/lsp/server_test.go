@@ -56,15 +56,15 @@ func startTestServer(t *testing.T, root string) *testServer {
 	return &testServer{server: remote, local: server, client: testClient, root: root}
 }
 
-// fixtureProject builds a temp project with porto.yml and all
-// three installed CLI schemas.
+// fixtureProject builds a temp project with porto.yml (the
+// detection marker) and the two installed CLI schemas the
+// server reads.
 func fixtureProject(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installSchema(t, root, schemaConfig, realConfigSchema(t))
 	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))
 	installSchema(t, root, schemaComponents, realSchema(t, schemaComponents))
 	return root
@@ -81,8 +81,8 @@ func (s *testServer) open(t *testing.T, path, text string) uri.URI {
 	return documentURI
 }
 
-// openNoWait sends didOpen without waiting: for documents the
-// server never diagnoses (non-config files).
+// openNoWait sends didOpen without waiting for the
+// diagnostics notification.
 func (s *testServer) openNoWait(t *testing.T, path, text string) uri.URI {
 	t.Helper()
 	documentURI := uri.File(path)
@@ -169,129 +169,7 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	}
 }
 
-func TestCompletionRootKeys(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "")
-	items := s.complete(t, documentURI, 0, 0)
-	for _, want := range []string{"site", "theme", "tasks", "vars", "home_page", "docs_home"} {
-		if !hasLabel(items, want) {
-			t.Fatalf("root completions %v missing %q", labels(items), want)
-		}
-	}
-}
-
-func TestCompletionNestedKeys(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "site:\n  ")
-	items := s.complete(t, documentURI, 1, 2)
-	for _, want := range []string{"title", "content", "url"} {
-		if !hasLabel(items, want) {
-			t.Fatalf("site completions %v missing %q", labels(items), want)
-		}
-	}
-	if hasLabel(items, "theme") {
-		t.Fatalf("site completions %v include the root key theme", labels(items))
-	}
-}
-
-func TestCompletionFiltersByPartial(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "site:\n  ti")
-	items := s.complete(t, documentURI, 1, 4)
-	if len(items) != 1 || items[0].Label != "title" {
-		t.Fatalf("completions = %v, want only title", labels(items))
-	}
-}
-
-func TestCompletionExcludesExistingKeys(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "site:\n  title: x\n  ")
-	items := s.complete(t, documentURI, 2, 2)
-	if hasLabel(items, "title") {
-		t.Fatalf("completions %v include the existing key title", labels(items))
-	}
-	if !hasLabel(items, "content") {
-		t.Fatalf("completions %v missing content", labels(items))
-	}
-}
-
-func TestCompletionKeyInsertsColon(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "")
-	items := s.complete(t, documentURI, 0, 0)
-	for _, item := range items {
-		if item.Label != "site" {
-			continue
-		}
-		edit, ok := item.TextEdit.(*protocol.TextEdit)
-		if !ok {
-			t.Fatalf("site TextEdit is %T, want *protocol.TextEdit", item.TextEdit)
-		}
-		if edit.NewText != "site:" {
-			t.Fatalf("site edit = %q, want %q (an object key takes no trailing space)", edit.NewText, "site:")
-		}
-		return
-	}
-	t.Fatal("site not in root completions")
-}
-
-func TestCompletionBooleanValue(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	text := "site:\n  content:\n    toc:\n      enable: "
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), text)
-	items := s.complete(t, documentURI, 3, 14)
-	if !hasLabel(items, "true") || !hasLabel(items, "false") {
-		t.Fatalf("boolean completions = %v, want true and false", labels(items))
-	}
-}
-
-// A porto.yml is always in a project — its own directory is the
-// project root by definition — so "outside a project" cannot
-// happen for it. What can happen is a project with no installed
-// CLI: then the website schema serves completion, but leniently,
-// with no schema diagnostics.
-func TestCompletionLenientMode(t *testing.T) {
-	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	raw := realConfigSchema(t)
-	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write(raw)
-	}))
-	defer website.Close()
-
-	s := startTestServer(t, root)
-	s.local.resolver.website = website.URL
-	documentURI := s.open(t, filepath.Join(root, "porto.yml"), "")
-	items := s.complete(t, documentURI, 0, 0)
-	if !hasLabel(items, "site") {
-		t.Fatalf("lenient completions = %v, want site", labels(items))
-	}
-}
-
-func TestDiagnosticsLenientModeIsEmpty(t *testing.T) {
-	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	raw := realConfigSchema(t)
-	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write(raw)
-	}))
-	defer website.Close()
-
-	s := startTestServer(t, root)
-	s.local.resolver.website = website.URL
-	// An invalid doc in lenient mode: no schema diagnostics.
-	documentURI := s.openNoWait(t, filepath.Join(root, "porto.yml"), "site:\n  bogus: true\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) != 0 {
-		t.Fatalf("lenient diagnostics = %+v, want none", diags)
-	}
-}
-
-func TestCompletionNonConfigFileIsEmpty(t *testing.T) {
+func TestCompletionNonMDXFileIsEmpty(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.openNoWait(t, filepath.Join(s.root, "other.yaml"), "")
 	items := s.complete(t, documentURI, 0, 0)
@@ -300,114 +178,17 @@ func TestCompletionNonConfigFileIsEmpty(t *testing.T) {
 	}
 }
 
-func TestHoverShowsDescription(t *testing.T) {
+// porto.yml is served by the YAML extension through the $schema
+// line, not by this server: no completions, no hover.
+func TestConfigFileIsNotServed(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "site:\n  title: Hello\n")
-	hover, err := s.server.Hover(context.Background(), &protocol.HoverParams{
-		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
-			TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
-			Position:     protocol.Position{Line: 1, Character: 4},
-		},
-	})
-	if err != nil {
-		t.Fatalf("hover: %v", err)
+	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  ")
+	items := s.complete(t, documentURI, 1, 2)
+	if len(items) != 0 {
+		t.Fatalf("completions for porto.yml = %v, want none", labels(items))
 	}
-	if hover == nil {
-		t.Fatal("no hover for the title key")
-	}
-	content, ok := hover.Contents.(*protocol.MarkupContent)
-	if !ok {
-		t.Fatalf("hover contents are %T, want *protocol.MarkupContent", hover.Contents)
-	}
-	if !strings.Contains(content.Value, "Global site title.") {
-		t.Fatalf("hover = %q, want the title description", content.Value)
-	}
-	if !strings.Contains(content.Value, "string") {
-		t.Fatalf("hover = %q, want the type", content.Value)
-	}
-}
-
-func TestHoverUnknownKeyIsEmpty(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "porto.yml"), "site:\n  bogus: true\n")
-	hover, err := s.server.Hover(context.Background(), &protocol.HoverParams{
-		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
-			TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
-			Position:     protocol.Position{Line: 1, Character: 4},
-		},
-	})
-	if err != nil {
-		t.Fatalf("hover: %v", err)
-	}
-	if hover != nil {
-		t.Fatalf("hover for an unknown key = %+v, want nil", hover)
-	}
-}
-
-func TestDiagnosticsValidDocument(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  title: Hello\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) != 0 {
-		t.Fatalf("diagnostics = %+v, want none", diags)
-	}
-}
-
-func TestDiagnosticsUnknownKey(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  bogus: true\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) != 1 {
-		t.Fatalf("diagnostics = %+v, want one", diags)
-	}
-	if !strings.Contains(string(diags[0].Message.(protocol.String)), "bogus") {
-		t.Fatalf("diagnostic = %q, want it to name bogus", diags[0].Message)
-	}
-	if diags[0].Range.Start.Line != 1 {
-		t.Fatalf("diagnostic line = %d, want 1", diags[0].Range.Start.Line)
-	}
-}
-
-func TestDiagnosticsWrongType(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  title: 42\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) != 1 {
-		t.Fatalf("diagnostics = %+v, want one", diags)
-	}
-	if !strings.Contains(string(diags[0].Message.(protocol.String)), "number") {
-		t.Fatalf("diagnostic = %q, want it to mention the number", diags[0].Message)
-	}
-	if diags[0].Range.Start.Line != 1 {
-		t.Fatalf("diagnostic line = %d, want 1", diags[0].Range.Start.Line)
-	}
-}
-
-func TestDiagnosticsSyntaxError(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  title: [unclosed\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) == 0 {
-		t.Fatal("no diagnostics for broken YAML")
-	}
-}
-
-func TestDiagnosticsClearedOnClose(t *testing.T) {
-	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "porto.yml"), "site:\n  bogus: true\n")
-	diags := s.waitDiagnostics(t, documentURI)
-	if len(diags) == 0 {
-		t.Fatal("no diagnostics before close")
-	}
-	err := s.server.DidClose(context.Background(), &protocol.DidCloseTextDocumentParams{
-		TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
-	})
-	if err != nil {
-		t.Fatalf("didClose: %v", err)
-	}
-	diags = s.waitDiagnostics(t, documentURI)
-	if len(diags) != 0 {
-		t.Fatalf("diagnostics after close = %+v, want none", diags)
+	if content := s.hover(t, documentURI, 0, 1); content != nil {
+		t.Fatalf("hover for porto.yml = %q, want nil", content.Value)
 	}
 }
 
@@ -565,6 +346,69 @@ func TestFrontmatterDiagnosticsValidDocument(t *testing.T) {
 	diags := s.waitDiagnostics(t, documentURI)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %+v, want none", diags)
+	}
+}
+
+// A project with no installed CLI: the website schema serves
+// frontmatter completion, but leniently, with no schema
+// diagnostics.
+func TestFrontmatterCompletionLenientMode(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	raw := realSchema(t, schemaFrontmatter)
+	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(raw)
+	}))
+	defer website.Close()
+
+	s := startTestServer(t, root)
+	s.local.resolver.website = website.URL
+	documentURI := s.open(t, filepath.Join(root, "page.mdx"), "---\n\n---\n")
+	items := s.complete(t, documentURI, 1, 0)
+	if !hasLabel(items, "title") {
+		t.Fatalf("lenient completions = %v, want title", labels(items))
+	}
+}
+
+func TestFrontmatterDiagnosticsLenientModeIsEmpty(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	raw := realSchema(t, schemaFrontmatter)
+	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(raw)
+	}))
+	defer website.Close()
+
+	s := startTestServer(t, root)
+	s.local.resolver.website = website.URL
+	// An invalid doc in lenient mode: no schema diagnostics.
+	documentURI := s.openNoWait(t, filepath.Join(root, "page.mdx"), "---\nbogus: true\n---\n")
+	diags := s.waitDiagnostics(t, documentURI)
+	if len(diags) != 0 {
+		t.Fatalf("lenient diagnostics = %+v, want none", diags)
+	}
+}
+
+func TestFrontmatterDiagnosticsClearedOnClose(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.openNoWait(t, filepath.Join(s.root, "page.mdx"), "---\nbogus: true\n---\n")
+	diags := s.waitDiagnostics(t, documentURI)
+	if len(diags) == 0 {
+		t.Fatal("no diagnostics before close")
+	}
+	err := s.server.DidClose(context.Background(), &protocol.DidCloseTextDocumentParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
+	})
+	if err != nil {
+		t.Fatalf("didClose: %v", err)
+	}
+	diags = s.waitDiagnostics(t, documentURI)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics after close = %+v, want none", diags)
 	}
 }
 

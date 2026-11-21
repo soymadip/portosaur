@@ -4,7 +4,9 @@ desc: "Suggestions, hover help, and error checking in porto.yml and MDX pages, r
 icon: "md:code"
 ---
 
-Portosaur ships a small language server, `porto-lsp`, that understands your site. In `porto.yml` it suggests config keys and values, explains each key on hover, and flags unknown keys and wrong types. In MDX pages it does the same for frontmatter, and suggests components like `<Btn>` and `<Hint>` while you type, with their props.
+Portosaur ships a small language server, `porto-lsp`, that understands your MDX pages. In frontmatter it suggests keys and values, explains each key on hover, and flags unknown keys and wrong types. In the page body it suggests components like `<Btn>` and `<Hint>` while you type, with their props.
+
+`porto.yml` is not handled by the server. Every `porto.yml` carries a `$schema` line at the top, and the YAML support in your editor reads it to suggest config keys and values, explain each key on hover, and flag mistakes.
 
 The server only activates inside a Portosaur project, so it stays quiet in other folders.
 
@@ -12,7 +14,7 @@ The server only activates inside a Portosaur project, so it stays quiet in other
 
 ## VS Code
 
-Install the [Portosaur extension](https://marketplace.visualstudio.com/items?itemName=soymadip.portosaur) from the Marketplace (also on [Open VSX](https://open-vsx.org/extension/soymadip/portosaur)). You also need the [MDX extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx), which provides the MDX language itself.
+Install the [Portosaur extension](https://marketplace.visualstudio.com/items?itemName=soymadip.portosaur) from the Marketplace (also on [Open VSX](https://open-vsx.org/extension/soymadip/portosaur)). You also need the [MDX extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx), which provides the MDX language itself, and the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), which handles `porto.yml` through the `$schema` line. Both are installed automatically along with the Portosaur extension.
 
 On first use the extension downloads the matching server binary from the Portosaur releases and checks it before running it. There is nothing else to set up.
 
@@ -29,7 +31,7 @@ If the server stops responding, run **Portosaur: Restart Language Server** from 
 
 ## Zed
 
-Install `portosaur` from the extension list, along with the [MDX extension](https://zed.dev/extensions/mdx), which provides the MDX language itself. The server binary is downloaded on first use, the same as in VS Code.
+Install `portosaur` from the extension list, along with the [MDX extension](https://zed.dev/extensions/mdx), which provides the MDX language itself. The server binary is downloaded on first use, the same as in VS Code. `porto.yml` works through Zed's built-in YAML support, which reads the `$schema` line, with nothing extra to install.
 
 To use a local build of the server instead, set the binary path in your Zed settings:
 
@@ -49,4 +51,4 @@ To use a local build of the server instead, set the binary path in your Zed sett
 
 ## Other editors
 
-Neovim, Helix, and anything else that speaks the Language Server Protocol can run the server directly. Download the binary for your platform from the [Portosaur releases](https://github.com/soymadip/portosaur/releases) and start it with the `--stdio` flag.
+Neovim, Helix, and anything else that speaks the Language Server Protocol can run the server directly. Download the binary for your platform from the [Portosaur releases](https://github.com/soymadip/portosaur/releases) and start it with the `--stdio` flag. For `porto.yml`, point your YAML language server at the schema with the `$schema` line at the top of the file.

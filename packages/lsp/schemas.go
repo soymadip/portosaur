@@ -25,13 +25,12 @@ import (
 type schemaKind string
 
 const (
-	schemaConfig      schemaKind = "config"
 	schemaFrontmatter schemaKind = "frontmatter"
 	schemaComponents  schemaKind = "components"
 )
 
 // websiteBase is where the current release's schemas live.
-const websiteBase = "https://soymadip.github.io/schema"
+const websiteBase = "https://soymadip.github.io/portosaur/schema"
 
 type resolvedSchema struct {
 	raw      map[string]any

@@ -1,6 +1,6 @@
 # Portosaur for Zed
 
-Language support for [Portosaur](https://github.com/soymadip/portosaur) sites: suggestions, hover help, and error checking in `porto.yml` config files and in the frontmatter and components of MDX pages.
+Language support for [Portosaur](https://github.com/soymadip/portosaur) sites: suggestions, hover help, and error checking in the frontmatter and components of MDX pages. `porto.yml` is handled by Zed's built-in YAML support, which reads the `$schema` line at the top of the file.
 
 ## Requirements
 
