@@ -242,7 +242,8 @@ export interface TocHeading {
   text: string;
 }
 
-/** A heading nested for the table of contents (h3s under their h2). */
+/** A heading nested for the table of contents (each heading under
+ * the nearest shallower heading before it). */
 export interface TocItem {
   depth: number;
   slug: string;
@@ -302,22 +303,30 @@ export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
 }
 
 /**
- * Nests a flat heading list into a TOC tree: depth-2 headings are
- * top-level, depth-3 headings become children of the preceding depth-2
- * heading (an orphan h3 — no preceding h2 — promotes to top-level).
- * The tree shape is what `TableOfContentsList` renders.
+ * Nests a flat heading list into a TOC tree: each heading nests
+ * under the nearest preceding heading shallower than it, so h3s
+ * sit under their h2 and h4s under their h3. A heading with no
+ * shallower heading before it (an orphan h3, a leading h4)
+ * promotes to top-level. The tree shape is what
+ * `TableOfContentsList` renders.
  */
 export function nestHeadings(headings: TocHeading[]): TocItem[] {
   const tree: TocItem[] = [];
-  let currentParent: TocItem | null = null;
+  const stack: TocItem[] = [];
   for (const heading of headings) {
     const item: TocItem = { ...heading, children: [] };
-    if (heading.depth === 2 || !currentParent) {
-      tree.push(item);
-      currentParent = item;
-    } else {
-      currentParent.children.push(item);
+    // Pop headings as deep as this one or deeper — the heading
+    // nests under the nearest preceding heading shallower than it.
+    while (stack.length > 0 && stack[stack.length - 1].depth >= heading.depth) {
+      stack.pop();
     }
+    const parent = stack[stack.length - 1];
+    if (parent) {
+      parent.children.push(item);
+    } else {
+      tree.push(item);
+    }
+    stack.push(item);
   }
   return tree;
 }
