@@ -18,10 +18,15 @@ export function TabItem({
   children,
   className,
 }: {
+  /** The tab's value. Tabs are matched by it. */
   value: string;
+  /** The label on the tab button. Falls back to the value. */
   label?: string;
+  /** Open this tab first. */
   default?: boolean;
+  /** Extra attributes on the tab button. */
   attributes?: ButtonHTMLAttributes<HTMLButtonElement>;
+  /** Extra classes on the tab panel. */
   className?: string;
   children?: ReactNode;
 }) {

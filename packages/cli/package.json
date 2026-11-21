@@ -13,10 +13,10 @@
     "src",
     "bin",
     "templates",
-    "config-schema.json"
+    "schema"
   ],
   "scripts": {
-    "prepack": "bun bin/porto.ts schema && bun x prettier --write config-schema.json"
+    "prepack": "bun bin/porto.ts schema -o schema/config.json && bun x prettier --write schema/config.json"
   },
   "type": "module",
   "bin": {

@@ -58,7 +58,9 @@ export function CodeBlockTabs({
   groupId,
 }: {
   children?: ReactNode;
+  /** The tab open on first render. */
   defaultValue?: string;
+  /** Tabs with the same group stay in sync across the page. */
   groupId?: string;
   /* The plugin passes `persist` with `groupId`. Portosaur always
      persists grouped tabs to localStorage, so there is nothing to

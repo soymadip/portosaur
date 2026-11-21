@@ -55,16 +55,26 @@ export function Dropdown({
   triggerClassName = "",
   ariaLabel,
 }: {
+  /** The trigger text. */
   label?: string;
+  /** Full trigger content — a string renders as the label text. */
   trigger?: string;
+  /** The menu items — links, buttons and separators. */
   items?: DropdownItem[];
   children?: React.ReactNode;
+  /** Pin the menu to the trigger's left or right edge. Centered by default. */
   align?: DropdownAlign;
+  /** Drop the chevron on the trigger. */
   noArrow?: boolean;
+  /** Open the menu above the trigger instead of below it. */
   dropUp?: boolean;
+  /** Extra class on the container (`<details>`). */
   className?: string;
+  /** Extra class on the menu (`<ul>`). */
   menuClassName?: string;
+  /** Extra class on the trigger (`<summary>`). */
   triggerClassName?: string;
+  /** Accessible label for the trigger. */
   ariaLabel?: string;
 }) {
   return (

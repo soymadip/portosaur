@@ -11,9 +11,13 @@ export function DynamicIcon({
   fallbackIcon,
   size,
 }: {
+  /** The icon value — an id, an emoji, or an image source. */
   icon: DynamicIconValue;
+  /** Guesses an icon from the page slug when no icon is given. */
   slug?: string;
+  /** Shown when the icon cannot be resolved. */
   fallbackIcon?: string;
+  /** The icon size, as a CSS length. */
   size?: string;
 }) {
   return (

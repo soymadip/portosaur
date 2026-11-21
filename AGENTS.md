@@ -62,8 +62,8 @@ the 0.26.0 reference code).
 
 ## Housekeeping
 
-- `bun run test:all` regenerates `packages/cli/config-schema.json` raw —
-  reformat it with `bun x prettier --write packages/cli/config-schema.json`
+- `bun run test:all` regenerates `packages/cli/schema/config.json` raw —
+  reformat it with `bun x prettier --write packages/cli/schema/config.json`
   before committing.
 
 - The playground (`.playground/`) is gitignored. Rebuild it with

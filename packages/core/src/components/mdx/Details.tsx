@@ -18,6 +18,7 @@ export function Details({
   summary,
   children,
 }: {
+  /** The text on the collapsed header. */
   summary?: string;
   children?: React.ReactNode;
 }) {

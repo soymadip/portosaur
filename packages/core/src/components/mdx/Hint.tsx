@@ -7,6 +7,7 @@ export function Hint({
   msg,
   children,
 }: {
+  /** The message shown above the content. */
   msg?: string;
   children?: React.ReactNode;
 }) {

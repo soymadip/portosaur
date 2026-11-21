@@ -1,0 +1,389 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Portosaur MDX Components",
+  "description": "Props of the components Portosaur provides in MDX.",
+  "type": "object",
+  "definitions": {
+    "Btn": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "A full URL — external links open in a new tab."
+        },
+        "to": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An internal page path."
+        },
+        "variant": {
+          "x-ts-type": "ButtonVariant",
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "danger",
+            "info",
+            "ghost"
+          ],
+          "description": "The button style."
+        },
+        "outline": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Outline style instead of a filled button."
+        },
+        "size": {
+          "x-ts-type": "\"sm\" | \"lg\"",
+          "type": "string",
+          "enum": ["sm", "lg"],
+          "description": "Small or large. Leave unset for the default size."
+        },
+        "icon": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An icon id shown before the label."
+        },
+        "sameTab": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Keep an external link in the same tab."
+        },
+        "className": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra classes on the button."
+        },
+        "disabled": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Render the button disabled."
+        },
+        "title": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Tooltip text."
+        },
+        "ariaLabel": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Accessible label for screen readers."
+        }
+      },
+      "additionalProperties": false
+    },
+    "CodeBlockTab": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "CodeBlockTabs": {
+      "type": "object",
+      "properties": {
+        "defaultValue": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The tab open on first render."
+        },
+        "groupId": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Tabs with the same group stay in sync across the page."
+        },
+        "persist": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "The plugin passes `persist` with `groupId`. Portosaur always persists grouped tabs to localStorage, so there is nothing to do with it."
+        }
+      },
+      "additionalProperties": false
+    },
+    "CodeBlockTabsList": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "CodeBlockTabsTrigger": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "Details": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The text on the collapsed header."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Diagram": {
+      "type": "object",
+      "properties": {
+        "svg": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The rendered SVG. Set by the Mermaid plugin, not written by hand."
+        }
+      },
+      "required": ["svg"],
+      "additionalProperties": false
+    },
+    "Dropdown": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The trigger text."
+        },
+        "trigger": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Full trigger content — a string renders as the label text."
+        },
+        "items": {
+          "x-ts-type": "DropdownItem[]",
+          "type": "array",
+          "description": "The menu items — links, buttons and separators."
+        },
+        "align": {
+          "x-ts-type": "DropdownAlign",
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Pin the menu to the trigger's left or right edge. Centered by default."
+        },
+        "noArrow": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Drop the chevron on the trigger."
+        },
+        "dropUp": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Open the menu above the trigger instead of below it."
+        },
+        "className": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra class on the container (`<details>`)."
+        },
+        "menuClassName": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra class on the menu (`<ul>`)."
+        },
+        "triggerClassName": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra class on the trigger (`<summary>`)."
+        },
+        "ariaLabel": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Accessible label for the trigger."
+        }
+      },
+      "additionalProperties": false
+    },
+    "DynamicIcon": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "x-ts-type": "DynamicIconValue",
+          "description": "The icon value — an id, an emoji, or an image source."
+        },
+        "slug": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Guesses an icon from the page slug when no icon is given."
+        },
+        "fallbackIcon": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Shown when the icon cannot be resolved."
+        },
+        "size": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The icon size, as a CSS length."
+        }
+      },
+      "required": ["icon"],
+      "additionalProperties": false
+    },
+    "Hint": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The message shown above the content."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Icon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The icon id, like `lu:star`."
+        },
+        "size": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The icon size, as a CSS length."
+        },
+        "color": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The icon color."
+        },
+        "className": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra classes on the icon."
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "IconSearch": {
+      "type": "object",
+      "properties": {
+        "dropUp": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Open the results above the field instead of below it."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Indent": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "Link": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An internal page path."
+        },
+        "href": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "A full URL or absolute path."
+        }
+      }
+    },
+    "Pv": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The link target. Without it the text renders unlinked."
+        }
+      },
+      "additionalProperties": false
+    },
+    "TabItem": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The tab's value. Tabs are matched by it."
+        },
+        "label": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The label on the tab button. Falls back to the value."
+        },
+        "default": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Open this tab first."
+        },
+        "attributes": {
+          "x-ts-type": "ButtonHTMLAttributes<HTMLButtonElement>",
+          "description": "Extra attributes on the tab button."
+        },
+        "className": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra classes on the tab panel."
+        }
+      },
+      "required": ["value"],
+      "additionalProperties": false
+    },
+    "Tabs": {
+      "type": "object",
+      "properties": {
+        "defaultValue": {
+          "x-ts-type": "string | null",
+          "type": "string",
+          "description": "The tab open on first render."
+        },
+        "groupId": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Tabs with the same group stay in sync across the page."
+        },
+        "queryString": {
+          "x-ts-type": "boolean | string",
+          "type": ["boolean", "string"],
+          "description": "Remember the active tab in the URL. True uses the group id as the key."
+        },
+        "values": {
+          "x-ts-type": "TabValue[]",
+          "type": "array",
+          "description": "The tabs, as value and label pairs."
+        },
+        "block": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Stretch the tab buttons to fill the width."
+        },
+        "lazy": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Render a tab's content only when it is opened."
+        },
+        "className": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "Extra classes on the tabs."
+        }
+      },
+      "additionalProperties": false
+    },
+    "TopicList": {
+      "type": "object",
+      "properties": {
+        "forceRender": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Show the list even when the page would not get one automatically."
+        },
+        "items": {
+          "x-ts-type": "TopicListItem[]",
+          "type": "array",
+          "description": "The cards to show, instead of the page's child pages."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

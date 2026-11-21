@@ -6,6 +6,7 @@ export function Pv({
   href,
   children,
 }: {
+  /** The link target. Without it the text renders unlinked. */
   href?: string;
   children?: React.ReactNode;
 }) {
