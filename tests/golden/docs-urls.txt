@@ -3,9 +3,7 @@
 /blog/
 /blog/authors/
 /docs/
-/docs/cli-reference/
 /docs/config/
-/docs/config/reference/
 /docs/deployment/
 /docs/deployment/codeberg-pages/
 /docs/deployment/github-pages/
@@ -18,6 +16,7 @@
 /docs/developer-guide/templates/
 /docs/developer-guide/wizard/
 /docs/getting-started/
+/docs/getting-started/cli-reference/
 /docs/getting-started/installation/
 /docs/getting-started/project-structure/
 /docs/markdown/
@@ -36,6 +35,7 @@
 /docs/markdown/components/preview/
 /docs/markdown/components/tabs/
 /docs/markdown/components/topic-list/
+/docs/markdown/diagrams/
 /docs/markdown/dynamic-variables/
 /docs/markdown/frontmatter/
 /docs/markdown/icons/

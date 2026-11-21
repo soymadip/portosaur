@@ -1,5 +1,5 @@
 {
-  "generated_from": "Diagram zoom added (Zooming section)",
+  "generated_from": "Config reference restructured (moved to /docs/config)",
   "routes": [
     {
       "url": "/",
@@ -35,8 +35,7 @@
       "headings": [
         "Portosaur Docs",
         "Getting Started",
-        "CLI Reference",
-        "Configuration Guide",
+        "Configuration",
         "Markdown Features",
         "Progressive Web App (PWA)",
         "Deployment Guide",
@@ -45,37 +44,9 @@
       ]
     },
     {
-      "url": "/docs/cli-reference/",
-      "title": "CLI Reference | Portosaur",
-      "headings": [
-        "CLI Reference",
-        "Global Options",
-        "porto init",
-        "porto providers",
-        "porto dev (alias: porto start)",
-        "porto build",
-        "porto serve"
-      ]
-    },
-    {
       "url": "/docs/config/",
-      "title": "Configuration Guide | Portosaur",
-      "headings": ["Configuration Guide", "Configuration Reference"]
-    },
-    {
-      "url": "/docs/config/reference/",
-      "title": "Configuration Reference | Portosaur",
-      "headings": [
-        "Configuration Reference",
-        "site",
-        "theme",
-        "docs_home",
-        "home_page",
-        "tasks",
-        "vars",
-        "Custom Head Tags",
-        "Icon Values"
-      ]
+      "title": "Configuration | Portosaur",
+      "headings": ["Configuration", "Config Reference"]
     },
     {
       "url": "/docs/deployment/",
@@ -194,7 +165,25 @@
     {
       "url": "/docs/getting-started/",
       "title": "Getting Started | Portosaur",
-      "headings": ["Getting Started", "Quick Overview"]
+      "headings": [
+        "Getting Started",
+        "Installation & Setup",
+        "Project Structure",
+        "CLI Reference"
+      ]
+    },
+    {
+      "url": "/docs/getting-started/cli-reference/",
+      "title": "CLI Reference | Portosaur",
+      "headings": [
+        "CLI Reference",
+        "Global Options",
+        "porto init",
+        "porto providers",
+        "porto dev (alias: porto start)",
+        "porto build",
+        "porto serve"
+      ]
     },
     {
       "url": "/docs/getting-started/installation/",
