@@ -28,7 +28,9 @@ export async function activate(
   if (await hasPortosaurProject()) {
     await startClient(context);
   }
-  const watcher = vscode.workspace.createFileSystemWatcher("**/porto.y?(a)ml");
+  const watcher = vscode.workspace.createFileSystemWatcher(
+    "**/porto.{yml,yaml}",
+  );
   watcher.onDidCreate(() => void startClient(context));
   context.subscriptions.push(watcher);
   context.subscriptions.push(
@@ -67,7 +69,7 @@ export async function deactivate(): Promise<void> {
 // on the Portosaur packages.
 async function hasPortosaurProject(): Promise<boolean> {
   const configs = await vscode.workspace.findFiles(
-    "**/porto.y?(a)ml",
+    "**/porto.{yml,yaml}",
     "**/node_modules/**",
     1,
   );
@@ -156,7 +158,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       documentSelector: [
         { scheme: "file", language: "mdx" },
         { scheme: "untitled", language: "mdx" },
-        { scheme: "file", pattern: "**/porto.y?(a)ml" },
+        { scheme: "file", pattern: "**/porto.{yml,yaml}" },
       ],
     };
     client = new LanguageClient(
