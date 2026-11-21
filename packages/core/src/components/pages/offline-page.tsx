@@ -19,8 +19,9 @@ export function OfflinePage({ config }: { config: PortosaurOptions }) {
         </div>
         <h2 className="porto-empty-state__title">You&apos;re Offline</h2>
         <p className="porto-empty-state__text">
-          It looks like you don&apos;t have an internet connection. Previously
-          visited pages are still available from cache.
+          It looks like you don&apos;t have an internet connection. This page
+          isn&apos;t saved on this device yet — pages you&apos;ve already
+          visited are still available.
         </p>
         <ReloadButton />
       </div>

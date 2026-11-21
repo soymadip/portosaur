@@ -9,7 +9,7 @@
  * - `lib/icon-scan.ts` — Node-only (`node:fs`). Build time only.
  * - `lib/image-size.ts` — Node-only (`node:fs`). Server code only.
  * - `lib/assets.ts` — Node-only (`node:fs`). Server code only
- *   (sitemap/robots builders, used by the generated routes).
+ *   (theme color for the generated metadata and manifest).
  * - `lib/source.ts` — Node-only (`node:path`) + loader setup.
  *   Server code only, imported by the generated `lib/source.ts`.
  * - `lib/slug-server.ts` — Node-only. Server code only.

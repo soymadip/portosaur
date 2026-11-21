@@ -40,6 +40,15 @@ export type {
   SiteIconsLogger,
   SiteIconsResult,
 } from "./utils/siteIcons.ts";
+export {
+  buildServiceWorkerContent,
+  serviceWorkerPrecache,
+  syncServiceWorker,
+} from "./utils/serviceWorker.ts";
+export type {
+  ServiceWorkerLogger,
+  ServiceWorkerSpec,
+} from "./utils/serviceWorker.ts";
 export { getDefaultColorScheme, resolveSiteCssFiles } from "./utils/css.ts";
 
 export { resolveVars, getNestedValue } from "./utils/config.ts";

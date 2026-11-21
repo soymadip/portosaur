@@ -76,17 +76,6 @@ function rootRelativeDir(dir: string): string {
 }
 
 /**
- * The site origin (URL + base path, no trailing slash) for sitemap,
- * robots, and metadata URLs.
- */
-function siteOrigin(options: PortosaurOptions): string {
-  const url = options.site.url.replace(/\/$/, "");
-  const base =
-    options.site.baseUrl === "/" ? "" : options.site.baseUrl.replace(/\/$/, "");
-  return `${url}${base}`;
-}
-
-/**
  * The export output dir as Next sees it: relative to the generated
  * root (`.portosaur/`). Shared by the config builder (which emits
  * it as `distDir`) and the tsconfig builder (whose type globs are
@@ -391,6 +380,15 @@ export function buildNextEnvContent(): string {
  * `<html>`/`<body>`, the theme pre-paint script, and the config context.
  * The user's `theme.custom_css` files are imported here too, resolved
  * relative to the generated root's `app/` directory.
+ *
+ * The metadata is a `generateMetadata` function, not a static object:
+ * the social card's dimensions are read from the image file at build
+ * time (via the core's `image-size` helper). The theme color lives
+ * in a `generateViewport` export instead: Next 16 ignores
+ * `metadata.themeColor` (it warns "unsupported metadata" and drops
+ * it) and only renders the tag from the viewport. The manifest link
+ * is emitted only when `site.pwa.enable` is on — with the PWA off
+ * there is no manifest file to link to.
  */
 export function buildRootLayoutContent(
   options: PortosaurOptions,
@@ -411,22 +409,82 @@ export function buildRootLayoutContent(
       return `import ${JSON.stringify(specifier)};`;
     })
     .join("\n");
+  const manifestField =
+    options.site.pwa?.enable !== false
+      ? `    manifest: absoluteImageUrl(config, "/manifest.webmanifest"),\n`
+      : "";
 
-  return `${header(mtime)}import type { Metadata } from "next";
+  return `${header(mtime)}import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { config } from "@/lib/config";
 import { siteIcons } from "../site-icons";
 import { RootLayout } from "@portosaur/core/components/layouts/root-layout";
+import { getCssVar } from "@portosaur/core/lib/assets";
+import {
+  absoluteImageUrl,
+  siteOriginOf,
+  sizedSocialImage,
+} from "@portosaur/core/lib/metadata";
 import "@portosaur/core/css/global.css";
 ${customImports ? `${customImports}\n` : ""}
-export const metadata: Metadata = {
-  metadataBase: new URL(${JSON.stringify(siteOrigin(options))}),
-  title: {
-    default: config.site.title,
-    template: \`%s | \${config.site.title}\`,
-  },
-  description: config.site.tagline,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const card = await sizedSocialImage(
+    config,
+    config.site.socialCard || "img/social-card.jpeg",
+  );
+  return {
+    metadataBase: new URL(siteOriginOf(config)),
+    title: {
+      default: config.site.title,
+      template: \`%s | \${config.site.title}\`,
+    },
+    description: config.site.tagline,
+    icons: {
+      icon: [
+        {
+          url: absoluteImageUrl(config, "/favicon/favicon.ico"),
+          sizes: "32x32",
+        },
+        {
+          url: absoluteImageUrl(config, "/favicon/icon-192x192.png"),
+          sizes: "192x192",
+          type: "image/png",
+        },
+      ],
+      apple: [
+        {
+          url: absoluteImageUrl(config, "/favicon/apple-touch-icon.png"),
+          sizes: "180x180",
+        },
+      ],
+    },
+${manifestField}    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: config.site.title,
+    },
+    openGraph: {
+      type: "website",
+      title: config.site.title,
+      description: config.site.tagline,
+      images: [card],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: config.site.title,
+      description: config.site.tagline,
+      images: [card.url],
+    },
+  };
+}
+
+export async function generateViewport(): Promise<Viewport> {
+  const themeColor = getCssVar("--porto-color-bg", config.cssFiles ?? []);
+  if (!themeColor) {
+    return {};
+  }
+  return { themeColor };
+}
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -546,6 +604,7 @@ export function buildDocPageContent(
 import { config } from "@/lib/config";
 import { DocPage } from "@portosaur/core/components/pages/doc-page";
 import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
+import { sizedSocialImage } from "@portosaur/core/lib/metadata";
 import { createRelativeLink } from "@portosaur/core/components/mdx";
 import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
 import { notFound } from "next/navigation";
@@ -599,6 +658,19 @@ export async function generateMetadata(
     contentTitle as { text: string; slug: string } | null,
     docFileTitle(page.path),
   );
+  // A frontmatter image is this page's social preview, overriding
+  // the site-wide card from the root layout. Pages without one
+  // inherit the site card.
+  const image = page.data.image;
+  if (image) {
+    const social = await sizedSocialImage(config, image);
+    return {
+      title: metaTitle,
+      description: page.data.desc,
+      openGraph: { images: [social] },
+      twitter: { images: [social.url] },
+    };
+  }
   return {
     title: metaTitle,
     description: page.data.desc,
@@ -794,6 +866,7 @@ import {
 } from "@/lib/blog";
 import { BlogPostPage } from "@portosaur/core/components/pages/blog-post-page";
 import { docPageTitles, docFileTitle } from "@portosaur/core/lib/docPage";
+import { sizedSocialImage } from "@portosaur/core/lib/metadata";
 import { createRelativeLink } from "@portosaur/core/components/mdx";
 import { pageHref } from "@portosaur/core/lib/pageUrl";
 import { CONTENT_TITLE_KEY } from "@portosaur/core/plugins/remarkContentTitle";
@@ -855,6 +928,19 @@ export async function generateMetadata(
     contentTitle as { text: string; slug: string } | null,
     docFileTitle(page.path),
   );
+  // A frontmatter image is this post's social preview, overriding
+  // the site-wide card from the root layout. Posts without one
+  // inherit the site card.
+  const image = page.data.image;
+  if (image) {
+    const social = await sizedSocialImage(config, image);
+    return {
+      title: metaTitle,
+      description: page.data.desc,
+      openGraph: { images: [social] },
+      twitter: { images: [social.url] },
+    };
+  }
   return {
     title: metaTitle,
     description: page.data.desc,
@@ -1081,6 +1167,200 @@ export default function robots(): MetadataRoute.Robots {
 }
 
 /**
+ * Builds the contents of the generated `.portosaur/app/manifest.ts`
+ * (Next's typed manifest — the file the browser reads for
+ * installability, generated at build time from the resolved
+ * config).
+ *
+ * The icon entries point at the generated favicon set (`/favicon/`),
+ * the theme color comes from the scheme CSS, and the scope/start
+ * URL follow the site base. Written only when `site.pwa.enable` is
+ * on — with the PWA off there is no manifest at all.
+ */
+/**
+ * Builds the contents of the generated `app/manifest.ts` (Next's
+ * metadata route — it renders `manifest.webmanifest` at build
+ * time, so the manifest always matches the current config).
+ *
+ * Shortcuts follow the site mode: docs sites get Documentation
+ * and Blog; portfolio sites get Notes Vault, Blog, and Tasks
+ * (only when `tasks.enable` is on). Screenshots come from
+ * `static/screenshots/` — the home shot first, square images
+ * skipped with a warning (browsers reject them for the install
+ * carousel). The maskable icon is the padded square render, not
+ * the circle crop.
+ */
+export function buildManifestContent(mtime: number): string {
+  return `${header(mtime)}import fs from "node:fs";
+import path from "node:path";
+import type { MetadataRoute } from "next";
+import { config } from "@/lib/config";
+import { getCssVar } from "@portosaur/core/lib/assets";
+import {
+  localImageDimensions,
+  staticDirsForConfig,
+} from "@portosaur/core/lib/image-size";
+import { withBase } from "@portosaur/core/lib/pageUrl";
+
+// Metadata routes compile to route handlers. With
+// \`output: 'export'\` they must be marked static or the build
+// fails at page-data collection.
+export const dynamic = "force-static";
+
+const SCREENSHOT_TYPES: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+};
+
+async function manifestScreenshots(
+  staticDirs: string[],
+): Promise<NonNullable<MetadataRoute.Manifest["screenshots"]>> {
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const dir of staticDirs) {
+    let entries: string[];
+    try {
+      entries = fs.readdirSync(path.join(dir, "screenshots"));
+    } catch {
+      continue;
+    }
+    for (const name of entries) {
+      if (
+        !seen.has(name) &&
+        SCREENSHOT_TYPES[path.extname(name).toLowerCase()]
+      ) {
+        seen.add(name);
+        names.push(name);
+      }
+    }
+  }
+  // The home shot leads the install carousel; the rest follow
+  // alphabetically.
+  names.sort((a, b) => {
+    const aHome = a.startsWith("home-") ? 0 : 1;
+    const bHome = b.startsWith("home-") ? 0 : 1;
+    return aHome - bHome || a.localeCompare(b);
+  });
+  const screenshots: NonNullable<MetadataRoute.Manifest["screenshots"]> = [];
+  for (const name of names) {
+    const dimensions = await localImageDimensions(
+      \`screenshots/\${name}\`,
+      staticDirs,
+    );
+    if (!dimensions) {
+      continue;
+    }
+    if (dimensions.width === dimensions.height) {
+      console.warn(
+        \`PWA: skipping square screenshot screenshots/\${name} — browsers reject square images for the install carousel.\`,
+      );
+      continue;
+    }
+    screenshots.push({
+      src: withBase(\`screenshots/\${name}\`, config.site.baseUrl),
+      sizes: \`\${dimensions.width}x\${dimensions.height}\`,
+      type: SCREENSHOT_TYPES[path.extname(name).toLowerCase()],
+      form_factor: dimensions.width > dimensions.height ? "wide" : "narrow",
+    });
+  }
+  return screenshots;
+}
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const base =
+    config.site.baseUrl === "/"
+      ? "/"
+      : config.site.baseUrl.endsWith("/")
+        ? config.site.baseUrl
+        : \`\${config.site.baseUrl}/\`;
+  const themeColor = getCssVar("--porto-color-bg", config.cssFiles ?? []);
+  const icon = (name: string) =>
+    withBase(\`favicon/\${name}\`, config.site.baseUrl);
+  const shortcutIcon = [
+    {
+      src: icon("icon-192x192.png"),
+      sizes: "192x192",
+      type: "image/png",
+    },
+  ];
+  const shortcuts =
+    config.siteMode === "docs"
+      ? [
+          {
+            name: "Documentation",
+            url: withBase("docs/", config.site.baseUrl),
+            icons: shortcutIcon,
+          },
+          {
+            name: "Blog",
+            url: withBase("blog/", config.site.baseUrl),
+            icons: shortcutIcon,
+          },
+        ]
+      : [
+          {
+            name: "Notes Vault",
+            url: withBase("notes/", config.site.baseUrl),
+            icons: shortcutIcon,
+          },
+          {
+            name: "Blog",
+            url: withBase("blog/", config.site.baseUrl),
+            icons: shortcutIcon,
+          },
+          ...(config.tasks.enable
+            ? [
+                {
+                  name: "Tasks",
+                  url: withBase("tasks/", config.site.baseUrl),
+                  icons: shortcutIcon,
+                },
+              ]
+            : []),
+        ];
+  const screenshots = await manifestScreenshots(staticDirsForConfig(config));
+  return {
+    name: config.site.title || "My Site",
+    short_name: config.site.title || "My Site",
+    description: config.site.tagline || "A Portosaur Site",
+    id: \`\${base}?source=pwa\`,
+    start_url: base,
+    lang: "en",
+    scope: base,
+    display: "standalone",
+    orientation: "natural",
+    theme_color: themeColor ?? undefined,
+    background_color: themeColor ?? undefined,
+    icons: [
+      {
+        src: icon("icon-192x192.png"),
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: icon("icon-512x512.png"),
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: icon("icon-maskable-512x512.png"),
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+    shortcuts,
+    ...(screenshots.length > 0 ? { screenshots } : {}),
+  };
+}
+`;
+}
+
+/**
  * Builds the contents of the generated
  * `.portosaur/app/llms.txt/route.ts` (the create-fumadocs-app scaffold
  * pattern, served from the `docsLlms` export in `lib/source.ts`).
@@ -1191,6 +1471,10 @@ export function buildNextRootFiles(
     "app/llms-full.txt/route.ts": buildLlmsFullTxtRouteContent(mtime),
     "app/llms.mdx/[...path]/route.ts": buildLlmsMdxRouteContent(mtime),
   };
+
+  if (options.site.pwa?.enable !== false) {
+    files["app/manifest.ts"] = buildManifestContent(mtime);
+  }
 
   if (options.siteMode === "docs") {
     files["app/docs/layout.tsx"] = buildDocsLayoutContent(mtime);

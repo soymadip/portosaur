@@ -98,10 +98,12 @@
           "properties": {
             "enable": {
               "type": ["boolean", "null"],
+              "description": "Enable the PWA manifest, install prompt, and offline service worker.",
               "default": true
             },
             "notifications": {
               "type": ["boolean", "null"],
+              "description": "Enable web push notifications. Reserved for later.",
               "default": false
             }
           }

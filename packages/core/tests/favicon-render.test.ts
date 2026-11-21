@@ -106,4 +106,39 @@ describe("renderFavicons", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  test("maskable icon is a padded square, artwork in the safe zone", async () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-render-"));
+    try {
+      const input = await makeTestImage(root);
+      const maskable = path.join(root, "maskable.png");
+      await renderFavicons({
+        source: input,
+        fitMode: "cover",
+        reshapedPath: path.join(root, "reshaped.png"),
+        outputs: [],
+        maskable: { path: maskable, size: 512 },
+      });
+      const meta = await sharp(maskable).metadata();
+      expect(meta.width).toBe(512);
+      expect(meta.height).toBe(512);
+      const { data, info } = await sharp(maskable)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const alphaAt = (x: number, y: number) =>
+        data[(y * info.width + x) * info.channels + 3];
+      // Transparent corners and padding.
+      expect(alphaAt(0, 0)).toBe(0);
+      expect(alphaAt(511, 511)).toBe(0);
+      expect(alphaAt(10, 256)).toBe(0);
+      // Opaque artwork: the center, and near the content's own
+      // corners (the artwork fills the middle 80%, no more).
+      expect(alphaAt(256, 256)).toBe(255);
+      expect(alphaAt(60, 160)).toBe(255);
+      expect(alphaAt(452, 350)).toBe(255);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });

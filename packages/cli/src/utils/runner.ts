@@ -14,6 +14,7 @@ import {
   ensurePublicUnion,
   generateFavicons,
   generateSiteIcons,
+  syncServiceWorker,
 } from "../engine/index.ts";
 import type {
   PortosaurOptions,
@@ -200,6 +201,16 @@ export async function writeNextRoot(
       portoPaths.static ?? path.join(portoPaths.coreRoot, "static"),
     coreAssetsDir: portoPaths.assets,
     coreRoot: portoPaths.coreRoot,
+    logger,
+  });
+
+  // Writes the PWA service worker (or removes a stale one when
+  // the PWA is off — off means off, and the union never deletes
+  // real files, so nothing else would clear it).
+  await syncServiceWorker({
+    publicDir,
+    enable: options.site.pwa?.enable !== false,
+    basePath: options.site.baseUrl,
     logger,
   });
 

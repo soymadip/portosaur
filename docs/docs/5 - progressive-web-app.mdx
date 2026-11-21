@@ -8,15 +8,11 @@ Portosaur generates the PWA manifest and app icons for both portfolio and docume
 
 The icon set is generated from `site.favicon` when it's set, otherwise from the home icon (`docs_home.icon` on docs sites, the hero picture on portfolio sites), falling back to `img/icon.png`.
 
-:::info[Coming soon]
-The service worker, app shortcuts, automated screenshots, and push notifications described below aren't built yet — today the build generates the manifest (`manifest.webmanifest`) and the favicon set only. Full installability and offline support land with the service worker.
-:::
-
 ---
 
 ## Configuration
 
-PWA support is enabled by default in `porto.yml`. You can customize or disable it under the `site.pwa` block (the switch is read today, but the service worker it will control is coming soon):
+PWA support is enabled by default in `porto.yml`. You can customize or disable it under the `site.pwa` block:
 
 ```yaml
 site:
@@ -25,13 +21,11 @@ site:
     notifications: false
 ```
 
+Push notifications are reserved for later and do nothing today.
+
 ---
 
 ## App Shortcuts
-
-:::info[Coming soon]
-Shortcuts aren't written to the manifest yet.
-:::
 
 When a user installs your Portosaur site and long-presses (on mobile) or right-clicks (on desktop) the app icon, the operating system displays instant **App Shortcuts**.
 
@@ -45,22 +39,18 @@ Portosaur configures shortcuts adaptively based on the active site mode:
   - **Blog** (`/blog`)
   - **Tasks** (`/tasks`) _(included when public tasks are enabled)_
 
-Shortcut icons are dynamically extracted from theme assets and tinted to match your site's active primary color palette.
+Shortcut icons reuse your site icon.
 
 ---
 
 ## Automated Screenshots (Zero-Config)
-
-:::info[Coming soon]
-Screenshot scanning isn't built yet — screenshots you place in `static/` aren't picked up into the manifest today.
-:::
 
 When a user selects "Install App" in Chromium-based browsers, a rich installation prompt is displayed featuring device screenshots (similar to an app store carousel).
 
 Portosaur automates screenshot detection with zero configuration:
 
 1. **Capture Screenshots**: Capture screenshots of your site on a desktop browser (widescreen/landscape) and on a mobile device (portrait/tall screen). Save them as `.png`, `.jpg`, or `.webp` files.
-2. **Drop into Assets**: Place your screenshot files into your static assets directory (e.g. `static/screenshots/` or project assets).
+2. **Drop into Assets**: Place your screenshot files in `static/screenshots/`.
 3. **Automated Dimension Detection**: When you run `porto dev` or `porto build`, Portosaur scans this directory, reads the image dimensions using `image-size`, determines whether each image is landscape or portrait, and injects compliant W3C manifest entries.
 
 :::tip[Screenshot Naming Recommendation]
@@ -75,11 +65,18 @@ PWA installation prompts require widescreen landscape screenshots (desktop) and 
 
 ## Offline Support & Caching
 
-:::info[Coming soon]
-No service worker is generated yet, so there is no offline caching today.
-:::
+The build writes a service worker (`sw.js`) that caches your site on the visitor's device, so it keeps working without a connection:
 
-The generated Service Worker will automatically cache static assets, fonts, icons, and visited documentation pages. If a user loses connectivity, previously visited pages will continue to load instantly, and unvisited pages will display a themed offline indicator.
+- **At install**, the worker saves the home page, the offline page, the icons, and the manifest.
+- **As you browse**, every page you visit is saved too, and kept fresh in the background — the saved copy loads at once, then the worker fetches the newest version for next time.
+- **The app's own files** (the hashed files under `/_next/static/`) are saved the first time they load and reused from then on.
+- **Offline**, a page you've visited loads from the saved copy. A page you haven't visited shows the offline page instead.
+
+When you publish a new version, the new worker takes over right away — no waiting for every tab to close — and drops the old caches.
+
+:::note
+Images and fonts are not cached yet: an offline page loads its text and layout, but a picture you haven't seen loads only once you're back online.
+:::
 
 ---
 
@@ -89,4 +86,4 @@ You can verify the generated manifest using [PWABuilder](https://www.pwabuilder.
 
 1. In Chrome, open **DevTools (F12) → Application → Manifest**.
 2. Verify that the manifest, theme colors, and icons are recognized without errors.
-3. Installation testing waits for the service worker (coming soon).
+3. Install the app from the browser's install prompt and confirm it opens standalone. In **DevTools → Application → Service Workers** you can also toggle offline and reload a visited page, then an unvisited one.

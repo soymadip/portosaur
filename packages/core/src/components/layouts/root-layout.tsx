@@ -3,13 +3,14 @@ import type { PortosaurOptions } from "../../lib/config.ts";
 import { PortoProvider } from "../../lib/porto-context.tsx";
 import type { SiteIcons } from "../../lib/site-icons.ts";
 import { NavProgress } from "../pages/frame/NavProgress.tsx";
+import { ServiceWorker } from "../pages/frame/ServiceWorker.tsx";
 import { SkipLink } from "../pages/frame/SkipLink.tsx";
 
 /**
  * RootLayout — the generated root's `app/layout.tsx` renders this.
  * Owns `<html>`/`<body>`, the pre-paint scripts (theme +
- * sidebar collapse), the config provider, the skip link, and
- * the nav progress bar.
+ * sidebar collapse), the config provider, the skip link, the
+ * nav progress bar, and the service worker registration.
  *
  * The navbar + footer live in `SiteShell`, NOT here: the root
  * layout can't know the route (server components can't read the
@@ -63,6 +64,7 @@ export function RootLayout({
         <PortoProvider config={config} icons={icons}>
           <SkipLink />
           <NavProgress />
+          <ServiceWorker />
           {children}
         </PortoProvider>
       </body>

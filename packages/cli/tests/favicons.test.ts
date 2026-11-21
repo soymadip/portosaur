@@ -197,7 +197,7 @@ describe("ensurePublicUnion", () => {
       const publicDir = path.join(root, ".portosaur", "public");
       ensurePublicUnion({ projectDir: root, publicDir });
       // A generated real file + a symlink that goes stale.
-      fs.writeFileSync(path.join(publicDir, "manifest.webmanifest"), "{}");
+      fs.writeFileSync(path.join(publicDir, "generated.txt"), "{}");
       fs.symlinkSync("../../static/gone.txt", path.join(publicDir, "gone.txt"));
       fs.writeFileSync(path.join(staticDir, "gone.txt"), "y");
       ensurePublicUnion({ projectDir: root, publicDir });
@@ -205,9 +205,7 @@ describe("ensurePublicUnion", () => {
 
       ensurePublicUnion({ projectDir: root, publicDir });
       expect(fs.existsSync(path.join(publicDir, "gone.txt"))).toBe(false);
-      expect(fs.existsSync(path.join(publicDir, "manifest.webmanifest"))).toBe(
-        true,
-      );
+      expect(fs.existsSync(path.join(publicDir, "generated.txt"))).toBe(true);
       expect(fs.existsSync(path.join(publicDir, "keep.txt"))).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
@@ -336,13 +334,11 @@ describe("ensurePublicUnion", () => {
 });
 
 describe("generateFavicons", () => {
-  test("writes the icon set + manifest from the site icon", async () => {
+  test("writes the icon set from the site icon, no manifest file", async () => {
     const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
     try {
       const staticDir = path.join(root, "static");
       await makeTestImage(path.join(staticDir, "img"));
-      const cssFile = path.join(root, "scheme.css");
-      fs.writeFileSync(cssFile, ":root { --porto-color-bg: #123456; }");
       const publicDir = path.join(root, ".portosaur", "public");
       fs.mkdirSync(publicDir, { recursive: true });
 
@@ -350,7 +346,6 @@ describe("generateFavicons", () => {
         projectDir: root,
         options: options({
           docsHome: { icon: "img/icon.png" },
-          cssFiles: [cssFile],
         }),
         publicDir,
         cacheDir: path.join(root, ".portosaur", "cache"),
@@ -363,10 +358,12 @@ describe("generateFavicons", () => {
         "favicon.ico",
         "icon-192x192.png",
         "icon-512x512.png",
+        "icon-maskable-512x512.png",
         "apple-touch-icon.png",
       ]) {
         expect(fs.existsSync(path.join(publicDir, "favicon", name))).toBe(true);
       }
+      expect(result.files).toContain("favicon/icon-maskable-512x512.png");
       const icoSize = readPngSize(
         path.join(publicDir, "favicon", "favicon.ico"),
       );
@@ -377,13 +374,98 @@ describe("generateFavicons", () => {
       );
       expect(icon192Size.width).toBe(192);
 
-      const manifest = JSON.parse(
-        fs.readFileSync(path.join(publicDir, "manifest.webmanifest"), "utf-8"),
+      // The manifest is Next's app/manifest.ts now — the favicon
+      // step only renders the icon files it points at.
+      expect(fs.existsSync(path.join(publicDir, "manifest.webmanifest"))).toBe(
+        false,
       );
-      expect(manifest.name).toBe("Test Site");
-      expect(manifest.theme_color).toBe("#123456");
-      expect(manifest.icons).toHaveLength(4);
-      expect(manifest.icons[0].src).toBe("/favicon/icon-192x192.png");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("removes a stale real manifest, leaves a linked one alone", async () => {
+    const run = async (plant: (publicDir: string) => void) => {
+      const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+      try {
+        const staticDir = path.join(root, "static");
+        await makeTestImage(path.join(staticDir, "img"));
+        const publicDir = path.join(root, ".portosaur", "public");
+        fs.mkdirSync(publicDir, { recursive: true });
+        plant(publicDir);
+        await generateFavicons({
+          projectDir: root,
+          options: options({ docsHome: { icon: "img/icon.png" } }),
+          publicDir,
+          cacheDir: path.join(root, ".portosaur", "cache"),
+          coreStaticDir,
+          coreRoot,
+          logger: silentLogger,
+        });
+        return fs.existsSync(path.join(publicDir, "manifest.webmanifest"));
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    };
+
+    // A real file is ours (the old hand-written manifest) — removed.
+    expect(
+      await run((publicDir) => {
+        fs.writeFileSync(
+          path.join(publicDir, "manifest.webmanifest"),
+          '{"version": "1.0"}',
+        );
+      }),
+    ).toBe(false);
+
+    // A symlink is the user's own file (linked by the union) — kept.
+    expect(
+      await run((publicDir) => {
+        const target = path.join(publicDir, "user-manifest.json");
+        fs.writeFileSync(target, "{}");
+        fs.symlinkSync(target, path.join(publicDir, "manifest.webmanifest"));
+      }),
+    ).toBe(true);
+  });
+
+  test("renders a padded square maskable icon", async () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+    try {
+      const staticDir = path.join(root, "static");
+      await makeTestImage(path.join(staticDir, "img"));
+      const publicDir = path.join(root, ".portosaur", "public");
+      fs.mkdirSync(publicDir, { recursive: true });
+      await generateFavicons({
+        projectDir: root,
+        options: options({ docsHome: { icon: "img/icon.png" } }),
+        publicDir,
+        cacheDir: path.join(root, ".portosaur", "cache"),
+        coreStaticDir,
+        coreRoot,
+        logger: silentLogger,
+      });
+      // The test image is 200x100 solid red: the maskable render
+      // scales it to the middle 80% (410x205, centered), so the
+      // artwork spans x 51..460 and y 153..357 of the 512 canvas.
+      const { width, height, data } = readPngPixels(
+        path.join(publicDir, "favicon", "icon-maskable-512x512.png"),
+      );
+      expect(width).toBe(512);
+      expect(height).toBe(512);
+      const alphaAt = (x: number, y: number) => data[(y * width + x) * 4 + 3];
+      const redAt = (x: number, y: number) => data[(y * width + x) * 4];
+      // Transparent corners and padding.
+      expect(alphaAt(0, 0)).toBe(0);
+      expect(alphaAt(511, 0)).toBe(0);
+      expect(alphaAt(0, 511)).toBe(0);
+      expect(alphaAt(511, 511)).toBe(0);
+      expect(alphaAt(10, 256)).toBe(0);
+      expect(alphaAt(500, 256)).toBe(0);
+      // Opaque red artwork: center and near the 80% edges.
+      expect(alphaAt(256, 256)).toBe(255);
+      expect(redAt(256, 256)).toBe(255);
+      expect(alphaAt(60, 256)).toBe(255);
+      expect(alphaAt(452, 256)).toBe(255);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

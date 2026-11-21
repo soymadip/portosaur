@@ -21,6 +21,7 @@ import {
   buildBlogIndexContent,
   buildBlogPostContent,
   buildBlogAuthorsContent,
+  buildManifestContent,
   buildNextRootFiles,
 } from "../src/engine/generators/nextRoot.ts";
 import type { PortosaurOptions } from "../src/engine/generators/siteConfig.ts";
@@ -335,6 +336,81 @@ describe("buildRootLayoutContent", () => {
       rmSync(projectDir, { recursive: true, force: true });
     }
   });
+
+  test("emits the PWA metadata: icons, manifest, social card, iOS tags", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
+    try {
+      const content = buildRootLayoutContent(options(), args(projectDir));
+      expect(content).toContain(
+        "export async function generateMetadata(): Promise<Metadata>",
+      );
+      // Icons and the manifest link are absolute URLs (base-aware
+      // via the metadata helper, so based sites get them right).
+      expect(content).toContain(
+        'absoluteImageUrl(config, "/favicon/favicon.ico")',
+      );
+      expect(content).toContain(
+        'absoluteImageUrl(config, "/favicon/icon-192x192.png")',
+      );
+      expect(content).toContain(
+        'absoluteImageUrl(config, "/favicon/apple-touch-icon.png")',
+      );
+      expect(content).toContain(
+        'manifest: absoluteImageUrl(config, "/manifest.webmanifest")',
+      );
+      // The social card is sized at build time from the image file.
+      expect(content).toContain("sizedSocialImage(");
+      expect(content).toContain(
+        'config.site.socialCard || "img/social-card.jpeg"',
+      );
+      expect(content).toContain('type: "website"');
+      expect(content).toContain("images: [card]");
+      expect(content).toContain('card: "summary_large_image"');
+      expect(content).toContain("images: [card.url]");
+      // iOS reads these instead of the manifest.
+      expect(content).toContain("appleWebApp: {");
+      expect(content).toContain("capable: true");
+      expect(content).toContain('statusBarStyle: "default"');
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("emits the theme color from generateViewport, not metadata", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
+    try {
+      const content = buildRootLayoutContent(options(), args(projectDir));
+      // Next 16 ignores metadata.themeColor (warns "unsupported
+      // metadata") and only renders the tag from the viewport.
+      expect(content).not.toContain("themeColor: themeColor ?? undefined");
+      expect(content).toContain(
+        "export async function generateViewport(): Promise<Viewport>",
+      );
+      expect(content).toContain(
+        'getCssVar("--porto-color-bg", config.cssFiles ?? [])',
+      );
+      expect(content).toContain("return { themeColor };");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("omits the manifest link when the PWA is off", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
+    try {
+      const content = buildRootLayoutContent(
+        options({ site: { pwa: { enable: false } } }),
+        args(projectDir),
+      );
+      expect(content).not.toContain("manifest.webmanifest");
+      // The icons stay — the tab icon is not a PWA feature.
+      expect(content).toContain(
+        'absoluteImageUrl(config, "/favicon/favicon.ico")',
+      );
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("buildHomePageContent", () => {
@@ -439,6 +515,17 @@ describe("buildDocPageContent", () => {
       "return source.generateParams().filter((p) => p.slug.length > 0);",
     );
   });
+
+  test("a frontmatter image overrides the site social card", () => {
+    const content = buildDocPageContent("docs", 0);
+    expect(content).toContain(
+      'import { sizedSocialImage } from "@portosaur/core/lib/metadata"',
+    );
+    expect(content).toContain("const image = page.data.image;");
+    expect(content).toContain("sizedSocialImage(config, image)");
+    expect(content).toContain("openGraph: { images: [social] }");
+    expect(content).toContain("twitter: { images: [social.url] }");
+  });
 });
 
 describe("buildBlogPostContent", () => {
@@ -470,6 +557,17 @@ describe("buildBlogPostContent", () => {
     expect(content).toContain(
       'return blogSource.getPages().map((page) => ({ slug: page.slugs.join("/") }));',
     );
+  });
+
+  test("a frontmatter image overrides the site social card", () => {
+    const content = buildBlogPostContent(0);
+    expect(content).toContain(
+      'import { sizedSocialImage } from "@portosaur/core/lib/metadata"',
+    );
+    expect(content).toContain("const image = page.data.image;");
+    expect(content).toContain("sizedSocialImage(config, image)");
+    expect(content).toContain("openGraph: { images: [social] }");
+    expect(content).toContain("twitter: { images: [social.url] }");
   });
 });
 
@@ -523,6 +621,50 @@ describe("buildBlogAuthorsContent", () => {
     expect(content).toContain("authors={getBlogAuthorsWithCounts()}");
     expect(content).not.toContain("pages={blogSource.getPages()}");
     expect(content).toContain('return { title: "Authors" };');
+  });
+});
+
+describe("buildManifestContent", () => {
+  test("emits a static manifest route with the padded maskable icon", () => {
+    const content = buildManifestContent(0);
+    expect(content).toContain('export const dynamic = "force-static"');
+    expect(content).toContain(
+      "export default async function manifest(): Promise<MetadataRoute.Manifest>",
+    );
+    expect(content).toContain('icon("icon-192x192.png")');
+    expect(content).toContain('icon("icon-512x512.png")');
+    expect(content).toContain('icon("icon-maskable-512x512.png")');
+    expect(content).toContain('purpose: "maskable"');
+    // No non-standard version field.
+    expect(content).not.toContain("version");
+  });
+
+  test("shortcuts follow the site mode, Tasks only when enabled", () => {
+    const content = buildManifestContent(0);
+    expect(content).toContain('config.siteMode === "docs"');
+    expect(content).toContain('name: "Documentation"');
+    expect(content).toContain('withBase("docs/", config.site.baseUrl)');
+    expect(content).toContain('name: "Notes Vault"');
+    expect(content).toContain('withBase("notes/", config.site.baseUrl)');
+    expect(content).toContain('name: "Blog"');
+    expect(content).toContain("config.tasks.enable");
+    expect(content).toContain('name: "Tasks"');
+    expect(content).toContain('withBase("tasks/", config.site.baseUrl)');
+    // Shortcut icons reuse the 192px site icon.
+    expect(content).toContain('src: icon("icon-192x192.png")');
+  });
+
+  test("scans static/screenshots/, home shots first, squares skipped", () => {
+    const content = buildManifestContent(0);
+    expect(content).toContain('path.join(dir, "screenshots")');
+    expect(content).toContain("localImageDimensions(");
+    expect(content).toContain('a.startsWith("home-")');
+    expect(content).toContain("dimensions.width === dimensions.height");
+    expect(content).toContain("console.warn(");
+    expect(content).toContain(
+      'form_factor: dimensions.width > dimensions.height ? "wide" : "narrow"',
+    );
+    expect(content).toContain("screenshots.length > 0 ? { screenshots } : {}");
   });
 });
 
@@ -600,6 +742,7 @@ describe("buildNextRootFiles", () => {
           "app/api/search/route.ts",
           "app/sitemap.ts",
           "app/robots.ts",
+          "app/manifest.ts",
           "app/llms.txt/route.ts",
           "app/llms-full.txt/route.ts",
           "app/llms.mdx/[...path]/route.ts",
@@ -666,6 +809,31 @@ describe("buildNextRootFiles", () => {
       expect(sitemap).toContain("pageHref(url)");
       expect(sitemap).toContain("source.getPages()");
       expect(sitemap).toContain("blogSource.getPages()");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("the manifest route is gated on the PWA switch", () => {
+    const projectDir = mkdtempSync(path.join(tmpdir(), "porto-next-"));
+    try {
+      // On by default.
+      expect(
+        buildNextRootFiles(options(), args(projectDir))["app/manifest.ts"],
+      ).toBeDefined();
+      expect(
+        buildNextRootFiles(
+          options({ site: { pwa: { enable: true } } }),
+          args(projectDir),
+        )["app/manifest.ts"],
+      ).toBeDefined();
+      // Off means off: no manifest file to link to.
+      expect(
+        buildNextRootFiles(
+          options({ site: { pwa: { enable: false } } }),
+          args(projectDir),
+        )["app/manifest.ts"],
+      ).toBeUndefined();
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }

@@ -234,8 +234,8 @@ export function buildSiteConfig(
   const onBrokenAnchors = get("site.on_broken_anchors", "warn"); // Behavior when a link anchor (#) is missing.
   const onBrokenLinks = get("site.on_broken_links", "throw"); // Behavior when a link is broken.
 
-  const pwaEnable = get("site.pwa.enable", true);
-  const pwaNotifications = get("site.pwa.notifications", false);
+  const pwaEnable = get("site.pwa.enable", true); // Enable the PWA manifest, install prompt, and offline service worker.
+  const pwaNotifications = get("site.pwa.notifications", false); // Enable web push notifications. Reserved for later.
 
   const addMdxDesc = get("site.content.add_mdx_desc", true); // Show the page description under the title.
   const mermaid = get("site.content.mermaid", true); // Enable support for Mermaid.js diagrams.

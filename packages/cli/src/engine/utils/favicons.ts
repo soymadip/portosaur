@@ -15,8 +15,9 @@ import type { PortosaurOptions } from "../generators/siteConfig.ts";
  * and both fall back to `img/icon.png` (the Portosaur dino). The
  * icon is circle-cropped (cover fit for portfolio, contain with
  * 15% padding for docs) and rendered at 32px (favicon.ico), 192px,
- * 512px, and 180px (apple-touch-icon), plus a `manifest.webmanifest`
- * with the icon entries.
+ * 512px, and 180px (apple-touch-icon). The manifest itself is
+ * Next's `app/manifest.ts`, generated from the same icon set — this
+ * module only renders the files it points at.
  *
  * The CLI only orchestrates: finding the icon, the stamp check,
  * the manifest. The pixel work runs in core
@@ -157,6 +158,7 @@ interface FaviconRenderSpec {
   fitMode: "cover" | "contain";
   reshapedPath: string;
   outputs: { path: string; size: number }[];
+  maskable?: { path: string; size: number };
 }
 
 /**
@@ -230,24 +232,6 @@ export async function reshapeToCircle(
     coreRoot,
   );
   return outputPath;
-}
-
-/** Read a CSS custom property's value out of a list of CSS files. */
-function readCssVar(varName: string, cssFiles: string[]): string | null {
-  const pattern = new RegExp(
-    `${varName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*([^;]+);`,
-  );
-  for (const file of cssFiles) {
-    try {
-      const match = pattern.exec(fs.readFileSync(file, "utf-8"));
-      if (match) {
-        return match[1].trim();
-      }
-    } catch {
-      // Missing or unreadable file — try the next one.
-    }
-  }
-  return null;
 }
 
 /** True when `dir` holds only symlinks (or is empty) — the mark of a dir the union built. */
@@ -345,10 +329,9 @@ function linkMergedDir(userDir: string, appDir: string, destDir: string): void {
  * (refreshed here — new entries linked, removed entries pruned),
  * plus the core package's default static files (`img/icon.png`,
  * ...) where the user has no entry of the same name, plus the
- * generated files (`favicon/`, `manifest.webmanifest`). Next.js
- * follows symlinks when it copies `public/` (verified in its
- * `recursive-copy.js`), so dev and the static export serve the
- * same files.
+ * generated files (`favicon/`, `sw.js`). Next.js follows symlinks
+ * when it copies `public/` (verified in its `recursive-copy.js`),
+ * so dev and the static export serve the same files.
  *
  * Where both sides have a directory of the same name (the user
  * has `static/img/` and the app ships `img/`), the two merge
@@ -498,12 +481,11 @@ const STAMP_FILE = ".favicon.source.json";
 /**
  * Generate the per-site favicon set into `publicDir`: `favicon/`
  * (favicon.ico, icon-192x192.png, icon-512x512.png,
- * apple-touch-icon.png) + `manifest.webmanifest` at the public
- * root. Skips when the user provides their own `favicon/` (a
- * symlink from the union) or when the stamp shows the source is
- * unchanged. Any failure resolving the configured icon falls back
- * to the default dino with a warning — only a missing default
- * fails the build.
+ * apple-touch-icon.png). Skips when the user provides their own
+ * `favicon/` (a symlink from the union) or when the stamp shows the
+ * source is unchanged. Any failure resolving the configured icon
+ * falls back to the default dino with a warning — only a missing
+ * default fails the build.
  */
 export async function generateFavicons({
   projectDir,
@@ -517,6 +499,27 @@ export async function generateFavicons({
 }: GenerateFaviconsParams): Promise<{ skipped: boolean; files: string[] }> {
   const log = normalizeLogger(logger);
   const outputDir = path.join(publicDir, "favicon");
+
+  // Leftover cleanup: the manifest used to be hand-written JSON
+  // here (`public/manifest.webmanifest`); it is Next's
+  // `app/manifest.ts` now. A real file at the old path is always
+  // ours — the union only ever links user files as symlinks, and
+  // those are left alone. Without this, a stale manifest survives
+  // in the export (Next copies `public/`) and breaks the
+  // `enable: false` gate. Runs first so it also applies when the
+  // icon set itself is skipped below.
+  try {
+    const staleManifest = path.join(publicDir, "manifest.webmanifest");
+    if (
+      fs.existsSync(staleManifest) &&
+      !fs.lstatSync(staleManifest).isSymbolicLink()
+    ) {
+      fs.rmSync(staleManifest, { force: true });
+    }
+  } catch {
+    // Unremovable — the build continues; the stale file is harmless
+    // when the PWA is on (the route output overwrites it).
+  }
 
   // A symlink here is the user's own favicon dir (linked by the
   // union) — user files always win.
@@ -579,11 +582,11 @@ export async function generateFavicons({
       "favicon.ico",
       "icon-192x192.png",
       "icon-512x512.png",
+      "icon-maskable-512x512.png",
       "apple-touch-icon.png",
     ].every((name) => fs.existsSync(path.join(outputDir, name)));
     if (
       outputs &&
-      fs.existsSync(path.join(publicDir, "manifest.webmanifest")) &&
       saved.source === stamp.source &&
       saved.mtimeMs === stamp.mtimeMs &&
       saved.size === stamp.size &&
@@ -615,60 +618,16 @@ export async function generateFavicons({
         path: path.join(outputDir, file.name),
         size: file.size,
       })),
+      // The maskable icon is a padded square, not a circle crop —
+      // the manifest lists it separately for `purpose: "maskable"`.
+      maskable: {
+        path: path.join(outputDir, "icon-maskable-512x512.png"),
+        size: 512,
+      },
     },
     coreRoot,
   );
 
-  const base = options.site.baseUrl;
-  const cleanBase =
-    !base || base === "/" ? "/" : base.endsWith("/") ? base : `${base}/`;
-  const themeColor = readCssVar("--porto-color-bg", options.cssFiles ?? []);
-  const manifest: Record<string, unknown> = {
-    name: options.site.title || "My Site",
-    short_name: options.site.title || "My Site",
-    description: options.site.tagline || "A Portosaur Site",
-    version: "1.0",
-    id: `${cleanBase}?source=pwa`,
-    start_url: cleanBase,
-    lang: "en",
-    scope: cleanBase,
-    display: "standalone",
-    orientation: "natural",
-    icons: [
-      {
-        src: `${cleanBase}favicon/icon-192x192.png`,
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: `${cleanBase}favicon/icon-192x192.png`,
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: `${cleanBase}favicon/icon-512x512.png`,
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: `${cleanBase}favicon/icon-512x512.png`,
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
-      },
-    ],
-  };
-  if (themeColor) {
-    manifest.theme_color = themeColor;
-    manifest.background_color = themeColor;
-  }
-  fs.writeFileSync(
-    path.join(publicDir, "manifest.webmanifest"),
-    `${JSON.stringify(manifest, null, 2)}\n`,
-  );
   fs.writeFileSync(stampPath, `${JSON.stringify(stamp, null, 2)}\n`);
 
   log.success("Generated favicon assets successfully.");
@@ -676,7 +635,7 @@ export async function generateFavicons({
     skipped: false,
     files: [
       ...files.map((file) => `favicon/${file.name}`),
-      "manifest.webmanifest",
+      "favicon/icon-maskable-512x512.png",
     ],
   };
 }

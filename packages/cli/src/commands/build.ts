@@ -18,15 +18,36 @@ export interface BuildCommandOptions {
 /**
  * Builds the static Portosaur site.
  *
- * Thin launcher: validate → write the Next.js root → run `next build`.
- * With `output: 'export'` and the generated `distDir`, the static export
- * lands in the resolved output dir. The CLI then copies the app
- * package's default static files into the output (without overwriting
- * — Next already copied the project's own `static/` via `public/`, so
- * user files win), and writes `.nojekyll` (GitHub Pages) and `_headers`
- * (immutable caching for fingerprinted `/_next/static/*` assets,
- * honored by Netlify) into the output dir.
+ * Thin launcher: validate → write the Next.js root → clear the
+ * output dir → run `next build`. With `output: 'export'` and
+ * the generated `distDir`, the static export lands in the
+ * resolved output dir. The CLI then copies the app package's
+ * default static files into the output (without overwriting —
+ * Next already copied the project's own `static/` via `public/`,
+ * so user files win), and writes `.nojekyll` (GitHub Pages) and
+ * `_headers` (immutable caching for fingerprinted
+ * `/_next/static/*` assets, honored by Netlify) into the output
+ * dir.
  */
+
+/**
+ * Clear the output dir before the build writes into it, so no
+ * file from a previous build survives (a stale `sw.js` after
+ * the PWA is switched off would keep serving the old site).
+ * Only ever clears a directory strictly inside the project —
+ * a misconfigured output dir (the project itself, or outside
+ * it) is left alone with a warning, never wiped.
+ */
+function clearOutputDir(outDir: string, projectDir: string): void {
+  const relative = path.relative(projectDir, outDir);
+  if (!relative || relative === ".." || relative.startsWith(`..${path.sep}`)) {
+    logger.warn(
+      `Output dir ${outDir} is not inside the project — leaving previous build files in place.`,
+    );
+    return;
+  }
+  fs.rmSync(outDir, { recursive: true, force: true });
+}
 
 /**
  * Recursively copies a directory. With `overwrite: false`, files
@@ -91,6 +112,11 @@ export async function buildCommand(
     // ------- Next Build -------
 
     logger.info("Building static site...");
+
+    // Clear the previous export first: without this, files the
+    // new build no longer produces (a removed page, a switched-off
+    // `sw.js`) would survive in the output.
+    clearOutputDir(outDir, UserRoot);
 
     await runNext("build", UserRoot, nextRoot, [], portoPaths);
 
