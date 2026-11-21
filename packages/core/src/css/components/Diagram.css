@@ -76,6 +76,12 @@
   height: auto;
 }
 
+/* The expanded viewer drops the padding further — full screen
+   is for the diagram, not the frame. */
+.porto-diagram-dialog--expanded .porto-diagram-dialog__viewer {
+  padding: 0.5rem 0;
+}
+
 /* Scroll lock while the viewer is open, on the root element.
    `scrollbar-gutter: stable` reserves the scrollbar's space
    while it is hidden, so the page doesn't widen and the content
