@@ -4,7 +4,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
+
+	"go.lsp.dev/protocol"
 )
 
 // Environment variables for `{env.VAR}` references: the build
@@ -106,6 +109,118 @@ func parseDotenvLine(line string) (string, string, bool) {
 		}
 	}
 	return key, value, true
+}
+
+// `{env.}` completion: inside an MDX `{...}` expression,
+// after `{env.` the server offers the env var names the build
+// can see: the system environment plus the project's `.env`
+// files. The detail names the source, never the value: env
+// values are far more likely to be secrets than vars values.
+
+// envContext describes the `{env.` expression the cursor sits
+// inside.
+type envContext struct {
+	found        bool
+	partial      string // the name being typed
+	partialRange protocol.Range
+}
+
+func isEnvNameChar(c byte) bool {
+	return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+}
+
+// scanEnvExpr finds the `{env.` expression the cursor sits
+// inside. Expressions in fenced code, the frontmatter, an inline
+// code span, or a quoted prop value are not expressions.
+func scanEnvExpr(text string, pos protocol.Position) envContext {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return envContext{}
+		}
+		contentStart = block.endLine + 1
+	}
+	lineNo := int(pos.Line)
+	if lineNo < contentStart || lineNo >= len(lines) {
+		return envContext{}
+	}
+	if fenceLines(lines, contentStart)[lineNo] {
+		return envContext{}
+	}
+	line := lines[lineNo]
+	cursor := utf16ToByte(line, pos.Character)
+	if tag := scanTag(text, pos); tag.found && tag.kind == tagValue && tag.quoted {
+		return envContext{}
+	}
+	open := strings.LastIndex(line[:cursor], "{")
+	if open < 0 {
+		return envContext{}
+	}
+	if strings.Contains(line[open+1:cursor], "}") {
+		return envContext{}
+	}
+	if inCodeSpan(codeSpanRanges(line), open) {
+		return envContext{}
+	}
+	exprStart := open + 1
+	for exprStart < cursor && (line[exprStart] == ' ' || line[exprStart] == '\t') {
+		exprStart++
+	}
+	partial, ok := strings.CutPrefix(line[exprStart:cursor], "env.")
+	if !ok {
+		return envContext{}
+	}
+	for i := 0; i < len(partial); i++ {
+		if !isEnvNameChar(partial[i]) {
+			return envContext{}
+		}
+	}
+	lineStart := 0
+	for i := 0; i < lineNo; i++ {
+		lineStart += len(lines[i]) + 1
+	}
+	return envContext{
+		found:        true,
+		partial:      partial,
+		partialRange: rangeFromOffsets(lines, lineStart+cursor-len(partial), lineStart+cursor),
+	}
+}
+
+// envCompletion offers the env var names the build can see at
+// the cursor. The second return value reports whether the
+// cursor is in an env expression at all: when it is not, the
+// caller falls through to link completion.
+func (s *Server) envCompletion(params *protocol.CompletionParams, text string, root string) (*protocol.CompletionList, bool) {
+	context := scanEnvExpr(text, params.Position)
+	if !context.found {
+		return nil, false
+	}
+	var items []protocol.CompletionItem
+	for name, value := range resolveEnv(root) {
+		if !strings.HasPrefix(name, context.partial) {
+			continue
+		}
+		item := protocol.CompletionItem{
+			Label:    name,
+			Kind:     protocol.CompletionItemKindVariable,
+			Detail:   protocol.NewOptional(envSourceDetail(value.source)),
+			TextEdit: &protocol.TextEdit{Range: context.partialRange, NewText: name},
+		}
+		items = append(items, item)
+	}
+	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
+	return &protocol.CompletionList{IsIncomplete: false, Items: items}, true
+}
+
+// envSourceDetail names where an env var comes from: the system
+// environment, or the `.env` file. The value is never shown:
+// env values are often secrets.
+func envSourceDetail(source string) string {
+	if source == "" {
+		return "system environment"
+	}
+	return source
 }
 
 // definedEnvNames returns the env vars that count as defined:

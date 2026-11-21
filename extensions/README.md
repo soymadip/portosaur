@@ -17,6 +17,7 @@ how `porto.yml` is handled.
 | `{vars.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
 | Missing `{env.}` warnings                          |   Yes   | Yes | Severity follows `site.content.on_missing_env`                                          |
 | `{env.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
+| `{env.}` completion                               |   Yes   | Yes | From the system environment and `.env` files                                            |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |
