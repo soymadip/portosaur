@@ -191,6 +191,32 @@ func TestScanVarsRefs(t *testing.T) {
 	}
 }
 
+func TestResolveVarsValue(t *testing.T) {
+	vars := map[string]any{
+		"name":   "Portosaur",
+		"count":  42,
+		"ratio":  1.5,
+		"flag":   true,
+		"nested": map[string]any{"deep": "x"},
+	}
+	for path, want := range map[string]any{
+		"name":        "Portosaur",
+		"count":       42,
+		"ratio":       1.5,
+		"nested.deep": "x",
+	} {
+		got, ok := resolveVarsValue(vars, path)
+		if !ok || got != want {
+			t.Fatalf("resolveVarsValue(%q) = %v, %v; want %v, true", path, got, ok, want)
+		}
+	}
+	for _, path := range []string{"flag", "nested", "nope", "nested.nope"} {
+		if got, ok := resolveVarsValue(vars, path); ok {
+			t.Fatalf("resolveVarsValue(%q) = %v, true; want not found", path, got)
+		}
+	}
+}
+
 func TestResolveVarsPath(t *testing.T) {
 	vars := map[string]any{
 		"name":   "Portosaur",

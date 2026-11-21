@@ -182,6 +182,9 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.HoverProvider == nil {
 		t.Fatal("no hover provider advertised")
 	}
+	if result.Capabilities.InlayHintProvider == nil {
+		t.Fatal("no inlay hint provider advertised")
+	}
 	if result.Capabilities.DefinitionProvider == nil {
 		t.Fatal("no definition provider advertised")
 	}

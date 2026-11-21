@@ -14,6 +14,7 @@ how `porto.yml` is handled.
 | Go-to-definition for links                         |   Yes   | Yes |                                                                                         |
 | `{vars.}` completion                               |   Yes   | Yes |                                                                                         |
 | Unknown `{vars.}` warnings                         |   Yes   | Yes | Severity follows `site.content.on_missing_var`                                          |
+| `{vars.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
 | Missing `{env.}` warnings                          |   Yes   | Yes | Severity follows `site.content.on_missing_env`                                          |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |

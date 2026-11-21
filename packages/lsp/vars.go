@@ -286,27 +286,35 @@ func scanEnvRefs(text string) []envRef {
 	return refs
 }
 
-// resolveVarsPath reports whether a dot path resolves to a value
-// the build can substitute: the full path must exist in the vars
-// map and end in a string or a number, mirroring resolveVarPath
-// in remarkVars.ts. A path ending in a nested map, a boolean, a
-// list, or a null is unresolved, just as the build treats it.
-func resolveVarsPath(vars map[string]any, path string) bool {
+// resolveVarsValue reports the value a dot path resolves to,
+// when the build can substitute it: the full path must exist in
+// the vars map and end in a string or a number, mirroring
+// resolveVarPath in remarkVars.ts. A path ending in a nested
+// map, a boolean, a list, or a null is unresolved, just as the
+// build treats it.
+func resolveVarsValue(vars map[string]any, path string) (any, bool) {
 	var current any = vars
 	for _, key := range strings.Split(path, ".") {
 		node, ok := current.(map[string]any)
 		if !ok {
-			return false
+			return nil, false
 		}
 		current, ok = node[key]
 		if !ok {
-			return false
+			return nil, false
 		}
 	}
 	switch current.(type) {
 	case string, int, int64, uint64, float64, float32:
-		return true
+		return current, true
 	default:
-		return false
+		return nil, false
 	}
+}
+
+// resolveVarsPath reports whether a dot path resolves to a value
+// the build can substitute.
+func resolveVarsPath(vars map[string]any, path string) bool {
+	_, ok := resolveVarsValue(vars, path)
+	return ok
 }

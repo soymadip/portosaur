@@ -21,6 +21,7 @@ Beyond completion and hover, the server also:
 - **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
 - **Flags unknown `{vars.}` keys.** A `{vars.key}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
+- **Shows `{vars.}` values inline.** A `{vars.key}` that resolves to a value shows that value right after it, and hovering over it says where the value comes from.
 - **Flags unset `{env.}` vars.** A `{env.VAR}` that is not set in the environment or the project's `.env` files is flagged with the severity from `site.content.on_missing_env`. The `{{env.VAR}}` escape form stays quiet.
 - **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
 - **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.

@@ -33,8 +33,39 @@ func (s *Server) mdxHover(params *protocol.HoverParams, text string) (*protocol.
 		slicePos := protocol.Position{Line: params.Position.Line - uint32(block.startLine), Character: params.Position.Character}
 		return yamlHover(schema, block.yaml, slicePos, block.startLine), nil
 	}
+	cfg := loadProjectConfig(root)
+	vars, _ := cfg["vars"].(map[string]any)
+	if hover := varsHover(text, params.Position, vars); hover != nil {
+		return hover, nil
+	}
 	schema := s.resolver.resolve(root, schemaComponents)
 	return componentHover(schema, text, params.Position), nil
+}
+
+// varsHover describes a `{vars.key}` reference: where the value
+// comes from and that the build replaces the reference with it.
+// The value itself stays out of the hover — it already shows
+// inline as an inlay hint — and so does any type. Only
+// references that resolve to a value the build can substitute
+// get a hover; unknown keys already get a diagnostic.
+func varsHover(text string, pos protocol.Position, vars map[string]any) *protocol.Hover {
+	lines := strings.Split(text, "\n")
+	offset := positionToOffset(lines, pos)
+	for _, ref := range scanVarsRefs(text) {
+		if offset < ref.start || offset >= ref.end {
+			continue
+		}
+		if _, ok := resolveVarsValue(vars, ref.path); !ok {
+			return nil
+		}
+		value := "**{vars." + ref.path + "}**\n\nDefined under `vars:` in `porto.yml`. The build replaces this reference with its value."
+		rng := rangeFromOffsets(lines, ref.start, ref.end)
+		return &protocol.Hover{
+			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: value},
+			Range:    &rng,
+		}
+	}
+	return nil
 }
 
 // yamlHover shows the schema's description and type for the key
