@@ -78,6 +78,39 @@ describe("portoDocSchema", () => {
       portoDocSchema.parse({ topic_list: { depth: 2 } }).topic_list,
     ).toEqual({ depth: 2 });
   });
+
+  test("accepts a single-segment slug", () => {
+    expect(portoDocSchema.parse({ slug: "custom" }).slug).toBe("custom");
+    // Cleaning to a URL segment happens in the slug function, not
+    // the schema — the schema only checks the shape.
+    expect(portoDocSchema.parse({ slug: "My Page" }).slug).toBe("My Page");
+  });
+
+  test("rejects a multi-segment slug", () => {
+    expect(() => portoDocSchema.parse({ slug: "apple/google" })).toThrow(
+      "slug must be a single segment, no slashes",
+    );
+  });
+
+  test("rejects an absolute slug", () => {
+    expect(() => portoDocSchema.parse({ slug: "/apple" })).toThrow(
+      "slug must be a single segment, no slashes",
+    );
+  });
+
+  test("rejects dot and empty slugs", () => {
+    for (const slug of ["", ".", ".."]) {
+      expect(() => portoDocSchema.parse({ slug })).toThrow(
+        "slug must be a single segment, no slashes",
+      );
+    }
+  });
+
+  test("rejects a slug with no letters or digits", () => {
+    expect(() => portoDocSchema.parse({ slug: "---" })).toThrow(
+      "slug must be a single segment, no slashes",
+    );
+  });
 });
 
 describe("portoSlugs", () => {
@@ -91,7 +124,7 @@ describe("portoSlugs", () => {
     // Parent index with a custom slug, for the inheritance case.
     fs.writeFileSync(
       path.join(docsDir, "guide", "index.mdx"),
-      "---\nslug: /manual\n---\n# Guide\n",
+      "---\nslug: manual\n---\n# Guide\n",
     );
     fs.writeFileSync(path.join(docsDir, "guide", "setup.mdx"), "# Setup\n");
   });
@@ -137,10 +170,19 @@ describe("portoSlugs", () => {
     ).toEqual(["other", "custom"]);
   });
 
-  test("honors an absolute frontmatter slug", () => {
+  test("cleans a frontmatter slug to one segment", () => {
+    // A directory with no index file, so no parent slug is inherited.
     expect(
-      portoSlugs(file("guide/setup.mdx", { slug: "/custom" }), next),
-    ).toEqual(["custom"]);
+      portoSlugs(file("other/setup.mdx", { slug: "My Page" }), next),
+    ).toEqual(["other", "my-page"]);
+  });
+
+  test("treats an absolute-looking slug as one segment", () => {
+    // The schema rejects these at build time; the slug function
+    // normalizes them defensively instead of re-rooting.
+    expect(
+      portoSlugs(file("other/setup.mdx", { slug: "/custom" }), next),
+    ).toEqual(["other", "custom"]);
   });
 
   test("inherits slugs from parent index files on disk", () => {

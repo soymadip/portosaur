@@ -65,7 +65,18 @@ export const portoDocSchema = pageSchema
     hide_desc: z.boolean().optional(),
     color: z.string().optional(),
     sidebar_label: z.string().optional(),
-    slug: z.string().optional(),
+    // A slug renames only the file's own segment: one piece, no
+    // slashes, at least one letter or digit (so cleaning it never
+    // yields an empty segment). A regex, not a refine, so the
+    // constraint survives into the generated JSON Schema as a
+    // pattern and the editor warns too.
+    slug: z
+      .string()
+      .regex(
+        /^[^/]*[a-zA-Z0-9][^/]*$/,
+        "slug must be a single segment, no slashes",
+      )
+      .optional(),
     topic_list: z
       .union([z.boolean(), z.record(z.string(), z.any())])
       .optional(),

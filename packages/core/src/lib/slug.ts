@@ -24,9 +24,11 @@
  * Notes on the unified behavior: a file whose name matches its parent
  * directory (e.g. `guide/guide.mdx`) is an ordinary file, not an
  * index — only `index`/`README` files are indexes. A frontmatter `id`
- * is ignored. The filename is always the base. A relative `slug` on
- * an index file resolves against the site root, not its parent
- * directory.
+ * is ignored. The filename is always the base. A frontmatter `slug`
+ * is a single segment that renames the file's own piece of the URL
+ * (or the folder, for an index file): multi-segment and absolute
+ * slugs are rejected by the frontmatter schema, and this function
+ * cleans any slug it is handed down to one segment.
  */
 
 /** Parsed YAML frontmatter — values are genuinely dynamic. */
@@ -133,11 +135,11 @@ function computeSlug({
     const resolvedSlug = resolveParentSlug(dirSegments);
 
     if (resolvedSlug) {
-      if (resolvedSlug.startsWith("/")) {
-        currentRoutePath = resolvedSlug;
-      } else {
-        currentRoutePath = posixResolve(currentRoutePath, resolvedSlug);
-      }
+      // A parent index slug renames that directory: one segment.
+      currentRoutePath = posixResolve(
+        currentRoutePath,
+        cleanSegment(resolvedSlug),
+      );
     } else {
       currentRoutePath = posixResolve(
         currentRoutePath,
@@ -151,11 +153,9 @@ function computeSlug({
 
   if (isIndexFile) {
     if (userSlug) {
-      if (userSlug.startsWith("/")) {
-        finalSlug = userSlug;
-      } else {
-        finalSlug = posixResolve(currentRoutePath, userSlug);
-      }
+      // An index slug renames the folder: one segment, resolved
+      // against the grandparent path.
+      finalSlug = posixResolve(currentRoutePath, cleanSegment(userSlug));
     } else if (segments.length === 1) {
       finalSlug = currentRoutePath;
     } else {
@@ -163,11 +163,8 @@ function computeSlug({
       finalSlug = posixResolve(currentRoutePath, cleanSegment(lastDirSegment));
     }
   } else if (userSlug) {
-    if (userSlug.startsWith("/")) {
-      finalSlug = userSlug;
-    } else {
-      finalSlug = posixResolve(currentRoutePath, userSlug);
-    }
+    // A slug renames only the file's own segment.
+    finalSlug = posixResolve(currentRoutePath, cleanSegment(userSlug));
   } else {
     finalSlug = posixResolve(currentRoutePath, cleanSegment(base));
   }
@@ -184,7 +181,7 @@ function computeSlug({
  * @param frontMatter - The parsed frontmatter of the file
  *   (e.g. { slug: "custom" }).
  * @param parentSlugs - Custom slugs of parent index files, keyed
- *   by directory path relative to the content root (e.g. { guide: "/manual" }).
+ *   by directory path relative to the content root (e.g. { guide: "manual" }).
  * @returns The computed slug with no leading slash (e.g. { slug:
  *   "python/loops/while-loops", fileSlug: "python" }). `fileSlug` is the
  *   cleaned first directory segment, or the cleaned file base name for

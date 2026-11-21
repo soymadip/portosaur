@@ -49,11 +49,34 @@ describe("guessDocPermalink", () => {
     expect(slug).toBe("guide/custom");
   });
 
-  test("resolves a relative slug on an index file against the root", () => {
+  test("an index slug renames the folder", () => {
     const { slug } = guessDocPermalink("guide/index.mdx", {
       slug: "custom",
     });
     expect(slug).toBe("custom");
+  });
+
+  test("an index slug renames a nested folder, keeping its parent", () => {
+    const { slug } = guessDocPermalink("python/loops/index.mdx", {
+      slug: "custom",
+    });
+    expect(slug).toBe("python/custom");
+  });
+
+  test("cleans a user slug to one segment", () => {
+    const { slug } = guessDocPermalink("guide/setup.mdx", {
+      slug: "My Page",
+    });
+    expect(slug).toBe("guide/my-page");
+  });
+
+  test("treats an absolute-looking slug as one segment", () => {
+    // The schema rejects these at build time; the function
+    // normalizes them defensively instead of re-rooting.
+    const { slug } = guessDocPermalink("guide/setup.mdx", {
+      slug: "/custom",
+    });
+    expect(slug).toBe("guide/custom");
   });
 
   test("ignores frontmatter id (the filename is the base)", () => {
@@ -65,7 +88,7 @@ describe("guessDocPermalink", () => {
     const { slug } = guessDocPermalink(
       "guide/setup.mdx",
       {},
-      { guide: "/manual" },
+      { guide: "manual" },
     );
     expect(slug).toBe("manual/setup");
   });

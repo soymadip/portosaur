@@ -50,7 +50,7 @@ const INDEX_NAMES = ["index.mdx", "index.md", "README.mdx", "README.md"];
 /**
  * Custom slugs of the index files in a file's ancestor directories,
  * keyed by directory path relative to the content root (e.g.
- * `{ guide: "/manual" }`) — the `parentSlugs` map
+ * `{ guide: "manual" }`) — the `parentSlugs` map
  * `guessDocPermalink` takes. `contentPath` is the file's
  * content-relative path with `/` separators; `absolutePath` is its
  * path on disk. Shared by the loader's slug function and the
