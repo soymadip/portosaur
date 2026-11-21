@@ -17,7 +17,9 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * at the bottom-right). A second expand button beside the close
  * button grows the popup to near-fullscreen, and back. On a
  * phone the popup is a bottom sheet: it slides up from the
- * bottom, and the expand button takes it full screen. Inline zoom was tried first and dropped —
+ * bottom, and the expand button takes it full screen. The bar
+ * at the top of the sheet is a drag handle: pull up to expand,
+ * down to shrink back or close. Inline zoom was tried first and dropped —
  * zooming inside the small inline box just overflowed it. The
  * zoom code loads on the first expand, never on page load.
  * Imported from `pele/core`, not `pele` — the main entry is one
@@ -200,6 +202,117 @@ export function Diagram({ svg }: { svg: string }) {
     }
   };
 
+  // Sheet drag (mobile only — the drag strip is display:none on
+  // desktop): pulling the bar at the top of the sheet up expands
+  // it to full screen, pulling down shrinks it back to a sheet,
+  // and pulling a sheet down far enough closes it. The sheet
+  // follows the finger during the drag: growing changes the
+  // height toward full screen, dismissing slides it down. The
+  // drag state lives in a ref — no re-render per move.
+  const dragRef = useRef<{
+    pointerId: number;
+    startY: number;
+    startTime: number;
+    sheetHeight: number;
+    viewportHeight: number;
+  } | null>(null);
+
+  const onDragStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    const dialog = dialogRef.current;
+    if (!dialog?.open || closingRef.current) {
+      return;
+    }
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startTime: performance.now(),
+      sheetHeight: dialog.getBoundingClientRect().height,
+      viewportHeight: window.innerHeight,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onDragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    const dialog = dialogRef.current;
+    if (!drag || !dialog || event.pointerId !== drag.pointerId) {
+      return;
+    }
+    const dy = event.clientY - drag.startY;
+    // Follow the finger directly: the 300ms transition would lag
+    // behind it. Restored on release.
+    dialog.style.transition = "none";
+    if (expanded) {
+      // From full screen, only a downward pull does anything:
+      // the sheet shrinks toward its resting height. Pulling
+      // back up restores full screen.
+      if (dy > 0) {
+        dialog.style.height = `${Math.max(drag.viewportHeight - dy, drag.sheetHeight)}px`;
+      } else {
+        dialog.style.height = "";
+      }
+      dialog.style.translate = "";
+    } else if (dy < 0) {
+      // From the sheet, an upward pull grows it toward full
+      // screen. The max-height override lifts the sheet's 85%
+      // cap, or the height below would stop at the resting size.
+      dialog.style.height = `${Math.min(drag.sheetHeight - dy, drag.viewportHeight)}px`;
+      dialog.style.maxHeight = "100dvh";
+      dialog.style.translate = "";
+    } else {
+      // A downward pull slides the sheet toward dismissing.
+      dialog.style.translate = `0 ${dy}px`;
+      dialog.style.height = "";
+      dialog.style.maxHeight = "";
+    }
+  };
+
+  const finishDrag = (
+    event: React.PointerEvent<HTMLDivElement>,
+    commit: boolean,
+  ) => {
+    const drag = dragRef.current;
+    const dialog = dialogRef.current;
+    if (!drag || !dialog || event.pointerId !== drag.pointerId) {
+      return;
+    }
+    dragRef.current = null;
+    const dy = event.clientY - drag.startY;
+    const dt = performance.now() - drag.startTime;
+    const velocity = dt > 0 ? dy / dt : 0;
+    // Clear the drag's inline styles first: the transition comes
+    // back, and the dialog glides to whichever state the release
+    // picks below. A cancelled drag just snaps back.
+    dialog.style.transition = "";
+    dialog.style.height = "";
+    dialog.style.maxHeight = "";
+    dialog.style.translate = "";
+    if (!commit || !dialog.open) {
+      return;
+    }
+    if (expanded) {
+      if (dy > 60 || (dy > 20 && velocity > 0.5)) {
+        setExpanded(false);
+      }
+      return;
+    }
+    if (dy < -60 || (dy < -20 && velocity < -0.5)) {
+      setExpanded(true);
+      return;
+    }
+    if (dy > 100 || (dy > 40 && velocity > 0.5)) {
+      close();
+    }
+  };
+
+  const onDragEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    finishDrag(event, true);
+  };
+
+  const onDragCancel = (event: React.PointerEvent<HTMLDivElement>) => {
+    finishDrag(event, false);
+  };
+
   const dialogClassName = [
     "porto-diagram-dialog",
     ...(expanded ? ["porto-diagram-dialog--expanded"] : []),
@@ -231,6 +344,19 @@ export function Diagram({ svg }: { svg: string }) {
         onClick={onDialogClick}
       >
         <div className="porto-diagram-dialog__frame">
+          {/* The drag strip is mobile-only (display:none on
+              desktop): the bar at the top of the sheet, and the
+              handle for pulling it up to expand or down to
+              shrink and close. */}
+          <div
+            className="porto-diagram-dialog__drag"
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragCancel}
+          >
+            <div className="porto-diagram-dialog__grabber" />
+          </div>
           <div className="porto-diagram-dialog__actions">
             {/* The expand button toggles the popup between its
                 default size and near-fullscreen. The two icons are

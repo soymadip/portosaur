@@ -85,6 +85,12 @@
   scrollbar-gutter: stable;
 }
 
+/* The drag strip is mobile-only: on desktop there is no sheet
+   to drag. */
+.porto-diagram-dialog__drag {
+  display: none;
+}
+
 /* On a phone the viewer is a bottom sheet, app-style: full
    width, anchored to the bottom, rounded top corners only. The
    expand button takes it full screen, edge to edge. */
@@ -109,5 +115,32 @@
     max-height: 100dvh;
     border: 0;
     border-radius: 0;
+  }
+  /* The drag strip spans the top of the sheet — the whole strip
+     is the handle, not just the bar, so it is easy to grab. It
+     sits above the viewer (Pele makes the viewer positioned, so
+     without a z-index the viewer would cover the strip and
+     swallow the drag) and under the action buttons, which come
+     later in the DOM at the same z-index. `touch-action: none`
+     keeps the browser from stealing the drag for scrolling. */
+  .porto-diagram-dialog__drag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    height: 2.5rem;
+    padding-top: 0.5rem;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }
+  .porto-diagram-dialog__grabber {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background-color: var(--porto-color-gray-3);
   }
 }
