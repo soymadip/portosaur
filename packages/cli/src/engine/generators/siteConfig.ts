@@ -61,7 +61,7 @@ export interface PortosaurOptions {
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;
       onBrokenImages: string;
-      toc: { enabled: boolean; minLevel: number; maxLevel: number };
+      toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };
     pwa: { enable: boolean; notifications: boolean };
@@ -243,7 +243,7 @@ export function buildSiteConfig(
   ); // Render emoji shortcodes like :smile:.
   const contentOnBrokenLinks = get("site.content.on_broken_links", "throw"); // Broken link behavior.
   const contentOnBrokenImages = get("site.content.on_broken_images", "throw"); // Broken image behavior.
-  const tocEnabled = get("site.content.toc.enabled", true); // Show the table of contents.
+  const tocEnable = get("site.content.toc.enable", true); // Show the table of contents.
   const tocMinLevel = get("site.content.toc.min_level", 2); // Shallowest heading level in the table of contents.
   const tocMaxLevel = get("site.content.toc.max_level", 5); // Deepest heading level in the table of contents.
 
@@ -456,7 +456,7 @@ export function buildSiteConfig(
         onBrokenLinks: contentOnBrokenLinks,
         onBrokenImages: contentOnBrokenImages,
         toc: {
-          enabled: tocEnabled,
+          enable: tocEnable,
           minLevel: tocMinLevel,
           maxLevel: tocMaxLevel,
         },

@@ -146,7 +146,7 @@ export function DocPage({
     minLevel: tocSettings.minLevel,
     maxLevel: tocSettings.maxLevel,
   });
-  const hasToc = tocSettings.enabled && tocHeadings.length > 0;
+  const hasToc = tocSettings.enable && tocHeadings.length > 0;
 
   // The topic list: the automatic cards after the content on
   // index pages, and the context an explicit `<TopicList />` tag

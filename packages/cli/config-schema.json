@@ -139,7 +139,7 @@
               "type": ["object", "null"],
               "additionalProperties": false,
               "properties": {
-                "enabled": {
+                "enable": {
                   "type": ["boolean", "null"],
                   "description": "Show the table of contents.",
                   "default": true

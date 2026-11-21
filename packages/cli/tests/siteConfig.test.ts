@@ -112,13 +112,13 @@ describe("buildSiteConfig", () => {
     expect(off.site.content.addMdxDesc).toBe(false);
   });
 
-  test("toc defaults to enabled, levels 2 to 5, and can be narrowed", () => {
+  test("toc defaults to on, levels 2 to 5, and can be narrowed", () => {
     const defaults = buildSiteConfig({}, process.cwd(), {
       gitDate: "June 26, 2026",
       portoPaths,
     });
     expect(defaults.site.content.toc).toEqual({
-      enabled: true,
+      enable: true,
       minLevel: 2,
       maxLevel: 5,
     });
@@ -126,14 +126,14 @@ describe("buildSiteConfig", () => {
     const custom = buildSiteConfig(
       {
         site: {
-          content: { toc: { enabled: false, min_level: 3, max_level: 4 } },
+          content: { toc: { enable: false, min_level: 3, max_level: 4 } },
         },
       },
       process.cwd(),
       { gitDate: "June 26, 2026", portoPaths },
     );
     expect(custom.site.content.toc).toEqual({
-      enabled: false,
+      enable: false,
       minLevel: 3,
       maxLevel: 4,
     });

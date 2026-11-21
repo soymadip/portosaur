@@ -313,7 +313,7 @@ export function tocToHeadings(
 
 /** The effective table of contents settings for one page. */
 export interface TocSettings {
-  enabled: boolean;
+  enable: boolean;
   minLevel: number;
   maxLevel: number;
 }
@@ -327,13 +327,13 @@ export interface TocSettings {
 export function resolveTocSettings(
   global: TocSettings,
   frontmatter?: {
-    enabled?: boolean;
+    enable?: boolean;
     min_level?: number;
     max_level?: number;
   },
 ): TocSettings {
   return {
-    enabled: frontmatter?.enabled ?? global.enabled,
+    enable: frontmatter?.enable ?? global.enable,
     minLevel: frontmatter?.min_level ?? global.minLevel,
     maxLevel: frontmatter?.max_level ?? global.maxLevel,
   };

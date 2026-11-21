@@ -80,7 +80,7 @@ export const portoDocSchema = pageSchema
     sidebar_collapsed: z.boolean().optional(),
     table_of_contents: z
       .object({
-        enabled: z.boolean().optional(),
+        enable: z.boolean().optional(),
         min_level: z.number().optional(),
         max_level: z.number().optional(),
       })

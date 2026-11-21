@@ -133,7 +133,7 @@ describe("tocToHeadings", () => {
 });
 
 describe("resolveTocSettings", () => {
-  const global = { enabled: true, minLevel: 2, maxLevel: 5 };
+  const global = { enable: true, minLevel: 2, maxLevel: 5 };
 
   test("uses the global values when the page sets nothing", () => {
     expect(resolveTocSettings(global)).toEqual(global);
@@ -142,12 +142,12 @@ describe("resolveTocSettings", () => {
 
   test("overrides field by field, unset fields fall back to global", () => {
     expect(resolveTocSettings(global, { max_level: 3 })).toEqual({
-      enabled: true,
+      enable: true,
       minLevel: 2,
       maxLevel: 3,
     });
-    expect(resolveTocSettings(global, { enabled: false })).toEqual({
-      enabled: false,
+    expect(resolveTocSettings(global, { enable: false })).toEqual({
+      enable: false,
       minLevel: 2,
       maxLevel: 5,
     });
