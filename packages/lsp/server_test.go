@@ -61,8 +61,16 @@ func startTestServer(t *testing.T, root string) *testServer {
 // server reads.
 func fixtureProject(t *testing.T) string {
 	t.Helper()
+	return fixtureProjectWithConfig(t, "")
+}
+
+// fixtureProjectWithConfig builds a temp project with the given
+// porto.yml content and the two installed CLI schemas the
+// server reads.
+func fixtureProjectWithConfig(t *testing.T, config string) string {
+	t.Helper()
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(config), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))

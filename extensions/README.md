@@ -13,6 +13,7 @@ how `porto.yml` is handled.
 | Missing-required-prop warnings                     |   Yes   | Yes |                                                                                         |
 | Go-to-definition for links                         |   Yes   | Yes |                                                                                         |
 | `{vars.}` completion                               |   Yes   | Yes |                                                                                         |
+| Unknown `{vars.}` warnings                         |   Yes   | Yes | Severity follows `site.content.on_missing_var`                                          |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |

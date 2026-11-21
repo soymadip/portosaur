@@ -162,3 +162,59 @@ func TestVarsCompletionValueDetail(t *testing.T) {
 		}
 	}
 }
+
+func TestScanVarsRefs(t *testing.T) {
+	for _, tc := range []struct {
+		text  string
+		paths []string
+	}{
+		{"a {vars.x} b {vars.y.z} c", []string{"x", "y.z"}},
+		{"{{vars.x}} and {vars.y}", []string{"y"}},
+		{"{{{vars.x}}}", nil},
+		{"---\ntitle: {vars.x}\n---\n{vars.y}\n", []string{"y"}},
+		{"---\n{vars.x}\n", nil},
+		{"{vars.<key>} and {vars.*} and {vars.} and {vars.1a}", nil},
+		{"no refs here", nil},
+	} {
+		refs := scanVarsRefs(tc.text)
+		if len(refs) != len(tc.paths) {
+			t.Fatalf("scanVarsRefs(%q): got %d refs, want %d", tc.text, len(refs), len(tc.paths))
+		}
+		for i, want := range tc.paths {
+			if refs[i].path != want {
+				t.Fatalf("scanVarsRefs(%q): ref %d path = %q, want %q", tc.text, i, refs[i].path, want)
+			}
+			if got := tc.text[refs[i].start:refs[i].end]; got != "{vars."+want+"}" {
+				t.Fatalf("scanVarsRefs(%q): ref %d text = %q, want %q", tc.text, i, got, "{vars."+want+"}")
+			}
+		}
+	}
+}
+
+func TestResolveVarsPath(t *testing.T) {
+	vars := map[string]any{
+		"name":   "Portosaur",
+		"count":  42,
+		"ratio":  1.5,
+		"flag":   true,
+		"empty":  nil,
+		"nested": map[string]any{"deep": "x"},
+		"list":   []any{"a"},
+	}
+	for path, want := range map[string]bool{
+		"name":        true,
+		"count":       true,
+		"ratio":       true,
+		"flag":        false,
+		"empty":       false,
+		"nested":      false,
+		"nested.deep": true,
+		"nested.nope": false,
+		"nope":        false,
+		"list":        false,
+	} {
+		if got := resolveVarsPath(vars, path); got != want {
+			t.Fatalf("resolveVarsPath(%q) = %v, want %v", path, got, want)
+		}
+	}
+}

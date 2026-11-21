@@ -157,6 +157,127 @@ func TestFrontmatterIconDiagnosticsValid(t *testing.T) {
 	}
 }
 
+func TestVarsDiagnosticsUnknownKeyDefault(t *testing.T) {
+	root := fixtureProjectWithConfig(t, "vars:\n  known: hello\n")
+	s := startTestServer(t, root)
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "# Hello\n\nSee {vars.nope} here.\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Unknown vars key "{vars.nope}"`) {
+		t.Fatalf("diagnostics = %v, want the unknown-vars-key error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 4 || diags[0].Range.End.Character != 15 {
+		t.Fatalf("diagnostic range = %+v, want the {vars.nope} occurrence", diags[0].Range)
+	}
+}
+
+func TestVarsDiagnosticsSeverityFollowsSetting(t *testing.T) {
+	for _, tc := range []struct {
+		setting  string
+		severity protocol.DiagnosticSeverity
+		want     int
+	}{
+		{"warn", protocol.DiagnosticSeverityWarning, 1},
+		{"ignore", 0, 0},
+		{"bogus", protocol.DiagnosticSeverityError, 1},
+	} {
+		config := "site:\n  content:\n    on_missing_var: " + tc.setting + "\nvars:\n  known: hello\n"
+		s := startTestServer(t, fixtureProjectWithConfig(t, config))
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {vars.nope}.\n")
+		if len(diags) != tc.want {
+			t.Fatalf("on_missing_var %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+		}
+		if tc.want == 1 && diags[0].Severity != tc.severity {
+			t.Fatalf("on_missing_var %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+		}
+	}
+}
+
+func TestVarsDiagnosticsKnownKeysAreQuiet(t *testing.T) {
+	config := "vars:\n  known: hello\n  nested:\n    deep: 42\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n{vars.known} and {vars.nested.deep} work.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
+	}
+}
+
+func TestVarsDiagnosticsNestedMissingKey(t *testing.T) {
+	config := "vars:\n  nested:\n    deep: 42\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {vars.nested.nope}.\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Unknown vars key "{vars.nested.nope}"`) {
+		t.Fatalf("diagnostics = %v, want the nested unknown-key error", diagnosticMessages(diags))
+	}
+}
+
+func TestVarsDiagnosticsEscapeIsQuiet(t *testing.T) {
+	config := "vars:\n  known: hello\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "Write {{vars.nope}} literally, even {{{vars.nope}}}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for the escape form", diagnosticMessages(diags))
+	}
+}
+
+func TestVarsDiagnosticsAllPositions(t *testing.T) {
+	config := "vars:\n  known: hello\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	doc := "# Hello\n\nText {vars.a} here.\n\nUse `{vars.b}` inline.\n\n```sh\nrun {vars.c}\n```\n\n[link]({vars.d})\n\n![img]({vars.e})\n\n{vars.f}\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 6 {
+		t.Fatalf("diagnostics = %v, want one per position", diagnosticMessages(diags))
+	}
+	for _, key := range []string{"a", "b", "c", "d", "e", "f"} {
+		if !hasDiagnostic(diags, `Unknown vars key "{vars.`+key+`}"`) {
+			t.Fatalf("diagnostics = %v, want the {vars.%s} error", diagnosticMessages(diags), key)
+		}
+	}
+}
+
+func TestVarsDiagnosticsFrontmatterSkipped(t *testing.T) {
+	config := "vars:\n  known: hello\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: \"See {vars.nope}\"\n---\n\nBody text.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for a reference in frontmatter", diagnosticMessages(diags))
+	}
+}
+
+func TestVarsDiagnosticsUnclosedFrontmatterSkipped(t *testing.T) {
+	config := "vars:\n  known: hello\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: x\n\nSee {vars.nope}.\n")
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none when the frontmatter never closes", diagnosticMessages(diags))
+	}
+}
+
+// The build only substitutes strings and numbers: a reference to
+// a nested map or a boolean is unknown to it, so the server
+// flags it too.
+func TestVarsDiagnosticsNonScalarValueIsUnknown(t *testing.T) {
+	config := "vars:\n  nested:\n    deep: 42\n  flag: true\n"
+	s := startTestServer(t, fixtureProjectWithConfig(t, config))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {vars.nested} and {vars.flag}.\n")
+	if len(diags) != 2 {
+		t.Fatalf("diagnostics = %v, want one per non-scalar reference", diagnosticMessages(diags))
+	}
+}
+
+// A project without a vars: section has no known keys, so every
+// reference is unknown. (The build leaves such references
+// untouched instead of failing; the diagnostic still flags them,
+// since the reference can never resolve.)
+func TestVarsDiagnosticsNoVarsSection(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "See {vars.nope}.\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Unknown vars key "{vars.nope}"`) {
+		t.Fatalf("diagnostics = %v, want the unknown-vars-key error", diagnosticMessages(diags))
+	}
+}
+
 // The schema-based component checks are strict-only: in lenient
 // mode an unknown component draws no warning. The static icon
 // checks still run.

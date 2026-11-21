@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -180,4 +181,89 @@ func varsDetail(value any) string {
 		preview = preview[:37] + "..."
 	}
 	return preview
+}
+
+// varsRef is one `{vars.path}` occurrence in the MDX body: the
+// dot path after `vars.` and the byte offsets of the whole
+// `{...}` form, so the range can cover the occurrence.
+type varsRef struct {
+	path  string
+	start int
+	end   int
+}
+
+// The build's patterns from remarkVars.ts: a reference, and the
+// double-brace escape form that renders literally.
+var varsBraceRe = regexp.MustCompile(`\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}`)
+var varsEscapeRe = regexp.MustCompile(`\{\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}\}`)
+
+// scanVarsRefs finds every `{vars.path}` reference in the MDX
+// body. Text, inline code, fenced code blocks, link and image
+// URLs, and MDX expressions are all plain `{vars.path}` in the
+// source, so one raw-text scan covers every position the build
+// substitutes. Frontmatter is skipped (the `vars:` definitions
+// live there), and so is the `{{vars.path}}` escape form, which
+// renders literally. An unclosed frontmatter block cannot be
+// told apart from the prose below it, so nothing is scanned.
+func scanVarsRefs(text string) []varsRef {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return nil
+		}
+		for i := 0; i <= block.endLine; i++ {
+			contentStart += len(lines[i]) + 1
+		}
+	}
+	if contentStart > len(text) {
+		return nil
+	}
+	body := text[contentStart:]
+	escapes := varsEscapeRe.FindAllStringIndex(body, -1)
+	var refs []varsRef
+	for _, match := range varsBraceRe.FindAllStringSubmatchIndex(body, -1) {
+		start, end := match[0], match[1]
+		escaped := false
+		for _, esc := range escapes {
+			if start < esc[1] && end > esc[0] {
+				escaped = true
+				break
+			}
+		}
+		if escaped {
+			continue
+		}
+		refs = append(refs, varsRef{
+			path:  body[match[2]:match[3]],
+			start: contentStart + start,
+			end:   contentStart + end,
+		})
+	}
+	return refs
+}
+
+// resolveVarsPath reports whether a dot path resolves to a value
+// the build can substitute: the full path must exist in the vars
+// map and end in a string or a number, mirroring resolveVarPath
+// in remarkVars.ts. A path ending in a nested map, a boolean, a
+// list, or a null is unresolved, just as the build treats it.
+func resolveVarsPath(vars map[string]any, path string) bool {
+	var current any = vars
+	for _, key := range strings.Split(path, ".") {
+		node, ok := current.(map[string]any)
+		if !ok {
+			return false
+		}
+		current, ok = node[key]
+		if !ok {
+			return false
+		}
+	}
+	switch current.(type) {
+	case string, int, int64, uint64, float64, float32:
+		return true
+	default:
+		return false
+	}
 }

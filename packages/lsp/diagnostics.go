@@ -14,7 +14,7 @@ import (
 
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
-// checks over the page body. The schema-based component checks
+// checks and `{vars.}` reference checks over the page body. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
 // cannot be tied to the project's version. The icon checks are
@@ -44,6 +44,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	}
 	for _, issue := range s.componentIssues(text, root) {
 		diags = append(diags, issue.diag)
+	}
+	for _, diag := range s.varsIssues(text, root) {
+		diags = append(diags, diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
 }
@@ -246,6 +249,39 @@ func (s *Server) componentIssues(text string, root string) []componentIssue {
 		}
 	}
 	return issues
+}
+
+// varsIssues checks every `{vars.key}` reference in the
+// document body against the project's `vars:` map. The severity
+// follows site.content.on_missing_var: throw is an error, warn
+// is a warning, ignore reports nothing. The default is throw,
+// and an unrecognized value falls back to it. The check reads
+// porto.yml directly, not a schema, so it runs in both modes.
+func (s *Server) varsIssues(text string, root string) []protocol.Diagnostic {
+	cfg := loadProjectConfig(root)
+	behavior := configString(cfg, []string{"site", "content", "on_missing_var"}, "throw")
+	if behavior == "ignore" {
+		return nil
+	}
+	severity := protocol.DiagnosticSeverityError
+	if behavior == "warn" {
+		severity = protocol.DiagnosticSeverityWarning
+	}
+	vars, _ := cfg["vars"].(map[string]any)
+	lines := strings.Split(text, "\n")
+	var diags []protocol.Diagnostic
+	for _, ref := range scanVarsRefs(text) {
+		if resolveVarsPath(vars, ref.path) {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, ref.start, ref.end),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String("Unknown vars key \"{vars." + ref.path + "}\" (not defined under 'vars:' in porto.yml)"),
+		})
+	}
+	return diags
 }
 
 func (s *Server) sendDiagnostics(documentURI uri.URI, diags []protocol.Diagnostic) {
