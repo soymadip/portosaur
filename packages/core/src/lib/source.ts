@@ -42,8 +42,13 @@ import { parseFileFrontmatter } from "./slug-server.ts";
  * 25, matching Portosaur's `desc` convention). The remaining fields
  * are the Astro `docSchema` shapes, minus `sidebar_position` (removed
  * — decision 24) and plus `math` (frontmatter flag for the KaTeX
- * stylesheet gate) and `sidebar_collapsed` (per-page sidebar
- * default — overrides `theme.navigation.sidebar_collapsed`).
+ * stylesheet gate), `sidebar_collapsed` (per-page sidebar
+ * default — overrides `theme.navigation.sidebar_collapsed`), and
+ * `table_of_contents` (per-page table of contents settings —
+ * overrides `site.content.toc` field by field). The frontmatter key
+ * is `table_of_contents`, not `toc`: Fumadocs puts the compiled
+ * heading list on `page.data.toc`, so a frontmatter `toc` key would
+ * be overwritten by it.
  * Unknown keys are stripped by zod.
  *
  * The `file` transformer maps `desc` onto the page-tree node's
@@ -73,6 +78,13 @@ export const portoDocSchema = pageSchema
     draft: z.boolean().optional(),
     math: z.boolean().optional(),
     sidebar_collapsed: z.boolean().optional(),
+    table_of_contents: z
+      .object({
+        enabled: z.boolean().optional(),
+        min_level: z.number().optional(),
+        max_level: z.number().optional(),
+      })
+      .optional(),
   });
 
 /** The validated frontmatter of a doc/note/blog page. */

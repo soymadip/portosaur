@@ -283,12 +283,21 @@ function tocTitleText(title: ReactNode): string {
  * Converts Fumadocs TOC items to flat headings: the URL fragment
  * becomes the slug, the title's text becomes the text. H1s are
  * dropped — the hoisted H1 is gone from the TOC by the time the
- * page renders, and a stray H1 must not enter the list.
+ * page renders, and a stray H1 must not enter the list. `options`
+ * narrows the levels shown (the `site.content.toc` min/max levels,
+ * overridden per page): headings shallower than `minLevel` or
+ * deeper than `maxLevel` are dropped. The floor stays 2 even when
+ * `minLevel` is lower — the TOC never shows an H1.
  */
-export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
+export function tocToHeadings(
+  toc: TOCItemType[],
+  options: { minLevel?: number; maxLevel?: number } = {},
+): TocHeading[] {
+  const minLevel = Math.max(2, options.minLevel ?? 2);
+  const maxLevel = options.maxLevel ?? 6;
   const headings: TocHeading[] = [];
   for (const item of toc) {
-    if (item.depth < 2) {
+    if (item.depth < minLevel || item.depth > maxLevel) {
       continue;
     }
     const hashIndex = item.url.indexOf("#");
@@ -300,6 +309,34 @@ export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
     }
   }
   return headings;
+}
+
+/** The effective table of contents settings for one page. */
+export interface TocSettings {
+  enabled: boolean;
+  minLevel: number;
+  maxLevel: number;
+}
+
+/**
+ * The table of contents settings for one page: the global
+ * `site.content.toc` values, overridden field by field by the
+ * page's `table_of_contents` frontmatter. An unset frontmatter
+ * field falls back to the global value.
+ */
+export function resolveTocSettings(
+  global: TocSettings,
+  frontmatter?: {
+    enabled?: boolean;
+    min_level?: number;
+    max_level?: number;
+  },
+): TocSettings {
+  return {
+    enabled: frontmatter?.enabled ?? global.enabled,
+    minLevel: frontmatter?.min_level ?? global.minLevel,
+    maxLevel: frontmatter?.max_level ?? global.maxLevel,
+  };
 }
 
 /**

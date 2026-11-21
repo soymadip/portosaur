@@ -65,6 +65,9 @@ Configure how content renders.
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
 | `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                      |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
+| `toc.enabled`             | `bool` | `true`    | Show the table of contents. Per-page `table_of_contents` frontmatter overrides this.                           |
+| `toc.min_level`           | `num`  | `2`       | Shallowest heading level in the table of contents.                                                             |
+| `toc.max_level`           | `num`  | `5`       | Deepest heading level in the table of contents.                                                                |
 
 #### `site.pwa`
 

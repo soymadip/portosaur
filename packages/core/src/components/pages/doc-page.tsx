@@ -6,6 +6,7 @@ import type { PortosaurOptions } from "../../lib/config.ts";
 import {
   findCategoryItems,
   findPrevNext,
+  resolveTocSettings,
   tocToHeadings,
   topicListCards,
   topicListShouldRender,
@@ -131,8 +132,21 @@ export function DocPage({
   const prevLink = prev ? { ...prev, href: pageHref(prev.href) } : null;
   const nextLink = next ? { ...next, href: pageHref(next.href) } : null;
 
-  const tocHeadings = tocToHeadings(data.toc);
-  const hasToc = tocHeadings.length > 0;
+  // The table of contents for this page: the global
+  // `site.content.toc` levels, overridden field by field by the
+  // page's `table_of_contents` frontmatter. Disabled pages show no
+  // TOC column at all (and no mobile TOC bar — it lives in the
+  // same column), and neither do pages with no headings left
+  // after the level filter.
+  const tocSettings = resolveTocSettings(
+    config.site.content.toc,
+    data.table_of_contents,
+  );
+  const tocHeadings = tocToHeadings(data.toc, {
+    minLevel: tocSettings.minLevel,
+    maxLevel: tocSettings.maxLevel,
+  });
+  const hasToc = tocSettings.enabled && tocHeadings.length > 0;
 
   // The topic list: the automatic cards after the content on
   // index pages, and the context an explicit `<TopicList />` tag

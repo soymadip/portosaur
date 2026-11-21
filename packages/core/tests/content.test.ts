@@ -2,6 +2,7 @@ import { describe, test, expect } from "bun:test";
 import { createElement, Fragment } from "react";
 import {
   nestHeadings,
+  resolveTocSettings,
   tocToHeadings,
   topicListCards,
 } from "../src/lib/content.ts";
@@ -63,6 +64,93 @@ describe("tocToHeadings", () => {
       { title: "No hash", url: "/docs/page", depth: 2 },
     ]);
     expect(headings).toEqual([]);
+  });
+
+  test("drops headings deeper than maxLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+      ],
+      { maxLevel: 3 },
+    );
+    expect(headings).toEqual([
+      { depth: 2, slug: "section", text: "Section" },
+      { depth: 3, slug: "subsection", text: "Subsection" },
+    ]);
+  });
+
+  test("drops headings shallower than minLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+      ],
+      { minLevel: 3 },
+    );
+    expect(headings).toEqual([
+      { depth: 3, slug: "subsection", text: "Subsection" },
+      { depth: 4, slug: "detail", text: "Detail" },
+    ]);
+  });
+
+  test("keeps only headings between minLevel and maxLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+        { title: "Fine print", url: "#fine-print", depth: 5 },
+      ],
+      { minLevel: 3, maxLevel: 4 },
+    );
+    expect(headings).toEqual([
+      { depth: 3, slug: "subsection", text: "Subsection" },
+      { depth: 4, slug: "detail", text: "Detail" },
+    ]);
+  });
+
+  test("returns nothing when no heading is in range", () => {
+    const headings = tocToHeadings(
+      [{ title: "Section", url: "#section", depth: 2 }],
+      { minLevel: 3 },
+    );
+    expect(headings).toEqual([]);
+  });
+
+  test("never shows an H1 even with minLevel 1", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Title", url: "#title", depth: 1 },
+        { title: "Section", url: "#section", depth: 2 },
+      ],
+      { minLevel: 1 },
+    );
+    expect(headings).toEqual([{ depth: 2, slug: "section", text: "Section" }]);
+  });
+});
+
+describe("resolveTocSettings", () => {
+  const global = { enabled: true, minLevel: 2, maxLevel: 5 };
+
+  test("uses the global values when the page sets nothing", () => {
+    expect(resolveTocSettings(global)).toEqual(global);
+    expect(resolveTocSettings(global, {})).toEqual(global);
+  });
+
+  test("overrides field by field, unset fields fall back to global", () => {
+    expect(resolveTocSettings(global, { max_level: 3 })).toEqual({
+      enabled: true,
+      minLevel: 2,
+      maxLevel: 3,
+    });
+    expect(resolveTocSettings(global, { enabled: false })).toEqual({
+      enabled: false,
+      minLevel: 2,
+      maxLevel: 5,
+    });
   });
 });
 
