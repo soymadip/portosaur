@@ -234,7 +234,10 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 // propNameCompletions offers the props of the tag's component,
 // minus the ones already present. Boolean props complete bare
 // (a bare prop means true in JSX); the rest take `name=` so the
-// value can follow.
+// value can follow, and carry a triggerSuggest command so the
+// value list pops up on its own once the name is accepted (VS
+// Code runs it; Zed ignores completion-item commands, and the
+// values appear there when the quote is typed).
 func propNameCompletions(schema *resolvedSchema, context tagContext) *protocol.CompletionList {
 	def := componentDef(schema, context.name)
 	if def == nil {
@@ -266,6 +269,7 @@ func propNameCompletions(schema *resolvedSchema, context tagContext) *protocol.C
 		text := name
 		if !schemaHasType(prop, "boolean") {
 			text += "="
+			item.Command = protocol.Command{Title: "Trigger Suggest", Command: "editor.action.triggerSuggest"}
 		}
 		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: text}
 		items = append(items, item)

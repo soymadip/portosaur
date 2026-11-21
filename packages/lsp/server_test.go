@@ -222,6 +222,17 @@ func TestConfigFileIsNotServed(t *testing.T) {
 	}
 }
 
+// itemCommand returns the command of the completion item with
+// the given label.
+func itemCommand(items []protocol.CompletionItem, label string) (protocol.Command, bool) {
+	for _, item := range items {
+		if item.Label == label {
+			return item.Command, true
+		}
+	}
+	return protocol.Command{}, false
+}
+
 // editText returns the inserted text of the completion item with
 // the given label.
 func editText(items []protocol.CompletionItem, label string) (string, bool) {
@@ -643,6 +654,37 @@ func TestComponentCompletionProps(t *testing.T) {
 	}
 	if text, ok := editText(items, "outline"); !ok || text != "outline" {
 		t.Fatalf("outline edit = %q, want %q (a boolean prop completes bare)", text, "outline")
+	}
+}
+
+func TestComponentCompletionValuePropTriggersSuggest(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn ")
+	items := s.complete(t, documentURI, 2, 5)
+	if cmd, ok := itemCommand(items, "variant"); !ok || cmd.Command != "editor.action.triggerSuggest" {
+		t.Fatalf("variant command = %q, want %q", cmd.Command, "editor.action.triggerSuggest")
+	}
+	if cmd, ok := itemCommand(items, "outline"); !ok || cmd.Command != "" {
+		t.Fatalf("outline command = %q, want none (a boolean prop takes no value)", cmd.Command)
+	}
+}
+
+func TestComponentCompletionValuePopupAfterAccept(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn ")
+	items := s.complete(t, documentURI, 2, 5)
+	text, ok := editText(items, "variant")
+	if !ok || text != "variant=" {
+		t.Fatalf("variant edit = %q, want %q", text, "variant=")
+	}
+	// The editor inserts `variant=` and runs triggerSuggest:
+	// completing right after the `=` must offer the values.
+	acceptedURI := s.open(t, filepath.Join(s.root, "accepted.mdx"), "# Hello\n\n<Btn "+text)
+	values := s.complete(t, acceptedURI, 2, 13)
+	for _, want := range []string{"primary", "secondary", "ghost"} {
+		if !hasLabel(values, want) {
+			t.Fatalf("variant completions %v missing %q", labels(values), want)
+		}
 	}
 }
 

@@ -9,6 +9,7 @@ how `porto.yml` is handled.
 | :------------------------------------------------- | :-----: | :-: | :-------------------------------------------------------------------------------------- |
 | MDX frontmatter completion, hover, and diagnostics |   Yes   | Yes |                                                                                         |
 | Component completion and hover                     |   Yes   | Yes |                                                                                         |
+| Prop values pop up after accepting a prop name     |   Yes   |  —  | Zed shows the values when you type the quote instead                                    |
 | Imported-component and HTML tag completion         |   Yes   | Yes | After `<`, alongside the built-in components. Picking a tag inserts the whole tag       |
 | Unknown-component and icon warnings                |   Yes   | Yes |                                                                                         |
 | Missing-required-prop warnings                     |   Yes   | Yes |                                                                                         |
