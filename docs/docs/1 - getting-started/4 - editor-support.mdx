@@ -26,10 +26,10 @@ Beyond completion and hover, the server also:
 - **Flags multi-segment slugs.** A `slug:` in frontmatter with a `/` in it is an error, since a slug only renames the file itself.
 - **Warns about duplicate slugs.** Two pages that land on the same URL get a warning naming the other page, since the build fails on duplicate slugs.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
-- **Flags unknown `{vars.}` keys.** A `{vars.key}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
-- **Shows `{vars.}` values inline.** A `{vars.key}` that resolves to a value shows that value right after it, and hovering over it says where the value comes from.
-- **Flags unset `{env.}` vars.** A `{env.VAR}` that is not set in the environment or the project's `.env` files is flagged with the severity from `site.content.on_missing_env`. The `{{env.VAR}}` escape form stays quiet.
-- **Shows `{env.}` values inline.** A `{env.VAR}` that is set shows that value right after it, and hovering over it says where the value comes from.
+- **Flags unknown `{vars.}` keys.** A `{{vars.key}}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
+- **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows that value right after it, and hovering over it says where the value comes from.
+- **Flags unset `{env.}` vars.** A `{{env.VAR}}` that is not set in the environment or the project's `.env` files is flagged with the severity from `site.content.on_missing_env`. The `{{env.VAR}}` escape form stays quiet.
+- **Shows `{env.}` values inline.** A `{{env.VAR}}` that is set shows that value right after it, and hovering over it says where the value comes from.
 - **Completes `{env.}`.** Inside an expression it suggests the env var names the build can see, from the system environment and the project's `.env` files. Each suggestion names its source, never the value.
 - **Suggests shortcodes.** Typing `:` in prose offers icon packs (`:si:` and the rest) and emoji shortcodes (`:smile:`), filtered as you type. Emoji appear only when `site.content.render_emoji_shortcodes` is on.
 - **Suggests code fence languages and options.** On a fence line it offers language names, including `mermaid`, `package-install`, and `npm`, and after the language it offers the block options `title`, `tab`, `noCopy`, `noWrap`, and `lineNumbers`.
