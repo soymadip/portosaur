@@ -85,7 +85,11 @@ export function resolveSiteIcon(
         fallback: fallback ? withBase(fallback, base) : undefined,
       };
     }
-    if (/\p{Emoji}/u.test(iconStr)) {
+    // Emoji only when the value carries no colon: icon ids always
+    // do (`prefix:name`), and digits carry the Emoji property, so
+    // a bare contains-check read ids like `lu:maximize-2` as emoji
+    // and rendered the raw id as text.
+    if (!iconStr.includes(":") && /\p{Emoji}/u.test(iconStr)) {
       return { kind: "emoji", value: iconStr };
     }
     const mappedId = techMap[iconStr.toLowerCase()]?.icon ?? iconStr;

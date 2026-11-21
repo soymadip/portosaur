@@ -109,6 +109,27 @@ describe("collectSiteIcons", () => {
       rmSync(projectDir, { recursive: true, force: true });
     }
   });
+
+  test("collects icon ids containing digits", () => {
+    // Digits carry the Emoji property, so a bare contains-check
+    // skipped ids like `lu:maximize-2` as emoji, silently.
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      fs.writeFileSync(
+        path.join(contentDir, "digits.md"),
+        `---\ntitle: Digits\nicon: lu:maximize-2\n---\n`,
+      );
+      const { icons, warnings } = collectSiteIcons({
+        projectDir,
+        contentDirs: [contentDir],
+        coreRoot,
+      });
+      expect(icons.has("lucide:maximize-2")).toBe(true);
+      expect(warnings).not.toContain("[Icons] Icon not found: lu:maximize-2");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("renderSiteIconsModule", () => {

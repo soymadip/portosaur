@@ -17,6 +17,10 @@ const icons: SiteIcons = {
     body: "<path d='python'/>",
   },
   "devicon:rust": { viewBox: "0 0 128 128", body: "<path d='rust'/>" },
+  "lucide:maximize-2": {
+    viewBox: "0 0 24 24",
+    body: "<path d='maximize-2'/>",
+  },
 };
 
 describe("normalizeIconId", () => {
@@ -91,6 +95,15 @@ describe("resolveSiteIcon", () => {
     expect(resolveSiteIcon("📁", {}, icons)).toEqual({
       kind: "emoji",
       value: "📁",
+    });
+  });
+
+  test("resolves icon ids containing digits as icons, not emoji", () => {
+    // Digits carry the Emoji property, so a bare contains-check
+    // read `lu:maximize-2` as emoji and rendered the raw id.
+    expect(resolveSiteIcon("lu:maximize-2", {}, icons)).toEqual({
+      kind: "icon",
+      id: "lucide:maximize-2",
     });
   });
 
