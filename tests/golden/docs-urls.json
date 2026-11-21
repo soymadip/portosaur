@@ -1,5 +1,5 @@
 {
-  "generated_from": "Markdown pages rearranged, Components last",
+  "generated_from": "Dead config keys removed",
   "routes": [
     {
       "url": "/",
@@ -72,7 +72,6 @@
         "docs_home",
         "home_page",
         "tasks",
-        "tools.link_shortener",
         "vars",
         "Custom Head Tags",
         "Icon Values"

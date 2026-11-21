@@ -2,36 +2,6 @@ import { execSync, spawn } from "node:child_process";
 import { git } from "../app.ts";
 
 /**
- * Performs a deep merge of two objects.
- * @param {Object} target - The target object.
- * @param {Object} source - The source object.
- * @returns {Object} The merged object.
- */
-export function deepMerge(
-  target: Record<string, any>,
-  source: Record<string, any>,
-): Record<string, any> {
-  const result = { ...target };
-
-  for (const key of Object.keys(source)) {
-    if (
-      source[key] &&
-      typeof source[key] === "object" &&
-      !Array.isArray(source[key]) &&
-      target[key] &&
-      typeof target[key] === "object" &&
-      !Array.isArray(target[key])
-    ) {
-      result[key] = deepMerge(target[key], source[key]);
-    } else if (source[key] !== undefined) {
-      result[key] = source[key];
-    }
-  }
-
-  return result;
-}
-
-/**
  * Gets the last modification date of a git project.
  * @param {string} siteDir - The project directory.
  * @returns {string} Formatted date string.
@@ -69,30 +39,6 @@ export function hasCommand(command: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * Filters a list of items, only including those that are enabled.
- * Supports both raw values and { enable: boolean, value: any } objects.
- * @param {Array} items - The items to filter.
- * @returns {Array} The enabled values.
- */
-export function useEnabled(items: any[]): any[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items.flatMap((item) => {
-    if (
-      item &&
-      typeof item === "object" &&
-      "enable" in item &&
-      "value" in item
-    ) {
-      return item.enable === true ? [item.value] : [];
-    }
-    return [item];
-  });
 }
 
 /**

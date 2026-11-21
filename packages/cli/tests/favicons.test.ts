@@ -48,6 +48,17 @@ const silentLogger = {
 };
 
 describe("resolveSiteIconSpec", () => {
+  test("site.favicon wins over the home icon", () => {
+    expect(
+      resolveSiteIconSpec(
+        options({
+          site: { favicon: "img/custom.png" },
+          docsHome: { icon: "img/docs.png" },
+        }),
+      ),
+    ).toBe("img/custom.png");
+  });
+
   test("docs mode reads docs_home.icon", () => {
     expect(
       resolveSiteIconSpec(options({ docsHome: { icon: "img/docs.png" } })),
@@ -373,6 +384,42 @@ describe("generateFavicons", () => {
       expect(manifest.theme_color).toBe("#123456");
       expect(manifest.icons).toHaveLength(4);
       expect(manifest.icons[0].src).toBe("/favicon/icon-192x192.png");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("site.favicon wins over the home icon for the generated set", async () => {
+    const root = mkdtempSync(path.join(tmpdir(), "porto-favicon-"));
+    try {
+      const imgDir = path.join(root, "static", "img");
+      await makeTestImage(imgDir, "home.png"); // solid red
+      writeSolidPng(path.join(imgDir, "fav.png"), 200, 100, 0, 0, 255, 255); // solid blue
+      const publicDir = path.join(root, ".portosaur", "public");
+      fs.mkdirSync(publicDir, { recursive: true });
+
+      const result = await generateFavicons({
+        projectDir: root,
+        options: options({
+          site: { favicon: "img/fav.png" },
+          docsHome: { icon: "img/home.png" },
+        }),
+        publicDir,
+        cacheDir: path.join(root, ".portosaur", "cache"),
+        coreStaticDir,
+        coreRoot,
+        logger: silentLogger,
+      });
+      expect(result.skipped).toBe(false);
+      // The center pixel of the 192px icon is blue (the favicon
+      // image), not red (the home icon).
+      const { width, data } = readPngPixels(
+        path.join(publicDir, "favicon", "icon-192x192.png"),
+      );
+      const center = (96 * width + 96) * 4;
+      expect([data[center], data[center + 1], data[center + 2]]).toEqual([
+        0, 0, 255,
+      ]);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

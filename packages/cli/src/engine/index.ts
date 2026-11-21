@@ -1,12 +1,6 @@
 export { mirrorSync, loadPkg, getPortoDotDir } from "./utils/fs.ts";
 
-export {
-  deepMerge,
-  getGitDate,
-  hasCommand,
-  useEnabled,
-  openInBrowser,
-} from "./utils/system.ts";
+export { getGitDate, hasCommand, openInBrowser } from "./utils/system.ts";
 
 export * from "./app.ts";
 

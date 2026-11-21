@@ -659,33 +659,6 @@
           }
         }
       }
-    },
-    "tools": {
-      "type": ["object", "null"],
-      "additionalProperties": false,
-      "properties": {
-        "link_shortener": {
-          "type": ["object", "null"],
-          "additionalProperties": false,
-          "properties": {
-            "enable": {
-              "type": ["boolean", "null"],
-              "description": "Toggle the internal link shortener.",
-              "default": false
-            },
-            "deploy_path": {
-              "type": ["string", "null"],
-              "description": "URL base path for redirects.",
-              "default": "/l"
-            },
-            "short_links": {
-              "type": ["object", "null"],
-              "additionalProperties": true,
-              "description": "Key-value map of slugs to target URLs."
-            }
-          }
-        }
-      }
     }
   },
   "required": [],

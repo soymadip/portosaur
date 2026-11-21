@@ -69,23 +69,6 @@ describe("validateUserConfig", () => {
     expect(violations).toEqual([]);
   });
 
-  test("should allow any keys under freeform block 'tools.link_shortener.short_links'", () => {
-    const rawConfig = {
-      tools: {
-        link_shortener: {
-          enable: true, // valid schema key
-          short_links: {
-            // freeform block
-            gh: "https://github.com",
-            tw: "https://twitter.com",
-          },
-        },
-      },
-    };
-    const violations = validateUserConfig(rawConfig);
-    expect(violations).toEqual([]);
-  });
-
   test("should not complain about arrays containing unknown object shapes", () => {
     // Array items are not strictly validated by shape yet.
     const rawConfig = {

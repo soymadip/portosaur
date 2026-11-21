@@ -2,21 +2,15 @@
  * Canonical slug utilities for Portosaur content.
  *
  * Ported from the Astro app (`packages/app/src/utils/slug.ts`): the
- * algorithm is the one `cleanFrontMatterSlug` used in the Docusaurus
- * build (and therefore the one the golden URLs encode). Both entry
- * points share the internal `computeSlug` core — same number-prefix
- * stripping (including dotted prefixes like `4.1 - x`), same parent
- * index/README slug inheritance, same index-file handling. They
- * differ only in inputs and output shape:
- *
- * - `cleanFrontMatterSlug` (in `slug-server.ts`) takes absolute file
- *   paths, reads parent index frontmatter from disk, mutates +
- *   returns the frontmatter object, and returns slugs with a leading
- *   `/`.
- * - `guessDocPermalink` takes content-relative paths, takes parent
- *   index slugs as an explicit lookup (built from collection entries
- *   at build time), and returns `{ slug, fileSlug }` with no leading
- *   slash on `slug`.
+ * algorithm is the one the Docusaurus build used (and therefore
+ * the one the golden URLs encode). `guessDocPermalink` is the one
+ * entry point — same number-prefix stripping (including dotted
+ * prefixes like `4.1 - x`), same parent index/README slug
+ * inheritance, same index-file handling. It takes
+ * content-relative paths, takes parent index slugs as an
+ * explicit lookup (built from collection entries at build time),
+ * and returns `{ slug, fileSlug }` with no leading slash on
+ * `slug`.
  *
  * This file MUST stay free of Node imports (`node:fs`, `node:path`,
  * …): it is imported by `docPage.ts`, which client components use
@@ -183,7 +177,7 @@ function computeSlug({
 
 /**
  * Computes a doc permalink from a content-relative file path, using the
- * same algorithm as `cleanFrontMatterSlug`.
+ * Docusaurus slug algorithm.
  *
  * @param filePath - The file path relative to the content root
  *   (e.g. "python/4 - loops/4.1 - while-loops.mdx").

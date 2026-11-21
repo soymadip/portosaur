@@ -1,109 +1,16 @@
-import { expect, test, describe, beforeAll, afterAll } from "bun:test";
-import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
+import { expect, test, describe } from "bun:test";
 import { guessDocPermalink } from "../src/lib/slug.ts";
-import { cleanFrontMatterSlug } from "../src/lib/slug-server.ts";
 
 /**
- * Slug behavior tests. Phase 2 unified both functions onto one algorithm:
- * `cleanFrontMatterSlug`'s, the one the Docusaurus build actually used (and
- * therefore the one the golden URLs encode). `guessDocPermalink` is a thin
- * wrapper over the same core — same number-prefix stripping (including
- * dotted prefixes like `4.1 - x`), same parent index/README slug
- * inheritance, same index-file handling — differing only in that it returns
- * `{ slug, fileSlug }` with no leading slash on `slug`, and takes parent
- * index slugs as an explicit lookup instead of reading them from disk.
+ * Slug behavior tests. `guessDocPermalink` is the one slug
+ * algorithm: the one the Docusaurus build actually used (and
+ * therefore the one the golden URLs encode). Same number-prefix
+ * stripping (including dotted prefixes like `4.1 - x`), same
+ * parent index/README slug inheritance, same index-file
+ * handling. It returns `{ slug, fileSlug }` with no leading
+ * slash on `slug`, and takes parent index slugs as an explicit
+ * lookup instead of reading them from disk.
  */
-
-describe("cleanFrontMatterSlug", () => {
-  let projectDir!: string;
-
-  beforeAll(() => {
-    projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "porto-slug-"));
-    const notesDir = path.join(projectDir, "notes");
-    fs.mkdirSync(path.join(notesDir, "guide"), { recursive: true });
-    fs.mkdirSync(path.join(notesDir, "python"), { recursive: true });
-    // Parent index with a custom slug, for the inheritance case.
-    fs.writeFileSync(
-      path.join(notesDir, "guide", "index.mdx"),
-      "---\nslug: /manual\n---\n# Guide\n",
-    );
-    fs.writeFileSync(path.join(notesDir, "guide", "setup.mdx"), "# Setup\n");
-    fs.writeFileSync(
-      path.join(notesDir, "getting-started.mdx"),
-      "# Getting Started\n",
-    );
-  });
-
-  afterAll(() => {
-    fs.rmSync(projectDir, { recursive: true, force: true });
-  });
-
-  test("cleans a plain file name", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "getting-started.mdx"),
-      frontMatter: {},
-      projectDir,
-    });
-    expect(fm.slug).toBe("/getting-started");
-  });
-
-  test("strips number prefixes", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "1 - intro.mdx"),
-      frontMatter: {},
-      projectDir,
-    });
-    expect(fm.slug).toBe("/intro");
-  });
-
-  test("strips dotted number prefixes", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "4.1 - while-loops.mdx"),
-      frontMatter: {},
-      projectDir,
-    });
-    expect(fm.slug).toBe("/while-loops");
-  });
-
-  test("inherits slugs from parent index files", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "guide", "setup.mdx"),
-      frontMatter: {},
-      projectDir,
-    });
-    expect(fm.slug).toBe("/manual/setup");
-  });
-
-  test("resolves index files to their directory", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "python", "index.mdx"),
-      frontMatter: {},
-      projectDir,
-    });
-    expect(fm.slug).toBe("/python");
-  });
-
-  test("honors an explicit user slug", () => {
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "notes", "getting-started.mdx"),
-      frontMatter: { slug: "/custom" },
-      projectDir,
-    });
-    expect(fm.slug).toBe("/custom");
-  });
-
-  test("leaves files outside the content dir untouched", () => {
-    const frontMatter = {};
-    const fm = cleanFrontMatterSlug({
-      filePath: path.join(projectDir, "blog", "post.mdx"),
-      frontMatter,
-      projectDir,
-    });
-    expect(fm.slug).toBeUndefined();
-  });
-});
 
 describe("guessDocPermalink", () => {
   test("computes a plain slug", () => {

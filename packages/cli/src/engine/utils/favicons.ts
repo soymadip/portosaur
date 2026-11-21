@@ -84,15 +84,17 @@ function unwrapImage(value: ImageValue): string | null | undefined {
 
 /**
  * The site icon spec (a local path relative to `static/`, or a
- * remote URL): docs mode reads `docs_home.icon`, portfolio mode
- * reads the hero profile picture, and both fall back to
- * `img/icon.png`.
+ * remote URL): `site.favicon` wins when set, so the favicon can
+ * differ from the home icon. Otherwise docs mode reads
+ * `docs_home.icon`, portfolio mode reads the hero profile
+ * picture, and both fall back to `img/icon.png`.
  */
 export function resolveSiteIconSpec(options: PortosaurOptions): string {
   const raw =
-    options.siteMode === "docs"
+    options.site.favicon ||
+    (options.siteMode === "docs"
       ? options.docsHome?.icon
-      : options.homePage?.heroSection?.profilePic;
+      : options.homePage?.heroSection?.profilePic);
   return unwrapImage(raw) || "img/icon.png";
 }
 

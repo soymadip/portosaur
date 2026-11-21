@@ -1,10 +1,8 @@
-import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { getGitDate } from "../utils/system.ts";
 import { porto } from "../app.ts";
 import { resolveVars, getNestedValue } from "../utils/config.ts";
-import { getPortoDotDir } from "../utils/fs.ts";
 import { resolveSiteUrl, resolveBasePath } from "../utils/site.ts";
 import { createAssetValidator } from "../utils/assets.ts";
 import {
@@ -93,12 +91,10 @@ export interface PortosaurOptions {
   homePage: Record<string, any>;
   docsHome: Record<string, any>;
   tasks: Record<string, any>;
-  tools: { linkShortener: Record<string, any> };
   portoVersion: string;
   lastUpdated: string;
   projectDir: string;
   portoPaths: Record<string, any>;
-  staticDirectories: string[];
   cssFiles: string[];
   extraHeadTags: any[];
   userVars: Record<string, any>;
@@ -124,11 +120,11 @@ export interface PortosaurOptions {
  * - `site` — identity, routing, markdown, feeds, PWA, preview, robots, build
  * - `theme` — color scheme, mode, navigation, footer
  * - `siteMode` — `"docs"` or `"portfolio"`
- * - `homePage`, `docsHome`, `tasks`, `tools` — page/section data
+ * - `homePage`, `docsHome`, `tasks` — page/section data
  * - `topicList` — notes topic-list gating
  * - `portoVersion`, `lastUpdated`, `projectDir`, `portoPaths`,
- *   `staticDirectories`, `cssFiles`, `extraHeadTags`, `userVars` — build
- *   context the adapter (Phase 1) and the integration (Phase 2) consume.
+ *   `cssFiles`, `extraHeadTags`, `userVars` — build context the
+ *   adapter (Phase 1) and the integration (Phase 2) consume.
  *
  * @param {Object} rawUserConfig - The parsed `config.yml` (vars unresolved).
  * @param {string} projectDir - The user's project directory.
@@ -412,12 +408,6 @@ export function buildSiteConfig(
     list: get("tasks.list", []), // @items { title: string, status: string, desc?: string }
   };
 
-  const linkShortener = {
-    enable: get("tools.link_shortener.enable", false), // Toggle the internal link shortener.
-    deployPath: get("tools.link_shortener.deploy_path", "/l"), // URL base path for redirects.
-    shortLinks: get("tools.link_shortener.short_links", {}), // Key-value map of slugs to target URLs.
-  };
-
   const robotsEnable = rawGet("site.robots_txt.enable", true); // Toggle robots.txt file generation.
   const robotsRules = rawGet("site.robots_txt.rules", []); // List of rules (e.g., user_agent, allow, disallow).
   const robotsCustomLines = rawGet("site.robots_txt.custom_lines", []); // Extra raw lines to append to robots.txt.
@@ -434,13 +424,6 @@ export function buildSiteConfig(
   const outputDir = get("site.build.output_dir", "build"); // Directory name for the compiled site output. Relative to project root.
 
   const customCss = get("theme.custom_css", ""); // Custom CSS file(s) to load. @type {string|array}
-
-  // Collect static directories: local site static/, theme static/, and portosaur dot dir.
-  const staticDirectories = [
-    "static",
-    portoStaticDir,
-    path.join(getPortoDotDir(projectDir), "static"),
-  ].filter((dir) => dir && fs.existsSync(dir));
 
   const cssFiles = resolveSiteCssFiles(projectDir, userConfig, coreRoot);
 
@@ -521,14 +504,10 @@ export function buildSiteConfig(
     },
     docsHome,
     tasks,
-    tools: {
-      linkShortener,
-    },
     portoVersion,
     lastUpdated,
     projectDir,
     portoPaths,
-    staticDirectories,
     cssFiles,
     extraHeadTags,
     userVars,

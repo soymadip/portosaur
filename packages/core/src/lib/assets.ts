@@ -1,17 +1,13 @@
 import fs from "node:fs";
-import type { MetadataRoute } from "next";
 import type { PortosaurOptions } from "./config.ts";
-import { pageHref } from "./pageUrl.ts";
 
 /**
  * Asset helpers for the generated root — the head tags for the
- * generated favicons/manifest, and the sitemap/robots data the
- * generated `app/sitemap.ts` / `app/robots.ts` return.
+ * generated favicons/manifest.
  *
  * Ported from the Astro app (`packages/app/src/utils/assets.ts`):
- * `getAssetHeadTags` is the same function. The sitemap/robots
- * helpers are new, shaped for Next.js's `MetadataRoute` types.
- * Server-only (reads CSS files from disk for the theme color).
+ * `getAssetHeadTags` is the same function. Server-only (reads CSS
+ * files from disk for the theme color).
  */
 
 /** One head tag: `{ tagName, attributes, innerHTML? }`. */
@@ -106,68 +102,4 @@ export function getAssetHeadTags(options: PortosaurOptions): HeadTag[] {
   }
 
   return headTags;
-}
-
-/** One sitemap URL: the fields the generated `app/sitemap.ts` needs. */
-export interface SitemapPage {
-  url: string;
-  lastModified?: string | Date;
-}
-
-/**
- * Builds the sitemap entries for the generated `app/sitemap.ts`:
- * every page URL, trailing-slashed and absolutized against the site
- * URL + base. Pages are the caller's list (loader pages + the static
- * routes). The home page is included by passing `"/"`.
- */
-export function buildSitemapEntries(
-  config: PortosaurOptions,
-  pages: SitemapPage[],
-): MetadataRoute.Sitemap {
-  const siteUrl = (config.site.url ?? "").replace(/\/$/, "");
-  const base = cleanBaseUrlOf(config.site.baseUrl);
-  const basePrefix = base === "/" ? "" : base.replace(/\/$/, "");
-  return pages.map((page) => {
-    const slashed = pageHref(page.url);
-    const path =
-      slashed === "/"
-        ? "/"
-        : `${basePrefix}${slashed.startsWith("/") ? slashed : `/${slashed}`}`;
-    return {
-      url: `${siteUrl}${path}`,
-      lastModified: page.lastModified,
-    };
-  });
-}
-
-/**
- * Builds the robots rules for the generated `app/robots.ts` from
- * `site.robots_txt` config (enable/rules). Returns `null` when
- * robots generation is disabled — the route then emits nothing.
- * The sitemap URL points at the generated sitemap.
- *
- * Limitation: Next.js's robots convention has no slot for the raw
- * `custom_lines` the Astro build appended to robots.txt — they are
- * dropped here. If a site needs them, the CLI must write a static
- * `robots.txt` into the output dir instead of the generated route.
- */
-export function buildRobots(
-  config: PortosaurOptions,
-): MetadataRoute.Robots | null {
-  const robots = config.site.robotsTxt;
-  if (!robots?.enable) {
-    return null;
-  }
-  const siteUrl = (config.site.url ?? "").replace(/\/$/, "");
-  const base = cleanBaseUrlOf(config.site.baseUrl);
-  const rules = (robots.rules ?? []).map((rule: any) => ({
-    userAgent: rule.user_agent ?? rule.userAgent ?? "*",
-    allow: rule.allow,
-    disallow: rule.disallow,
-  }));
-  const result: MetadataRoute.Robots = {
-    rules: rules.length > 0 ? rules : { userAgent: "*" },
-    sitemap: `${siteUrl}${base}sitemap.xml`,
-  };
-  return result;
 }

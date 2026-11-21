@@ -61,7 +61,7 @@ function walk(
   const schemaProperties = schemaNode?.properties ?? {};
   const allowsAdditional = schemaNode?.additionalProperties !== false;
 
-  // Skip validation for freeform blocks (custom, short_links, etc.)
+  // Skip validation for freeform blocks (custom, etc.)
   if (allowsAdditional) {
     return;
   }
@@ -93,8 +93,8 @@ function walk(
  * Validates the raw user config object against the generated JSON Schema.
  * Returns a list of dot-notation paths for any unknown keys found.
  *
- * Unknown keys inside freeform blocks (custom, tools.link_shortener.short_links)
- * are intentionally ignored — those blocks allow arbitrary content.
+ * Unknown keys inside freeform blocks (like `custom`) are
+ * intentionally ignored — those blocks allow arbitrary content.
  *
  * @param {object} rawConfig - The parsed config.yml object.
  * @returns {string[]} Array of unknown key paths, empty if config is valid.

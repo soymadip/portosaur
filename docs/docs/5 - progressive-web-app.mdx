@@ -6,6 +6,8 @@ icon: "si:pwa"
 
 Portosaur generates the PWA manifest and app icons for both portfolio and documentation sites out of the box.
 
+The icon set is generated from `site.favicon` when it's set, otherwise from the home icon (`docs_home.icon` on docs sites, the hero picture on portfolio sites), falling back to `img/icon.png`.
+
 :::info[Coming soon]
 The service worker, app shortcuts, automated screenshots, and push notifications described below aren't built yet — today the build generates the manifest (`manifest.webmanifest`) and the favicon set only. Full installability and offline support land with the service worker.
 :::

@@ -77,12 +77,10 @@ export interface PortosaurOptions {
   homePage: Record<string, any>;
   docsHome: Record<string, any>;
   tasks: Record<string, any>;
-  tools: { linkShortener: Record<string, any> };
   portoVersion: string;
   lastUpdated: string;
   projectDir: string;
   portoPaths: Record<string, any>;
-  staticDirectories: string[];
   cssFiles: string[];
   extraHeadTags: any[];
   userVars: Record<string, any>;
