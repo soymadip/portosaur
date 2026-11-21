@@ -62,6 +62,9 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 	} else if folders, ok := params.WorkspaceFolders.Get(); ok && len(folders) > 0 {
 		s.detector = newProjectDetector(fsPath(uri.URI(folders[0].URI)))
 	}
+	// Document links are computed fully up front, so there is
+	// no resolve step.
+	resolveProvider := false
 	return &protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncKindFull,
@@ -71,6 +74,9 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			HoverProvider:      protocol.Boolean(true),
 			InlayHintProvider:  protocol.Boolean(true),
 			DefinitionProvider: protocol.Boolean(true),
+			DocumentLinkProvider: &protocol.DocumentLinkOptions{
+				ResolveProvider: &resolveProvider,
+			},
 			CodeActionProvider: &protocol.CodeActionOptions{
 				CodeActionKinds: []protocol.CodeActionKind{protocol.CodeActionKindQuickFix},
 			},

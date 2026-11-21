@@ -14,6 +14,7 @@ how `porto.yml` is handled.
 | Unknown-component and icon warnings                |   Yes   | Yes |                                                                                         |
 | Missing-required-prop warnings                     |   Yes   | Yes |                                                                                         |
 | Go-to-definition for links                         |   Yes   | Yes |                                                                                         |
+| Clickable links                                    |   Yes   | Yes | Ctrl/Cmd+click opens pages, files, and external URLs                                    |
 | Broken-link warnings                               |   Yes   | Yes | Severity follows `site.content.on_broken_links`                                         |
 | Broken-image warnings                              |   Yes   | Yes | Severity follows `site.content.on_broken_images`                                        |
 | Multi-segment `slug:` errors                       |   Yes   | Yes | A slug only renames the file itself                                                     |

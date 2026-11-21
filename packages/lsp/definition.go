@@ -181,6 +181,48 @@ func imageBroken(root, currentFile, value string) bool {
 	}
 }
 
+// resolveImage turns an image src into the file it points
+// at: a relative src resolves against the MDX file's own
+// directory, an absolute src against `static/` at the project
+// root (the CLI unions `static/` into the generated site's
+// `public/`, so the browser sees it at the site root). A `#hash`
+// or `?query` is stripped. It mirrors imageBroken's branches:
+// external URLs, protocol-relative URLs, `data:` URIs, bare
+// words, and a src holding a `{vars.}` or `{env.}` expression
+// have no file here.
+func resolveImage(root, currentFile, value string) (string, bool) {
+	if value == "" {
+		return "", false
+	}
+	if strings.Contains(value, "{vars.") || strings.Contains(value, "{env.") {
+		return "", false
+	}
+	path, _, _ := strings.Cut(value, "#")
+	path, _, _ = strings.Cut(path, "?")
+	switch {
+	case path == "":
+		return "", false
+	case strings.HasPrefix(path, "//"):
+		return "", false
+	case strings.HasPrefix(path, "."):
+		decoded, err := url.PathUnescape(path)
+		if err != nil {
+			decoded = path
+		}
+		file := filepath.Join(filepath.Dir(currentFile), decoded)
+		return file, isFile(file)
+	case strings.HasPrefix(path, "/"):
+		decoded, err := url.PathUnescape(path)
+		if err != nil {
+			decoded = path
+		}
+		file := filepath.Join(root, "static", decoded)
+		return file, isFile(file)
+	default:
+		return "", false
+	}
+}
+
 // isFile reports whether path exists and is a file, not a
 // directory.
 func isFile(path string) bool {

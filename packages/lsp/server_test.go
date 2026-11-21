@@ -188,6 +188,12 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.DefinitionProvider == nil {
 		t.Fatal("no definition provider advertised")
 	}
+	if result.Capabilities.DocumentLinkProvider == nil {
+		t.Fatal("no document link provider advertised")
+	}
+	if resolve := result.Capabilities.DocumentLinkProvider.ResolveProvider; resolve == nil || *resolve {
+		t.Fatal("document link resolve provider advertised, want none (links are computed fully up front)")
+	}
 	if result.Capabilities.CodeActionProvider == nil {
 		t.Fatal("no code action provider advertised")
 	}
