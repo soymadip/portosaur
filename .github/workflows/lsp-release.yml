@@ -1,0 +1,75 @@
+# Release the Portosaur language server and its editor extensions.
+#
+# Triggered by lsp-v* tags, cut with `mise run bump-lsp`. Runs three
+# steps in order: the server binaries go out as a GitHub release
+# first, then the VS Code extension is published, then a pull request
+# updates the version in the Zed extension registry.
+#
+# Secrets this workflow needs (repository settings > Secrets):
+# - VSCE_PAT: Visual Studio Marketplace publisher token.
+# - OVSX_PAT: Open VSX publish token.
+# - ZED_COMMITTER_TOKEN: personal access token with `repo` and
+#   `workflow` scopes, for the fork and pull request to
+#   zed-industries/extensions. The registry entry itself is created
+#   once by hand; this workflow only bumps its version afterwards.
+name: Release LSP
+run-name: release ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - "lsp-v*"
+
+jobs:
+  release:
+    name: Release server and extensions
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Derive the version from the tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#lsp-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.4"
+
+      - name: Build and release the server
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+          workdir: packages/lsp
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LSP_VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Publish the VS Code extension
+        working-directory: extensions/vscode
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+          bun x @vscode/vsce publish -p "$VSCE_PAT"
+          bun x ovsx publish -p "$OVSX_PAT"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Open the Zed registry update
+        uses: huacnlee/zed-extension-action@v2
+        with:
+          extension-name: portosaur
+          push-to: soymadip/extensions
+        env:
+          COMMITTER_TOKEN: ${{ secrets.ZED_COMMITTER_TOKEN }}

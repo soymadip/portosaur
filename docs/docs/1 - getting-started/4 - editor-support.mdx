@@ -1,0 +1,50 @@
+---
+title: "Editor Support"
+desc: "Suggestions, hover help, and error checking in porto.yml and MDX pages, right in your editor."
+icon: "md:code"
+---
+
+Portosaur ships a small language server, `porto-lsp`, that understands your site. In `porto.yml` it suggests config keys and values, explains each key on hover, and flags unknown keys and wrong types. In MDX pages it does the same for frontmatter, and suggests components like `<Btn>` and `<Hint>` while you type, with their props.
+
+The server only activates inside a Portosaur project, so it stays quiet in other folders.
+
+---
+
+## VS Code
+
+Install the [Portosaur extension](https://marketplace.visualstudio.com/items?itemName=soymadip.portosaur) from the Marketplace (also on [Open VSX](https://open-vsx.org/extension/soymadip/portosaur)). You also need the [MDX extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx), which provides the MDX language itself.
+
+On first use the extension downloads the matching server binary from the Portosaur releases and checks it before running it. There is nothing else to set up.
+
+Two settings are available:
+
+| Setting                  | What it does                                                                                                   |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `portosaur.server.path`  | Use a local build of the server instead of the downloaded one.                                                 |
+| `portosaur.trace.server` | Log the traffic between the editor and the server (`off`, `messages`, `verbose`). Useful when reporting a bug. |
+
+---
+
+## Zed
+
+Install `portosaur` from the extension list, along with the [MDX extension](https://zed.dev/extensions/mdx), which provides the MDX language itself. The server binary is downloaded on first use, the same as in VS Code.
+
+To use a local build of the server instead, set the binary path in your Zed settings:
+
+```json
+{
+  "lsp": {
+    "porto-lsp": {
+      "binary": {
+        "path": "/path/to/porto-lsp"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Other editors
+
+Neovim, Helix, and anything else that speaks the Language Server Protocol can run the server directly. Download the binary for your platform from the [Portosaur releases](https://github.com/soymadip/portosaur/releases) and start it with the `--stdio` flag.

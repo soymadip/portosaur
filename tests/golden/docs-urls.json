@@ -1,5 +1,5 @@
 {
-  "generated_from": "Config reference restructured (moved to /docs/config)",
+  "generated_from": "Editor support page added (getting-started/editor-support)",
   "routes": [
     {
       "url": "/",
@@ -165,12 +165,7 @@
     {
       "url": "/docs/getting-started/",
       "title": "Getting Started | Portosaur",
-      "headings": [
-        "Getting Started",
-        "Installation & Setup",
-        "Project Structure",
-        "CLI Reference"
-      ]
+      "headings": ["Getting Started"]
     },
     {
       "url": "/docs/getting-started/cli-reference/",
@@ -184,6 +179,11 @@
         "porto build",
         "porto serve"
       ]
+    },
+    {
+      "url": "/docs/getting-started/editor-support/",
+      "title": "Editor Support | Portosaur",
+      "headings": ["Editor Support", "VS Code", "Zed", "Other editors"]
     },
     {
       "url": "/docs/getting-started/installation/",

@@ -18,6 +18,7 @@ porto = './packages/cli/bin/porto.ts'
 
 [tasks]
 bump = "cz --config $CZ_CONFIG  bump"
+bump-lsp = "cz --config src/cz/cz-lsp.yaml bump"
 commit = "cz --config $CZ_CONFIG commit"
 changelog = "cz --config $CZ_CONFIG changelog"
 pr = "gh pr create"

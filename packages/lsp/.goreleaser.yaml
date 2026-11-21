@@ -1,0 +1,63 @@
+# GoReleaser config for porto-lsp, the Portosaur language server.
+#
+# The release workflow runs GoReleaser from this directory
+# (packages/lsp), which is its own Go module. Tags look like
+# lsp-v0.1.0; the workflow strips the prefix into LSP_VERSION,
+# which is baked into the binary as its --version output.
+version: 2
+
+project_name: porto-lsp
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: porto-lsp
+    main: .
+    binary: porto-lsp
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Env.LSP_VERSION }}
+
+# Bare binaries, no tarballs: the editor extensions download the
+# binary for their platform straight from the release. The name
+# template drops the CPU-version suffix GoReleaser appends by
+# default (_v1, _v8.0): the extensions look for porto-lsp_<os>_<arch>.
+archives:
+  - formats:
+      - binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+# No auto-generated notes: the commits since the previous tag
+# are mostly main-project work, not LSP work. Release notes are
+# written by hand on the release page.
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: soymadip
+    name: portosaur
+  header: |
+    Language server for Portosaur sites, plus the editor extensions that use it.
+
+    - VS Code: install `soymadip.portosaur` from the Marketplace or Open VSX.
+    - Zed: install `portosaur` from the extension list.
+    - Anything else: download the binary for your platform below and point your editor at it.

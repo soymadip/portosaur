@@ -1,0 +1,36 @@
+---
+commitizen:
+  annotated_tag: true
+  breaking_change_exclamation_in_title: true
+  bump_message: "chore(release): lsp-v$new_version"
+  customize:
+    change_type_map:
+      docs: "\u23E9\uFE0E Documentation"
+      feat: "\u23E9\uFE0E Features"
+      fix: "\u23E9\uFE0E Bug Fixes"
+      perf: "\u23E9\uFE0E Performance"
+      refactor: "\u23E9\uFE0E Refactor"
+    change_type_order:
+      - "\u23E9\uFE0E Features"
+      - "\u23E9\uFE0E Bug Fixes"
+      - "\u23E9\uFE0E Performance"
+      - "\u23E9\uFE0E Refactor"
+      - "\u23E9\uFE0E Documentation"
+    # Only lsp-scoped commits move this version line. Everything
+    # else in the repo is versioned by the main config.
+    commit_parser: '(?i)^(?P<change_type>feat|fix|perf|refactor|docs)\(lsp\)!?: (?P<message>.*)$'
+  gpg_sign: true
+  major_version_zero: true
+  name: cz_customize
+  post_bump_hooks:
+    - git push origin $(git branch --show-current) --follow-tags
+  pre_bump_hooks:
+    - cd packages/lsp && go test ./...
+    - bun run schema && git diff --exit-code -- packages/cli/schema/
+    - src/cz/bumper-lsp.sh
+  tag_format: lsp-v$version
+  template: src/cz/changelog.j2
+  update_changelog_on_bump: false
+  # Nothing released yet: the first bump takes this to 0.1.0.
+  version: 0.0.0
+  version_scheme: semver
