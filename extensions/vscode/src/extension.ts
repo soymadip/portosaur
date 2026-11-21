@@ -1,3 +1,4 @@
+import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import * as vscode from "vscode";
@@ -16,6 +17,7 @@ type TraceLevel = "off" | "messages" | "verbose";
 
 let client: LanguageClient | undefined;
 let starting = false;
+let restartTimer: ReturnType<typeof setTimeout> | undefined;
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -35,7 +37,10 @@ export async function activate(
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration("portosaur.server.path")) {
-        void restartClient(context);
+        // Typing a path fires this on every keystroke: wait
+        // until the user stops typing before restarting.
+        clearTimeout(restartTimer);
+        restartTimer = setTimeout(() => void restartClient(context), 500);
       } else if (event.affectsConfiguration("portosaur.trace.server")) {
         void client?.setTrace(Trace.fromString(traceLevel()));
       }
@@ -44,6 +49,7 @@ export async function activate(
 }
 
 export async function deactivate(): Promise<void> {
+  clearTimeout(restartTimer);
   // A client whose start failed is not running: stopping it
   // throws.
   if (client?.needsStop()) {
@@ -118,7 +124,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
   try {
     const serverPath = serverPathSetting();
     const command = serverPath
-      ? serverPath
+      ? await resolveLocalServer(serverPath)
       : await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
@@ -174,4 +180,30 @@ async function restartClient(context: vscode.ExtensionContext): Promise<void> {
   }
   client = undefined;
   await startClient(context);
+}
+
+// resolveLocalServer checks a user-provided server path before
+// the client spawns it: a missing file or a folder gets a clear
+// error instead of a spawn failure, and a downloaded binary gets
+// its executable bit back (browsers strip it on download).
+async function resolveLocalServer(serverPath: string): Promise<string> {
+  let stat;
+  try {
+    stat = await fs.stat(serverPath);
+  } catch {
+    throw new Error(
+      `portosaur.server.path points to a file that does not exist: ${serverPath}`,
+    );
+  }
+  if (stat.isDirectory()) {
+    throw new Error(
+      `portosaur.server.path points to a folder, not the server file: ${serverPath}`,
+    );
+  }
+  if (process.platform !== "win32") {
+    // A failed chmod is not fatal: the spawn below reports the
+    // real problem if the file still cannot run.
+    await fs.chmod(serverPath, 0o755).catch(() => undefined);
+  }
+  return serverPath;
 }
