@@ -321,7 +321,7 @@ export interface TocSettings {
 /**
  * The table of contents settings for one page: the global
  * `site.content.toc` values, overridden field by field by the
- * page's `table_of_contents` frontmatter. An unset frontmatter
+ * page's `toc` frontmatter. An unset frontmatter
  * field falls back to the global value.
  */
 export function resolveTocSettings(

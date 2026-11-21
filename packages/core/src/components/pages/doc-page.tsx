@@ -134,7 +134,7 @@ export function DocPage({
 
   // The table of contents for this page: the global
   // `site.content.toc` levels, overridden field by field by the
-  // page's `table_of_contents` frontmatter. Disabled pages show no
+  // page's `toc` frontmatter. Disabled pages show no
   // TOC column at all (and no mobile TOC bar — it lives in the
   // same column), and neither do pages with no headings left
   // after the level filter.

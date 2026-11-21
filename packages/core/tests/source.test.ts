@@ -60,6 +60,18 @@ describe("portoDocSchema", () => {
     expect(parsed.bogus_key).toBeUndefined();
   });
 
+  test("renames the toc frontmatter key to table_of_contents", () => {
+    const parsed = portoDocSchema.parse({
+      toc: { enable: false, max_level: 3 },
+    });
+    expect(parsed.table_of_contents).toEqual({
+      enable: false,
+      max_level: 3,
+    });
+    expect("toc" in parsed).toBe(false);
+    expect(portoDocSchema.parse({}).table_of_contents).toBeUndefined();
+  });
+
   test("accepts topic_list as a boolean or a record", () => {
     expect(portoDocSchema.parse({ topic_list: true }).topic_list).toBe(true);
     expect(

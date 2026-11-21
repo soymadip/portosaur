@@ -17,7 +17,7 @@ icon: 🚀
 color: "#F7DF1E"
 sidebar_label: JS Tips
 pagination_label: JavaScript
-table_of_contents:
+toc:
   enable: true
   min_level: 2
   max_level: 5
@@ -42,7 +42,7 @@ These options apply to documents in the configured notes/docs directory. See the
 | **`sidebar_label`**     | `str`       | `title`                                | Custom label shown in the sidebar.                                                                                                                                                                                               |
 | **`sidebar_collapsed`** | `bool`      | Global `sidebar_collapsed`             | Start this page with the sidebar closed (`false` forces it open, overriding the global `theme.navigation.sidebar_collapsed`).                                                                                                    |
 | **`pagination_label`**  | `str`       | `title`                                | Label used for previous/next document navigation. Coming soon — not used yet.                                                                                                                                                    |
-| **`table_of_contents`** | `obj`       | Global `site.content.toc`              | Table of contents settings for this page.<br/> See the options [below](#table_of_contents-options).                                                                                                                              |
+| **`toc`**               | `obj`       | Global `site.content.toc`              | Table of contents settings for this page.<br/> See the options [below](#toc-options).                                                                                                                                            |
 | **`hide_title`**        | `bool`      | `false`                                | Hides the page title above the content.                                                                                                                                                                                          |
 | **`hide_desc`**         | `bool`      | `false`                                | Hides the page description under the title (`false` shows it even when the global `site.content.add_mdx_desc` is off).                                                                                                           |
 | **`math`**              | `bool`      | `false`                                | Loads the math stylesheet for this page. Math in content is usually detected automatically — set this when a page needs it anyway.                                                                                               |
@@ -62,7 +62,7 @@ These options apply to documents in the configured notes/docs directory. See the
 | **`enable`** | `boolean` | Automatic on category index pages when globally enabled | Enables or disables the list on this page.                                       |
 | **`class`**  | `string`  | None                                                    | Additional CSS class name(s) on the topic-card grid. Coming soon — not used yet. |
 
-### `table_of_contents` Options
+### `toc` Options
 
 Use an object to configure the table of contents for this page. Each field overrides the matching global `site.content.toc` setting, and unset fields fall back to it.
 
