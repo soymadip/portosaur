@@ -109,6 +109,12 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 					valueStart++
 					valueEnd = valueStart + close - 1
 					angled = true
+				} else {
+					// Unclosed bracket: the user is still typing
+					// the destination, so everything after the
+					// `<` is it.
+					valueStart++
+					angled = true
 				}
 			}
 			lineStart := 0

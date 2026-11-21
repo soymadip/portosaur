@@ -188,3 +188,44 @@ func TestLinkCompletionRelativePlainIsEncoded(t *testing.T) {
 		t.Fatalf("completions = %v, include the literal form in a plain destination", labels(items))
 	}
 }
+
+func TestLinkCompletionRelativeUnclosedAngledIsLiteral(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./")
+	items := s.complete(t, documentURI, 2, 7)
+	if !hasLabel(items, "./my page.mdx") {
+		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	}
+	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+		t.Fatalf("my page edit = %q, want the literal insert", text)
+	}
+	if hasLabel(items, "./my%20page.mdx") {
+		t.Fatalf("completions = %v, include the %%20 form in an unclosed angled destination", labels(items))
+	}
+}
+
+func TestLinkCompletionRelativeUnclosedAngledFilters(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./my")
+	items := s.complete(t, documentURI, 2, 9)
+	if len(items) != 1 || items[0].Label != "./my page.mdx" {
+		t.Fatalf("completions = %v, want only ./my page.mdx", labels(items))
+	}
+}
+
+func TestLinkCompletionUnclosedAngledEmptyOffersPageURLs(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<")
+	items := s.complete(t, documentURI, 2, 5)
+	// The fixture has 5 pages: installation, getting-started,
+	// sibling, my page, first-post.
+	if len(items) != 5 {
+		t.Fatalf("completions = %v, want 5 pages", labels(items))
+	}
+	if !hasLabel(items, "/docs/sibling/") {
+		t.Fatalf("completions = %v, missing /docs/sibling/", labels(items))
+	}
+	if text, ok := editText(items, "/docs/sibling/"); !ok || text != "/docs/sibling/" {
+		t.Fatalf("sibling edit = %q, want the clean URL", text)
+	}
+}
