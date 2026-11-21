@@ -14,7 +14,8 @@ import { SiteIcon } from "../SiteIcon.tsx";
  *
  * An expand button opens the diagram in a popup, GitHub-style: a
  * large native `<dialog>` with the diagram big and Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
- * at the bottom-right). A second expand button beside the close
+ * at the bottom-right). On a phone, tapping the diagram itself
+ * opens the popup too. A second expand button beside the close
  * button grows the popup to near-fullscreen, and back. On a
  * phone the popup is a bottom sheet: it slides up from the
  * bottom, and the expand button takes it full screen. The bar
@@ -202,6 +203,15 @@ export function Diagram({ svg }: { svg: string }) {
     }
   };
 
+  // On a phone, tapping the diagram itself opens the popup — the
+  // expand button stays the way in on desktop. The breakpoint
+  // matches the sheet layout in Diagram.css.
+  const onInlineTap = () => {
+    if (window.matchMedia("(max-width: 50rem)").matches) {
+      openDialog();
+    }
+  };
+
   // Sheet drag (mobile only — the drag strip is display:none on
   // desktop): pulling the bar at the top of the sheet up expands
   // it to full screen, pulling down shrinks it back to a sheet,
@@ -324,7 +334,7 @@ export function Diagram({ svg }: { svg: string }) {
       {/* The svg lives in its own div: `dangerouslySetInnerHTML`
           wipes children, so the expand button is a sibling, not a
           child of the svg's container. */}
-      <div className="porto-diagram">
+      <div className="porto-diagram" onClick={onInlineTap}>
         <div dangerouslySetInnerHTML={{ __html: svg }} />
         <button
           type="button"
