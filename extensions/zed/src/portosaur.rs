@@ -59,7 +59,12 @@ impl PortosaurExtension {
             &zed::LanguageServerInstallationStatus::Downloading,
         );
         let release = zed::github_release_by_tag_name(REPOSITORY, &release_tag())
-            .map_err(|err| format!("failed to find the {REPOSITORY} release: {err}"))?;
+            .map_err(|err| {
+                format!(
+                    "failed to find the {REPOSITORY} release {}: {err}. To use a local server build instead, set lsp.porto-lsp.binary.path in your Zed settings",
+                    release_tag()
+                )
+            })?;
         let asset = release
             .assets
             .iter()
