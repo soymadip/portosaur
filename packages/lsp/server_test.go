@@ -502,6 +502,69 @@ func TestFrontmatterCompletionUnindentedLineExcludesChildrenBelow(t *testing.T) 
 	}
 }
 
+// A PARTIAL key on a column-0 line under a fresh `toc:` completes
+// the toc children too, filtered by what was typed: `en` offers
+// `enable` alone, and the insert replaces the partial with the
+// indented child.
+func TestFrontmatterCompletionPartialKeyUnderNewKey(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\nen\n---\n")
+	items := s.complete(t, documentURI, 2, 2)
+	if len(items) != 1 || items[0].Label != "enable" {
+		t.Fatalf("completions = %v, want only enable", labels(items))
+	}
+	edit, ok := editText(items, "enable")
+	if !ok || edit != "  enable: " {
+		t.Fatalf("enable edit = %q, want %q (indented child)", edit, "  enable: ")
+	}
+	textEdit, ok := items[0].TextEdit.(*protocol.TextEdit)
+	if !ok {
+		t.Fatalf("enable TextEdit is %T, want *protocol.TextEdit", items[0].TextEdit)
+	}
+	if textEdit.Range.Start.Character != 0 || textEdit.Range.End.Character != 2 {
+		t.Fatalf("enable edit range = %v, want chars 0-2 covering the partial", textEdit.Range)
+	}
+}
+
+// When the orphan resolves but no child key matches the partial,
+// the list is empty — there is no fallback to top-level keys,
+// which would insert a top-level key as a child of the object.
+func TestFrontmatterCompletionPartialKeyWithNoMatchOffersNothing(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\nzz\n---\n")
+	items := s.complete(t, documentURI, 2, 2)
+	if len(items) != 0 {
+		t.Fatalf("completions = %v, want none", labels(items))
+	}
+}
+
+// A partial key below a `toc:` that already has children is a
+// sibling line: top-level keys, not toc children.
+func TestFrontmatterCompletionPartialKeyUnderKeyWithChildren(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n  enable: true\nde\n---\n")
+	items := s.complete(t, documentURI, 3, 2)
+	if !hasLabel(items, "desc") {
+		t.Fatalf("completions %v missing top-level key desc", labels(items))
+	}
+	for _, child := range []string{"enable", "max_level", "min_level"} {
+		if hasLabel(items, child) {
+			t.Fatalf("completions %v include toc child %q", labels(items), child)
+		}
+	}
+}
+
+// A partial key under a value-less scalar key falls back to the
+// top-level keys, same as the blank-line case.
+func TestFrontmatterCompletionPartialKeyUnderScalarKey(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntitle:\nde\n---\n")
+	items := s.complete(t, documentURI, 2, 2)
+	if !hasLabel(items, "desc") {
+		t.Fatalf("completions %v missing top-level key desc", labels(items))
+	}
+}
+
 func TestFrontmatterCompletionBooleanValue(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n  enable: \n---\n")

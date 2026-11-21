@@ -31,12 +31,12 @@ type cursorContext struct {
 	partialRange protocol.Range
 	existingKeys map[string]bool
 	// orphanPath is the schema path to a value-less key directly
-	// above a blank cursor line, when the key has no children
-	// yet: the cursor is about to type its first child. Set only
-	// on blank lines, and only when the key sits at or above the
-	// cursor's indent — an indented line already finds the key
-	// through the enclosing path. The completion side uses it
-	// only when it resolves to an object with properties.
+	// above a blank or partial-key cursor line, when the key has
+	// no children yet: the cursor is about to type its first
+	// child. Set only when the key sits at or above the cursor's
+	// indent — an indented line already finds the key through
+	// the enclosing path. The completion side uses it only when
+	// it resolves to an object with properties.
 	orphanPath []string
 	// orphanKeys are the keys already present in the orphan
 	// key's mapping: children typed below the cursor line.
@@ -49,6 +49,10 @@ type cursorContext struct {
 // A `key:` line, plain or quoted, with its indent and the rest of
 // the line after the colon.
 var keyLineRe = regexp.MustCompile(`^([ \t]*)(?:([\w.-]+)|"([^"]+)"|'([^']+)')[ \t]*:(.*)$`)
+
+// A partial key name: letters, digits, and underscores, with no
+// colon yet.
+var partialKeyRe = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
 func keyOf(match []string) string {
 	for _, group := range match[2:5] {
@@ -211,11 +215,14 @@ func analyzeCursor(text string, pos protocol.Position) cursorContext {
 		},
 		existingKeys: siblingKeys(lines, parentLine, indent),
 	}
-	// A blank line right under a value-less key with no children
+	// A blank line, or a line holding only a partial key (no
+	// colon yet), right under a value-less key with no children
 	// yet is about to hold that key's first child, even when the
 	// editor left the line unindented: record the key's path so
-	// the completion side can offer its keys.
-	if strings.TrimSpace(line) == "" {
+	// the completion side can offer its keys. A line with a
+	// colon already typed is a complete key, not a partial one.
+	lineText := strings.TrimSpace(line)
+	if lineText == "" || partialKeyRe.MatchString(lineText) {
 		context.orphanPath, context.orphanKeys, context.orphanIndent = orphanKeyPath(lines, lineNo, indent)
 	}
 	return context
@@ -252,14 +259,14 @@ func enclosingPath(lines []string, lineNo int, indent int) ([]string, int) {
 }
 
 // orphanKeyPath finds the value-less mapping key directly above
-// a blank cursor line: the nearest non-blank, non-comment line
-// above, when it is a `key:` line with nothing after the colon
-// and an indent at or above the cursor's. The key has no
-// children yet — nothing sits between it and the cursor — so the
-// cursor is about to type its first child. It returns the full
-// path to the key (ancestors included), the keys already present
-// in its mapping, and the indent its children take, or nil when
-// there is no such key.
+// a blank or partial-key cursor line: the nearest non-blank,
+// non-comment line above, when it is a `key:` line with nothing
+// after the colon and an indent at or above the cursor's. The key
+// has no children yet — nothing sits between it and the cursor —
+// so the cursor is about to type its first child. It returns the
+// full path to the key (ancestors included), the keys already
+// present in its mapping, and the indent its children take, or
+// nil when there is no such key.
 func orphanKeyPath(lines []string, lineNo int, indent int) ([]string, map[string]bool, int) {
 	for i := lineNo - 1; i >= 0; i-- {
 		trimmed := strings.TrimSpace(lines[i])

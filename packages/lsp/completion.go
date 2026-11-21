@@ -374,14 +374,16 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 	if !ok {
 		return &protocol.CompletionList{}
 	}
-	// A blank line right under a value-less key with no children
-	// yet completes that key's object, not the enclosing mapping:
-	// the user just typed `toc:` and is about to fill it in. Only
-	// when the key resolves to an object with properties — a
-	// value-less scalar falls back to the enclosing keys. The
+	// A blank or partial-key line right under a value-less key
+	// with no children yet completes that key's object, not the
+	// enclosing mapping: the user just typed `toc:` and is about
+	// to fill it in. Only when the key resolves to an object
+	// with properties — a value-less scalar falls back to the
+	// enclosing keys, and when the object resolves the list is
+	// its keys alone, even when none match the partial. The
 	// insert carries the child's indent, since the line itself
 	// was left unindented, and the edit starts at column 0 so
-	// any whitespace already on the line does not double it.
+	// the partial is replaced and the indent never doubles.
 	indent := ""
 	if len(context.orphanPath) > 0 {
 		if orphan, ok := schemaAt(schema.raw, context.orphanPath); ok && schemaProperties(orphan) != nil {
