@@ -935,9 +935,9 @@ func TestComponentCompletionNamesFilterByPartial(t *testing.T) {
 
 // TestComponentCompletionInsertsFullTag checks the snippet each
 // tag inserts on pick: containers pair with the cursor inside,
-// leaf components close themselves, void HTML tags take no
-// closing tag. Every tag item is a snippet, and the edit range
-// covers the `<` the user typed.
+// leaf components close themselves, void HTML tags self-close.
+// Every tag item is a snippet, and the edit range covers the
+// `<` the user typed.
 func TestComponentCompletionInsertsFullTag(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
@@ -953,9 +953,9 @@ func TestComponentCompletionInsertsFullTag(t *testing.T) {
 		"IconSearch":  "<IconSearch />",
 		"Pv":          "<Pv>$0</Pv>",
 		"div":         "<div>$0</div>",
-		"br":          "<br>",
-		"hr":          "<hr>",
-		"img":         "<img>",
+		"br":          "<br/>",
+		"hr":          "<hr/>",
+		"img":         "<img/>",
 	}
 	for label, text := range want {
 		if got, ok := editText(items, label); !ok || got != text {

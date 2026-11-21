@@ -136,7 +136,7 @@ const (
 // tagCandidate is one name offered after `<`, with the detail
 // and doc the editor shows beside it. source and void decide
 // the inserted tag: leaf built-ins close themselves, void HTML
-// tags take no closing tag.
+// tags self-close.
 type tagCandidate struct {
 	name   string
 	detail string
@@ -159,12 +159,13 @@ var leafComponents = map[string]bool{
 // tagInsert returns the snippet inserted when a tag is picked:
 // the whole tag, with a plain `$0` tabstop where the cursor
 // lands. Containers pair with the cursor inside, leaf built-ins
-// close themselves, void HTML tags take no closing tag, and
+// close themselves, void HTML tags self-close (a bare `<br>` is
+// a syntax error in MDX, the parser wants a closing tag), and
 // imports pair since their shape is unknown.
 func tagInsert(cand tagCandidate) string {
 	switch {
 	case cand.source == tagHTML && cand.void:
-		return "<" + cand.name + ">"
+		return "<" + cand.name + "/>"
 	case cand.source == tagBuiltin && leafComponents[cand.name]:
 		return "<" + cand.name + " />"
 	default:
@@ -182,7 +183,7 @@ func tagInsert(cand tagCandidate) string {
 // required ones marked; imports name their source, HTML tags
 // say so. Picking a tag inserts the whole tag as a snippet:
 // containers pair with the cursor inside, leaf components close
-// themselves, and void HTML tags take no closing tag.
+// themselves, and void HTML tags self-close.
 func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
 	candidates := map[string]tagCandidate{}
 	for _, tag := range htmlTags {
