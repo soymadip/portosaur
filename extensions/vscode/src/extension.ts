@@ -32,6 +32,9 @@ export async function activate(
   watcher.onDidCreate(() => void startClient(context));
   context.subscriptions.push(watcher);
   context.subscriptions.push(
+    vscode.commands.registerCommand("portosaur.restartServer", () => {
+      void restartClient(context);
+    }),
     vscode.workspace.onDidChangeWorkspaceFolders(() => {
       void startClient(context);
     }),

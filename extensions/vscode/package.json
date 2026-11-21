@@ -12,6 +12,12 @@
     "Programming Languages"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "portosaur.restartServer",
+        "title": "Portosaur: Restart Language Server"
+      }
+    ],
     "configuration": {
       "properties": {
         "portosaur.server.path": {
