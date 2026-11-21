@@ -55,6 +55,7 @@ import remarkContentTitle, {
 import remarkHasMath, { HAS_MATH_KEY } from "./plugins/remarkHasMath.ts";
 import remarkVars from "./plugins/remarkVars.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
+import remarkMermaid from "./plugins/remarkMermaid.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
 import remarkDetailsMarker from "./plugins/remarkDetailsMarker.ts";
@@ -68,6 +69,8 @@ export interface PortosaurMdxArgs {
   colorScheme?: string;
   /** Render `:smile:`-style emoji shortcodes (default true). */
   renderEmojiShortcodes?: boolean;
+  /** Render ```mermaid fences as diagrams (default true). */
+  mermaid?: boolean;
 }
 
 /**
@@ -122,11 +125,14 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  * @param args.renderEmojiShortcodes - Whether `:smile:`-style emoji
  *   shortcodes render (`site.markdown.render_emoji_shortcodes`,
  *   default true).
+ * @param args.mermaid - Whether ```mermaid fences render as diagrams
+ *   (`site.markdown.mermaid`, default true).
  */
 export function portosaurMdxOptions({
   userVars = {},
   colorScheme,
   renderEmojiShortcodes = true,
+  mermaid = true,
 }: PortosaurMdxArgs = {}): MDXPresetOptions {
   // NOTE: unified calls each plugin itself — pass the plugin functions
   // (and `[plugin, options]` tuples where options are needed), never
@@ -140,6 +146,10 @@ export function portosaurMdxOptions({
       remarkHasMath,
       [remarkVars, userVars],
       remarkInstall,
+      // Mermaid fences render as diagrams when the site enables them
+      // (`site.markdown.mermaid`, default true). After remarkVars so
+      // `{vars.key}` substitution applies inside diagram fences too.
+      ...(mermaid ? [remarkMermaid] : []),
       remarkIcons,
       remarkDirective,
       remarkAdmonitions,

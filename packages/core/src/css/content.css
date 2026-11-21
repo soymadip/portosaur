@@ -94,6 +94,40 @@
   height: auto;
 }
 
+/* Diagrams. ```mermaid fences render to inline SVG at build time
+   (Pele — see remarkMermaid). The `.pele` variables map Pele's
+   theme onto the scheme tokens, so diagrams follow light/dark and
+   the active scheme with no re-render. The wrapper centers the
+   diagram; the SVG scales down to fit narrow containers. */
+.porto-markdown-content .porto-diagram:not(:where(.not-content *)) {
+  overflow-x: auto;
+}
+.porto-markdown-content .porto-diagram > svg.pele:not(:where(.not-content *)) {
+  margin-inline: auto;
+}
+.pele {
+  --pele-bg: var(--porto-color-bg);
+  --pele-fg: var(--porto-color-text);
+  --pele-muted: var(--porto-color-gray-3);
+  --pele-line: var(--porto-color-text);
+  --pele-surface: var(--porto-color-gray-6);
+  --pele-surface-alt: var(--porto-color-gray-5);
+  --pele-border: var(--porto-color-gray-4);
+  --pele-accent: var(--porto-color-text-accent);
+  --pele-critical: var(--porto-color-red);
+  --pele-error: var(--porto-color-red);
+  --pele-font: var(--font-sans);
+  --pele-font-mono: var(--font-mono);
+  --pele-series-1: var(--porto-color-blue);
+  --pele-series-2: var(--porto-color-orange);
+  --pele-series-3: var(--porto-color-green);
+  --pele-series-4: var(--porto-color-red);
+  --pele-series-5: var(--porto-color-purple);
+  --pele-series-6: var(--porto-color-accent);
+  --pele-series-7: var(--porto-color-blue-high);
+  --pele-series-8: var(--porto-color-orange-high);
+}
+
 /* Links. The color fades on hover (150ms, like the other rows). */
 .porto-markdown-content a:not(:where(.not-content *)) {
   color: var(--porto-color-text-accent);

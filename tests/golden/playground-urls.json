@@ -234,6 +234,7 @@
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
+        "Diagrams",
         "Preview Window",
         "🧩UI Components",
         "Built-in MDX Components",
@@ -269,6 +270,18 @@
         "Line Numbers",
         "Magic Comments",
         "Dynamic Variables in Code Blocks"
+      ]
+    },
+    {
+      "url": "/notes/markdown/diagrams/",
+      "title": "Diagrams | Soumadip Das",
+      "headings": [
+        "Diagrams",
+        "Sequence Diagrams",
+        "Icons in Labels",
+        "What Isn't Supported",
+        "Theming",
+        "Turning Diagrams Off"
       ]
     },
     {

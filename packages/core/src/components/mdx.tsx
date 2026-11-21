@@ -17,6 +17,7 @@ import {
   CodeBlockTabsTrigger,
 } from "./mdx/CodeBlockTabs.tsx";
 import { Details } from "./mdx/Details.tsx";
+import { Diagram } from "./mdx/Diagram.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
 import { Heading } from "./mdx/Heading.tsx";
 import { Hint } from "./mdx/Hint.tsx";
@@ -98,6 +99,7 @@ const BLOCK_COMPONENTS: Set<unknown> = new Set([
   CodeBlock,
   CodeBlockTabs,
   Details,
+  Diagram,
   Dropdown,
   Hint,
   IconSearch,
@@ -192,6 +194,7 @@ export function getMDXComponents(components?: MDXComponents) {
     CodeBlockTabsList,
     CodeBlockTabsTrigger,
     Details,
+    Diagram,
     Dropdown,
     DynamicIcon,
     Hint,

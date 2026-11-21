@@ -57,7 +57,7 @@ Configure the Markdown renderer behavior.
 | `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                               |
 | `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet. |
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
-| `mermaid`                 | `bool` | `true`    | Render diagrams from Mermaid syntax. Coming soon — the diagram renderer isn't built yet.                       |
+| `mermaid`                 | `bool` | `true`    | Render ```mermaid fences as diagrams (Pele renders them at build time, no client JS).                          |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
 
 ### `site.pwa`

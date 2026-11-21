@@ -1,12 +1,15 @@
 import { describe, test, expect } from "bun:test";
 import remarkEmoji from "remark-emoji";
 import { portosaurMdxOptions, parseCodeBlockMeta } from "../src/mdx.ts";
+import remarkMermaid from "../src/plugins/remarkMermaid.ts";
 
 /**
  * `portosaurMdxOptions` builds the Fumadocs global MDX preset for a
  * site. The emoji-shortcodes switch (`site.markdown
  * .render_emoji_shortcodes`, default true) gates the remark-emoji
- * plugin: off means `:smile:` stays literal text.
+ * plugin: off means `:smile:` stays literal text. The mermaid switch
+ * (`site.markdown.mermaid`, default true) gates the diagram plugin:
+ * off means ```mermaid fences stay plain code blocks.
  */
 describe("portosaurMdxOptions", () => {
   test("renders emoji shortcodes by default", () => {
@@ -19,6 +22,16 @@ describe("portosaurMdxOptions", () => {
       renderEmojiShortcodes: false,
     });
     expect(remarkPlugins).not.toContain(remarkEmoji);
+  });
+
+  test("renders mermaid diagrams by default", () => {
+    const { remarkPlugins } = portosaurMdxOptions();
+    expect(remarkPlugins).toContain(remarkMermaid);
+  });
+
+  test("skips the diagram plugin when mermaid is false", () => {
+    const { remarkPlugins } = portosaurMdxOptions({ mermaid: false });
+    expect(remarkPlugins).not.toContain(remarkMermaid);
   });
 });
 

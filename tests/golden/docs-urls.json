@@ -1,5 +1,5 @@
 {
-  "generated_from": "Dead config keys removed",
+  "generated_from": "Mermaid diagrams implemented (Diagrams page added)",
   "routes": [
     {
       "url": "/",
@@ -223,6 +223,7 @@
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
+        "Diagrams",
         "Dynamic Variables",
         "Icons & Emoji",
         "Components"
@@ -346,6 +347,18 @@
       "url": "/docs/markdown/components/topic-list/",
       "title": "TopicList | Portosaur",
       "headings": ["TopicList", "Props Reference"]
+    },
+    {
+      "url": "/docs/markdown/diagrams/",
+      "title": "Diagrams | Portosaur",
+      "headings": [
+        "Diagrams",
+        "Sequence Diagrams",
+        "Icons in Labels",
+        "What Isn't Supported",
+        "Theming",
+        "Turning Diagrams Off"
+      ]
     },
     {
       "url": "/docs/markdown/dynamic-variables/",
