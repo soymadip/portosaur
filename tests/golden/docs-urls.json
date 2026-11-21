@@ -1,5 +1,5 @@
 {
-  "generated_from": "Icons & Dynamic Variables moved under /docs/markdown/",
+  "generated_from": "Markdown pages rearranged, Components last",
   "routes": [
     {
       "url": "/",
@@ -224,9 +224,9 @@
         "Markdown Features",
         "Frontmatter",
         "Code Blocks",
-        "Components",
         "Dynamic Variables",
-        "Icons & Emoji"
+        "Icons & Emoji",
+        "Components"
       ]
     },
     {
