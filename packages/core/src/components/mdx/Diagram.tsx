@@ -16,7 +16,9 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * large native `<dialog>` with the diagram big and Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
  * at the bottom-right). On a phone, tapping the diagram itself
  * opens the popup too. A second expand button beside the close
- * button grows the popup to near-fullscreen, and back. On a
+ * button grows the popup to near-fullscreen, and back — expanding
+ * zooms the diagram in, shrinking back resets it to the whole
+ * diagram. On a
  * phone the popup is a bottom sheet: it slides up from the
  * bottom, and the expand button takes it full screen. The bar
  * at the top of the sheet is a drag handle: pull up to expand,
@@ -138,6 +140,28 @@ export function Diagram({ svg }: { svg: string }) {
       zoomRef.current = undefined;
     };
   }, [open]);
+
+  // Expanding zooms the diagram in: the expanded viewer is
+  // mostly empty otherwise, since the diagram keeps its natural
+  // size. The zoom waits out the 300ms size transition — Pele
+  // resets the zoom whenever the viewer resizes, so zooming
+  // mid-transition would be undone. Shrinking back resets to
+  // the whole diagram.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    if (!expanded) {
+      zoomRef.current?.reset();
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      zoomRef.current?.zoomTo(2);
+    }, 350);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [expanded, open]);
 
   // Escape closes — listened for on the window in the CAPTURE
   // phase, like the search dialog: a dialog-level or bubble-phase
