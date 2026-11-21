@@ -336,6 +336,25 @@ body:has(#porto__sidebar:popover-open) {
   .porto-sidebar-title-row .porto-sidebar-collapse-trigger {
     display: inline-flex;
   }
+  /* Sticky — the title row stays put while the tree scrolls
+     beneath it, on the sidebar background so scrolled rows
+     don't show through. The box extends 1rem up (negative
+     margin + matching padding), so it covers the strip
+     between the navbar and the title and never jumps when
+     scrolling starts. The 1rem gap to the tree is padding,
+     not margin, so the background covers it. Desktop only:
+     on mobile the pane starts below the navbar, so the
+     resting offset is different. */
+  .porto-sidebar-title-row {
+    position: sticky;
+    top: var(--porto-nav-height);
+    z-index: 1;
+    background-color: var(--porto-color-bg-sidebar);
+    margin-top: -1rem;
+    margin-bottom: 0;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
 }
 .porto-sidebar-collapse-trigger {
   color: var(--porto-color-gray-3);

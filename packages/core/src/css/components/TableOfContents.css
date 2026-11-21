@@ -11,11 +11,24 @@
   padding-inline-end: 0.5rem;
 }
 .porto-toc-title {
+  /* Sticky — the title stays put while the entries scroll
+     beneath it, on the page background so scrolled entries
+     don't show through. The box extends 1rem up into the
+     panel's top padding (negative margin + matching padding),
+     so it covers the whole strip above the text and never
+     jumps when scrolling starts. The 0.7rem gap to the list
+     is padding, not margin, so the background covers it. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--porto-color-bg);
+  margin-top: -1rem;
+  padding-top: 1rem;
   color: var(--porto-color-white);
   font-size: var(--porto-text-h5);
   font-weight: 600;
   line-height: var(--porto-line-height-headings);
-  margin-bottom: 0.7rem;
+  padding-bottom: 0.7rem;
 }
 .porto-toc-panel a {
   display: block;
