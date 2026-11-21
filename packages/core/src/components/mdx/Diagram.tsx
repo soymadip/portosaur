@@ -13,9 +13,9 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * Iconify packs). The wrapper centers the diagram (content.css).
  *
  * An expand button opens the diagram in a popup, GitHub-style: a
- * near-fullscreen native `<dialog>` with the diagram large and
- * Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
- * at the bottom-right). Inline zoom was tried first and dropped —
+ * large native `<dialog>` with the diagram big and Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
+ * at the bottom-right). A second expand button beside the close
+ * button grows the popup to near-fullscreen, and back. Inline zoom was tried first and dropped —
  * zooming inside the small inline box just overflowed it. The
  * zoom code loads on the first expand, never on page load.
  * Imported from `pele/core`, not `pele` — the main entry is one
@@ -30,6 +30,7 @@ import { SiteIcon } from "../SiteIcon.tsx";
  */
 export function Diagram({ svg }: { svg: string }) {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
   // True while the exit animation runs: the dialog is still open
   // (and still focused), it just wears the `closing` class until
@@ -107,6 +108,8 @@ export function Diagram({ svg }: { svg: string }) {
         dialog.close();
       }
       document.documentElement.removeAttribute("data-diagram-modal-open");
+      // Reopening starts at the default size, not expanded.
+      setExpanded(false);
       return;
     }
     if (!dialog.open) {
@@ -197,6 +200,7 @@ export function Diagram({ svg }: { svg: string }) {
 
   const dialogClassName = [
     "porto-diagram-dialog",
+    ...(expanded ? ["porto-diagram-dialog--expanded"] : []),
     ...(closing ? ["porto-diagram-dialog--closing"] : []),
   ].join(" ");
 
@@ -225,15 +229,36 @@ export function Diagram({ svg }: { svg: string }) {
         onClick={onDialogClick}
       >
         <div className="porto-diagram-dialog__frame">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="porto-diagram-dialog__close"
-            ariaLabel="Close diagram viewer"
-            onClick={close}
-          >
-            <SiteIcon icon="lu:x" size="20px" strokeWidth={2.5} />
-          </Button>
+          <div className="porto-diagram-dialog__actions">
+            {/* The expand button toggles the popup between its
+                default size and near-fullscreen. The two icons are
+                literal `icon="..."` props, not a computed value —
+                the icon scan only picks up literals. */}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="porto-diagram-dialog__expand"
+              ariaLabel={expanded ? "Shrink popup" : "Expand popup"}
+              onClick={() => {
+                setExpanded((value) => !value);
+              }}
+            >
+              {expanded ? (
+                <SiteIcon icon="lu:minimize-2" size="20px" strokeWidth={2.5} />
+              ) : (
+                <SiteIcon icon="lu:maximize-2" size="20px" strokeWidth={2.5} />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="porto-diagram-dialog__close"
+              ariaLabel="Close diagram viewer"
+              onClick={close}
+            >
+              <SiteIcon icon="lu:x" size="20px" strokeWidth={2.5} />
+            </Button>
+          </div>
           {/* The viewer only exists while the popup is open — it
               mounts with the diagram, so the zoom code attaches
               to a live svg, and unmounts after the exit. */}

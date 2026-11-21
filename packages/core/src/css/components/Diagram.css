@@ -1,7 +1,7 @@
-/* Diagram viewer — the expand popup, GitHub-style: a
- * near-fullscreen native <dialog> with the diagram large and
- * Pele's zoom inside. Rendered by Diagram. The open/close fade
- * lives in animations.css, with the other dialog motion. */
+/* Diagram viewer — the expand popup, GitHub-style: a large
+ * native <dialog> with the diagram big and Pele's zoom inside.
+ * Rendered by Diagram. The open/close fade lives in
+ * animations.css, with the other dialog motion. */
 
 .porto-diagram-dialog {
   margin: auto;
@@ -14,9 +14,10 @@
   background-color: var(--porto-color-bg);
   border: 1px solid var(--porto-color-gray-5);
   border-radius: 0.5rem;
-  width: calc(100% - 2rem);
-  height: calc(100% - 2rem);
-  max-width: 90rem;
+  /* Large, but clearly a floating panel — near-fullscreen felt
+     like it swallowed the page. */
+  width: min(90rem, 90%);
+  height: 80%;
 }
 .porto-diagram-dialog[open] {
   display: flex;
@@ -30,12 +31,22 @@
   height: 100%;
 }
 
-/* The close button floats top-right, above the diagram. */
-.porto-diagram-dialog__close {
+/* The expanded popup: near-fullscreen, like the first version
+   of the viewer. The size glides on the transition in
+   animations.css. */
+.porto-diagram-dialog--expanded {
+  width: calc(100% - 2rem);
+  height: calc(100% - 2rem);
+}
+
+/* The expand + close buttons float top-right, above the diagram. */
+.porto-diagram-dialog__actions {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
   z-index: 1;
+  display: flex;
+  gap: 0.25rem;
 }
 
 /* The viewer fills the frame and centers the diagram. The zoom
@@ -71,7 +82,9 @@
 
 @media (max-width: 50rem) {
   /* On mobile the viewer takes the whole viewport: full width
-     and height, no border or radius — diagrams need the space. */
+     and height, no border or radius — diagrams need the space.
+     The expand button hides: there is nothing bigger to grow
+     into. */
   .porto-diagram-dialog {
     width: 100%;
     height: 100%;
@@ -81,5 +94,8 @@
     max-height: 100dvh;
     border: 0;
     border-radius: 0;
+  }
+  .porto-diagram-dialog__expand {
+    display: none;
   }
 }

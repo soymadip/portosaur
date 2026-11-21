@@ -196,6 +196,10 @@
 .porto-diagram-dialog {
   transition:
     opacity 300ms ease,
+    /* The size glides when the expand button toggles the
+       near-fullscreen state, like the search dialog's glide. */
+    width 300ms ease,
+    height 300ms ease,
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
 }
