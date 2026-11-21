@@ -1,5 +1,5 @@
 /* The flash on a search result's target: the matched section's
-   heading (or the page title) glows in the accent tint for two
+   heading (or the page title) glows in the accent tint for three
    and a half seconds after landing, then fades back to nothing.
    The class comes off by timer, so the `forwards` fill only holds
    the transparent end state. */
@@ -17,7 +17,7 @@
 }
 
 .porto-search-highlight {
-  animation: porto-search-highlight-fade 2.5s ease-out forwards;
+  animation: porto-search-highlight-fade 3.5s ease-out forwards;
   border-radius: 0.375rem;
 }
 
