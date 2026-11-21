@@ -15,7 +15,9 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * An expand button opens the diagram in a popup, GitHub-style: a
  * large native `<dialog>` with the diagram big and Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
  * at the bottom-right). A second expand button beside the close
- * button grows the popup to near-fullscreen, and back. Inline zoom was tried first and dropped —
+ * button grows the popup to near-fullscreen, and back. On a
+ * phone the popup is a bottom sheet: it slides up from the
+ * bottom, and the expand button takes it full screen. Inline zoom was tried first and dropped —
  * zooming inside the small inline box just overflowed it. The
  * zoom code loads on the first expand, never on page load.
  * Imported from `pele/core`, not `pele` — the main entry is one

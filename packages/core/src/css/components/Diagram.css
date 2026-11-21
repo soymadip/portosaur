@@ -84,3 +84,30 @@
   overflow: hidden;
   scrollbar-gutter: stable;
 }
+
+/* On a phone the viewer is a bottom sheet, app-style: full
+   width, anchored to the bottom, rounded top corners only. The
+   expand button takes it full screen, edge to edge. */
+@media (max-width: 50rem) {
+  .porto-diagram-dialog {
+    width: 100%;
+    height: 85%;
+    /* The max sizes match, like the expanded state: the
+       browser's own dialog cap would otherwise narrow the
+       sheet to 100% - 2em - 6px. */
+    max-width: 100%;
+    max-height: 85%;
+    margin: auto auto 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+  .porto-diagram-dialog--expanded {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+}

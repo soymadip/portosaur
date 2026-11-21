@@ -196,6 +196,9 @@
 .porto-diagram-dialog {
   transition:
     opacity 300ms ease,
+    /* The sheet slides on mobile (translate only changes there —
+       on desktop it stays put). */
+    translate 300ms ease,
     /* The size glides when the expand button toggles the
        near-fullscreen state, like the search dialog's glide. */
     width 300ms ease,
@@ -238,11 +241,32 @@
    snap away. */
 .porto-diagram-dialog--closing {
   opacity: 0;
-  transition: opacity 300ms ease;
+  transition:
+    opacity 300ms ease,
+    translate 300ms ease;
 }
 .porto-diagram-dialog--closing::backdrop {
   opacity: 0;
   transition: opacity 300ms ease;
+}
+
+/* On a phone the viewer is a bottom sheet: it slides up from
+   below the screen on entry and back down on close. The resting
+   translate lives in this file, next to the @starting-style that
+   animates from it — split across stylesheets, the entry would
+   render at rest with no slide. */
+@media (max-width: 50rem) {
+  .porto-diagram-dialog {
+    translate: 0 0;
+  }
+  @starting-style {
+    .porto-diagram-dialog {
+      translate: 0 100%;
+    }
+  }
+  .porto-diagram-dialog--closing {
+    translate: 0 100%;
+  }
 }
 
 /* Hamburger icon morph (three lines -> X), 0.25s. */
