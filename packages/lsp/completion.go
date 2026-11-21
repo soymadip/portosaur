@@ -68,6 +68,9 @@ func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (
 	if list, handled := s.varsCompletion(params, text, root); handled {
 		return list, nil
 	}
+	if list, handled := s.linkCompletion(params, text, root); handled {
+		return list, nil
+	}
 	return s.componentCompletion(params, text, s.resolver.resolve(root, schemaComponents)), nil
 }
 

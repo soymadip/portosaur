@@ -161,6 +161,16 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.CompletionProvider == nil {
 		t.Fatal("no completion provider advertised")
 	}
+	wantTriggers := []string{":", "<", "=", ".", "(", "/"}
+	triggers := result.Capabilities.CompletionProvider.TriggerCharacters
+	if len(triggers) != len(wantTriggers) {
+		t.Fatalf("trigger characters = %v, want %v", triggers, wantTriggers)
+	}
+	for i, want := range wantTriggers {
+		if triggers[i] != want {
+			t.Fatalf("trigger characters = %v, want %v", triggers, wantTriggers)
+		}
+	}
 	if result.Capabilities.HoverProvider == nil {
 		t.Fatal("no hover provider advertised")
 	}
