@@ -73,7 +73,12 @@ function renderFetchedIcon(collection: unknown, name: string): string {
   return `<svg ${attributes} fill="currentColor" aria-hidden="true">${rendered.body}</svg>`;
 }
 
-export function IconSearch({ dropUp = false }: { dropUp?: boolean }) {
+export function IconSearch({
+  dropUp = false,
+}: {
+  /** Open the results above the field instead of below it. */
+  dropUp?: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [results, setResults] = useState<string[]>([]);

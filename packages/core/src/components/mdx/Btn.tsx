@@ -26,17 +26,28 @@ export function Btn({
   ariaLabel,
   children,
 }: {
+  /** A full URL — external links open in a new tab. */
   href?: string;
+  /** An internal page path. */
   to?: string;
+  /** The button style. */
   variant?: ButtonVariant;
+  /** Outline style instead of a filled button. */
   outline?: boolean;
+  /** Small or large. Leave unset for the default size. */
   size?: "sm" | "lg";
+  /** An icon id shown before the label. */
   icon?: string;
+  /** Keep an external link in the same tab. */
   sameTab?: boolean;
+  /** Extra classes on the button. */
   className?: string;
+  /** Render the button disabled. */
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
+  /** Tooltip text. */
   title?: string;
+  /** Accessible label for screen readers. */
   ariaLabel?: string;
   children?: React.ReactNode;
 }) {

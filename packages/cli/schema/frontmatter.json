@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Portosaur Frontmatter",
+  "description": "Frontmatter keys for a Portosaur doc, note or blog page.",
+  "type": "object",
+  "properties": {
+    "staticParams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "icon": {
+      "type": "string"
+    },
+    "full": {
+      "type": "boolean"
+    },
+    "_openapi": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "_asyncapi": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "title": {
+      "type": "string"
+    },
+    "desc": {
+      "type": "string"
+    },
+    "hide_title": {
+      "type": "boolean"
+    },
+    "hide_desc": {
+      "type": "boolean"
+    },
+    "color": {
+      "type": "string"
+    },
+    "sidebar_label": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "topic_list": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        }
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        ]
+      }
+    },
+    "image": {
+      "type": "string"
+    },
+    "pagination_label": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "description": "The page date, as YYYY-MM-DD."
+    },
+    "draft": {
+      "type": "boolean"
+    },
+    "math": {
+      "type": "boolean"
+    },
+    "sidebar_collapsed": {
+      "type": "boolean"
+    },
+    "toc": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean"
+        },
+        "min_level": {
+          "type": "number"
+        },
+        "max_level": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

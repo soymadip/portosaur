@@ -160,12 +160,19 @@ export function Tabs({
   className,
 }: {
   children?: ReactNode;
+  /** The tab open on first render. */
   defaultValue?: string | null;
+  /** Tabs with the same group stay in sync across the page. */
   groupId?: string;
+  /** Remember the active tab in the URL. True uses the group id as the key. */
   queryString?: boolean | string;
+  /** The tabs, as value and label pairs. */
   values?: TabValue[];
+  /** Stretch the tab buttons to fill the width. */
   block?: boolean;
+  /** Render a tab's content only when it is opened. */
   lazy?: boolean;
+  /** Extra classes on the tabs. */
   className?: string;
 }) {
   const instanceId = useId().replace(/:/g, "");

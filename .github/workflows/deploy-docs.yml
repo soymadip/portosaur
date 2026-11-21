@@ -69,14 +69,14 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Generate CLI Config Schema
-        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o packages/cli/config-schema.json
+      - name: Generate schemas
+        run: bun run schema
 
       - name: Compile Site
         run: bun run --cwd ${{ env.DOCS_DIR }} build
 
-      - name: Generate Published Config Schema
-        run: bun run ${{ env.CLI_DIR }}/bin/porto.ts schema -o ${{ env.DOCS_OUT_DIR }}/config-schema.json
+      - name: Publish schemas
+        run: mkdir -p ${{ env.DOCS_OUT_DIR }}/schema && cp packages/cli/schema/*.json ${{ env.DOCS_OUT_DIR }}/schema/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

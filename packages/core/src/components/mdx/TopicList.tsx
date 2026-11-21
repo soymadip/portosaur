@@ -136,7 +136,9 @@ export function TopicList({
   forceRender = false,
   items: propItems,
 }: {
+  /** Show the list even when the page would not get one automatically. */
   forceRender?: boolean;
+  /** The cards to show, instead of the page's child pages. */
   items?: TopicListItem[];
 }) {
   const context = useContext(TopicListContext);

@@ -7,8 +7,9 @@ import { fileURLToPath } from "node:url";
 let _cachedSchema: Record<string, any> | null = null;
 
 /**
- * Loads and caches the generated config-schema.json from the package root.
- * The schema is generated before builds and shipped with @portosaur/cli.
+ * Loads and caches the generated config schema from the package's
+ * schema/ directory. The schema is generated before builds and
+ * shipped with @portosaur/cli.
  *
  * @returns {object} The parsed JSON Schema object.
  */
@@ -19,7 +20,8 @@ function loadSchema(): Record<string, any> {
 
   const schemaPath = path.resolve(
     fileURLToPath(new URL("../../..", import.meta.url)),
-    "config-schema.json",
+    "schema",
+    "config.json",
   );
 
   if (!fs.existsSync(schemaPath)) {

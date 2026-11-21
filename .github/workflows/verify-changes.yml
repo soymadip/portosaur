@@ -49,6 +49,13 @@ jobs:
       - name: Run Unit Tests
         run: bun run test:all
 
+      - name: Check schemas are fresh
+        run: |
+          git diff --exit-code -- packages/cli/schema/ || {
+            echo "::error::Schemas are stale. Run 'bun run schema' and commit the result."
+            exit 1
+          }
+
       - name: Build documentation
         run: bun run --cwd docs build
 

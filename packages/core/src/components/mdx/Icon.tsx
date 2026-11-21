@@ -12,9 +12,13 @@ export function Icon({
   color,
   className,
 }: {
+  /** The icon id, like `lu:star`. */
   id: string;
+  /** The icon size, as a CSS length. */
   size?: string;
+  /** The icon color. */
   color?: string;
+  /** Extra classes on the icon. */
   className?: string;
 }) {
   return (

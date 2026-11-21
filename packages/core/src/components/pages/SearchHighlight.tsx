@@ -164,7 +164,7 @@ function tryHighlight(): boolean {
   }
   window.setTimeout(() => {
     flash.classList.remove("porto-search-highlight");
-  }, 2500);
+  }, 3500);
   return true;
 }
 

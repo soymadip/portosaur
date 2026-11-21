@@ -14,7 +14,9 @@ export function Link({
   children,
   ...props
 }: {
+  /** An internal page path. */
   to?: string;
+  /** A full URL or absolute path. */
   href?: string;
   children?: React.ReactNode;
   [key: string]: unknown;

@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "bun run packages/cli/bin/porto.ts schema -o packages/cli/config-schema.json && bun run --cwd docs build && bun run packages/cli/bin/porto.ts schema -o docs/build/config-schema.json"
+  command = "bun run schema && bun run --cwd docs build && mkdir -p docs/build/schema && cp packages/cli/schema/*.json docs/build/schema/"
   publish = "docs/build"
 
 [build.environment]

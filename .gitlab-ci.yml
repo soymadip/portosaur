@@ -63,7 +63,7 @@ pages:
         - "bun.lock"
   script:
     - bun run --cwd docs build
-    - bun run packages/cli/bin/porto.ts schema -o docs/build/config-schema.json
+    - mkdir -p docs/build/schema && cp packages/cli/schema/*.json docs/build/schema/
     - mv docs/build public
   artifacts:
     paths:

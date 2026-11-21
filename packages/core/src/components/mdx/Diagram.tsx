@@ -35,7 +35,12 @@ import { SiteIcon } from "../SiteIcon.tsx";
  * swallowed at capture phase (Chrome's `cancel` is not
  * cancelable), and body scroll locked while open.
  */
-export function Diagram({ svg }: { svg: string }) {
+export function Diagram({
+  svg,
+}: {
+  /** The rendered SVG. Set by the Mermaid plugin, not written by hand. */
+  svg: string;
+}) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
