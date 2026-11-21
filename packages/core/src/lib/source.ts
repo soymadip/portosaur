@@ -31,7 +31,7 @@ import {
   NUMBER_PREFIX_PATTERN,
   type Frontmatter,
 } from "./slug.ts";
-import { parseFileFrontmatter } from "./slug-server.ts";
+import { collectParentSlugs } from "./slug-server.ts";
 
 /**
  * Portosaur's frontmatter schema for doc/note/blog pages.
@@ -121,30 +121,10 @@ export type PortoPageFile = ContentStoragePageFile<
  */
 export const portoSlugs: SlugFn = (file, _next) => {
   const portoFile = file as PortoPageFile;
-  const parentSlugs: Record<string, string> = {};
   const absolutePath = portoFile.absolutePath;
-  if (absolutePath) {
-    // Ancestor directories of the file, content-relative, from the
-    // content root down to the file's parent directory.
-    const relativeDir = path.posix.dirname(portoFile.path);
-    const dirSegments =
-      relativeDir === "." ? [] : relativeDir.split("/").filter(Boolean);
-    const fileDir = path.dirname(absolutePath);
-    for (let i = 1; i <= dirSegments.length; i++) {
-      const dirKey = dirSegments.slice(0, i).join("/");
-      // The directory on disk: walk up from the file's directory.
-      const up = dirSegments.length - i;
-      const dirPath =
-        up === 0 ? fileDir : path.resolve(fileDir, ...Array(up).fill(".."));
-      for (const name of ["index.mdx", "index.md", "README.mdx", "README.md"]) {
-        const fm = parseFileFrontmatter(path.join(dirPath, name));
-        if (fm && typeof fm.slug === "string" && fm.slug !== "") {
-          parentSlugs[dirKey] = fm.slug;
-          break;
-        }
-      }
-    }
-  }
+  const parentSlugs = absolutePath
+    ? collectParentSlugs(absolutePath, portoFile.path)
+    : {};
   const { slug } = guessDocPermalink(
     portoFile.path,
     (portoFile.data ?? {}) as Frontmatter,

@@ -169,6 +169,21 @@ export function buildSourceConfigContent(
   options: PortosaurOptions,
   mtime: number,
 ): string {
+  // Content directories for relative file links (`./sibling.mdx`):
+  // the same directories the docs and blog collections read, as
+  // absolute paths, with the URL section each one serves under.
+  // `notesDir` / `notesRoute` are already mode-aware (docs mode →
+  // the docs dir, portfolio mode → the notes dir).
+  const contentDirs = [
+    {
+      dir: path.join(options.projectDir, options.site.notesDir),
+      route: options.site.notesRoute,
+    },
+    {
+      dir: path.join(options.projectDir, options.site.blogDir),
+      route: options.site.blogRoute,
+    },
+  ];
   return `${header(mtime)}import { defineConfig } from "fumadocs-mdx/config";
 import { portosaurMdxOptions } from "@portosaur/core/mdx";
 
@@ -178,6 +193,7 @@ export default defineConfig({
     colorScheme: ${JSON.stringify(options.theme.colorScheme)},
     renderEmojiShortcodes: ${JSON.stringify(options.site.content.renderEmojiShortcodes)},
     mermaid: ${JSON.stringify(options.site.content.mermaid)},
+    contentDirs: ${JSON.stringify(contentDirs)},
   }),
 });
 `;

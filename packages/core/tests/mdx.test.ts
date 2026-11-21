@@ -2,6 +2,7 @@ import { describe, test, expect } from "bun:test";
 import remarkEmoji from "remark-emoji";
 import { portosaurMdxOptions, parseCodeBlockMeta } from "../src/mdx.ts";
 import remarkMermaid from "../src/plugins/remarkMermaid.ts";
+import remarkFileLinks from "../src/plugins/remarkFileLinks.ts";
 
 /**
  * `portosaurMdxOptions` builds the Fumadocs global MDX preset for a
@@ -9,7 +10,9 @@ import remarkMermaid from "../src/plugins/remarkMermaid.ts";
  * .render_emoji_shortcodes`, default true) gates the remark-emoji
  * plugin: off means `:smile:` stays literal text. The mermaid switch
  * (`site.content.mermaid`, default true) gates the diagram plugin:
- * off means ```mermaid fences stay plain code blocks.
+ * off means ```mermaid fences stay plain code blocks. The file-links
+ * plugin is always in the list, carrying the content directories
+ * the generator passes (empty means file links are left alone).
  */
 describe("portosaurMdxOptions", () => {
   test("renders emoji shortcodes by default", () => {
@@ -32,6 +35,17 @@ describe("portosaurMdxOptions", () => {
   test("skips the diagram plugin when mermaid is false", () => {
     const { remarkPlugins } = portosaurMdxOptions({ mermaid: false });
     expect(remarkPlugins).not.toContain(remarkMermaid);
+  });
+
+  test("includes the file-links plugin with the content dirs", () => {
+    const dirs = [{ dir: "/site/docs", route: "docs" }];
+    const { remarkPlugins } = portosaurMdxOptions({ contentDirs: dirs });
+    expect(remarkPlugins).toContainEqual([remarkFileLinks, dirs]);
+  });
+
+  test("includes the file-links plugin with empty dirs by default", () => {
+    const { remarkPlugins } = portosaurMdxOptions();
+    expect(remarkPlugins).toContainEqual([remarkFileLinks, []]);
   });
 });
 

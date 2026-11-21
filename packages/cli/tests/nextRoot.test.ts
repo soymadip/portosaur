@@ -54,6 +54,7 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
       ...(overrides.theme ?? {}),
     },
     siteMode: overrides.siteMode ?? "docs",
+    projectDir: "/site",
     tasks: {
       enable: false,
       title: "Tasks",
@@ -163,6 +164,30 @@ describe("buildSourceConfigContent", () => {
       0,
     );
     expect(content).toContain("renderEmojiShortcodes: false");
+  });
+
+  test("passes the content dirs and routes for file links", () => {
+    const content = buildSourceConfigContent(options(), 0);
+    expect(content).toContain(
+      'contentDirs: [{"dir":"/site/docs","route":"docs"},{"dir":"/site/blog","route":"blog"}]',
+    );
+  });
+
+  test("uses the configured dirs and routes, not hardcoded ones", () => {
+    const content = buildSourceConfigContent(
+      options({
+        site: {
+          notesDir: "notes",
+          notesRoute: "my-notes",
+          blogDir: "posts",
+          blogRoute: "my-blog",
+        },
+      }),
+      0,
+    );
+    expect(content).toContain(
+      'contentDirs: [{"dir":"/site/notes","route":"my-notes"},{"dir":"/site/posts","route":"my-blog"}]',
+    );
   });
 });
 

@@ -24,7 +24,9 @@
  * slot (after remarkHeading assigned its id) before any content
  * transform sees it. remarkHasMath runs right after remarkMath — it
  * flags pages with math nodes, which only exist once remarkMath has
- * created them. remark-directive runs before remarkAdmonitions (which
+ * created them. remarkFileLinks runs right after remarkVars, so a
+ * `{vars.key}` in a link URL is substituted before file-link
+ * matching sees it. remark-directive runs before remarkAdmonitions (which
  * consumes its nodes). RemarkIcons runs before remark-emoji so icon
  * shortcodes are claimed first. remarkGithubAlerts runs beside
  * remarkAdmonitions — both emit the same admonition `<div>`s, from
@@ -54,6 +56,7 @@ import remarkContentTitle, {
 } from "./plugins/remarkContentTitle.ts";
 import remarkHasMath, { HAS_MATH_KEY } from "./plugins/remarkHasMath.ts";
 import remarkVars from "./plugins/remarkVars.ts";
+import remarkFileLinks, { type ContentDir } from "./plugins/remarkFileLinks.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
 import remarkMermaid from "./plugins/remarkMermaid.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
@@ -71,6 +74,13 @@ export interface PortosaurMdxArgs {
   renderEmojiShortcodes?: boolean;
   /** Render ```mermaid fences as diagrams (default true). */
   mermaid?: boolean;
+  /**
+   * Content directories and their URL sections, for relative
+   * file links (`./sibling.mdx` → the page URL). The same
+   * directories the docs and blog collections read, as absolute
+   * paths. Empty (or unset) means file links are left alone.
+   */
+  contentDirs?: ContentDir[];
 }
 
 /**
@@ -127,12 +137,16 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  *   default true).
  * @param args.mermaid - Whether ```mermaid fences render as diagrams
  *   (`site.content.mermaid`, default true).
+ * @param args.contentDirs - Content directories and their URL
+ *   sections, for relative file links. Empty means file links are
+ *   left alone.
  */
 export function portosaurMdxOptions({
   userVars = {},
   colorScheme,
   renderEmojiShortcodes = true,
   mermaid = true,
+  contentDirs = [],
 }: PortosaurMdxArgs = {}): MDXPresetOptions {
   // NOTE: unified calls each plugin itself — pass the plugin functions
   // (and `[plugin, options]` tuples where options are needed), never
@@ -145,6 +159,10 @@ export function portosaurMdxOptions({
       remarkMath,
       remarkHasMath,
       [remarkVars, userVars],
+      // Relative file links (`./sibling.mdx`) resolve to page URLs.
+      // After remarkVars so `{vars.key}` substitution applies inside
+      // link URLs first.
+      [remarkFileLinks, contentDirs],
       remarkInstall,
       // Mermaid fences render as diagrams when the site enables them
       // (`site.content.mermaid`, default true). After remarkVars so
