@@ -29,6 +29,7 @@ how `porto.yml` is handled.
 | Code fence suggestions                            |   Yes   | Yes | Languages after the fence, meta params after the language                               |
 | Icon prefix suggestions                            |   Yes   | Yes | Pack prefixes in icon values, before the colon                                          |
 | List auto-insert on Enter                          |   Yes   | Yes | Enter continues numbered, bullet, and task lists                                        |
+| Frontmatter auto-indent on Enter                   |   Yes   | Yes | Enter after a `key:` line indents two spaces                                            |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |

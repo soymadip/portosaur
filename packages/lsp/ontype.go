@@ -12,9 +12,9 @@ import (
 // OnTypeFormatting answers the editor's request after a trigger
 // character is typed. The only trigger is the newline, and the
 // handler dispatches by context: the list branch continues
-// lists in the MDX body, and a later item adds a frontmatter
-// branch that indents after a `key:` line. Each branch returns
-// its edits, or nothing when its context does not apply.
+// lists in the MDX body, and the frontmatter branch indents
+// after a `key:` line. Each branch returns its edits, or
+// nothing when its context does not apply.
 func (s *Server) OnTypeFormatting(_ context.Context, params *protocol.DocumentOnTypeFormattingParams) ([]protocol.TextEdit, error) {
 	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
 	if !ok {
@@ -24,6 +24,9 @@ func (s *Server) OnTypeFormatting(_ context.Context, params *protocol.DocumentOn
 		return nil, nil
 	}
 	if edits, ok := listOnTypeFormatting(text, params.Position); ok {
+		return edits, nil
+	}
+	if edits, ok := frontmatterOnTypeFormatting(text, params.Position); ok {
 		return edits, nil
 	}
 	return nil, nil
@@ -196,5 +199,73 @@ func listOnTypeFormatting(text string, pos protocol.Position) ([]protocol.TextEd
 			End:   protocol.Position{Line: pos.Line, Character: byteToUTF16(newLine, end)},
 		},
 		NewText: item.indent + item.nextMarker(),
+	}}, true
+}
+
+// parseKeyLine reads a frontmatter line as a mapping key with
+// no value: it ends with a colon and nothing follows it. It
+// returns the line's indentation. Comment lines and sequence
+// items are not keys, and a line with nothing before the colon
+// is not one either. A dash only starts a sequence item when a
+// space or tab follows it, so `-key:` is still a key.
+func parseKeyLine(line string) (string, bool) {
+	trimmed := strings.TrimRight(line, " \t")
+	if !strings.HasSuffix(trimmed, ":") {
+		return "", false
+	}
+	i := 0
+	for i < len(trimmed) && (trimmed[i] == ' ' || trimmed[i] == '\t') {
+		i++
+	}
+	rest := trimmed[i:]
+	if rest == ":" || rest[0] == '#' {
+		return "", false
+	}
+	if rest[0] == '-' && len(rest) > 1 && (rest[1] == ' ' || rest[1] == '\t') {
+		return "", false
+	}
+	return trimmed[:i], true
+}
+
+// frontmatterOnTypeFormatting indents the new line after a
+// frontmatter `key:` line, the way the YAML extension does:
+// the key's indent plus two spaces. It reports false when the
+// context does not apply: the previous line is not a key with
+// no value, it sits outside a closed frontmatter block, or
+// Enter was pressed mid-line.
+func frontmatterOnTypeFormatting(text string, pos protocol.Position) ([]protocol.TextEdit, bool) {
+	lines := strings.Split(text, "\n")
+	lineNo := int(pos.Line)
+	if lineNo == 0 || lineNo >= len(lines) {
+		return nil, false
+	}
+	prev := lineNo - 1
+	block, ok := extractFrontmatter(text)
+	if !ok || !block.closed || !block.contains(uint32(prev)) {
+		return nil, false
+	}
+	indent, ok := parseKeyLine(lines[prev])
+	if !ok {
+		return nil, false
+	}
+	newLine := lines[lineNo]
+	cursor := utf16ToByte(newLine, pos.Character)
+	if strings.TrimSpace(newLine[cursor:]) != "" {
+		return nil, false
+	}
+	// The range runs from the start of the line through the
+	// whitespace the editor auto-inserted around the cursor,
+	// so the result is exactly the target indent whether the
+	// editor auto-indented or not.
+	end := cursor
+	for end < len(newLine) && (newLine[end] == ' ' || newLine[end] == '\t') {
+		end++
+	}
+	return []protocol.TextEdit{{
+		Range: protocol.Range{
+			Start: protocol.Position{Line: pos.Line, Character: 0},
+			End:   protocol.Position{Line: pos.Line, Character: byteToUTF16(newLine, end)},
+		},
+		NewText: indent + "  ",
 	}}, true
 }

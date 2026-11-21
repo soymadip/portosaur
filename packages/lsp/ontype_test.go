@@ -192,3 +192,92 @@ func TestParseListItem(t *testing.T) {
 		})
 	}
 }
+
+func TestFrontmatterOnTypeIndents(t *testing.T) {
+	cases := []struct {
+		name string
+		text string
+		line uint32
+		want string
+	}{
+		{"top-level key", "---\ntoc:\n\n---\n", 2, "  "},
+		{"nested key", "---\nparent:\n  child:\n\n---\n", 3, "    "},
+		{"trailing space after colon", "---\ntoc: \n\n---\n", 2, "  "},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			edits := typeEnter(t, tc.text, tc.line, 0)
+			wantEdit(t, edits, tc.line, 0, tc.line, 0, tc.want)
+		})
+	}
+}
+
+// TestFrontmatterOnTypeAutoIndent checks the edit when the
+// editor already indented the new line: the indent is replaced
+// by the target indent, never doubled, even when the editor
+// indented further than the target.
+func TestFrontmatterOnTypeAutoIndent(t *testing.T) {
+	edits := typeEnter(t, "---\ntoc:\n  \n---\n", 2, 2)
+	wantEdit(t, edits, 2, 0, 2, 2, "  ")
+	edits = typeEnter(t, "---\ntoc:\n    \n---\n", 2, 4)
+	wantEdit(t, edits, 2, 0, 2, 4, "  ")
+}
+
+func TestFrontmatterOnTypeSkipped(t *testing.T) {
+	cases := []struct {
+		name string
+		text string
+		line uint32
+		char uint32
+	}{
+		{"key with a value", "---\ntitle: x\n\n---\n", 2, 0},
+		{"key in the body", "---\ntitle: x\n---\nnote:\n", 4, 0},
+		{"unclosed frontmatter", "---\ntoc:\n", 2, 0},
+		{"enter mid-line", "---\ntoc:\nmore\n---\n", 2, 0},
+		{"comment ending in a colon", "---\n# note:\n\n---\n", 2, 0},
+		{"sequence item key", "---\nitems:\n  - key:\n\n---\n", 3, 0},
+		{"after the closing fence", "---\ntitle: x\n---\n\n", 3, 0},
+		{"after the opening fence", "---\n\ntitle: x\n---\n", 1, 0},
+		{"colon alone", "---\n:\n\n---\n", 2, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			wantNoEdits(t, typeEnter(t, tc.text, tc.line, tc.char))
+		})
+	}
+}
+
+func TestParseKeyLine(t *testing.T) {
+	cases := []struct {
+		line   string
+		ok     bool
+		indent string
+	}{
+		{"toc:", true, ""},
+		{"  child:", true, "  "},
+		{"\tkey:", true, "\t"},
+		{"toc: ", true, ""},
+		{"key :", true, ""},
+		{"\"quoted\":", true, ""},
+		{"-key:", true, ""},
+		{"my-key:", true, ""},
+		{"title: x", false, ""},
+		{":", false, ""},
+		{"  :", false, ""},
+		{"# note:", false, ""},
+		{"  # note:", false, ""},
+		{"- key:", false, ""},
+		{"  - key:", false, ""},
+		{"- item", false, ""},
+		{"", false, ""},
+		{"---", false, ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.line, func(t *testing.T) {
+			indent, ok := parseKeyLine(tc.line)
+			if ok != tc.ok || indent != tc.indent {
+				t.Fatalf("parseKeyLine(%q) = %q, %v, want %q, %v", tc.line, indent, ok, tc.indent, tc.ok)
+			}
+		})
+	}
+}
