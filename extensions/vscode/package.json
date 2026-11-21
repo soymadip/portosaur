@@ -1,0 +1,78 @@
+{
+  "activationEvents": [
+    "onLanguage:mdx",
+    "onLanguage:yaml",
+    "workspaceContains:**/porto.yml",
+    "workspaceContains:**/porto.yaml"
+  ],
+  "bugs": {
+    "url": "https://github.com/soymadip/portosaur/issues"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "portosaur.server.path": {
+          "default": null,
+          "description": "Path to a local porto-lsp build. When set, the extension uses it instead of downloading the server from the GitHub release.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "portosaur.trace.server": {
+          "default": "off",
+          "description": "Traces the communication between VS Code and the Portosaur language server.",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "type": "string"
+        }
+      },
+      "title": "Portosaur"
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^11.0.0"
+  },
+  "description": "Language support for Portosaur sites: completions, hover and diagnostics for porto.yml and MDX frontmatter.",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.91.0",
+    "@vscode/vsce": "^4.1.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  },
+  "displayName": "Portosaur",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "extensionDependencies": [
+    "unifiedjs.vscode-mdx"
+  ],
+  "homepage": "https://github.com/soymadip/portosaur",
+  "keywords": [
+    "portosaur",
+    "mdx",
+    "lsp"
+  ],
+  "license": "GPL-3.0-only",
+  "main": "./out/extension.js",
+  "name": "portosaur",
+  "publisher": "soymadip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soymadip/portosaur"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "check": "tsc --noEmit",
+    "package": "vsce package",
+    "watch": "node esbuild.mjs --watch"
+  },
+  "version": "0.1.0"
+}

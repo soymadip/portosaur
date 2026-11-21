@@ -1,0 +1,28 @@
+{
+  // The bundle is CommonJS: VS Code only loads ESM extensions
+  // from 1.100, and the CJS bundle runs on every supported
+  // version. That rules out verbatimModuleSyntax, which forbids
+  // ESM syntax in a CommonJS file — the type-only imports below
+  // are still written as `import type`.
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "declaration": false,
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    "outDir": "out",
+    "resolveJsonModule": true,
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2022",
+    "types": ["node"]
+  },
+  "exclude": ["node_modules", "out"],
+  "include": ["src"]
+}

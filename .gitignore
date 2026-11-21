@@ -26,6 +26,9 @@ Thumbs.db
 *.log
 bun-debug.log*
 
+# Packaged VS Code extension
+*.vsix
+
 # Playgrounds and scratch sites
 .playground/
 *test-site/
