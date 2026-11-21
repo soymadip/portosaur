@@ -8,31 +8,36 @@ import (
 	"testing"
 )
 
-// realConfigSchema reads the repo's generated config schema, so
-// the tests exercise the schema users actually get.
-func realConfigSchema(t *testing.T) []byte {
+// realSchema reads one of the repo's generated schemas, so the
+// tests exercise the schemas users actually get.
+func realSchema(t *testing.T, kind schemaKind) []byte {
 	t.Helper()
-	raw, err := os.ReadFile("../cli/schema/config.json")
+	raw, err := os.ReadFile("../cli/schema/" + string(kind) + ".json")
 	if err != nil {
-		t.Fatalf("reading the generated config schema: %v", err)
+		t.Fatalf("reading the generated %s schema: %v", kind, err)
 	}
 	return raw
 }
 
-func installSchema(t *testing.T, root string, raw []byte) {
+func realConfigSchema(t *testing.T) []byte {
+	t.Helper()
+	return realSchema(t, schemaConfig)
+}
+
+func installSchema(t *testing.T, root string, kind schemaKind, raw []byte) {
 	t.Helper()
 	dir := filepath.Join(root, "node_modules", "@portosaur", "cli", "schema")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "config.json"), raw, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, string(kind)+".json"), raw, 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestResolveInstalledSchemaIsStrict(t *testing.T) {
 	root := t.TempDir()
-	installSchema(t, root, realConfigSchema(t))
+	installSchema(t, root, schemaConfig, realConfigSchema(t))
 	resolver := newSchemaResolver(func(string) { t.Fatal("onFatal called for an installed schema") })
 	schema := resolver.resolve(root, schemaConfig)
 	if !schema.strict {
@@ -48,7 +53,7 @@ func TestResolveInstalledSchemaIsStrict(t *testing.T) {
 
 func TestResolveFindsHoistedSchema(t *testing.T) {
 	parent := t.TempDir()
-	installSchema(t, parent, realConfigSchema(t))
+	installSchema(t, parent, schemaConfig, realConfigSchema(t))
 	child := filepath.Join(parent, "packages", "site")
 	if err := os.MkdirAll(child, 0o755); err != nil {
 		t.Fatal(err)
@@ -98,7 +103,7 @@ func TestResolveFatalWhenNothingWorks(t *testing.T) {
 
 func TestResolveSkipsUnparseableInstalledSchema(t *testing.T) {
 	root := t.TempDir()
-	installSchema(t, root, []byte("{not json"))
+	installSchema(t, root, schemaConfig, []byte("{not json"))
 	raw := realConfigSchema(t)
 	website := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(raw)

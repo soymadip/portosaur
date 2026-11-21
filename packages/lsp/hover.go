@@ -3,29 +3,63 @@ package main
 import (
 	"context"
 	"strings"
+	"time"
 
 	"go.lsp.dev/protocol"
 )
 
-// Hover shows the schema's description and type for the key under
-// the cursor, whether the cursor sits on the key or its value.
+// Hover shows the schema's description and type for the key
+// under the cursor, whether the cursor sits on the key or its
+// value. In MDX it covers frontmatter keys and component names
+// and props.
 func (s *Server) Hover(ctx context.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	text, ok := s.documents.get(params.TextDocument.URI)
-	if !ok || !isConfigFile(params.TextDocument.URI) {
+	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	if !ok {
 		return nil, nil
 	}
+	if isConfigFile(params.TextDocument.URI) {
+		return s.configHover(params, text)
+	}
+	if isMDXFile(params.TextDocument.URI) {
+		return s.mdxHover(params, text)
+	}
+	return nil, nil
+}
+
+func (s *Server) configHover(params *protocol.HoverParams, text string) (*protocol.Hover, error) {
 	root, ok := s.projectFor(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
 	schema := s.resolver.resolve(root, schemaConfig)
-	path, key, span, ok := hoverTarget(text, params.Position)
+	return yamlHover(schema, text, params.Position, 0), nil
+}
+
+func (s *Server) mdxHover(params *protocol.HoverParams, text string) (*protocol.Hover, error) {
+	root, ok := s.projectFor(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
+	if block, ok := extractFrontmatter(text); ok && block.contains(params.Position.Line) {
+		schema := s.resolver.resolve(root, schemaFrontmatter)
+		slicePos := protocol.Position{Line: params.Position.Line - uint32(block.startLine), Character: params.Position.Character}
+		return yamlHover(schema, block.yaml, slicePos, block.startLine), nil
+	}
+	schema := s.resolver.resolve(root, schemaComponents)
+	return componentHover(schema, text, params.Position), nil
+}
+
+// yamlHover shows the schema's description and type for the key
+// on the cursor's line, shifting the range down by lineOffset
+// (the frontmatter slice's line 0 is the document's line 1).
+func yamlHover(schema *resolvedSchema, text string, pos protocol.Position, lineOffset int) *protocol.Hover {
+	path, key, span, ok := hoverTarget(text, pos)
+	if !ok {
+		return nil
+	}
 	node, ok := schemaAt(schema.raw, append(path, key))
 	if !ok {
-		return nil, nil
+		return nil
 	}
 	var value strings.Builder
 	value.WriteString("**" + key + "**")
@@ -35,10 +69,54 @@ func (s *Server) Hover(ctx context.Context, params *protocol.HoverParams) (*prot
 	if d := schemaDescription(node); d != "" {
 		value.WriteString("\n\n" + d)
 	}
+	span = shiftRange(span, lineOffset)
 	return &protocol.Hover{
 		Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: value.String()},
 		Range:    &span,
-	}, nil
+	}
+}
+
+// componentHover shows a component's props on its tag name, or
+// a prop's description and type on its name or value.
+func componentHover(schema *resolvedSchema, text string, pos protocol.Position) *protocol.Hover {
+	context := scanTag(text, pos)
+	if !context.found {
+		return nil
+	}
+	def := componentDef(schema, context.name)
+	if def == nil {
+		return nil
+	}
+	switch context.token.kind {
+	case tokenName:
+		doc := componentDoc(def)
+		if doc == "" {
+			return nil
+		}
+		return &protocol.Hover{
+			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: "**" + context.name + "**\n\n" + doc},
+			Range:    &context.token.rng,
+		}
+	case tokenPropName, tokenPropValue:
+		prop, ok := asMap(schemaProperties(def)[context.token.prop])
+		if !ok {
+			return nil
+		}
+		var value strings.Builder
+		value.WriteString("**" + context.token.prop + "**")
+		if t := schemaType(prop); t != "" {
+			value.WriteString(" `" + t + "`")
+		}
+		if d := schemaDescription(prop); d != "" {
+			value.WriteString("\n\n" + d)
+		}
+		return &protocol.Hover{
+			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: value.String()},
+			Range:    &context.token.rng,
+		}
+	default:
+		return nil
+	}
 }
 
 // hoverTarget finds the key on the cursor's line and the span to

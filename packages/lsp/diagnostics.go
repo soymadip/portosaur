@@ -12,15 +12,37 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Diagnostics for porto.yml: YAML syntax errors always, schema
-// validation only in strict mode (the installed CLI's schema).
-// Lenient mode (the website's schema) skips validation — the
-// latest schema cannot be tied to the project's version.
+// Diagnostics for porto.yml and for MDX frontmatter: YAML
+// syntax errors always, schema validation only in strict mode
+// (the installed CLI's schema). Lenient mode (the website's
+// schema) skips validation — the latest schema cannot be tied
+// to the project's version. An unclosed frontmatter block gets
+// no diagnostics at all: the YAML cannot be told apart from the
+// prose below it.
 func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	text, ok := s.documents.get(documentURI)
-	if !ok || !isConfigFile(documentURI) {
+	if !ok {
 		return
 	}
+	if isConfigFile(documentURI) {
+		s.publishYAMLDiagnostics(documentURI, text, schemaConfig, 0)
+		return
+	}
+	if !isMDXFile(documentURI) {
+		return
+	}
+	block, ok := extractFrontmatter(text)
+	if !ok || !block.closed {
+		s.sendDiagnostics(documentURI, nil)
+		return
+	}
+	s.publishYAMLDiagnostics(documentURI, block.yaml, schemaFrontmatter, block.startLine)
+}
+
+// publishYAMLDiagnostics validates one YAML document (a config
+// file or a frontmatter block) and publishes the results, moving
+// every range down by lineOffset.
+func (s *Server) publishYAMLDiagnostics(documentURI uri.URI, text string, kind schemaKind, lineOffset int) {
 	root, ok := s.projectFor(documentURI)
 	if !ok {
 		s.sendDiagnostics(documentURI, nil)
@@ -29,10 +51,10 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	lines := strings.Split(text, "\n")
 	rootNode, err := parseYAML(text)
 	if err != nil {
-		s.sendDiagnostics(documentURI, yamlParseDiagnostics(err, lines))
+		s.sendDiagnostics(documentURI, shiftDiagnostics(yamlParseDiagnostics(err, lines), lineOffset))
 		return
 	}
-	schema := s.resolver.resolve(root, schemaConfig)
+	schema := s.resolver.resolve(root, kind)
 	if !schema.strict {
 		s.sendDiagnostics(documentURI, nil)
 		return
@@ -40,7 +62,7 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	var value any
 	if rootNode != nil {
 		if err := rootNode.Decode(&value); err != nil {
-			s.sendDiagnostics(documentURI, []protocol.Diagnostic{{
+			s.sendDiagnostics(documentURI, shiftDiagnostics([]protocol.Diagnostic{{
 				Range: protocol.Range{
 					Start: protocol.Position{Line: 0, Character: 0},
 					End:   protocol.Position{Line: 0, Character: 1},
@@ -48,7 +70,7 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 				Severity: protocol.DiagnosticSeverityError,
 				Source:   protocol.NewOptional("porto-lsp"),
 				Message:  protocol.String(err.Error()),
-			}})
+			}}, lineOffset))
 			return
 		}
 	}
@@ -63,7 +85,7 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 			s.sendDiagnostics(documentURI, nil)
 			return
 		}
-		s.sendDiagnostics(documentURI, validationDiagnostics(verr, rootNode, lines))
+		s.sendDiagnostics(documentURI, shiftDiagnostics(validationDiagnostics(verr, rootNode, lines), lineOffset))
 		return
 	}
 	s.sendDiagnostics(documentURI, nil)

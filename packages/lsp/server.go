@@ -65,7 +65,7 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncKindFull,
 			CompletionProvider: &protocol.CompletionOptions{
-				TriggerCharacters: []string{":"},
+				TriggerCharacters: []string{":", "<", "="},
 			},
 			HoverProvider: protocol.Boolean(true),
 		},
