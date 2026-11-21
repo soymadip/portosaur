@@ -42,8 +42,9 @@ func TestExtractHeadings(t *testing.T) {
 		{2, "Getting Started", "getting-started-1", 9},
 	}
 	for i, w := range want {
-		if headings[i] != (heading{w.level, w.text, w.id, w.line}) {
-			t.Fatalf("heading %d = %+v, want %+v", i, headings[i], w)
+		got := headings[i]
+		if got.level != w.level || got.text != w.text || got.id != w.id || got.line != w.line {
+			t.Fatalf("heading %d = %+v, want %+v", i, got, w)
 		}
 	}
 }

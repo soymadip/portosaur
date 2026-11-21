@@ -12,12 +12,15 @@ import (
 // of a link), heading completion, and the document outline.
 
 // heading is one ATX heading: its level, plain text, rendered
-// id, and 0-based document line.
+// id, 0-based document line, and the byte offsets of its text
+// within the line (for the outline's selection range).
 type heading struct {
-	level int
-	text  string
-	id    string
-	line  int
+	level    int
+	text     string
+	id       string
+	line     int
+	textFrom int
+	textTo   int
 }
 
 var atxHeadingRe = regexp.MustCompile(`^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$`)
@@ -41,11 +44,11 @@ func extractHeadings(text string) []heading {
 		if fences[i] {
 			continue
 		}
-		match := atxHeadingRe.FindStringSubmatch(lines[i])
+		match := atxHeadingRe.FindStringSubmatchIndex(lines[i])
 		if match == nil {
 			continue
 		}
-		plain := plainHeadingText(match[2])
+		plain := plainHeadingText(lines[i][match[4]:match[5]])
 		id := githubSlug(plain)
 		if id == "" {
 			continue
@@ -57,10 +60,12 @@ func extractHeadings(text string) []heading {
 			seen[id] = 0
 		}
 		out = append(out, heading{
-			level: len(match[1]),
-			text:  plain,
-			id:    id,
-			line:  i,
+			level:    len(lines[i][match[2]:match[3]]),
+			text:     plain,
+			id:       id,
+			line:     i,
+			textFrom: match[4],
+			textTo:   match[5],
 		})
 	}
 	return out

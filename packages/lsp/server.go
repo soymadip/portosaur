@@ -73,6 +73,7 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			CodeActionProvider: &protocol.CodeActionOptions{
 				CodeActionKinds: []protocol.CodeActionKind{protocol.CodeActionKindQuickFix},
 			},
+			DocumentSymbolProvider: protocol.Boolean(true),
 		},
 		ServerInfo: protocol.ServerInfo{
 			Name:    "porto-lsp",
