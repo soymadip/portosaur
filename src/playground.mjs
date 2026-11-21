@@ -111,7 +111,7 @@ function prepareSite(siteDir, siteName, isExisting) {
 }
 
 /**
- * Line range of the top-level `vars:` block in a config.yml: from the
+ * Line range of the top-level `vars:` block in a porto.yml: from the
  * `vars:` line up to (excluding) the next top-level key or column-0
  * comment, with trailing blank lines trimmed. Returns null when the
  * file has no top-level `vars:` block.
@@ -209,8 +209,8 @@ function syncDocsContent(siteDir) {
   }
   cpSync(docsDir, notesDir, { recursive: true });
 
-  const docsConfigPath = path.join(REPO_ROOT, "docs", "config.yml");
-  const pgConfigPath = path.join(siteDir, "config.yml");
+  const docsConfigPath = path.join(REPO_ROOT, "docs", "porto.yml");
+  const pgConfigPath = path.join(siteDir, "porto.yml");
   const mergedConfig = mergeVarsBlocks(
     readFileSync(docsConfigPath, "utf8"),
     readFileSync(pgConfigPath, "utf8"),
@@ -246,7 +246,7 @@ export function runPlayground({
   const isInitialized =
     dirExists &&
     existsSync(path.join(SITE_DIR, "package.json")) &&
-    existsSync(path.join(SITE_DIR, "config.yml"));
+    existsSync(path.join(SITE_DIR, "porto.yml"));
 
   if (dirExists && !isInitialized) {
     console.log(

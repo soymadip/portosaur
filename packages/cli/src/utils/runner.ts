@@ -10,6 +10,7 @@ import {
   openInBrowser,
   getPortoDotDir,
   loadUserConfig,
+  resolveConfigFile,
   ensurePublicUnion,
   generateFavicons,
   generateSiteIcons,
@@ -137,12 +138,10 @@ export async function writeNextRoot(
   }
 
   let configMtime = Date.now();
-  const configYaml = ["config.yaml", "config.yml"].find((file) =>
-    fs.existsSync(path.join(UserRoot, file)),
-  );
+  const configFile = resolveConfigFile(UserRoot);
 
-  if (configYaml && !forceRefresh) {
-    configMtime = fs.statSync(path.join(UserRoot, configYaml)).mtimeMs;
+  if (configFile && !forceRefresh) {
+    configMtime = fs.statSync(path.join(UserRoot, configFile)).mtimeMs;
   }
 
   const rawConf = loadUserConfig(UserRoot);
@@ -242,16 +241,14 @@ export function logResolvedSiteLocation(
 /**
  * Validate that the current directory is a Portosaur project.
  * @param {string} UserRoot - The directory to validate.
- * @throws {Error} If config.yml is missing.
+ * @throws {Error} If porto.yml is missing.
  */
 export function validateProject(UserRoot: string): void {
-  const configPath = ["config.yaml", "config.yml"].find((file) =>
-    fs.existsSync(path.join(UserRoot, file)),
-  );
+  const configFile = resolveConfigFile(UserRoot);
 
-  if (!configPath) {
+  if (!configFile) {
     throw new Error(
-      "config.yml/config.yaml not found. Are you in a Portosaur project directory?",
+      "porto.yml not found. Are you in a Portosaur project directory?",
     );
   }
 }

@@ -46,7 +46,7 @@ icon: md:definitely-not-an-icon
 `,
   );
   fs.writeFileSync(
-    path.join(projectDir, "config.yml"),
+    path.join(projectDir, "porto.yml"),
     `site:
   title: Test
 docsHome:
@@ -65,7 +65,7 @@ describe("collectSiteIcons", () => {
       const { icons, warnings } = collectSiteIcons({
         projectDir,
         contentDirs: [contentDir],
-        configFile: path.join(projectDir, "config.yml"),
+        configFile: path.join(projectDir, "porto.yml"),
         coreRoot,
       });
       // Frontmatter `icon:`, the shortcode, the Btn prop.
@@ -164,7 +164,7 @@ describe("generateSiteIcons", () => {
       const spec = {
         projectDir,
         contentDirs: [contentDir],
-        configFile: path.join(projectDir, "config.yml"),
+        configFile: path.join(projectDir, "porto.yml"),
         coreRoot,
         outFile,
       };

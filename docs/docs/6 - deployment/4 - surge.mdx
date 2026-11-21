@@ -15,7 +15,7 @@ bunx surge login
 bunx surge token
 ```
 
-Keep the token private. Do not put it in `config.yml` or commit it to your repository.
+Keep the token private. Do not put it in `porto.yml` or commit it to your repository.
 
 ## 2. Generate a Deployment Workflow
 
@@ -55,4 +55,4 @@ Use the secret settings for your provider:
 
 Commit and push to `main`. Open the provider's CI page and confirm the build and deploy steps pass. Visit `https://<repository-name>.surge.sh` to verify the published site.
 
-The default domain is based on the repository name, not the VCS username. To use a custom domain, change the generated `surge --domain` argument and configure that domain in Surge. Set `site.url` in `config.yml` to the chosen origin and `site.base_url` to `/`.
+The default domain is based on the repository name, not the VCS username. To use a custom domain, change the generated `surge --domain` argument and configure that domain in Surge. Set `site.url` in `porto.yml` to the chosen origin and `site.base_url` to `/`.

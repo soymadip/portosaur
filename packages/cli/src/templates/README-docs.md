@@ -16,7 +16,7 @@ It serves as the single source of truth for:
 
 ## Repository Structure
 
-- `config.yml` — The configuration for the site.
+- `porto.yml` — The configuration for the site.
 - `docs/` — Markdown/MDX source files for the documentation.
 - `blog/` — Release notes and other blog posts.
 - `static/` — Static assets like images and diagrams.

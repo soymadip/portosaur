@@ -96,7 +96,7 @@ function walk(
  * Unknown keys inside freeform blocks (like `custom`) are
  * intentionally ignored — those blocks allow arbitrary content.
  *
- * @param {object} rawConfig - The parsed config.yml object.
+ * @param {object} rawConfig - The parsed porto.yml object.
  * @returns {string[]} Array of unknown key paths, empty if config is valid.
  */
 export function validateUserConfig(

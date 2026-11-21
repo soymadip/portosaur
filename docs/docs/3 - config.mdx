@@ -4,11 +4,13 @@ desc: "Learn how to configure your site to suit your preference & needs."
 icon: "md:settings"
 ---
 
-{vars.project.title} allows you to customize the look & behaviour of your site through a single `config.yml` in your project's root.
+{vars.project.title} allows you to customize the look & behaviour of your site through a single `porto.yml` in your project's root.
+
+Portosaur 1.0 renamed the config file from `config.yml` to `porto.yml`. A `config.yml` still works, but it is deprecated — rename it to `porto.yml`.
 
 ## Config Reference
 
-Below is a reference of all the configuration keys available in `config.yml`.
+Below is a reference of all the configuration keys available in `porto.yml`.
 
 ### `site`
 
@@ -299,7 +301,7 @@ site:
 
 ### Icon Values
 
-Every `icon` key in `config.yml` (and Markdown frontmatter) accepts either:
+Every `icon` key in `porto.yml` (and Markdown frontmatter) accepts either:
 
 - **Unicode Emojis**: `"⚡"`, `"🚀"`, `"🛠️"`
 - **Icon Identifiers**: `<prefix>:<name>` syntax (e.g., `si:github`, `lucide:rocket`, `md:settings`, `di:nodejs`)

@@ -4,14 +4,14 @@ desc: "Reuse values and inject environment variables across your site."
 icon: "md:code-braces"
 ---
 
-{vars.project.title} lets you define values once in `config.yml` & reference them dynamically throughout your config and Markdown/MDX pages.
+{vars.project.title} lets you define values once in `porto.yml` & reference them dynamically throughout your config and Markdown/MDX pages.
 
 ## Syntax Overview
 
-- **In `config.yml`**: Use double curly braces `{{path.to.key}}`.
+- **In `porto.yml`**: Use double curly braces `{{path.to.key}}`.
 - **In `.md`/`.mdx` files**: Use single curly braces `{vars.<path.to.key>}` (or `{vars.<key>}`).
 
-```yaml title="config.yml"
+```yaml title="porto.yml"
 vars:
   project:
     title: "Portosaur"
@@ -41,7 +41,7 @@ Check out the repository at [{vars.project.title} on GitHub]({vars.project.repo}
 
 ### 1. User Variables (`vars`)
 
-Any key declared under the `vars:` root block in `config.yml` is accessible as `{vars.<key>}` or `{{vars.<key>}}`.
+Any key declared under the `vars:` root block in `porto.yml` is accessible as `{vars.<key>}` or `{{vars.<key>}}`.
 
 ```yaml
 vars:
