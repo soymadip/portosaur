@@ -30,6 +30,20 @@ type cursorContext struct {
 	partial      string   // text typed so far (key prefix or value prefix)
 	partialRange protocol.Range
 	existingKeys map[string]bool
+	// orphanPath is the schema path to a value-less key directly
+	// above a blank cursor line, when the key has no children
+	// yet: the cursor is about to type its first child. Set only
+	// on blank lines, and only when the key sits at or above the
+	// cursor's indent — an indented line already finds the key
+	// through the enclosing path. The completion side uses it
+	// only when it resolves to an object with properties.
+	orphanPath []string
+	// orphanKeys are the keys already present in the orphan
+	// key's mapping: children typed below the cursor line.
+	orphanKeys map[string]bool
+	// orphanIndent is the indent the orphan key's children take:
+	// the key's indent plus two spaces.
+	orphanIndent int
 }
 
 // A `key:` line, plain or quoted, with its indent and the rest of
@@ -187,7 +201,7 @@ func analyzeCursor(text string, pos protocol.Position) cursorContext {
 	}
 
 	path, parentLine := enclosingPath(lines, lineNo, indent)
-	return cursorContext{
+	context := cursorContext{
 		kind:    cursorKey,
 		path:    path,
 		partial: partial,
@@ -197,6 +211,14 @@ func analyzeCursor(text string, pos protocol.Position) cursorContext {
 		},
 		existingKeys: siblingKeys(lines, parentLine, indent),
 	}
+	// A blank line right under a value-less key with no children
+	// yet is about to hold that key's first child, even when the
+	// editor left the line unindented: record the key's path so
+	// the completion side can offer its keys.
+	if strings.TrimSpace(line) == "" {
+		context.orphanPath, context.orphanKeys, context.orphanIndent = orphanKeyPath(lines, lineNo, indent)
+	}
+	return context
 }
 
 // enclosingPath collects the parent keys above a line: each `key:`
@@ -227,6 +249,41 @@ func enclosingPath(lines []string, lineNo int, indent int) ([]string, int) {
 		}
 	}
 	return path, parentLine
+}
+
+// orphanKeyPath finds the value-less mapping key directly above
+// a blank cursor line: the nearest non-blank, non-comment line
+// above, when it is a `key:` line with nothing after the colon
+// and an indent at or above the cursor's. The key has no
+// children yet — nothing sits between it and the cursor — so the
+// cursor is about to type its first child. It returns the full
+// path to the key (ancestors included), the keys already present
+// in its mapping, and the indent its children take, or nil when
+// there is no such key.
+func orphanKeyPath(lines []string, lineNo int, indent int) ([]string, map[string]bool, int) {
+	for i := lineNo - 1; i >= 0; i-- {
+		trimmed := strings.TrimSpace(lines[i])
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		match := keyLineRe.FindStringSubmatch(lines[i])
+		if match == nil {
+			return nil, nil, 0
+		}
+		// A value after the colon means the key is complete; a
+		// trailing comment leaves it value-less.
+		rest := strings.TrimSpace(match[5])
+		if rest != "" && !strings.HasPrefix(rest, "#") {
+			return nil, nil, 0
+		}
+		keyIndent := len(match[1])
+		if keyIndent < indent {
+			return nil, nil, 0
+		}
+		ancestors, _ := enclosingPath(lines, i, keyIndent)
+		return append(ancestors, keyOf(match)), siblingKeys(lines, i, keyIndent+2), keyIndent + 2
+	}
+	return nil, nil, 0
 }
 
 // siblingKeys collects the keys already present in a mapping: the

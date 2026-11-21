@@ -13,14 +13,15 @@ func pos(line, character uint32) protocol.Position {
 
 func TestAnalyzeCursor(t *testing.T) {
 	tests := []struct {
-		name         string
-		text         string
-		pos          protocol.Position
-		wantKind     cursorKind
-		wantPath     []string
-		wantKey      string
-		wantPartial  string
-		wantExisting []string
+		name           string
+		text           string
+		pos            protocol.Position
+		wantKind       cursorKind
+		wantPath       []string
+		wantKey        string
+		wantPartial    string
+		wantExisting   []string
+		wantOrphanPath []string
 	}{
 		{
 			name:     "empty doc completes a root key",
@@ -53,6 +54,52 @@ func TestAnalyzeCursor(t *testing.T) {
 			name:     "blank line back at root",
 			text:     "site:\n  title: x\n",
 			pos:      pos(2, 0),
+			wantKind: cursorKey,
+			wantPath: nil,
+		},
+		{
+			name:           "blank column-0 line under a childless key",
+			text:           "toc:\n",
+			pos:            pos(1, 0),
+			wantKind:       cursorKey,
+			wantPath:       nil,
+			wantOrphanPath: []string{"toc"},
+		},
+		{
+			name:     "blank column-0 line under a key with children",
+			text:     "toc:\n  enable: true\n",
+			pos:      pos(2, 0),
+			wantKind: cursorKey,
+			wantPath: nil,
+		},
+		{
+			name:           "blank column-0 line under a value-less scalar key",
+			text:           "title:\n",
+			pos:            pos(1, 0),
+			wantKind:       cursorKey,
+			wantPath:       nil,
+			wantOrphanPath: []string{"title"},
+		},
+		{
+			name:           "blank column-0 line under a nested childless key",
+			text:           "site:\n  content:\n    toc:\n",
+			pos:            pos(3, 0),
+			wantKind:       cursorKey,
+			wantPath:       nil,
+			wantOrphanPath: []string{"site", "content", "toc"},
+		},
+		{
+			name:           "a comment between the key and the blank line",
+			text:           "toc:\n# note\n",
+			pos:            pos(2, 0),
+			wantKind:       cursorKey,
+			wantPath:       nil,
+			wantOrphanPath: []string{"toc"},
+		},
+		{
+			name:     "blank line under a key with a value",
+			text:     "title: x\n",
+			pos:      pos(1, 0),
 			wantKind: cursorKey,
 			wantPath: nil,
 		},
@@ -130,6 +177,9 @@ func TestAnalyzeCursor(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got.path, tc.wantPath) {
 				t.Fatalf("path = %v, want %v", got.path, tc.wantPath)
+			}
+			if !reflect.DeepEqual(got.orphanPath, tc.wantOrphanPath) {
+				t.Fatalf("orphanPath = %v, want %v", got.orphanPath, tc.wantOrphanPath)
 			}
 			if got.key != tc.wantKey {
 				t.Fatalf("key = %q, want %q", got.key, tc.wantKey)

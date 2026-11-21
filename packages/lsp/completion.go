@@ -374,6 +374,23 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 	if !ok {
 		return &protocol.CompletionList{}
 	}
+	// A blank line right under a value-less key with no children
+	// yet completes that key's object, not the enclosing mapping:
+	// the user just typed `toc:` and is about to fill it in. Only
+	// when the key resolves to an object with properties — a
+	// value-less scalar falls back to the enclosing keys. The
+	// insert carries the child's indent, since the line itself
+	// was left unindented, and the edit starts at column 0 so
+	// any whitespace already on the line does not double it.
+	indent := ""
+	if len(context.orphanPath) > 0 {
+		if orphan, ok := schemaAt(schema.raw, context.orphanPath); ok && schemaProperties(orphan) != nil {
+			node = orphan
+			context.existingKeys = context.orphanKeys
+			context.partialRange.Start.Character = 0
+			indent = strings.Repeat(" ", context.orphanIndent)
+		}
+	}
 	props := schemaProperties(node)
 	if props == nil {
 		return &protocol.CompletionList{}
@@ -403,7 +420,7 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 		if !isObjectSchema(prop) {
 			text += " "
 		}
-		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: text}
+		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: indent + text}
 		items = append(items, item)
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })

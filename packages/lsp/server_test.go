@@ -347,6 +347,114 @@ func TestFrontmatterCompletionExcludesExistingKeys(t *testing.T) {
 	}
 }
 
+// A blank line at column 0 right under a `toc:` with no children
+// yet completes the toc keys, not the top-level keys — the user
+// just typed `toc:` and is about to fill it in. The insert
+// carries the child's indent, since the line itself was left
+// unindented.
+func TestFrontmatterCompletionUnindentedLineUnderNewKey(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n\n---\n")
+	items := s.complete(t, documentURI, 2, 0)
+	if len(items) != 3 {
+		t.Fatalf("completions = %v, want exactly the 3 toc children", labels(items))
+	}
+	for _, want := range []string{"enable", "max_level", "min_level"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("completions %v missing %q", labels(items), want)
+		}
+	}
+	for _, top := range []string{"title", "desc", "toc"} {
+		if hasLabel(items, top) {
+			t.Fatalf("completions %v include top-level key %q", labels(items), top)
+		}
+	}
+	edit, ok := editText(items, "enable")
+	if !ok || edit != "  enable: " {
+		t.Fatalf("enable edit = %q, want %q (indented child)", edit, "  enable: ")
+	}
+	item := items[0]
+	for _, it := range items {
+		if it.Label == "enable" {
+			item = it
+		}
+	}
+	textEdit, ok := item.TextEdit.(*protocol.TextEdit)
+	if !ok {
+		t.Fatalf("enable TextEdit is %T, want *protocol.TextEdit", item.TextEdit)
+	}
+	if textEdit.Range.Start.Character != 0 {
+		t.Fatalf("enable edit starts at char %d, want 0", textEdit.Range.Start.Character)
+	}
+}
+
+// The same blank line below a `toc:` that already has children
+// is a sibling line: top-level keys, not toc children.
+func TestFrontmatterCompletionUnindentedLineUnderKeyWithChildren(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n  enable: true\n\n---\n")
+	items := s.complete(t, documentURI, 3, 0)
+	for _, want := range []string{"title", "desc"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("completions %v missing top-level key %q", labels(items), want)
+		}
+	}
+	for _, child := range []string{"enable", "max_level", "min_level"} {
+		if hasLabel(items, child) {
+			t.Fatalf("completions %v include toc child %q", labels(items), child)
+		}
+	}
+}
+
+// A value-less scalar key has no children to offer: the blank
+// line under `title:` falls back to the top-level keys.
+func TestFrontmatterCompletionUnindentedLineUnderScalarKey(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntitle:\n\n---\n")
+	items := s.complete(t, documentURI, 2, 0)
+	for _, want := range []string{"desc", "toc"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("completions %v missing top-level key %q", labels(items), want)
+		}
+	}
+}
+
+// A blank INDENTED line under `toc:` still completes the toc
+// children, with no added indent — the line already has it.
+func TestFrontmatterCompletionIndentedLineUnderNewKey(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n  \n---\n")
+	items := s.complete(t, documentURI, 2, 2)
+	if len(items) != 3 {
+		t.Fatalf("completions = %v, want exactly the 3 toc children", labels(items))
+	}
+	for _, want := range []string{"enable", "max_level", "min_level"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("completions %v missing %q", labels(items), want)
+		}
+	}
+	edit, ok := editText(items, "enable")
+	if !ok || edit != "enable: " {
+		t.Fatalf("enable edit = %q, want %q (no added indent)", edit, "enable: ")
+	}
+}
+
+// Children typed below the blank line are still excluded from
+// the orphan key's completions.
+func TestFrontmatterCompletionUnindentedLineExcludesChildrenBelow(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n\n  enable: true\n---\n")
+	items := s.complete(t, documentURI, 2, 0)
+	if hasLabel(items, "enable") {
+		t.Fatalf("completions %v include the existing child enable", labels(items))
+	}
+	for _, want := range []string{"max_level", "min_level"} {
+		if !hasLabel(items, want) {
+			t.Fatalf("completions %v missing %q", labels(items), want)
+		}
+	}
+}
+
 func TestFrontmatterCompletionBooleanValue(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntoc:\n  enable: \n---\n")
