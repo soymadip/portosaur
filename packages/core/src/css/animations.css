@@ -187,6 +187,88 @@
   transition: opacity 450ms ease;
 }
 
+/* Diagram viewer: a 300ms fade, the backdrop fading with it.
+   The entry is pure CSS via `@starting-style` + `allow-discrete`,
+   like the search dialog. The exit runs on the `closing` class
+   instead, over 300ms (Diagram closes for real 300ms later) —
+   the pure-CSS exit never ran on some phones, where the dialog
+   just blinked out. */
+.porto-diagram-dialog {
+  transition:
+    opacity 300ms ease,
+    /* The sheet slides on mobile (translate only changes there —
+       on desktop it stays put). */
+    translate 300ms ease,
+    /* The size glides when the expand button toggles the
+       near-fullscreen state, like the search dialog's glide. */
+    width 300ms ease,
+    height 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+/* The backdrop is the search dialog's overlay: black at 20% with
+   a 4px blur, so the page stays visible behind the frosted glass
+   instead of going dark. */
+.porto-diagram-dialog::backdrop {
+  background-color: hsla(0, 0%, 0%, 0.2);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition:
+    opacity 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+@starting-style {
+  .porto-diagram-dialog,
+  .porto-diagram-dialog::backdrop {
+    opacity: 0;
+  }
+}
+/* The exit fades toward the closed state — `@starting-style`
+   alone only covers the entry, so without this the dialog would
+   sit at full opacity for 300ms and then vanish. */
+.porto-diagram-dialog:not([open]) {
+  opacity: 0;
+}
+.porto-diagram-dialog:not([open])::backdrop {
+  opacity: 0;
+}
+/* Closing: the exit runs on this class while the dialog is
+   still open (Diagram closes for real 300ms later) — the
+   pure-CSS exit never ran on some phones, so the dialog just
+   blinked out. The dialog and the backdrop fade together, so by
+   the time the dialog closes for real there is nothing left to
+   snap away. */
+.porto-diagram-dialog--closing {
+  opacity: 0;
+  transition:
+    opacity 300ms ease,
+    translate 300ms ease;
+}
+.porto-diagram-dialog--closing::backdrop {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+/* On a phone the viewer is a bottom sheet: it slides up from
+   below the screen on entry and back down on close. The resting
+   translate lives in this file, next to the @starting-style that
+   animates from it — split across stylesheets, the entry would
+   render at rest with no slide. */
+@media (max-width: 50rem) {
+  .porto-diagram-dialog {
+    translate: 0 0;
+  }
+  @starting-style {
+    .porto-diagram-dialog {
+      translate: 0 100%;
+    }
+  }
+  .porto-diagram-dialog--closing {
+    translate: 0 100%;
+  }
+}
+
 /* Hamburger icon morph (three lines -> X), 0.25s. */
 .porto-hamburger span {
   transition:
@@ -267,6 +349,8 @@ details.porto-navbar__dropdown[open]::details-content {
   .porto-mobile-menu .porto-mobile-menu__content,
   .porto-search-dialog,
   .porto-search-dialog::backdrop,
+  .porto-diagram-dialog,
+  .porto-diagram-dialog::backdrop,
   .porto-hamburger span,
   .porto-dropdown__menu,
   details.porto-navbar__dropdown::details-content {

@@ -285,7 +285,10 @@ export function collectSiteIcons(
     if (value.includes(".") || value.includes("/")) {
       continue;
     }
-    if (/\p{Emoji}/u.test(value)) {
+    // Emoji only when the value carries no colon: icon ids always
+    // do (`prefix:name`), and digits carry the Emoji property, so
+    // a bare contains-check dropped ids like `lu:maximize-2`.
+    if (!value.includes(":") && /\p{Emoji}/u.test(value)) {
       continue;
     }
     const mapped = techMap[value.toLowerCase()]?.icon;

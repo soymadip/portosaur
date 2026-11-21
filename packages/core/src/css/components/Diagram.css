@@ -1,0 +1,146 @@
+/* Diagram viewer — the expand popup, GitHub-style: a large
+ * native <dialog> with the diagram big and Pele's zoom inside.
+ * Rendered by Diagram. The open/close fade lives in
+ * animations.css, with the other dialog motion. */
+
+.porto-diagram-dialog {
+  margin: auto;
+  padding: 0;
+  /* Nothing needs the dialog to scroll: the viewer sizes the
+     diagram to the frame, and zoom pans through the viewBox. */
+  overflow: hidden;
+  /* The page background, not the panel gray: the diagram's own
+     background is the same token, so it blends into the frame. */
+  background-color: var(--porto-color-bg);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
+  /* Large, but clearly a floating panel — near-fullscreen felt
+     like it swallowed the page. */
+  width: min(90rem, 90%);
+  height: 80%;
+}
+.porto-diagram-dialog[open] {
+  display: flex;
+}
+
+.porto-diagram-dialog__frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* The expanded popup: near-fullscreen, like the first version
+   of the viewer. The size glides on the transition in
+   animations.css. The max sizes match the sizes: the browser's
+   own dialog styles cap every dialog at calc(100% - 2em - 6px),
+   and without these that cap, not the width above, decides the
+   size. */
+.porto-diagram-dialog--expanded {
+  width: calc(100% - 1rem);
+  height: calc(100% - 1rem);
+  max-width: calc(100% - 1rem);
+  max-height: calc(100% - 1rem);
+}
+
+/* The expand + close buttons float top-right, above the diagram. */
+.porto-diagram-dialog__actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* The viewer fills the frame and centers the diagram. The zoom
+   buttons sit bottom-right, GitHub-style, clear of the close
+   button up top (Pele reads these variables for the button
+   position). */
+.porto-diagram-dialog__viewer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.25rem;
+  --pele-zoom-top: auto;
+  --pele-zoom-bottom: 0.5rem;
+  --pele-zoom-right: 0.5rem;
+}
+.porto-diagram-dialog__viewer > svg.pele {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* Scroll lock while the viewer is open, on the root element.
+   `scrollbar-gutter: stable` reserves the scrollbar's space
+   while it is hidden, so the page doesn't widen and the content
+   doesn't shift sideways when the dialog opens. */
+[data-diagram-modal-open] {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* The drag strip is mobile-only: on desktop there is no sheet
+   to drag. */
+.porto-diagram-dialog__drag {
+  display: none;
+}
+
+/* On a phone the viewer is a bottom sheet, app-style: full
+   width, anchored to the bottom, rounded top corners only. The
+   expand button takes it full screen, edge to edge. */
+@media (max-width: 50rem) {
+  .porto-diagram-dialog {
+    width: 100%;
+    height: 85%;
+    /* The max sizes match, like the expanded state: the
+       browser's own dialog cap would otherwise narrow the
+       sheet to 100% - 2em - 6px. */
+    max-width: 100%;
+    max-height: 85%;
+    margin: auto auto 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+  .porto-diagram-dialog--expanded {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: 100%;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+  /* The drag strip spans the top of the sheet — the whole strip
+     is the handle, not just the bar, so it is easy to grab. It
+     sits above the viewer (Pele makes the viewer positioned, so
+     without a z-index the viewer would cover the strip and
+     swallow the drag) and under the action buttons, which come
+     later in the DOM at the same z-index. `touch-action: none`
+     keeps the browser from stealing the drag for scrolling. */
+  .porto-diagram-dialog__drag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    height: 2.5rem;
+    padding-top: 0.5rem;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }
+  .porto-diagram-dialog__grabber {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background-color: var(--porto-color-gray-3);
+  }
+}

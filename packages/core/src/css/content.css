@@ -98,16 +98,52 @@
    (Pele — see remarkMermaid). The `.pele` variables map Pele's
    theme onto the scheme tokens, so diagrams follow light/dark and
    the active scheme with no re-render. The wrapper centers the
-   diagram and anchors the zoom buttons; the SVG scales down to fit
-   narrow containers, and zoom (Diagram.tsx) enlarges it on demand. */
+   diagram and anchors the expand button; the SVG scales down to
+   fit narrow containers. The expand button opens the popup
+   (Diagram.css), where Pele's zoom runs — zooming inline was
+   tried first and dropped, since the small box just overflowed. */
 .porto-markdown-content .porto-diagram:not(:where(.not-content *)) {
   position: relative;
 }
-.porto-markdown-content .porto-diagram > svg.pele:not(:where(.not-content *)) {
+.porto-markdown-content .porto-diagram svg.pele:not(:where(.not-content *)) {
   display: block;
   max-width: 100%;
   height: auto;
   margin-inline: auto;
+}
+/* The expand button, top-right of the diagram — the code-block
+   copy button's shape (code.css), in the content colors: gray
+   at rest, the text color on hover (white would vanish on a
+   light page). Always visible, so it works on touch too. */
+.porto-markdown-content .porto-diagram__expand:not(:where(.not-content *)) {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-markdown-content
+  .porto-diagram__expand:hover:not(:where(.not-content *)) {
+  color: var(--porto-color-text);
+}
+.porto-markdown-content .porto-diagram__expand svg:not(:where(.not-content *)) {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .porto-markdown-content .porto-diagram__expand:not(:where(.not-content *)) {
+    transition: none;
+  }
 }
 .pele {
   --pele-bg: var(--porto-color-bg);
