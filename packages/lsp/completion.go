@@ -385,12 +385,14 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 	// was left unindented, and the edit starts at column 0 so
 	// the partial is replaced and the indent never doubles.
 	indent := ""
+	keyIndent := context.lineIndent
 	if len(context.orphanPath) > 0 {
 		if orphan, ok := schemaAt(schema.raw, context.orphanPath); ok && schemaProperties(orphan) != nil {
 			node = orphan
 			context.existingKeys = context.orphanKeys
 			context.partialRange.Start.Character = 0
 			indent = strings.Repeat(" ", context.orphanIndent)
+			keyIndent = context.orphanIndent
 		}
 	}
 	props := schemaProperties(node)
@@ -416,11 +418,28 @@ func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.Com
 		if d := schemaDescription(prop); d != "" {
 			item.Documentation = &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: d}
 		}
-		// Object-valued keys take `key:` (the value goes on the
-		// next line); scalars take `key: ` (the value follows).
-		text := name + ":"
-		if !isObjectSchema(prop) {
-			text += " "
+		var text string
+		if schemaProperties(prop) != nil {
+			// An object key with children drops the cursor
+			// onto the next line, indented for the first
+			// child, and pops the child list up on its own:
+			// the triggerSuggest command runs once the
+			// snippet lands (VS Code runs it; Zed ignores
+			// completion-item commands, and the children
+			// appear there when a letter is typed or
+			// Ctrl+Space is hit).
+			item.InsertTextFormat = protocol.InsertTextFormatSnippet
+			item.Command = protocol.Command{Title: "Trigger Suggest", Command: "editor.action.triggerSuggest"}
+			text = name + ":\n" + strings.Repeat(" ", keyIndent+2) + "$0"
+		} else {
+			// Object-valued keys without listed children
+			// take `key:` (the value goes on the next
+			// line); scalars take `key: ` (the value
+			// follows).
+			text = name + ":"
+			if !isObjectSchema(prop) {
+				text += " "
+			}
 		}
 		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: indent + text}
 		items = append(items, item)

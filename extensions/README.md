@@ -24,13 +24,14 @@ how `porto.yml` is handled.
 | Unknown `{vars.}` warnings                         |   Yes   | Yes | Severity follows `site.content.on_missing_var`                                          |
 | `{vars.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
 | Missing `{env.}` warnings                          |   Yes   | Yes | Severity follows `site.content.on_missing_env`                                          |
-| `{env.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
-| `{env.}` completion                               |   Yes   | Yes | From the system environment and `.env` files                                            |
-| Shortcode suggestions                             |   Yes   | Yes | Icon packs and emoji after `:`. Emoji need `site.content.render_emoji_shortcodes`       |
-| Code fence suggestions                            |   Yes   | Yes | Languages after the fence, meta params after the language                               |
+| `{env.}` values inline and on hover                |   Yes   | Yes |                                                                                         |
+| `{env.}` completion                                |   Yes   | Yes | From the system environment and `.env` files                                            |
+| Shortcode suggestions                              |   Yes   | Yes | Icon packs and emoji after `:`. Emoji need `site.content.render_emoji_shortcodes`       |
+| Code fence suggestions                             |   Yes   | Yes | Languages after the fence, meta params after the language                               |
 | Icon prefix suggestions                            |   Yes   | Yes | Pack prefixes in icon values, before the colon                                          |
 | List auto-insert on Enter                          |   Yes   | Yes | Enter continues numbered, bullet, and task lists                                        |
 | Frontmatter auto-indent on Enter                   |   Yes   | Yes | Enter after a `key:` line indents two spaces                                            |
+| Object keys drop onto an indented next line        |   Yes   | Yes | Cursor drops in both editors, the child list pops up on its own in VS Code only         |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |

@@ -44,6 +44,11 @@ type cursorContext struct {
 	// orphanIndent is the indent the orphan key's children take:
 	// the key's indent plus two spaces.
 	orphanIndent int
+	// lineIndent is the cursor line's own indent in spaces: the
+	// leading whitespace of a partial-key line, or the cursor
+	// column of a blank line (where the editor's auto-indent
+	// puts it). Key context only.
+	lineIndent int
 }
 
 // A `key:` line, plain or quoted, with its indent and the rest of
@@ -214,6 +219,7 @@ func analyzeCursor(text string, pos protocol.Position) cursorContext {
 			End:   pos,
 		},
 		existingKeys: siblingKeys(lines, parentLine, indent),
+		lineIndent:   indent,
 	}
 	// A blank line, or a line holding only a partial key (no
 	// colon yet), right under a value-less key with no children

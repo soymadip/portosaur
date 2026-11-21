@@ -38,6 +38,7 @@ Beyond completion and hover, the server also:
 - **Pops up prop values.** Accepting a prop that takes a value opens the value list on its own in VS Code, so the values follow right after `name=`. In Zed the values appear when you type the quote instead.
 - **Continues lists.** Pressing Enter at the end of a list item starts the next one: the next number, the same bullet, or a fresh unchecked task box. Enter on an empty item leaves the list.
 - **Indents after frontmatter keys.** Pressing Enter after a `key:` line in frontmatter starts the next line two spaces in, so the nested keys line up. A `key: value` line stays at the same level.
+- **Drops object keys onto the next line.** Accepting an object key like `toc:` puts the cursor on the next line, indented for the first child, and the child list pops up on its own in VS Code. In Zed the children appear when you type a letter or hit Ctrl+Space.
 - **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
 - **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.
 

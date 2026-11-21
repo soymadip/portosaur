@@ -259,3 +259,29 @@ func TestAnalyzeCursorUTF16(t *testing.T) {
 		t.Fatalf("partial = %q, want the emoji", got.partial)
 	}
 }
+
+// lineIndent is the cursor line's own indent: the leading
+// whitespace of a partial-key line, or the cursor column of
+// a blank line. The object-key snippet indents its next line
+// from it, so a nested object key indents from its own level.
+func TestAnalyzeCursorLineIndent(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		pos  protocol.Position
+		want int
+	}{
+		{"partial root key", "to", pos(0, 2), 0},
+		{"blank line at root", "title: x\n", pos(1, 0), 0},
+		{"blank line indented under a key", "toc:\n  ", pos(1, 2), 2},
+		{"partial key indented under a key", "toc:\n  en", pos(1, 4), 2},
+		{"blank line nested three deep", "site:\n  content:\n    toc:\n      ", pos(3, 6), 6},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := analyzeCursor(tc.text, tc.pos); got.lineIndent != tc.want {
+				t.Fatalf("lineIndent = %d, want %d", got.lineIndent, tc.want)
+			}
+		})
+	}
+}

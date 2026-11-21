@@ -306,6 +306,17 @@ func itemCommand(items []protocol.CompletionItem, label string) (protocol.Comman
 	return protocol.Command{}, false
 }
 
+// itemFormat returns the insert text format of the completion
+// item with the given label.
+func itemFormat(items []protocol.CompletionItem, label string) (protocol.InsertTextFormat, bool) {
+	for _, item := range items {
+		if item.Label == label {
+			return item.InsertTextFormat, true
+		}
+	}
+	return 0, false
+}
+
 // editText returns the inserted text of the completion item with
 // the given label.
 func editText(items []protocol.CompletionItem, label string) (string, bool) {
@@ -391,6 +402,69 @@ func TestFrontmatterCompletionExcludesExistingKeys(t *testing.T) {
 	}
 	if !hasLabel(items, "desc") {
 		t.Fatalf("completions %v missing desc", labels(items))
+	}
+}
+
+// Picking an object key with children drops the cursor onto
+// the next line, indented for the first child, and pops the
+// child list up on its own: the snippet is `toc:` plus a
+// newline plus the child indent, with a triggerSuggest
+// command. The position it lands on is the one
+// TestFrontmatterCompletionIndentedLineUnderNewKey covers —
+// the children are already offered there.
+func TestFrontmatterCompletionObjectKeyInsertsSnippet(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nt\n---\n")
+	items := s.complete(t, documentURI, 1, 1)
+	edit, ok := editText(items, "toc")
+	if !ok || edit != "toc:\n  $0" {
+		t.Fatalf("toc edit = %q, want %q", edit, "toc:\n  $0")
+	}
+	format, ok := itemFormat(items, "toc")
+	if !ok || format != protocol.InsertTextFormatSnippet {
+		t.Fatalf("toc format = %v, want Snippet", format)
+	}
+	if cmd, ok := itemCommand(items, "toc"); !ok || cmd.Command != "editor.action.triggerSuggest" {
+		t.Fatalf("toc command = %q, want %q", cmd.Command, "editor.action.triggerSuggest")
+	}
+	if rng := editRange(items, "toc"); rng.Start != (protocol.Position{Line: 1, Character: 0}) || rng.End != (protocol.Position{Line: 1, Character: 1}) {
+		t.Fatalf("toc edit range = %v, want (1,0)-(1,1) covering the partial", rng)
+	}
+}
+
+// A scalar key keeps the plain `key: ` insert, with no snippet
+// and no triggerSuggest command.
+func TestFrontmatterCompletionScalarKeyKeepsPlainInsert(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nti\n---\n")
+	items := s.complete(t, documentURI, 1, 2)
+	edit, ok := editText(items, "title")
+	if !ok || edit != "title: " {
+		t.Fatalf("title edit = %q, want %q", edit, "title: ")
+	}
+	if format, ok := itemFormat(items, "title"); !ok || format == protocol.InsertTextFormatSnippet {
+		t.Fatalf("title format = %v, want not Snippet", format)
+	}
+	if cmd, ok := itemCommand(items, "title"); !ok || cmd.Command != "" {
+		t.Fatalf("title command = %q, want none (a scalar key takes its value on the same line)", cmd.Command)
+	}
+}
+
+// An object key with no listed children keeps the plain `key:`
+// insert: there are no children to drop onto.
+func TestFrontmatterCompletionObjectKeyWithoutPropertiesKeepsPlainInsert(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\n_op\n---\n")
+	items := s.complete(t, documentURI, 1, 3)
+	edit, ok := editText(items, "_openapi")
+	if !ok || edit != "_openapi:" {
+		t.Fatalf("_openapi edit = %q, want %q", edit, "_openapi:")
+	}
+	if format, ok := itemFormat(items, "_openapi"); !ok || format == protocol.InsertTextFormatSnippet {
+		t.Fatalf("_openapi format = %v, want not Snippet", format)
+	}
+	if cmd, ok := itemCommand(items, "_openapi"); !ok || cmd.Command != "" {
+		t.Fatalf("_openapi command = %q, want none (no children to suggest)", cmd.Command)
 	}
 }
 
