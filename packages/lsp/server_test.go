@@ -164,6 +164,9 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.HoverProvider == nil {
 		t.Fatal("no hover provider advertised")
 	}
+	if result.Capabilities.DefinitionProvider == nil {
+		t.Fatal("no definition provider advertised")
+	}
 	if result.Capabilities.TextDocumentSync != protocol.TextDocumentSyncKindFull {
 		t.Fatalf("sync = %v, want full", result.Capabilities.TextDocumentSync)
 	}

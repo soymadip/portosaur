@@ -22,12 +22,13 @@ type Server struct {
 	documents *documentStore
 	detector  *projectDetector
 	resolver  *schemaResolver
+	pages     *pageIndexCache
 
 	shutdownReceived atomic.Bool
 }
 
 func newServer() *Server {
-	s := &Server{documents: newDocumentStore(), detector: newProjectDetector("")}
+	s := &Server{documents: newDocumentStore(), detector: newProjectDetector(""), pages: newPageIndexCache()}
 	s.resolver = newSchemaResolver(s.fatal)
 	return s
 }
@@ -67,7 +68,8 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 			CompletionProvider: &protocol.CompletionOptions{
 				TriggerCharacters: []string{":", "<", "="},
 			},
-			HoverProvider: protocol.Boolean(true),
+			HoverProvider:      protocol.Boolean(true),
+			DefinitionProvider: protocol.Boolean(true),
 		},
 		ServerInfo: protocol.ServerInfo{
 			Name:    "porto-lsp",
@@ -79,8 +81,21 @@ func (s *Server) Initialize(_ context.Context, params *protocol.InitializeParams
 // DidOpen stores the document and publishes its diagnostics.
 func (s *Server) DidOpen(_ context.Context, params *protocol.DidOpenTextDocumentParams) error {
 	s.documents.open(params.TextDocument.URI, params.TextDocument.Text)
+	s.invalidatePages(params.TextDocument.URI)
 	s.publishDiagnostics(params.TextDocument.URI)
 	return nil
+}
+
+// invalidatePages drops the cached page index for the project
+// a document belongs to, so a link target added, renamed, or
+// re-slugged in it resolves fresh. Only content files matter.
+func (s *Server) invalidatePages(documentURI uri.URI) {
+	if !isContentFile(uriPath(documentURI)) {
+		return
+	}
+	if root, ok := s.projectFor(documentURI); ok {
+		s.pages.invalidate(root)
+	}
 }
 
 // DidChange replaces the document's text (full sync) and
@@ -98,6 +113,7 @@ func (s *Server) DidChange(_ context.Context, params *protocol.DidChangeTextDocu
 		return nil
 	}
 	s.documents.change(params.TextDocument.URI, text)
+	s.invalidatePages(params.TextDocument.URI)
 	s.publishDiagnostics(params.TextDocument.URI)
 	return nil
 }
@@ -105,6 +121,7 @@ func (s *Server) DidChange(_ context.Context, params *protocol.DidChangeTextDocu
 // DidClose forgets the document and clears its diagnostics.
 func (s *Server) DidClose(_ context.Context, params *protocol.DidCloseTextDocumentParams) error {
 	s.documents.close(params.TextDocument.URI)
+	s.invalidatePages(params.TextDocument.URI)
 	s.sendDiagnostics(params.TextDocument.URI, nil)
 	return nil
 }
