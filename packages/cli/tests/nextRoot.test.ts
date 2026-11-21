@@ -37,12 +37,13 @@ function options(overrides: Record<string, any> = {}): PortosaurOptions {
       notesRoute: "docs",
       blogDir: "blog",
       blogRoute: "blog",
-      markdown: {
+      content: {
         addMdxDesc: true,
         mermaid: true,
         renderEmojiShortcodes: true,
         onBrokenLinks: "throw",
         onBrokenImages: "throw",
+        toc: { enabled: true, minLevel: 2, maxLevel: 5 },
       },
       build: { outputDir: "build" },
       ...(overrides.site ?? {}),
@@ -149,12 +150,13 @@ describe("buildSourceConfigContent", () => {
     const content = buildSourceConfigContent(
       options({
         site: {
-          markdown: {
+          content: {
             addMdxDesc: true,
             mermaid: true,
             renderEmojiShortcodes: false,
             onBrokenLinks: "throw",
             onBrokenImages: "throw",
+            toc: { enabled: true, minLevel: 2, maxLevel: 5 },
           },
         },
       }),

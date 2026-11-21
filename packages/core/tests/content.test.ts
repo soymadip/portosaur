@@ -1,6 +1,11 @@
 import { describe, test, expect } from "bun:test";
 import { createElement, Fragment } from "react";
-import { tocToHeadings, topicListCards } from "../src/lib/content.ts";
+import {
+  nestHeadings,
+  resolveTocSettings,
+  tocToHeadings,
+  topicListCards,
+} from "../src/lib/content.ts";
 
 /**
  * `tocToHeadings` converts Fumadocs TOC items to flat headings for
@@ -59,6 +64,145 @@ describe("tocToHeadings", () => {
       { title: "No hash", url: "/docs/page", depth: 2 },
     ]);
     expect(headings).toEqual([]);
+  });
+
+  test("drops headings deeper than maxLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+      ],
+      { maxLevel: 3 },
+    );
+    expect(headings).toEqual([
+      { depth: 2, slug: "section", text: "Section" },
+      { depth: 3, slug: "subsection", text: "Subsection" },
+    ]);
+  });
+
+  test("drops headings shallower than minLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+      ],
+      { minLevel: 3 },
+    );
+    expect(headings).toEqual([
+      { depth: 3, slug: "subsection", text: "Subsection" },
+      { depth: 4, slug: "detail", text: "Detail" },
+    ]);
+  });
+
+  test("keeps only headings between minLevel and maxLevel", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Section", url: "#section", depth: 2 },
+        { title: "Subsection", url: "#subsection", depth: 3 },
+        { title: "Detail", url: "#detail", depth: 4 },
+        { title: "Fine print", url: "#fine-print", depth: 5 },
+      ],
+      { minLevel: 3, maxLevel: 4 },
+    );
+    expect(headings).toEqual([
+      { depth: 3, slug: "subsection", text: "Subsection" },
+      { depth: 4, slug: "detail", text: "Detail" },
+    ]);
+  });
+
+  test("returns nothing when no heading is in range", () => {
+    const headings = tocToHeadings(
+      [{ title: "Section", url: "#section", depth: 2 }],
+      { minLevel: 3 },
+    );
+    expect(headings).toEqual([]);
+  });
+
+  test("never shows an H1 even with minLevel 1", () => {
+    const headings = tocToHeadings(
+      [
+        { title: "Title", url: "#title", depth: 1 },
+        { title: "Section", url: "#section", depth: 2 },
+      ],
+      { minLevel: 1 },
+    );
+    expect(headings).toEqual([{ depth: 2, slug: "section", text: "Section" }]);
+  });
+});
+
+describe("resolveTocSettings", () => {
+  const global = { enable: true, minLevel: 2, maxLevel: 5 };
+
+  test("uses the global values when the page sets nothing", () => {
+    expect(resolveTocSettings(global)).toEqual(global);
+    expect(resolveTocSettings(global, {})).toEqual(global);
+  });
+
+  test("overrides field by field, unset fields fall back to global", () => {
+    expect(resolveTocSettings(global, { max_level: 3 })).toEqual({
+      enable: true,
+      minLevel: 2,
+      maxLevel: 3,
+    });
+    expect(resolveTocSettings(global, { enable: false })).toEqual({
+      enable: false,
+      minLevel: 2,
+      maxLevel: 5,
+    });
+  });
+});
+
+describe("nestHeadings", () => {
+  test("nests h3s under their h2 and h4s under their h3", () => {
+    const tree = nestHeadings([
+      { depth: 2, slug: "config-reference", text: "Config Reference" },
+      { depth: 3, slug: "site", text: "site" },
+      { depth: 4, slug: "sitebuild", text: "site.build" },
+      { depth: 4, slug: "siterss", text: "site.rss" },
+      {
+        depth: 3,
+        slug: "content-directories--routing",
+        text: "Content Directories & Routing",
+      },
+      { depth: 2, slug: "custom-head-tags", text: "Custom Head Tags" },
+    ]);
+    expect(tree.map((item) => item.slug)).toEqual([
+      "config-reference",
+      "custom-head-tags",
+    ]);
+    const reference = tree[0];
+    expect(reference.children.map((item) => item.slug)).toEqual([
+      "site",
+      "content-directories--routing",
+    ]);
+    expect(reference.children[0].children.map((item) => item.slug)).toEqual([
+      "sitebuild",
+      "siterss",
+    ]);
+  });
+
+  test("promotes orphan headings to top-level", () => {
+    const tree = nestHeadings([
+      { depth: 3, slug: "orphan", text: "Orphan" },
+      { depth: 4, slug: "deep", text: "Deep" },
+    ]);
+    expect(tree.map((item) => item.slug)).toEqual(["orphan"]);
+    expect(tree[0].children.map((item) => item.slug)).toEqual(["deep"]);
+  });
+
+  test("nests a deeper heading under the nearest shallower one", () => {
+    // An h4 straight after an h2 nests under the h2 — no level
+    // is skipped in the tree.
+    const tree = nestHeadings([
+      { depth: 2, slug: "first", text: "First" },
+      { depth: 4, slug: "deep", text: "Deep" },
+      { depth: 2, slug: "second", text: "Second" },
+    ]);
+    expect(tree.map((item) => item.slug)).toEqual(["first", "second"]);
+    expect(tree[0].children.map((item) => item.slug)).toEqual(["deep"]);
+    expect(tree[1].children).toEqual([]);
   });
 });
 

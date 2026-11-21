@@ -86,15 +86,15 @@ describe("buildSiteConfig", () => {
     expect(custom.site.build.outputDir).toBe("dist");
   });
 
-  test("has no markdown.format key (MDX-only)", () => {
+  test("has no content.format key (MDX-only)", () => {
     const options = buildSiteConfig(
-      { site: { markdown: { format: "md", mermaid: false } } },
+      { site: { content: { format: "md", mermaid: false } } },
       process.cwd(),
       { gitDate: "June 26, 2026", portoPaths, env: {} },
     );
 
-    expect(options.site.markdown).not.toHaveProperty("format");
-    expect(options.site.markdown.mermaid).toBe(false);
+    expect(options.site.content).not.toHaveProperty("format");
+    expect(options.site.content.mermaid).toBe(false);
   });
 
   test("add_mdx_desc defaults to true and can be turned off", () => {
@@ -102,14 +102,41 @@ describe("buildSiteConfig", () => {
       gitDate: "June 26, 2026",
       portoPaths,
     });
-    expect(defaults.site.markdown.addMdxDesc).toBe(true);
+    expect(defaults.site.content.addMdxDesc).toBe(true);
 
     const off = buildSiteConfig(
-      { site: { markdown: { add_mdx_desc: false } } },
+      { site: { content: { add_mdx_desc: false } } },
       process.cwd(),
       { gitDate: "June 26, 2026", portoPaths },
     );
-    expect(off.site.markdown.addMdxDesc).toBe(false);
+    expect(off.site.content.addMdxDesc).toBe(false);
+  });
+
+  test("toc defaults to on, levels 2 to 5, and can be narrowed", () => {
+    const defaults = buildSiteConfig({}, process.cwd(), {
+      gitDate: "June 26, 2026",
+      portoPaths,
+    });
+    expect(defaults.site.content.toc).toEqual({
+      enable: true,
+      minLevel: 2,
+      maxLevel: 5,
+    });
+
+    const custom = buildSiteConfig(
+      {
+        site: {
+          content: { toc: { enable: false, min_level: 3, max_level: 4 } },
+        },
+      },
+      process.cwd(),
+      { gitDate: "June 26, 2026", portoPaths },
+    );
+    expect(custom.site.content.toc).toEqual({
+      enable: false,
+      minLevel: 3,
+      maxLevel: 4,
+    });
   });
 
   test("passes custom_css through as string or array", () => {

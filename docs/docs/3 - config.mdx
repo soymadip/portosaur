@@ -53,9 +53,9 @@ Robots file generator for search engine crawlers.
 | `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                                                |
 | `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`. Coming soon — not emitted yet. |
 
-#### `site.markdown`
+#### `site.content`
 
-Configure the Markdown renderer behavior.
+Configure how content renders.
 
 | Key                       | Type   | Default   | Description                                                                                                    |
 | :------------------------ | :----- | :-------- | :------------------------------------------------------------------------------------------------------------- |
@@ -65,6 +65,9 @@ Configure the Markdown renderer behavior.
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                 |
 | `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                      |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                        |
+| `toc.enable`              | `bool` | `true`    | Show the table of contents. Per-page `toc` frontmatter overrides this.                                         |
+| `toc.min_level`           | `num`  | `2`       | Shallowest heading level in the table of contents.                                                             |
+| `toc.max_level`           | `num`  | `5`       | Deepest heading level in the table of contents.                                                                |
 
 #### `site.pwa`
 

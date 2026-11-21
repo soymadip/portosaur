@@ -14,8 +14,11 @@ import { SiteIcon } from "../SiteIcon.tsx";
  *
  * An expand button opens the diagram in a popup, GitHub-style: a
  * large native `<dialog>` with the diagram big and Pele's zoom inside (pinch, Ctrl+scroll, drag, and the buttons
- * at the bottom-right). A second expand button beside the close
- * button grows the popup to near-fullscreen, and back. On a
+ * at the bottom-right). On a phone, tapping the diagram itself
+ * opens the popup too. A second expand button beside the close
+ * button grows the popup to near-fullscreen, and back — expanding
+ * fits the diagram to the popup's width, shrinking back resets
+ * it to the whole diagram. On a
  * phone the popup is a bottom sheet: it slides up from the
  * bottom, and the expand button takes it full screen. The bar
  * at the top of the sheet is a drag handle: pull up to expand,
@@ -138,6 +141,52 @@ export function Diagram({ svg }: { svg: string }) {
     };
   }, [open]);
 
+  // Expanding fits the diagram to the popup's width: the
+  // diagram keeps its natural size otherwise, so a narrow one
+  // floats in the middle of the bigger view with gaps at the
+  // sides. Pele leaves about 8px of space inside the svg around
+  // the drawing, so the fit is measured on the drawing itself,
+  // not the svg — fitting the svg would leave those gaps. The
+  // zoom waits out the 300ms size transition — Pele resets the
+  // zoom whenever the viewer resizes, so zooming mid-transition
+  // would be undone. Shrinking back resets to the whole diagram.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    if (!expanded) {
+      zoomRef.current?.reset();
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      const viewer = viewerRef.current;
+      const zoom = zoomRef.current;
+      const svg = viewer?.querySelector("svg");
+      const naturalWidth = Number(svg?.getAttribute("width"));
+      if (!viewer || !zoom || !svg || !naturalWidth) {
+        return;
+      }
+      let contentWidth = naturalWidth;
+      try {
+        const bbox = svg.getBBox();
+        if (bbox.width > 0) {
+          contentWidth = bbox.width;
+        }
+      } catch {
+        // getBBox throws when the svg isn't rendered — the svg
+        // width is close enough.
+      }
+      const style = window.getComputedStyle(viewer);
+      const paddingX =
+        (parseFloat(style.paddingLeft) || 0) +
+        (parseFloat(style.paddingRight) || 0);
+      zoom.zoomTo((viewer.clientWidth - paddingX) / contentWidth);
+    }, 350);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [expanded, open]);
+
   // Escape closes — listened for on the window in the CAPTURE
   // phase, like the search dialog: a dialog-level or bubble-phase
   // listener needed two presses in Firefox (the first never
@@ -199,6 +248,15 @@ export function Diagram({ svg }: { svg: string }) {
   const onDialogClick = (event: React.MouseEvent<HTMLDialogElement>) => {
     if (event.target === dialogRef.current) {
       close();
+    }
+  };
+
+  // On a phone, tapping the diagram itself opens the popup — the
+  // expand button stays the way in on desktop. The breakpoint
+  // matches the sheet layout in Diagram.css.
+  const onInlineTap = () => {
+    if (window.matchMedia("(max-width: 50rem)").matches) {
+      openDialog();
     }
   };
 
@@ -324,7 +382,7 @@ export function Diagram({ svg }: { svg: string }) {
       {/* The svg lives in its own div: `dangerouslySetInnerHTML`
           wipes children, so the expand button is a sibling, not a
           child of the svg's container. */}
-      <div className="porto-diagram">
+      <div className="porto-diagram" onClick={onInlineTap}>
         <div dangerouslySetInnerHTML={{ __html: svg }} />
         <button
           type="button"

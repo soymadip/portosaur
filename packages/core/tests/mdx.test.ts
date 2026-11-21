@@ -5,10 +5,10 @@ import remarkMermaid from "../src/plugins/remarkMermaid.ts";
 
 /**
  * `portosaurMdxOptions` builds the Fumadocs global MDX preset for a
- * site. The emoji-shortcodes switch (`site.markdown
+ * site. The emoji-shortcodes switch (`site.content
  * .render_emoji_shortcodes`, default true) gates the remark-emoji
  * plugin: off means `:smile:` stays literal text. The mermaid switch
- * (`site.markdown.mermaid`, default true) gates the diagram plugin:
+ * (`site.content.mermaid`, default true) gates the diagram plugin:
  * off means ```mermaid fences stay plain code blocks.
  */
 describe("portosaurMdxOptions", () => {

@@ -242,7 +242,8 @@ export interface TocHeading {
   text: string;
 }
 
-/** A heading nested for the table of contents (h3s under their h2). */
+/** A heading nested for the table of contents (each heading under
+ * the nearest shallower heading before it). */
 export interface TocItem {
   depth: number;
   slug: string;
@@ -282,12 +283,21 @@ function tocTitleText(title: ReactNode): string {
  * Converts Fumadocs TOC items to flat headings: the URL fragment
  * becomes the slug, the title's text becomes the text. H1s are
  * dropped — the hoisted H1 is gone from the TOC by the time the
- * page renders, and a stray H1 must not enter the list.
+ * page renders, and a stray H1 must not enter the list. `options`
+ * narrows the levels shown (the `site.content.toc` min/max levels,
+ * overridden per page): headings shallower than `minLevel` or
+ * deeper than `maxLevel` are dropped. The floor stays 2 even when
+ * `minLevel` is lower — the TOC never shows an H1.
  */
-export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
+export function tocToHeadings(
+  toc: TOCItemType[],
+  options: { minLevel?: number; maxLevel?: number } = {},
+): TocHeading[] {
+  const minLevel = Math.max(2, options.minLevel ?? 2);
+  const maxLevel = options.maxLevel ?? 6;
   const headings: TocHeading[] = [];
   for (const item of toc) {
-    if (item.depth < 2) {
+    if (item.depth < minLevel || item.depth > maxLevel) {
       continue;
     }
     const hashIndex = item.url.indexOf("#");
@@ -301,23 +311,59 @@ export function tocToHeadings(toc: TOCItemType[]): TocHeading[] {
   return headings;
 }
 
+/** The effective table of contents settings for one page. */
+export interface TocSettings {
+  enable: boolean;
+  minLevel: number;
+  maxLevel: number;
+}
+
 /**
- * Nests a flat heading list into a TOC tree: depth-2 headings are
- * top-level, depth-3 headings become children of the preceding depth-2
- * heading (an orphan h3 — no preceding h2 — promotes to top-level).
- * The tree shape is what `TableOfContentsList` renders.
+ * The table of contents settings for one page: the global
+ * `site.content.toc` values, overridden field by field by the
+ * page's `toc` frontmatter. An unset frontmatter
+ * field falls back to the global value.
+ */
+export function resolveTocSettings(
+  global: TocSettings,
+  frontmatter?: {
+    enable?: boolean;
+    min_level?: number;
+    max_level?: number;
+  },
+): TocSettings {
+  return {
+    enable: frontmatter?.enable ?? global.enable,
+    minLevel: frontmatter?.min_level ?? global.minLevel,
+    maxLevel: frontmatter?.max_level ?? global.maxLevel,
+  };
+}
+
+/**
+ * Nests a flat heading list into a TOC tree: each heading nests
+ * under the nearest preceding heading shallower than it, so h3s
+ * sit under their h2 and h4s under their h3. A heading with no
+ * shallower heading before it (an orphan h3, a leading h4)
+ * promotes to top-level. The tree shape is what
+ * `TableOfContentsList` renders.
  */
 export function nestHeadings(headings: TocHeading[]): TocItem[] {
   const tree: TocItem[] = [];
-  let currentParent: TocItem | null = null;
+  const stack: TocItem[] = [];
   for (const heading of headings) {
     const item: TocItem = { ...heading, children: [] };
-    if (heading.depth === 2 || !currentParent) {
-      tree.push(item);
-      currentParent = item;
-    } else {
-      currentParent.children.push(item);
+    // Pop headings as deep as this one or deeper — the heading
+    // nests under the nearest preceding heading shallower than it.
+    while (stack.length > 0 && stack[stack.length - 1].depth >= heading.depth) {
+      stack.pop();
     }
+    const parent = stack[stack.length - 1];
+    if (parent) {
+      parent.children.push(item);
+    } else {
+      tree.push(item);
+    }
+    stack.push(item);
   }
   return tree;
 }

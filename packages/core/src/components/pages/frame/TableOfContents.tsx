@@ -31,7 +31,7 @@ import { SiteIcon } from "../../SiteIcon.tsx";
 export function useTocScrollSpy(pageTitleId: string): string | null {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const activeSlugRef = useRef<string | null>(null);
-  const tocHeadingSelector = `h1#${pageTitleId},:where(h2,h3)[id]`;
+  const tocHeadingSelector = `h1#${pageTitleId},:where(h2,h3,h4,h5,h6)[id]`;
 
   useEffect(() => {
     const onIdle = (cb: () => void) => {
@@ -95,6 +95,14 @@ export function useTocScrollSpy(pageTitleId: string): string | null {
     };
 
     const setCurrent: IntersectionObserverCallback = (entries) => {
+      // Every intersecting entry is considered, and the last one
+      // wins: entries arrive in document order, so the last is
+      // the lowest element in the band — the section the reader
+      // has reached. Taking the first (as Starlight does) lags a
+      // section behind on jumps and fast scrolls, where a section
+      // boundary and the section below it enter the band in one
+      // callback. On a gradual scroll each callback holds one
+      // entry, so this behaves the same.
       for (const { isIntersecting, target } of entries) {
         if (!isIntersecting) {
           continue;
@@ -108,7 +116,6 @@ export function useTocScrollSpy(pageTitleId: string): string | null {
           activeSlugRef.current = slug;
           setActiveSlug(slug);
         }
-        break;
       }
     };
 

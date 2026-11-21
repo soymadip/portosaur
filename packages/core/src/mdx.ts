@@ -123,10 +123,10 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  * @param args.colorScheme - The site's color scheme (for the Shiki
  *   light/dark themes).
  * @param args.renderEmojiShortcodes - Whether `:smile:`-style emoji
- *   shortcodes render (`site.markdown.render_emoji_shortcodes`,
+ *   shortcodes render (`site.content.render_emoji_shortcodes`,
  *   default true).
  * @param args.mermaid - Whether ```mermaid fences render as diagrams
- *   (`site.markdown.mermaid`, default true).
+ *   (`site.content.mermaid`, default true).
  */
 export function portosaurMdxOptions({
   userVars = {},
@@ -147,7 +147,7 @@ export function portosaurMdxOptions({
       [remarkVars, userVars],
       remarkInstall,
       // Mermaid fences render as diagrams when the site enables them
-      // (`site.markdown.mermaid`, default true). After remarkVars so
+      // (`site.content.mermaid`, default true). After remarkVars so
       // `{vars.key}` substitution applies inside diagram fences too.
       ...(mermaid ? [remarkMermaid] : []),
       remarkIcons,
@@ -157,7 +157,7 @@ export function portosaurMdxOptions({
       remarkGithubAlerts,
       remarkDetailsMarker,
       // Emoji shortcodes render only when the site enables them
-      // (`site.markdown.render_emoji_shortcodes`, default true).
+      // (`site.content.render_emoji_shortcodes`, default true).
       ...(renderEmojiShortcodes ? [remarkEmoji] : []),
       remarkImageSrc,
     ],

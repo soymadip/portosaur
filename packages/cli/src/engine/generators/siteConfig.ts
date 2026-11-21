@@ -55,12 +55,13 @@ export interface PortosaurOptions {
     blogRoute: string;
     onBrokenLinks: string;
     onBrokenAnchors: string;
-    markdown: {
+    content: {
       addMdxDesc: boolean;
       mermaid: boolean;
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;
       onBrokenImages: string;
+      toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };
     pwa: { enable: boolean; notifications: boolean };
@@ -234,14 +235,17 @@ export function buildSiteConfig(
   const pwaEnable = get("site.pwa.enable", true);
   const pwaNotifications = get("site.pwa.notifications", false);
 
-  const addMdxDesc = get("site.markdown.add_mdx_desc", true); // Show the page description under the title.
-  const mermaid = get("site.markdown.mermaid", true); // Enable support for Mermaid.js diagrams.
+  const addMdxDesc = get("site.content.add_mdx_desc", true); // Show the page description under the title.
+  const mermaid = get("site.content.mermaid", true); // Enable support for Mermaid.js diagrams.
   const renderEmojiShortcodes = get(
-    "site.markdown.render_emoji_shortcodes",
+    "site.content.render_emoji_shortcodes",
     true,
   ); // Render emoji shortcodes like :smile:.
-  const markdownOnBrokenLinks = get("site.markdown.on_broken_links", "throw"); // Broken link behavior.
-  const markdownOnBrokenImages = get("site.markdown.on_broken_images", "throw"); // Broken image behavior.
+  const contentOnBrokenLinks = get("site.content.on_broken_links", "throw"); // Broken link behavior.
+  const contentOnBrokenImages = get("site.content.on_broken_images", "throw"); // Broken image behavior.
+  const tocEnable = get("site.content.toc.enable", true); // Show the table of contents.
+  const tocMinLevel = get("site.content.toc.min_level", 2); // Shallowest heading level in the table of contents.
+  const tocMaxLevel = get("site.content.toc.max_level", 5); // Deepest heading level in the table of contents.
 
   const socialCard = validateAsset(get("site.social_card", "")) || undefined; // Preview image used when sharing your site on social media.
 
@@ -445,12 +449,17 @@ export function buildSiteConfig(
       blogRoute,
       onBrokenLinks,
       onBrokenAnchors,
-      markdown: {
+      content: {
         addMdxDesc,
         mermaid,
         renderEmojiShortcodes,
-        onBrokenLinks: markdownOnBrokenLinks,
-        onBrokenImages: markdownOnBrokenImages,
+        onBrokenLinks: contentOnBrokenLinks,
+        onBrokenImages: contentOnBrokenImages,
+        toc: {
+          enable: tocEnable,
+          minLevel: tocMinLevel,
+          maxLevel: tocMaxLevel,
+        },
       },
       rss: {
         enable: rssEnable,

@@ -41,12 +41,13 @@ export interface PortosaurOptions {
     blogRoute: string;
     onBrokenLinks: string;
     onBrokenAnchors: string;
-    markdown: {
+    content: {
       addMdxDesc: boolean;
       mermaid: boolean;
       renderEmojiShortcodes: boolean;
       onBrokenLinks: string;
       onBrokenImages: string;
+      toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };
     pwa: { enable: boolean; notifications: boolean };

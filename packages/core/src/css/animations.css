@@ -200,9 +200,18 @@
        on desktop it stays put). */
     translate 300ms ease,
     /* The size glides when the expand button toggles the
-       near-fullscreen state, like the search dialog's glide. */
+       near-fullscreen state, like the search dialog's glide.
+       The max sizes glide with it: the rendered size is the
+       smaller of size and max-size, so if the max snapped
+       while the size glided, shrinking back would jump
+       straight to the small size instead of gliding. The
+       radius glides too, or the sheet's corners would pop
+       while the rest of it slid. */
     width 300ms ease,
     height 300ms ease,
+    max-width 300ms ease,
+    max-height 300ms ease,
+    border-radius 300ms ease,
     display 300ms allow-discrete,
     overlay 300ms allow-discrete;
 }
