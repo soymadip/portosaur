@@ -42,10 +42,11 @@ import {
  * pure-CSS exit never ran on some phones, where the dialog just
  * blinked out. No JS animation state besides the closing flag.
  *
- * - Cmd/Ctrl+K toggles, Escape / outside-click / link-click closes,
+ * - Cmd/Ctrl+P toggles, Escape / outside-click / link-click closes,
  *   body scroll locks while open (`data-search-modal-open`).
+ *   Cmd/Ctrl+K still opens it when closed.
  * - Arrow keys move the active result, Enter navigates to it.
- *   Ctrl+N / Ctrl+J move down and Ctrl+P moves up, vim-style.
+ *   Ctrl+N / Ctrl+J move down and Ctrl+K moves up, vim-style.
  * - The section filter offers a "This page" choice (the page
  *   the dialog opened from); "All" (or a section) lifts it.
  *   `?search=query` in the address opens the dialog with that
@@ -285,7 +286,7 @@ export function SearchDialog() {
     setOpen(true);
   }, [basePrefix, onSearchChange]);
 
-  // Cmd/Ctrl+K toggles. Escape closes — listened for on the
+  // Cmd/Ctrl+P toggles, Cmd/Ctrl+K opens when closed. Escape closes — listened for on the
   // window in the CAPTURE phase, like Radix does, instead of
   // on the dialog element: a dialog-level handler needed two
   // presses in Firefox (the first never reached it), and a
@@ -301,10 +302,25 @@ export function SearchDialog() {
   // Outside clicks close.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-        event.preventDefault();
-        toggleDialog();
-        return;
+      if (event.metaKey || event.ctrlKey) {
+        const key = event.key.toLowerCase();
+        // Ctrl/Cmd+P toggles the search. It took the toggle over
+        // from Ctrl+K, which now moves up through the results
+        // when the dialog is open (vim-style J/K) — a toggle
+        // there would close the dialog on every move up. Ctrl+K
+        // still opens the dialog when it is closed (or mid-exit,
+        // where it cancels the close); when open, the key falls
+        // through to the input handler below.
+        if (key === "p") {
+          event.preventDefault();
+          toggleDialog();
+          return;
+        }
+        if (key === "k" && (!dialogRef.current?.open || closingRef.current)) {
+          event.preventDefault();
+          openDialog();
+          return;
+        }
       }
       if (event.key === "Escape" && dialogRef.current?.open) {
         // Swallow the key: its default action fires the dialog's
@@ -320,7 +336,7 @@ export function SearchDialog() {
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
     };
-  }, [close, toggleDialog]);
+  }, [close, openDialog, toggleDialog]);
 
   // The native `cancel` event (Android Back, or Escape reaching
   // the dialog) must not close the dialog itself — the exit
@@ -366,13 +382,12 @@ export function SearchDialog() {
   };
 
   // Arrow-key navigation + Enter to navigate to the active result.
-  // Vim-style too: Ctrl+N / Ctrl+J move down, Ctrl+P moves up.
+  // Vim-style too: Ctrl+N / Ctrl+J move down, Ctrl+K moves up.
   // Firefox and Chrome both reserve Ctrl+N for a new window and
   // never deliver the key to the page, so Ctrl+J is the forward
-  // key that actually works in those browsers; Ctrl+P reaches
-  // the page fine once its default (the print dialog) is
-  // prevented. The handler still covers Ctrl+N for browsers
-  // that do deliver it.
+  // key that actually works in those browsers. The handler still
+  // covers Ctrl+N for browsers that do deliver it. (Ctrl+P used
+  // to move up — it toggles the search now, so Ctrl+K took over.)
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.ctrlKey && !event.metaKey && !event.altKey) {
       const key = event.key.toLowerCase();
@@ -383,7 +398,7 @@ export function SearchDialog() {
         );
         return;
       }
-      if (key === "p") {
+      if (key === "k") {
         event.preventDefault();
         setActiveIndex((index) =>
           navList.length === 0
@@ -474,7 +489,7 @@ export function SearchDialog() {
         variant="ghost"
         size="icon"
         ariaLabel="Search"
-        ariaKeyshortcuts="Control+K"
+        ariaKeyshortcuts="Control+P"
         onClick={openDialog}
       >
         <SiteIcon icon="lu:search" size="20px" strokeWidth={2.5} />
