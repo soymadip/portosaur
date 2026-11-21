@@ -125,7 +125,7 @@ func TestHTMLTags(t *testing.T) {
 			t.Fatalf("htmlTags is missing %q", want)
 		}
 	}
-	for _, want := range []string{"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"} {
+	for _, want := range []string{"br", "col", "hr", "img", "input", "source", "track", "wbr"} {
 		if !void[want] {
 			t.Fatalf("htmlTags does not mark %q as void", want)
 		}
@@ -133,6 +133,14 @@ func TestHTMLTags(t *testing.T) {
 	for _, want := range []string{"div", "span", "p", "a", "svg", "video"} {
 		if void[want] {
 			t.Fatalf("htmlTags wrongly marks %q as void", want)
+		}
+	}
+	// Document-shell tags, obsolete elements, and tags with no
+	// use inside page content are not offered: they do not
+	// belong in an MDX page.
+	for _, want := range []string{"html", "head", "body", "title", "base", "meta", "link", "style", "script", "noscript", "template", "slot", "object", "embed", "param", "area", "map"} {
+		if seen[want] {
+			t.Fatalf("htmlTags lists %q, which has no use inside an MDX page", want)
 		}
 	}
 }
