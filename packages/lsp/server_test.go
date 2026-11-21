@@ -494,8 +494,8 @@ func TestComponentCompletionNamesIncludeImports(t *testing.T) {
 	if detail, ok := detailText(items, "Bar"); !ok || detail != "from './parts'" {
 		t.Fatalf("Bar detail = %q, want %q", detail, "from './parts'")
 	}
-	if text, ok := editText(items, "Foo"); !ok || text != "Foo" {
-		t.Fatalf("Foo edit = %q, want %q (the bare name only)", text, "Foo")
+	if text, ok := editText(items, "Foo"); !ok || text != "<Foo>$0</Foo>" {
+		t.Fatalf("Foo edit = %q, want %q (imports pair, their shape is unknown)", text, "<Foo>$0</Foo>")
 	}
 }
 
@@ -541,8 +541,8 @@ func TestComponentCompletionHTMLFiltersByPartial(t *testing.T) {
 	if len(items) != 2 || !hasLabel(items, "dialog") || !hasLabel(items, "div") {
 		t.Fatalf("completions = %v, want only dialog and div", labels(items))
 	}
-	if text, ok := editText(items, "div"); !ok || text != "div" {
-		t.Fatalf("div edit = %q, want %q (the bare name only)", text, "div")
+	if text, ok := editText(items, "div"); !ok || text != "<div>$0</div>" {
+		t.Fatalf("div edit = %q, want %q (the whole tag)", text, "<div>$0</div>")
 	}
 }
 
@@ -552,6 +552,77 @@ func TestComponentCompletionNamesFilterByPartial(t *testing.T) {
 	items := s.complete(t, documentURI, 2, 2)
 	if len(items) != 1 || items[0].Label != "Btn" {
 		t.Fatalf("completions = %v, want only Btn", labels(items))
+	}
+}
+
+// TestComponentCompletionInsertsFullTag checks the snippet each
+// tag inserts on pick: containers pair with the cursor inside,
+// leaf components close themselves, void HTML tags take no
+// closing tag. Every tag item is a snippet, and the edit range
+// covers the `<` the user typed.
+func TestComponentCompletionInsertsFullTag(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	want := map[string]string{
+		"Hint":       "<Hint>$0</Hint>",
+		"Details":    "<Details>$0</Details>",
+		"Tabs":       "<Tabs>$0</Tabs>",
+		"Icon":       "<Icon />",
+		"Diagram":    "<Diagram />",
+		"TopicList":  "<TopicList />",
+		"IconSearch": "<IconSearch />",
+		"Pv":         "<Pv />",
+		"div":        "<div>$0</div>",
+		"br":         "<br>",
+		"hr":         "<hr>",
+		"img":        "<img>",
+	}
+	for label, text := range want {
+		if got, ok := editText(items, label); !ok || got != text {
+			t.Fatalf("%s edit = %q, want %q", label, got, text)
+		}
+	}
+	for _, item := range items {
+		if item.InsertTextFormat != protocol.InsertTextFormatSnippet {
+			t.Fatalf("%s insert format = %v, want Snippet", item.Label, item.InsertTextFormat)
+		}
+	}
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 1}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,1) covering the `<`", rng)
+	}
+}
+
+// TestComponentCompletionInsertRangeCoversPartial checks the
+// edit range swallows the `<` and the partial name, so picking
+// Hint after `<Hi` leaves exactly one tag.
+func TestComponentCompletionInsertRangeCoversPartial(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Hi")
+	items := s.complete(t, documentURI, 2, 3)
+	if len(items) != 1 || items[0].Label != "Hint" {
+		t.Fatalf("completions = %v, want only Hint", labels(items))
+	}
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 3}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,3) covering `<Hi`", rng)
+	}
+	if text, ok := editText(items, "Hint"); !ok || text != "<Hint>$0</Hint>" {
+		t.Fatalf("Hint edit = %q, want %q", text, "<Hint>$0</Hint>")
+	}
+}
+
+// TestComponentCompletionImportedInsertsFullTag checks an
+// imported component pairs on pick (its shape is unknown) and
+// keeps its source detail.
+func TestComponentCompletionImportedInsertsFullTag(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Foo from './Foo'\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	if text, ok := editText(items, "Foo"); !ok || text != "<Foo>$0</Foo>" {
+		t.Fatalf("Foo edit = %q, want %q", text, "<Foo>$0</Foo>")
+	}
+	if detail, ok := detailText(items, "Foo"); !ok || detail != "from './Foo'" {
+		t.Fatalf("Foo detail = %q, want %q", detail, "from './Foo'")
 	}
 }
 

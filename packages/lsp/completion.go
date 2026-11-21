@@ -122,12 +122,54 @@ func (s *Server) componentCompletion(params *protocol.CompletionParams, text str
 	}
 }
 
+// tagSource says where a tag name came from: a built-in
+// component, an import, or an HTML tag. The full-tag insert
+// depends on it.
+type tagSource int
+
+const (
+	tagBuiltin tagSource = iota
+	tagImport
+	tagHTML
+)
+
 // tagCandidate is one name offered after `<`, with the detail
-// and doc the editor shows beside it.
+// and doc the editor shows beside it. source and void decide
+// the inserted tag: leaf built-ins close themselves, void HTML
+// tags take no closing tag.
 type tagCandidate struct {
 	name   string
 	detail string
 	doc    string
+	source tagSource
+	void   bool
+}
+
+// leafComponents are the built-in components the full-tag
+// insert writes self-closing. The components schema does not
+// mark leaf-ness, so the list is explicit.
+var leafComponents = map[string]bool{
+	"Diagram":    true,
+	"Icon":       true,
+	"IconSearch": true,
+	"Pv":         true,
+	"TopicList":  true,
+}
+
+// tagInsert returns the snippet inserted when a tag is picked:
+// the whole tag, with a plain `$0` tabstop where the cursor
+// lands. Containers pair with the cursor inside, leaf built-ins
+// close themselves, void HTML tags take no closing tag, and
+// imports pair since their shape is unknown.
+func tagInsert(cand tagCandidate) string {
+	switch {
+	case cand.source == tagHTML && cand.void:
+		return "<" + cand.name + ">"
+	case cand.source == tagBuiltin && leafComponents[cand.name]:
+		return "<" + cand.name + " />"
+	default:
+		return "<" + cand.name + ">$0</" + cand.name + ">"
+	}
 }
 
 // componentNameCompletions offers the tag names from three
@@ -138,16 +180,18 @@ type tagCandidate struct {
 // shadows the components map in MDX), and a built-in shadows
 // an HTML tag. The description lists the component's props,
 // required ones marked; imports name their source, HTML tags
-// say so.
+// say so. Picking a tag inserts the whole tag as a snippet:
+// containers pair with the cursor inside, leaf components close
+// themselves, and void HTML tags take no closing tag.
 func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
 	candidates := map[string]tagCandidate{}
 	for _, tag := range htmlTags {
-		candidates[tag.name] = tagCandidate{name: tag.name, detail: "HTML tag"}
+		candidates[tag.name] = tagCandidate{name: tag.name, detail: "HTML tag", source: tagHTML, void: tag.void}
 	}
 	if definitions, ok := asMap(schema.raw["definitions"]); ok {
 		for name, raw := range definitions {
 			def, _ := asMap(raw)
-			cand := tagCandidate{name: name, doc: componentDoc(def)}
+			cand := tagCandidate{name: name, doc: componentDoc(def), source: tagBuiltin}
 			if required := schemaRequired(def); len(required) > 0 {
 				cand.detail = "required: " + strings.Join(required, ", ")
 			}
@@ -155,16 +199,24 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 		}
 	}
 	for _, imp := range scanImports(text) {
-		candidates[imp.name] = tagCandidate{name: imp.name, detail: "from '" + imp.source + "'"}
+		candidates[imp.name] = tagCandidate{name: imp.name, detail: "from '" + imp.source + "'", source: tagImport}
 	}
+	// The name range covers the typed name only, not the `<` in
+	// front of it. The snippet starts with `<`, so the edit
+	// range extends one character back to swallow it, or the
+	// `<` would double. The `<` always sits right before the
+	// name on the same line.
+	editRange := context.partialRange
+	editRange.Start.Character--
 	var items []protocol.CompletionItem
 	for _, cand := range candidates {
 		if !strings.HasPrefix(cand.name, context.partial) {
 			continue
 		}
 		item := protocol.CompletionItem{
-			Label: cand.name,
-			Kind:  protocol.CompletionItemKindClass,
+			Label:            cand.name,
+			Kind:             protocol.CompletionItemKindClass,
+			InsertTextFormat: protocol.InsertTextFormatSnippet,
 		}
 		if cand.detail != "" {
 			item.Detail = protocol.NewOptional(cand.detail)
@@ -172,7 +224,7 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 		if cand.doc != "" {
 			item.Documentation = &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: cand.doc}
 		}
-		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: cand.name}
+		item.TextEdit = &protocol.TextEdit{Range: editRange, NewText: tagInsert(cand)}
 		items = append(items, item)
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
