@@ -1,0 +1,13 @@
+[package]
+name = "zed-portosaur"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "GPL-3.0-only"
+
+[lib]
+path = "src/portosaur.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7.0"

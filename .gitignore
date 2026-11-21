@@ -29,6 +29,9 @@ bun-debug.log*
 # Packaged VS Code extension
 *.vsix
 
+# Rust build output (Zed extension)
+extensions/zed/target/
+
 # Playgrounds and scratch sites
 .playground/
 *test-site/
