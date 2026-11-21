@@ -146,6 +146,25 @@ type linkDest struct {
 // Single-line links only, and reference-style links
 // (`[text][ref]`) are not covered in v1.
 func scanMarkdownLinks(text string) []linkDest {
+	return scanLinkDests(text, false)
+}
+
+// scanMarkdownImages finds every markdown image destination
+// `![alt](...)` in the MDX body, in document order, with the
+// same skips as scanMarkdownLinks. A trailing title
+// (`![alt](src "title")`) is stripped from the destination:
+// the title is not part of the file path.
+func scanMarkdownImages(text string) []linkDest {
+	return scanLinkDests(text, true)
+}
+
+// scanLinkDests finds every markdown link destination `](...)`
+// in the MDX body, in document order. Destinations in fenced
+// code blocks, the frontmatter, or an inline code span are
+// ignored. With images false it returns plain links; with
+// images true it returns image links only, with a trailing
+// title stripped (see scanMarkdownImages).
+func scanLinkDests(text string, images bool) []linkDest {
 	lines := strings.Split(text, "\n")
 	contentStart := 0
 	if block, ok := extractFrontmatter(text); ok {
@@ -177,12 +196,23 @@ func scanMarkdownLinks(text string) []linkDest {
 					destEnd = len(line) - destStart
 				}
 				destEnd += destStart
-				if !inCodeSpan(spans, destStart) && !isImageLink(line, bracket) {
+				if !inCodeSpan(spans, destStart) && isImageLink(line, bracket) == images {
 					valueStart, valueEnd := destStart, destEnd
+					angled := false
 					if valueStart < valueEnd && line[valueStart] == '<' {
 						if close := strings.IndexByte(line[valueStart:], '>'); close >= 0 && valueStart+close < valueEnd {
 							valueStart++
 							valueEnd = valueStart + close - 1
+							angled = true
+						}
+					}
+					if images && !angled {
+						// A title after the src (`![alt](src "title")`)
+						// is not part of the path. Angle-bracketed
+						// srcs may hold literal spaces, so they are
+						// left alone.
+						if space := strings.IndexAny(line[valueStart:valueEnd], " \t"); space >= 0 {
+							valueEnd = valueStart + space
 						}
 					}
 					dests = append(dests, linkDest{

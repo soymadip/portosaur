@@ -20,6 +20,7 @@ Beyond completion and hover, the server also:
 - **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` `to`/`href` value opens the target page, landing on the heading after a `#hash`.
 - **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`.
 - **Flags broken links.** A link to a page that does not exist, by clean URL or by relative file path, is flagged with the severity from `site.content.on_broken_links`. External links, anchors, and destinations holding a `{vars.}` or `{env.}` expression stay quiet.
+- **Flags broken images.** An image whose file does not exist, by relative path or under the project's `static/` directory, is flagged with the severity from `site.content.on_broken_images`. External images, `data:` URIs, and sources holding a `{vars.}` or `{env.}` expression stay quiet.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
 - **Flags unknown `{vars.}` keys.** A `{vars.key}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
 - **Shows `{vars.}` values inline.** A `{vars.key}` that resolves to a value shows that value right after it, and hovering over it says where the value comes from.

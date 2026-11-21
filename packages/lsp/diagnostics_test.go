@@ -514,13 +514,117 @@ func TestLinkDiagnosticsJSXProps(t *testing.T) {
 }
 
 // Image destinations are the broken-image check's job: a
-// missing image file must not draw a broken-link diagnostic.
+// missing image file draws a broken-image diagnostic, never a
+// broken-link one.
 func TestLinkDiagnosticsImageLinksSkipped(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	doc := "# Page\n\n![img](/images/missing.png)\n\n![img](./missing.png)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 2 {
+		t.Fatalf("diagnostics = %v, want the two broken-image errors", diagnosticMessages(diags))
+	}
+	for _, d := range diags {
+		if !strings.HasPrefix(string(d.Message.(protocol.String)), "Broken image ") {
+			t.Fatalf("diagnostics = %v, want only broken-image errors", diagnosticMessages(diags))
+		}
+	}
+}
+
+// imagesFixture is a project with an image next to the docs and
+// one under static/, for the broken-image checks.
+func imagesFixture(t *testing.T) string {
+	t.Helper()
+	return contentFixture(t, "docs_home:\n  title: Docs\nvars:\n  logo: /images/existing.png\n", map[string]string{
+		"docs/existing.png":          "fake png",
+		"docs/my pic.png":            "fake png",
+		"static/images/existing.png": "fake png",
+	})
+}
+
+func TestImageDiagnosticsBrokenRelative(t *testing.T) {
+	s := startTestServer(t, imagesFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n![img](./missing.png)\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "./missing.png"`) {
+		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 7 || diags[0].Range.End.Character != 20 {
+		t.Fatalf("diagnostic range = %+v, want the src", diags[0].Range)
+	}
+}
+
+func TestImageDiagnosticsBrokenAbsolute(t *testing.T) {
+	s := startTestServer(t, imagesFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n![img](/images/missing.png)\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "/images/missing.png"`) {
+		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+}
+
+func TestImageDiagnosticsValidImagesAreQuiet(t *testing.T) {
+	s := startTestServer(t, imagesFixture(t))
+	doc := "# Page\n\n![a](./existing.png)\n\n![b](/images/existing.png)\n\n![c](./existing.png \"A title\")\n\n![d](./my%20pic.png)\n\n![e](./existing.png?v=2)\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
-		t.Fatalf("diagnostics = %v, want none for image links", diagnosticMessages(diags))
+		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
+	}
+}
+
+func TestImageDiagnosticsExternalAndSpecialAreQuiet(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_LOGO", "logo.png")
+	s := startTestServer(t, imagesFixture(t))
+	doc := "# Page\n\n![a](https://example.com/x.png)\n\n![b](http://example.com/x.png)\n\n![c](//cdn.example.com/x.png)\n\n![d](data:image/png;base64,AAAA)\n\n![e]()\n\n![f]({vars.logo})\n\n![g](/images/{env.PORTO_LSP_TEST_LOGO}.png)\n\n![h](images/bare.png)\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for unchecked sources", diagnosticMessages(diags))
+	}
+}
+
+func TestImageDiagnosticsSeverityFollowsSetting(t *testing.T) {
+	for _, tc := range []struct {
+		setting  string
+		severity protocol.DiagnosticSeverity
+		want     int
+	}{
+		{"warn", protocol.DiagnosticSeverityWarning, 1},
+		{"ignore", 0, 0},
+		{"bogus", protocol.DiagnosticSeverityError, 1},
+	} {
+		config := "site:\n  content:\n    on_broken_images: " + tc.setting + "\n"
+		s := startTestServer(t, fixtureProjectWithConfig(t, config))
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "![x](./missing.png)\n")
+		if len(diags) != tc.want {
+			t.Fatalf("on_broken_images %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+		}
+		if tc.want == 1 && diags[0].Severity != tc.severity {
+			t.Fatalf("on_broken_images %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+		}
+	}
+}
+
+func TestImageDiagnosticsImgTag(t *testing.T) {
+	s := startTestServer(t, imagesFixture(t))
+	doc := "# Page\n\n<img src=\"./missing.png\" />\n\n<img src=\"/images/missing.png\" />\n\n<img src=\"./existing.png\" />\n\n<img src={dynamic} />\n\n<img src=\"https://example.com/x.png\" />\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 2 {
+		t.Fatalf("diagnostics = %v, want one per broken img src", diagnosticMessages(diags))
+	}
+	if !hasDiagnostic(diags, `Broken image "./missing.png"`) || !hasDiagnostic(diags, `Broken image "/images/missing.png"`) {
+		t.Fatalf("diagnostics = %v, want both broken img sources", diagnosticMessages(diags))
+	}
+}
+
+func TestImageDiagnosticsCodeSkipped(t *testing.T) {
+	s := startTestServer(t, imagesFixture(t))
+	doc := "# Page\n\n```md\n![x](./missing.png)\n\n<img src=\"./missing.png\" />\n```\n\nUse `![y](./missing.png)` inline.\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for images in code", diagnosticMessages(diags))
 	}
 }
 

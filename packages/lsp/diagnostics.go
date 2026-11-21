@@ -15,7 +15,7 @@ import (
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
 // checks, `{vars.}` and `{env.}` reference checks, and
-// broken-link checks over the page body. The schema-based component checks
+// broken-link and broken-image checks over the page body. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
 // cannot be tied to the project's version. The icon checks are
@@ -53,6 +53,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, diag)
 	}
 	for _, diag := range s.linkIssues(text, root, uriPath(documentURI)) {
+		diags = append(diags, diag)
+	}
+	for _, diag := range s.imageIssues(text, root, uriPath(documentURI)) {
 		diags = append(diags, diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
@@ -389,6 +392,66 @@ func linkBrokenMessage(value string) string {
 		return "Broken link \"" + value + "\" (no page serves this URL)"
 	}
 	return "Broken link \"" + value + "\" (no such file)"
+}
+
+// imageIssues checks every image in the document body:
+// markdown images and `<img src="...">` tags. A relative src
+// with no file behind it, or an absolute src with no file under
+// the project's `static/` directory, is broken. The severity
+// follows site.content.on_broken_images: throw is an error, warn
+// is a warning, ignore reports nothing. The default is throw,
+// and an unrecognized value falls back to it. The check reads
+// porto.yml directly, not a schema, so it runs in both modes.
+func (s *Server) imageIssues(text string, root string, currentFile string) []protocol.Diagnostic {
+	cfg := loadProjectConfig(root)
+	behavior := configString(cfg, []string{"site", "content", "on_broken_images"}, "throw")
+	if behavior == "ignore" {
+		return nil
+	}
+	severity := protocol.DiagnosticSeverityError
+	if behavior == "warn" {
+		severity = protocol.DiagnosticSeverityWarning
+	}
+	lines := strings.Split(text, "\n")
+	var diags []protocol.Diagnostic
+	for _, dest := range scanMarkdownImages(text) {
+		if !imageBroken(root, currentFile, dest.value) {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, dest.start, dest.end),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String(imageBrokenMessage(dest.value)),
+		})
+	}
+	for _, tag := range scanAllTags(text) {
+		if tag.name != "img" {
+			continue
+		}
+		for _, prop := range tag.props {
+			if prop.name != "src" || !prop.hasValue || prop.expr {
+				continue
+			}
+			value := text[prop.valueStart:prop.valueEnd]
+			if !imageBroken(root, currentFile, value) {
+				continue
+			}
+			diags = append(diags, protocol.Diagnostic{
+				Range:    rangeFromOffsets(lines, prop.valueStart, prop.valueEnd),
+				Severity: severity,
+				Source:   protocol.NewOptional("porto-lsp"),
+				Message:  protocol.String(imageBrokenMessage(value)),
+			})
+		}
+	}
+	return diags
+}
+
+// imageBrokenMessage names the src and says the file is
+// missing.
+func imageBrokenMessage(value string) string {
+	return "Broken image \"" + value + "\" (no such file)"
 }
 
 func (s *Server) sendDiagnostics(documentURI uri.URI, diags []protocol.Diagnostic) {

@@ -69,10 +69,10 @@ func TestLinkAtCursorNotALink(t *testing.T) {
 	}
 }
 
-func TestScanMarkdownLinks(t *testing.T) {
-	text := "---\ntitle: [fm](/docs/fm/)\n---\n\n[a](/docs/one/)\n\n![img](/images/two.png)\n\n[b](<./my page.mdx>) and [c](./three.mdx)\n\n```md\n[d](/docs/four/)\n```\n\nUse `[e](/docs/five/)` inline.\n"
-	dests := scanMarkdownLinks(text)
-	want := []string{"/docs/one/", "./my page.mdx", "./three.mdx"}
+func TestScanMarkdownImages(t *testing.T) {
+	text := "---\ntitle: ![fm](/docs/fm.png)\n---\n\n![a](/images/one.png)\n\n[b](/docs/page/)\n\n![c](./two.png \"A title\")\n\n![d](<./my pic.png>)\n\n```md\n![e](/images/three.png)\n```\n\nUse `![f](/images/four.png)` inline.\n"
+	dests := scanMarkdownImages(text)
+	want := []string{"/images/one.png", "./two.png", "./my pic.png"}
 	if len(dests) != len(want) {
 		t.Fatalf("destinations = %+v, want %v", dests, want)
 	}

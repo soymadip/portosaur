@@ -138,6 +138,56 @@ func (s *Server) linkBroken(root, currentFile, value string) bool {
 	}
 }
 
+// imageBroken reports whether an image src points at no file:
+// a relative src with no file behind it, or an absolute src
+// with no file under the project's `static/` directory. It
+// mirrors the build: relative srcs resolve against the MDX
+// file's own directory, absolute srcs against `static/` at the
+// project root (the CLI unions `static/` into the generated
+// site's `public/`, so the browser sees it at the site root).
+// A `#hash` or `?query` is stripped and never validated.
+// External URLs, protocol-relative URLs, `data:` URIs, bare
+// words, and a src holding a `{vars.}` or `{env.}` expression
+// cannot be checked statically, so they are not broken. An
+// empty src is not broken either.
+func imageBroken(root, currentFile, value string) bool {
+	if value == "" {
+		return false
+	}
+	if strings.Contains(value, "{vars.") || strings.Contains(value, "{env.") {
+		return false
+	}
+	path, _, _ := strings.Cut(value, "#")
+	path, _, _ = strings.Cut(path, "?")
+	switch {
+	case path == "":
+		return false
+	case strings.HasPrefix(path, "//"):
+		return false
+	case strings.HasPrefix(path, "."):
+		decoded, err := url.PathUnescape(path)
+		if err != nil {
+			decoded = path
+		}
+		return !isFile(filepath.Join(filepath.Dir(currentFile), decoded))
+	case strings.HasPrefix(path, "/"):
+		decoded, err := url.PathUnescape(path)
+		if err != nil {
+			decoded = path
+		}
+		return !isFile(filepath.Join(root, "static", decoded))
+	default:
+		return false
+	}
+}
+
+// isFile reports whether path exists and is a file, not a
+// directory.
+func isFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
+}
+
 // targetText reads a link target's text, preferring the open
 // document when the file is open in the editor (so unsaved edits
 // count for the heading lookup).
