@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://soymadip.github.io/portosaur/schema/config.json
+# yaml-language-server: $schema=./node_modules/@portosaur/cli/schema/config.json
 #
 
 # User variables for use in your values as {{vars.key}}

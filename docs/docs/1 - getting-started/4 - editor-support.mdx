@@ -6,7 +6,7 @@ icon: "md:code"
 
 Portosaur ships a small language server, `porto-lsp`, that understands your MDX pages. In frontmatter it suggests keys and values, explains each key on hover, and flags unknown keys and wrong types. In the page body it suggests components like `<Btn>` and `<Hint>` while you type, with their props.
 
-`porto.yml` is not handled by the server. Every `porto.yml` carries a `$schema` line at the top, and the YAML support in your editor reads it to suggest config keys and values, explain each key on hover, and flag mistakes.
+`porto.yml` is not handled by the server. Every `porto.yml` carries a `$schema` line at the top, pointing at the schema shipped with the installed `@portosaur/cli`, and the YAML support in your editor reads it to suggest config keys and values, explain each key on hover, and flag mistakes.
 
 The server only activates inside a Portosaur project, so it stays quiet in other folders.
 
