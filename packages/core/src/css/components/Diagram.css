@@ -33,10 +33,15 @@
 
 /* The expanded popup: near-fullscreen, like the first version
    of the viewer. The size glides on the transition in
-   animations.css. */
+   animations.css. The max sizes match the sizes: the browser's
+   own dialog styles cap every dialog at calc(100% - 2em - 6px),
+   and without these that cap, not the width above, decides the
+   size. */
 .porto-diagram-dialog--expanded {
-  width: calc(100% - 2rem);
-  height: calc(100% - 2rem);
+  width: calc(100% - 1rem);
+  height: calc(100% - 1rem);
+  max-width: calc(100% - 1rem);
+  max-height: calc(100% - 1rem);
 }
 
 /* The expand + close buttons float top-right, above the diagram. */
