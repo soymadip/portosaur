@@ -1,7 +1,8 @@
 /**
  * remarkVarsPlugin
  *
- * Replaces {vars.key} and {vars.nested.key} references from porto.yml's `vars` section.
+ * Replaces {vars.key} and {vars.nested.key} references from porto.yml's `vars` section,
+ * and {env.VAR} references from the build environment.
  *
  * Ported from the Astro app (`packages/app/src/plugins/remarkVars.ts`):
  * logic verbatim. The `{{vars.key}}` escape is kept — the docs
@@ -10,7 +11,7 @@
  * node because the inner `{vars.project.title}` is not valid JS), so
  * dropping it would change rendered content versus Docusaurus.
  *
- * Supported locations:
+ * Supported locations (both forms):
  *   - Text nodes:         "Visit {vars.github} for more."
  *   - Inline code:        `{vars.twitter}`
  *   - Code blocks:        ```\ngit clone {vars.repo}\n```
@@ -18,8 +19,12 @@
  *   - Image URLs:         ![logo]({vars.logo})
  *   - MDX expressions:    {vars.project.title}  or  {vars.tools.bun}
  *
+ * Env names match [a-zA-Z_][a-zA-Z0-9_]* (no dots, unlike vars paths).
+ * An unset env var resolves to an empty string, matching {{env.VAR}}
+ * in porto.yml, while an unknown vars key fails the build.
+ *
  * Escape (render the literal token without replacement):
- *   - In text / code:     use double braces: {{vars.key}} → {vars.key}
+ *   - In text / code:     use double braces: {{vars.key}} → {vars.key}, {{env.VAR}} → {env.VAR}
  */
 
 /** Minimal recursive AST walker (no external dep, matches remarkIcons pattern). */
@@ -74,23 +79,31 @@ function resolveVarPath(
 
 /**
  * @param vars - The resolved vars map from porto.yml.
- * @returns The transformer. With no vars defined it returns the
- *   identity transformer directly — NOT a thunk yielding one: unified
- *   treats the factory's return value as the transformer, and a thunk
- *   would run as the transformer, return a function, and unified
- *   would replace the whole tree with that function (the next plugin
- *   then crashes on a non-node tree).
+ * @param env - Environment variables to resolve {env.VAR} from,
+ *   defaults to the build process environment. A separate parameter
+ *   so tests can pass a fixed map.
+ * @returns The transformer. Vars replacement only runs when vars are
+ *   defined, so a project without a vars section keeps the old
+ *   behavior of leaving {vars.key} untouched. Env replacement always
+ *   runs.
  */
-export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
-  if (!vars || Object.keys(vars).length === 0) {
-    return (tree: any) => tree;
-  }
+export default function remarkVarsPlugin(
+  vars: Record<string, unknown> = {},
+  env: Record<string, string | undefined> = process.env,
+) {
+  const hasVars = !!vars && Object.keys(vars).length > 0;
 
   // Matches {vars.key} or {vars.nested.key} in plain text / URLs
   const bracePattern = /\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}/g;
 
   // Matches {{vars.key}} — escape form (renders as literal {vars.key})
   const escapePattern = /\{\{vars\.([a-zA-Z_][a-zA-Z0-9_.]*)\}\}/g;
+
+  // Matches {env.VAR} in plain text / URLs (env names have no dots)
+  const envBracePattern = /\{env\.([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
+
+  // Matches {{env.VAR}} — escape form (renders as literal {env.VAR})
+  const envEscapePattern = /\{\{env\.([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
 
   /**
    * Throw a descriptive build error so the build fails on the offending file.
@@ -110,7 +123,7 @@ export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
    * @param str
    * @param filePath - Source file path for error context.
    */
-  function replaceBraces(str: string, filePath: string): string {
+  function replaceVarsBraces(str: string, filePath: string): string {
     // Step 1: protect escaped {{vars.key}} with a null-byte placeholder
     //         so the single-brace replacer never sees them.
     const ESCAPE_PLACEHOLDER = "\x00VARS_LITERAL\x00";
@@ -136,6 +149,41 @@ export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
       ),
       (_, path) => `{vars.${path}}`,
     );
+  }
+
+  /**
+   * Replace {env.VAR} occurrences in a string. An unset variable
+   * resolves to an empty string, matching {{env.VAR}} in porto.yml.
+   * Double-brace form {{env.VAR}} is an escape — it renders as {env.VAR} literally.
+   */
+  function replaceEnvBraces(str: string): string {
+    // Protect escaped {{env.VAR}} with a null-byte placeholder
+    // so the single-brace replacer never sees them.
+    const ESCAPE_PLACEHOLDER = "\x00ENV_LITERAL\x00";
+    const escaped = str.replace(
+      envEscapePattern,
+      (_, name) => `${ESCAPE_PLACEHOLDER}${name}${ESCAPE_PLACEHOLDER}`,
+    );
+
+    // Replace {env.VAR} — any remaining single-brace form is a real reference.
+    const replaced = escaped.replace(
+      envBracePattern,
+      (_, name) => env[name] ?? "",
+    );
+
+    // Restore escaped tokens as literal {env.VAR}
+    return replaced.replace(
+      new RegExp(
+        `${ESCAPE_PLACEHOLDER}([a-zA-Z_][a-zA-Z0-9_]*)${ESCAPE_PLACEHOLDER}`,
+        "g",
+      ),
+      (_, name) => `{env.${name}}`,
+    );
+  }
+
+  function replaceBraces(str: string, filePath: string): string {
+    const afterVars = hasVars ? replaceVarsBraces(str, filePath) : str;
+    return replaceEnvBraces(afterVars);
   }
 
   // The transformer receives (tree, file) — `file.path` is the source file path
@@ -167,21 +215,31 @@ export default function remarkVarsPlugin(vars: Record<string, unknown> = {}) {
       node.url = replaceBraces(node.url, filePath);
     });
 
-    // --- .mdx expression nodes: {vars.key} is parsed as a JSX expression ---
+    // --- .mdx expression nodes: {vars.key} and {env.VAR} are parsed as JSX expressions ---
     // We intercept these and replace them with plain text nodes so the MDX
-    // runtime never tries to evaluate `vars` as a JavaScript variable.
+    // runtime never tries to evaluate `vars` or `env` as JavaScript variables.
 
     function handleMdxExpression(node: any, index: number, parent: any): void {
-      const path = node.value?.trim();
-      if (!path || !path.startsWith("vars.")) {
+      const expr = node.value?.trim();
+      if (!expr) {
         return;
       }
 
-      const varPath = path.replace(/^vars\./, "");
-      const resolved = resolveVarPath(varPath, vars);
-
-      if (resolved === undefined) {
-        throw unknownKeyError(varPath, filePath);
+      let resolved: string | undefined;
+      if (expr.startsWith("env.")) {
+        const name = expr.replace(/^env\./, "");
+        if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
+          return;
+        }
+        resolved = env[name] ?? "";
+      } else if (hasVars && expr.startsWith("vars.")) {
+        const varPath = expr.replace(/^vars\./, "");
+        resolved = resolveVarPath(varPath, vars);
+        if (resolved === undefined) {
+          throw unknownKeyError(varPath, filePath);
+        }
+      } else {
+        return;
       }
 
       // Replace the expression node with a plain text node in its parent

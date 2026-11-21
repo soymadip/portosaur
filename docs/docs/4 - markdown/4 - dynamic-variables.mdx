@@ -9,7 +9,7 @@ icon: "md:code-braces"
 ## Syntax Overview
 
 - **In `porto.yml`**: Use double curly braces `{{path.to.key}}`.
-- **In `.md`/`.mdx` files**: Use single curly braces `{vars.<path.to.key>}` (or `{vars.<key>}`).
+- **In `.md`/`.mdx` files**: Use single curly braces `{vars.<path.to.key>}` (or `{vars.<key>}`), and `{env.<VAR_NAME>}` for environment variables.
 
 ```yaml title="porto.yml"
 vars:
@@ -62,6 +62,16 @@ site:
 
 If an environment variable is unset, the placeholder resolves safely to an empty string.
 
+In MDX files, use `{env.<VAR_NAME>}` the same way you use `{vars.<key>}`:
+
+```md title="docs/example.mdx"
+Deploys go to {{env.PORTOSAUR_DEPLOY_URL}}.
+```
+
+An unset variable resolves to an empty string here too.
+
+**Never put secrets in MDX.** Env values used in MDX end up in the built public HTML, so anyone can read them. Use `{env.}` for public values like deploy URLs, never for tokens or passwords.
+
 ## Escaping Variables
 
 ```markdown
@@ -73,3 +83,5 @@ The rendered output will be:
 ```text
 Use {{vars.project.title}} to reference your title.
 ```
+
+The same double-brace escape works for env vars: `{{env.<VAR_NAME>}}` renders as the literal text `{env.<VAR_NAME>}`.
