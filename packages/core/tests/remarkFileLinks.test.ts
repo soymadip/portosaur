@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll, spyOn } from "bun:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -97,6 +97,25 @@ async function transform(
   const file = fakeFile(current);
   await processor.run(tree, file);
   return { tree, file };
+}
+
+/**
+ * Run a function with console.warn spied on, restoring it after.
+ * Returns the warn calls alongside the function's result, so warn
+ * tests stay quiet and can assert on the printed warning.
+ */
+async function captureWarn<T>(
+  fn: () => Promise<T>,
+): Promise<{ result: T; warns: any[][] }> {
+  // spyOn calls through to the real console.warn by default, so
+  // silence it — otherwise warn tests print into the suite output.
+  const spy = spyOn(console, "warn").mockImplementation(() => {});
+  try {
+    const result = await fn();
+    return { result, warns: spy.mock.calls };
+  } finally {
+    spy.mockRestore();
+  }
 }
 
 function findLinks(tree: any): string[] {
@@ -231,17 +250,29 @@ describe("remarkFileLinks", () => {
   });
 
   test("warns and leaves a missing file untouched", async () => {
-    const { tree, file } = await transform("[x](./no-such-page.mdx)");
+    const {
+      result: { tree, file },
+      warns,
+    } = await captureWarn(() => transform("[x](./no-such-page.mdx)"));
     expect(findLinks(tree)).toEqual(["./no-such-page.mdx"]);
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toContain("does not exist");
+    expect(warns).toHaveLength(1);
+    expect(warns[0]?.[0]).toContain("does not exist");
+    expect(warns[0]?.[0]).toContain("2 - installation.mdx");
   });
 
   test("warns and leaves a link outside the content dirs untouched", async () => {
-    const { tree, file } = await transform("[x](../../outside.mdx)");
+    const {
+      result: { tree, file },
+      warns,
+    } = await captureWarn(() => transform("[x](../../outside.mdx)"));
     expect(findLinks(tree)).toEqual(["../../outside.mdx"]);
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toContain("outside the content directories");
+    expect(warns).toHaveLength(1);
+    expect(warns[0]?.[0]).toContain("outside the content directories");
+    expect(warns[0]?.[0]).toContain("2 - installation.mdx");
   });
 
   test("rewrites a definition node", async () => {

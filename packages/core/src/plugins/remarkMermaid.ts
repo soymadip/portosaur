@@ -83,6 +83,7 @@ function resolveDiagramIcon(name: string): string | undefined {
 
 export default function remarkMermaid() {
   return (tree: any, file: any) => {
+    const filePath = file?.path || file?.history?.[0] || "unknown file";
     // Unique per diagram on the page (Sankey gradients share IDs
     // otherwise). Letters, digits, `-` and `_` only.
     let count = 0;
@@ -92,11 +93,13 @@ export default function remarkMermaid() {
       }
       const source = node.value ?? "";
       if (!supports(source)) {
-        file.message(
-          "Portosaur: unsupported mermaid diagram type — the fence is left as a plain code block. " +
-            "ZenUML and external Mermaid plugins are not supported.",
-          node,
-        );
+        const message =
+          `Portosaur: unsupported mermaid diagram type in "${filePath}" — the fence is left as a plain code block. ` +
+          "ZenUML and external Mermaid plugins are not supported.";
+        file.message(message, node);
+        // fumadocs-mdx drops vfile messages, so a file.message
+        // alone never reaches the build log — print it too.
+        console.warn(message);
         return;
       }
       count += 1;
@@ -122,11 +125,13 @@ export default function remarkMermaid() {
         };
       } catch (error) {
         if (error instanceof PeleError) {
-          file.message(
-            `Portosaur: the mermaid diagram could not be rendered (${error.code}: ${error.message}). ` +
-              "The fence is left as a plain code block.",
-            node,
-          );
+          const message =
+            `Portosaur: the mermaid diagram in "${filePath}" could not be rendered (${error.code}: ${error.message}). ` +
+            "The fence is left as a plain code block.";
+          file.message(message, node);
+          // fumadocs-mdx drops vfile messages, so a file.message
+          // alone never reaches the build log — print it too.
+          console.warn(message);
           return;
         }
         throw error;

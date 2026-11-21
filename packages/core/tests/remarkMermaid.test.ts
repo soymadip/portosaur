@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, spyOn } from "bun:test";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkMdx from "remark-mdx";
@@ -35,6 +35,25 @@ async function transform(mdx: string): Promise<{ tree: any; file: any }> {
   const file = fakeFile();
   await processor.run(tree, file);
   return { tree, file };
+}
+
+/**
+ * Run a function with console.warn spied on, restoring it after.
+ * Returns the warn calls alongside the function's result, so warn
+ * tests stay quiet and can assert on the printed warning.
+ */
+async function captureWarn<T>(
+  fn: () => Promise<T>,
+): Promise<{ result: T; warns: any[][] }> {
+  // spyOn calls through to the real console.warn by default, so
+  // silence it — otherwise warn tests print into the suite output.
+  const spy = spyOn(console, "warn").mockImplementation(() => {});
+  try {
+    const result = await fn();
+    return { result, warns: spy.mock.calls };
+  } finally {
+    spy.mockRestore();
+  }
 }
 
 function findDiagrams(tree: any): any[] {
@@ -93,23 +112,35 @@ describe("remarkMermaid", () => {
   });
 
   test("leaves an unsupported type as a code block with a warning", async () => {
-    const { tree, file } = await transform(
-      "```mermaid\nzenuml\n  A->B: hi\n```\n",
+    const {
+      result: { tree, file },
+      warns,
+    } = await captureWarn(() =>
+      transform("```mermaid\nzenuml\n  A->B: hi\n```\n"),
     );
     expect(findDiagrams(tree)).toHaveLength(0);
     expect(findCode(tree)).toHaveLength(1);
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toContain("unsupported mermaid diagram type");
+    expect(warns).toHaveLength(1);
+    expect(warns[0]?.[0]).toContain("unsupported mermaid diagram type");
+    expect(warns[0]?.[0]).toContain("test.mdx");
   });
 
   test("leaves a broken diagram as a code block with a warning", async () => {
-    const { tree, file } = await transform(
-      "```mermaid\nflowchart LR\n  A -->\n```\n",
+    const {
+      result: { tree, file },
+      warns,
+    } = await captureWarn(() =>
+      transform("```mermaid\nflowchart LR\n  A -->\n```\n"),
     );
     expect(findDiagrams(tree)).toHaveLength(0);
     expect(findCode(tree)).toHaveLength(1);
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toContain("could not be rendered");
+    expect(warns).toHaveLength(1);
+    expect(warns[0]?.[0]).toContain("could not be rendered");
+    expect(warns[0]?.[0]).toContain("test.mdx");
   });
 
   test("resolves fa: icons through the Iconify packs", async () => {

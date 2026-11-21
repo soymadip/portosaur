@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, spyOn } from "bun:test";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkMdx from "remark-mdx";
@@ -37,6 +37,25 @@ async function transform(mdx: string): Promise<{ tree: any; file: any }> {
   const file = fakeFile();
   await processor.run(tree, file);
   return { tree, file };
+}
+
+/**
+ * Run a function with console.warn spied on, restoring it after.
+ * Returns the warn calls alongside the function's result, so warn
+ * tests stay quiet and can assert on the printed warning.
+ */
+async function captureWarn<T>(
+  fn: () => Promise<T>,
+): Promise<{ result: T; warns: any[][] }> {
+  // spyOn calls through to the real console.warn by default, so
+  // silence it — otherwise warn tests print into the suite output.
+  const spy = spyOn(console, "warn").mockImplementation(() => {});
+  try {
+    const result = await fn();
+    return { result, warns: spy.mock.calls };
+  } finally {
+    spy.mockRestore();
+  }
 }
 
 function findTabs(tree: any): any[] {
@@ -179,15 +198,23 @@ describe("remarkInstall", () => {
   });
 
   test("leaves an unknown language alone with a warning", async () => {
-    const { tree, file } = await transform(
-      '```package-install lang="rust"\nserde\n```\n',
+    const {
+      result: { tree, file },
+      warns,
+    } = await captureWarn(() =>
+      transform('```package-install lang="rust"\nserde\n```\n'),
     );
     expect(findTabs(tree)).toHaveLength(0);
     const [fence] = findCode(tree);
-    expect(fence.lang).toBe("package-install");
+    // The lang becomes `text`: Shiki has no `package-install`
+    // grammar, so keeping it would fail the build at highlight time.
+    expect(fence.lang).toBe("text");
     expect(fence.value).toBe("serde");
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toContain('lang "rust"');
+    expect(warns).toHaveLength(1);
+    expect(warns[0]?.[0]).toContain('lang "rust"');
+    expect(warns[0]?.[0]).toContain("test.mdx");
   });
 
   test("leaves ordinary fences untouched", async () => {

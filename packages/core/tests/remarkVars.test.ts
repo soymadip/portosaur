@@ -42,7 +42,9 @@ function run(mdx: string, options: RemarkVarsOptions = {}): string {
  * tests stay quiet and can assert on the printed warning.
  */
 function captureWarn<T>(fn: () => T): { result: T; warns: any[][] } {
-  const spy = spyOn(console, "warn");
+  // spyOn calls through to the real console.warn by default, so
+  // silence it — otherwise warn tests print into the suite output.
+  const spy = spyOn(console, "warn").mockImplementation(() => {});
   try {
     const result = fn();
     return { result, warns: spy.mock.calls };

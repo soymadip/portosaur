@@ -157,21 +157,25 @@ function resolveFileLink(
 }
 
 /** The build warning for a link that could not be resolved. */
-function warningFor(url: string, reason: UnresolvedReason): string {
+function warningFor(
+  url: string,
+  reason: UnresolvedReason,
+  filePath: string,
+): string {
   if (reason === "missing") {
     return (
-      `Portosaur: the link to "${url}" points at a file that does not exist. ` +
+      `Portosaur: the link to "${url}" in "${filePath}" points at a file that does not exist. ` +
       "The link is left as-is."
     );
   }
   if (reason === "outside") {
     return (
-      `Portosaur: the link to "${url}" points outside the content directories. ` +
+      `Portosaur: the link to "${url}" in "${filePath}" points outside the content directories. ` +
       "The link is left as-is."
     );
   }
   return (
-    `Portosaur: the link to "${url}" could not be decoded. ` +
+    `Portosaur: the link to "${url}" in "${filePath}" could not be decoded. ` +
     "The link is left as-is."
   );
 }
@@ -196,7 +200,11 @@ export default function remarkFileLinks(contentDirs: ContentDir[] = []) {
       if (result.ok) {
         return result.url;
       }
-      file.message(warningFor(url, result.reason), node);
+      const message = warningFor(url, result.reason, currentPath);
+      file.message(message, node);
+      // fumadocs-mdx drops vfile messages, so a file.message
+      // alone never reaches the build log — print it too.
+      console.warn(message);
       return url;
     };
     visit(tree, "link", (node) => {

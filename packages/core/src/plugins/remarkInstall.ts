@@ -25,8 +25,8 @@
  * install a package. The fence holds plain package names (one
  * line or several). Each manager's tab fills in its own command.
  *
- * An unknown language is left alone (the fence renders as a plain
- * code block) with a build warning, rather than rendering the
+ * An unknown language keeps its content and renders as a plain
+ * text block, with a build warning, rather than rendering the
  * wrong tabs.
  */
 
@@ -126,6 +126,7 @@ function tableTabs(
 
 export default function remarkInstall() {
   return (tree: any, file: any) => {
+    const filePath = file?.path || file?.history?.[0] || "unknown file";
     visit(tree, "code", (node, index, parent) => {
       if (node.lang !== "package-install" && node.lang !== "npm") {
         return;
@@ -160,12 +161,18 @@ export default function remarkInstall() {
         const packages = node.value.trim().split(/\s+/).join(" ");
         tabs = tableTabs(language, packages);
       } else {
-        file.message(
-          `Portosaur: package-install lang "${rawLang}" is not supported. ` +
-            `Supported languages are: js, python, ruby. ` +
-            `The fence is left as a plain code block.`,
-          node,
-        );
+        // Shiki has no `package-install` grammar: keeping the lang
+        // would fail the build at highlight time, so the fence
+        // renders as plain text instead.
+        node.lang = "text";
+        const message =
+          `Portosaur: package-install lang "${rawLang}" in "${filePath}" is not supported. ` +
+          `Supported languages are: js, python, ruby. ` +
+          `The fence is left as a plain code block.`;
+        file.message(message, node);
+        // fumadocs-mdx drops vfile messages, so a file.message
+        // alone never reaches the build log — print it too.
+        console.warn(message);
         return;
       }
 
