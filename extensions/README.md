@@ -23,6 +23,7 @@ how `porto.yml` is handled.
 | `{env.}` values inline and on hover               |   Yes   | Yes |                                                                                         |
 | `{env.}` completion                               |   Yes   | Yes | From the system environment and `.env` files                                            |
 | Shortcode suggestions                             |   Yes   | Yes | Icon packs and emoji after `:`. Emoji need `site.content.render_emoji_shortcodes`       |
+| Code fence suggestions                            |   Yes   | Yes | Languages after the fence, meta params after the language                               |
 | Path completion for links                          |   Yes   | Yes |                                                                                         |
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |

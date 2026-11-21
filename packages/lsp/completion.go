@@ -77,6 +77,9 @@ func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (
 	if list, handled := s.shortcodeCompletion(params, text, root); handled {
 		return list, nil
 	}
+	if list, handled := s.fenceCompletion(params, text); handled {
+		return list, nil
+	}
 	return s.componentCompletion(params, text, s.resolver.resolve(root, schemaComponents)), nil
 }
 

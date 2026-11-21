@@ -30,6 +30,7 @@ Beyond completion and hover, the server also:
 - **Shows `{env.}` values inline.** A `{env.VAR}` that is set shows that value right after it, and hovering over it says where the value comes from.
 - **Completes `{env.}`.** Inside an expression it suggests the env var names the build can see, from the system environment and the project's `.env` files. Each suggestion names its source, never the value.
 - **Suggests shortcodes.** Typing `:` in prose offers icon packs (`:si:` and the rest) and emoji shortcodes (`:smile:`), filtered as you type. Emoji appear only when `site.content.render_emoji_shortcodes` is on.
+- **Suggests code fence languages and options.** On a fence line it offers language names, including `mermaid`, `package-install`, and `npm`, and after the language it offers the block options `title`, `tab`, `noCopy`, `noWrap`, and `lineNumbers`.
 - **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
 - **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.
 
