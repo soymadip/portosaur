@@ -129,7 +129,7 @@
   background: color-mix(in srgb, var(--porto-color-gray-2) 8%, transparent);
   color: var(--porto-color-text-accent);
 }
-.porto-tasks-tab:focus {
+.porto-tasks-tab:focus:not(:focus-visible) {
   outline: none;
 }
 
