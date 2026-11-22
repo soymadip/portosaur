@@ -276,3 +276,75 @@ func TestPageIndexInvalidatesOnOpen(t *testing.T) {
 		t.Fatalf("definition after the page appears = %v, want one location", locations)
 	}
 }
+
+func TestDefinitionRefUseJumpsToDefinition(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\nSee [the guide][guide] here.\n\n[guide]: /docs/getting-started/\n"
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	locations := s.definition(t, documentURI, 2, 18)
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	if locations[0].URI != documentURI {
+		t.Fatalf("definition URI = %v, want the same document", locations[0].URI)
+	}
+	if locations[0].Range.Start.Line != 4 || locations[0].Range.Start.Character != 1 {
+		t.Fatalf("definition = %+v, want the definition label on line 4", locations[0].Range)
+	}
+}
+
+func TestDefinitionRefCollapsedAndShortcut(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	for _, doc := range []string{
+		"# Page\n\nSee [guide][] here.\n\n[guide]: /docs/getting-started/\n",
+		"# Page\n\nSee [guide] here.\n\n[guide]: /docs/getting-started/\n",
+	} {
+		documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+		locations := s.definition(t, documentURI, 2, 7)
+		if len(locations) != 1 || locations[0].Range.Start.Line != 4 {
+			t.Fatalf("definition = %v, want the definition line for %q", locations, doc)
+		}
+	}
+}
+
+func TestDefinitionRefUndefinedIsEmpty(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee [x][missing] here.\n")
+	if locations := s.definition(t, documentURI, 2, 10); len(locations) != 0 {
+		t.Fatalf("definition = %v, want none for an undefined ref", locations)
+	}
+}
+
+func TestDefinitionRefUseCaseInsensitive(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee [x][GUIDE] here.\n\n[guide]: /docs/getting-started/\n")
+	locations := s.definition(t, documentURI, 2, 10)
+	if len(locations) != 1 || locations[0].Range.Start.Line != 4 {
+		t.Fatalf("definition = %v, want the definition line (labels match case-insensitively)", locations)
+	}
+}
+
+func TestDefinitionRefDestinationJumpsToPage(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/getting-started/installation/\n")
+	locations := s.definition(t, documentURI, 2, 20)
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	want := uri.File(filepath.Join(s.root, "docs", "1 - getting-started", "2 - installation.mdx"))
+	if locations[0].URI != want {
+		t.Fatalf("definition URI = %v, want %v", locations[0].URI, want)
+	}
+}
+
+func TestDefinitionRefDestinationHashJumpsToHeading(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/getting-started/installation/#setup\n")
+	locations := s.definition(t, documentURI, 2, 48)
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	if locations[0].Range.Start.Line != 2 {
+		t.Fatalf("definition line = %d, want the Setup heading line", locations[0].Range.Start.Line)
+	}
+}

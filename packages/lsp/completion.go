@@ -72,6 +72,9 @@ func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (
 	if list, handled := s.envCompletion(params, text, root); handled {
 		return list, nil
 	}
+	if list, handled := s.refLabelCompletion(params, text); handled {
+		return list, nil
+	}
 	if list, handled := s.linkCompletion(params, text, root); handled {
 		return list, nil
 	}

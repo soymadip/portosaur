@@ -85,3 +85,111 @@ func TestScanMarkdownImages(t *testing.T) {
 		}
 	}
 }
+
+func TestScanRefDefinitions(t *testing.T) {
+	text := "---\ntitle: x\n---\n\n[install]: /docs/getting-started/installation/\n[angled]: <./my page.mdx>\n[titled]: /docs/sibling/ \"Sibling page\"\n  [indented]: /docs/sibling/\n    [codeblock]: /docs/sibling/\n[INSTALL]: /docs/other/\n[empty]:\n[bad[bracket]: /docs/sibling/\n\n`[code]: /docs/sibling/`\n\n```md\n[fenced]: /docs/sibling/\n```\n"
+	defs := scanRefDefinitions(text)
+	want := []struct {
+		label string
+		dest  string
+	}{
+		{"install", "/docs/getting-started/installation/"},
+		{"angled", "./my page.mdx"},
+		{"titled", "/docs/sibling/"},
+		{"indented", "/docs/sibling/"},
+	}
+	if len(defs) != len(want) {
+		t.Fatalf("definitions = %+v, want %d", defs, len(want))
+	}
+	for i, w := range want {
+		if defs[i].label != w.label || defs[i].dest != w.dest {
+			t.Fatalf("definition %d = %q -> %q, want %q -> %q", i, defs[i].label, defs[i].dest, w.label, w.dest)
+		}
+		if text[defs[i].destStart:defs[i].destEnd] != w.dest {
+			t.Fatalf("definition %d offsets cover %q, want %q", i, text[defs[i].destStart:defs[i].destEnd], w.dest)
+		}
+		if text[defs[i].labelStart:defs[i].labelEnd] != w.label {
+			t.Fatalf("definition %d label offsets cover %q, want %q", i, text[defs[i].labelStart:defs[i].labelEnd], w.label)
+		}
+	}
+}
+
+func TestScanRefDefinitionsUnclosedFrontmatter(t *testing.T) {
+	text := "---\ntitle: x\n\n[install]: /docs/page/\n"
+	if defs := scanRefDefinitions(text); len(defs) != 0 {
+		t.Fatalf("definitions = %+v, want none for unclosed frontmatter", defs)
+	}
+}
+
+func TestScanRefUses(t *testing.T) {
+	text := "[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n\nSee [the install guide][install] and [guide][] and [guide] for more.\nAn [undefined][missing] ref and [also undefined][] stay plain.\nAn [inline](/docs/page/) link is not a ref.\n![an image][install] uses the same definition.\nUse `[code][install]` inline, not a use.\n[no def here] is plain text.\n"
+	defs := scanRefDefinitions(text)
+	uses := scanRefUses(text, defs)
+	want := []struct {
+		label string
+		image bool
+	}{
+		{"install", false},
+		{"guide", false},
+		{"guide", false},
+		{"missing", false},
+		{"also undefined", false},
+		{"install", true},
+	}
+	if len(uses) != len(want) {
+		t.Fatalf("uses = %+v, want %d", uses, len(want))
+	}
+	for i, w := range want {
+		if uses[i].label != w.label || uses[i].image != w.image {
+			t.Fatalf("use %d = %+v, want label %q image %v", i, uses[i], w.label, w.image)
+		}
+		if text[uses[i].labelStart:uses[i].labelEnd] != w.label {
+			t.Fatalf("use %d offsets cover %q, want %q", i, text[uses[i].labelStart:uses[i].labelEnd], w.label)
+		}
+	}
+}
+
+func TestScanRefUsesCaseInsensitive(t *testing.T) {
+	text := "[Guide]: /docs/getting-started/\n\nSee [GUIDE] here.\n"
+	defs := scanRefDefinitions(text)
+	uses := scanRefUses(text, defs)
+	if len(uses) != 1 || uses[0].label != "GUIDE" {
+		t.Fatalf("uses = %+v, want the shortcut ref matching case-insensitively", uses)
+	}
+}
+
+func TestLinkAtCursorRefDefinition(t *testing.T) {
+	text, pos := posAt(t, "[install]: /docs/getting-started/installation/|")
+	ctx := linkAtCursor(text, pos)
+	if !ctx.found || ctx.value != "/docs/getting-started/installation/" || ctx.partial != "/docs/getting-started/installation/" {
+		t.Fatalf("link = %+v, want the definition destination", ctx)
+	}
+}
+
+func TestLinkAtCursorRefDefinitionPartial(t *testing.T) {
+	text, pos := posAt(t, "[install]: /docs/get|ting-started/")
+	ctx := linkAtCursor(text, pos)
+	if !ctx.found || ctx.partial != "/docs/get" || ctx.value != "/docs/getting-started/" {
+		t.Fatalf("link = %+v, want partial /docs/get", ctx)
+	}
+}
+
+func TestLinkAtCursorRefDefinitionAngled(t *testing.T) {
+	text, pos := posAt(t, "[mp]: <./my page|.mdx>")
+	ctx := linkAtCursor(text, pos)
+	if !ctx.found || ctx.value != "./my page.mdx" || !ctx.angled {
+		t.Fatalf("link = %+v, want the angled destination", ctx)
+	}
+}
+
+func TestLinkAtCursorRefDefinitionTitleAndLabel(t *testing.T) {
+	for _, marked := range []string{
+		"[t]: /docs/sibling/ \"Ti|tle\"",
+		"[ins|tall]: /docs/getting-started/",
+	} {
+		text, pos := posAt(t, marked)
+		if ctx := linkAtCursor(text, pos); ctx.found {
+			t.Fatalf("linkAtCursor(%q) = %+v, want none (title and label are not destinations)", marked, ctx)
+		}
+	}
+}

@@ -40,6 +40,71 @@ func (s *Server) linkCompletion(params *protocol.CompletionParams, text string, 
 	return s.pageCompletion(params, root, link, partial), true
 }
 
+// refLabelCompletion offers the document's reference labels
+// inside the second bracket of `[text][|]` (or `![alt][|]`),
+// filtered by the typed prefix, case-insensitively. The edit
+// replaces the label text typed so far. The second return
+// value reports whether the cursor is on a ref label at all.
+func (s *Server) refLabelCompletion(params *protocol.CompletionParams, text string) (*protocol.CompletionList, bool) {
+	lines := strings.Split(text, "\n")
+	contentStart := 0
+	if block, ok := extractFrontmatter(text); ok {
+		if !block.closed {
+			return nil, false
+		}
+		contentStart = block.endLine + 1
+	}
+	lineNo := int(params.Position.Line)
+	if lineNo < contentStart || lineNo >= len(lines) {
+		return nil, false
+	}
+	if fenceLines(lines, contentStart)[lineNo] {
+		return nil, false
+	}
+	line := lines[lineNo]
+	cursor := utf16ToByte(line, params.Position.Character)
+	spans := codeSpanRanges(line)
+	for i := 0; i < len(line); i++ {
+		if line[i] != '[' || i == 0 || line[i-1] != ']' {
+			continue
+		}
+		// The second bracket follows a `]` directly; the
+		// first bracket opens the link text before it.
+		if strings.LastIndex(line[:i-1], "[") < 0 {
+			continue
+		}
+		if inCodeSpan(spans, i) {
+			continue
+		}
+		labelStart := i + 1
+		labelEnd := len(line)
+		if close := strings.IndexByte(line[labelStart:], ']'); close >= 0 {
+			labelEnd = labelStart + close
+		}
+		if cursor < labelStart || cursor > labelEnd {
+			continue
+		}
+		partial := line[labelStart:cursor]
+		lineOffset := positionToOffset(lines, protocol.Position{Line: uint32(lineNo)})
+		editRange := rangeFromOffsets(lines, lineOffset+labelStart, lineOffset+labelEnd)
+		var items []protocol.CompletionItem
+		for _, def := range scanRefDefinitions(text) {
+			if !strings.HasPrefix(strings.ToLower(def.label), strings.ToLower(partial)) {
+				continue
+			}
+			items = append(items, protocol.CompletionItem{
+				Label:    def.label,
+				Kind:     protocol.CompletionItemKindReference,
+				Detail:   protocol.NewOptional(def.dest),
+				TextEdit: &protocol.TextEdit{Range: editRange, NewText: def.label},
+			})
+		}
+		sort.Slice(items, func(a, b int) bool { return strings.ToLower(items[a].Label) < strings.ToLower(items[b].Label) })
+		return &protocol.CompletionList{IsIncomplete: false, Items: items}, true
+	}
+	return nil, false
+}
+
 // pageCompletion offers clean URLs from the page index,
 // filtered by the typed prefix.
 func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, link linkContext, partial string) *protocol.CompletionList {

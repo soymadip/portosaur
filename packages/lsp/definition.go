@@ -18,8 +18,12 @@ import (
 // and to the file top otherwise.
 
 // Definition answers textDocument/definition for link
-// destinations. A document outside a project, or a cursor that
-// is not on a link, gets no definition.
+// destinations and reference uses. A document outside a
+// project, or a cursor that is not on a link, gets no
+// definition. A reference use (`[text][ref]`, `[text][]`,
+// `[text]`) jumps to its `[ref]:` definition line; a
+// definition's destination jumps to the target page or
+// heading, like an inline link.
 func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams) (protocol.DefinitionResult, error) {
 	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
 	if !ok {
@@ -31,6 +35,9 @@ func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams
 	root, ok := s.projectFor(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
+	}
+	if location, ok := refUseDefinition(text, params.TextDocument.URI, params.Position); ok {
+		return protocol.LocationSlice{location}, nil
 	}
 	link := linkAtCursor(text, params.Position)
 	if !link.found || link.value == "" {
@@ -46,6 +53,37 @@ func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams
 		Range: protocol.Range{Start: at, End: at},
 	}
 	return protocol.LocationSlice{location}, nil
+}
+
+// refUseDefinition jumps from a reference use site to its
+// `[ref]:` definition line, landing on the label. An
+// undefined ref has no definition.
+func refUseDefinition(text string, documentURI uri.URI, pos protocol.Position) (protocol.Location, bool) {
+	defs := scanRefDefinitions(text)
+	if len(defs) == 0 {
+		return protocol.Location{}, false
+	}
+	lines := strings.Split(text, "\n")
+	cursor := positionToOffset(lines, pos)
+	byLabel := map[string]refDefinition{}
+	for _, def := range defs {
+		byLabel[normalizeRefLabel(def.label)] = def
+	}
+	for _, use := range scanRefUses(text, defs) {
+		if cursor < use.labelStart || cursor > use.labelEnd {
+			continue
+		}
+		def, ok := byLabel[normalizeRefLabel(use.label)]
+		if !ok {
+			return protocol.Location{}, false
+		}
+		at := offsetToPosition(lines, def.labelStart)
+		return protocol.Location{
+			URI:   documentURI,
+			Range: protocol.Range{Start: at, End: at},
+		}, true
+	}
+	return protocol.Location{}, false
 }
 
 // linkTarget is a resolved link destination: the file and the

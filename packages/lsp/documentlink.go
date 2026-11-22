@@ -10,12 +10,15 @@ import (
 )
 
 // DocumentLink returns every clickable link in the document:
-// markdown links and images, and Link/Btn link prop values.
-// An internal link targets its file, an external link targets
-// its own URL, and a link that points nowhere gets no document
+// markdown links and images, reference-definition
+// destinations, and Link/Btn link prop values. An internal
+// link targets its file, an external link targets its own
+// URL, and a link that points nowhere gets no document
 // link — there is nothing to open. The range covers the
 // destination text, like the diagnostic and go-to-definition
-// ranges.
+// ranges. A reference use site (`[text][ref]`) gets no
+// document link — go-to-definition jumps to its definition
+// instead.
 func (s *Server) DocumentLink(_ context.Context, params *protocol.DocumentLinkParams) ([]protocol.DocumentLink, error) {
 	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
 	if !ok {
@@ -35,6 +38,25 @@ func (s *Server) DocumentLink(_ context.Context, params *protocol.DocumentLinkPa
 		if target, ok := s.linkTargetURI(root, currentFile, dest.value); ok {
 			links = append(links, protocol.DocumentLink{
 				Range:  rangeFromOffsets(lines, dest.start, dest.end),
+				Target: target,
+			})
+		}
+	}
+	defs := scanRefDefinitions(text)
+	uses := scanRefUses(text, defs)
+	for _, def := range defs {
+		if refDefImageOnly(def, uses) {
+			if target, ok := s.imageTargetURI(root, currentFile, def.dest); ok {
+				links = append(links, protocol.DocumentLink{
+					Range:  rangeFromOffsets(lines, def.destStart, def.destEnd),
+					Target: target,
+				})
+			}
+			continue
+		}
+		if target, ok := s.linkTargetURI(root, currentFile, def.dest); ok {
+			links = append(links, protocol.DocumentLink{
+				Range:  rangeFromOffsets(lines, def.destStart, def.destEnd),
 				Target: target,
 			})
 		}

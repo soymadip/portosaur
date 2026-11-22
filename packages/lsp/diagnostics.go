@@ -16,8 +16,9 @@ import (
 // Diagnostics for MDX documents: frontmatter YAML (syntax errors
 // always, schema validation only in strict mode) plus component
 // checks, `{vars.}` and `{env.}` reference checks, broken-link
-// and broken-image checks over the page body, and duplicate-slug
-// checks against the project's pages. The schema-based component checks
+// and broken-image checks over the page body, undefined
+// reference-style link warnings, and duplicate-slug checks
+// against the project's pages. The schema-based component checks
 // (unknown components, missing required props) are strict-only
 // too — the website's schema is the latest release's, which
 // cannot be tied to the project's version. The icon, slug, and
@@ -55,6 +56,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, diag)
 	}
 	for _, diag := range s.linkIssues(text, root, uriPath(documentURI)) {
+		diags = append(diags, diag)
+	}
+	for _, diag := range s.refIssues(text) {
 		diags = append(diags, diag)
 	}
 	for _, diag := range s.imageIssues(text, root, uriPath(documentURI)) {
@@ -360,13 +364,15 @@ func (s *Server) envIssues(text string, root string) []protocol.Diagnostic {
 }
 
 // linkIssues checks every internal link in the document body:
-// markdown links and Link/Btn link prop values. A clean URL
-// no page serves, or a relative path with no file behind it, is
-// broken. The severity follows site.content.on_broken_links:
-// throw is an error, warn is a warning, ignore reports nothing.
-// The default is throw, and an unrecognized value falls back to
+// markdown links, reference-definition destinations, and
+// Link/Btn link prop values. A clean URL no page serves, or a
+// relative path with no file behind it, is broken. The
+// severity follows site.content.on_broken_links: throw is an
+// error, warn is a warning, ignore reports nothing. The
+// default is throw, and an unrecognized value falls back to
 // it. The check reads porto.yml directly, not a schema, so it
-// runs in both modes.
+// runs in both modes. A definition feeding image uses only is
+// an image src, not a link — the image check covers it.
 func (s *Server) linkIssues(text string, root string, currentFile string) []protocol.Diagnostic {
 	cfg := loadProjectConfig(root)
 	behavior := configString(cfg, []string{"site", "content", "on_broken_links"}, "throw")
@@ -388,6 +394,22 @@ func (s *Server) linkIssues(text string, root string, currentFile string) []prot
 			Severity: severity,
 			Source:   protocol.NewOptional("porto-lsp"),
 			Message:  protocol.String(linkBrokenMessage(dest.value)),
+		})
+	}
+	defs := scanRefDefinitions(text)
+	uses := scanRefUses(text, defs)
+	for _, def := range defs {
+		if refDefImageOnly(def, uses) {
+			continue
+		}
+		if !s.linkBroken(root, currentFile, def.dest) {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, def.destStart, def.destEnd),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String(linkBrokenMessage(def.dest)),
 		})
 	}
 	for _, tag := range scanAllTags(text) {
@@ -424,8 +446,41 @@ func linkBrokenMessage(value string) string {
 	return "Broken link \"" + value + "\" (no such file)"
 }
 
+// refIssues warns about reference-style link and image uses
+// with no matching `[ref]:` definition: the build renders the
+// brackets as plain text. Always a warning — an undefined ref
+// is not a broken link, so on_broken_links does not govern it.
+// The check reads the document directly, not a schema, so it
+// runs in both modes.
+func (s *Server) refIssues(text string) []protocol.Diagnostic {
+	defs := scanRefDefinitions(text)
+	defined := map[string]bool{}
+	for _, def := range defs {
+		defined[normalizeRefLabel(def.label)] = true
+	}
+	lines := strings.Split(text, "\n")
+	var diags []protocol.Diagnostic
+	for _, use := range scanRefUses(text, defs) {
+		if defined[normalizeRefLabel(use.label)] {
+			continue
+		}
+		kind := "link"
+		if use.image {
+			kind = "image"
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, use.labelStart, use.labelEnd),
+			Severity: protocol.DiagnosticSeverityWarning,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String("Undefined " + kind + " reference \"[" + use.label + "]\" (no matching definition)"),
+		})
+	}
+	return diags
+}
+
 // imageIssues checks every image in the document body:
-// markdown images and `<img src="...">` tags. A relative src
+// markdown images, reference-definition destinations feeding
+// image uses only, and `<img src="...">` tags. A relative src
 // with no file behind it, or an absolute src with no file under
 // the project's `static/` directory, is broken. The severity
 // follows site.content.on_broken_images: throw is an error, warn
@@ -453,6 +508,22 @@ func (s *Server) imageIssues(text string, root string, currentFile string) []pro
 			Severity: severity,
 			Source:   protocol.NewOptional("porto-lsp"),
 			Message:  protocol.String(imageBrokenMessage(dest.value)),
+		})
+	}
+	defs := scanRefDefinitions(text)
+	uses := scanRefUses(text, defs)
+	for _, def := range defs {
+		if !refDefImageOnly(def, uses) {
+			continue
+		}
+		if !imageBroken(root, currentFile, def.dest) {
+			continue
+		}
+		diags = append(diags, protocol.Diagnostic{
+			Range:    rangeFromOffsets(lines, def.destStart, def.destEnd),
+			Severity: severity,
+			Source:   protocol.NewOptional("porto-lsp"),
+			Message:  protocol.String(imageBrokenMessage(def.dest)),
 		})
 	}
 	for _, tag := range scanAllTags(text) {
