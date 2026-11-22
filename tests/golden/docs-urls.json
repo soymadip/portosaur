@@ -1,5 +1,5 @@
 {
-  "generated_from": "Cards, Steps and FileTree component pages added; editor-support and link heading updates; Details page Behavior section",
+  "generated_from": "FileTree page Codeblock Syntax section",
   "routes": [
     {
       "url": "/",
@@ -310,7 +310,12 @@
     {
       "url": "/docs/markdown/components/file-tree/",
       "title": "File Tree | Portosaur",
-      "headings": ["File Tree", "Behavior", "Props Reference"]
+      "headings": [
+        "File Tree",
+        "Behavior",
+        "Codeblock Syntax",
+        "Props Reference"
+      ]
     },
     {
       "url": "/docs/markdown/components/hint/",
