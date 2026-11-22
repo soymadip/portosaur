@@ -72,9 +72,7 @@ export async function RepoInfo({
         </span>
       </span>
       {info?.description ? (
-        <span className="porto-repo-info__description">
-          {info.description}
-        </span>
+        <span className="porto-repo-info__description">{info.description}</span>
       ) : null}
       {info && info.stars !== null && info.forks !== null ? (
         <span className="porto-repo-info__counts">

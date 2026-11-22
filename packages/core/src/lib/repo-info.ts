@@ -24,12 +24,7 @@
  */
 
 export type RepoProvider =
-  | "github"
-  | "gitlab"
-  | "codeberg"
-  | "forgejo"
-  | "gitea"
-  | "sourcehut";
+  "github" | "gitlab" | "codeberg" | "forgejo" | "gitea" | "sourcehut";
 
 export interface RepositoryInfo {
   /** Null when the provider has no star count (SourceHut). */
@@ -172,11 +167,7 @@ export function getRepoUrl(
   repo: string,
   host?: string,
 ): string {
-  return PROVIDERS[provider].siteUrl(
-    owner,
-    repo,
-    requireHost(provider, host),
-  );
+  return PROVIDERS[provider].siteUrl(owner, repo, requireHost(provider, host));
 }
 
 /** One fetch per repo per build, shared across pages. */

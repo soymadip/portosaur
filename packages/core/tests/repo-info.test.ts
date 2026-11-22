@@ -146,9 +146,7 @@ describe("fetchRepositoryInfo", () => {
       });
     }) as any;
     const info = await fetchRepositoryInfo("owner-b", "repo-b", "gitlab");
-    expect(seenUrl).toBe(
-      "https://gitlab.com/api/v4/projects/owner-b%2Frepo-b",
-    );
+    expect(seenUrl).toBe("https://gitlab.com/api/v4/projects/owner-b%2Frepo-b");
     expect(info).toEqual({ stars: 10, forks: 2, description: "A GitLab repo" });
   });
 
@@ -183,9 +181,7 @@ describe("fetchRepositoryInfo", () => {
       "forgejo",
       "git.example.com",
     );
-    expect(seenUrl).toBe(
-      "https://git.example.com/api/v1/repos/owner-m/repo-m",
-    );
+    expect(seenUrl).toBe("https://git.example.com/api/v1/repos/owner-m/repo-m");
     expect(info).toEqual({
       stars: 9,
       forks: 3,
@@ -210,9 +206,9 @@ describe("fetchRepositoryInfo", () => {
   });
 
   test("a missing host throws instead of fetching nowhere", async () => {
-    expect(() =>
-      fetchRepositoryInfo("owner-o", "repo-o", "gitea"),
-    ).toThrow('provider "gitea" needs a host');
+    expect(() => fetchRepositoryInfo("owner-o", "repo-o", "gitea")).toThrow(
+      'provider "gitea" needs a host',
+    );
   });
 
   test("reads a SourceHut description through its GraphQL API", async () => {
