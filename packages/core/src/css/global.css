@@ -92,6 +92,7 @@
 @import "./components/SearchPageBody.css";
 /* Shared components + MDX components. */
 @import "./components/Button.css";
+@import "./components/Cards.css";
 @import "./components/Heading.css";
 @import "./components/Hint.css";
 @import "./components/Indent.css";

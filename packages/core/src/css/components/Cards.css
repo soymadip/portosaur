@@ -1,0 +1,81 @@
+/* Cards — an author-written grid of cards. Rendered by Cards/Card.
+   The card itself mirrors the TopicList card (same border, fill,
+   radius, shadow and hover), so the two card kinds look like one
+   family. The description is fuller here — TopicList truncates
+   page descriptions to one small line, but a Card's description
+   is written for the card and reads as content. */
+
+/* The list gets the page's own block rhythm above it: the prose
+   spacing is margin-top-only, so a zero top margin would leave
+   the cards sitting flush against whatever came before them. */
+.porto-cards-wrapper {
+  margin-top: var(--porto-content-gap-y);
+}
+.porto-cards {
+  display: grid;
+  gap: 0.96rem;
+}
+@media (min-width: 997px) {
+  .porto-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.porto-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* The description must not force the grid track wider than the
+     container — without this the mobile grid blows out. */
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--porto-color-card-border);
+  background-color: var(--porto-color-gray-6);
+  border-radius: 0.5rem;
+  box-shadow: var(--porto-shadow-sm);
+  text-decoration: none;
+  color: var(--porto-color-text);
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Only link cards lift on hover — a plain card lifting would
+   promise a link that isn't there. */
+a.porto-card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
+  box-shadow: var(--porto-shadow-md);
+}
+.porto-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 750;
+  color: var(--porto-color-text);
+}
+.porto-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 2px;
+}
+.porto-card__title-text {
+  min-width: 0;
+}
+.porto-card__description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--porto-color-gray-3);
+}
+.porto-card__body p {
+  margin: 0;
+}
+.porto-card__body p + p {
+  margin-top: 0.5rem;
+}

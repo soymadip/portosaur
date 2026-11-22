@@ -9,6 +9,7 @@ import {
   type DropdownItem,
 } from "./Dropdown.tsx";
 import { Btn } from "./mdx/Btn.tsx";
+import { Card, Cards } from "./mdx/Cards.tsx";
 import { CodeBlock } from "./mdx/CodeBlock.tsx";
 import {
   CodeBlockTab,
@@ -106,6 +107,7 @@ export function Dropdown({
  * a <p> — their roots are phrasing content.
  */
 const BLOCK_COMPONENTS: Set<unknown> = new Set([
+  Cards,
   CodeBlock,
   CodeBlockTabs,
   Details,
@@ -199,6 +201,8 @@ export function createRelativeLink(
 export function getMDXComponents(components?: MDXComponents) {
   return {
     Btn,
+    Card,
+    Cards,
     CodeBlockTab,
     CodeBlockTabs,
     CodeBlockTabsList,
@@ -257,6 +261,7 @@ declare global {
 }
 
 export { Btn } from "./mdx/Btn.tsx";
+export { Card, Cards } from "./mdx/Cards.tsx";
 export { CodeBlock } from "./mdx/CodeBlock.tsx";
 export {
   CodeBlockTab,
