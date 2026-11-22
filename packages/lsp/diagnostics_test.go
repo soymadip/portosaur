@@ -989,14 +989,14 @@ func TestDuplicateHeadingDiagnosticsSeverityFollowsSetting(t *testing.T) {
 		{"ignore", 0, 0},
 		{"bogus", protocol.DiagnosticSeverityWarning, 1},
 	} {
-		config := "site:\n  content:\n    on_duplicate_anchor: " + tc.setting + "\n"
+		config := "site:\n  content:\n    on_duplicate_h2: " + tc.setting + "\n"
 		s := startTestServer(t, fixtureProjectWithConfig(t, config))
 		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Same\n\n## Same\n")
 		if len(diags) != tc.want {
-			t.Fatalf("on_duplicate_anchor %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+			t.Fatalf("on_duplicate_h2 %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
 		}
 		if tc.want == 1 && diags[0].Severity != tc.severity {
-			t.Fatalf("on_duplicate_anchor %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+			t.Fatalf("on_duplicate_h2 %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
 		}
 	}
 }
@@ -1016,5 +1016,14 @@ func TestDuplicateHeadingDiagnosticsUniqueAreQuiet(t *testing.T) {
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for distinct headings", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateHeadingDiagnosticsH3Flagged(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "## Init\n\n### Options\n\n## Build\n\n### Options\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, `Duplicate heading "Options"`) || !hasDiagnostic(diags, `"options-1"`) {
+		t.Fatalf("diagnostics = %v, want the h3 duplicate flagged (the LSP checks every level)", diagnosticMessages(diags))
 	}
 }

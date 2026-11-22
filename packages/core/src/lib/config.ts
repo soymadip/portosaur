@@ -49,7 +49,7 @@ export interface PortosaurOptions {
       onBrokenImages: string;
       onMissingVar: string;
       onMissingEnv: string;
-      onDuplicateAnchor: string;
+      onDuplicateH2: string;
       toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };

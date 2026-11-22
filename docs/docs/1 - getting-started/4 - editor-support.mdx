@@ -26,7 +26,7 @@ Beyond completion and hover, the server also:
 - **Flags broken images.** An image whose file does not exist, by relative path or under the project's `static/` directory, is flagged with the severity from `site.content.on_broken_images`. External images, `data:` URIs, and sources holding a `{vars.}` or `{env.}` expression stay quiet.
 - **Flags multi-segment slugs.** A `slug:` in frontmatter with a `/` in it is an error, since a slug only renames the file itself.
 - **Warns about duplicate slugs.** Two pages that land on the same URL get a warning naming the other page, since the build fails on duplicate slugs.
-- **Warns about duplicate headings.** Two headings in a page that share an anchor get flagged with the severity from `site.content.on_duplicate_anchor`, naming the `-1` id the second one gets.
+- **Warns about duplicate headings.** Two headings in a page that share an anchor get flagged with the severity from `site.content.on_duplicate_h2`, naming the `-1` id the second one gets. The editor checks every level, not just h2, and offers a quick fix that adds the id as a custom id, so the heading keeps the id it already has.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
 - **Flags unknown `{vars.}` keys.** A `{{vars.key}}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
 - **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows `→ value` right after it, and hovering over it shows the value and where it comes from.

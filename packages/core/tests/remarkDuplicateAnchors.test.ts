@@ -8,11 +8,12 @@ import remarkDuplicateAnchors, {
 } from "../src/plugins/remarkDuplicateAnchors.ts";
 
 /**
- * `remarkDuplicateAnchors` reports headings that share an anchor
- * id within one page, following `site.content.on_duplicate_anchor`:
- * "throw" fails the build, "warn" warns (default), "ignore" stays
- * silent. These tests run it through the real unified pipeline,
- * the way the MDX compiler calls it.
+ * `remarkDuplicateAnchors` reports h2 headings that share an
+ * anchor id within one page, following
+ * `site.content.on_duplicate_h2`: "throw" fails the build,
+ * "warn" warns (default), "ignore" stays silent. These tests run
+ * it through the real unified pipeline, the way the MDX compiler
+ * calls it.
  */
 
 function process(
@@ -73,13 +74,13 @@ describe("remarkDuplicateAnchors", () => {
 
   test("with throw, fails the build on a duplicate", () => {
     expect(() =>
-      process("## Same\n\n## Same\n", { onDuplicateAnchor: "throw" }),
+      process("## Same\n\n## Same\n", { onDuplicateH2: "throw" }),
     ).toThrow('Duplicate heading "Same"');
   });
 
   test("with ignore, stays silent on a duplicate", () => {
     const { result, warns } = captureWarn(() =>
-      process("## Same\n\n## Same\n", { onDuplicateAnchor: "ignore" }),
+      process("## Same\n\n## Same\n", { onDuplicateH2: "ignore" }),
     );
     expect(result.messages).toHaveLength(0);
     expect(warns).toHaveLength(0);
@@ -88,9 +89,9 @@ describe("remarkDuplicateAnchors", () => {
   test("an invalid behavior fails at plugin creation", () => {
     expect(() =>
       process("## Same\n", {
-        onDuplicateAnchor: "error" as never,
+        onDuplicateH2: "error" as never,
       }),
-    ).toThrow('Invalid site.content.on_duplicate_anchor "error"');
+    ).toThrow('Invalid site.content.on_duplicate_h2 "error"');
   });
 
   test("two headings with the same custom id warn", () => {
@@ -124,9 +125,17 @@ describe("remarkDuplicateAnchors", () => {
     const {
       result: { messages },
     } = captureWarn(() =>
-      process("### `topic_list` Options\n\n### `topic_list` Options\n"),
+      process("## `topic_list` Options\n\n## `topic_list` Options\n"),
     );
     expect(messages).toHaveLength(1);
     expect(messages[0]).toContain('"topic_list-options-1"');
+  });
+
+  test("repeated h3 headings under different sections are quiet", () => {
+    const { result, warns } = captureWarn(() =>
+      process("## Init\n\n### Options\n\n## Build\n\n### Options\n"),
+    );
+    expect(result.messages).toHaveLength(0);
+    expect(warns).toHaveLength(0);
   });
 });

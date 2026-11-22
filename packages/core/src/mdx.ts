@@ -57,7 +57,7 @@ import remarkContentTitle, {
 import remarkHasMath, { HAS_MATH_KEY } from "./plugins/remarkHasMath.ts";
 import remarkVars, { type MissingBehavior } from "./plugins/remarkVars.ts";
 import remarkDuplicateAnchors, {
-  type DuplicateAnchorBehavior,
+  type DuplicateH2Behavior,
 } from "./plugins/remarkDuplicateAnchors.ts";
 import remarkFileLinks, { type ContentDir } from "./plugins/remarkFileLinks.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
@@ -76,8 +76,8 @@ export interface PortosaurMdxArgs {
   onMissingVar?: MissingBehavior;
   /** Behavior for an unset `{env.VAR}` (default "warn"). */
   onMissingEnv?: MissingBehavior;
-  /** Behavior for two headings in a page sharing an anchor (default "warn"). */
-  onDuplicateAnchor?: DuplicateAnchorBehavior;
+  /** Behavior for two h2 headings in a page sharing an anchor (default "warn"). */
+  onDuplicateH2?: DuplicateH2Behavior;
   colorScheme?: string;
   /** Render `:smile:`-style emoji shortcodes (default true). */
   renderEmojiShortcodes?: boolean;
@@ -143,8 +143,8 @@ export function parseCodeBlockMeta(meta: string): Record<string, unknown> {
  *   (`site.content.on_missing_var`, default "throw").
  * @param args.onMissingEnv - Behavior for an unset `{env.VAR}`
  *   (`site.content.on_missing_env`, default "warn").
- * @param args.onDuplicateAnchor - Behavior for two headings in a
- *   page sharing an anchor (`site.content.on_duplicate_anchor`,
+ * @param args.onDuplicateH2 - Behavior for two h2 headings in a
+ *   page sharing an anchor (`site.content.on_duplicate_h2`,
  *   default "warn").
  * @param args.colorScheme - The site's color scheme (for the Shiki
  *   light/dark themes).
@@ -161,7 +161,7 @@ export function portosaurMdxOptions({
   userVars = {},
   onMissingVar = "throw",
   onMissingEnv = "warn",
-  onDuplicateAnchor = "warn",
+  onDuplicateH2 = "warn",
   colorScheme,
   renderEmojiShortcodes = true,
   mermaid = true,
@@ -200,7 +200,7 @@ export function portosaurMdxOptions({
       // Duplicate anchors are checked last, so the headings seen
       // here are the ones remarkHeading will slug: the H1 already
       // hoisted, `{vars.key}` substituted, emoji rendered.
-      [remarkDuplicateAnchors, { onDuplicateAnchor }],
+      [remarkDuplicateAnchors, { onDuplicateH2 }],
     ],
     rehypePlugins: [rehypeKatex],
     // Fumadocs' remarkNpm is replaced by Portosaur's remarkInstall

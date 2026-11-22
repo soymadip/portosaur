@@ -167,6 +167,31 @@ func TestCodeActionRangeFilter(t *testing.T) {
 	}
 }
 
+func TestCodeActionDuplicateHeading(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "## Prerequisites\n\nSome text.\n\n## Prerequisites\n")
+	actions := s.codeActions(t, documentURI, 4, 5)
+	if len(actions) != 1 || actions[0].Title != "Use custom id '[#prerequisites-1]'" {
+		t.Fatalf("actions = %v, want the custom-id fix", actionTitles(actions))
+	}
+	edit := actionEdit(t, actions[0])
+	if edit.Range.Start.Line != 4 || edit.Range.Start.Character != 16 || edit.Range.End.Line != 4 || edit.Range.End.Character != 16 {
+		t.Fatalf("edit range = %+v, want an insert at (4, 16) (end of the heading text)", edit.Range)
+	}
+	if edit.NewText != " [#prerequisites-1]" {
+		t.Fatalf("edit text = %q, want \" [#prerequisites-1]\"", edit.NewText)
+	}
+}
+
+func TestCodeActionDuplicateHeadingSharedIDHasNoFix(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "## First [#shared]\n\n## Second [#shared]\n")
+	actions := s.codeActions(t, documentURI, 2, 5)
+	if len(actions) != 0 {
+		t.Fatalf("actions = %v, want none (a shared custom id has no fix to offer)", actionTitles(actions))
+	}
+}
+
 func TestCodeActionOnlyKindFilter(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nbogus: true\n---\n")

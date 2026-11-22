@@ -15,8 +15,9 @@ import (
 // never from stored diagnostics. An enum mismatch offers one
 // action per valid value, an unknown frontmatter key offers its
 // removal (only when the value is a single-line scalar, so the
-// whole line can go safely), and a missing required prop offers
-// its insertion.
+// whole line can go safely), a missing required prop offers its
+// insertion, and a duplicate heading offers a custom id with the
+// id it already renders as.
 
 // CodeAction answers textDocument/codeAction.
 func (s *Server) CodeAction(_ context.Context, params *protocol.CodeActionParams) ([]protocol.CommandOrCodeAction, error) {
@@ -82,6 +83,20 @@ func (s *Server) CodeAction(_ context.Context, params *protocol.CodeActionParams
 				},
 			))
 		}
+	}
+	for _, issue := range s.duplicateHeadingIssues(text, root) {
+		if issue.fixID == "" || !rangesOverlap(issue.diag.Range, params.Range) {
+			continue
+		}
+		actions = append(actions, quickFixAction(
+			"Use custom id '[#"+issue.fixID+"]'",
+			issue.diag,
+			params.TextDocument.URI,
+			protocol.TextEdit{
+				Range:   protocol.Range{Start: issue.diag.Range.End, End: issue.diag.Range.End},
+				NewText: " [#" + issue.fixID + "]",
+			},
+		))
 	}
 	return actions, nil
 }

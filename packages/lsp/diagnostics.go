@@ -68,8 +68,8 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 	for _, diag := range s.duplicateSlugIssues(text, root, uriPath(documentURI)) {
 		diags = append(diags, diag)
 	}
-	for _, diag := range s.duplicateHeadingIssues(text, root) {
-		diags = append(diags, diag)
+	for _, issue := range s.duplicateHeadingIssues(text, root) {
+		diags = append(diags, issue.diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
 }
@@ -595,19 +595,30 @@ func (s *Server) duplicateSlugIssues(text string, root string, currentFile strin
 	}}
 }
 
-// duplicateHeadingIssues warns on a heading whose id repeats
-// an earlier heading's id in the same document. The site dedups
-// plain repeats with a `-1` suffix, so a link to the plain id
-// reaches the first heading, not this one; custom ids are not
-// deduped at all, so two headings share the id outright. The
-// severity follows site.content.on_duplicate_anchor: throw is
-// an error, warn is a warning, ignore reports nothing. The
-// default is warn, and an unrecognized value falls back to it.
-// The check reads porto.yml directly, not a schema, so it runs
-// in both modes.
-func (s *Server) duplicateHeadingIssues(text string, root string) []protocol.Diagnostic {
+// duplicateHeadingIssue is one duplicate heading: the
+// diagnostic plus the id a quick fix inserts as a custom id.
+// fixID is empty for a shared custom id, where no fix is
+// offered — the user picks a new id themselves.
+type duplicateHeadingIssue struct {
+	diag  protocol.Diagnostic
+	fixID string
+}
+
+// duplicateHeadingIssues warns on a heading whose id repeats an
+// earlier heading's id in the same document, at any level. The
+// site dedups plain repeats with a `-1` suffix, so a link to
+// the plain id reaches the first heading, not this one; custom
+// ids are not deduped at all, so two headings share the id
+// outright. The LSP checks every level, unlike the build (h2
+// only): in the editor a duplicate is one click from fixed, so
+// flagging more is useful rather than noise. The severity
+// follows site.content.on_duplicate_h2: throw is an error, warn
+// is a warning, ignore reports nothing. The default is warn,
+// and an unrecognized value falls back to it. The check reads
+// porto.yml directly, not a schema, so it runs in both modes.
+func (s *Server) duplicateHeadingIssues(text string, root string) []duplicateHeadingIssue {
 	cfg := loadProjectConfig(root)
-	behavior := configString(cfg, []string{"site", "content", "on_duplicate_anchor"}, "warn")
+	behavior := configString(cfg, []string{"site", "content", "on_duplicate_h2"}, "warn")
 	if behavior == "ignore" {
 		return nil
 	}
@@ -617,7 +628,7 @@ func (s *Server) duplicateHeadingIssues(text string, root string) []protocol.Dia
 	}
 	lines := strings.Split(text, "\n")
 	firstSeen := map[string]int{}
-	var diags []protocol.Diagnostic
+	var issues []duplicateHeadingIssue
 	for _, h := range extractHeadings(text) {
 		firstLine, ok := firstSeen[h.baseID]
 		if !ok {
@@ -625,22 +636,27 @@ func (s *Server) duplicateHeadingIssues(text string, root string) []protocol.Dia
 			continue
 		}
 		var msg string
+		var fixID string
 		if h.id == h.baseID {
 			msg = "Duplicate heading id \"" + h.baseID + "\": two headings share it (first on line " + strconv.Itoa(firstLine+1) + ")"
 		} else {
 			msg = "Duplicate heading \"" + h.text + "\": this one gets the id \"" + h.id + "\" (first on line " + strconv.Itoa(firstLine+1) + ")"
+			fixID = h.id
 		}
-		diags = append(diags, protocol.Diagnostic{
-			Range: protocol.Range{
-				Start: protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textFrom)},
-				End:   protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textTo)},
+		issues = append(issues, duplicateHeadingIssue{
+			diag: protocol.Diagnostic{
+				Range: protocol.Range{
+					Start: protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textFrom)},
+					End:   protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textTo)},
+				},
+				Severity: severity,
+				Source:   protocol.NewOptional("porto-lsp"),
+				Message:  protocol.String(msg),
 			},
-			Severity: severity,
-			Source:   protocol.NewOptional("porto-lsp"),
-			Message:  protocol.String(msg),
+			fixID: fixID,
 		})
 	}
-	return diags
+	return issues
 }
 
 // duplicateSlugRange points at the frontmatter `slug:` value

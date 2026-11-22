@@ -1,12 +1,14 @@
 /**
  * remarkDuplicateAnchors
  *
- * Reports headings that share an anchor id within one page. Two
- * headings with the same text (or the same `[#id]`) are usually a
- * copy-paste slip: the site dedups plain repeats with a `-1`
- * suffix, so a link to the plain id reaches the first heading,
- * not the second, and custom ids are not deduped at all, so two
- * headings share the id outright.
+ * Reports h2 headings that share an anchor id within one page.
+ * Two h2 headings with the same text (or the same `[#id]`) are
+ * usually a copy-paste slip: the site dedups plain repeats with
+ * a `-1` suffix, so a link to the plain id reaches the first
+ * heading, not the second, and custom ids are not deduped at
+ * all, so two headings share the id outright. Only h2 headings
+ * are checked — repeated h3 headings under different sections
+ * (an "Options" under every command) are a normal pattern.
  *
  * The ids are computed the way Fumadocs' remarkHeading computes
  * them: one `github-slugger` instance per document, a trailing
@@ -19,25 +21,25 @@
  * shortcodes rendered.
  *
  * What happens on a duplicate follows
- * `site.content.on_duplicate_anchor`: "throw" fails the build,
+ * `site.content.on_duplicate_h2`: "throw" fails the build,
  * "warn" warns (default), "ignore" stays silent.
  */
 
 import Slugger from "github-slugger";
 
 /**
- * What happens when two headings in a page share an anchor:
+ * What happens when two h2 headings in a page share an anchor:
  * fail the build ("throw"), warn ("warn"), or stay silent
  * ("ignore").
  */
-export type DuplicateAnchorBehavior = "throw" | "warn" | "ignore";
+export type DuplicateH2Behavior = "throw" | "warn" | "ignore";
 
 export interface RemarkDuplicateAnchorsOptions {
-  /** Behavior for a duplicate anchor (default "warn"). */
-  onDuplicateAnchor?: DuplicateAnchorBehavior;
+  /** Behavior for a duplicate h2 anchor (default "warn"). */
+  onDuplicateH2?: DuplicateH2Behavior;
 }
 
-const DUPLICATE_ANCHOR_BEHAVIORS: DuplicateAnchorBehavior[] = [
+const DUPLICATE_H2_BEHAVIORS: DuplicateH2Behavior[] = [
   "throw",
   "warn",
   "ignore",
@@ -76,16 +78,16 @@ function flattenNode(node: any): string {
 }
 
 export default function remarkDuplicateAnchors({
-  onDuplicateAnchor = "warn",
+  onDuplicateH2 = "warn",
 }: RemarkDuplicateAnchorsOptions = {}) {
-  if (!DUPLICATE_ANCHOR_BEHAVIORS.includes(onDuplicateAnchor)) {
+  if (!DUPLICATE_H2_BEHAVIORS.includes(onDuplicateH2)) {
     throw new Error(
-      `[Portosaur] Invalid site.content.on_duplicate_anchor "${onDuplicateAnchor}" — expected "throw", "warn", or "ignore".`,
+      `[Portosaur] Invalid site.content.on_duplicate_h2 "${onDuplicateH2}" — expected "throw", "warn", or "ignore".`,
     );
   }
 
   return (tree: any, file: any) => {
-    if (onDuplicateAnchor === "ignore") {
+    if (onDuplicateH2 === "ignore") {
       return;
     }
     const filePath = file?.path || file?.history?.[0] || "";
@@ -93,6 +95,11 @@ export default function remarkDuplicateAnchors({
     const seenBases = new Set<string>();
 
     visit(tree, "heading", (heading) => {
+      // Only h2 headings are checked — repeated h3 headings
+      // under different sections are a normal pattern.
+      if (heading.depth !== 2) {
+        return;
+      }
       // A trailing `[#id]` on the last text child is the id,
       // used verbatim.
       const lastChild = heading.children?.at(-1);
@@ -134,7 +141,7 @@ export default function remarkDuplicateAnchors({
         id === base
           ? `[Portosaur] Duplicate heading id "${base}" in "${filePath}"${where} — two headings share it.`
           : `[Portosaur] Duplicate heading "${text}" in "${filePath}"${where} — this one gets the id "${id}".`;
-      if (onDuplicateAnchor === "throw") {
+      if (onDuplicateH2 === "throw") {
         throw new Error(message);
       }
       file.message(message, heading);
