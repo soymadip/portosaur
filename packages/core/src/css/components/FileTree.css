@@ -229,7 +229,9 @@
   width: 1px;
   background-color: var(--porto-color-gray-4);
 }
-/* The stub from the line to the row's icon. */
+/* The stub from the line toward the row's icon — it stops a
+   little short of the icon, so the branch and the icon don't
+   touch. */
 .porto-file-tree__folder-children > .porto-file-tree__file::after,
 .porto-file-tree__folder-children
   > .porto-file-tree__folder
@@ -238,6 +240,6 @@
   position: absolute;
   inset-inline-start: -0.5rem;
   top: 50%;
-  width: 1rem;
+  width: 0.5rem;
   border-top: 1px solid var(--porto-color-gray-4);
 }
