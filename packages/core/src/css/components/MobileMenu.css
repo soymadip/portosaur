@@ -105,10 +105,14 @@ body:has(#porto__sidebar:popover-open) {
        top with the pane. */
     inset-block: 0 0;
   }
-  /* The collapse slide: transform + inset-block + border-radius
-     + shadow over the shared collapse duration, so the pane
-     morphs between the full-height sidebar and the floating card
-     in lockstep with the content. DOUBLED selector on purpose:
+  /* The collapse slide: transform + inset-block-start/end +
+     border-radius + shadow over the shared collapse duration,
+     so the pane morphs between the full-height sidebar and the
+     floating card in lockstep with the content. The inset
+     longhands, not the `inset-block` shorthand: WebKit does not
+     animate the shorthand in a transition list (the pane snaps
+     while Chrome glides), and the longhands animate everywhere.
+     DOUBLED selector on purpose:
      animations.css (loaded after this file) sets a `transition`
      on `.porto-mobile-menu` for the mobile popover fade — at
      equal specificity it wiped this list out, and the pane
@@ -117,7 +121,8 @@ body:has(#porto__sidebar:popover-open) {
   .porto-mobile-menu.porto-mobile-menu--persistent {
     transition:
       transform var(--porto-sidebar-collapse-duration) ease,
-      inset-block var(--porto-sidebar-collapse-duration) ease,
+      inset-block-start var(--porto-sidebar-collapse-duration) ease,
+      inset-block-end var(--porto-sidebar-collapse-duration) ease,
       border-radius var(--porto-sidebar-collapse-duration) ease,
       box-shadow var(--porto-sidebar-collapse-duration) ease,
       opacity 0.25s,
@@ -128,8 +133,9 @@ body:has(#porto__sidebar:popover-open) {
      it (stuck to the navbar's bottom edge), so the sidebar and
      the TOC move as one with the navbar. Only the top moves —
      the bottom stays at the viewport bottom, so the pane grows
-     taller and the tree gains the freed space. The `inset-block`
-     entry in the transition above animates the move. Scoped to
+     taller and the tree gains the freed space. The
+     `inset-block-start` entry in the transition above animates
+     the move. Scoped to
      the expanded sidebar: the collapsed floating card keeps its
      own inset from the navbar. */
   html.porto-navbar-hidden:not(.porto-sidebar-collapsed)
