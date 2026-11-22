@@ -48,7 +48,7 @@ func (s *Server) projectFor(documentURI uri.URI) (string, bool) {
 // prop values in MDX from the components schema. A document
 // outside a Portosaur project gets an empty list, not an error.
 func (s *Server) Completion(ctx context.Context, params *protocol.CompletionParams) (protocol.CompletionResult, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return &protocol.CompletionList{}, nil
 	}
@@ -70,6 +70,9 @@ func (s *Server) mdxCompletion(params *protocol.CompletionParams, text string) (
 		return list, nil
 	}
 	if list, handled := s.envCompletion(params, text, root); handled {
+		return list, nil
+	}
+	if list, handled := s.refLabelCompletion(params, text); handled {
 		return list, nil
 	}
 	if list, handled := s.linkCompletion(params, text, root); handled {
@@ -113,7 +116,7 @@ func (s *Server) componentCompletion(params *protocol.CompletionParams, text str
 	}
 	switch context.kind {
 	case tagName:
-		return componentNameCompletions(schema, context, text)
+		return componentNameCompletions(schema, context, text, params.Position)
 	case tagProp:
 		return propNameCompletions(schema, context, text, params.Position)
 	case tagValue:
@@ -194,7 +197,7 @@ func tagInsert(cand tagCandidate) string {
 // as a snippet: containers pair with the cursor inside, leaf
 // components close themselves, and void HTML tags self-close.
 // A built-in with required props fills them in as tabstops.
-func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
+func componentNameCompletions(schema *resolvedSchema, context tagContext, text string, pos protocol.Position) *protocol.CompletionList {
 	candidates := map[string]tagCandidate{}
 	for _, tag := range htmlTags {
 		candidates[tag.name] = tagCandidate{name: tag.name, detail: tag.desc, source: tagHTML, void: tag.void}
@@ -230,6 +233,14 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 	// name on the same line.
 	editRange := context.partialRange
 	editRange.Start.Character--
+	// VS Code auto-closes `<` to `<>` in MDX, so the cursor
+	// usually sits right before a `>` the editor inserted.
+	// Swallow that too, or accepting a tag leaves a stray `>`
+	// behind. The range still contains the cursor.
+	lines := strings.Split(text, "\n")
+	if cursor := positionToOffset(lines, pos); cursor < len(text) && text[cursor] == '>' {
+		editRange.End = offsetToPosition(lines, cursor+1)
+	}
 	var items []protocol.CompletionItem
 	for _, cand := range candidates {
 		if !strings.HasPrefix(cand.name, context.partial) {
@@ -239,6 +250,12 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 			Label:            cand.name,
 			Kind:             protocol.CompletionItemKindClass,
 			InsertTextFormat: protocol.InsertTextFormatSnippet,
+			// VS Code filters each item against the text
+			// its edit range covers up to the cursor, and
+			// this range starts at the `<`: without the
+			// `<` in the filter text, no label matches and
+			// the whole list is hidden.
+			FilterText: protocol.NewOptional("<" + cand.name),
 		}
 		if cand.detail != "" {
 			item.Detail = protocol.NewOptional(cand.detail)

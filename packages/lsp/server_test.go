@@ -210,7 +210,7 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.CompletionProvider == nil {
 		t.Fatal("no completion provider advertised")
 	}
-	wantTriggers := []string{":", "<", "=", ".", "(", "/", "'", "\""}
+	wantTriggers := []string{":", "<", "=", ".", "(", "/", "'", "\"", "#"}
 	triggers := result.Capabilities.CompletionProvider.TriggerCharacters
 	if len(triggers) != len(wantTriggers) {
 		t.Fatalf("trigger characters = %v, want %v", triggers, wantTriggers)
@@ -330,6 +330,18 @@ func editText(items []protocol.CompletionItem, label string) (string, bool) {
 			return "", false
 		}
 		return edit.NewText, true
+	}
+	return "", false
+}
+
+// filterText returns the filter text of the completion item
+// with the given label.
+func filterText(items []protocol.CompletionItem, label string) (string, bool) {
+	for _, item := range items {
+		if item.Label != label {
+			continue
+		}
+		return item.FilterText.Get()
 	}
 	return "", false
 }
@@ -1118,6 +1130,48 @@ func TestComponentCompletionInsertRangeCoversPartial(t *testing.T) {
 	}
 }
 
+// TestComponentCompletionFilterTextKeepsAngle checks every tag
+// item filters on `<` plus its name: VS Code matches each item
+// against the text its edit range covers up to the cursor, and
+// the range starts at the `<`, so a bare name matches nothing
+// and the whole list is hidden.
+func TestComponentCompletionFilterTextKeepsAngle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Foo from './Foo'\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	for _, want := range []string{"Btn", "div", "Foo"} {
+		got, ok := filterText(items, want)
+		if !ok || got != "<"+want {
+			t.Fatalf("%s filter text = %q, want %q", want, got, "<"+want)
+		}
+	}
+}
+
+// TestComponentCompletionSwallowsAutoClosedBracket checks the
+// edit range covers the `>` VS Code auto-inserts after `<`, so
+// accepting a tag leaves no stray `>` behind — and leaves the
+// range alone when the next character is not a `>`.
+func TestComponentCompletionSwallowsAutoClosedBracket(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<>")
+	items := s.complete(t, documentURI, 2, 1)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 2}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,2) covering `<>`", rng)
+	}
+
+	documentURI = s.open(t, filepath.Join(s.root, "other.mdx"), "# Hello\n\n<Hi>")
+	items = s.complete(t, documentURI, 2, 3)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 4}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,4) covering `<Hi>`", rng)
+	}
+
+	documentURI = s.open(t, filepath.Join(s.root, "third.mdx"), "# Hello\n\n< ")
+	items = s.complete(t, documentURI, 2, 1)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 1}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,1) with no `>` to swallow", rng)
+	}
+}
+
 // TestComponentCompletionImportedInsertsFullTag checks an
 // imported component pairs on pick (its shape is unknown) and
 // keeps its source detail.
@@ -1594,5 +1648,51 @@ func TestMDXOutsideProjectIsEmpty(t *testing.T) {
 	items := s.complete(t, documentURI, 2, 1)
 	if len(items) != 0 {
 		t.Fatalf("completions outside a project = %v, want none", labels(items))
+	}
+}
+
+// TestCompletionWaitsForDidChange covers the stale-read race: a
+// completion requested while the didChange carrying the typed
+// text is still in flight must wait for the change and answer
+// from the new text, not the old one. The change lands from a
+// goroutine after a short delay. Without the wait the completion
+// sees the old text, whose last line is above the cursor, and
+// offers nothing.
+func TestCompletionWaitsForDidChange(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSome text.\n")
+	changed := make(chan struct{})
+	go func() {
+		defer close(changed)
+		time.Sleep(20 * time.Millisecond)
+		err := s.local.DidChange(context.Background(), &protocol.DidChangeTextDocumentParams{
+			TextDocument: protocol.VersionedTextDocumentIdentifier{
+				TextDocumentIdentifier: protocol.TextDocumentIdentifier{URI: documentURI},
+				Version:                2,
+			},
+			ContentChanges: []protocol.TextDocumentContentChangeEvent{
+				&protocol.TextDocumentContentChangeWholeDocument{Text: "# Page\n\nSome text.\n\n<"},
+			},
+		})
+		if err != nil {
+			t.Errorf("didChange: %v", err)
+		}
+	}()
+	result, err := s.local.Completion(context.Background(), &protocol.CompletionParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
+			Position:     protocol.Position{Line: 4, Character: 1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("completion: %v", err)
+	}
+	list, ok := result.(*protocol.CompletionList)
+	if !ok {
+		t.Fatalf("completion: got %T, want *protocol.CompletionList", result)
+	}
+	<-changed
+	if !hasLabel(list.Items, "Btn") {
+		t.Fatalf("completions = %v, want the tag list including Btn", labels(list.Items))
 	}
 }

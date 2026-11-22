@@ -4,6 +4,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import {
   LanguageClient,
+  State,
   Trace,
   TransportKind,
 } from "vscode-languageclient/node";
@@ -20,6 +21,16 @@ let client: LanguageClient | undefined;
 let starting = false;
 let restartTimer: ReturnType<typeof setTimeout> | undefined;
 let preview: PreviewManager | undefined;
+let statusBarItem: vscode.StatusBarItem | undefined;
+let stateSubscription: vscode.Disposable | undefined;
+// The typing watcher, registered once when the client starts.
+let typingSubscription: vscode.Disposable | undefined;
+// True while the extension's own <> insert is landing, so the
+// change it fires cannot re-trigger the handler.
+let insertingAngle = false;
+// The client state and the binary it spawned, for the server menu.
+let clientState: State | undefined;
+let serverCommand: string | undefined;
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -38,6 +49,12 @@ export async function activate(
   context.subscriptions.push(
     vscode.commands.registerCommand("portosaur.restartServer", () => {
       void restartClient(context);
+    }),
+    vscode.commands.registerCommand("portosaur.showServerStatus", () => {
+      void showServerStatus(context);
+    }),
+    vscode.commands.registerCommand("portosaur.selectServer", () => {
+      void pickServerPath();
     }),
     vscode.commands.registerCommand("portosaur.preview", () => {
       void previewManager().showPreview();
@@ -68,12 +85,19 @@ export async function deactivate(): Promise<void> {
   clearTimeout(restartTimer);
   preview?.dispose();
   preview = undefined;
+  stateSubscription?.dispose();
+  stateSubscription = undefined;
+  typingSubscription?.dispose();
+  typingSubscription = undefined;
+  statusBarItem?.dispose();
+  statusBarItem = undefined;
   // A client whose start failed is not running: stopping it
   // throws.
   if (client?.needsStop()) {
     await client.stop();
   }
   client = undefined;
+  clientState = undefined;
 }
 
 // previewManager is the one preview panel and dev server, created
@@ -134,7 +158,11 @@ function serverPathSetting(): string | undefined {
   if (!value) {
     return undefined;
   }
-  // A leading ~/ is the user's home directory.
+  return expandHome(value);
+}
+
+// expandHome resolves a leading ~/ to the user's home directory.
+function expandHome(value: string): string {
   return value.startsWith("~/")
     ? path.join(os.homedir(), value.slice(2))
     : value;
@@ -173,6 +201,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       args: ["--stdio"],
       transport: TransportKind.stdio,
     };
+    serverCommand = command;
     const clientOptions: LanguageClientOptions = {
       // MDX files only. porto.yml is left to the YAML extension,
       // which reads the $schema line at the top of the file.
@@ -187,6 +216,12 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       serverOptions,
       clientOptions,
     );
+    showStatusBarItem(context);
+    watchTyping(context);
+    setClientState(State.Starting);
+    stateSubscription = client.onDidChangeState((event) => {
+      setClientState(event.newState);
+    });
     await client.setTrace(Trace.fromString(traceLevel()));
     await client.start();
   } catch (error) {
@@ -203,8 +238,337 @@ async function restartClient(context: vscode.ExtensionContext): Promise<void> {
   if (client?.needsStop()) {
     await client.stop();
   }
+  stateSubscription?.dispose();
+  stateSubscription = undefined;
   client = undefined;
+  clientState = undefined;
   await startClient(context);
+}
+
+// showStatusBarItem creates the server status item on first use
+// and shows it. The item appears only once a Portosaur project
+// has started the client, and lives until deactivate.
+function showStatusBarItem(context: vscode.ExtensionContext): void {
+  if (!statusBarItem) {
+    statusBarItem = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Right,
+      100,
+    );
+    statusBarItem.command = "portosaur.showServerStatus";
+    context.subscriptions.push(statusBarItem);
+  }
+  statusBarItem.show();
+}
+
+// watchTyping registers the typing helpers once: the
+// link-destination `<>` insert and the completion menu reopen
+// on backspace. Restarts call startClient again, so the
+// subscription guard keeps this registered exactly once.
+function watchTyping(context: vscode.ExtensionContext): void {
+  if (typingSubscription) {
+    return;
+  }
+  typingSubscription = vscode.workspace.onDidChangeTextDocument(onTextChanged);
+  context.subscriptions.push(typingSubscription);
+}
+
+// onTextChanged runs the typing helpers on each document change.
+function onTextChanged(event: vscode.TextDocumentChangeEvent): void {
+  maybeInsertLinkAngles(event);
+  maybeReopenSuggest(event);
+}
+
+// maybeInsertLinkAngles is the link-destination helper: when
+// the user types `(` right after `]` (the `[text](` link syntax,
+// or `![alt](` for an image), insert `<>` after the cursor and
+// put the cursor inside it. The server cannot do this: on-type
+// formatting returns text edits only, and an inserted `<>`
+// would leave the cursor after it instead of inside. The helper
+// cannot tell whether the cursor sits in a code fence or
+// frontmatter, so `](` typed there gets `<>` too. That is
+// literal text either way, so the extra brackets are harmless
+// there.
+function maybeInsertLinkAngles(event: vscode.TextDocumentChangeEvent): void {
+  if (insertingAngle) {
+    return;
+  }
+  // Undo and redo carry a reason, plain typing does not.
+  if (event.reason !== undefined) {
+    return;
+  }
+  if (event.document.languageId !== "mdx") {
+    return;
+  }
+  if (event.contentChanges.length !== 1) {
+    return;
+  }
+  const change = event.contentChanges[0];
+  // Exactly one typed `(`: a paste inserts more than one
+  // character, and a replacement removes text first.
+  if (change.text !== "(" || change.rangeLength !== 0) {
+    return;
+  }
+  const insertedAt = change.range.start;
+  if (insertedAt.character === 0) {
+    return;
+  }
+  const before = event.document.getText(
+    new vscode.Range(insertedAt.translate(0, -1), insertedAt),
+  );
+  if (before !== "]") {
+    return;
+  }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document !== event.document) {
+    return;
+  }
+  const after = insertedAt.translate(0, 1);
+  if (!editor.selection.isEmpty || !editor.selection.active.isEqual(after)) {
+    return;
+  }
+  const inside = after.translate(0, 1);
+  insertingAngle = true;
+  void editor.edit((edit) => {
+    edit.insert(after, "<>");
+  }).then(
+    () => {
+      editor.selection = new vscode.Selection(inside, inside);
+      insertingAngle = false;
+    },
+    () => {
+      insertingAngle = false;
+    },
+  );
+}
+
+// maybeReopenSuggest pops the completion menu back open after
+// the user erases a letter or two: VS Code never asks for
+// suggestions on a deletion, so without this the menu stays
+// closed until the next typed character. No check of where the
+// cursor sits is needed here: the server returns items only
+// where completions exist, and an empty list everywhere else,
+// so the menu appears exactly where it has something to offer.
+// triggerSuggest changes no document text, so it cannot loop.
+function maybeReopenSuggest(event: vscode.TextDocumentChangeEvent): void {
+  // Undo and redo carry a reason, plain typing does not.
+  if (event.reason !== undefined) {
+    return;
+  }
+  if (event.document.languageId !== "mdx") {
+    return;
+  }
+  if (event.contentChanges.length !== 1) {
+    return;
+  }
+  const change = event.contentChanges[0];
+  // A pure deletion of one or two characters: a paste or a
+  // replacement inserts text, so it is excluded naturally.
+  if (change.text !== "" || change.rangeLength < 1 || change.rangeLength > 2) {
+    return;
+  }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document !== event.document) {
+    return;
+  }
+  void vscode.commands.executeCommand("editor.action.triggerSuggest");
+}
+
+// setClientState records the client state for the server menu
+// and redraws the status bar item.
+function setClientState(state: State): void {
+  clientState = state;
+  updateStatusBarItem(state);
+}
+
+// updateStatusBarItem redraws the status item for a client state.
+function updateStatusBarItem(state: State): void {
+  if (!statusBarItem) {
+    return;
+  }
+  switch (state) {
+    case State.Running:
+      statusBarItem.text = "$(check) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server is running. Click for status.";
+      break;
+    case State.Starting:
+      statusBarItem.text = "$(sync~spin) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server is starting… Click for status.";
+      break;
+    case State.StartFailed:
+      statusBarItem.text = "$(error) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server could not start. Click for status.";
+      break;
+    case State.Stopped:
+      statusBarItem.text = "$(error) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server is stopped. Click for status.";
+      break;
+  }
+}
+
+// A row of the server menu, carrying what picking it does.
+type ServerMenuItem = vscode.QuickPickItem & {
+  action: "none" | "path" | "restart";
+};
+
+// showServerStatus opens the server menu: the status, the
+// server version when known, the binary path, and a restart
+// row. With no client yet the status reads Not started and the
+// path row still opens the picker.
+async function showServerStatus(
+  context: vscode.ExtensionContext,
+): Promise<void> {
+  const items: ServerMenuItem[] = [{ label: statusRowLabel(), action: "none" }];
+  const version = client?.initializeResult?.serverInfo?.version;
+  if (version) {
+    items.push({ label: `$(tag) Version: ${version}`, action: "none" });
+  }
+  if (clientState === State.Running) {
+    const memory = await serverMemory();
+    if (memory !== undefined) {
+      items.push({
+        label: `$(database) Memory: ${formatBytes(memory)}`,
+        action: "none",
+      });
+    }
+  }
+  const effectivePath =
+    serverCommand ?? serverPathSetting() ?? "(downloaded automatically)";
+  items.push({
+    label: `$(file) Path: ${effectivePath}`,
+    description: "Click to change",
+    action: "path",
+  });
+  items.push({ label: "$(refresh) Restart server", action: "restart" });
+  const picked = await vscode.window.showQuickPick(items, {
+    title: "Portosaur Language Server",
+    placeHolder: "Server status",
+  });
+  if (!picked) {
+    return;
+  }
+  if (picked.action === "path") {
+    await pickServerPath();
+  } else if (picked.action === "restart") {
+    await restartClient(context);
+  }
+}
+
+// serverMemory asks the running server how much RAM it uses.
+// Older servers do not know the request and answer
+// method-not-found, and a slow answer times out after a
+// second: either way there is simply no memory row.
+async function serverMemory(): Promise<number | undefined> {
+  const running = client;
+  if (!running) {
+    return undefined;
+  }
+  try {
+    const stats = await Promise.race([
+      // The empty params object is required: the server's
+      // protocol handler decodes params before routing, and a
+      // request with no params field fails that decode.
+      running.sendRequest<{ memoryBytes: number }>("portosaur/serverStats", {}),
+      new Promise<undefined>((resolve) =>
+        setTimeout(() => resolve(undefined), 1000),
+      ),
+    ]);
+    const bytes = stats?.memoryBytes;
+    return typeof bytes === "number" ? bytes : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// formatBytes renders a byte count for the menu: MB with one
+// decimal, KB when under a megabyte.
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// statusRowLabel is the menu's status row, mirroring the status
+// bar's four states.
+function statusRowLabel(): string {
+  switch (clientState) {
+    case State.Running:
+      return "$(check) Status: Running";
+    case State.Starting:
+      return "$(sync~spin) Status: Starting";
+    case State.StartFailed:
+      return "$(error) Status: Failed";
+    case State.Stopped:
+      return "$(error) Status: Stopped";
+    default:
+      return "$(circle-slash) Server: Not started";
+  }
+}
+
+// A row of the path picker, carrying how the path is chosen.
+type PathPickerItem = vscode.QuickPickItem & {
+  method: "file" | "typed";
+};
+
+// pickServerPath lets the user choose a server binary from a
+// file dialog or type a path, then saves it to the global
+// portosaur.server.path setting. The configuration watcher
+// restarts the client on the change, so nothing here restarts
+// it. A path that does not exist, or a folder, is refused.
+async function pickServerPath(): Promise<void> {
+  const choice = await vscode.window.showQuickPick<PathPickerItem>(
+    [
+      { label: "Choose a file…", method: "file" },
+      { label: "Type a path…", method: "typed" },
+    ],
+    {
+      title: "Portosaur Server Path",
+      placeHolder: "How to pick the server binary",
+    },
+  );
+  if (!choice) {
+    return;
+  }
+  let picked: string | undefined;
+  if (choice.method === "file") {
+    const files = await vscode.window.showOpenDialog({
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: false,
+    });
+    picked = files?.[0]?.fsPath;
+  } else {
+    picked = await vscode.window.showInputBox({
+      title: "Portosaur Server Path",
+      prompt: "Path to the porto-lsp binary",
+      value: serverPathSetting() ?? serverCommand ?? "",
+    });
+  }
+  if (!picked) {
+    return;
+  }
+  let stat;
+  try {
+    stat = await fs.stat(expandHome(picked));
+  } catch {
+    void vscode.window.showErrorMessage(
+      `Portosaur: no file at that path: ${picked}`,
+    );
+    return;
+  }
+  if (stat.isDirectory()) {
+    void vscode.window.showErrorMessage(
+      `Portosaur: that path is a folder, not the server file: ${picked}`,
+    );
+    return;
+  }
+  await vscode.workspace
+    .getConfiguration("portosaur")
+    .update("server.path", picked, vscode.ConfigurationTarget.Global);
 }
 
 // resolveLocalServer checks a user-provided server path before

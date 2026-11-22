@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"go.lsp.dev/protocol"
 )
 
 func TestParseDotenvLine(t *testing.T) {
@@ -201,8 +203,12 @@ func TestEnvCompletionNameInBothAppearsOnce(t *testing.T) {
 		t.Fatalf("completions = %v, want only PORTO_LSP_TEST_BOTH once", labels(items))
 	}
 	detail, ok := items[0].Detail.Get()
-	if !ok || detail != "system environment" {
-		t.Fatalf("BOTH detail = %q, want system environment (the process env wins)", detail)
+	if !ok || detail != "from-process" {
+		t.Fatalf("BOTH detail = %q, want from-process (the process env wins)", detail)
+	}
+	doc, ok := items[0].Documentation.(*protocol.MarkupContent)
+	if !ok || doc.Value != "system environment" {
+		t.Fatalf("BOTH documentation = %v, want system environment", items[0].Documentation)
 	}
 }
 
@@ -233,12 +239,18 @@ func TestEnvCompletionOutsideEnvContext(t *testing.T) {
 	}
 }
 
-func TestEnvCompletionDetailNamesSourceNotValue(t *testing.T) {
+func TestEnvCompletionDetailShowsValue(t *testing.T) {
 	t.Setenv("PORTO_LSP_TEST_PROC", "s3cr3t-proc-value")
 	s := startTestServer(t, envCompletionFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_")
 	items := s.complete(t, documentURI, 2, 20)
 	wantDetail := map[string]string{
+		"PORTO_LSP_TEST_PROC":   "s3cr3t-proc-value",
+		"PORTO_LSP_TEST_DOTENV": "from-dotenv",
+		"PORTO_LSP_TEST_LOCAL":  "from-local",
+		"PORTO_LSP_TEST_BOTH":   "from-dotenv",
+	}
+	wantDoc := map[string]string{
 		"PORTO_LSP_TEST_PROC":   "system environment",
 		"PORTO_LSP_TEST_DOTENV": ".env",
 		"PORTO_LSP_TEST_LOCAL":  ".env.local",
@@ -249,11 +261,44 @@ func TestEnvCompletionDetailNamesSourceNotValue(t *testing.T) {
 		if !ok || detail == "" {
 			t.Fatalf("item %q has no detail", item.Label)
 		}
-		if strings.Contains(detail, "s3cr3t-proc-value") || strings.Contains(detail, "from-dotenv") || strings.Contains(detail, "from-local") {
-			t.Fatalf("item %q detail = %q, want a source name, never a value", item.Label, detail)
-		}
 		if want, known := wantDetail[item.Label]; known && detail != want {
 			t.Fatalf("item %q detail = %q, want %q", item.Label, detail, want)
 		}
+		doc, ok := item.Documentation.(*protocol.MarkupContent)
+		if !ok || doc.Value == "" {
+			t.Fatalf("item %q has no documentation", item.Label)
+		}
+		if want, known := wantDoc[item.Label]; known && doc.Value != want {
+			t.Fatalf("item %q documentation = %q, want %q", item.Label, doc.Value, want)
+		}
+	}
+}
+
+func TestEnvCompletionDetailTruncatesLongValue(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_LONG", strings.Repeat("x", 50))
+	s := startTestServer(t, envCompletionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_LONG")
+	items := s.complete(t, documentURI, 2, 24)
+	if len(items) != 1 || items[0].Label != "PORTO_LSP_TEST_LONG" {
+		t.Fatalf("completions = %v, want only PORTO_LSP_TEST_LONG", labels(items))
+	}
+	want := strings.Repeat("x", 37) + "..."
+	detail, ok := items[0].Detail.Get()
+	if !ok || detail != want {
+		t.Fatalf("LONG detail = %q, want %q", detail, want)
+	}
+}
+
+func TestEnvCompletionDetailFallsBackToSourceForEmptyValue(t *testing.T) {
+	t.Setenv("PORTO_LSP_TEST_EMPTY", "")
+	s := startTestServer(t, envCompletionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_EMPTY")
+	items := s.complete(t, documentURI, 2, 25)
+	if len(items) != 1 || items[0].Label != "PORTO_LSP_TEST_EMPTY" {
+		t.Fatalf("completions = %v, want only PORTO_LSP_TEST_EMPTY", labels(items))
+	}
+	detail, ok := items[0].Detail.Get()
+	if !ok || detail != "system environment" {
+		t.Fatalf("EMPTY detail = %q, want system environment (an empty value falls back to the source)", detail)
 	}
 }

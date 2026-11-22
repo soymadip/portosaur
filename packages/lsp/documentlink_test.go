@@ -167,3 +167,44 @@ func TestDocumentLinkSkipsCodeAndFrontmatter(t *testing.T) {
 		t.Fatalf("link line = %d, want 12 (the real link)", links[0].Range.Start.Line)
 	}
 }
+
+func TestDocumentLinkRefDefinition(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/getting-started/installation/\n\nSee [it][install].\n")
+	links := s.documentLinks(t, documentURI)
+	if len(links) != 1 {
+		t.Fatalf("links = %v, want only the definition destination (the use site gets none)", links)
+	}
+	want := uri.File(filepath.Join(s.root, "docs", "1 - getting-started", "2 - installation.mdx")).String()
+	if linkTargetString(links[0]) != want {
+		t.Fatalf("target = %q, want %q", linkTargetString(links[0]), want)
+	}
+	if links[0].Range.Start.Line != 2 || links[0].Range.Start.Character != 11 {
+		t.Fatalf("range = %+v, want the destination", links[0].Range)
+	}
+}
+
+func TestDocumentLinkRefDefinitionBrokenIsEmpty(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/missing/\n")
+	if links := s.documentLinks(t, documentURI); len(links) != 0 {
+		t.Fatalf("links = %v, want none for a broken destination", links)
+	}
+}
+
+func TestDocumentLinkRefImageDefinition(t *testing.T) {
+	root := contentFixture(t, "docs_home:\n  title: Docs\n", map[string]string{
+		"docs/page.mdx":         "# Page\n",
+		"static/images/pic.png": "fake png",
+	})
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n![alt][pic]\n\n[pic]: /images/pic.png\n")
+	links := s.documentLinks(t, documentURI)
+	if len(links) != 1 {
+		t.Fatalf("links = %v, want the image definition destination", links)
+	}
+	want := uri.File(filepath.Join(s.root, "static", "images", "pic.png")).String()
+	if linkTargetString(links[0]) != want {
+		t.Fatalf("target = %q, want %q", linkTargetString(links[0]), want)
+	}
+}

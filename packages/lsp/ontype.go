@@ -16,7 +16,7 @@ import (
 // after a `key:` line. Each branch returns its edits, or
 // nothing when its context does not apply.
 func (s *Server) OnTypeFormatting(_ context.Context, params *protocol.DocumentOnTypeFormattingParams) ([]protocol.TextEdit, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}

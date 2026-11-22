@@ -2,7 +2,10 @@ package main
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"go.lsp.dev/protocol"
 )
 
 func TestLinkCompletionPageURLs(t *testing.T) {
@@ -14,13 +17,21 @@ func TestLinkCompletionPageURLs(t *testing.T) {
 	if len(items) != 5 {
 		t.Fatalf("completions = %v, want 5 pages", labels(items))
 	}
-	for _, want := range []string{"/docs/getting-started/installation/", "/docs/getting-started/", "/docs/sibling/", "/docs/my-page/", "/blog/first-post/"} {
+	for _, want := range []string{"/docs/getting-started/installation", "/docs/getting-started", "/docs/sibling", "/docs/my-page", "/blog/first-post"} {
 		if !hasLabel(items, want) {
 			t.Fatalf("completions = %v, missing %q", labels(items), want)
 		}
 	}
-	if text, ok := editText(items, "/docs/sibling/"); !ok || text != "/docs/sibling/" {
-		t.Fatalf("sibling edit = %q, want the clean URL", text)
+	for _, item := range items {
+		if strings.HasSuffix(item.Label, "/") {
+			t.Fatalf("label %q ends with a slash, want none", item.Label)
+		}
+		if text, ok := editText(items, item.Label); !ok || strings.HasSuffix(text, "/") {
+			t.Fatalf("edit for %q = %q, want no trailing slash", item.Label, text)
+		}
+	}
+	if text, ok := editText(items, "/docs/sibling"); !ok || text != "/docs/sibling" {
+		t.Fatalf("sibling edit = %q, want the clean URL without a trailing slash", text)
 	}
 }
 
@@ -28,7 +39,7 @@ func TestLinkCompletionFiltersByPrefix(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](/docs/getting-started/")
 	items := s.complete(t, documentURI, 2, 26)
-	if len(items) != 2 || !hasLabel(items, "/docs/getting-started/") || !hasLabel(items, "/docs/getting-started/installation/") {
+	if len(items) != 2 || !hasLabel(items, "/docs/getting-started") || !hasLabel(items, "/docs/getting-started/installation") {
 		t.Fatalf("completions = %v, want the two getting-started URLs", labels(items))
 	}
 }
@@ -37,8 +48,8 @@ func TestLinkCompletionJSXProp(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"/blog/")
 	items := s.complete(t, documentURI, 2, 16)
-	if len(items) != 1 || items[0].Label != "/blog/first-post/" {
-		t.Fatalf("completions = %v, want only /blog/first-post/", labels(items))
+	if len(items) != 1 || items[0].Label != "/blog/first-post" {
+		t.Fatalf("completions = %v, want only /blog/first-post", labels(items))
 	}
 }
 
@@ -63,12 +74,56 @@ func TestLinkCompletionHeadingsFilter(t *testing.T) {
 	}
 }
 
+func TestLinkCompletionHeadingsSlashLessPath(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	// The flow after picking a path: the insert has no
+	// trailing slash, and `#` still finds the page.
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](/docs/getting-started/installation#se")
+	items := s.complete(t, documentURI, 2, 41)
+	if len(items) != 1 || items[0].Label != "setup" {
+		t.Fatalf("completions = %v, want only setup", labels(items))
+	}
+}
+
+func TestLinkCompletionHeadingsJSXProp(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"/docs/getting-started/installation#\"")
+	items := s.complete(t, documentURI, 2, 47)
+	if len(items) != 2 || !hasLabel(items, "installation") || !hasLabel(items, "setup") {
+		t.Fatalf("completions = %v, want the installation page's heading ids", labels(items))
+	}
+	if text, ok := editText(items, "setup"); !ok || text != "setup" {
+		t.Fatalf("setup edit = %q, want only the id (the # stays)", text)
+	}
+}
+
+func TestCompletionURL(t *testing.T) {
+	if got := completionURL("/docs/getting-started/installation/"); got != "/docs/getting-started/installation" {
+		t.Fatalf("completionURL = %q, want the URL without a trailing slash", got)
+	}
+	if got := completionURL("/"); got != "/" {
+		t.Fatalf("completionURL = %q, want a bare / to stay /", got)
+	}
+	if got := completionURL("/docs/sibling"); got != "/docs/sibling" {
+		t.Fatalf("completionURL = %q, want an already slash-less URL unchanged", got)
+	}
+}
+
 func TestLinkCompletionSameFileHeadings(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](#\n\n## Details\n")
 	items := s.complete(t, documentURI, 2, 5)
 	if len(items) != 2 || !hasLabel(items, "page") || !hasLabel(items, "details") {
 		t.Fatalf("completions = %v, want the current file's heading ids", labels(items))
+	}
+}
+
+func TestLinkCompletionSameFileHeadingsCustomID(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](#\n\n## Details [#info]\n")
+	items := s.complete(t, documentURI, 2, 5)
+	if len(items) != 2 || !hasLabel(items, "page") || !hasLabel(items, "info") {
+		t.Fatalf("completions = %v, want page and the custom id info", labels(items))
 	}
 }
 
@@ -222,10 +277,82 @@ func TestLinkCompletionUnclosedAngledEmptyOffersPageURLs(t *testing.T) {
 	if len(items) != 5 {
 		t.Fatalf("completions = %v, want 5 pages", labels(items))
 	}
-	if !hasLabel(items, "/docs/sibling/") {
-		t.Fatalf("completions = %v, missing /docs/sibling/", labels(items))
+	if !hasLabel(items, "/docs/sibling") {
+		t.Fatalf("completions = %v, missing /docs/sibling", labels(items))
 	}
-	if text, ok := editText(items, "/docs/sibling/"); !ok || text != "/docs/sibling/" {
+	if text, ok := editText(items, "/docs/sibling"); !ok || text != "/docs/sibling" {
 		t.Fatalf("sibling edit = %q, want the clean URL", text)
+	}
+}
+
+func TestRefLabelCompletion(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n\nSee [the guide]["
+	items := s.complete(t, s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc), 5, 16)
+	if len(items) != 2 || !hasLabel(items, "install") || !hasLabel(items, "guide") {
+		t.Fatalf("completions = %v, want the two defined labels", labels(items))
+	}
+	if items[0].Kind != protocol.CompletionItemKindReference {
+		t.Fatalf("kind = %v, want Reference", items[0].Kind)
+	}
+}
+
+func TestRefLabelCompletionShowsDestination(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[install]: /docs/getting-started/installation/\n\nSee [x]["
+	items := s.complete(t, s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc), 4, 9)
+	if len(items) != 1 {
+		t.Fatalf("completions = %v, want one label", labels(items))
+	}
+	if detail, ok := items[0].Detail.Get(); !ok || detail != "/docs/getting-started/installation/" {
+		t.Fatalf("detail = %q, want the definition destination", detail)
+	}
+}
+
+func TestRefLabelCompletionFiltersCaseInsensitively(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n\nSee [the guide][INS"
+	items := s.complete(t, s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc), 5, 19)
+	if len(items) != 1 || items[0].Label != "install" {
+		t.Fatalf("completions = %v, want only install", labels(items))
+	}
+	if text, ok := editText(items, "install"); !ok || text != "install" {
+		t.Fatalf("install edit = %q, want the label", text)
+	}
+}
+
+func TestRefLabelCompletionNoMatchIsEmpty(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[install]: /docs/getting-started/installation/\n\nSee [x][zzz"
+	items := s.complete(t, s.open(t, filepath.Join(s.root, "docs", "page.mdx"), doc), 4, 12)
+	if len(items) != 0 {
+		t.Fatalf("completions = %v, want none (no label matches, and no fall-through to components)", labels(items))
+	}
+}
+
+func TestLinkCompletionRefDefinitionDestination(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/get")
+	items := s.complete(t, documentURI, 2, 20)
+	if len(items) != 2 || !hasLabel(items, "/docs/getting-started") || !hasLabel(items, "/docs/getting-started/installation") {
+		t.Fatalf("completions = %v, want the two getting-started URLs", labels(items))
+	}
+}
+
+func TestLinkCompletionRefDefinitionHeadings(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/getting-started/installation/#")
+	items := s.complete(t, documentURI, 2, 47)
+	if len(items) != 2 || !hasLabel(items, "installation") || !hasLabel(items, "setup") {
+		t.Fatalf("completions = %v, want the installation page's heading ids", labels(items))
+	}
+}
+
+func TestLinkCompletionRefDefinitionRelative(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: ./")
+	items := s.complete(t, documentURI, 2, 13)
+	if !hasLabel(items, "./sibling.mdx") || !hasLabel(items, "./my%20page.mdx") {
+		t.Fatalf("completions = %v, want the sibling files", labels(items))
 	}
 }

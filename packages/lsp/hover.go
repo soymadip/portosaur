@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 // value. In MDX it covers frontmatter keys and component names
 // and props.
 func (s *Server) Hover(ctx context.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}
@@ -45,12 +46,11 @@ func (s *Server) mdxHover(params *protocol.HoverParams, text string) (*protocol.
 	return componentHover(schema, text, params.Position), nil
 }
 
-// varsHover describes a `{vars.key}` reference: where the value
-// comes from and that the build replaces the reference with it.
-// The value itself stays out of the hover — it already shows
-// inline as an inlay hint — and so does any type. Only
-// references that resolve to a value the build can substitute
-// get a hover; unknown keys already get a diagnostic.
+// varsHover shows a `{vars.key}` reference's value, and where
+// the value comes from: the build replaces the reference with
+// it. No type anywhere. Only references that resolve to a value
+// the build can substitute get a hover; unknown keys already get
+// a diagnostic.
 func varsHover(text string, pos protocol.Position, vars map[string]any) *protocol.Hover {
 	lines := strings.Split(text, "\n")
 	offset := positionToOffset(lines, pos)
@@ -58,10 +58,11 @@ func varsHover(text string, pos protocol.Position, vars map[string]any) *protoco
 		if offset < ref.start || offset >= ref.end {
 			continue
 		}
-		if _, ok := resolveVarsValue(vars, ref.path); !ok {
+		resolved, ok := resolveVarsValue(vars, ref.path)
+		if !ok {
 			return nil
 		}
-		value := "**{vars." + ref.path + "}**\n\nDefined under `vars:` in `porto.yml`. The build replaces this reference with its value."
+		value := "**{vars." + ref.path + "}**" + hoverValue(fmt.Sprintf("%v", resolved)) + "\n\nDefined under `vars:` in `porto.yml`. The build replaces this reference with its value."
 		rng := rangeFromOffsets(lines, ref.start, ref.end)
 		return &protocol.Hover{
 			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: value},
@@ -71,12 +72,10 @@ func varsHover(text string, pos protocol.Position, vars map[string]any) *protoco
 	return nil
 }
 
-// envHover describes a `{env.VAR}` reference: where the value
-// comes from and that the build replaces the reference with it.
-// The value itself stays out of the hover — it already shows
-// inline as an inlay hint — and so does any type. Only
-// references that resolve get a hover; unknown vars already get
-// a diagnostic.
+// envHover shows a `{env.VAR}` reference's value, and where
+// the value comes from: the build replaces the reference with
+// it. No type anywhere. Only references that resolve get a
+// hover; unknown vars already get a diagnostic.
 func envHover(text string, pos protocol.Position, env map[string]envValue) *protocol.Hover {
 	lines := strings.Split(text, "\n")
 	offset := positionToOffset(lines, pos)
@@ -92,7 +91,7 @@ func envHover(text string, pos protocol.Position, env map[string]envValue) *prot
 		if value.source != "" {
 			source = "Defined in `" + value.source + "`."
 		}
-		body := "**{env." + ref.name + "}**\n\n" + source + " The build replaces this reference with its value."
+		body := "**{env." + ref.name + "}**" + hoverValue(value.value) + "\n\n" + source + " The build replaces this reference with its value."
 		rng := rangeFromOffsets(lines, ref.start, ref.end)
 		return &protocol.Hover{
 			Contents: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: body},
@@ -100,6 +99,16 @@ func envHover(text string, pos protocol.Position, env map[string]envValue) *prot
 		}
 	}
 	return nil
+}
+
+// hoverValue renders a resolved value as its own paragraph in
+// code formatting, or nothing when the value is empty: an empty
+// code span would show nothing.
+func hoverValue(shown string) string {
+	if shown == "" {
+		return ""
+	}
+	return "\n\n`" + shown + "`"
 }
 
 // yamlHover shows the schema's description and type for the key

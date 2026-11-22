@@ -17,20 +17,21 @@ The server only activates inside a Portosaur project, so it stays quiet in other
 Beyond completion and hover, the server also:
 
 - **Warns about components.** An unknown component name, a missing required prop, a bad icon name, or a prop value outside its allowed list gets a warning. Icon names are checked the way the build checks them: the prefix must be a known icon pack and the value must be `prefix:name`.
-- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` link prop value opens the target page, landing on the heading after a `#hash`.
+- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` link prop value opens the target page, landing on the heading after a `#hash`. On a `{{vars.key}}` reference it opens `porto.yml` at the line defining the key.
 - **Makes links clickable.** Links and images in the document open their target on Ctrl/Cmd+click: pages and files in the project, and external URLs in the browser. Broken links get no link, since there is nothing to open.
-- **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`.
+- **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`. A heading with a custom `[#id]` is offered under that id.
 - **Updates links on rename.** Renaming a page file or a whole folder rewrites the clean-URL links that point at it, in markdown links and `Link`/`Btn` props across every page, keeping the `#hash` on the end. Relative file-path props inside the moved file are recomputed from its new location. Relative file-path markdown links are left to the MDX extension, which rewrites those itself.
 - **Flags broken links.** A link to a page that does not exist, by clean URL or by relative file path, is flagged with the severity from `site.content.on_broken_links`. External links, anchors, and destinations holding a `{vars.}` or `{env.}` expression stay quiet.
+- **Covers reference-style links.** `[text][ref]` links get the same treatment as inline links: the `[ref]:` destination completes, jumps, and is checked, the use site jumps to the definition, and a use with no definition is flagged.
 - **Flags broken images.** An image whose file does not exist, by relative path or under the project's `static/` directory, is flagged with the severity from `site.content.on_broken_images`. External images, `data:` URIs, and sources holding a `{vars.}` or `{env.}` expression stay quiet.
 - **Flags multi-segment slugs.** A `slug:` in frontmatter with a `/` in it is an error, since a slug only renames the file itself.
 - **Warns about duplicate slugs.** Two pages that land on the same URL get a warning naming the other page, since the build fails on duplicate slugs.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
 - **Flags unknown `{vars.}` keys.** A `{{vars.key}}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
-- **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows that value right after it, and hovering over it says where the value comes from.
+- **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows `→ value` right after it, and hovering over it shows the value and where it comes from.
 - **Flags unset `{env.}` vars.** A `{{env.VAR}}` that is not set in the environment or the project's `.env` files is flagged with the severity from `site.content.on_missing_env`. The `{{env.VAR}}` escape form stays quiet.
-- **Shows `{env.}` values inline.** A `{{env.VAR}}` that is set shows that value right after it, and hovering over it says where the value comes from.
-- **Completes `{env.}`.** Inside an expression it suggests the env var names the build can see, from the system environment and the project's `.env` files. Each suggestion names its source, never the value.
+- **Shows `{env.}` values inline.** A `{{env.VAR}}` that is set shows `→ value` right after it, and hovering over it shows the value and where it comes from.
+- **Completes `{env.}`.** Inside an expression it suggests the env var names the build can see, from the system environment and the project's `.env` files. Each suggestion shows the value beside the name, with its source in the popup.
 - **Suggests shortcodes.** Typing `:` in prose offers icon packs (`:si:` and the rest) and emoji shortcodes (`:smile:`), filtered as you type. Emoji appear only when `site.content.render_emoji_shortcodes` is on.
 - **Suggests code fence languages and options.** On a fence line it offers language names, including `mermaid`, `package-install`, and `npm`, and after the language it offers the block options `title`, `tab`, `noCopy`, `noWrap`, and `lineNumbers`.
 - **Suggests icon pack prefixes.** While typing an icon value, in frontmatter `icon:` or an `Icon`, `DynamicIcon`, or `Btn` prop, it offers the pack prefixes (`si:`, `lu:`, and the rest) with the pack name beside each. After the colon, icon names stay free text.
@@ -58,6 +59,12 @@ Two settings are available:
 | `portosaur.trace.server` | Log the traffic between the editor and the server (`off`, `messages`, `verbose`). Useful when reporting a bug. |
 
 If the server stops responding, run **Portosaur: Restart Language Server** from the Command Palette.
+
+The status bar shows whether the server is running, starting, or stopped. Clicking it opens a menu with the server status, version, memory use, and path, plus a restart button. Picking the path row opens a picker to choose or type a different server binary. The Command Palette offers the same picker directly as **Portosaur: Select Language Server**.
+
+Typing `(` right after `]` in a link or image puts `<>` in with the cursor inside, ready for the destination. This only happens in VS Code.
+
+After picking a completion, erasing a letter or two brings the menu back. This only happens in VS Code.
 
 ### Preview
 

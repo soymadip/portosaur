@@ -233,6 +233,7 @@ export function TableOfContents({
 }) {
   const toc = nestHeadings(headings);
   const activeSlug = useTocScrollSpy(pageTitleId);
+  const navRef = useRef<HTMLElement>(null);
   /* The TOC rail is content-sized, and the site footer (in the
      shell, outside the columns) stops its top border at the
      rail's edge — so the rail's rendered width is reported up
@@ -259,11 +260,38 @@ export function TableOfContents({
       window.removeEventListener("resize", report);
     };
   }, [headings]);
+  // Keep the active entry visible: when the scroll-spy moves the
+  // highlight to an entry outside the panel's visible slice, nudge
+  // the panel just enough to bring it in — below the sticky title
+  // at the top, above the panel's bottom edge. Only the panel's
+  // own scrollTop moves, never the page's. The link is looked up
+  // through this component's own nav: the mobile list renders
+  // inside the same panel (hidden at desktop) and its active link
+  // would shadow the visible one.
+  useEffect(() => {
+    if (!activeSlug) {
+      return;
+    }
+    const panel = document.querySelector(".porto-right-sidebar");
+    const link = navRef.current?.querySelector('a[aria-current="true"]');
+    if (!(panel instanceof HTMLElement) || !(link instanceof HTMLElement)) {
+      return;
+    }
+    const panelRect = panel.getBoundingClientRect();
+    const title = panel.querySelector(".porto-toc-title");
+    const topEdge = title?.getBoundingClientRect().bottom ?? panelRect.top;
+    const linkRect = link.getBoundingClientRect();
+    if (linkRect.top < topEdge) {
+      panel.scrollTop -= topEdge - linkRect.top;
+    } else if (linkRect.bottom > panelRect.bottom) {
+      panel.scrollTop += linkRect.bottom - panelRect.bottom;
+    }
+  }, [activeSlug]);
   if (toc.length === 0) {
     return null;
   }
   return (
-    <nav aria-labelledby="porto__on-this-page">
+    <nav aria-labelledby="porto__on-this-page" ref={navRef}>
       <p id="porto__on-this-page" className="porto-toc-title">
         On this page
       </p>

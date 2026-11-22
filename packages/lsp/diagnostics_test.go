@@ -450,7 +450,7 @@ func TestLinkDiagnosticsBrokenRelativePath(t *testing.T) {
 
 func TestLinkDiagnosticsValidLinksAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
+	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[noslash](/docs/getting-started/installation)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
@@ -871,5 +871,95 @@ func TestDuplicateSlugDiagnosticsLenientMode(t *testing.T) {
 	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "# Intro\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/2 - intro.mdx") {
 		t.Fatalf("lenient diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
+	}
+}
+
+func TestLinkDiagnosticsRefDefinitionBrokenCleanURL(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/missing/\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "/docs/missing/"`) {
+		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 || diags[0].Range.Start.Character != 11 || diags[0].Range.End.Character != 25 {
+		t.Fatalf("diagnostic range = %+v, want the destination", diags[0].Range)
+	}
+}
+
+func TestLinkDiagnosticsRefDefinitionBrokenRelativePath(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: ./missing.mdx\n")
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "./missing.mdx"`) {
+		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
+	}
+}
+
+func TestRefDiagnosticsUndefined(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\nSee [x][missing] and [gone][] here.\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 2 || !hasDiagnostic(diags, `Undefined link reference "[missing]"`) || !hasDiagnostic(diags, `Undefined link reference "[gone]"`) {
+		t.Fatalf("diagnostics = %v, want both undefined-ref warnings", diagnosticMessages(diags))
+	}
+	for _, diag := range diags {
+		if diag.Severity != protocol.DiagnosticSeverityWarning {
+			t.Fatalf("severity = %v, want warning", diag.Severity)
+		}
+	}
+}
+
+func TestRefDiagnosticsShortcutWithoutDefinitionIsQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n[just text] and [x][defined].\n\n[defined]: /docs/getting-started/\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (a bare bracket is not a use without a definition)", diagnosticMessages(diags))
+	}
+}
+
+func TestRefDiagnosticsValidAreQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\nSee [the install][install], [guide][] and [guide].\n\n[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for defined refs with valid destinations", diagnosticMessages(diags))
+	}
+}
+
+func TestRefDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\nSee [x][ext] and [y][anchor].\n\n[ext]: https://example.com/page\n[anchor]: #details\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for external and anchor-only definition destinations", diagnosticMessages(diags))
+	}
+}
+
+func TestImageDiagnosticsRefDefinition(t *testing.T) {
+	root := contentFixture(t, "docs_home:\n  title: Docs\n", map[string]string{
+		"docs/page.mdx":         "# Page\n",
+		"static/images/pic.png": "fake png",
+	})
+	s := startTestServer(t, root)
+	doc := "# Page\n\n![alt][pic]\n\n[pic]: /images/pic.png\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (an absolute image src resolves against static/, not the page index)", diagnosticMessages(diags))
+	}
+	doc = "# Page\n\n![alt][gone]\n\n[gone]: ./missing.png\n"
+	diags = s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "./missing.png"`) {
+		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
+	}
+}
+
+func TestRefDiagnosticsCodeSkipped(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	doc := "# Page\n\n```\n[bad]: /docs/missing/\n```\n\nUse `[x][bad]` here.\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for definitions and uses in code", diagnosticMessages(diags))
 	}
 }

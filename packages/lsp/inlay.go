@@ -15,7 +15,7 @@ import (
 // can substitute get a hint: unknown keys already get a
 // diagnostic, and a map, list, or boolean cannot be substituted.
 func (s *Server) InlayHint(_ context.Context, params *protocol.InlayHintParams) ([]protocol.InlayHint, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Range.End, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}
@@ -52,9 +52,10 @@ func (s *Server) InlayHint(_ context.Context, params *protocol.InlayHintParams) 
 	return hints, nil
 }
 
-// valueHint is the inlay hint showing label right after the
-// reference ending at end, when the label is non-empty and the
-// position falls inside rng.
+// valueHint is the inlay hint showing `→ label` right after
+// the reference ending at end, when the label is non-empty and
+// the position falls inside rng. The arrow reads as "resolves
+// to": a bare value looks like a type annotation.
 func valueHint(lines []string, end int, rng protocol.Range, label string) (protocol.InlayHint, bool) {
 	if label == "" {
 		// An empty string cannot be a hint label.
@@ -67,7 +68,7 @@ func valueHint(lines []string, end int, rng protocol.Range, label string) (proto
 	padding := true
 	return protocol.InlayHint{
 		Position:    pos,
-		Label:       protocol.String(label),
+		Label:       protocol.String("→ " + label),
 		PaddingLeft: &padding,
 	}, true
 }

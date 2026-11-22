@@ -202,10 +202,11 @@ func (s *Server) envCompletion(params *protocol.CompletionParams, text string, r
 			continue
 		}
 		item := protocol.CompletionItem{
-			Label:    name,
-			Kind:     protocol.CompletionItemKindVariable,
-			Detail:   protocol.NewOptional(envSourceDetail(value.source)),
-			TextEdit: &protocol.TextEdit{Range: context.partialRange, NewText: name},
+			Label:         name,
+			Kind:          protocol.CompletionItemKindVariable,
+			Detail:        protocol.NewOptional(envDetail(value)),
+			Documentation: &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: envSourceDetail(value.source)},
+			TextEdit:      &protocol.TextEdit{Range: context.partialRange, NewText: name},
 		}
 		items = append(items, item)
 	}
@@ -213,9 +214,20 @@ func (s *Server) envCompletion(params *protocol.CompletionParams, text string, r
 	return &protocol.CompletionList{IsIncomplete: false, Items: items}, true
 }
 
+// envDetail previews an env var's value in the completion
+// list, the same way varsDetail previews a vars value. An empty
+// value falls back to the source, which is more useful than a
+// blank.
+func envDetail(value envValue) string {
+	if value.value == "" {
+		return envSourceDetail(value.source)
+	}
+	return varsDetail(value.value)
+}
+
 // envSourceDetail names where an env var comes from: the system
-// environment, or the `.env` file. The value is never shown:
-// env values are often secrets.
+// environment, or the `.env` file. Shown in the completion
+// popup and the hover, beside the value.
 func envSourceDetail(source string) string {
 	if source == "" {
 		return "system environment"
