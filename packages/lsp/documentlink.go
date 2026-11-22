@@ -10,7 +10,7 @@ import (
 )
 
 // DocumentLink returns every clickable link in the document:
-// markdown links and images, and Link/Btn `to`/`href` values.
+// markdown links and images, and Link/Btn link prop values.
 // An internal link targets its file, an external link targets
 // its own URL, and a link that points nowhere gets no document
 // link — there is nothing to open. The range covers the
@@ -52,7 +52,7 @@ func (s *Server) DocumentLink(_ context.Context, params *protocol.DocumentLinkPa
 			continue
 		}
 		for _, prop := range tag.props {
-			if !linkProps[prop.name] || !prop.hasValue || prop.expr {
+			if !linkProps[tag.name][prop.name] || !prop.hasValue || prop.expr {
 				continue
 			}
 			value := text[prop.valueStart:prop.valueEnd]

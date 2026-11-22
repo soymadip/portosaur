@@ -283,24 +283,24 @@ describe("remarkFileLinks", () => {
 
   test("rewrites JSX Link and Btn string attributes", async () => {
     const { tree, file } = await transform(
-      '<Link to="./plain.mdx">x</Link>\n\n<Btn href="./3 - sibling.mdx">y</Btn>\n',
+      '<Link href="./plain.mdx">x</Link>\n\n<Btn to="./3 - sibling.mdx">y</Btn>\n',
     );
     expect(findJsxAttrs(tree, "Link")).toEqual([
-      { to: "/docs/getting-started/plain/" },
+      { href: "/docs/getting-started/plain/" },
     ]);
     expect(findJsxAttrs(tree, "Btn")).toEqual([
-      { href: "/docs/getting-started/sibling/" },
+      { to: "/docs/getting-started/sibling/" },
     ]);
     expect(file.messages).toHaveLength(0);
   });
 
   test("leaves JSX expression attributes alone", async () => {
     const { tree, file } = await transform(
-      '<Link to={"./plain.mdx"}>x</Link>\n',
+      '<Link href={"./plain.mdx"}>x</Link>\n',
     );
     const attrs = findJsxAttrs(tree, "Link");
     expect(attrs).toHaveLength(1);
-    expect(attrs[0].to).not.toBe("/docs/getting-started/plain/");
+    expect(attrs[0].href).not.toBe("/docs/getting-started/plain/");
     expect(file.messages).toHaveLength(0);
   });
 

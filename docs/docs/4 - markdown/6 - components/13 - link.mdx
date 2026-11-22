@@ -9,23 +9,25 @@ The `<Link>` component is the explicit way to write a link in MDX. Plain Markdow
 ## Basic Usage
 
 ```jsx
-<Link to="/docs/getting-started/installation">Install Portosaur</Link>
+<Link href="/docs/getting-started/installation">Install Portosaur</Link>
 ```
 
-<Link to="/docs/getting-started/installation">Install Portosaur</Link>
+<Link href="/docs/getting-started/installation">Install Portosaur</Link>
 
 ## Internal and external links
 
-- **Internal links** (`to` with a page path): navigate client-side, without a full page reload. The site's trailing slash is added automatically.
-- **External links** (a full URL): open in a new tab, safely (`target="_blank"` and `rel="noopener noreferrer"`).
-- **Same-page anchors** (`to` with a `#section`): plain anchors, no routing.
+The component resolves the destination itself, so one prop covers every kind of link:
+
+- **Internal links** (`href` with a page path): navigate client-side, without a full page reload. The site's trailing slash is added automatically.
+- **External links** (`href` with a full URL): open in a new tab, safely (`target="_blank"` and `rel="noopener noreferrer"`).
+- **Same-page anchors** (`href` with a `#section`): plain anchors, no routing.
 
 ```jsx
-<Link to="/docs/config/reference">Config Reference</Link>
+<Link href="/docs/config/reference">Config Reference</Link>
 
 <Link href="https://github.com/soymadip/portosaur">GitHub Repo</Link>
 
-<Link to="#basic-usage">Back to the top</Link>
+<Link href="#basic-usage">Back to the top</Link>
 ```
 
 Any other props (like `className`) pass through to the anchor element.
@@ -49,15 +51,14 @@ Numbered names carry spaces, so write them as `%20`, or wrap the whole path in a
 It works in `<Link>` too, where the name goes in as-is, spaces and all:
 
 ```jsx
-<Link to="./1 - installation.mdx">Installation</Link>
+<Link href="./1 - installation.mdx">Installation</Link>
 ```
 
 A link to a file that does not exist, or to a file outside the content folders, is left alone with a build warning.
 
 ## Props Reference
 
-| Prop       | Type     | Default | Description                                                                                                      |
-| :--------- | :------- | :------ | :--------------------------------------------------------------------------------------------------------------- |
-| `to`       | `string` | None    | Link destination. Internal paths navigate client-side. Full URLs open in a new tab. `#anchors` stay on the page. |
-| `href`     | `string` | None    | Same as `to`. When both are given, `to` wins.                                                                    |
-| `children` | `node`   | None    | The link text or content.                                                                                        |
+| Prop       | Type     | Default | Description                                                                                                                |
+| :--------- | :------- | :------ | :------------------------------------------------------------------------------------------------------------------------- |
+| `href`     | `string` | None    | Link destination. Required. Internal paths navigate client-side. Full URLs open in a new tab. `#anchors` stay on the page. |
+| `children` | `node`   | None    | The link text or content.                                                                                                  |

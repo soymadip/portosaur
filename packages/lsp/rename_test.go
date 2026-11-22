@@ -42,7 +42,7 @@ func TestWillRenameFilesUpdatesCleanURLs(t *testing.T) {
 		"docs/linker.mdx": "# Linker\n\n" +
 			"[install](/docs/getting-started/installation/)\n\n" +
 			"[sib](/docs/sibling/)\n\n" +
-			"<Link to=\"/docs/getting-started/installation\">Install</Link>\n",
+			"<Link href=\"/docs/getting-started/installation\">Install</Link>\n",
 		"docs/other.mdx": "# Other\n\n<Btn to=\"/docs/getting-started/installation/\">Go</Btn>\n",
 	})
 	s := startTestServer(t, root)
@@ -64,8 +64,8 @@ func TestWillRenameFilesUpdatesCleanURLs(t *testing.T) {
 	wantLinker := "# Linker\n\n" +
 		"[install](/docs/getting-started/setup/)\n\n" +
 		"[sib](/docs/sibling/)\n\n" +
-		"<Link to=\"/docs/getting-started/setup\">Install</Link>\n"
-	gotLinker := applyEdits("# Linker\n\n[install](/docs/getting-started/installation/)\n\n[sib](/docs/sibling/)\n\n<Link to=\"/docs/getting-started/installation\">Install</Link>\n", linkerEdits)
+		"<Link href=\"/docs/getting-started/setup\">Install</Link>\n"
+	gotLinker := applyEdits("# Linker\n\n[install](/docs/getting-started/installation/)\n\n[sib](/docs/sibling/)\n\n<Link href=\"/docs/getting-started/installation\">Install</Link>\n", linkerEdits)
 	if gotLinker != wantLinker {
 		t.Fatalf("linker after edits = %q, want %q", gotLinker, wantLinker)
 	}
@@ -124,10 +124,10 @@ func TestWillRenameFilesLeavesRelativeMarkdownLinks(t *testing.T) {
 func TestWillRenameFilesRecomputesRelativeProps(t *testing.T) {
 	root := contentFixture(t, "docs_home:\n  title: Docs\n", map[string]string{
 		"docs/guide/a.mdx": "# A\n\n" +
-			"<Link to=\"./b.mdx\">B</Link>\n\n" +
-			"<Link to=\"../sibling.mdx\">Sib</Link>\n\n" +
-			"<Link to=\"./b.mdx#part\">B part</Link>\n\n" +
-			"<Link to=\"./my%20page.mdx\">My</Link>\n\n" +
+			"<Link href=\"./b.mdx\">B</Link>\n\n" +
+			"<Link href=\"../sibling.mdx\">Sib</Link>\n\n" +
+			"<Link href=\"./b.mdx#part\">B part</Link>\n\n" +
+			"<Link href=\"./my%20page.mdx\">My</Link>\n\n" +
 			"[b](./b.mdx)\n",
 		"docs/guide/b.mdx":       "# B\n",
 		"docs/guide/my page.mdx": "# My Page\n",
@@ -150,12 +150,12 @@ func TestWillRenameFilesRecomputesRelativeProps(t *testing.T) {
 		t.Fatalf("moved file edits = %d, want 3 (the two ./b.mdx props and the encoded one)", len(aEdits))
 	}
 	wantA := "# A\n\n" +
-		"<Link to=\"../guide/b.mdx\">B</Link>\n\n" +
-		"<Link to=\"../sibling.mdx\">Sib</Link>\n\n" +
-		"<Link to=\"../guide/b.mdx#part\">B part</Link>\n\n" +
-		"<Link to=\"../guide/my%20page.mdx\">My</Link>\n\n" +
+		"<Link href=\"../guide/b.mdx\">B</Link>\n\n" +
+		"<Link href=\"../sibling.mdx\">Sib</Link>\n\n" +
+		"<Link href=\"../guide/b.mdx#part\">B part</Link>\n\n" +
+		"<Link href=\"../guide/my%20page.mdx\">My</Link>\n\n" +
 		"[b](./b.mdx)\n"
-	gotA := applyEdits("# A\n\n<Link to=\"./b.mdx\">B</Link>\n\n<Link to=\"../sibling.mdx\">Sib</Link>\n\n<Link to=\"./b.mdx#part\">B part</Link>\n\n<Link to=\"./my%20page.mdx\">My</Link>\n\n[b](./b.mdx)\n", aEdits)
+	gotA := applyEdits("# A\n\n<Link href=\"./b.mdx\">B</Link>\n\n<Link href=\"../sibling.mdx\">Sib</Link>\n\n<Link href=\"./b.mdx#part\">B part</Link>\n\n<Link href=\"./my%20page.mdx\">My</Link>\n\n[b](./b.mdx)\n", aEdits)
 	if gotA != wantA {
 		t.Fatalf("moved file after edits = %q, want %q", gotA, wantA)
 	}
@@ -172,7 +172,7 @@ func TestWillRenameFilesRecomputesRelativeProps(t *testing.T) {
 func TestWillRenameFilesDirectory(t *testing.T) {
 	root := contentFixture(t, "docs_home:\n  title: Docs\n", map[string]string{
 		"docs/guide/index.mdx": "# Guide\n",
-		"docs/guide/a.mdx":     "# A\n\n<Link to=\"./b.mdx\">B</Link>\n\n<Link to=\"../sibling.mdx\">Sib</Link>\n",
+		"docs/guide/a.mdx":     "# A\n\n<Link href=\"./b.mdx\">B</Link>\n\n<Link href=\"../sibling.mdx\">Sib</Link>\n",
 		"docs/guide/b.mdx":     "# B\n\n[x](/docs/guide/a/)\n",
 		"docs/sibling.mdx":     "# Sibling\n",
 		"docs/linker.mdx":      "# Linker\n\n[g](/docs/guide/)\n\n[a](/docs/guide/a/)\n\n[b](/docs/guide/b/)\n",

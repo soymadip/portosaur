@@ -98,7 +98,7 @@ func TestDocumentLinkImage(t *testing.T) {
 
 func TestDocumentLinkJSXProps(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link to=\"/docs/getting-started/installation/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n")
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"/docs/getting-started/installation/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n")
 	links := s.documentLinks(t, documentURI)
 	if len(links) != 2 {
 		t.Fatalf("document links = %d, want 2", len(links))
@@ -111,8 +111,8 @@ func TestDocumentLinkJSXProps(t *testing.T) {
 	if linkTargetString(links[1]) != want {
 		t.Fatalf("Btn target = %q, want %q", linkTargetString(links[1]), want)
 	}
-	if links[0].Range.Start != (protocol.Position{Line: 2, Character: 10}) || links[0].Range.End != (protocol.Position{Line: 2, Character: 45}) {
-		t.Fatalf("Link range = %v, want (2,10)-(2,45) covering the prop value", links[0].Range)
+	if links[0].Range.Start != (protocol.Position{Line: 2, Character: 12}) || links[0].Range.End != (protocol.Position{Line: 2, Character: 47}) {
+		t.Fatalf("Link range = %v, want (2,12)-(2,47) covering the prop value", links[0].Range)
 	}
 }
 

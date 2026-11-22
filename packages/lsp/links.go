@@ -6,10 +6,11 @@ import (
 	"go.lsp.dev/protocol"
 )
 
-// Links: the markdown link destination or Link/Btn `to`/`href`
-// value the cursor sits inside. Go-to-definition jumps through
-// it; link completion offers values for it. Single-line markdown
-// links only, and reference-style links (`[text][ref]`) are not
+// Links: the markdown link destination or the link prop value
+// of a `Link` or `Btn` tag (Link takes only `href`, Btn keeps
+// its `to`/`href` pair). Go-to-definition jumps through it; link
+// completion offers values for it. Single-line markdown links
+// only, and reference-style links (`[text][ref]`) are not
 // covered in v1.
 
 // linkContext describes the link destination at the cursor.
@@ -20,14 +21,18 @@ type linkContext struct {
 	partial      string         // the destination text before the cursor
 	partialRange protocol.Range // value start to the cursor
 	angled       bool           // a bracketed markdown destination `](<...>)`
-	jsx          bool           // a Link/Btn `to`/`href` prop value
+	jsx          bool           // a Link `href` or Btn `to`/`href` prop value
 }
 
-// linkProps are the JSX props that hold link destinations.
-var linkProps = map[string]bool{"to": true, "href": true}
+// linkProps are the JSX props that hold link destinations, per
+// tag. Link takes only `href`. Btn keeps its `to`/`href` pair.
+var linkProps = map[string]map[string]bool{
+	"Link": {"href": true},
+	"Btn":  {"to": true, "href": true},
+}
 
 // linkAtCursor finds the link destination the cursor sits
-// inside: a markdown link destination `](...)` or the `to`/`href`
+// inside: a markdown link destination `](...)` or the link prop
 // string value of a `Link` or `Btn` tag.
 func linkAtCursor(text string, pos protocol.Position) linkContext {
 	if ctx := jsxLinkAtCursor(text, pos); ctx.found {
@@ -36,8 +41,9 @@ func linkAtCursor(text string, pos protocol.Position) linkContext {
 	return markdownLinkAtCursor(text, pos)
 }
 
-// jsxLinkAtCursor finds a Link/Btn to/href value at the cursor.
-// Expression values (`to={...}`) are not link destinations.
+// jsxLinkAtCursor finds a Link/Btn link prop value at the
+// cursor. Expression values (`href={...}`) are not link
+// destinations.
 func jsxLinkAtCursor(text string, pos protocol.Position) linkContext {
 	ctx := scanTag(text, pos)
 	if !ctx.found || ctx.kind != tagValue {
@@ -46,7 +52,7 @@ func jsxLinkAtCursor(text string, pos protocol.Position) linkContext {
 	if ctx.name != "Link" && ctx.name != "Btn" {
 		return linkContext{}
 	}
-	if !linkProps[ctx.prop] {
+	if !linkProps[ctx.name][ctx.prop] {
 		return linkContext{}
 	}
 	for _, prop := range ctx.props {

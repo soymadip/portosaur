@@ -217,13 +217,15 @@ export default function remarkFileLinks(contentDirs: ContentDir[] = []) {
       if (node.name !== "Link" && node.name !== "Btn") {
         return;
       }
+      // Link takes only `href`. Btn keeps its `to`/`href` pair.
+      const linkAttrs = node.name === "Link" ? ["href"] : ["to", "href"];
       for (const attr of node.attributes ?? []) {
-        // Only plain string attributes (`to="./page.mdx"`) — an
-        // expression value (`to={...}`) cannot be resolved at
+        // Only plain string attributes (`href="./page.mdx"`) — an
+        // expression value (`href={...}`) cannot be resolved at
         // build time.
         if (
           attr.type !== "mdxJsxAttribute" ||
-          (attr.name !== "to" && attr.name !== "href") ||
+          !linkAttrs.includes(attr.name) ||
           typeof attr.value !== "string"
         ) {
           continue;

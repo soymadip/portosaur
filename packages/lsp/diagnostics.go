@@ -360,7 +360,7 @@ func (s *Server) envIssues(text string, root string) []protocol.Diagnostic {
 }
 
 // linkIssues checks every internal link in the document body:
-// markdown links and Link/Btn `to`/`href` values. A clean URL
+// markdown links and Link/Btn link prop values. A clean URL
 // no page serves, or a relative path with no file behind it, is
 // broken. The severity follows site.content.on_broken_links:
 // throw is an error, warn is a warning, ignore reports nothing.
@@ -395,7 +395,7 @@ func (s *Server) linkIssues(text string, root string, currentFile string) []prot
 			continue
 		}
 		for _, prop := range tag.props {
-			if !linkProps[prop.name] || !prop.hasValue || prop.expr {
+			if !linkProps[tag.name][prop.name] || !prop.hasValue || prop.expr {
 				continue
 			}
 			value := text[prop.valueStart:prop.valueEnd]

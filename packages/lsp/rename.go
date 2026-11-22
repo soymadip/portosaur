@@ -266,7 +266,7 @@ func (p *renamePlan) fileEdits(file, text string) []renameEdit {
 			continue
 		}
 		for _, prop := range tag.props {
-			if !linkProps[prop.name] || !prop.hasValue || prop.expr {
+			if !linkProps[tag.name][prop.name] || !prop.hasValue || prop.expr {
 				continue
 			}
 			value := text[prop.valueStart:prop.valueEnd]

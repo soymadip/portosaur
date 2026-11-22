@@ -2,26 +2,24 @@ import NextLink from "next/link";
 import { pageHref } from "../../lib/pageUrl.ts";
 
 /**
- * Link — the explicit `<Link to="…">` MDX tag (distinct from
+ * Link — the explicit `<Link href="…">` MDX tag (distinct from
  * Markdown `[text](href)` links, which the route's `a` override
- * handles). `to` maps to `href`. Internal links render through
- * Next.js `<Link>` (trailing-slashed), external ones as plain
- * anchors opening in a new tab.
+ * handles). The component resolves the destination itself.
+ * Internal links render through Next.js `<Link>`
+ * (trailing-slashed), external ones as plain anchors opening
+ * in a new tab.
  */
 export function Link({
-  to,
   href,
   children,
   ...props
 }: {
-  /** An internal page path. */
-  to?: string;
-  /** A full URL or absolute path. */
-  href?: string;
+  /** The link destination. An internal page path, a full URL, or a `#section` anchor. */
+  href: string;
   children?: React.ReactNode;
   [key: string]: unknown;
 }) {
-  const target = to ?? href ?? "#";
+  const target = href;
   const external =
     /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("//");
   if (external) {

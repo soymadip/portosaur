@@ -38,15 +38,15 @@ func TestLinkAtCursorMarkdownAngleBrackets(t *testing.T) {
 }
 
 func TestLinkAtCursorJSX(t *testing.T) {
-	text, pos := posAt(t, "<Link to=\"/docs/get|ting-started/\">x</Link>")
+	text, pos := posAt(t, "<Link href=\"/docs/get|ting-started/\">x</Link>")
 	ctx := linkAtCursor(text, pos)
 	if !ctx.found || ctx.value != "/docs/getting-started/" || ctx.partial != "/docs/get" {
-		t.Fatalf("link = %+v, want the Link to value", ctx)
+		t.Fatalf("link = %+v, want the Link href value", ctx)
 	}
 }
 
 func TestLinkAtCursorJSXExpression(t *testing.T) {
-	text, pos := posAt(t, "<Link to={u|rl}>x</Link>")
+	text, pos := posAt(t, "<Link href={u|rl}>x</Link>")
 	if ctx := linkAtCursor(text, pos); ctx.found {
 		t.Fatalf("link = %+v, want none for an expression value", ctx)
 	}

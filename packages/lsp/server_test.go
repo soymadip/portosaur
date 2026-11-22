@@ -1077,9 +1077,9 @@ func TestComponentCompletionInsertsFullTag(t *testing.T) {
 // TestComponentCompletionInsertsRequiredProps checks the
 // full-tag insert fills in a built-in's required props as
 // quoted tabstops: Icon and DynamicIcon close themselves with
-// the cursor inside the quotes, TabItem pairs with the body
-// cursor last. Diagram keeps its plain insert, its svg is set
-// by the Mermaid plugin, and a component with no required
+// the cursor inside the quotes, TabItem and Link pair with the
+// body cursor last. Diagram keeps its plain insert, its svg is
+// set by the Mermaid plugin, and a component with no required
 // props, Btn, is unchanged.
 func TestComponentCompletionInsertsRequiredProps(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
@@ -1089,6 +1089,7 @@ func TestComponentCompletionInsertsRequiredProps(t *testing.T) {
 		"Icon":        "<Icon id=\"$1\" />",
 		"DynamicIcon": "<DynamicIcon icon=\"$1\" />",
 		"TabItem":     "<TabItem value=\"$1\">$0</TabItem>",
+		"Link":        "<Link href=\"$1\">$0</Link>",
 		"Diagram":     "<Diagram />",
 		"Btn":         "<Btn>$0</Btn>",
 	}

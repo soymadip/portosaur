@@ -17,7 +17,7 @@ The server only activates inside a Portosaur project, so it stays quiet in other
 Beyond completion and hover, the server also:
 
 - **Warns about components.** An unknown component name, a missing required prop, a bad icon name, or a prop value outside its allowed list gets a warning. Icon names are checked the way the build checks them: the prefix must be a known icon pack and the value must be `prefix:name`.
-- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` `to`/`href` value opens the target page, landing on the heading after a `#hash`.
+- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` link prop value opens the target page, landing on the heading after a `#hash`.
 - **Makes links clickable.** Links and images in the document open their target on Ctrl/Cmd+click: pages and files in the project, and external URLs in the browser. Broken links get no link, since there is nothing to open.
 - **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`.
 - **Updates links on rename.** Renaming a page file or a whole folder rewrites the clean-URL links that point at it, in markdown links and `Link`/`Btn` props across every page, keeping the `#hash` on the end. Relative file-path props inside the moved file are recomputed from its new location. Relative file-path markdown links are left to the MDX extension, which rewrites those itself.

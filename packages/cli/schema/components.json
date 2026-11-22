@@ -297,19 +297,15 @@
     },
     "Link": {
       "type": "object",
-      "description": "Link — the explicit `<Link to=\"…\">` MDX tag (distinct from Markdown `[text](href)` links, which the route's `a` override handles). `to` maps to `href`. Internal links render through Next.js `<Link>` (trailing-slashed), external ones as plain anchors opening in a new tab.",
+      "description": "Link — the explicit `<Link href=\"…\">` MDX tag (distinct from Markdown `[text](href)` links, which the route's `a` override handles). The component resolves the destination itself. Internal links render through Next.js `<Link>` (trailing-slashed), external ones as plain anchors opening in a new tab.",
       "properties": {
-        "to": {
-          "x-ts-type": "string",
-          "type": "string",
-          "description": "An internal page path."
-        },
         "href": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "A full URL or absolute path."
+          "description": "The link destination. An internal page path, a full URL, or a `#section` anchor."
         }
-      }
+      },
+      "required": ["href"]
     },
     "Pv": {
       "type": "object",

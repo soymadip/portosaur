@@ -11,7 +11,7 @@ import (
 )
 
 // Path completion for links: inside a markdown link destination
-// or a Link/Btn `to`/`href` value, the server offers page paths
+// or a Link/Btn link prop value, the server offers page paths
 // from the page index as clean URLs with a trailing slash. After
 // a `#` it offers the target page's heading ids, and when the
 // typed text starts with `.` it offers relative `.md`/`.mdx`

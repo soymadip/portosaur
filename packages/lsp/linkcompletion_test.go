@@ -33,9 +33,9 @@ func TestLinkCompletionFiltersByPrefix(t *testing.T) {
 	}
 }
 
-func TestLinkCompletionJSXTo(t *testing.T) {
+func TestLinkCompletionJSXProp(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link to=\"/blog/")
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"/blog/")
 	items := s.complete(t, documentURI, 2, 16)
 	if len(items) != 1 || items[0].Label != "/blog/first-post/" {
 		t.Fatalf("completions = %v, want only /blog/first-post/", labels(items))
@@ -164,8 +164,8 @@ func TestLinkCompletionRelativeAngledIsLiteral(t *testing.T) {
 
 func TestLinkCompletionRelativeJSXIsLiteral(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link to=\"./")
-	items := s.complete(t, documentURI, 2, 12)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"./")
+	items := s.complete(t, documentURI, 2, 14)
 	if !hasLabel(items, "./my page.mdx") {
 		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
 	}

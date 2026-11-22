@@ -188,10 +188,10 @@ func TestDefinitionRelativePathEncoded(t *testing.T) {
 
 func TestDefinitionJSXLink(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link to=\"/docs/getting-started/installation/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n")
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"/docs/getting-started/installation/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n")
 	locations := s.definition(t, documentURI, 2, 20)
 	if len(locations) != 1 {
-		t.Fatalf("definition for Link to = %v, want one location", locations)
+		t.Fatalf("definition for Link href = %v, want one location", locations)
 	}
 	want := uri.File(filepath.Join(s.root, "docs", "1 - getting-started", "2 - installation.mdx"))
 	if locations[0].URI != want {

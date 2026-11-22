@@ -13,7 +13,7 @@ import (
 )
 
 // Go-to-definition for links: a markdown link destination or a
-// Link/Btn `to`/`href` value jumps to the target page file. A
+// Link/Btn link prop value jumps to the target page file. A
 // `#hash` jumps to the matching heading line when one exists,
 // and to the file top otherwise.
 

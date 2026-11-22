@@ -503,7 +503,7 @@ func TestLinkDiagnosticsSeverityFollowsSetting(t *testing.T) {
 
 func TestLinkDiagnosticsJSXProps(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n<Link to=\"/docs/missing/\">x</Link>\n\n<Btn href=\"./missing.mdx\">x</Btn>\n\n<Link to=\"/docs/getting-started/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n\n<Link to={dynamic}>x</Link>\n"
+	doc := "# Page\n\n<Link href=\"/docs/missing/\">x</Link>\n\n<Btn href=\"./missing.mdx\">x</Btn>\n\n<Link href=\"/docs/getting-started/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n\n<Link href={dynamic}>x</Link>\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 2 {
 		t.Fatalf("diagnostics = %v, want one per broken JSX link", diagnosticMessages(diags))
