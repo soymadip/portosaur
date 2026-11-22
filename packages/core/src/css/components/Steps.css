@@ -1,0 +1,71 @@
+/* Steps — a numbered sequence. Rendered by Steps/Step. The
+   numbers come from a CSS counter: each step's ::before is the
+   numbered badge, and the ::after is the line joining it to the
+   next step's badge. No JavaScript is involved. */
+
+.porto-steps {
+  margin-top: var(--porto-content-gap-y);
+  counter-reset: porto-step;
+}
+.porto-step {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 1.5rem;
+}
+.porto-step:last-child {
+  padding-bottom: 0;
+}
+/* The badge: the counter value in an accent-tinted circle. The
+   counter increments on the same ::before that prints it, so
+   the first step reads 1. */
+.porto-step::before {
+  counter-increment: porto-step;
+  content: counter(porto-step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--porto-color-text-accent) 30%, transparent);
+  border-radius: 9999px;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 12%,
+    transparent
+  );
+  color: var(--porto-color-text-accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+/* The line joining this badge to the next one — from below the
+   badge to the bottom of the step. The last step has no line. */
+.porto-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(1.75rem / 2 - 0.5px);
+  top: calc(1.75rem + 0.5rem);
+  bottom: 0.5rem;
+  width: 1px;
+  background-color: var(--porto-color-hairline-light);
+}
+.porto-step__body {
+  min-width: 0;
+  /* The title sits on the badge's middle line: the badge is
+     1.75rem tall, the title's line is 1.5rem, so half the
+     difference centers it. */
+  padding-top: 0.125rem;
+}
+.porto-step__title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+.porto-step__content p {
+  margin: 0;
+}
+.porto-step__content p + p {
+  margin-top: 0.5rem;
+}

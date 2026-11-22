@@ -27,6 +27,7 @@ import { IconSearch } from "./mdx/IconSearch.tsx";
 import { Indent } from "./mdx/Indent.tsx";
 import { Link } from "./mdx/Link.tsx";
 import { Pv } from "./mdx/Pv.tsx";
+import { Step, Steps } from "./mdx/Steps.tsx";
 import { TabItem } from "./mdx/TabItem.tsx";
 import { Table } from "./mdx/Table.tsx";
 import { Tabs } from "./mdx/Tabs.tsx";
@@ -116,6 +117,7 @@ const BLOCK_COMPONENTS: Set<unknown> = new Set([
   Hint,
   IconSearch,
   Indent,
+  Steps,
   Tabs,
   TopicList,
 ]);
@@ -217,6 +219,8 @@ export function getMDXComponents(components?: MDXComponents) {
     Indent,
     Link,
     Pv,
+    Step,
+    Steps,
     TabItem,
     Tabs,
     TopicList,
@@ -277,6 +281,7 @@ export { IconSearch } from "./mdx/IconSearch.tsx";
 export { Indent } from "./mdx/Indent.tsx";
 export { Link } from "./mdx/Link.tsx";
 export { Pv } from "./mdx/Pv.tsx";
+export { Step, Steps } from "./mdx/Steps.tsx";
 export { TabItem } from "./mdx/TabItem.tsx";
 export { Table } from "./mdx/Table.tsx";
 export { Tabs } from "./mdx/Tabs.tsx";
