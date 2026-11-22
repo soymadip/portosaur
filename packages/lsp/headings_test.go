@@ -71,6 +71,45 @@ func TestExtractHeadingsStripsMarkdown(t *testing.T) {
 	}
 }
 
+func TestExtractHeadingsCustomID(t *testing.T) {
+	text := "## Getting Started [#setup]\n\n## Mixed Case [#My-ID]\n"
+	headings := extractHeadings(text)
+	if len(headings) != 2 {
+		t.Fatalf("headings = %+v, want 2", headings)
+	}
+	if headings[0].text != "Getting Started" || headings[0].id != "setup" {
+		t.Fatalf("heading 0 = %+v, want text Getting Started and id setup", headings[0])
+	}
+	if headings[1].text != "Mixed Case" || headings[1].id != "My-ID" {
+		t.Fatalf("heading 1 = %+v, want text Mixed Case and id My-ID (verbatim)", headings[1])
+	}
+}
+
+func TestExtractHeadingsCustomIDDedup(t *testing.T) {
+	text := "## Same\n\n## Other [#same]\n\n## Same\n\n## Again [#same]\n"
+	headings := extractHeadings(text)
+	if len(headings) != 4 {
+		t.Fatalf("headings = %+v, want 4", headings)
+	}
+	want := []string{"same", "same", "same-2", "same"}
+	for i, w := range want {
+		if headings[i].id != w {
+			t.Fatalf("heading %d id = %q, want %q", i, headings[i].id, w)
+		}
+	}
+}
+
+func TestExtractHeadingsCustomIDOnlyMidText(t *testing.T) {
+	text := "## See [#note] here\n"
+	headings := extractHeadings(text)
+	if len(headings) != 1 {
+		t.Fatalf("headings = %+v, want 1", headings)
+	}
+	if headings[0].id != "see-note-here" {
+		t.Fatalf("heading id = %q, want see-note-here (a mid-text [#id] is not a custom id)", headings[0].id)
+	}
+}
+
 func TestExtractHeadingsUnclosedFrontmatter(t *testing.T) {
 	headings := extractHeadings("---\ntitle: x\n# Not a heading\n")
 	if len(headings) != 0 {

@@ -74,6 +74,15 @@ func TestLinkCompletionSameFileHeadings(t *testing.T) {
 	}
 }
 
+func TestLinkCompletionSameFileHeadingsCustomID(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](#\n\n## Details [#info]\n")
+	items := s.complete(t, documentURI, 2, 5)
+	if len(items) != 2 || !hasLabel(items, "page") || !hasLabel(items, "info") {
+		t.Fatalf("completions = %v, want page and the custom id info", labels(items))
+	}
+}
+
 func TestLinkCompletionUnknownPageHeadingsIsEmpty(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](/docs/nope/#")

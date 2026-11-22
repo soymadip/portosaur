@@ -156,6 +156,18 @@ func TestDefinitionSameFileHash(t *testing.T) {
 	}
 }
 
+func TestDefinitionSameFileHashCustomID(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[here](#info)\n\n## Details [#info]\n")
+	locations := s.definition(t, documentURI, 2, 10)
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	if locations[0].Range.Start.Line != 4 {
+		t.Fatalf("definition line = %d, want 4 (the Details heading with the custom id)", locations[0].Range.Start.Line)
+	}
+}
+
 func TestDefinitionRelativePath(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n")

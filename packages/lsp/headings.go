@@ -25,9 +25,17 @@ type heading struct {
 
 var atxHeadingRe = regexp.MustCompile(`^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$`)
 
+// headingCustomIDRe matches Fumadocs' custom heading id: a
+// trailing `[#id]` at the end of the heading text. The id is
+// used verbatim, never slugged.
+var headingCustomIDRe = regexp.MustCompile(`\s*\[#(.+?)\]\s*$`)
+
 // extractHeadings returns the document's ATX headings, outside
 // the frontmatter and fenced code blocks. Ids follow the site's
-// slugger, with `-1`, `-2` suffixes for repeats.
+// slugger, with `-1`, `-2` suffixes for repeats. A trailing
+// `[#id]` sets the id verbatim instead, like Fumadocs: repeats
+// of a custom id keep the same id, but the id is still recorded,
+// so a later plain heading slugging to it gets the `-1` suffix.
 func extractHeadings(text string) []heading {
 	lines := strings.Split(text, "\n")
 	contentStart := 0
@@ -48,14 +56,29 @@ func extractHeadings(text string) []heading {
 		if match == nil {
 			continue
 		}
-		plain := plainHeadingText(lines[i][match[4]:match[5]])
-		id := githubSlug(plain)
-		if id == "" {
-			continue
+		raw := lines[i][match[4]:match[5]]
+		textTo := match[5]
+		customID := ""
+		if m := headingCustomIDRe.FindStringSubmatchIndex(raw); m != nil {
+			customID = raw[m[2]:m[3]]
+			raw = raw[:m[0]]
+			textTo = match[4] + m[0]
+		}
+		plain := plainHeadingText(raw)
+		var id string
+		if customID != "" {
+			id = customID
+		} else {
+			id = githubSlug(plain)
+			if id == "" {
+				continue
+			}
 		}
 		if n, ok := seen[id]; ok {
 			seen[id] = n + 1
-			id = id + "-" + strconv.Itoa(n+1)
+			if customID == "" {
+				id = id + "-" + strconv.Itoa(n+1)
+			}
 		} else {
 			seen[id] = 0
 		}
@@ -65,7 +88,7 @@ func extractHeadings(text string) []heading {
 			id:       id,
 			line:     i,
 			textFrom: match[4],
-			textTo:   match[5],
+			textTo:   textTo,
 		})
 	}
 	return out
