@@ -65,12 +65,25 @@
     position: sticky;
     top: var(--porto-nav-height);
     border-inline-start: 1px solid var(--porto-color-hairline);
-    height: calc(100vh - var(--porto-nav-height));
+    /* Content-sized with a viewport cap, not a fixed viewport
+       height: a full-height panel is exactly as tall as its
+       container on short pages, leaving it no room to stick,
+       so the heading rode away with the page. A short panel
+       sticks in the taller container instead. */
+    max-height: calc(100vh - var(--porto-nav-height));
     overflow-y: auto;
     /* Keep scrolls that start over the TOC inside it: without
        this, wheeling past either end scrolls the page behind. */
     overscroll-behavior: contain;
     scrollbar-width: none;
+    transition: top 0.2s ease-in-out;
+  }
+
+  /* Navbar hidden: the panel glides to the viewport top so its
+     border spans all the way up instead of stopping below
+     the vanished navbar. */
+  html.porto-navbar-hidden .porto-right-sidebar {
+    top: 0;
   }
 
   .main-pane--toc {
