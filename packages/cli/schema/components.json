@@ -160,9 +160,19 @@
       "description": "Details — native `<details>` element. The Docusaurus `<Details summary=\"…\">` shape maps directly onto it. Styled by the prose rules in content.css.",
       "properties": {
         "summary": {
+          "x-ts-type": "string | React.ReactElement",
+          "description": "The text on the collapsed header."
+        },
+        "open": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Open the disclosure initially.",
+          "default": false
+        },
+        "className": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "The text on the collapsed header."
+          "description": "Additional class on the details element."
         }
       },
       "additionalProperties": false

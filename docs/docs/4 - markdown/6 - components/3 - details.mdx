@@ -13,6 +13,33 @@ Create collapsible disclosure accordions to tuck away secondary or advanced info
 </Details>
 ```
 
+The example above, live:
+
+<Details summary="Click to inspect advanced configurations">
+  This content is hidden by default until the user clicks the accordion header.
+  You can include Markdown, tables, and code blocks inside.
+</Details>
+
+With `open` it starts expanded:
+
+<Details summary="Already open" open>
+  This one starts open — useful when the content matters more than the space it
+  saves.
+</Details>
+
+## Behavior
+
+- **The look.** A Details is a 2px line down the left side, a bold
+  summary, and a chevron that turns when it opens. There is no box
+  or background around it — the line is the whole look. To dress it
+  up further, style `.porto-details` in `custom_css`.
+- **Hover.** The left line tints accent while the mouse is over the
+  summary, so the header reads as clickable.
+- **The fold.** Opening and closing animates over 200ms, like a
+  `<FileTree>` folder.
+- **No JavaScript.** A Details is a native `<details>` element, so
+  it works with scripting off.
+
 ## Props Reference
 
 | Prop                         | Type                     | Default         | Description                                           |

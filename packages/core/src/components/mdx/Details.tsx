@@ -16,14 +16,25 @@ export function DetailsMarker() {
  */
 export function Details({
   summary,
+  open = false,
+  className,
   children,
+  ...rest
 }: {
   /** The text on the collapsed header. */
-  summary?: string;
+  summary?: string | React.ReactElement;
+  /** Open the disclosure initially. */
+  open?: boolean;
+  /** Additional class on the details element. */
+  className?: string;
   children?: React.ReactNode;
-}) {
+} & React.DetailsHTMLAttributes<HTMLDetailsElement>) {
   return (
-    <details className="porto-details">
+    <details
+      className={className ? `porto-details ${className}` : "porto-details"}
+      open={open || undefined}
+      {...rest}
+    >
       {summary && (
         <summary>
           <DetailsMarker />
