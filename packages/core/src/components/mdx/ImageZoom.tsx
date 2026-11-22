@@ -7,10 +7,20 @@ import {
   useState,
   type ImgHTMLAttributes,
   type KeyboardEvent,
+  type PointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "../Button.tsx";
 import { SiteIcon } from "../SiteIcon.tsx";
+import {
+  ZOOM_FIT,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+  panBy,
+  zoomToPoint,
+  type ZoomTransform,
+} from "../../lib/imageZoomMath.ts";
 
 /**
  * The `src` a markdown image arrives with. Fumadocs' remarkImage
@@ -41,6 +51,13 @@ type ImageSource = string | { src: string; width?: number; height?: number };
  * in is invalid HTML, and React reports it as a hydration error.
  * The server renders only the image, so the first client render
  * matches, and the dialog appears once the page is interactive.
+ *
+ * Inside the viewer the image zooms: pinch on a phone,
+ * Ctrl+scroll (or Ctrl with + / -) on a desktop, drag to move
+ * around once zoomed in, and zoom buttons at the bottom right.
+ * The zoom math lives in lib/imageZoomMath.ts — the scale and
+ * pan are clamped so the frame center always shows image, and
+ * closing the viewer resets back to the fitted size.
  */
 export function ImageZoom(
   props: Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
@@ -61,10 +78,104 @@ export function ImageZoom(
   const closeTimerRef = useRef<number | undefined>(undefined);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const zoomImgRef = useRef<HTMLImageElement>(null);
+
+  // The zoom transform: the state drives the img's transform
+  // style, and the ref mirrors it so the wheel and pointer
+  // handlers always read the current value without stale
+  // closures. Both change together, through applyZoom.
+  const [zoom, setZoom] = useState<ZoomTransform>({ ...ZOOM_FIT });
+  const zoomRef = useRef<ZoomTransform>({ ...ZOOM_FIT });
+  const [dragging, setDragging] = useState(false);
+  // The pointers currently down on the viewer, by pointer id.
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  // The pinch in progress: the finger distance and midpoint from
+  // the last move, so each move zooms by the change since then.
+  const pinchRef = useRef<{
+    distance: number;
+    midpoint: { x: number; y: number };
+  } | null>(null);
+  // The drag in progress: the pointer that started it, where it
+  // started, and the pan it started from — the pan is recomputed
+  // from the start each move, so clamping never drifts it.
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startPan: { x: number; y: number };
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const applyZoom = useCallback((next: ZoomTransform) => {
+    zoomRef.current = next;
+    setZoom(next);
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    applyZoom({ ...ZOOM_FIT });
+  }, [applyZoom]);
+
+  // The image's layout box inside the viewer: the viewer centers
+  // it with flex, so the layout top-left is the viewer rect inset
+  // by half the leftover space on each side. clientWidth and
+  // clientHeight are the layout sizes — the transform never
+  // changes them.
+  const imageBox = useCallback(() => {
+    const viewer = viewerRef.current;
+    const img = zoomImgRef.current;
+    if (!viewer || !img) {
+      return null;
+    }
+    const rect = viewer.getBoundingClientRect();
+    const width = img.clientWidth;
+    const height = img.clientHeight;
+    return {
+      width,
+      height,
+      left: rect.left + (rect.width - width) / 2,
+      top: rect.top + (rect.height - height) / 2,
+      centerX: rect.left + rect.width / 2,
+      centerY: rect.top + rect.height / 2,
+    };
+  }, []);
+
+  // Zoom by a factor around a point on the screen (the cursor,
+  // or a pinch midpoint): the point is translated into
+  // image-layout coordinates for the math.
+  const zoomAt = useCallback(
+    (clientX: number, clientY: number, factor: number) => {
+      const box = imageBox();
+      if (!box) {
+        return;
+      }
+      applyZoom(
+        zoomToPoint(
+          zoomRef.current,
+          factor,
+          { x: clientX - box.left, y: clientY - box.top },
+          { width: box.width, height: box.height },
+        ),
+      );
+    },
+    [applyZoom, imageBox],
+  );
+
+  // Zoom by a factor around the frame center (the buttons and
+  // the keyboard shortcuts have no cursor point).
+  const zoomCenter = useCallback(
+    (factor: number) => {
+      const box = imageBox();
+      if (!box) {
+        return;
+      }
+      zoomAt(box.centerX, box.centerY, factor);
+    },
+    [imageBox, zoomAt],
+  );
 
   const close = useCallback(() => {
     const dialog = dialogRef.current;
@@ -120,7 +231,8 @@ export function ImageZoom(
   // lock lives on the root element, not the body: the CSS also
   // reserves the scrollbar gutter there
   // (`scrollbar-gutter: stable`), so hiding the scrollbar doesn't
-  // widen the page and shift the content sideways.
+  // widen the page and shift the content sideways. Closing resets
+  // the zoom, so reopening starts at the fitted size.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) {
@@ -131,13 +243,15 @@ export function ImageZoom(
         dialog.close();
       }
       document.documentElement.removeAttribute("data-image-modal-open");
+      applyZoom({ ...ZOOM_FIT });
+      setDragging(false);
       return;
     }
     if (!dialog.open) {
       dialog.showModal();
     }
     document.documentElement.setAttribute("data-image-modal-open", "");
-  }, [open]);
+  }, [open, applyZoom]);
 
   // Escape closes — listened for on the window in the CAPTURE
   // phase, like the search dialog: a dialog-level or bubble-phase
@@ -159,6 +273,63 @@ export function ImageZoom(
       window.removeEventListener("keydown", onKeyDown, true);
     };
   }, [close]);
+
+  // Ctrl (or Cmd) with + / - zooms the image in steps, Ctrl+0
+  // resets it — the viewer grabs the browser's zoom shortcuts
+  // while it is open, so they zoom the image instead of the page.
+  // Capture phase, like Escape: preventing the default here is
+  // what stops the browser zoom.
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (!dialogRef.current?.open) {
+        return;
+      }
+      if (!event.ctrlKey && !event.metaKey) {
+        return;
+      }
+      if (event.key === "=" || event.key === "+") {
+        event.preventDefault();
+        zoomCenter(ZOOM_STEP);
+      } else if (event.key === "-") {
+        event.preventDefault();
+        zoomCenter(1 / ZOOM_STEP);
+      } else if (event.key === "0") {
+        event.preventDefault();
+        resetZoom();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [zoomCenter, resetZoom]);
+
+  // Ctrl+scroll (and a trackpad pinch, which the browser reports
+  // the same way) zooms around the cursor. Attached natively, not
+  // through React: React's wheel listeners are passive, so
+  // preventDefault inside one does nothing and the browser would
+  // zoom the page instead. Plain scrolling without Ctrl is left
+  // alone — the viewer has nothing to scroll.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const viewer = viewerRef.current;
+    if (!viewer) {
+      return;
+    }
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) {
+        return;
+      }
+      event.preventDefault();
+      zoomAt(event.clientX, event.clientY, Math.exp(-event.deltaY * 0.0015));
+    };
+    viewer.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      viewer.removeEventListener("wheel", onWheel);
+    };
+  }, [open, zoomAt]);
 
   // The native `cancel` event (Android Back, or Escape reaching
   // the dialog) must not close the dialog itself — the exit
@@ -226,9 +397,121 @@ export function ImageZoom(
     openDialog();
   };
 
+  // Pointer down on the viewer: a second pointer starts a pinch
+  // (and ends any drag), a single pointer starts a drag — but a
+  // fitted image has nothing to pan to, so the drag only starts
+  // once zoomed in. The viewer captures the pointer, so moves
+  // keep coming even past its edge.
+  const onViewerPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const viewer = viewerRef.current;
+    if (!viewer) {
+      return;
+    }
+    viewer.setPointerCapture(event.pointerId);
+    pointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+    if (pointersRef.current.size === 2) {
+      dragRef.current = null;
+      setDragging(false);
+      const [a, b] = [...pointersRef.current.values()];
+      pinchRef.current = {
+        distance: Math.hypot(b.x - a.x, b.y - a.y),
+        midpoint: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+      };
+      return;
+    }
+    if (zoomRef.current.scale > ZOOM_MIN) {
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startPan: { x: zoomRef.current.x, y: zoomRef.current.y },
+      };
+      setDragging(true);
+    }
+  };
+
+  // Pointer move: with two pointers down it is a pinch — zoom by
+  // the change in finger distance, around the midpoint. With one
+  // pointer dragging, pan by the distance from where the drag
+  // started.
+  const onViewerPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const pointers = pointersRef.current;
+    if (!pointers.has(event.pointerId)) {
+      return;
+    }
+    pointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+    if (pointers.size === 2 && pinchRef.current) {
+      const [a, b] = [...pointers.values()];
+      const distance = Math.hypot(b.x - a.x, b.y - a.y);
+      const midpoint = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      if (pinchRef.current.distance > 0 && distance > 0) {
+        zoomAt(midpoint.x, midpoint.y, distance / pinchRef.current.distance);
+      }
+      pinchRef.current = { distance, midpoint };
+      return;
+    }
+    const drag = dragRef.current;
+    if (drag && event.pointerId === drag.pointerId) {
+      const box = imageBox();
+      if (!box) {
+        return;
+      }
+      applyZoom(
+        panBy(
+          {
+            scale: zoomRef.current.scale,
+            x: drag.startPan.x,
+            y: drag.startPan.y,
+          },
+          event.clientX - drag.startX,
+          event.clientY - drag.startY,
+          { width: box.width, height: box.height },
+        ),
+      );
+    }
+  };
+
+  // Pointer up or cancelled: forget the pointer, and end the
+  // pinch or drag it belonged to. Dropping from two fingers to
+  // one hands the drag to the remaining finger from where it is,
+  // so the image does not jump.
+  const endViewerPointer = (event: PointerEvent<HTMLDivElement>) => {
+    const pointers = pointersRef.current;
+    pointers.delete(event.pointerId);
+    if (pointers.size < 2) {
+      pinchRef.current = null;
+    }
+    if (dragRef.current?.pointerId === event.pointerId) {
+      dragRef.current = null;
+      setDragging(false);
+    }
+    if (pointers.size === 1 && zoomRef.current.scale > ZOOM_MIN) {
+      const [id, pos] = [...pointers.entries()][0];
+      dragRef.current = {
+        pointerId: id,
+        startX: pos.x,
+        startY: pos.y,
+        startPan: { x: zoomRef.current.x, y: zoomRef.current.y },
+      };
+      setDragging(true);
+    }
+  };
+
   const dialogClassName = [
     "porto-image-dialog",
     ...(closing ? ["porto-image-dialog--closing"] : []),
+  ].join(" ");
+
+  const viewerClassName = [
+    "porto-image-dialog__viewer",
+    ...(zoom.scale > ZOOM_MIN ? ["porto-image-dialog__viewer--pannable"] : []),
+    ...(dragging ? ["porto-image-dialog__viewer--dragging"] : []),
   ].join(" ");
 
   const alt = props.alt ?? "";
@@ -288,12 +571,68 @@ export function ImageZoom(
                 </Button>
               </div>
               {/* The viewer only exists while the popup is open — it
-                  mounts with the image, and unmounts after the exit. */}
+                  mounts with the image, and unmounts after the exit.
+                  The zoom toolbar sits beside it, not inside it, so
+                  its buttons never start a drag. */}
               {open && (
-                <div className="porto-image-dialog__viewer">
-                  <img src={src} alt={alt} draggable={false} />
+                <div
+                  ref={viewerRef}
+                  className={viewerClassName}
+                  onPointerDown={onViewerPointerDown}
+                  onPointerMove={onViewerPointerMove}
+                  onPointerUp={endViewerPointer}
+                  onPointerCancel={endViewerPointer}
+                >
+                  <img
+                    ref={zoomImgRef}
+                    src={src}
+                    alt={alt}
+                    draggable={false}
+                    style={{
+                      transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`,
+                    }}
+                  />
                 </div>
               )}
+              <div className="porto-image-dialog__zoom">
+                {/* The three icons are literal `icon="..."` props,
+                    not computed values — the icon scan only picks
+                    up literals. */}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  ariaLabel="Zoom in"
+                  title="Zoom in"
+                  disabled={zoom.scale >= ZOOM_MAX}
+                  onClick={() => {
+                    zoomCenter(ZOOM_STEP);
+                  }}
+                >
+                  <SiteIcon icon="lu:zoom-in" size="20px" strokeWidth={2.5} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  ariaLabel="Zoom out"
+                  title="Zoom out"
+                  disabled={zoom.scale <= ZOOM_MIN}
+                  onClick={() => {
+                    zoomCenter(1 / ZOOM_STEP);
+                  }}
+                >
+                  <SiteIcon icon="lu:zoom-out" size="20px" strokeWidth={2.5} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  ariaLabel="Reset zoom"
+                  title="Reset zoom"
+                  disabled={zoom.scale <= ZOOM_MIN}
+                  onClick={resetZoom}
+                >
+                  <SiteIcon icon="lu:scan" size="20px" strokeWidth={2.5} />
+                </Button>
+              </div>
             </div>
           </dialog>,
           document.body,

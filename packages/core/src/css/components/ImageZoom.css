@@ -45,7 +45,12 @@
 }
 
 /* The viewer fills the frame and centers the image. The image
-   keeps its own proportions and never runs past the frame. */
+   keeps its own proportions and never runs past the frame.
+   `touch-action: none` keeps the browser from stealing the
+   gestures for scrolling or its own pinch-zoom — the viewer
+   owns pinch, drag, and Ctrl+scroll. The transform grows from
+   the image's top-left corner, which is the origin the zoom
+   math in lib/imageZoomMath.ts assumes. */
 .porto-image-dialog__viewer {
   flex: 1;
   min-height: 0;
@@ -53,6 +58,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  touch-action: none;
 }
 .porto-image-dialog__viewer img {
   max-width: 100%;
@@ -60,6 +66,31 @@
   width: auto;
   height: auto;
   object-fit: contain;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+/* Once zoomed in the image can be dragged around, so the cursor
+   says so — a hand while hovering, a closed hand mid-drag. */
+.porto-image-dialog__viewer--pannable {
+  cursor: grab;
+}
+.porto-image-dialog__viewer--dragging {
+  cursor: grabbing;
+}
+
+/* The zoom buttons float bottom-right, GitHub-style, in a small
+   pill so they stay readable over the image itself. */
+.porto-image-dialog__zoom {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background-color: var(--porto-color-bg);
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.5rem;
 }
 
 /* Scroll lock while the viewer is open, on the root element.
