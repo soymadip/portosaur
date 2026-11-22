@@ -18,13 +18,14 @@ import (
 // always, schema validation only in strict mode) plus component
 // checks, `{vars.}` and `{env.}` reference checks, broken-link
 // and broken-image checks over the page body, undefined
-// reference-style link warnings, and duplicate-slug checks
-// against the project's pages. The schema-based component checks
-// (unknown components, missing required props) are strict-only
-// too — the website's schema is the latest release's, which
-// cannot be tied to the project's version. The icon, slug, and
-// duplicate-slug checks are static rules, not schema-based, so
-// they run in both modes. An unclosed frontmatter block gets no frontmatter diagnostics:
+// reference-style link warnings, duplicate-slug checks against
+// the project's pages, and H1/title interaction checks. The
+// schema-based component checks (unknown components, missing
+// required props) are strict-only too — the website's schema is
+// the latest release's, which cannot be tied to the project's
+// version. The icon, slug, and duplicate-slug checks are static
+// rules, not schema-based, so they run in both modes. An unclosed
+// frontmatter block gets no frontmatter diagnostics:
 // the YAML cannot be told apart from the prose below it.
 // porto.yml is not diagnosed here — the YAML extension handles
 // it through the $schema line at the top of the file.
@@ -69,6 +70,9 @@ func (s *Server) publishDiagnostics(documentURI uri.URI) {
 		diags = append(diags, diag)
 	}
 	for _, issue := range s.duplicateHeadingIssues(text, root) {
+		diags = append(diags, issue.diag)
+	}
+	for _, issue := range s.h1TitleIssues(text) {
 		diags = append(diags, issue.diag)
 	}
 	s.sendDiagnostics(documentURI, diags)
@@ -645,10 +649,7 @@ func (s *Server) duplicateHeadingIssues(text string, root string) []duplicateHea
 		}
 		issues = append(issues, duplicateHeadingIssue{
 			diag: protocol.Diagnostic{
-				Range: protocol.Range{
-					Start: protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textFrom)},
-					End:   protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textTo)},
-				},
+				Range:    headingTextRange(lines, h),
 				Severity: severity,
 				Source:   protocol.NewOptional("porto-lsp"),
 				Message:  protocol.String(msg),
@@ -657,6 +658,98 @@ func (s *Server) duplicateHeadingIssues(text string, root string) []duplicateHea
 		})
 	}
 	return issues
+}
+
+// h1TitleIssue is one H1/title problem: the diagnostic plus
+// the hoisted H1's plain text, which the "Move to frontmatter
+// title" quick fix needs. Only the hint carries it — the
+// warning and the error have no fix.
+type h1TitleIssue struct {
+	diag      protocol.Diagnostic
+	titleText string
+}
+
+// h1TitleIssues checks the H1s of a document against the
+// frontmatter title, following the build's title rule: the
+// first top-level heading, when it is depth 1, leaves the body
+// and becomes the page title H1. Three fixed-severity rules: a
+// frontmatter title plus a hoisted H1 warns that the H1
+// overrides the title for the visible heading; an H1 that
+// renders in place while another H1 is visible is an error; a
+// hoisted H1 with no frontmatter title is a hint suggesting the
+// title key instead, with a quick fix that moves it there.
+// hide_title hides the visible title, so the warning and the
+// hint stay quiet, and a lone in-place H1 is the only visible
+// H1. The check reads the document directly, not a schema, so
+// it runs in both modes. An empty H1 (no plain text) hoists no
+// title and renders nowhere, so it is neither the hoisted H1
+// nor an in-place one.
+func (s *Server) h1TitleIssues(text string) []h1TitleIssue {
+	headings := extractHeadings(text)
+	if len(headings) == 0 {
+		return nil
+	}
+	hasTitle, hideTitle := frontmatterTitleState(text)
+	lines := strings.Split(text, "\n")
+	var issues []h1TitleIssue
+	firstIsH1 := headings[0].level == 1
+	var hoisted *heading
+	if firstIsH1 && strings.TrimSpace(headings[0].text) != "" {
+		hoisted = &headings[0]
+	}
+	if hoisted != nil && !hideTitle {
+		issue := h1TitleIssue{diag: protocol.Diagnostic{
+			Range:  headingTextRange(lines, *hoisted),
+			Source: protocol.NewOptional("porto-lsp"),
+		}}
+		if hasTitle {
+			issue.diag.Severity = protocol.DiagnosticSeverityWarning
+			issue.diag.Message = protocol.String("This H1 overrides the frontmatter title (the page heading shows this text, not the title)")
+		} else {
+			issue.diag.Severity = protocol.DiagnosticSeverityHint
+			issue.diag.Message = protocol.String("Consider using the `title` frontmatter key instead of an H1 for the page title")
+			issue.titleText = hoisted.text
+		}
+		issues = append(issues, issue)
+	}
+	inPlace := 0
+	for i, h := range headings {
+		if h.level != 1 || (firstIsH1 && i == 0) {
+			continue
+		}
+		if !hideTitle || inPlace > 0 {
+			issues = append(issues, h1TitleIssue{diag: protocol.Diagnostic{
+				Range:    headingTextRange(lines, h),
+				Severity: protocol.DiagnosticSeverityError,
+				Source:   protocol.NewOptional("porto-lsp"),
+				Message:  protocol.String("This page already has an H1"),
+			}})
+		}
+		inPlace++
+	}
+	return issues
+}
+
+// frontmatterTitleState reads the `title` and `hide_title`
+// keys from a closed frontmatter block: whether a non-empty
+// title is set, and whether the title is hidden. An unclosed
+// block, a missing block, or unparsable YAML reports neither.
+func frontmatterTitleState(text string) (hasTitle, hideTitle bool) {
+	block, ok := extractFrontmatter(text)
+	if !ok || !block.closed {
+		return false, false
+	}
+	rootNode, err := parseYAML(block.yaml)
+	if err != nil || rootNode == nil {
+		return false, false
+	}
+	if _, value := yamlLookup(rootNode, []string{"title"}); value != nil && value.Kind == yaml.ScalarNode && strings.TrimSpace(value.Value) != "" {
+		hasTitle = true
+	}
+	if _, value := yamlLookup(rootNode, []string{"hide_title"}); value != nil && value.Tag == "!!bool" && value.Value == "true" {
+		hideTitle = true
+	}
+	return hasTitle, hideTitle
 }
 
 // duplicateSlugRange points at the frontmatter `slug:` value

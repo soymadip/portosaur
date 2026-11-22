@@ -49,6 +49,16 @@ func actionTitles(actions []*protocol.CodeAction) []string {
 // actionEdit returns the single edit of an action, or fails.
 func actionEdit(t *testing.T, action *protocol.CodeAction) protocol.TextEdit {
 	t.Helper()
+	edits := actionEdits(t, action)
+	if len(edits) != 1 {
+		t.Fatalf("action %q has %d edits, want one", action.Title, len(edits))
+	}
+	return edits[0]
+}
+
+// actionEdits returns every edit of an action, or fails.
+func actionEdits(t *testing.T, action *protocol.CodeAction) []protocol.TextEdit {
+	t.Helper()
 	if action.Edit == nil {
 		t.Fatalf("action %q has no edit", action.Title)
 	}
@@ -56,10 +66,7 @@ func actionEdit(t *testing.T, action *protocol.CodeAction) protocol.TextEdit {
 	for _, list := range action.Edit.Changes {
 		edits = append(edits, list...)
 	}
-	if len(edits) != 1 {
-		t.Fatalf("action %q has %d edits, want one", action.Title, len(edits))
-	}
-	return edits[0]
+	return edits
 }
 
 func TestCodeActionUnknownKey(t *testing.T) {
@@ -156,7 +163,7 @@ func TestCodeActionNoFixForTypeError(t *testing.T) {
 
 func TestCodeActionRangeFilter(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nbogus: true\n---\n\n# Hello\n")
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\nbogus: true\n---\n\n## Hello\n")
 	actions := s.codeActions(t, documentURI, 0, 0)
 	if len(actions) != 0 {
 		t.Fatalf("actions at (0, 0) = %v, want none (the diagnostic is on line 1)", actionTitles(actions))
@@ -315,5 +322,62 @@ func TestValidationIssuesUnknownKey(t *testing.T) {
 	}
 	if issues[0].diag.Range.Start.Line != 1 {
 		t.Fatalf("diagnostic line = %d, want 1", issues[0].diag.Range.Start.Line)
+	}
+}
+
+func TestCodeActionMoveToFrontmatterTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "# Hello\n\nSome text.\n"
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), doc)
+	actions := s.codeActions(t, documentURI, 0, 3)
+	if len(actions) != 1 || actions[0].Title != "Move to frontmatter title" {
+		t.Fatalf("actions = %v, want only Move to frontmatter title", actionTitles(actions))
+	}
+	if got := applyEdits(doc, actionEdits(t, actions[0])); got != "---\ntitle: Hello\n---\n\n\nSome text.\n" {
+		t.Fatalf("after the fix the document is %q, want the H1 moved to a new frontmatter title", got)
+	}
+}
+
+func TestCodeActionMoveToFrontmatterTitleExisting(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\ndesc: Something\n---\n\n# Hello\n"
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), doc)
+	actions := s.codeActions(t, documentURI, 4, 3)
+	if len(actions) != 1 || actions[0].Title != "Move to frontmatter title" {
+		t.Fatalf("actions = %v, want only Move to frontmatter title", actionTitles(actions))
+	}
+	if got := applyEdits(doc, actionEdits(t, actions[0])); got != "---\ntitle: Hello\ndesc: Something\n---\n\n" {
+		t.Fatalf("after the fix the document is %q, want the title key added and the H1 removed", got)
+	}
+}
+
+func TestCodeActionMoveToFrontmatterTitleQuoted(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "# Hello: World\n"
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), doc)
+	actions := s.codeActions(t, documentURI, 0, 3)
+	if len(actions) != 1 || actions[0].Title != "Move to frontmatter title" {
+		t.Fatalf("actions = %v, want only Move to frontmatter title", actionTitles(actions))
+	}
+	if got := applyEdits(doc, actionEdits(t, actions[0])); got != "---\ntitle: \"Hello: World\"\n---\n\n" {
+		t.Fatalf("after the fix the document is %q, want the title quoted (it holds a colon)", got)
+	}
+}
+
+func TestCodeActionNoFixForH1Warning(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: T\n---\n\n# Hello\n")
+	actions := s.codeActions(t, documentURI, 4, 3)
+	if len(actions) != 0 {
+		t.Fatalf("actions = %v, want none (the override warning has no fix)", actionTitles(actions))
+	}
+}
+
+func TestCodeActionNoFixForSecondH1(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# First\n\n# Second\n")
+	actions := s.codeActions(t, documentURI, 2, 3)
+	if len(actions) != 0 {
+		t.Fatalf("actions = %v, want none (the second-H1 error has no fix)", actionTitles(actions))
 	}
 }

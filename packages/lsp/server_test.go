@@ -742,7 +742,7 @@ func TestFrontmatterDiagnosticsUnclosedFenceIsEmpty(t *testing.T) {
 
 func TestFrontmatterDiagnosticsValidDocument(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	documentURI := s.openNoWait(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: Hello\n---\n# Hello\n")
+	documentURI := s.openNoWait(t, filepath.Join(s.root, "page.mdx"), "---\ntitle: Hello\n---\n## Hello\n")
 	diags := s.waitDiagnostics(t, documentURI)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %+v, want none", diags)

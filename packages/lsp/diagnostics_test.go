@@ -38,7 +38,7 @@ func hasDiagnostic(diags []protocol.Diagnostic, want string) bool {
 
 func TestComponentDiagnosticsUnknownComponent(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Foo>text</Foo>\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Foo>text</Foo>\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "Unknown component <Foo>") {
 		t.Fatalf("diagnostics = %v, want one unknown-component warning", diagnosticMessages(diags))
 	}
@@ -52,7 +52,7 @@ func TestComponentDiagnosticsUnknownComponent(t *testing.T) {
 
 func TestComponentDiagnosticsKnownComponentIsClean(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=\"primary\">Click</Btn>\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Btn variant=\"primary\">Click</Btn>\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
 	}
@@ -60,7 +60,7 @@ func TestComponentDiagnosticsKnownComponentIsClean(t *testing.T) {
 
 func TestComponentDiagnosticsLowercaseTagsSkipped(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<div><span>text</span></div>\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<div><span>text</span></div>\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for plain HTML", diagnosticMessages(diags))
 	}
@@ -68,7 +68,7 @@ func TestComponentDiagnosticsLowercaseTagsSkipped(t *testing.T) {
 
 func TestComponentDiagnosticsFencedCodeSkipped(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n```mdx\n<Foo>\n```\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n```mdx\n<Foo>\n```\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for fenced code", diagnosticMessages(diags))
 	}
@@ -76,7 +76,7 @@ func TestComponentDiagnosticsFencedCodeSkipped(t *testing.T) {
 
 func TestComponentDiagnosticsInlineCodeSkipped(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\nUse `<Foo>` and `<Icon>` for things.\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\nUse `<Foo>` and `<Icon>` for things.\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for inline code spans", diagnosticMessages(diags))
 	}
@@ -84,7 +84,7 @@ func TestComponentDiagnosticsInlineCodeSkipped(t *testing.T) {
 
 func TestComponentDiagnosticsMissingRequiredProp(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon>\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Icon>\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "Missing required prop 'id' for <Icon>") {
 		t.Fatalf("diagnostics = %v, want the missing-id warning", diagnosticMessages(diags))
 	}
@@ -92,7 +92,7 @@ func TestComponentDiagnosticsMissingRequiredProp(t *testing.T) {
 
 func TestComponentDiagnosticsMissingRequiredPropPresent(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"lu:star\">\n\n<TabItem value=\"a\">x</TabItem>\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Icon id=\"lu:star\">\n\n<TabItem value=\"a\">x</TabItem>\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
 	}
@@ -110,7 +110,7 @@ func TestComponentDiagnosticsBadIcon(t *testing.T) {
 		{`<Btn icon="xx:star">x</Btn>`, "Unknown icon prefix"},
 		{`<DynamicIcon icon="xx:star">`, "Unknown icon prefix"},
 	} {
-		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n"+tc.markup+"\n")
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n"+tc.markup+"\n")
 		if !hasDiagnostic(diags, tc.want) {
 			t.Fatalf("diagnostics for %s = %v, want %q", tc.markup, diagnosticMessages(diags), tc.want)
 		}
@@ -119,7 +119,7 @@ func TestComponentDiagnosticsBadIcon(t *testing.T) {
 
 func TestComponentDiagnosticsBadEnumValue(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=\"bogus\">\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Btn variant=\"bogus\">\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "Invalid value 'bogus' for prop 'variant'") {
 		t.Fatalf("diagnostics = %v, want the invalid-enum warning", diagnosticMessages(diags))
 	}
@@ -130,7 +130,7 @@ func TestComponentDiagnosticsBadEnumValue(t *testing.T) {
 
 func TestComponentDiagnosticsValidIcons(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Icon id=\"lu:star\">\n\n<DynamicIcon icon=\"🚀\">\n\n<DynamicIcon icon=\"/img/logo.png\">\n\n<Icon id=\"react\">\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n<Icon id=\"lu:star\">\n\n<DynamicIcon icon=\"🚀\">\n\n<DynamicIcon icon=\"/img/logo.png\">\n\n<Icon id=\"react\">\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
 	}
@@ -160,7 +160,7 @@ func TestFrontmatterIconDiagnosticsValid(t *testing.T) {
 func TestVarsDiagnosticsUnknownKeyDefault(t *testing.T) {
 	root := fixtureProjectWithConfig(t, "vars:\n  known: hello\n")
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "# Hello\n\nSee {vars.nope} here.\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "## Hello\n\nSee {vars.nope} here.\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Unknown vars key "{vars.nope}"`) {
 		t.Fatalf("diagnostics = %v, want the unknown-vars-key error", diagnosticMessages(diags))
 	}
@@ -197,7 +197,7 @@ func TestVarsDiagnosticsSeverityFollowsSetting(t *testing.T) {
 func TestVarsDiagnosticsKnownKeysAreQuiet(t *testing.T) {
 	config := "vars:\n  known: hello\n  nested:\n    deep: 42\n"
 	s := startTestServer(t, fixtureProjectWithConfig(t, config))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n{vars.known} and {vars.nested.deep} work.\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\n{vars.known} and {vars.nested.deep} work.\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
 	}
@@ -224,7 +224,7 @@ func TestVarsDiagnosticsEscapeIsQuiet(t *testing.T) {
 func TestVarsDiagnosticsAllPositions(t *testing.T) {
 	config := "vars:\n  known: hello\n"
 	s := startTestServer(t, fixtureProjectWithConfig(t, config))
-	doc := "# Hello\n\nText {vars.a} here.\n\nUse `{vars.b}` inline.\n\n```sh\nrun {vars.c}\n```\n\n[link]({vars.d})\n\n![img]({vars.e})\n\n{vars.f}\n"
+	doc := "## Hello\n\nText {vars.a} here.\n\nUse `{vars.b}` inline.\n\n```sh\nrun {vars.c}\n```\n\n[link]({vars.d})\n\n![img]({vars.e})\n\n{vars.f}\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
 	if len(diags) != 6 {
 		t.Fatalf("diagnostics = %v, want one per position", diagnosticMessages(diags))
@@ -280,7 +280,7 @@ func TestVarsDiagnosticsNoVarsSection(t *testing.T) {
 
 func TestEnvDiagnosticsMissingVarDefault(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\nSee {env.PORTO_LSP_TEST_NOPE} here.\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Hello\n\nSee {env.PORTO_LSP_TEST_NOPE} here.\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Unset env var "{env.PORTO_LSP_TEST_NOPE}"`) {
 		t.Fatalf("diagnostics = %v, want the unset-env-var warning", diagnosticMessages(diags))
 	}
@@ -361,7 +361,7 @@ func TestEnvDiagnosticsEscapeIsQuiet(t *testing.T) {
 
 func TestEnvDiagnosticsAllPositions(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	doc := "# Hello\n\nText {env.PORTO_LSP_TEST_A} here.\n\nUse `{env.PORTO_LSP_TEST_B}` inline.\n\n```sh\nrun {env.PORTO_LSP_TEST_C}\n```\n\n[link]({env.PORTO_LSP_TEST_D})\n\n![img]({env.PORTO_LSP_TEST_E})\n\n{env.PORTO_LSP_TEST_F}\n"
+	doc := "## Hello\n\nText {env.PORTO_LSP_TEST_A} here.\n\nUse `{env.PORTO_LSP_TEST_B}` inline.\n\n```sh\nrun {env.PORTO_LSP_TEST_C}\n```\n\n[link]({env.PORTO_LSP_TEST_D})\n\n![img]({env.PORTO_LSP_TEST_E})\n\n{env.PORTO_LSP_TEST_F}\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
 	if len(diags) != 6 {
 		t.Fatalf("diagnostics = %v, want one per position", diagnosticMessages(diags))
@@ -413,11 +413,11 @@ func TestComponentDiagnosticsLenientMode(t *testing.T) {
 
 	s := startTestServer(t, root)
 	s.local.resolver.website = website.URL
-	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "# Hello\n\n<Foo>\n\n<Icon>\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "## Hello\n\n<Foo>\n\n<Icon>\n")
 	if len(diags) != 0 {
 		t.Fatalf("lenient diagnostics = %v, want none", diagnosticMessages(diags))
 	}
-	diags = s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "# Hello\n\n<Icon id=\"xx:star\">\n")
+	diags = s.openDiagnostics(t, filepath.Join(root, "page.mdx"), "## Hello\n\n<Icon id=\"xx:star\">\n")
 	if !hasDiagnostic(diags, "Unknown icon prefix") {
 		t.Fatalf("lenient icon diagnostics = %v, want the bad-prefix warning", diagnosticMessages(diags))
 	}
@@ -425,7 +425,7 @@ func TestComponentDiagnosticsLenientMode(t *testing.T) {
 
 func TestLinkDiagnosticsBrokenCleanURL(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install](/docs/missing/)\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n[install](/docs/missing/)\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "/docs/missing/"`) {
 		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
 	}
@@ -439,7 +439,7 @@ func TestLinkDiagnosticsBrokenCleanURL(t *testing.T) {
 
 func TestLinkDiagnosticsBrokenRelativePath(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[sib](./missing.mdx)\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n[sib](./missing.mdx)\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "./missing.mdx"`) {
 		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
 	}
@@ -450,7 +450,7 @@ func TestLinkDiagnosticsBrokenRelativePath(t *testing.T) {
 
 func TestLinkDiagnosticsValidLinksAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[noslash](/docs/getting-started/installation)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
+	doc := "## Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[noslash](/docs/getting-started/installation)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
@@ -459,7 +459,7 @@ func TestLinkDiagnosticsValidLinksAreQuiet(t *testing.T) {
 
 func TestLinkDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n[x](https://example.com/page)\n\n[y](http://example.com)\n\n[z](mailto:me@example.com)\n\n[w](//cdn.example.com/x.js)\n\n[v](#details)\n"
+	doc := "## Page\n\n[x](https://example.com/page)\n\n[y](http://example.com)\n\n[z](mailto:me@example.com)\n\n[w](//cdn.example.com/x.js)\n\n[v](#details)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for external and anchor-only links", diagnosticMessages(diags))
@@ -469,10 +469,10 @@ func TestLinkDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
 func TestLinkDiagnosticsVarsDestinationIsQuiet(t *testing.T) {
 	t.Setenv("PORTO_LSP_TEST_DOCS_URL", "/docs/getting-started/")
 	root := contentFixture(t, "docs_home:\n  title: Docs\nvars:\n  page: /docs/getting-started/\n  slug: getting-started\n", map[string]string{
-		"docs/1 - getting-started/index.mdx": "# Getting Started\n",
+		"docs/1 - getting-started/index.mdx": "## Getting Started\n",
 	})
 	s := startTestServer(t, root)
-	doc := "# Page\n\n[x]({vars.page})\n\n[y](/docs/{vars.slug}/)\n\n[z]({env.PORTO_LSP_TEST_DOCS_URL})\n"
+	doc := "## Page\n\n[x]({vars.page})\n\n[y](/docs/{vars.slug}/)\n\n[z]({env.PORTO_LSP_TEST_DOCS_URL})\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for destinations that resolve at build time", diagnosticMessages(diags))
@@ -503,7 +503,7 @@ func TestLinkDiagnosticsSeverityFollowsSetting(t *testing.T) {
 
 func TestLinkDiagnosticsJSXProps(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n<Link href=\"/docs/missing/\">x</Link>\n\n<Btn href=\"./missing.mdx\">x</Btn>\n\n<Link href=\"/docs/getting-started/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n\n<Link href={dynamic}>x</Link>\n"
+	doc := "## Page\n\n<Link href=\"/docs/missing/\">x</Link>\n\n<Btn href=\"./missing.mdx\">x</Btn>\n\n<Link href=\"/docs/getting-started/\">x</Link>\n\n<Btn href=\"./sibling.mdx\">x</Btn>\n\n<Link href={dynamic}>x</Link>\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 2 {
 		t.Fatalf("diagnostics = %v, want one per broken JSX link", diagnosticMessages(diags))
@@ -518,7 +518,7 @@ func TestLinkDiagnosticsJSXProps(t *testing.T) {
 // broken-link one.
 func TestLinkDiagnosticsImageLinksSkipped(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n![img](/images/missing.png)\n\n![img](./missing.png)\n"
+	doc := "## Page\n\n![img](/images/missing.png)\n\n![img](./missing.png)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 2 {
 		t.Fatalf("diagnostics = %v, want the two broken-image errors", diagnosticMessages(diags))
@@ -543,7 +543,7 @@ func imagesFixture(t *testing.T) string {
 
 func TestImageDiagnosticsBrokenRelative(t *testing.T) {
 	s := startTestServer(t, imagesFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n![img](./missing.png)\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n![img](./missing.png)\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "./missing.png"`) {
 		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
 	}
@@ -557,7 +557,7 @@ func TestImageDiagnosticsBrokenRelative(t *testing.T) {
 
 func TestImageDiagnosticsBrokenAbsolute(t *testing.T) {
 	s := startTestServer(t, imagesFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n![img](/images/missing.png)\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n![img](/images/missing.png)\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "/images/missing.png"`) {
 		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
 	}
@@ -568,7 +568,7 @@ func TestImageDiagnosticsBrokenAbsolute(t *testing.T) {
 
 func TestImageDiagnosticsValidImagesAreQuiet(t *testing.T) {
 	s := startTestServer(t, imagesFixture(t))
-	doc := "# Page\n\n![a](./existing.png)\n\n![b](/images/existing.png)\n\n![c](./existing.png \"A title\")\n\n![d](./my%20pic.png)\n\n![e](./existing.png?v=2)\n"
+	doc := "## Page\n\n![a](./existing.png)\n\n![b](/images/existing.png)\n\n![c](./existing.png \"A title\")\n\n![d](./my%20pic.png)\n\n![e](./existing.png?v=2)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))
@@ -578,7 +578,7 @@ func TestImageDiagnosticsValidImagesAreQuiet(t *testing.T) {
 func TestImageDiagnosticsExternalAndSpecialAreQuiet(t *testing.T) {
 	t.Setenv("PORTO_LSP_TEST_LOGO", "logo.png")
 	s := startTestServer(t, imagesFixture(t))
-	doc := "# Page\n\n![a](https://example.com/x.png)\n\n![b](http://example.com/x.png)\n\n![c](//cdn.example.com/x.png)\n\n![d](data:image/png;base64,AAAA)\n\n![e]()\n\n![f]({vars.logo})\n\n![g](/images/{env.PORTO_LSP_TEST_LOGO}.png)\n\n![h](images/bare.png)\n"
+	doc := "## Page\n\n![a](https://example.com/x.png)\n\n![b](http://example.com/x.png)\n\n![c](//cdn.example.com/x.png)\n\n![d](data:image/png;base64,AAAA)\n\n![e]()\n\n![f]({vars.logo})\n\n![g](/images/{env.PORTO_LSP_TEST_LOGO}.png)\n\n![h](images/bare.png)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for unchecked sources", diagnosticMessages(diags))
@@ -609,7 +609,7 @@ func TestImageDiagnosticsSeverityFollowsSetting(t *testing.T) {
 
 func TestImageDiagnosticsImgTag(t *testing.T) {
 	s := startTestServer(t, imagesFixture(t))
-	doc := "# Page\n\n<img src=\"./missing.png\" />\n\n<img src=\"/images/missing.png\" />\n\n<img src=\"./existing.png\" />\n\n<img src={dynamic} />\n\n<img src=\"https://example.com/x.png\" />\n"
+	doc := "## Page\n\n<img src=\"./missing.png\" />\n\n<img src=\"/images/missing.png\" />\n\n<img src=\"./existing.png\" />\n\n<img src={dynamic} />\n\n<img src=\"https://example.com/x.png\" />\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 2 {
 		t.Fatalf("diagnostics = %v, want one per broken img src", diagnosticMessages(diags))
@@ -621,7 +621,7 @@ func TestImageDiagnosticsImgTag(t *testing.T) {
 
 func TestImageDiagnosticsCodeSkipped(t *testing.T) {
 	s := startTestServer(t, imagesFixture(t))
-	doc := "# Page\n\n```md\n![x](./missing.png)\n\n<img src=\"./missing.png\" />\n```\n\nUse `![y](./missing.png)` inline.\n"
+	doc := "## Page\n\n```md\n![x](./missing.png)\n\n<img src=\"./missing.png\" />\n```\n\nUse `![y](./missing.png)` inline.\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for images in code", diagnosticMessages(diags))
@@ -630,7 +630,7 @@ func TestImageDiagnosticsCodeSkipped(t *testing.T) {
 
 func TestLinkDiagnosticsCodeSkipped(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n```md\n[x](/docs/missing/)\n```\n\nUse `[y](/docs/missing/)` inline.\n"
+	doc := "## Page\n\n```md\n[x](/docs/missing/)\n```\n\nUse `[y](/docs/missing/)` inline.\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for links in code", diagnosticMessages(diags))
@@ -641,7 +641,7 @@ func TestLinkDiagnosticsCodeSkipped(t *testing.T) {
 // never validated against the page's headings.
 func TestLinkDiagnosticsHashNotValidated(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[setup](/docs/getting-started/installation/#nope)\n\n[sib](./sibling.mdx#nope)\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n[setup](/docs/getting-started/installation/#nope)\n\n[sib](./sibling.mdx#nope)\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for unknown hashes on existing pages", diagnosticMessages(diags))
 	}
@@ -736,11 +736,11 @@ func duplicateSlugFixture(t *testing.T, files map[string]string) string {
 
 func TestDuplicateSlugDiagnosticsNumericPrefix(t *testing.T) {
 	root := duplicateSlugFixture(t, map[string]string{
-		"docs/1 - intro.mdx": "# Intro\n",
-		"docs/2 - intro.mdx": "# Intro again\n",
+		"docs/1 - intro.mdx": "## Intro\n",
+		"docs/2 - intro.mdx": "## Intro again\n",
 	})
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "# Intro\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "## Intro\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "Duplicate slug") {
 		t.Fatalf("diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
 	}
@@ -753,7 +753,7 @@ func TestDuplicateSlugDiagnosticsNumericPrefix(t *testing.T) {
 	if diags[0].Range.Start.Line != 0 {
 		t.Fatalf("diagnostic line = %d, want 0 (the first line, no slug key)", diags[0].Range.Start.Line)
 	}
-	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "2 - intro.mdx"), "# Intro again\n")
+	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "2 - intro.mdx"), "## Intro again\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/1 - intro.mdx") {
 		t.Fatalf("diagnostics = %v, want the warning on the other side too", diagnosticMessages(diags))
 	}
@@ -761,18 +761,18 @@ func TestDuplicateSlugDiagnosticsNumericPrefix(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsSlugOverride(t *testing.T) {
 	root := duplicateSlugFixture(t, map[string]string{
-		"docs/apple.mdx":  "# Apple\n",
-		"docs/orange.mdx": "---\nslug: apple\n---\n# Orange\n",
+		"docs/apple.mdx":  "## Apple\n",
+		"docs/orange.mdx": "---\nslug: apple\n---\n## Orange\n",
 	})
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "orange.mdx"), "---\nslug: apple\n---\n# Orange\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "orange.mdx"), "---\nslug: apple\n---\n## Orange\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/apple.mdx") || !hasDiagnostic(diags, "/docs/apple/") {
 		t.Fatalf("diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
 	}
 	if diags[0].Range.Start.Line != 1 || diags[0].Range.Start.Character != 6 || diags[0].Range.End.Character != 11 {
 		t.Fatalf("diagnostic range = %+v, want the slug value", diags[0].Range)
 	}
-	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "apple.mdx"), "# Apple\n")
+	diags = s.openDiagnostics(t, filepath.Join(root, "docs", "apple.mdx"), "## Apple\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/orange.mdx") {
 		t.Fatalf("diagnostics = %v, want the warning on the other side too", diagnosticMessages(diags))
 	}
@@ -783,11 +783,11 @@ func TestDuplicateSlugDiagnosticsSlugOverride(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsReadmeVsIndex(t *testing.T) {
 	root := duplicateSlugFixture(t, map[string]string{
-		"docs/guide/README.mdx": "# Guide\n",
-		"docs/guide/index.mdx":  "# Guide index\n",
+		"docs/guide/README.mdx": "## Guide\n",
+		"docs/guide/index.mdx":  "## Guide index\n",
 	})
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "# Guide\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "## Guide\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/guide/index.mdx") || !hasDiagnostic(diags, "/docs/guide/") {
 		t.Fatalf("diagnostics = %v, want the readme/index collision warning", diagnosticMessages(diags))
 	}
@@ -795,11 +795,11 @@ func TestDuplicateSlugDiagnosticsReadmeVsIndex(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsReadmeVsSibling(t *testing.T) {
 	root := duplicateSlugFixture(t, map[string]string{
-		"docs/guide/README.mdx": "# Guide\n",
-		"docs/guide.mdx":        "# Guide page\n",
+		"docs/guide/README.mdx": "## Guide\n",
+		"docs/guide.mdx":        "## Guide page\n",
 	})
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "# Guide\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "guide", "README.mdx"), "## Guide\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/guide.mdx") || !hasDiagnostic(diags, "/docs/guide/") {
 		t.Fatalf("diagnostics = %v, want the readme/sibling collision warning", diagnosticMessages(diags))
 	}
@@ -807,11 +807,11 @@ func TestDuplicateSlugDiagnosticsReadmeVsSibling(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsStrippedFolders(t *testing.T) {
 	root := duplicateSlugFixture(t, map[string]string{
-		"docs/1 - guide/setup.mdx": "# Setup\n",
-		"docs/2 - guide/setup.mdx": "# Setup again\n",
+		"docs/1 - guide/setup.mdx": "## Setup\n",
+		"docs/2 - guide/setup.mdx": "## Setup again\n",
 	})
 	s := startTestServer(t, root)
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - guide", "setup.mdx"), "# Setup\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - guide", "setup.mdx"), "## Setup\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/2 - guide/setup.mdx") || !hasDiagnostic(diags, "/docs/guide/setup/") {
 		t.Fatalf("diagnostics = %v, want the stripped-folder collision warning", diagnosticMessages(diags))
 	}
@@ -819,7 +819,7 @@ func TestDuplicateSlugDiagnosticsStrippedFolders(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsDistinctPagesAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "sibling.mdx"), "# Sibling\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "sibling.mdx"), "## Sibling\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for distinct pages", diagnosticMessages(diags))
 	}
@@ -827,7 +827,7 @@ func TestDuplicateSlugDiagnosticsDistinctPagesAreQuiet(t *testing.T) {
 
 func TestDuplicateSlugDiagnosticsOutsideContentDirIsQuiet(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "# Page\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Page\n")
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for a file outside the content dirs", diagnosticMessages(diags))
 	}
@@ -841,8 +841,8 @@ func TestDuplicateSlugDiagnosticsLenientMode(t *testing.T) {
 		t.Fatal(err)
 	}
 	for rel, content := range map[string]string{
-		"docs/1 - intro.mdx": "# Intro\n",
-		"docs/2 - intro.mdx": "# Intro again\n",
+		"docs/1 - intro.mdx": "## Intro\n",
+		"docs/2 - intro.mdx": "## Intro again\n",
 	} {
 		path := filepath.Join(root, rel)
 		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -868,7 +868,7 @@ func TestDuplicateSlugDiagnosticsLenientMode(t *testing.T) {
 
 	s := startTestServer(t, root)
 	s.local.resolver.website = website.URL
-	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "# Intro\n")
+	diags := s.openDiagnostics(t, filepath.Join(root, "docs", "1 - intro.mdx"), "## Intro\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, "docs/2 - intro.mdx") {
 		t.Fatalf("lenient diagnostics = %v, want the duplicate-slug warning", diagnosticMessages(diags))
 	}
@@ -876,7 +876,7 @@ func TestDuplicateSlugDiagnosticsLenientMode(t *testing.T) {
 
 func TestLinkDiagnosticsRefDefinitionBrokenCleanURL(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: /docs/missing/\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n[install]: /docs/missing/\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "/docs/missing/"`) {
 		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
 	}
@@ -890,7 +890,7 @@ func TestLinkDiagnosticsRefDefinitionBrokenCleanURL(t *testing.T) {
 
 func TestLinkDiagnosticsRefDefinitionBrokenRelativePath(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: ./missing.mdx\n")
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), "## Page\n\n[install]: ./missing.mdx\n")
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken link "./missing.mdx"`) {
 		t.Fatalf("diagnostics = %v, want the broken-link error", diagnosticMessages(diags))
 	}
@@ -898,7 +898,7 @@ func TestLinkDiagnosticsRefDefinitionBrokenRelativePath(t *testing.T) {
 
 func TestRefDiagnosticsUndefined(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\nSee [x][missing] and [gone][] here.\n"
+	doc := "## Page\n\nSee [x][missing] and [gone][] here.\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 2 || !hasDiagnostic(diags, `Undefined link reference "[missing]"`) || !hasDiagnostic(diags, `Undefined link reference "[gone]"`) {
 		t.Fatalf("diagnostics = %v, want both undefined-ref warnings", diagnosticMessages(diags))
@@ -912,7 +912,7 @@ func TestRefDiagnosticsUndefined(t *testing.T) {
 
 func TestRefDiagnosticsShortcutWithoutDefinitionIsQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n[just text] and [x][defined].\n\n[defined]: /docs/getting-started/\n"
+	doc := "## Page\n\n[just text] and [x][defined].\n\n[defined]: /docs/getting-started/\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none (a bare bracket is not a use without a definition)", diagnosticMessages(diags))
@@ -921,7 +921,7 @@ func TestRefDiagnosticsShortcutWithoutDefinitionIsQuiet(t *testing.T) {
 
 func TestRefDiagnosticsValidAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\nSee [the install][install], [guide][] and [guide].\n\n[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n"
+	doc := "## Page\n\nSee [the install][install], [guide][] and [guide].\n\n[install]: /docs/getting-started/installation/\n[guide]: /docs/getting-started/\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for defined refs with valid destinations", diagnosticMessages(diags))
@@ -930,7 +930,7 @@ func TestRefDiagnosticsValidAreQuiet(t *testing.T) {
 
 func TestRefDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\nSee [x][ext] and [y][anchor].\n\n[ext]: https://example.com/page\n[anchor]: #details\n"
+	doc := "## Page\n\nSee [x][ext] and [y][anchor].\n\n[ext]: https://example.com/page\n[anchor]: #details\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for external and anchor-only definition destinations", diagnosticMessages(diags))
@@ -939,16 +939,16 @@ func TestRefDiagnosticsExternalAndAnchorAreQuiet(t *testing.T) {
 
 func TestImageDiagnosticsRefDefinition(t *testing.T) {
 	root := contentFixture(t, "docs_home:\n  title: Docs\n", map[string]string{
-		"docs/page.mdx":         "# Page\n",
+		"docs/page.mdx":         "## Page\n",
 		"static/images/pic.png": "fake png",
 	})
 	s := startTestServer(t, root)
-	doc := "# Page\n\n![alt][pic]\n\n[pic]: /images/pic.png\n"
+	doc := "## Page\n\n![alt][pic]\n\n[pic]: /images/pic.png\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none (an absolute image src resolves against static/, not the page index)", diagnosticMessages(diags))
 	}
-	doc = "# Page\n\n![alt][gone]\n\n[gone]: ./missing.png\n"
+	doc = "## Page\n\n![alt][gone]\n\n[gone]: ./missing.png\n"
 	diags = s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 1 || !hasDiagnostic(diags, `Broken image "./missing.png"`) {
 		t.Fatalf("diagnostics = %v, want the broken-image error", diagnosticMessages(diags))
@@ -957,7 +957,7 @@ func TestImageDiagnosticsRefDefinition(t *testing.T) {
 
 func TestRefDiagnosticsCodeSkipped(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n```\n[bad]: /docs/missing/\n```\n\nUse `[x][bad]` here.\n"
+	doc := "## Page\n\n```\n[bad]: /docs/missing/\n```\n\nUse `[x][bad]` here.\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none for definitions and uses in code", diagnosticMessages(diags))
@@ -1025,5 +1025,112 @@ func TestDuplicateHeadingDiagnosticsH3Flagged(t *testing.T) {
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
 	if len(diags) != 1 || !hasDiagnostic(diags, `Duplicate heading "Options"`) || !hasDiagnostic(diags, `"options-1"`) {
 		t.Fatalf("diagnostics = %v, want the h3 duplicate flagged (the LSP checks every level)", diagnosticMessages(diags))
+	}
+}
+
+func TestH1TitleWarningTitleAndH1(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\ntitle: Hello\n---\n\n# Hello\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, "overrides the frontmatter title") {
+		t.Fatalf("diagnostics = %v, want the H1-overrides-title warning", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityWarning {
+		t.Fatalf("severity = %v, want warning", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 4 || diags[0].Range.Start.Character != 2 || diags[0].Range.End.Character != 7 {
+		t.Fatalf("diagnostic range = %+v, want the H1 text on line 4", diags[0].Range)
+	}
+}
+
+func TestH1TitleWarningSkippedWithHideTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\ntitle: Hello\nhide_title: true\n---\n\n# Hello\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (hide_title hides the H1, nothing is overridden)", diagnosticMessages(diags))
+	}
+}
+
+func TestH1TitleErrorSecondH1(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\ntitle: T\n---\n\n# First\n\n# Second\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 2 || !hasDiagnostic(diags, "overrides the frontmatter title") || !hasDiagnostic(diags, "already has an H1") {
+		t.Fatalf("diagnostics = %v, want the override warning plus the second-H1 error", diagnosticMessages(diags))
+	}
+	for _, d := range diags {
+		if d.Severity == protocol.DiagnosticSeverityError && d.Range.Start.Line != 6 {
+			t.Fatalf("error range = %+v, want the second H1 on line 6", d.Range)
+		}
+	}
+}
+
+func TestH1TitleErrorLoneH1AfterH2(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "## Intro\n\n# Only\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, "already has an H1") {
+		t.Fatalf("diagnostics = %v, want the error (the first heading is H2, so this H1 renders next to the title)", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityError {
+		t.Fatalf("severity = %v, want error", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 2 {
+		t.Fatalf("diagnostic range = %+v, want the H1 on line 2", diags[0].Range)
+	}
+}
+
+func TestH1TitleHoistedPlusSecondWithHideTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\nhide_title: true\n---\n\n# First\n\n# Second\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (the hoisted H1 is hidden, the second is the only visible H1)", diagnosticMessages(diags))
+	}
+}
+
+func TestH1TitleErrorSecondInPlaceWithHideTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\nhide_title: true\n---\n\n## Intro\n\n# One\n\n# Two\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, "already has an H1") {
+		t.Fatalf("diagnostics = %v, want the error on the second in-place H1", diagnosticMessages(diags))
+	}
+	if diags[0].Range.Start.Line != 8 {
+		t.Fatalf("diagnostic range = %+v, want the second in-place H1 on line 8", diags[0].Range)
+	}
+}
+
+func TestH1TitleHintNoTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "# Hello\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, "title` frontmatter key") {
+		t.Fatalf("diagnostics = %v, want the suggest-the-title-key hint", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityHint {
+		t.Fatalf("severity = %v, want hint", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 0 || diags[0].Range.Start.Character != 2 || diags[0].Range.End.Character != 7 {
+		t.Fatalf("diagnostic range = %+v, want the H1 text on line 0", diags[0].Range)
+	}
+}
+
+func TestH1TitleHintSkippedWithHideTitle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "---\nhide_title: true\n---\n\n# Hello\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (a frontmatter title would be hidden too)", diagnosticMessages(diags))
+	}
+}
+
+func TestH1TitleEmptyH1IsQuiet(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "# [#id]\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none (an empty H1 hoists no title and renders nowhere)", diagnosticMessages(diags))
 	}
 }
