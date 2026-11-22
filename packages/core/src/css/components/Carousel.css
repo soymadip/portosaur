@@ -60,8 +60,8 @@
 }
 
 /* The arrows float over the slide edges, vertically centered, big
-   enough to tap (2.75rem). The background is mostly opaque so
-   they read over any image. */
+   enough to tap (2.75rem). The background is the solid secondary
+   surface, so they read over any image and against the page. */
 .porto-carousel__arrow {
   position: absolute;
   top: 50%;
@@ -74,7 +74,7 @@
   padding: 0;
   border: 1px solid var(--porto-color-hairline);
   border-radius: 9999px;
-  background-color: color-mix(in srgb, var(--porto-color-bg) 85%, transparent);
+  background-color: var(--porto-color-gray-6);
   color: var(--porto-color-gray-1);
   cursor: pointer;
   transition:
@@ -90,7 +90,7 @@
   inset-inline-end: 0.5rem;
 }
 .porto-carousel__arrow:hover {
-  background-color: var(--porto-color-hairline-light);
+  background-color: var(--porto-color-gray-5);
   color: var(--porto-color-white);
 }
 .porto-carousel__arrow:active {
@@ -101,7 +101,7 @@
   cursor: default;
 }
 .porto-carousel__arrow:disabled:hover {
-  background-color: color-mix(in srgb, var(--porto-color-bg) 85%, transparent);
+  background-color: var(--porto-color-gray-6);
   color: var(--porto-color-gray-1);
 }
 
