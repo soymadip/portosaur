@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"runtime"
 	"sort"
@@ -138,11 +139,12 @@ const (
 // the inserted tag: leaf built-ins close themselves, void HTML
 // tags self-close.
 type tagCandidate struct {
-	name   string
-	detail string
-	doc    string
-	source tagSource
-	void   bool
+	name     string
+	detail   string
+	doc      string
+	source   tagSource
+	void     bool
+	required []string
 }
 
 // leafComponents are the built-in components the full-tag
@@ -161,15 +163,22 @@ var leafComponents = map[string]bool{
 // lands. Containers pair with the cursor inside, leaf built-ins
 // close themselves, void HTML tags self-close (a bare `<br>` is
 // a syntax error in MDX, the parser wants a closing tag), and
-// imports pair since their shape is unknown.
+// imports pair since their shape is unknown. A built-in's
+// required props are written in as quoted tabstops, numbered in
+// schema order, so the cursor lands in the first one and Tab
+// walks through them before the body.
 func tagInsert(cand tagCandidate) string {
+	attrs := ""
+	for i, prop := range cand.required {
+		attrs += fmt.Sprintf(" %s=\"$%d\"", prop, i+1)
+	}
 	switch {
 	case cand.source == tagHTML && cand.void:
 		return "<" + cand.name + "/>"
 	case cand.source == tagBuiltin && leafComponents[cand.name]:
-		return "<" + cand.name + " />"
+		return "<" + cand.name + attrs + " />"
 	default:
-		return "<" + cand.name + ">$0</" + cand.name + ">"
+		return "<" + cand.name + attrs + ">$0</" + cand.name + ">"
 	}
 }
 
@@ -184,6 +193,7 @@ func tagInsert(cand tagCandidate) string {
 // describe what they do. Picking a tag inserts the whole tag
 // as a snippet: containers pair with the cursor inside, leaf
 // components close themselves, and void HTML tags self-close.
+// A built-in with required props fills them in as tabstops.
 func componentNameCompletions(schema *resolvedSchema, context tagContext, text string) *protocol.CompletionList {
 	candidates := map[string]tagCandidate{}
 	for _, tag := range htmlTags {
@@ -193,6 +203,12 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 		for name, raw := range definitions {
 			def, _ := asMap(raw)
 			cand := tagCandidate{name: name, doc: componentDoc(def), source: tagBuiltin}
+			// Required props are auto-entered by the full-tag
+			// insert, except Diagram's svg: the Mermaid plugin
+			// sets it, so the user never writes it by hand.
+			if name != "Diagram" {
+				cand.required = schemaRequired(def)
+			}
 			// The detail names what the component does, like the
 			// YAML server's schema descriptions. A component with
 			// no description falls back to its required props.

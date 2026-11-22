@@ -1048,9 +1048,9 @@ func TestComponentCompletionInsertsFullTag(t *testing.T) {
 		"Hint":        "<Hint>$0</Hint>",
 		"Details":     "<Details>$0</Details>",
 		"Tabs":        "<Tabs>$0</Tabs>",
-		"Icon":        "<Icon />",
+		"Icon":        "<Icon id=\"$1\" />",
 		"Diagram":     "<Diagram />",
-		"DynamicIcon": "<DynamicIcon />",
+		"DynamicIcon": "<DynamicIcon icon=\"$1\" />",
 		"TopicList":   "<TopicList />",
 		"IconSearch":  "<IconSearch />",
 		"Pv":          "<Pv>$0</Pv>",
@@ -1071,6 +1071,31 @@ func TestComponentCompletionInsertsFullTag(t *testing.T) {
 	}
 	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 1}) {
 		t.Fatalf("Hint edit range = %v, want (2,0)-(2,1) covering the `<`", rng)
+	}
+}
+
+// TestComponentCompletionInsertsRequiredProps checks the
+// full-tag insert fills in a built-in's required props as
+// quoted tabstops: Icon and DynamicIcon close themselves with
+// the cursor inside the quotes, TabItem pairs with the body
+// cursor last. Diagram keeps its plain insert, its svg is set
+// by the Mermaid plugin, and a component with no required
+// props, Btn, is unchanged.
+func TestComponentCompletionInsertsRequiredProps(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	want := map[string]string{
+		"Icon":        "<Icon id=\"$1\" />",
+		"DynamicIcon": "<DynamicIcon icon=\"$1\" />",
+		"TabItem":     "<TabItem value=\"$1\">$0</TabItem>",
+		"Diagram":     "<Diagram />",
+		"Btn":         "<Btn>$0</Btn>",
+	}
+	for label, text := range want {
+		if got, ok := editText(items, label); !ok || got != text {
+			t.Fatalf("%s edit = %q, want %q", label, got, text)
+		}
 	}
 }
 
