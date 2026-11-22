@@ -256,8 +256,8 @@ describe("CLI: init", () => {
     expect(pkg.dependencies["next"]).toBe("^16.4.6");
     expect(pkg.dependencies["react"]).toBe("^19.3.1");
     expect(pkg.dependencies["react-dom"]).toBe("^19.3.1");
-    expect(pkg.dependencies["fumadocs-core"]).toBe("16.19.3");
-    expect(pkg.dependencies["fumadocs-mdx"]).toBe("15.6.2");
+    expect(pkg.dependencies["fumadocs-core"]).toBe("16.19.7");
+    expect(pkg.dependencies["fumadocs-mdx"]).toBe("15.6.4");
     // User projects take @portosaur/core from the registry (a version
     // range), never a workspace link.
     expect(pkg.dependencies["@portosaur/core"]).toMatch(/^\^0\.26\.0$/);

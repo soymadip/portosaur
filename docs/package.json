@@ -11,10 +11,10 @@
   },
   "version": "0.26.0",
   "dependencies": {
-    "@portosaur/core": "workspace:*",
     "@portosaur/cli": "workspace:*",
-    "fumadocs-core": "16.19.3",
-    "fumadocs-mdx": "15.6.2",
+    "@portosaur/core": "workspace:*",
+    "fumadocs-core": "16.19.7",
+    "fumadocs-mdx": "15.6.4",
     "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
