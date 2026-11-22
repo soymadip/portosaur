@@ -154,23 +154,43 @@ func TestLinkCompletionRelativeFiles(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](./")
 	items := s.complete(t, documentURI, 2, 6)
-	if !hasLabel(items, "./sibling.mdx") || !hasLabel(items, "./my%20page.mdx") {
-		t.Fatalf("completions = %v, want the sibling files (%%20-encoded)", labels(items))
+	if !hasLabel(items, "sibling.mdx") || !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want the sibling files by name", labels(items))
 	}
-	if !hasLabel(items, "./1%20-%20getting-started/") {
-		t.Fatalf("completions = %v, want the getting-started directory (%%20-encoded)", labels(items))
+	if !hasLabel(items, "1 - getting-started/") {
+		t.Fatalf("completions = %v, want the getting-started directory by name", labels(items))
 	}
-	if hasLabel(items, "./page.mdx") {
+	if hasLabel(items, "page.mdx") {
 		t.Fatalf("completions = %v, include the unsaved page itself (not on disk)", labels(items))
 	}
+}
+
+func TestLinkCompletionRelativeLabelIsName(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](./")
+	items := s.complete(t, documentURI, 2, 6)
+	for _, item := range items {
+		if item.Label != "sibling.mdx" {
+			continue
+		}
+		filter, ok := item.FilterText.Get()
+		if !ok || filter != "./sibling.mdx" {
+			t.Fatalf("sibling filter text = %q, want the full path ./sibling.mdx", filter)
+		}
+		if text, ok := editText(items, "sibling.mdx"); !ok || text != "./sibling.mdx" {
+			t.Fatalf("sibling edit = %q, want the full path ./sibling.mdx", text)
+		}
+		return
+	}
+	t.Fatalf("completions = %v, missing sibling.mdx", labels(items))
 }
 
 func TestLinkCompletionRelativeFilter(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](./sib")
 	items := s.complete(t, documentURI, 2, 9)
-	if len(items) != 1 || items[0].Label != "./sibling.mdx" {
-		t.Fatalf("completions = %v, want only ./sibling.mdx", labels(items))
+	if len(items) != 1 || items[0].Label != "sibling.mdx" {
+		t.Fatalf("completions = %v, want only sibling.mdx", labels(items))
 	}
 }
 
@@ -178,11 +198,11 @@ func TestLinkCompletionRelativeParent(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "1 - getting-started", "page.mdx"), "# Page\n\n[x](../")
 	items := s.complete(t, documentURI, 2, 7)
-	if !hasLabel(items, "../sibling.mdx") {
-		t.Fatalf("completions = %v, want ../sibling.mdx", labels(items))
+	if !hasLabel(items, "sibling.mdx") {
+		t.Fatalf("completions = %v, want sibling.mdx", labels(items))
 	}
-	if !hasLabel(items, "../my%20page.mdx") {
-		t.Fatalf("completions = %v, want ../my%%20page.mdx", labels(items))
+	if !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want my page.mdx", labels(items))
 	}
 }
 
@@ -194,8 +214,8 @@ func TestLinkCompletionRelativeSkipsNonContent(t *testing.T) {
 	s := startTestServer(t, root)
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](../")
 	items := s.complete(t, documentURI, 2, 7)
-	if hasLabel(items, "../other/") {
-		t.Fatalf("completions = %v, include ../other/ (not a content dir)", labels(items))
+	if hasLabel(items, "other/") {
+		t.Fatalf("completions = %v, include other/ (not a content dir)", labels(items))
 	}
 }
 
@@ -203,16 +223,16 @@ func TestLinkCompletionRelativeAngledIsLiteral(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./>)")
 	items := s.complete(t, documentURI, 2, 7)
-	if !hasLabel(items, "./my page.mdx") {
-		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	if !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want my page.mdx (literal spaces)", labels(items))
 	}
-	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my page.mdx" {
 		t.Fatalf("my page edit = %q, want the literal insert", text)
 	}
-	if !hasLabel(items, "./1 - getting-started/") {
-		t.Fatalf("completions = %v, want ./1 - getting-started/ (literal, with trailing /)", labels(items))
+	if !hasLabel(items, "1 - getting-started/") {
+		t.Fatalf("completions = %v, want 1 - getting-started/ (literal, with trailing /)", labels(items))
 	}
-	if hasLabel(items, "./my%20page.mdx") {
+	if hasLabel(items, "my%20page.mdx") {
 		t.Fatalf("completions = %v, include the %%20 form in an angled destination", labels(items))
 	}
 }
@@ -221,13 +241,13 @@ func TestLinkCompletionRelativeJSXIsLiteral(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n<Link href=\"./")
 	items := s.complete(t, documentURI, 2, 14)
-	if !hasLabel(items, "./my page.mdx") {
-		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	if !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want my page.mdx (literal spaces)", labels(items))
 	}
-	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my page.mdx" {
 		t.Fatalf("my page edit = %q, want the literal insert", text)
 	}
-	if hasLabel(items, "./my%20page.mdx") {
+	if hasLabel(items, "my%20page.mdx") {
 		t.Fatalf("completions = %v, include the %%20 form in a Link prop", labels(items))
 	}
 }
@@ -236,11 +256,14 @@ func TestLinkCompletionRelativePlainIsEncoded(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](./")
 	items := s.complete(t, documentURI, 2, 6)
-	if text, ok := editText(items, "./my%20page.mdx"); !ok || text != "./my%20page.mdx" {
+	if !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want my page.mdx as the label", labels(items))
+	}
+	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my%20page.mdx" {
 		t.Fatalf("my page edit = %q, want the %%20-encoded insert", text)
 	}
-	if hasLabel(items, "./my page.mdx") {
-		t.Fatalf("completions = %v, include the literal form in a plain destination", labels(items))
+	if hasLabel(items, "my%20page.mdx") {
+		t.Fatalf("completions = %v, show the %%20 form as the label", labels(items))
 	}
 }
 
@@ -248,13 +271,13 @@ func TestLinkCompletionRelativeUnclosedAngledIsLiteral(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./")
 	items := s.complete(t, documentURI, 2, 7)
-	if !hasLabel(items, "./my page.mdx") {
-		t.Fatalf("completions = %v, want ./my page.mdx (literal spaces)", labels(items))
+	if !hasLabel(items, "my page.mdx") {
+		t.Fatalf("completions = %v, want my page.mdx (literal spaces)", labels(items))
 	}
-	if text, ok := editText(items, "./my page.mdx"); !ok || text != "./my page.mdx" {
+	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my page.mdx" {
 		t.Fatalf("my page edit = %q, want the literal insert", text)
 	}
-	if hasLabel(items, "./my%20page.mdx") {
+	if hasLabel(items, "my%20page.mdx") {
 		t.Fatalf("completions = %v, include the %%20 form in an unclosed angled destination", labels(items))
 	}
 }
@@ -263,8 +286,8 @@ func TestLinkCompletionRelativeUnclosedAngledFilters(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./my")
 	items := s.complete(t, documentURI, 2, 9)
-	if len(items) != 1 || items[0].Label != "./my page.mdx" {
-		t.Fatalf("completions = %v, want only ./my page.mdx", labels(items))
+	if len(items) != 1 || items[0].Label != "my page.mdx" {
+		t.Fatalf("completions = %v, want only my page.mdx", labels(items))
 	}
 }
 
@@ -352,7 +375,7 @@ func TestLinkCompletionRefDefinitionRelative(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[install]: ./")
 	items := s.complete(t, documentURI, 2, 13)
-	if !hasLabel(items, "./sibling.mdx") || !hasLabel(items, "./my%20page.mdx") {
+	if !hasLabel(items, "sibling.mdx") || !hasLabel(items, "my page.mdx") {
 		t.Fatalf("completions = %v, want the sibling files", labels(items))
 	}
 }

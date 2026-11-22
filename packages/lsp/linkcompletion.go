@@ -174,7 +174,10 @@ func (s *Server) headingCompletion(params *protocol.CompletionParams, text, root
 // relativeCompletion offers relative `.md`/`.mdx` file paths
 // for a partial starting with `.`. With no slash yet, the only
 // candidates are `./` and `../`; after a slash, the files and
-// subdirectories of the directory named so far.
+// subdirectories of the directory named so far. The label shows
+// just the name (the directory is already typed); the filter
+// text carries the full path so the editor still matches the
+// typed partial, and the edit inserts the full path.
 func (s *Server) relativeCompletion(params *protocol.CompletionParams, root string, link linkContext, partial string) *protocol.CompletionList {
 	slash := strings.LastIndex(partial, "/")
 	if slash < 0 {
@@ -231,9 +234,10 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 			}
 			insert := dirPart + encode(name) + "/"
 			items = append(items, protocol.CompletionItem{
-				Label:    insert,
-				Kind:     protocol.CompletionItemKindFolder,
-				TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: insert},
+				Label:      name + "/",
+				Kind:       protocol.CompletionItemKindFolder,
+				FilterText: protocol.NewOptional(insert),
+				TextEdit:   &protocol.TextEdit{Range: link.partialRange, NewText: insert},
 			})
 			continue
 		}
@@ -242,9 +246,10 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 		}
 		insert := dirPart + encode(name)
 		items = append(items, protocol.CompletionItem{
-			Label:    insert,
-			Kind:     protocol.CompletionItemKindFile,
-			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: insert},
+			Label:      name,
+			Kind:       protocol.CompletionItemKindFile,
+			FilterText: protocol.NewOptional(insert),
+			TextEdit:   &protocol.TextEdit{Range: link.partialRange, NewText: insert},
 		})
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
