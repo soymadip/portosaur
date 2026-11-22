@@ -1,5 +1,5 @@
 {
-  "generated_from": "Cards, Steps and FileTree component pages added; editor-support and link heading updates",
+  "generated_from": "Cards, Steps and FileTree component pages added; editor-support and link heading updates; Details page Behavior section",
   "routes": [
     {
       "url": "/",
@@ -295,7 +295,7 @@
     {
       "url": "/docs/markdown/components/details/",
       "title": "Details | Portosaur",
-      "headings": ["Details", "Props Reference"]
+      "headings": ["Details", "Behavior", "Props Reference"]
     },
     {
       "url": "/docs/markdown/components/dropdown/",
