@@ -6,8 +6,8 @@
  * Docusaurus title rules: the metadata title is the frontmatter
  * title, else the content H1, else the file base. The page `<h1>` is
  * the hoisted content H1 when the content has one, else the synthetic
- * title (unless `hide_title` is set) — otherwise the page would show
- * two. The hoisted title comes from the remark plugin's export
+ * title. `hide_title` hides the page title either way, hoisted H1
+ * included. The hoisted title comes from the remark plugin's export
  * (`page.data._exports.__portoContentTitle`), NOT the TOC: the H1 is
  * gone from the TOC by the time the page renders.
  */
@@ -70,14 +70,16 @@ export function docPageTitles(
   const hideTitle = data?.hide_title === true;
   const frontmatterTitle = data?.title;
   const metaTitle = frontmatterTitle ?? contentTitle?.text ?? fallback;
+  if (hideTitle) {
+    return { heading: null, metaTitle };
+  }
   if (contentTitle) {
     return {
       heading: { text: contentTitle.text, id: contentTitle.slug },
       metaTitle,
     };
   }
-  const heading = !hideTitle ? { text: frontmatterTitle ?? fallback } : null;
-  return { heading, metaTitle };
+  return { heading: { text: frontmatterTitle ?? fallback }, metaTitle };
 }
 
 /**
