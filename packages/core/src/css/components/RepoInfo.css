@@ -3,9 +3,19 @@
    card accent, so every row carries its own color and the icons
    inherit from their row. */
 .porto-repo-info {
-  display: flex;
+  /* Inline so two cards next to each other sit side by side
+     and wrap onto separate lines when the page is too narrow
+     for both. The top margin from the content rhythm still
+     applies (atomic inline boxes keep their vertical margins),
+     so a lone card spaces exactly as a block card did. */
+  display: inline-flex;
   flex-direction: column;
   gap: 0.25rem;
+  vertical-align: top;
+  /* The gap to the card beside it. No bottom margin: the next
+     element's top margin already leaves the 1rem gap, and a
+     bottom margin here would double it. */
+  margin-right: 1rem;
   /* The card hugs its content instead of spanning the page —
      a repo name and two counts don't need the full width. A long
      description caps it at 28rem so the card stays a card. */
