@@ -334,31 +334,59 @@
   border-bottom: 1px solid var(--porto-color-hairline);
 }
 
-/* Details / summary (also used by the Details MDX component). */
+/* Details / summary (also used by the Details MDX component).
+   A bordered panel with a header row: the summary spans the
+   full panel width (negative margins cancel the panel padding)
+   and the content sits below a hairline divider when open. */
 .porto-markdown-content details:not(:where(.not-content *)) {
-  --porto-details-border-color: var(--porto-color-gray-5);
-  --porto-details-border-color--hover: var(--porto-color-text-accent);
-
-  border-inline-start: 2px solid var(--porto-details-border-color);
-  padding-inline-start: 1rem;
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 0.5rem;
+  background-color: var(--porto-color-gray-6);
+  padding: 0 1rem;
   /* Lets `block-size: 0 -> auto` interpolate for the fold below. */
   interpolate-size: allow-keywords;
+}
+.porto-markdown-content details[open]:not(:where(.not-content *)) {
+  padding-bottom: 1rem;
 }
 .porto-markdown-content details:not([open]):hover:not(:where(.not-content *)),
 .porto-markdown-content
   details:has(> summary:hover):not(:where(.not-content *)) {
-  border-color: var(--porto-details-border-color--hover);
+  border-color: var(--porto-color-text-accent);
 }
 .porto-markdown-content summary:not(:where(.not-content *)) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline: -1rem;
+  padding: 0.75rem 1rem;
   color: var(--porto-color-white);
   cursor: pointer;
-  display: block;
   font-weight: 600;
-  margin-inline-start: -0.5rem;
-  padding-inline-start: 0.5rem;
 }
 .porto-markdown-content details[open] > summary:not(:where(.not-content *)) {
-  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--porto-color-hairline-light);
+}
+/* Content spacing inside the panel: the first block sits 1rem
+   below the header, siblings keep the page's 1rem rhythm. The
+   component wraps its children in .porto-details-content, which
+   carries the same rhythm for its own children. */
+.porto-markdown-content details > summary + *:not(:where(.not-content *)) {
+  margin-top: 1rem;
+}
+.porto-markdown-content
+  details
+  > :not(summary)
+  + :not(summary):not(:where(.not-content *)) {
+  margin-top: 1rem;
+}
+.porto-details-content > * + * {
+  margin-top: 1rem;
+}
+/* Without a summary the content wrapper is the first child and
+   needs its own top gap (the header rule above can't match). */
+.porto-details-content:first-child {
+  margin-top: 1rem;
 }
 .porto-markdown-content summary:not(:where(.not-content *))::marker,
 .porto-markdown-content
@@ -373,9 +401,8 @@
   --porto-details-marker-size: 1.25rem;
 
   display: inline-flex;
+  flex-shrink: 0;
   font-size: var(--porto-details-marker-size);
-  margin-inline: calc((var(--porto-details-marker-size) / 4) * -1) 0.25rem;
-  vertical-align: middle;
 }
 @media (prefers-reduced-motion: no-preference) {
   .porto-markdown-content

@@ -41,7 +41,7 @@ export function Details({
           {summary}
         </summary>
       )}
-      {children}
+      <div className="porto-details-content">{children}</div>
     </details>
   );
 }
