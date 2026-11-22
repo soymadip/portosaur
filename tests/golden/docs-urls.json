@@ -1,5 +1,5 @@
 {
-  "generated_from": "Editor support page added (getting-started/editor-support)",
+  "generated_from": "Cards, Steps and FileTree component pages added; editor-support and link heading updates",
   "routes": [
     {
       "url": "/",
@@ -183,7 +183,13 @@
     {
       "url": "/docs/getting-started/editor-support/",
       "title": "Editor Support | Portosaur",
-      "headings": ["Editor Support", "VS Code", "Zed", "Other editors"]
+      "headings": [
+        "Editor Support",
+        "What the server does",
+        "VS Code",
+        "Zed",
+        "Other editors"
+      ]
     },
     {
       "url": "/docs/getting-started/installation/",
@@ -250,7 +256,10 @@
         "DynamicIcon",
         "IconSearch",
         "Preview",
-        "Link"
+        "Link",
+        "Cards",
+        "Steps",
+        "File Tree"
       ]
     },
     {
@@ -272,6 +281,18 @@
       ]
     },
     {
+      "url": "/docs/markdown/components/cards/",
+      "title": "Cards | Portosaur",
+      "headings": [
+        "Cards",
+        "Getting started",
+        "Configuration",
+        "A plain card",
+        "Behavior",
+        "Props Reference"
+      ]
+    },
+    {
       "url": "/docs/markdown/components/details/",
       "title": "Details | Portosaur",
       "headings": ["Details", "Props Reference"]
@@ -285,6 +306,11 @@
       "url": "/docs/markdown/components/dynamic-icon/",
       "title": "DynamicIcon | Portosaur",
       "headings": ["DynamicIcon"]
+    },
+    {
+      "url": "/docs/markdown/components/file-tree/",
+      "title": "File Tree | Portosaur",
+      "headings": ["File Tree", "Behavior", "Props Reference"]
     },
     {
       "url": "/docs/markdown/components/hint/",
@@ -313,6 +339,7 @@
         "Link",
         "Basic Usage",
         "Internal and external links",
+        "Linking by file path",
         "Props Reference"
       ]
     },
@@ -326,6 +353,11 @@
         "Layout Modes",
         "<Pv /> Props Reference"
       ]
+    },
+    {
+      "url": "/docs/markdown/components/steps/",
+      "title": "Steps | Portosaur",
+      "headings": ["Steps", "Behavior", "Props Reference"]
     },
     {
       "url": "/docs/markdown/components/tabs/",
