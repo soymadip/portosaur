@@ -181,6 +181,7 @@ export default defineConfig({
     userVars: ${JSON.stringify(options.userVars ?? {}, null, 2)},
     onMissingVar: ${JSON.stringify(options.site.content.onMissingVar)},
     onMissingEnv: ${JSON.stringify(options.site.content.onMissingEnv)},
+    onDuplicateAnchor: ${JSON.stringify(options.site.content.onDuplicateAnchor)},
     colorScheme: ${JSON.stringify(options.theme.colorScheme)},
     renderEmojiShortcodes: ${JSON.stringify(options.site.content.renderEmojiShortcodes)},
     mermaid: ${JSON.stringify(options.site.content.mermaid)},

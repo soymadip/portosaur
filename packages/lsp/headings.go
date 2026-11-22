@@ -13,11 +13,14 @@ import (
 
 // heading is one ATX heading: its level, plain text, rendered
 // id, 0-based document line, and the byte offsets of its text
-// within the line (for the outline's selection range).
+// within the line (for the outline's selection range). baseID
+// is the id before the `-1` repeat suffix, so duplicate
+// headings can be found by grouping on it.
 type heading struct {
 	level    int
 	text     string
 	id       string
+	baseID   string
 	line     int
 	textFrom int
 	textTo   int
@@ -65,11 +68,13 @@ func extractHeadings(text string) []heading {
 			textTo = match[4] + m[0]
 		}
 		plain := plainHeadingText(raw)
-		var id string
+		var id, baseID string
 		if customID != "" {
 			id = customID
+			baseID = customID
 		} else {
 			id = githubSlug(plain)
+			baseID = id
 			if id == "" {
 				continue
 			}
@@ -86,6 +91,7 @@ func extractHeadings(text string) []heading {
 			level:    len(lines[i][match[2]:match[3]]),
 			text:     plain,
 			id:       id,
+			baseID:   baseID,
 			line:     i,
 			textFrom: match[4],
 			textTo:   textTo,

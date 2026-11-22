@@ -67,6 +67,7 @@ Configure how content renders.
 | `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                                      |
 | `on_missing_var`          | `str`  | `"throw"` | Missing `{vars.<key>}` behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. `warn` and `ignore` render the missing key as empty. |
 | `on_missing_env`          | `str`  | `"warn"`  | Missing `{env.<VAR_NAME>}` behavior.<br/>Options: same as above.                                                                    |
+| `on_duplicate_anchor`     | `str`  | `"warn"`  | Two headings in a page sharing an anchor.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. `throw` fails the build.                    |
 | `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                                           |
 | `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                                             |
 | `toc.enable`              | `bool` | `true`    | Show the table of contents. Per-page `toc` frontmatter overrides this.                                                              |

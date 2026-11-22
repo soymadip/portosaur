@@ -63,6 +63,7 @@ export interface PortosaurOptions {
       onBrokenImages: string;
       onMissingVar: string;
       onMissingEnv: string;
+      onDuplicateAnchor: string;
       toc: { enable: boolean; minLevel: number; maxLevel: number };
     };
     rss: { enable: boolean; desc: string; copyright: string };
@@ -247,6 +248,10 @@ export function buildSiteConfig(
   const contentOnBrokenImages = get("site.content.on_broken_images", "throw"); // Broken image behavior.
   const contentOnMissingVar = get("site.content.on_missing_var", "throw"); // Behavior when a {vars.key} reference is missing.
   const contentOnMissingEnv = get("site.content.on_missing_env", "warn"); // Behavior when an {env.VAR} reference is unset.
+  const contentOnDuplicateAnchor = get(
+    "site.content.on_duplicate_anchor",
+    "warn",
+  ); // Behavior when two headings in a page share an anchor.
   const tocEnable = get("site.content.toc.enable", true); // Show the table of contents.
   const tocMinLevel = get("site.content.toc.min_level", 2); // Shallowest heading level in the table of contents.
   const tocMaxLevel = get("site.content.toc.max_level", 5); // Deepest heading level in the table of contents.
@@ -461,6 +466,7 @@ export function buildSiteConfig(
         onBrokenImages: contentOnBrokenImages,
         onMissingVar: contentOnMissingVar,
         onMissingEnv: contentOnMissingEnv,
+        onDuplicateAnchor: contentOnDuplicateAnchor,
         toc: {
           enable: tocEnable,
           minLevel: tocMinLevel,

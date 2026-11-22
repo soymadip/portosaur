@@ -147,6 +147,11 @@
               "description": "Behavior when an {env.VAR} reference is unset.",
               "default": "warn"
             },
+            "on_duplicate_anchor": {
+              "type": ["string", "null"],
+              "description": "Behavior when two headings in a page share an anchor.",
+              "default": "warn"
+            },
             "toc": {
               "type": ["object", "null"],
               "additionalProperties": false,

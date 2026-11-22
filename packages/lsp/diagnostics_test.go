@@ -963,3 +963,58 @@ func TestRefDiagnosticsCodeSkipped(t *testing.T) {
 		t.Fatalf("diagnostics = %v, want none for definitions and uses in code", diagnosticMessages(diags))
 	}
 }
+
+func TestDuplicateHeadingDiagnosticsDefault(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "## Prerequisites\n\nSome text.\n\n## Prerequisites\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, `Duplicate heading "Prerequisites"`) || !hasDiagnostic(diags, `"prerequisites-1"`) {
+		t.Fatalf("diagnostics = %v, want the duplicate-heading warning naming the -1 id", diagnosticMessages(diags))
+	}
+	if diags[0].Severity != protocol.DiagnosticSeverityWarning {
+		t.Fatalf("severity = %v, want warning (the default)", diags[0].Severity)
+	}
+	if diags[0].Range.Start.Line != 4 || diags[0].Range.Start.Character != 3 || diags[0].Range.End.Character != 16 {
+		t.Fatalf("diagnostic range = %+v, want the second heading's text", diags[0].Range)
+	}
+}
+
+func TestDuplicateHeadingDiagnosticsSeverityFollowsSetting(t *testing.T) {
+	for _, tc := range []struct {
+		setting  string
+		severity protocol.DiagnosticSeverity
+		want     int
+	}{
+		{"throw", protocol.DiagnosticSeverityError, 1},
+		{"ignore", 0, 0},
+		{"bogus", protocol.DiagnosticSeverityWarning, 1},
+	} {
+		config := "site:\n  content:\n    on_duplicate_anchor: " + tc.setting + "\n"
+		s := startTestServer(t, fixtureProjectWithConfig(t, config))
+		diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), "## Same\n\n## Same\n")
+		if len(diags) != tc.want {
+			t.Fatalf("on_duplicate_anchor %q: diagnostics = %v, want %d", tc.setting, diagnosticMessages(diags), tc.want)
+		}
+		if tc.want == 1 && diags[0].Severity != tc.severity {
+			t.Fatalf("on_duplicate_anchor %q: severity = %v, want %v", tc.setting, diags[0].Severity, tc.severity)
+		}
+	}
+}
+
+func TestDuplicateHeadingDiagnosticsCustomID(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "## First [#shared]\n\n## Second [#shared]\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 1 || !hasDiagnostic(diags, `Duplicate heading id "shared"`) {
+		t.Fatalf("diagnostics = %v, want the shared custom id warning", diagnosticMessages(diags))
+	}
+}
+
+func TestDuplicateHeadingDiagnosticsUniqueAreQuiet(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	doc := "## One\n\n## Two\n\n## Three\n"
+	diags := s.openDiagnostics(t, filepath.Join(s.root, "page.mdx"), doc)
+	if len(diags) != 0 {
+		t.Fatalf("diagnostics = %v, want none for distinct headings", diagnosticMessages(diags))
+	}
+}
