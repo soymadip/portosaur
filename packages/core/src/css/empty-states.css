@@ -41,11 +41,3 @@
   max-width: 32rem;
   color: var(--porto-color-gray-3);
 }
-
-.porto-empty-state__link {
-  color: var(--porto-color-text-accent);
-  text-decoration: none;
-}
-.porto-empty-state__link:hover {
-  text-decoration: underline;
-}

@@ -47,10 +47,6 @@
     transform: none;
   }
 }
-.porto-button:focus-visible {
-  outline: 2px solid var(--porto-color-text-accent);
-  outline-offset: 2px;
-}
 .porto-button:disabled {
   pointer-events: none;
   opacity: 0.5;

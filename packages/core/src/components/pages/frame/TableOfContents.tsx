@@ -133,7 +133,7 @@ export function useTocScrollSpy(pageTitleId: string): string | null {
       const toObserve = document.querySelectorAll(
         [
           `main :where(${tocHeadingSelector})`,
-          `main :where(${tocHeadingSelector}, .porto-heading-wrapper) ~ *:not(:has(${tocHeadingSelector}))`,
+          `main :where(${tocHeadingSelector}) ~ *:not(:has(${tocHeadingSelector}))`,
           `main .porto-markdown-content > *:not(:has(${tocHeadingSelector}))`,
           `main > *:not(:has(${tocHeadingSelector}))`,
         ].join(),
