@@ -38,6 +38,7 @@ how `porto.yml` is handled.
 | MDX preview                                        |   Yes   |  —  | Zed extensions cannot show panels                                                       |
 | Server status in the status bar                    |   Yes   |  —  | Click to open the server menu. Zed extensions cannot add status bar items               |
 | `<>` auto-inserted in link destinations            |   Yes   |  —  | Typing `(` after `]` drops `<>` in, cursor inside. Zed extensions cannot watch typing   |
+| Completion menu reopens on backspace               |   Yes   |  —  | Backspacing after a pick shows the menu again. Zed extensions cannot watch typing       |
 | `porto.yml` handling                               |   Yes   | Yes | Through the `$schema` line: the YAML extension in VS Code, built-in YAML support in Zed |
 
 The extensions themselves live in `vscode/` and `zed/`. The server

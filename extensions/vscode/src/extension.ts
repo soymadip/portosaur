@@ -23,9 +23,8 @@ let restartTimer: ReturnType<typeof setTimeout> | undefined;
 let preview: PreviewManager | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 let stateSubscription: vscode.Disposable | undefined;
-// The link-destination typing watcher, registered once when the
-// client starts.
-let linkAngleSubscription: vscode.Disposable | undefined;
+// The typing watcher, registered once when the client starts.
+let typingSubscription: vscode.Disposable | undefined;
 // True while the extension's own <> insert is landing, so the
 // change it fires cannot re-trigger the handler.
 let insertingAngle = false;
@@ -88,8 +87,8 @@ export async function deactivate(): Promise<void> {
   preview = undefined;
   stateSubscription?.dispose();
   stateSubscription = undefined;
-  linkAngleSubscription?.dispose();
-  linkAngleSubscription = undefined;
+  typingSubscription?.dispose();
+  typingSubscription = undefined;
   statusBarItem?.dispose();
   statusBarItem = undefined;
   // A client whose start failed is not running: stopping it
@@ -218,7 +217,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       clientOptions,
     );
     showStatusBarItem(context);
-    watchLinkTyping(context);
+    watchTyping(context);
     setClientState(State.Starting);
     stateSubscription = client.onDidChangeState((event) => {
       setClientState(event.newState);
@@ -261,31 +260,35 @@ function showStatusBarItem(context: vscode.ExtensionContext): void {
   statusBarItem.show();
 }
 
-// watchLinkTyping registers the link-destination helper once:
-// typing `(` right after `]` in an MDX file drops `<>` in with
-// the cursor inside. Restarts call startClient again, so the
+// watchTyping registers the typing helpers once: the
+// link-destination `<>` insert and the completion menu reopen
+// on backspace. Restarts call startClient again, so the
 // subscription guard keeps this registered exactly once.
-function watchLinkTyping(context: vscode.ExtensionContext): void {
-  if (linkAngleSubscription) {
+function watchTyping(context: vscode.ExtensionContext): void {
+  if (typingSubscription) {
     return;
   }
-  linkAngleSubscription = vscode.workspace.onDidChangeTextDocument(
-    onLinkTextChanged,
-  );
-  context.subscriptions.push(linkAngleSubscription);
+  typingSubscription = vscode.workspace.onDidChangeTextDocument(onTextChanged);
+  context.subscriptions.push(typingSubscription);
 }
 
-// onLinkTextChanged is the link-destination helper: when the
-// user types `(` right after `]` (the `[text](` link syntax, or
-// `![alt](` for an image), insert `<>` after the cursor and put
-// the cursor inside it. The server cannot do this: on-type
+// onTextChanged runs the typing helpers on each document change.
+function onTextChanged(event: vscode.TextDocumentChangeEvent): void {
+  maybeInsertLinkAngles(event);
+  maybeReopenSuggest(event);
+}
+
+// maybeInsertLinkAngles is the link-destination helper: when
+// the user types `(` right after `]` (the `[text](` link syntax,
+// or `![alt](` for an image), insert `<>` after the cursor and
+// put the cursor inside it. The server cannot do this: on-type
 // formatting returns text edits only, and an inserted `<>`
-// would leave the cursor after it instead of inside. The
-// handler cannot tell whether the cursor sits in a code fence
-// or frontmatter, so `](` typed there gets `<>` too. That is
+// would leave the cursor after it instead of inside. The helper
+// cannot tell whether the cursor sits in a code fence or
+// frontmatter, so `](` typed there gets `<>` too. That is
 // literal text either way, so the extra brackets are harmless
 // there.
-function onLinkTextChanged(event: vscode.TextDocumentChangeEvent): void {
+function maybeInsertLinkAngles(event: vscode.TextDocumentChangeEvent): void {
   if (insertingAngle) {
     return;
   }
@@ -336,6 +339,38 @@ function onLinkTextChanged(event: vscode.TextDocumentChangeEvent): void {
       insertingAngle = false;
     },
   );
+}
+
+// maybeReopenSuggest pops the completion menu back open after
+// the user erases a letter or two: VS Code never asks for
+// suggestions on a deletion, so without this the menu stays
+// closed until the next typed character. No check of where the
+// cursor sits is needed here: the server returns items only
+// where completions exist, and an empty list everywhere else,
+// so the menu appears exactly where it has something to offer.
+// triggerSuggest changes no document text, so it cannot loop.
+function maybeReopenSuggest(event: vscode.TextDocumentChangeEvent): void {
+  // Undo and redo carry a reason, plain typing does not.
+  if (event.reason !== undefined) {
+    return;
+  }
+  if (event.document.languageId !== "mdx") {
+    return;
+  }
+  if (event.contentChanges.length !== 1) {
+    return;
+  }
+  const change = event.contentChanges[0];
+  // A pure deletion of one or two characters: a paste or a
+  // replacement inserts text, so it is excluded naturally.
+  if (change.text !== "" || change.rangeLength < 1 || change.rangeLength > 2) {
+    return;
+  }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document !== event.document) {
+    return;
+  }
+  void vscode.commands.executeCommand("editor.action.triggerSuggest");
 }
 
 // setClientState records the client state for the server menu
