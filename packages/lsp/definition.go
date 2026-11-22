@@ -18,12 +18,14 @@ import (
 // and to the file top otherwise.
 
 // Definition answers textDocument/definition for link
-// destinations and reference uses. A document outside a
-// project, or a cursor that is not on a link, gets no
-// definition. A reference use (`[text][ref]`, `[text][]`,
-// `[text]`) jumps to its `[ref]:` definition line; a
-// definition's destination jumps to the target page or
-// heading, like an inline link.
+// destinations, reference uses, and `{vars.}` references. A
+// document outside a project, or a cursor that is not on a
+// link or a vars reference, gets no definition. A reference
+// use (`[text][ref]`, `[text][]`, `[text]`) jumps to its
+// `[ref]:` definition line; a definition's destination jumps
+// to the target page or heading, like an inline link. A vars
+// reference jumps to the line defining the key under `vars:`
+// in porto.yml.
 func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams) (protocol.DefinitionResult, error) {
 	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
@@ -37,6 +39,9 @@ func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams
 		return nil, nil
 	}
 	if location, ok := refUseDefinition(text, params.TextDocument.URI, params.Position); ok {
+		return protocol.LocationSlice{location}, nil
+	}
+	if location, ok := s.varsDefinition(root, text, params.Position); ok {
 		return protocol.LocationSlice{location}, nil
 	}
 	link := linkAtCursor(text, params.Position)
@@ -53,6 +58,127 @@ func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams
 		Range: protocol.Range{Start: at, End: at},
 	}
 	return protocol.LocationSlice{location}, nil
+}
+
+// varsDefinition jumps from a `{vars.path}` reference to the
+// line defining the key under `vars:` in the project's config
+// file. A reference to a mid-level object lands on that
+// object's key line. An unknown key, a missing `vars:`
+// section, or no config file has no definition.
+func (s *Server) varsDefinition(root, text string, pos protocol.Position) (protocol.Location, bool) {
+	lines := strings.Split(text, "\n")
+	cursor := positionToOffset(lines, pos)
+	var path string
+	found := false
+	for _, ref := range scanVarsRefs(text) {
+		if cursor >= ref.start && cursor <= ref.end {
+			path = ref.path
+			found = true
+			break
+		}
+	}
+	if !found {
+		return protocol.Location{}, false
+	}
+	configPath, ok := configFilePath(root)
+	if !ok {
+		return protocol.Location{}, false
+	}
+	rng, ok := findVarsKey(s.targetText(configPath), strings.Split(path, "."))
+	if !ok {
+		return protocol.Location{}, false
+	}
+	return protocol.Location{URI: uri.File(configPath), Range: rng}, true
+}
+
+// findVarsKey finds the line defining a dotted vars path in the
+// config file's YAML text: the top-level `vars:` mapping, then
+// each path segment in turn, descending by indentation. It
+// returns the range covering the leaf key token on its line. A
+// parent with a value on its own line has no children, so a
+// deeper path through it is not found.
+func findVarsKey(yamlText string, path []string) (protocol.Range, bool) {
+	lines := strings.Split(yamlText, "\n")
+	parentLine := -1
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		match := keyLineRe.FindStringSubmatch(line)
+		if match == nil || len(match[1]) != 0 || keyOf(match) != "vars" {
+			continue
+		}
+		parentLine = i
+		break
+	}
+	if parentLine < 0 {
+		return protocol.Range{}, false
+	}
+	parentIndent := 0
+	for si, segment := range path {
+		// The parent must be a bare key: a value after the
+		// colon (other than a comment) leaves no children.
+		rest := strings.TrimSpace(keyLineRe.FindStringSubmatch(lines[parentLine])[5])
+		if rest != "" && !strings.HasPrefix(rest, "#") {
+			return protocol.Range{}, false
+		}
+		// The first deeper key line sets the children's
+		// indent; deeper lines past it belong to a nested
+		// mapping, and a dedent ends this one.
+		childIndent := -1
+		foundLine := -1
+		var foundMatch []string
+		for i := parentLine + 1; i < len(lines); i++ {
+			trimmed := strings.TrimSpace(lines[i])
+			if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+				continue
+			}
+			match := keyLineRe.FindStringSubmatch(lines[i])
+			if match == nil {
+				continue
+			}
+			indent := len(match[1])
+			if indent <= parentIndent {
+				break
+			}
+			if childIndent < 0 {
+				childIndent = indent
+			}
+			if indent != childIndent || keyOf(match) != segment {
+				continue
+			}
+			foundLine = i
+			foundMatch = match
+			break
+		}
+		if foundLine < 0 {
+			return protocol.Range{}, false
+		}
+		if si == len(path)-1 {
+			line := lines[foundLine]
+			start := len(foundMatch[1])
+			end := start + keyTokenLength(foundMatch)
+			return protocol.Range{
+				Start: protocol.Position{Line: uint32(foundLine), Character: byteToUTF16(line, start)},
+				End:   protocol.Position{Line: uint32(foundLine), Character: byteToUTF16(line, end)},
+			}, true
+		}
+		parentLine, parentIndent = foundLine, childIndent
+	}
+	return protocol.Range{}, false
+}
+
+// keyTokenLength is the length of the key token as written on
+// its line, quotes included for a quoted key.
+func keyTokenLength(match []string) int {
+	if match[2] != "" {
+		return len(match[2])
+	}
+	if match[3] != "" {
+		return len(match[3]) + 2
+	}
+	return len(match[4]) + 2
 }
 
 // refUseDefinition jumps from a reference use site to its

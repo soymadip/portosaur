@@ -12,25 +12,39 @@ import (
 // directories, the routes, and the `vars:` map — a small file,
 // so a fresh read is always correct and needs no cache.
 
+// configFilePath returns the project's config file: porto.yml
+// when it exists, else porto.yaml. It reports false when
+// neither exists.
+func configFilePath(root string) (string, bool) {
+	for _, name := range configFileNames {
+		path := filepath.Join(root, name)
+		if _, err := os.Stat(path); err == nil {
+			return path, true
+		}
+	}
+	return "", false
+}
+
 // loadProjectConfig parses the project's porto.yml (or
 // porto.yaml) into a plain map. It returns nil when the file is
 // missing or unparsable; callers fall back to defaults.
 func loadProjectConfig(root string) map[string]any {
-	for _, name := range configFileNames {
-		raw, err := os.ReadFile(filepath.Join(root, name))
-		if err != nil {
-			continue
-		}
-		var cfg map[string]any
-		if yaml.Unmarshal(raw, &cfg) != nil {
-			return nil
-		}
-		if cfg == nil {
-			return map[string]any{}
-		}
-		return cfg
+	path, ok := configFilePath(root)
+	if !ok {
+		return nil
 	}
-	return nil
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var cfg map[string]any
+	if yaml.Unmarshal(raw, &cfg) != nil {
+		return nil
+	}
+	if cfg == nil {
+		return map[string]any{}
+	}
+	return cfg
 }
 
 // configString reads a dotted key from the config, falling back

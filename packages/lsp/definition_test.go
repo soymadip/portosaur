@@ -360,3 +360,94 @@ func TestDefinitionRefDestinationHashJumpsToHeading(t *testing.T) {
 		t.Fatalf("definition line = %d, want the Setup heading line", locations[0].Range.Start.Line)
 	}
 }
+
+// varsDefinitionFixture is a docs-mode project whose porto.yml
+// defines vars: a top-level title, a nested project map, and
+// an author after the nested map.
+func varsDefinitionFixture(t *testing.T) string {
+	t.Helper()
+	return contentFixture(t, "docs_home:\n  title: Docs\nvars:\n  title: Portosaur\n  project:\n    name: Demo\n    url: https://example.com\n  author: Ada\n", map[string]string{})
+}
+
+// varsLocation checks the definition lands on the key token in
+// porto.yml: the line and the character range of the key.
+func varsLocation(t *testing.T, locations []protocol.Location, root string, line, start, end uint32) {
+	t.Helper()
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	want := uri.File(filepath.Join(root, "porto.yml"))
+	if locations[0].URI != want {
+		t.Fatalf("definition URI = %v, want %v", locations[0].URI, want)
+	}
+	rng := locations[0].Range
+	if rng.Start.Line != line || rng.Start.Character != start || rng.End.Line != line || rng.End.Character != end {
+		t.Fatalf("definition range = %+v, want line %d chars %d-%d (the key token)", rng, line, start, end)
+	}
+}
+
+func TestDefinitionVarsNestedPath(t *testing.T) {
+	s := startTestServer(t, varsDefinitionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.project.name} here.\n")
+	varsLocation(t, s.definition(t, documentURI, 2, 10), s.root, 5, 4, 8)
+}
+
+func TestDefinitionVarsTopLevelKey(t *testing.T) {
+	s := startTestServer(t, varsDefinitionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.title} and {vars.author}.\n")
+	varsLocation(t, s.definition(t, documentURI, 2, 10), s.root, 3, 2, 7)
+	// The author key sits after the nested project map: the
+	// scan resumes past the deeper lines.
+	varsLocation(t, s.definition(t, documentURI, 2, 28), s.root, 7, 2, 8)
+}
+
+func TestDefinitionVarsMidLevelObject(t *testing.T) {
+	s := startTestServer(t, varsDefinitionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.project} here.\n")
+	varsLocation(t, s.definition(t, documentURI, 2, 10), s.root, 4, 2, 9)
+}
+
+func TestDefinitionVarsUnknownKeyIsEmpty(t *testing.T) {
+	s := startTestServer(t, varsDefinitionFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.nope} and {vars.project.nope}.\n")
+	if locations := s.definition(t, documentURI, 2, 10); len(locations) != 0 {
+		t.Fatalf("definition for {vars.nope} = %v, want none", locations)
+	}
+	if locations := s.definition(t, documentURI, 2, 28); len(locations) != 0 {
+		t.Fatalf("definition for {vars.project.nope} = %v, want none", locations)
+	}
+}
+
+func TestDefinitionVarsNoVarsSectionIsEmpty(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.title} here.\n")
+	if locations := s.definition(t, documentURI, 2, 10); len(locations) != 0 {
+		t.Fatalf("definition = %v, want none (no vars: section)", locations)
+	}
+}
+
+// A project with porto.yaml and no porto.yml jumps into the
+// yaml file: the definition follows whichever file the project
+// actually uses.
+func TestDefinitionVarsPortoYaml(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yaml"), []byte("vars:\n  title: Portosaur\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))
+	installSchema(t, root, schemaComponents, realSchema(t, schemaComponents))
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSee {vars.title}.\n")
+	locations := s.definition(t, documentURI, 2, 10)
+	if len(locations) != 1 {
+		t.Fatalf("definition = %v, want one location", locations)
+	}
+	want := uri.File(filepath.Join(s.root, "porto.yaml"))
+	if locations[0].URI != want {
+		t.Fatalf("definition URI = %v, want %v", locations[0].URI, want)
+	}
+	rng := locations[0].Range
+	if rng.Start.Line != 1 || rng.Start.Character != 2 || rng.End.Character != 7 {
+		t.Fatalf("definition range = %+v, want line 1 chars 2-7 (the title key)", rng)
+	}
+}
