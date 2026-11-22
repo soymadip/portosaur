@@ -46,25 +46,56 @@ The example above, live — try opening the `components` folder:
 - **No JavaScript.** A folder is a native `<details>` element, so
   the tree works with scripting off.
 
+## Codeblock Syntax
+
+Draw the tree as text in a `files` fence instead of writing JSX
+— handy for a quick listing. Nesting comes from how far right
+each name starts, so the tree characters are only decoration and
+plain indentation works too. A name ending with `/` is a folder,
+and so is any name with lines nested under it. Every folder
+starts open.
+
+````md
+```files
+project
+├── src
+│   ├── index.ts
+│   └── components
+│       └── Button.tsx
+├── package.json
+```
+````
+
+The fence above, live:
+
+```files
+project
+├── src
+│   ├── index.ts
+│   └── components
+│       └── Button.tsx
+├── package.json
+```
+
 ## Props Reference
 
 ### `<FileTree />`
 
-| Prop | Type | Description |
-| ---- | ---- | ----------- |
+| Prop       | Type        | Description                           |
+| ---------- | ----------- | ------------------------------------- |
 | `children` | `ReactNode` | The `<File>` and `<Folder>` elements. |
 
 ### `<File />`
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `name` | `string` | — | The file name, shown in mono. Required. |
+| Prop   | Type     | Default    | Description                                           |
+| ------ | -------- | ---------- | ----------------------------------------------------- |
+| `name` | `string` | —          | The file name, shown in mono. Required.               |
 | `icon` | `string` | Plain file | An Iconify id for the file icon, like `lu:file-json`. |
 
 ### `<Folder />`
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `name` | `string` | — | The folder name, shown in mono. Required. |
-| `defaultOpen` | `boolean` | `false` | Open the folder by default. |
-| `children` | `ReactNode` | — | The files and folders inside. |
+| Prop          | Type        | Default | Description                               |
+| ------------- | ----------- | ------- | ----------------------------------------- |
+| `name`        | `string`    | —       | The folder name, shown in mono. Required. |
+| `defaultOpen` | `boolean`   | `false` | Open the folder by default.               |
+| `children`    | `ReactNode` | —       | The files and folders inside.             |

@@ -62,6 +62,7 @@ import remarkDuplicateAnchors, {
 import remarkFileLinks, { type ContentDir } from "./plugins/remarkFileLinks.ts";
 import remarkInstall from "./plugins/remarkInstall.ts";
 import remarkMermaid from "./plugins/remarkMermaid.ts";
+import remarkFileTree from "./plugins/remarkFileTree.ts";
 import remarkIcons from "./plugins/remarkIcons.ts";
 import remarkAdmonitions from "./plugins/remarkAdmonitions.ts";
 import remarkDetailsMarker from "./plugins/remarkDetailsMarker.ts";
@@ -187,6 +188,10 @@ export function portosaurMdxOptions({
       // (`site.content.mermaid`, default true). After remarkVars so
       // `{vars.key}` substitution applies inside diagram fences too.
       ...(mermaid ? [remarkMermaid] : []),
+      // ```files fences render as FileTree components. After
+      // remarkVars so `{vars.key}` substitution applies inside
+      // files fences too.
+      remarkFileTree,
       remarkIcons,
       remarkDirective,
       remarkAdmonitions,
