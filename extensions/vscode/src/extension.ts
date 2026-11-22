@@ -23,6 +23,12 @@ let restartTimer: ReturnType<typeof setTimeout> | undefined;
 let preview: PreviewManager | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 let stateSubscription: vscode.Disposable | undefined;
+// The link-destination typing watcher, registered once when the
+// client starts.
+let linkAngleSubscription: vscode.Disposable | undefined;
+// True while the extension's own <> insert is landing, so the
+// change it fires cannot re-trigger the handler.
+let insertingAngle = false;
 // The client state and the binary it spawned, for the server menu.
 let clientState: State | undefined;
 let serverCommand: string | undefined;
@@ -82,6 +88,8 @@ export async function deactivate(): Promise<void> {
   preview = undefined;
   stateSubscription?.dispose();
   stateSubscription = undefined;
+  linkAngleSubscription?.dispose();
+  linkAngleSubscription = undefined;
   statusBarItem?.dispose();
   statusBarItem = undefined;
   // A client whose start failed is not running: stopping it
@@ -210,6 +218,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       clientOptions,
     );
     showStatusBarItem(context);
+    watchLinkTyping(context);
     setClientState(State.Starting);
     stateSubscription = client.onDidChangeState((event) => {
       setClientState(event.newState);
@@ -250,6 +259,83 @@ function showStatusBarItem(context: vscode.ExtensionContext): void {
     context.subscriptions.push(statusBarItem);
   }
   statusBarItem.show();
+}
+
+// watchLinkTyping registers the link-destination helper once:
+// typing `(` right after `]` in an MDX file drops `<>` in with
+// the cursor inside. Restarts call startClient again, so the
+// subscription guard keeps this registered exactly once.
+function watchLinkTyping(context: vscode.ExtensionContext): void {
+  if (linkAngleSubscription) {
+    return;
+  }
+  linkAngleSubscription = vscode.workspace.onDidChangeTextDocument(
+    onLinkTextChanged,
+  );
+  context.subscriptions.push(linkAngleSubscription);
+}
+
+// onLinkTextChanged is the link-destination helper: when the
+// user types `(` right after `]` (the `[text](` link syntax, or
+// `![alt](` for an image), insert `<>` after the cursor and put
+// the cursor inside it. The server cannot do this: on-type
+// formatting returns text edits only, and an inserted `<>`
+// would leave the cursor after it instead of inside. The
+// handler cannot tell whether the cursor sits in a code fence
+// or frontmatter, so `](` typed there gets `<>` too. That is
+// literal text either way, so the extra brackets are harmless
+// there.
+function onLinkTextChanged(event: vscode.TextDocumentChangeEvent): void {
+  if (insertingAngle) {
+    return;
+  }
+  // Undo and redo carry a reason, plain typing does not.
+  if (event.reason !== undefined) {
+    return;
+  }
+  if (event.document.languageId !== "mdx") {
+    return;
+  }
+  if (event.contentChanges.length !== 1) {
+    return;
+  }
+  const change = event.contentChanges[0];
+  // Exactly one typed `(`: a paste inserts more than one
+  // character, and a replacement removes text first.
+  if (change.text !== "(" || change.rangeLength !== 0) {
+    return;
+  }
+  const insertedAt = change.range.start;
+  if (insertedAt.character === 0) {
+    return;
+  }
+  const before = event.document.getText(
+    new vscode.Range(insertedAt.translate(0, -1), insertedAt),
+  );
+  if (before !== "]") {
+    return;
+  }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document !== event.document) {
+    return;
+  }
+  const after = insertedAt.translate(0, 1);
+  if (!editor.selection.isEmpty || !editor.selection.active.isEqual(after)) {
+    return;
+  }
+  const inside = after.translate(0, 1);
+  insertingAngle = true;
+  void editor.edit((edit) => {
+    edit.insert(after, "<>");
+  }).then(
+    () => {
+      editor.selection = new vscode.Selection(inside, inside);
+      insertingAngle = false;
+    },
+    () => {
+      insertingAngle = false;
+    },
+  );
 }
 
 // setClientState records the client state for the server menu
