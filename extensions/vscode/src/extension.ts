@@ -48,6 +48,9 @@ export async function activate(
     vscode.commands.registerCommand("portosaur.showServerStatus", () => {
       void showServerStatus(context);
     }),
+    vscode.commands.registerCommand("portosaur.selectServer", () => {
+      void pickServerPath();
+    }),
     vscode.commands.registerCommand("portosaur.preview", () => {
       void previewManager().showPreview();
     }),
