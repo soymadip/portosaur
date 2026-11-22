@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 // Walking a raw JSON Schema (the parsed JSON document) by path.
 // The compiled schema validates; the raw document answers
@@ -76,6 +79,21 @@ func schemaDescription(node map[string]any) string {
 		return d
 	}
 	return ""
+}
+
+// schemaDefaultText renders a schema node's default value as
+// plain text for a snippet placeholder, or "" when the node has
+// no literal default. JSON numbers arrive as float64.
+func schemaDefaultText(node map[string]any) (string, bool) {
+	switch v := node["default"].(type) {
+	case string:
+		return v, true
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64), true
+	case bool:
+		return strconv.FormatBool(v), true
+	}
+	return "", false
 }
 
 // schemaEnum returns the node's enum values as strings, or nil.

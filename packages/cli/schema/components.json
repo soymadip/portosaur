@@ -30,12 +30,14 @@
             "info",
             "ghost"
           ],
-          "description": "The button style."
+          "description": "The button style.",
+          "default": "primary"
         },
         "outline": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Outline style instead of a filled button."
+          "description": "Outline style instead of a filled button.",
+          "default": false
         },
         "size": {
           "x-ts-type": "\"sm\" | \"lg\"",
@@ -51,17 +53,20 @@
         "sameTab": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Keep an external link in the same tab."
+          "description": "Keep an external link in the same tab.",
+          "default": false
         },
         "className": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "Extra classes on the button."
+          "description": "Extra classes on the button.",
+          "default": ""
         },
         "disabled": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Render the button disabled."
+          "description": "Render the button disabled.",
+          "default": false
         },
         "title": {
           "x-ts-type": "string",
@@ -169,27 +174,32 @@
         "noArrow": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Drop the chevron on the trigger."
+          "description": "Drop the chevron on the trigger.",
+          "default": false
         },
         "dropUp": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Open the menu above the trigger instead of below it."
+          "description": "Open the menu above the trigger instead of below it.",
+          "default": false
         },
         "className": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "Extra class on the container (`<details>`)."
+          "description": "Extra class on the container (`<details>`).",
+          "default": ""
         },
         "menuClassName": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "Extra class on the menu (`<ul>`)."
+          "description": "Extra class on the menu (`<ul>`).",
+          "default": ""
         },
         "triggerClassName": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "Extra class on the trigger (`<summary>`)."
+          "description": "Extra class on the trigger (`<summary>`).",
+          "default": ""
         },
         "ariaLabel": {
           "x-ts-type": "string",
@@ -273,7 +283,8 @@
         "dropUp": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Open the results above the field instead of below it."
+          "description": "Open the results above the field instead of below it.",
+          "default": false
         }
       },
       "additionalProperties": false
@@ -361,7 +372,8 @@
         "queryString": {
           "x-ts-type": "boolean | string",
           "type": ["boolean", "string"],
-          "description": "Remember the active tab in the URL. True uses the group id as the key."
+          "description": "Remember the active tab in the URL. True uses the group id as the key.",
+          "default": false
         },
         "values": {
           "x-ts-type": "TabValue[]",
@@ -371,12 +383,14 @@
         "block": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Stretch the tab buttons to fill the width."
+          "description": "Stretch the tab buttons to fill the width.",
+          "default": false
         },
         "lazy": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Render a tab's content only when it is opened."
+          "description": "Render a tab's content only when it is opened.",
+          "default": false
         },
         "className": {
           "x-ts-type": "string",
@@ -393,7 +407,8 @@
         "forceRender": {
           "x-ts-type": "boolean",
           "type": "boolean",
-          "description": "Show the list even when the page would not get one automatically."
+          "description": "Show the list even when the page would not get one automatically.",
+          "default": false
         },
         "items": {
           "x-ts-type": "TopicListItem[]",

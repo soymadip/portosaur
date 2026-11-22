@@ -242,10 +242,12 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 // (a bare prop means true in JSX); the rest take `name=` with
 // the cursor placed after it: inside quotes for a string value,
 // bare for anything else, and a space after so the next prop
-// has room. The value list pops up on its own once the name is
-// accepted (VS Code runs the triggerSuggest command; Zed
-// ignores completion-item commands, and the values appear
-// there when typing starts).
+// has room. A prop with a default prefills it as a selected
+// placeholder, so typing replaces it and Tab keeps it. The
+// value list pops up on its own once the name is accepted (VS
+// Code runs the triggerSuggest command; Zed ignores
+// completion-item commands, and the values appear there when
+// typing starts).
 func propNameCompletions(schema *resolvedSchema, context tagContext, text string, pos protocol.Position) *protocol.CompletionList {
 	def := componentDef(schema, context.name)
 	if def == nil {
@@ -287,10 +289,14 @@ func propNameCompletions(schema *resolvedSchema, context tagContext, text string
 		insert := name
 		if !schemaHasType(prop, "boolean") {
 			item.InsertTextFormat = protocol.InsertTextFormatSnippet
+			tabstop := "$0"
+			if def, ok := schemaDefaultText(prop); ok {
+				tabstop = "${1:" + snippetEscape(def) + "}"
+			}
 			if schemaHasType(prop, "string") {
-				insert = name + `="$0"` + space
+				insert = name + `="` + tabstop + `"` + space
 			} else {
-				insert = name + "=$0" + space
+				insert = name + "=" + tabstop + space
 			}
 			item.Command = protocol.Command{Title: "Trigger Suggest", Command: "editor.action.triggerSuggest"}
 		}
@@ -299,6 +305,13 @@ func propNameCompletions(schema *resolvedSchema, context tagContext, text string
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
 	return &protocol.CompletionList{IsIncomplete: false, Items: items}
+}
+
+// snippetEscape escapes the characters with meaning inside a
+// snippet placeholder, so a default like `a$b` lands as text
+// instead of a tabstop.
+func snippetEscape(text string) string {
+	return strings.NewReplacer(`\`, `\\`, `$`, `\$`, `}`, `\}`).Replace(text)
 }
 
 // propValueCompletions offers the prop's enum values, or

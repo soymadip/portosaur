@@ -1119,8 +1119,8 @@ func TestComponentCompletionProps(t *testing.T) {
 	if hasLabel(items, "value") {
 		t.Fatalf("Btn prop completions %v include TabItem's value", labels(items))
 	}
-	if text, ok := editText(items, "variant"); !ok || text != `variant="$0" ` {
-		t.Fatalf("variant edit = %q, want %q", text, `variant="$0" `)
+	if text, ok := editText(items, "variant"); !ok || text != `variant="${1:primary}" ` {
+		t.Fatalf("variant edit = %q, want %q", text, `variant="${1:primary}" `)
 	}
 	if format, ok := itemFormat(items, "variant"); !ok || format != protocol.InsertTextFormatSnippet {
 		t.Fatalf("variant format = %v, want Snippet", format)
@@ -1150,8 +1150,8 @@ func TestComponentCompletionValuePopupAfterAccept(t *testing.T) {
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn ")
 	items := s.complete(t, documentURI, 2, 5)
 	text, ok := editText(items, "variant")
-	if !ok || text != `variant="$0" ` {
-		t.Fatalf("variant edit = %q, want %q", text, `variant="$0" `)
+	if !ok || text != `variant="${1:primary}" ` {
+		t.Fatalf("variant edit = %q, want %q", text, `variant="${1:primary}" `)
 	}
 	// The editor inserts `variant="" ` with the cursor inside
 	// the quotes and runs triggerSuggest: completing there
@@ -1191,8 +1191,103 @@ func TestComponentCompletionPropSkipsSpaceBeforeWhitespace(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn  >")
 	items := s.complete(t, documentURI, 2, 5)
-	if text, ok := editText(items, "variant"); !ok || text != `variant="$0"` {
-		t.Fatalf("variant edit = %q, want %q (no trailing space, one follows)", text, `variant="$0"`)
+	if text, ok := editText(items, "variant"); !ok || text != `variant="${1:primary}"` {
+		t.Fatalf("variant edit = %q, want %q (no trailing space, one follows)", text, `variant="${1:primary}"`)
+	}
+}
+
+// A prop with a default prefills it as a selected placeholder:
+// typing replaces it, Tab keeps it. A prop without one keeps the
+// bare tabstop, and an empty-string default prefills empty.
+func TestComponentCompletionPropPrefillsDefault(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn ")
+	items := s.complete(t, documentURI, 2, 5)
+	want := map[string]string{
+		"variant":   `variant="${1:primary}" `,
+		"className": `className="${1:}" `,
+		"size":      `size="$0" `,
+	}
+	for label, text := range want {
+		if got, ok := editText(items, label); !ok || got != text {
+			t.Fatalf("%s edit = %q, want %q", label, got, text)
+		}
+	}
+	if format, ok := itemFormat(items, "variant"); !ok || format != protocol.InsertTextFormatSnippet {
+		t.Fatalf("variant format = %v, want Snippet", format)
+	}
+}
+
+// A non-string default prefills bare, without quotes. No shipped
+// component has a number default yet, so the fixture carries one
+// on Dropdown's array prop.
+func TestComponentCompletionPropPrefillsNumberDefault(t *testing.T) {
+	raw := realSchema(t, schemaComponents)
+	var schema map[string]any
+	if err := json.Unmarshal(raw, &schema); err != nil {
+		t.Fatalf("parsing the components schema: %v", err)
+	}
+	defs, _ := schema["definitions"].(map[string]any)
+	dropdown, _ := defs["Dropdown"].(map[string]any)
+	props, _ := dropdown["properties"].(map[string]any)
+	itemsProp, _ := props["items"].(map[string]any)
+	itemsProp["default"] = float64(2)
+	tweaked, err := json.Marshal(schema)
+	if err != nil {
+		t.Fatalf("re-encoding the components schema: %v", err)
+	}
+
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))
+	installSchema(t, root, schemaComponents, tweaked)
+
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Dropdown ")
+	items := s.complete(t, documentURI, 2, 10)
+	if text, ok := editText(items, "items"); !ok || text != "items=${1:2} " {
+		t.Fatalf("items edit = %q, want %q (a number default takes no quotes)", text, "items=${1:2} ")
+	}
+}
+
+// After the snippet applies, the value list pops up inside the
+// quotes with the placeholder text as the partial word: picking
+// a value replaces the placeholder with a bare edit.
+func TestComponentCompletionValueReplacesDefaultPlaceholder(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn variant=\"primary\" ")
+	values := s.complete(t, documentURI, 2, 21)
+	if !hasLabel(values, "primary") {
+		t.Fatalf("variant completions %v missing %q", labels(values), "primary")
+	}
+	if text, ok := editText(values, "primary"); !ok || text != "primary" {
+		t.Fatalf("primary edit = %q, want %q (bare, the quotes are there)", text, "primary")
+	}
+	if rng := editRange(values, "primary"); rng.Start != (protocol.Position{Line: 2, Character: 14}) || rng.End != (protocol.Position{Line: 2, Character: 21}) {
+		t.Fatalf("primary edit range = %v, want (2,14)-(2,21) covering the placeholder", rng)
+	}
+}
+
+func TestSchemaDefaultText(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		node map[string]any
+		want string
+		ok   bool
+	}{
+		{"string", map[string]any{"default": "primary"}, "primary", true},
+		{"empty string", map[string]any{"default": ""}, "", true},
+		{"number", map[string]any{"default": float64(2)}, "2", true},
+		{"fraction", map[string]any{"default": float64(2.5)}, "2.5", true},
+		{"boolean", map[string]any{"default": true}, "true", true},
+		{"missing", map[string]any{}, "", false},
+		{"object", map[string]any{"default": map[string]any{}}, "", false},
+	} {
+		if got, ok := schemaDefaultText(tc.node); got != tc.want || ok != tc.ok {
+			t.Fatalf("%s: schemaDefaultText = (%q, %v), want (%q, %v)", tc.name, got, ok, tc.want, tc.ok)
+		}
 	}
 }
 

@@ -318,6 +318,65 @@ function componentDescription(file: string, name: string): string | null {
   return text || null;
 }
 
+// The destructured defaults of `export function Name(`: the
+// literal values (`variant = "primary"`) from the first
+// parameter's object pattern. Non-literal defaults (an
+// identifier, a call, an object) are skipped, and a component
+// whose first parameter is not a destructured object gets none:
+// a missing default just means no prefill, so this never throws
+// the way the shape parsers do.
+function componentDefaults(
+  file: string,
+  name: string,
+): Map<string, string | number | boolean> {
+  const defaults = new Map<string, string | number | boolean>();
+  const source = fs.readFileSync(file, "utf8");
+  const fnAt = source.indexOf(`export function ${name}(`);
+  if (fnAt === -1) {
+    return defaults;
+  }
+  const openAt = source.indexOf("(", fnAt);
+  const closeAt = matchingBracket(source, openAt);
+  const params = source.slice(openAt + 1, closeAt);
+  const colonAt = firstTopLevelColon(params);
+  if (colonAt === -1) {
+    return defaults;
+  }
+  const first = params.slice(0, colonAt).trim();
+  if (!first.startsWith("{")) {
+    return defaults;
+  }
+  const body = first.slice(1, matchingBracket(first, 0));
+  for (const chunk of splitTopLevel(body, ",")) {
+    const code = stripComments(chunk).trim();
+    if (!code || code.startsWith("...")) {
+      continue;
+    }
+    const match =
+      /^([A-Za-z_$][A-Za-z0-9_$]*)\s*(?::\s*[A-Za-z_$][A-Za-z0-9_$]*)?\s*=\s*([\s\S]*)$/.exec(
+        code,
+      );
+    if (!match) {
+      continue;
+    }
+    const [, prop, raw] = match;
+    const value = raw.trim();
+    const str = /^"([^"]*)"$/.exec(value) ?? /^'([^']*)'$/.exec(value);
+    if (str) {
+      defaults.set(prop, str[1]);
+      continue;
+    }
+    if (value === "true" || value === "false") {
+      defaults.set(prop, value === "true");
+      continue;
+    }
+    if (/^-?\d+(\.\d+)?$/.test(value)) {
+      defaults.set(prop, Number(value));
+    }
+  }
+  return defaults;
+}
+
 // The first parameter's type annotation of `export function Name(`.
 function componentPropsType(file: string, name: string): string {
   const source = fs.readFileSync(file, "utf8");
@@ -516,6 +575,7 @@ function generateComponentSchema(): Record<string, unknown> {
       propsType = resolved;
     }
     const { props, hasIndexSignature } = parseObjectMembers(propsType, name);
+    const defaults = componentDefaults(file, name);
 
     const properties: Record<string, unknown> = {};
     const required: string[] = [];
@@ -523,6 +583,10 @@ function generateComponentSchema(): Record<string, unknown> {
       const propSchema = typeToSchema(prop.typeText, file, name);
       if (prop.description) {
         propSchema.description = prop.description;
+      }
+      const def = defaults.get(prop.name);
+      if (def !== undefined) {
+        propSchema.default = def;
       }
       properties[prop.name] = propSchema;
       if (!prop.optional) {
