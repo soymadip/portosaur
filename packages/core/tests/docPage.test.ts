@@ -11,8 +11,8 @@ import {
  * Doc page title tests (ported from the Astro `docPageTitles` rules):
  * the metadata title is the frontmatter title, else the content H1,
  * else the file base. The page `<h1>` is the hoisted content H1 when
- * the content has one, else the synthetic title (unless `hide_title`
- * is set).
+ * the content has one, else the synthetic title. `hide_title` hides
+ * the page title either way.
  */
 
 describe("docPageTitles", () => {
@@ -51,13 +51,14 @@ describe("docPageTitles", () => {
     expect(heading).toBeNull();
   });
 
-  test("hide_title does not suppress a hoisted H1", () => {
-    const { heading } = docPageTitles(
+  test("hide_title suppresses a hoisted H1 but keeps its metadata title", () => {
+    const { heading, metaTitle } = docPageTitles(
       { hide_title: true },
       { text: "Content H1", slug: "content-h1" },
       "File Base",
     );
-    expect(heading).toEqual({ text: "Content H1", id: "content-h1" });
+    expect(heading).toBeNull();
+    expect(metaTitle).toBe("Content H1");
   });
 });
 

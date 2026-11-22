@@ -14,6 +14,11 @@
   "categories": [
     "Programming Languages"
   ],
+  "configurationDefaults": {
+    "[mdx]": {
+      "editor.formatOnType": true
+    }
+  },
   "contributes": {
     "commands": [
       {

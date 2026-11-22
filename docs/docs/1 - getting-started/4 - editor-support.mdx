@@ -27,6 +27,9 @@ Beyond completion and hover, the server also:
 - **Flags multi-segment slugs.** A `slug:` in frontmatter with a `/` in it is an error, since a slug only renames the file itself.
 - **Warns about duplicate slugs.** Two pages that land on the same URL get a warning naming the other page, since the build fails on duplicate slugs.
 - **Warns about duplicate headings.** Two headings in a page that share an anchor get flagged with the severity from `site.content.on_duplicate_h2`, naming the `-1` id the second one gets. The editor checks every level, not just h2, and offers a quick fix that adds the id as a custom id, so the heading keeps the id it already has.
+- **Warns when an H1 overrides the title.** A page with a frontmatter `title` and an H1 in the body gets a warning, since the H1 wins for the visible page heading. With `hide_title` the warning stays quiet, since the H1 is hidden too.
+- **Errors on a second H1.** An H1 that renders beside the page title H1 is an error, since a page should have one H1. The first H1 becomes the page title, so any later H1, or a lone H1 when the first heading is H2 or deeper, is flagged.
+- **Suggests the title key over an H1.** A page with an H1 and no frontmatter `title` gets a hint suggesting the `title` key instead, with a quick fix that moves the text into frontmatter and removes the H1.
 - **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
 - **Flags unknown `{vars.}` keys.** A `{{vars.key}}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
 - **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows `→ value` right after it, and hovering over it shows the value and where it comes from.
@@ -40,6 +43,7 @@ Beyond completion and hover, the server also:
 - **Pops up prop values.** Accepting a prop that takes a value puts the cursor after `name=`, inside quotes for a text value, and leaves a space after the value so the next prop has room. A prop with a default fills it in as selected text, so typing replaces it and Tab keeps it. The value list opens on its own in VS Code. In Zed the values appear when you start typing instead.
 - **Continues lists.** Pressing Enter at the end of a list item starts the next one: the next number, the same bullet, or a fresh unchecked task box. Enter on an empty item leaves the list.
 - **Indents after frontmatter keys.** Pressing Enter after a `key:` line in frontmatter starts the next line two spaces in, so the nested keys line up. A `key: value` line stays at the same level.
+- **Needs format on type.** List continuation and frontmatter indent run on format on type, which the extension turns on for MDX by default. Setting `editor.formatOnType` to false in your settings still wins and turns both off.
 - **Drops object keys onto the next line.** Accepting an object key like `toc:` puts the cursor on the next line, indented for the first child, and the child list pops up on its own in VS Code. In Zed the children appear when you type a letter or hit Ctrl+Space.
 - **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
 - **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.

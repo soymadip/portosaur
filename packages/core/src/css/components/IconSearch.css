@@ -56,23 +56,8 @@
   margin-bottom: 0.4rem;
 }
 
-.porto-icon-search__input {
-  width: 100%;
-  border: 1px solid var(--porto-color-gray-5);
-  border-radius: 0.375rem;
-  background-color: var(--porto-color-black);
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  color: var(--porto-color-white);
-}
-.porto-icon-search__input::placeholder {
-  color: var(--porto-color-gray-3);
-  opacity: 1;
-}
-.porto-icon-search__input:focus {
-  outline: none;
-  border-color: var(--porto-color-accent);
-}
+/* The input itself is the shared .porto-search-input (search-input.css);
+   only the bar layout stays here. */
 
 /* The results list: one row per icon, scrolling inside the
    panel past 400px (OG's cap). */

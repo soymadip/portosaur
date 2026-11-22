@@ -32,6 +32,7 @@ import {
   type Frontmatter,
 } from "./slug.ts";
 import { collectParentSlugs } from "./slug-server.ts";
+import { readContentTitle } from "./content-title-server.ts";
 
 /**
  * Portosaur's frontmatter schema for doc/note/blog pages.
@@ -166,9 +167,14 @@ function cleanFolderName(name: string): string {
  * Page-tree transformers (passed as `pageTree.transformers` to the
  * loader). One transformer object with `file` + `folder` hooks:
  *
- * - `file`: `sidebar_label` overrides the node's display name,
- *   `desc` becomes the node's description, and `color` is copied
- *   onto the node for sidebar and topic-list icon styling.
+ * - `file`: the node's display name follows `sidebar_label`, else
+ *   the content H1, else the builder's name (frontmatter `title`,
+ *   else the humanized file name). The H1 wins over the title, the
+ *   same way the hoisted H1 wins for the page header — a page with
+ *   an H1 and no `title` key shows the H1 in the sidebar instead
+ *   of the file name. `desc` becomes the node's description, and
+ *   `color` is copied onto the node for sidebar and topic-list
+ *   icon styling.
  * - `folder`: a folder whose name is the builder's path fallback
  *   (no meta title, no index page) gets its number prefix stripped
  *   (`3 - config` → `Config`). Names from meta.json or an index page
@@ -206,6 +212,17 @@ export const portoTreeTransformers: PageTreeTransformer<any>[] = [
       const data = file.data as PortoDocData;
       if (typeof data.sidebar_label === "string" && data.sidebar_label !== "") {
         node.name = data.sidebar_label;
+      } else {
+        // The content H1 wins over the title, matching the page
+        // header. Without an absolute path (or with no H1) the
+        // lookup returns null and the builder's name stands.
+        const contentTitle = readContentTitle(
+          (file as PortoPageFile).absolutePath,
+          data,
+        );
+        if (contentTitle !== null) {
+          node.name = contentTitle;
+        }
       }
       if (typeof data.desc === "string" && data.desc !== "") {
         node.description = data.desc;

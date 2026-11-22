@@ -59,17 +59,11 @@
   .print\:hidden {
     display: none;
   }
-  .print\:flex {
-    display: flex;
-  }
-  .print\:block {
-    display: block;
-  }
 
   /* Hide the chrome — navbar, sidebars, TOC, menus, progress. */
   .porto-navbar,
   .porto-sidebar,
-  .porto-toc,
+  .porto-toc-panel,
   .porto-mobile-toc,
   .porto-mobile-menu,
   .porto-nav-progress,

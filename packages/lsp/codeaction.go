@@ -16,8 +16,9 @@ import (
 // action per valid value, an unknown frontmatter key offers its
 // removal (only when the value is a single-line scalar, so the
 // whole line can go safely), a missing required prop offers its
-// insertion, and a duplicate heading offers a custom id with the
-// id it already renders as.
+// insertion, a duplicate heading offers a custom id with the
+// id it already renders as, and a hoisted H1 with no
+// frontmatter title offers moving it to the `title` key.
 
 // CodeAction answers textDocument/codeAction.
 func (s *Server) CodeAction(_ context.Context, params *protocol.CodeActionParams) ([]protocol.CommandOrCodeAction, error) {
@@ -98,6 +99,17 @@ func (s *Server) CodeAction(_ context.Context, params *protocol.CodeActionParams
 			},
 		))
 	}
+	for _, issue := range s.h1TitleIssues(text) {
+		if issue.titleText == "" || !rangesOverlap(issue.diag.Range, params.Range) {
+			continue
+		}
+		actions = append(actions, quickFixActionEdits(
+			"Move to frontmatter title",
+			issue.diag,
+			params.TextDocument.URI,
+			h1TitleFixEdits(text, int(issue.diag.Range.Start.Line), issue.titleText),
+		))
+	}
 	return actions, nil
 }
 
@@ -118,14 +130,56 @@ func wantsQuickFix(only []protocol.CodeActionKind) bool {
 // quickFixAction builds one quick-fix action performing a single
 // edit in the document.
 func quickFixAction(title string, diag protocol.Diagnostic, documentURI uri.URI, edit protocol.TextEdit) *protocol.CodeAction {
+	return quickFixActionEdits(title, diag, documentURI, []protocol.TextEdit{edit})
+}
+
+// quickFixActionEdits builds one quick-fix action performing
+// several edits in the document.
+func quickFixActionEdits(title string, diag protocol.Diagnostic, documentURI uri.URI, edits []protocol.TextEdit) *protocol.CodeAction {
 	kind := protocol.CodeActionKindQuickFix
 	return &protocol.CodeAction{
 		Title:       title,
 		Kind:        &kind,
 		Diagnostics: []protocol.Diagnostic{diag},
 		Edit: &protocol.WorkspaceEdit{
-			Changes: map[uri.URI][]protocol.TextEdit{documentURI: {edit}},
+			Changes: map[uri.URI][]protocol.TextEdit{documentURI: edits},
 		},
+	}
+}
+
+// h1TitleFixEdits builds the edits for "Move to frontmatter
+// title": the H1's text becomes the frontmatter `title`, and
+// the H1 line is removed. With a frontmatter block the key is
+// inserted after the opening fence; without one the block is
+// created at the top of the file — as one edit when the H1 is
+// the first line, so the edits never overlap.
+func h1TitleFixEdits(text string, h1Line int, titleText string) []protocol.TextEdit {
+	lines := strings.Split(text, "\n")
+	key := "title: " + yamlQuote(titleText) + "\n"
+	if block, ok := extractFrontmatter(text); ok && block.closed {
+		return []protocol.TextEdit{
+			{
+				Range: protocol.Range{
+					Start: protocol.Position{Line: uint32(block.startLine)},
+					End:   protocol.Position{Line: uint32(block.startLine)},
+				},
+				NewText: key,
+			},
+			{Range: lineRange(lines, h1Line), NewText: ""},
+		}
+	}
+	if h1Line == 0 {
+		return []protocol.TextEdit{{
+			Range:   lineRange(lines, 0),
+			NewText: "---\n" + key + "---\n\n",
+		}}
+	}
+	return []protocol.TextEdit{
+		{
+			Range:   protocol.Range{Start: protocol.Position{Line: 0}, End: protocol.Position{Line: 0}},
+			NewText: "---\n" + key + "---\n\n",
+		},
+		{Range: lineRange(lines, h1Line), NewText: ""},
 	}
 }
 

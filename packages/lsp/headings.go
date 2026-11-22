@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"go.lsp.dev/protocol"
 )
 
 // Headings: the ATX headings of a document, with the ids the
@@ -104,6 +106,15 @@ var (
 	headingLinkRe = regexp.MustCompile(`\[([^\]]*)\]\([^)]*\)`)
 	headingTagRe  = regexp.MustCompile(`<[^>]*>`)
 )
+
+// headingTextRange is the range of a heading's text within its
+// line (the `#` markers excluded).
+func headingTextRange(lines []string, h heading) protocol.Range {
+	return protocol.Range{
+		Start: protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textFrom)},
+		End:   protocol.Position{Line: uint32(h.line), Character: byteToUTF16(lines[h.line], h.textTo)},
+	}
+}
 
 // plainHeadingText strips inline markdown from a heading: code
 // spans, emphasis markers, links (keeping the text), images and

@@ -426,3 +426,116 @@ describe("portoTreeTransformers", () => {
     expect(out.children.map((child: any) => child.name)).toEqual(["B", "A"]);
   });
 });
+
+describe("portoTreeTransformers file: content H1", () => {
+  const transformer = portoTreeTransformers[0];
+  let projectDir!: string;
+
+  beforeAll(() => {
+    projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "porto-h1-"));
+    const write = (name: string, content: string) => {
+      fs.writeFileSync(path.join(projectDir, name), content);
+    };
+    write("h1-only.mdx", "# Install Guide\n\nText.\n");
+    write("h1-beats-title.mdx", "# Install Guide\n\nText.\n");
+    write("h1-beats-label.mdx", "# Install Guide\n\nText.\n");
+    write("no-h1.mdx", "## Section\n\nText.\n");
+    write("blockquote-h1.mdx", "> # Quoted\n\n## Section\n\nText.\n");
+    write("fence-h1.mdx", "```md\n# Not a heading\n```\n\n## Section\n");
+    write("h2-first.mdx", "## First\n\n# Later\n\nText.\n");
+    write("empty-h1.mdx", "#\n\n## Section\n\nText.\n");
+    write("code-span-h1.mdx", "# Using `bun`\n\nText.\n");
+    write(
+      "fm-comment.mdx",
+      "---\n# a comment\ntitle: Setup\n---\n\n## Section\n",
+    );
+    write("expr-h1.mdx", "# {frontmatter.title}\n\nText.\n");
+  });
+
+  afterAll(() => {
+    fs.rmSync(projectDir, { recursive: true, force: true });
+  });
+
+  function labelFor(
+    name: string,
+    builderName: string,
+    data: Record<string, unknown> = {},
+    withPath = true,
+  ): string {
+    const ctx: any = {
+      storage: {
+        read: () => ({
+          format: "page",
+          data,
+          ...(withPath ? { absolutePath: path.join(projectDir, name) } : {}),
+        }),
+      },
+    };
+    const node: any = { type: "page", name: builderName, url: "/docs/x" };
+    const out = transformer.file!.call(ctx, node, name) as any;
+    return out.name;
+  }
+
+  test("H1 beats the file name", () => {
+    expect(labelFor("h1-only.mdx", "Setup")).toBe("Install Guide");
+  });
+
+  test("H1 beats the frontmatter title", () => {
+    expect(labelFor("h1-beats-title.mdx", "Setup", { title: "Setup" })).toBe(
+      "Install Guide",
+    );
+  });
+
+  test("sidebar_label beats the H1", () => {
+    expect(
+      labelFor("h1-beats-label.mdx", "Setup", {
+        title: "Setup",
+        sidebar_label: "Install",
+      }),
+    ).toBe("Install");
+  });
+
+  test("no H1 leaves the builder name alone", () => {
+    expect(labelFor("no-h1.mdx", "Setup", { title: "Setup" })).toBe("Setup");
+  });
+
+  test("an H1 nested in a blockquote does not count", () => {
+    expect(labelFor("blockquote-h1.mdx", "Setup", { title: "Setup" })).toBe(
+      "Setup",
+    );
+  });
+
+  test("a `#` inside a fenced code block does not count", () => {
+    expect(labelFor("fence-h1.mdx", "Setup", { title: "Setup" })).toBe("Setup");
+  });
+
+  test("first-heading-H2 plus a later H1 does not count", () => {
+    expect(labelFor("h2-first.mdx", "Setup", { title: "Setup" })).toBe("Setup");
+  });
+
+  test("an empty H1 contributes nothing", () => {
+    expect(labelFor("empty-h1.mdx", "Setup", { title: "Setup" })).toBe("Setup");
+  });
+
+  test("the H1 text is extracted plain (code spans unwrapped)", () => {
+    expect(labelFor("code-span-h1.mdx", "Setup")).toBe("Using bun");
+  });
+
+  test("a `#` comment in the frontmatter does not count", () => {
+    expect(labelFor("fm-comment.mdx", "Setup", { title: "Setup" })).toBe(
+      "Setup",
+    );
+  });
+
+  test("a frontmatter expression in the H1 resolves", () => {
+    expect(labelFor("expr-h1.mdx", "Setup", { title: "Resolved" })).toBe(
+      "Resolved",
+    );
+  });
+
+  test("without an absolute path the builder name stands", () => {
+    expect(labelFor("h1-only.mdx", "Setup", { title: "Setup" }, false)).toBe(
+      "Setup",
+    );
+  });
+});

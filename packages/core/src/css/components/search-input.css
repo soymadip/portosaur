@@ -1,0 +1,22 @@
+/* The shared full-box search input: the icon search and the search
+   page use the same input, so it lives here once instead of being
+   written out in both files. The search dialog's input is a
+   different design (borderless, transparent, flexed) and keeps its
+   own rules in SearchDialog.css. */
+.porto-search-input {
+  width: 100%;
+  border: 1px solid var(--porto-color-gray-5);
+  border-radius: 0.375rem;
+  background-color: var(--porto-color-black);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--porto-color-white);
+}
+.porto-search-input::placeholder {
+  color: var(--porto-color-gray-3);
+  opacity: 1;
+}
+.porto-search-input:focus {
+  outline: none;
+  border-color: var(--porto-color-accent);
+}

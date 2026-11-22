@@ -239,7 +239,7 @@ export function IconSearch({
       <div className="porto-icon-search__bar">
         <input
           type="search"
-          className="porto-icon-search__input"
+          className="porto-search-input porto-icon-search__input"
           placeholder="Search icons…"
           value={query}
           onChange={(event) => setQuery(event.target.value)}

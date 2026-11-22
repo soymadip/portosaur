@@ -328,17 +328,19 @@ function maybeInsertLinkAngles(event: vscode.TextDocumentChangeEvent): void {
   }
   const inside = after.translate(0, 1);
   insertingAngle = true;
-  void editor.edit((edit) => {
-    edit.insert(after, "<>");
-  }).then(
-    () => {
-      editor.selection = new vscode.Selection(inside, inside);
-      insertingAngle = false;
-    },
-    () => {
-      insertingAngle = false;
-    },
-  );
+  void editor
+    .edit((edit) => {
+      edit.insert(after, "<>");
+    })
+    .then(
+      () => {
+        editor.selection = new vscode.Selection(inside, inside);
+        insertingAngle = false;
+      },
+      () => {
+        insertingAngle = false;
+      },
+    );
 }
 
 // maybeReopenSuggest pops the completion menu back open after
