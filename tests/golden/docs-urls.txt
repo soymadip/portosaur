@@ -26,6 +26,7 @@
 /docs/markdown/components/alerts/
 /docs/markdown/components/btn/
 /docs/markdown/components/cards/
+/docs/markdown/components/carousel/
 /docs/markdown/components/details/
 /docs/markdown/components/dropdown/
 /docs/markdown/components/dynamic-icon/

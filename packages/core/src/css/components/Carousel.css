@@ -1,0 +1,152 @@
+/* Carousel — one slide at a time, switched by arrows, dots,
+ * keyboard, or swipe. Rendered by Carousel. The track is a flex
+ * row of full-width slides; its position comes from the
+ * --porto-carousel-index variable the component sets, so the
+ * stylesheet can flip the slide direction for right-to-left
+ * pages. The row's height is the tallest slide's, so the
+ * carousel never jumps between slides of different heights. */
+
+.porto-carousel {
+  position: relative;
+  margin-top: var(--porto-content-gap-y);
+}
+
+.porto-carousel__viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  /* Vertical scrolling stays with the browser; horizontal drags
+     reach the swipe handlers instead of scrolling the page. */
+  touch-action: pan-y;
+}
+
+.porto-carousel__track {
+  display: flex;
+  transform: translateX(calc(var(--porto-carousel-index, 0) * -100%));
+  transition: transform 250ms ease;
+}
+
+/* Right-to-left: the row lays out right to left, so the track
+   moves right to reach the next slide. */
+[dir="rtl"] .porto-carousel__track {
+  transform: translateX(calc(var(--porto-carousel-index, 0) * 100%));
+}
+
+.porto-carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* A lone image arrives wrapped in a paragraph; its margins would
+   push the image away from the caption below it. */
+.porto-carousel__slide > p {
+  margin: 0;
+}
+
+/* Slide images fill the slide width (small ones stay small and
+   center) and keep their aspect ratio. */
+.porto-carousel__slide img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.porto-carousel__slide .porto-carousel__caption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--porto-color-gray-2);
+}
+
+/* The arrows float over the slide edges, vertically centered, big
+   enough to tap (2.75rem). The background is mostly opaque so
+   they read over any image. */
+.porto-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--porto-color-hairline);
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--porto-color-bg) 85%, transparent);
+  color: var(--porto-color-gray-1);
+  cursor: pointer;
+  transition:
+    transform 100ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+}
+.porto-carousel__arrow--prev {
+  inset-inline-start: 0.5rem;
+}
+.porto-carousel__arrow--next {
+  inset-inline-end: 0.5rem;
+}
+.porto-carousel__arrow:hover {
+  background-color: var(--porto-color-hairline-light);
+  color: var(--porto-color-white);
+}
+.porto-carousel__arrow:active {
+  transform: translateY(-50%) scale(0.97);
+}
+.porto-carousel__arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.porto-carousel__arrow:disabled:hover {
+  background-color: color-mix(in srgb, var(--porto-color-bg) 85%, transparent);
+  color: var(--porto-color-gray-1);
+}
+
+/* Right-to-left: the chevrons point the other way. */
+[dir="rtl"] .porto-carousel__arrow svg {
+  transform: rotate(180deg);
+}
+
+/* Dots: each button is a 1.5rem tap target with the dot drawn
+   inside it. The current dot stretches into an accent pill. */
+.porto-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+}
+.porto-carousel__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+.porto-carousel__dot::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--porto-color-gray-4);
+  transition:
+    width 200ms ease,
+    background-color 200ms ease;
+}
+.porto-carousel__dot[aria-current="true"]::before {
+  width: 1.25rem;
+  background-color: var(--porto-color-text-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-carousel__track,
+  .porto-carousel__dot::before {
+    transition: none;
+  }
+}

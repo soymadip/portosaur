@@ -10,6 +10,7 @@ import {
 } from "./Dropdown.tsx";
 import { Btn } from "./mdx/Btn.tsx";
 import { Card, Cards } from "./mdx/Cards.tsx";
+import { Carousel } from "./mdx/Carousel.tsx";
 import { CodeBlock } from "./mdx/CodeBlock.tsx";
 import {
   CodeBlockTab,
@@ -112,6 +113,7 @@ export function Dropdown({
  */
 const BLOCK_COMPONENTS: Set<unknown> = new Set([
   Cards,
+  Carousel,
   CodeBlock,
   CodeBlockTabs,
   Details,
@@ -210,6 +212,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Btn,
     Card,
     Cards,
+    Carousel,
     CodeBlockTab,
     CodeBlockTabs,
     CodeBlockTabsList,
@@ -278,6 +281,7 @@ declare global {
 
 export { Btn } from "./mdx/Btn.tsx";
 export { Card, Cards } from "./mdx/Cards.tsx";
+export { Carousel } from "./mdx/Carousel.tsx";
 export { CodeBlock } from "./mdx/CodeBlock.tsx";
 export {
   CodeBlockTab,

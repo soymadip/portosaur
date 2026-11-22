@@ -1,5 +1,5 @@
 {
-  "generated_from": "GhInfo component page",
+  "generated_from": "Carousel component page",
   "routes": [
     {
       "url": "/",
@@ -260,7 +260,8 @@
         "Cards",
         "Steps",
         "File Tree",
-        "GhInfo"
+        "GhInfo",
+        "Carousel"
       ]
     },
     {
@@ -289,6 +290,21 @@
         "Getting started",
         "Configuration",
         "A plain card",
+        "Behavior",
+        "Props Reference"
+      ]
+    },
+    {
+      "url": "/docs/markdown/components/carousel/",
+      "title": "Carousel | Portosaur",
+      "headings": [
+        "Carousel",
+        "Raw images",
+        "Cards as slides",
+        "Install",
+        "Scaffold",
+        "Write",
+        "Build",
         "Behavior",
         "Props Reference"
       ]

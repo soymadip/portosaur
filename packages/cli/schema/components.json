@@ -115,6 +115,37 @@
       "properties": {},
       "additionalProperties": false
     },
+    "Carousel": {
+      "type": "object",
+      "description": "Carousel — one slide at a time: images, cards, or any MDX content, switched by arrows, dots, keyboard, or swipe. The slides are the children, one element each. A bare image slide shows its alt text as a caption underneath.",
+      "properties": {
+        "showArrows": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Show the prev/next arrow buttons.",
+          "default": true
+        },
+        "showDots": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Show the dot indicators under the slides.",
+          "default": true
+        },
+        "autoplay": {
+          "x-ts-type": "number",
+          "type": "number",
+          "description": "Seconds between slides. 0 turns autoplay off.",
+          "default": 0
+        },
+        "loop": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Wrap from the last slide back to the first.",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
     "CodeBlockTab": {
       "type": "object",
       "description": "CodeBlockTab — one code panel of a CodeBlockTabs group. A descriptor only: CodeBlockTabs reads its props and never renders it.",
