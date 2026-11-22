@@ -210,7 +210,7 @@ func TestInitializeAdvertisesFeatures(t *testing.T) {
 	if result.Capabilities.CompletionProvider == nil {
 		t.Fatal("no completion provider advertised")
 	}
-	wantTriggers := []string{":", "<", "=", ".", "(", "/", "'", "\""}
+	wantTriggers := []string{":", "<", "=", ".", "(", "/", "'", "\"", "#"}
 	triggers := result.Capabilities.CompletionProvider.TriggerCharacters
 	if len(triggers) != len(wantTriggers) {
 		t.Fatalf("trigger characters = %v, want %v", triggers, wantTriggers)

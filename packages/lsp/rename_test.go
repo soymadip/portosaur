@@ -363,8 +363,8 @@ func TestDidRenameFilesRefreshesPageIndex(t *testing.T) {
 	// Warm the page index: the old URL is offered, the new one
 	// is not a page yet.
 	items := s.complete(t, documentURI, 2, 4)
-	if !hasLabel(items, "/docs/a/") {
-		t.Fatalf("completions = %v, want /docs/a/ (warming the index)", labels(items))
+	if !hasLabel(items, "/docs/a") {
+		t.Fatalf("completions = %v, want /docs/a (warming the index)", labels(items))
 	}
 	if err := os.Rename(filepath.Join(root, "docs", "a.mdx"), filepath.Join(root, "docs", "b.mdx")); err != nil {
 		t.Fatal(err)
@@ -374,19 +374,19 @@ func TestDidRenameFilesRefreshesPageIndex(t *testing.T) {
 	// it, the test below could pass even if didRenameFiles did
 	// nothing.
 	items = s.complete(t, documentURI, 2, 4)
-	if !hasLabel(items, "/docs/a/") {
-		t.Fatalf("completions = %v, want /docs/a/ still (stale cache before the notification)", labels(items))
+	if !hasLabel(items, "/docs/a") {
+		t.Fatalf("completions = %v, want /docs/a still (stale cache before the notification)", labels(items))
 	}
 	s.didRenameFiles(t, renamePair(
 		filepath.Join(root, "docs", "a.mdx"),
 		filepath.Join(root, "docs", "b.mdx"),
 	))
 	items = s.complete(t, documentURI, 2, 4)
-	if !hasLabel(items, "/docs/b/") {
-		t.Fatalf("completions = %v, want /docs/b/ after the rename", labels(items))
+	if !hasLabel(items, "/docs/b") {
+		t.Fatalf("completions = %v, want /docs/b after the rename", labels(items))
 	}
-	if hasLabel(items, "/docs/a/") {
-		t.Fatalf("completions = %v, want no /docs/a/ after the rename", labels(items))
+	if hasLabel(items, "/docs/a") {
+		t.Fatalf("completions = %v, want no /docs/a after the rename", labels(items))
 	}
 }
 
@@ -399,8 +399,8 @@ func TestDidRenameFilesOutsideProjectIsNoop(t *testing.T) {
 	linker := filepath.Join(root, "docs", "linker.mdx")
 	documentURI := s.open(t, linker, "# Linker\n\n[x](")
 	items := s.complete(t, documentURI, 2, 4)
-	if !hasLabel(items, "/docs/a/") {
-		t.Fatalf("completions = %v, want /docs/a/ (warming the index)", labels(items))
+	if !hasLabel(items, "/docs/a") {
+		t.Fatalf("completions = %v, want /docs/a (warming the index)", labels(items))
 	}
 	if err := os.Rename(filepath.Join(root, "docs", "a.mdx"), filepath.Join(root, "docs", "b.mdx")); err != nil {
 		t.Fatal(err)
@@ -413,10 +413,10 @@ func TestDidRenameFilesOutsideProjectIsNoop(t *testing.T) {
 	// The outside rename changed nothing: the index is still the
 	// warm, stale one, and nothing crashed.
 	items = s.complete(t, documentURI, 2, 4)
-	if !hasLabel(items, "/docs/a/") {
-		t.Fatalf("completions = %v, want /docs/a/ still (outside rename must not invalidate)", labels(items))
+	if !hasLabel(items, "/docs/a") {
+		t.Fatalf("completions = %v, want /docs/a still (outside rename must not invalidate)", labels(items))
 	}
-	if hasLabel(items, "/docs/b/") {
-		t.Fatalf("completions = %v, want no /docs/b/ (outside rename must not invalidate)", labels(items))
+	if hasLabel(items, "/docs/b") {
+		t.Fatalf("completions = %v, want no /docs/b (outside rename must not invalidate)", labels(items))
 	}
 }

@@ -450,7 +450,7 @@ func TestLinkDiagnosticsBrokenRelativePath(t *testing.T) {
 
 func TestLinkDiagnosticsValidLinksAreQuiet(t *testing.T) {
 	s := startTestServer(t, docsFixture(t))
-	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
+	doc := "# Page\n\n[install](/docs/getting-started/installation/)\n\n[gs](/docs/getting-started/)\n\n[noslash](/docs/getting-started/installation)\n\n[sib](./sibling.mdx)\n\n[up](../docs/sibling.mdx)\n\n[home](/)\n"
 	diags := s.openDiagnostics(t, filepath.Join(s.root, "docs", "page.mdx"), doc)
 	if len(diags) != 0 {
 		t.Fatalf("diagnostics = %v, want none", diagnosticMessages(diags))

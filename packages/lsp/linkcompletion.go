@@ -106,7 +106,10 @@ func (s *Server) refLabelCompletion(params *protocol.CompletionParams, text stri
 }
 
 // pageCompletion offers clean URLs from the page index,
-// filtered by the typed prefix.
+// filtered by the typed prefix. The insert drops the trailing
+// slash: the user picks the path and types `#heading` right
+// after it, and a slash in the way only has to be deleted
+// again.
 func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, link linkContext, partial string) *protocol.CompletionList {
 	index := s.pages.forRoot(root)
 	var items []protocol.CompletionItem
@@ -114,10 +117,11 @@ func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, 
 		if !strings.HasPrefix(pageURL, partial) {
 			continue
 		}
+		label := completionURL(pageURL)
 		item := protocol.CompletionItem{
-			Label:    pageURL,
+			Label:    label,
 			Kind:     protocol.CompletionItemKindFile,
-			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: pageURL},
+			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: label},
 		}
 		if rel, err := filepath.Rel(root, files[0]); err == nil {
 			item.Detail = protocol.NewOptional(filepath.ToSlash(rel))
@@ -126,6 +130,15 @@ func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, 
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
 	return &protocol.CompletionList{IsIncomplete: false, Items: items}
+}
+
+// completionURL drops the trailing slash from a clean URL for
+// completion inserts. A bare `/` has nothing to drop.
+func completionURL(pageURL string) string {
+	if len(pageURL) > 1 {
+		return strings.TrimSuffix(pageURL, "/")
+	}
+	return pageURL
 }
 
 // headingCompletion offers the heading ids of the page the path
