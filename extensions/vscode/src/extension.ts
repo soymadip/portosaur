@@ -302,6 +302,15 @@ async function showServerStatus(
   if (version) {
     items.push({ label: `$(tag) Version: ${version}`, action: "none" });
   }
+  if (clientState === State.Running) {
+    const memory = await serverMemory();
+    if (memory !== undefined) {
+      items.push({
+        label: `$(database) Memory: ${formatBytes(memory)}`,
+        action: "none",
+      });
+    }
+  }
   const effectivePath =
     serverCommand ?? serverPathSetting() ?? "(downloaded automatically)";
   items.push({
@@ -322,6 +331,41 @@ async function showServerStatus(
   } else if (picked.action === "restart") {
     await restartClient(context);
   }
+}
+
+// serverMemory asks the running server how much RAM it uses.
+// Older servers do not know the request and answer
+// method-not-found, and a slow answer times out after a
+// second: either way there is simply no memory row.
+async function serverMemory(): Promise<number | undefined> {
+  const running = client;
+  if (!running) {
+    return undefined;
+  }
+  try {
+    const stats = await Promise.race([
+      // The empty params object is required: the server's
+      // protocol handler decodes params before routing, and a
+      // request with no params field fails that decode.
+      running.sendRequest<{ memoryBytes: number }>("portosaur/serverStats", {}),
+      new Promise<undefined>((resolve) =>
+        setTimeout(() => resolve(undefined), 1000),
+      ),
+    ]);
+    const bytes = stats?.memoryBytes;
+    return typeof bytes === "number" ? bytes : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// formatBytes renders a byte count for the menu: MB with one
+// decimal, KB when under a megabyte.
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // statusRowLabel is the menu's status row, mirroring the status
