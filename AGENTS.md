@@ -69,6 +69,8 @@ the 0.26.0 reference code).
 - The playground (`.playground/`) is gitignored. Rebuild it with
   `bun run playground build`.
 
+- Don't run smoke test if you dont think it's urgently needed. netlify will let know if anything is broken
+
 ## Committing, Staging
 
 Don't commit/stage without asking.
