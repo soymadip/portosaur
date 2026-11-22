@@ -78,9 +78,8 @@
 }
 .porto-mobile-menu .porto-mobile-menu__content {
   /* The content's top padding never changes during the
-     collapse — the title's glide comes from the pane's top
-     inset and the brand's shrink cancelling each other out —
-     so only the popover's transform transition lives here. */
+     collapse — the title rides the pane's top inset down with
+     it — so only the popover's transform transition lives here. */
   transition: transform 0.25s ease;
 }
 @starting-style {

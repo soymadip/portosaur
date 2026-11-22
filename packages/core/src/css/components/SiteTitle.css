@@ -1,5 +1,5 @@
 /* Site title — favicon logo + site title. Rendered by SiteTitle
- * (navbar, and the brand copy in the sidebar).
+ * (navbar).
  */
 
 /* Site title: favicon logo + site title, linked to the root. */
@@ -14,8 +14,7 @@
   white-space: nowrap;
   min-width: 0;
 }
-.porto-navbar .porto-site-title,
-.porto-mobile-menu__brand .porto-site-title {
+.porto-navbar .porto-site-title {
   gap: 0.5rem;
 }
 .porto-site-title span {

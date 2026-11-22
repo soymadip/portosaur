@@ -16,7 +16,6 @@ import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { buttonClass } from "../../Button.tsx";
 import { SiteIcon } from "../../SiteIcon.tsx";
 import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
-import { SiteTitle } from "./SiteTitle.tsx";
 
 /**
  * MobileMenu — the mobile navigation popover, shared by every page.
@@ -47,8 +46,7 @@ import { SiteTitle } from "./SiteTitle.tsx";
  *
  * Desktop sidebar collapse — ported from Fumadocs' docs layout:
  * the tree's title row holds a collapse trigger (Lucide's
- * sidebar glyph — the brand row would hide it behind the navbar
- * until the navbar hides on scroll). Clicking it slides the pane
+ * sidebar glyph). Clicking it slides the pane
  * out by its own width while the content expands into the freed
  * space, and a floating panel with the same trigger offers the
  * way back. Hovering the viewport's left edge while collapsed
@@ -77,9 +75,7 @@ import { SiteTitle } from "./SiteTitle.tsx";
  */
 
 /** The collapse state, shared with the sidebar tree: the trigger
- * lives in the tree's title row (the brand row sits hidden behind
- * the navbar until it hides on scroll, so a trigger there would
- * be unclickable on page load). */
+ * lives in the tree's title row. */
 const SidebarCollapseContext = createContext<{
   collapsed: boolean;
   toggleCollapsed: () => void;
@@ -149,12 +145,6 @@ export function MobileMenu({
   const restoredRef = useRef(false);
   const pathname = usePathname();
   const config = usePortoConfig();
-  // OG Docusaurus renders the sidebar logo only when the navbar
-  // hides on scroll — otherwise the brand copy would sit hidden
-  // behind the always-visible navbar forever, and the tree would
-  // need the navbar-height offset from padding instead (the
-  // `--no-brand` content variant below).
-  const showBrand = hasSidebar && config.theme.hideNavbarOnScroll;
   // The global default is known at render time (the config is
   // static, so server and client agree — no hydration mismatch).
   // the per-page frontmatter default arrives via the marker
@@ -394,7 +384,7 @@ export function MobileMenu({
   }, [hasSidebar, toggleCollapsed]);
 
   // When the collapse hides the trigger that had focus (the
-  // brand-row button goes inert with the pane), hand focus to the
+  // pane goes inert), hand focus to the
   // floating panel's trigger — Fumadocs does the same.
   useEffect(() => {
     if (collapsed && paneRef.current?.contains(document.activeElement)) {
@@ -491,18 +481,7 @@ export function MobileMenu({
           onPointerEnter={onPeekEnter}
           onPointerLeave={onPeekLeave}
         >
-          <div
-            className={
-              hasSidebar && !config.theme.hideNavbarOnScroll
-                ? "porto-mobile-menu__content porto-mobile-menu__content--no-brand"
-                : "porto-mobile-menu__content"
-            }
-          >
-            {showBrand && (
-              <div className="porto-mobile-menu__brand">
-                <SiteTitle />
-              </div>
-            )}
+          <div className="porto-mobile-menu__content">
             {children}
             <div className="md:hidden">
               <MobileMenuFooter />
