@@ -334,6 +334,18 @@ func editText(items []protocol.CompletionItem, label string) (string, bool) {
 	return "", false
 }
 
+// filterText returns the filter text of the completion item
+// with the given label.
+func filterText(items []protocol.CompletionItem, label string) (string, bool) {
+	for _, item := range items {
+		if item.Label != label {
+			continue
+		}
+		return item.FilterText.Get()
+	}
+	return "", false
+}
+
 // detailText returns the detail of the completion item with the
 // given label.
 func detailText(items []protocol.CompletionItem, label string) (string, bool) {
@@ -1115,6 +1127,48 @@ func TestComponentCompletionInsertRangeCoversPartial(t *testing.T) {
 	}
 	if text, ok := editText(items, "Hint"); !ok || text != "<Hint>$0</Hint>" {
 		t.Fatalf("Hint edit = %q, want %q", text, "<Hint>$0</Hint>")
+	}
+}
+
+// TestComponentCompletionFilterTextKeepsAngle checks every tag
+// item filters on `<` plus its name: VS Code matches each item
+// against the text its edit range covers up to the cursor, and
+// the range starts at the `<`, so a bare name matches nothing
+// and the whole list is hidden.
+func TestComponentCompletionFilterTextKeepsAngle(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "import Foo from './Foo'\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	for _, want := range []string{"Btn", "div", "Foo"} {
+		got, ok := filterText(items, want)
+		if !ok || got != "<"+want {
+			t.Fatalf("%s filter text = %q, want %q", want, got, "<"+want)
+		}
+	}
+}
+
+// TestComponentCompletionSwallowsAutoClosedBracket checks the
+// edit range covers the `>` VS Code auto-inserts after `<`, so
+// accepting a tag leaves no stray `>` behind — and leaves the
+// range alone when the next character is not a `>`.
+func TestComponentCompletionSwallowsAutoClosedBracket(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<>")
+	items := s.complete(t, documentURI, 2, 1)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 2}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,2) covering `<>`", rng)
+	}
+
+	documentURI = s.open(t, filepath.Join(s.root, "other.mdx"), "# Hello\n\n<Hi>")
+	items = s.complete(t, documentURI, 2, 3)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 4}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,4) covering `<Hi>`", rng)
+	}
+
+	documentURI = s.open(t, filepath.Join(s.root, "third.mdx"), "# Hello\n\n< ")
+	items = s.complete(t, documentURI, 2, 1)
+	if rng := editRange(items, "Hint"); rng.Start != (protocol.Position{Line: 2, Character: 0}) || rng.End != (protocol.Position{Line: 2, Character: 1}) {
+		t.Fatalf("Hint edit range = %v, want (2,0)-(2,1) with no `>` to swallow", rng)
 	}
 }
 
