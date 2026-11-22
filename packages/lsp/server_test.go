@@ -1119,11 +1119,17 @@ func TestComponentCompletionProps(t *testing.T) {
 	if hasLabel(items, "value") {
 		t.Fatalf("Btn prop completions %v include TabItem's value", labels(items))
 	}
-	if text, ok := editText(items, "variant"); !ok || text != "variant=" {
-		t.Fatalf("variant edit = %q, want %q", text, "variant=")
+	if text, ok := editText(items, "variant"); !ok || text != `variant="$0" ` {
+		t.Fatalf("variant edit = %q, want %q", text, `variant="$0" `)
+	}
+	if format, ok := itemFormat(items, "variant"); !ok || format != protocol.InsertTextFormatSnippet {
+		t.Fatalf("variant format = %v, want Snippet", format)
 	}
 	if text, ok := editText(items, "outline"); !ok || text != "outline" {
 		t.Fatalf("outline edit = %q, want %q (a boolean prop completes bare)", text, "outline")
+	}
+	if format, ok := itemFormat(items, "outline"); !ok || format == protocol.InsertTextFormatSnippet {
+		t.Fatalf("outline format = %v, want plain text (a boolean prop takes no value)", format)
 	}
 }
 
@@ -1144,17 +1150,49 @@ func TestComponentCompletionValuePopupAfterAccept(t *testing.T) {
 	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn ")
 	items := s.complete(t, documentURI, 2, 5)
 	text, ok := editText(items, "variant")
-	if !ok || text != "variant=" {
-		t.Fatalf("variant edit = %q, want %q", text, "variant=")
+	if !ok || text != `variant="$0" ` {
+		t.Fatalf("variant edit = %q, want %q", text, `variant="$0" `)
 	}
-	// The editor inserts `variant=` and runs triggerSuggest:
-	// completing right after the `=` must offer the values.
-	acceptedURI := s.open(t, filepath.Join(s.root, "accepted.mdx"), "# Hello\n\n<Btn "+text)
-	values := s.complete(t, acceptedURI, 2, 13)
+	// The editor inserts `variant="" ` with the cursor inside
+	// the quotes and runs triggerSuggest: completing there
+	// must offer the values, bare inside the quotes.
+	acceptedURI := s.open(t, filepath.Join(s.root, "accepted.mdx"), "# Hello\n\n<Btn variant=\"\" ")
+	values := s.complete(t, acceptedURI, 2, 14)
 	for _, want := range []string{"primary", "secondary", "ghost"} {
 		if !hasLabel(values, want) {
 			t.Fatalf("variant completions %v missing %q", labels(values), want)
 		}
+	}
+	if text, ok := editText(values, "primary"); !ok || text != "primary" {
+		t.Fatalf("primary edit = %q, want %q (bare, the quotes are there)", text, "primary")
+	}
+}
+
+// A prop whose value is not a string takes no quotes: the
+// cursor lands bare after `=` with a space after it.
+func TestComponentCompletionNonStringPropHasNoQuotes(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Dropdown ")
+	items := s.complete(t, documentURI, 2, 10)
+	if text, ok := editText(items, "items"); !ok || text != "items=$0 " {
+		t.Fatalf("items edit = %q, want %q (an array value takes no quotes)", text, "items=$0 ")
+	}
+	if format, ok := itemFormat(items, "items"); !ok || format != protocol.InsertTextFormatSnippet {
+		t.Fatalf("items format = %v, want Snippet", format)
+	}
+	if cmd, ok := itemCommand(items, "items"); !ok || cmd.Command != "editor.action.triggerSuggest" {
+		t.Fatalf("items command = %q, want %q", cmd.Command, "editor.action.triggerSuggest")
+	}
+}
+
+// The space after the value is skipped when the cursor
+// already sits before whitespace, or the space would double.
+func TestComponentCompletionPropSkipsSpaceBeforeWhitespace(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<Btn  >")
+	items := s.complete(t, documentURI, 2, 5)
+	if text, ok := editText(items, "variant"); !ok || text != `variant="$0"` {
+		t.Fatalf("variant edit = %q, want %q (no trailing space, one follows)", text, `variant="$0"`)
 	}
 }
 

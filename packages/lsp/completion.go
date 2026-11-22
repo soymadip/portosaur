@@ -114,7 +114,7 @@ func (s *Server) componentCompletion(params *protocol.CompletionParams, text str
 	case tagName:
 		return componentNameCompletions(schema, context, text)
 	case tagProp:
-		return propNameCompletions(schema, context)
+		return propNameCompletions(schema, context, text, params.Position)
 	case tagValue:
 		return propValueCompletions(schema, context)
 	default:
@@ -239,12 +239,14 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 
 // propNameCompletions offers the props of the tag's component,
 // minus the ones already present. Boolean props complete bare
-// (a bare prop means true in JSX); the rest take `name=` so the
-// value can follow, and carry a triggerSuggest command so the
-// value list pops up on its own once the name is accepted (VS
-// Code runs it; Zed ignores completion-item commands, and the
-// values appear there when the quote is typed).
-func propNameCompletions(schema *resolvedSchema, context tagContext) *protocol.CompletionList {
+// (a bare prop means true in JSX); the rest take `name=` with
+// the cursor placed after it: inside quotes for a string value,
+// bare for anything else, and a space after so the next prop
+// has room. The value list pops up on its own once the name is
+// accepted (VS Code runs the triggerSuggest command; Zed
+// ignores completion-item commands, and the values appear
+// there when typing starts).
+func propNameCompletions(schema *resolvedSchema, context tagContext, text string, pos protocol.Position) *protocol.CompletionList {
 	def := componentDef(schema, context.name)
 	if def == nil {
 		return &protocol.CompletionList{}
@@ -252,6 +254,16 @@ func propNameCompletions(schema *resolvedSchema, context tagContext) *protocol.C
 	props := schemaProperties(def)
 	if props == nil {
 		return &protocol.CompletionList{}
+	}
+	// A space follows the value so the next prop has room;
+	// skip it when the cursor already sits before whitespace,
+	// or the space would double.
+	space := " "
+	if offset := positionToOffset(strings.Split(text, "\n"), pos); offset < len(text) {
+		switch text[offset] {
+		case ' ', '\t', '\n', '\r':
+			space = ""
+		}
 	}
 	var items []protocol.CompletionItem
 	for name, raw := range props {
@@ -272,12 +284,17 @@ func propNameCompletions(schema *resolvedSchema, context tagContext) *protocol.C
 		if d := schemaDescription(prop); d != "" {
 			item.Documentation = &protocol.MarkupContent{Kind: protocol.MarkupKindMarkdown, Value: d}
 		}
-		text := name
+		insert := name
 		if !schemaHasType(prop, "boolean") {
-			text += "="
+			item.InsertTextFormat = protocol.InsertTextFormatSnippet
+			if schemaHasType(prop, "string") {
+				insert = name + `="$0"` + space
+			} else {
+				insert = name + "=$0" + space
+			}
 			item.Command = protocol.Command{Title: "Trigger Suggest", Command: "editor.action.triggerSuggest"}
 		}
-		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: text}
+		item.TextEdit = &protocol.TextEdit{Range: context.partialRange, NewText: insert}
 		items = append(items, item)
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
