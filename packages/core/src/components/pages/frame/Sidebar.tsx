@@ -344,6 +344,11 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
   );
   const openStateRef = useRef(openState);
   openStateRef.current = openState;
+  // Whether a scroll position was restored from storage — the
+  // follow effect lets that restored spot win over the jump to
+  // the active link on the first run.
+  const restoredScrollRef = useRef(false);
+  const firstFollowRef = useRef(true);
 
   const isOpen = (item: SidebarItem): boolean => {
     const index = categoryIndex.get(item);
@@ -389,6 +394,7 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
         const scroller = document.getElementById("porto__sidebar");
         if (scroller && typeof stored.scroll === "number") {
           scroller.scrollTop = stored.scroll;
+          restoredScrollRef.current = true;
         }
       }
     } catch {
@@ -529,6 +535,45 @@ export function Sidebar({ prepared }: { prepared: PreparedSidebar }) {
     if (block instanceof HTMLElement) {
       block.style.opacity = "0";
     }
+  }, [current]);
+
+  // Keep the active link visible: when the page changes and the
+  // active link sits outside the pane's visible slice, nudge the
+  // pane just enough to bring it in — below the sticky title row
+  // at the top, above the pane's bottom edge. Only the pane's
+  // own scrollTop moves, never the page's. The check waits out
+  // the 150ms category fold, so the link is measured where it
+  // lands. The first run is skipped when a scroll position was
+  // restored — the visitor's own spot wins over the jump.
+  useEffect(() => {
+    if (firstFollowRef.current) {
+      firstFollowRef.current = false;
+      if (restoredScrollRef.current) {
+        return;
+      }
+    }
+    const timer = window.setTimeout(() => {
+      const pane = document.getElementById("porto__sidebar");
+      const link = pane?.querySelector('.porto-sidebar a[aria-current="page"]');
+      if (!(pane instanceof HTMLElement) || !(link instanceof HTMLElement)) {
+        return;
+      }
+      const paneRect = pane.getBoundingClientRect();
+      const titleRow = pane.querySelector(".porto-sidebar-title-row");
+      const topEdge = Math.max(
+        titleRow?.getBoundingClientRect().bottom ?? paneRect.top,
+        paneRect.top,
+      );
+      const linkRect = link.getBoundingClientRect();
+      if (linkRect.top < topEdge) {
+        pane.scrollTop -= topEdge - linkRect.top;
+      } else if (linkRect.bottom > paneRect.bottom) {
+        pane.scrollTop += linkRect.bottom - paneRect.bottom;
+      }
+    }, 200);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [current]);
 
   const setCategoryOpen = (item: SidebarItem, open: boolean) => {
