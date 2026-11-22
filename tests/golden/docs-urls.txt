@@ -31,13 +31,13 @@
 /docs/markdown/components/dropdown/
 /docs/markdown/components/dynamic-icon/
 /docs/markdown/components/file-tree/
-/docs/markdown/components/gh-info/
 /docs/markdown/components/hint/
 /docs/markdown/components/icon-search/
 /docs/markdown/components/icon/
 /docs/markdown/components/indent/
 /docs/markdown/components/link/
 /docs/markdown/components/preview/
+/docs/markdown/components/repo-info/
 /docs/markdown/components/steps/
 /docs/markdown/components/tabs/
 /docs/markdown/components/topic-list/

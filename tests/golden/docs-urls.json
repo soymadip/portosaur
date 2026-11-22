@@ -1,5 +1,5 @@
 {
-  "generated_from": "Carousel component page",
+  "generated_from": "RepoInfo component page (renamed, six providers)",
   "routes": [
     {
       "url": "/",
@@ -260,7 +260,7 @@
         "Cards",
         "Steps",
         "File Tree",
-        "GhInfo",
+        "RepoInfo",
         "Carousel"
       ]
     },
@@ -335,11 +335,6 @@
       ]
     },
     {
-      "url": "/docs/markdown/components/gh-info/",
-      "title": "GhInfo | Portosaur",
-      "headings": ["GhInfo", "Behavior", "Props Reference"]
-    },
-    {
       "url": "/docs/markdown/components/hint/",
       "title": "Hint | Portosaur",
       "headings": ["Hint", "Positioning & Styles", "Props Reference"]
@@ -379,6 +374,18 @@
         "Supported Formats & Automatic Detection",
         "Layout Modes",
         "<Pv /> Props Reference"
+      ]
+    },
+    {
+      "url": "/docs/markdown/components/repo-info/",
+      "title": "RepoInfo | Portosaur",
+      "headings": [
+        "RepoInfo",
+        "Other Providers",
+        "Self-Hosted Forges",
+        "SourceHut",
+        "Behavior",
+        "Props Reference"
       ]
     },
     {
