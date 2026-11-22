@@ -9,30 +9,18 @@ any procedure where the order matters. The numbers are automatic.
 
 ```jsx
 <Steps>
-  <Step title="Install the CLI">
-    Run `bun add -g @portosaur/cli`.
-  </Step>
-  <Step title="Scaffold a site">
-    Run `porto init` and answer the prompts.
-  </Step>
-  <Step title="Build it">
-    Run `porto build` — the site lands in `build/`.
-  </Step>
+  <Step title="Install the CLI">Run `bun add -g @portosaur/cli`.</Step>
+  <Step title="Scaffold a site">Run `porto init` and answer the prompts.</Step>
+  <Step title="Build it">Run `porto build` — the site lands in `build/`.</Step>
 </Steps>
 ```
 
 The example above, live:
 
 <Steps>
-  <Step title="Install the CLI">
-    Run `bun add -g @portosaur/cli`.
-  </Step>
-  <Step title="Scaffold a site">
-    Run `porto init` and answer the prompts.
-  </Step>
-  <Step title="Build it">
-    Run `porto build` — the site lands in `build/`.
-  </Step>
+  <Step title="Install the CLI">Run `bun add -g @portosaur/cli`.</Step>
+  <Step title="Scaffold a site">Run `porto init` and answer the prompts.</Step>
+  <Step title="Build it">Run `porto build` — the site lands in `build/`.</Step>
 </Steps>
 
 ## Behavior
@@ -48,13 +36,13 @@ The example above, live:
 
 ### `<Steps />`
 
-| Prop | Type | Description |
-| ---- | ---- | ----------- |
+| Prop       | Type        | Description            |
+| ---------- | ----------- | ---------------------- |
 | `children` | `ReactNode` | The `<Step>` elements. |
 
 ### `<Step />`
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `title` | `string` | — | The step heading. |
-| `children` | `ReactNode` | — | The step body. |
+| Prop       | Type        | Default | Description       |
+| ---------- | ----------- | ------- | ----------------- |
+| `title`    | `string`    | —       | The step heading. |
+| `children` | `ReactNode` | —       | The step body.    |

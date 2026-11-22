@@ -54,12 +54,10 @@
 .porto-file-tree__folder-icon--open {
   display: none;
 }
-.porto-file-tree__folder[open]
-  .porto-file-tree__folder-icon--closed {
+.porto-file-tree__folder[open] .porto-file-tree__folder-icon--closed {
   display: none;
 }
-.porto-file-tree__folder[open]
-  .porto-file-tree__folder-icon--open {
+.porto-file-tree__folder[open] .porto-file-tree__folder-icon--open {
   display: inline-flex;
 }
 /* The chevron marker: same size and rotation as Details. */
