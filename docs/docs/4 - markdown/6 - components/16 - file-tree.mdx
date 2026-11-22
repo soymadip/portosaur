@@ -1,0 +1,70 @@
+---
+title: "File Tree"
+desc: "A file listing for docs — folders that open and close, files as rows."
+icon: "lu:folder-tree"
+---
+
+Show a project layout or a directory of files. Folders open and close
+on click; files are plain rows. Names render in mono.
+
+```jsx
+<FileTree>
+  <Folder name="src" defaultOpen>
+    <File name="index.ts" />
+    <File name="app.tsx" />
+    <Folder name="components">
+      <File name="Button.tsx" />
+    </Folder>
+  </Folder>
+  <File name="package.json" />
+</FileTree>
+```
+
+The example above, live — try opening the `components` folder:
+
+<FileTree>
+  <Folder name="src" defaultOpen>
+    <File name="index.ts" />
+    <File name="app.tsx" />
+    <Folder name="components">
+      <File name="Button.tsx" />
+    </Folder>
+  </Folder>
+  <File name="package.json" />
+</FileTree>
+
+## Behavior
+
+- **Folders.** Click a folder to open or close it. Folders start
+  closed unless `defaultOpen` is set. The chevron rotates and the
+  folder icon swaps open and closed; the fold animates over 200ms,
+  like `<Details>`.
+- **Files.** A file is a row with an icon and a name. The icon is a
+  plain file unless the `icon` prop gives an Iconify id.
+- **Nesting.** Folders nest as deep as needed — each level indents
+  behind a hairline guide.
+- **No JavaScript.** A folder is a native `<details>` element, so
+  the tree works with scripting off.
+
+## Props Reference
+
+### `<FileTree />`
+
+| Prop | Type | Description |
+| ---- | ---- | ----------- |
+| `children` | `ReactNode` | The `<File>` and `<Folder>` elements. |
+
+### `<File />`
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `name` | `string` | — | The file name, shown in mono. Required. |
+| `icon` | `string` | Plain file | An Iconify id for the file icon, like `lu:file-json`. |
+
+### `<Folder />`
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `name` | `string` | — | The folder name, shown in mono. Required. |
+| `defaultOpen` | `boolean` | `false` | Open the folder by default. |
+| `children` | `ReactNode` | — | The files and folders inside. |

@@ -1,0 +1,114 @@
+/* FileTree — a file listing. Rendered by FileTree/File/Folder.
+   A Folder is a native <details> (the same collapsible Details
+   uses), so the fold animation below mirrors the Details rules
+   in content.css — those rules skip .not-content, and this panel
+   carries it, so the tree needs its own copy. */
+
+.porto-file-tree {
+  margin-top: var(--porto-content-gap-y);
+  padding: 0.5rem;
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 0.5rem;
+  background-color: var(--porto-color-gray-6);
+  font-size: 0.875rem;
+}
+.porto-file-tree__file,
+.porto-file-tree__folder-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+.porto-file-tree__file:hover,
+.porto-file-tree__folder-summary:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-gray-2) 8%,
+    transparent
+  );
+}
+.porto-file-tree__folder-summary {
+  cursor: pointer;
+  list-style: none;
+}
+.porto-file-tree__folder-summary::marker,
+.porto-file-tree__folder-summary::-webkit-details-marker {
+  display: none;
+}
+.porto-file-tree__file-icon,
+.porto-file-tree__folder-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--porto-color-gray-3);
+}
+.porto-file-tree__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+/* The folder icon swaps closed and open with the fold. */
+.porto-file-tree__folder-icon--open {
+  display: none;
+}
+.porto-file-tree__folder[open]
+  .porto-file-tree__folder-icon--closed {
+  display: none;
+}
+.porto-file-tree__folder[open]
+  .porto-file-tree__folder-icon--open {
+  display: inline-flex;
+}
+/* The chevron marker: same size and rotation as Details. */
+.porto-file-tree__folder-summary .porto-details-marker {
+  --porto-details-marker-size: 1.25rem;
+
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: var(--porto-details-marker-size);
+}
+.porto-file-tree__folder[open]
+  > .porto-file-tree__folder-summary
+  .porto-details-marker {
+  transform: rotateZ(90deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .porto-file-tree__folder-summary .porto-details-marker {
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* The fold, same `::details-content` trick as Details: the
+     UA's `content-visibility: hidden` flips instantly, so we
+     override it and hide via opacity + visibility instead. */
+  .porto-file-tree__folder::details-content {
+    overflow: hidden;
+    block-size: 0;
+    opacity: 0;
+    visibility: hidden;
+    content-visibility: visible;
+    transition:
+      block-size 200ms ease-out,
+      opacity 200ms ease-out,
+      visibility 0s 200ms;
+    transition-behavior: allow-discrete;
+  }
+  .porto-file-tree__folder[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      block-size 200ms ease-out,
+      opacity 200ms ease-out,
+      visibility 0s;
+  }
+}
+/* Nested files sit under the folder's icon, behind a hairline
+   guide that drops from the chevron. */
+.porto-file-tree__folder-children {
+  margin-inline-start: 0.5rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 1px solid var(--porto-color-hairline-light);
+}

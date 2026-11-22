@@ -102,6 +102,7 @@
 @import "./components/Pv.css";
 @import "./components/IconSearch.css";
 @import "./components/Diagram.css";
+@import "./components/FileTree.css";
 @import "./reduced-motion.css";
 @import "./animations.css";
 @import "./print.css";

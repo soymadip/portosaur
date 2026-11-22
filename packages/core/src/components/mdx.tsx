@@ -19,6 +19,7 @@ import {
 } from "./mdx/CodeBlockTabs.tsx";
 import { Details } from "./mdx/Details.tsx";
 import { Diagram } from "./mdx/Diagram.tsx";
+import { File, FileTree, Folder } from "./mdx/FileTree.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
 import { Heading } from "./mdx/Heading.tsx";
 import { Hint } from "./mdx/Hint.tsx";
@@ -114,6 +115,7 @@ const BLOCK_COMPONENTS: Set<unknown> = new Set([
   Details,
   Diagram,
   Dropdown,
+  FileTree,
   Hint,
   IconSearch,
   Indent,
@@ -213,6 +215,9 @@ export function getMDXComponents(components?: MDXComponents) {
     Diagram,
     Dropdown,
     DynamicIcon,
+    File,
+    FileTree,
+    Folder,
     Hint,
     Icon,
     IconSearch,
@@ -275,6 +280,7 @@ export {
 } from "./mdx/CodeBlockTabs.tsx";
 export { Details } from "./mdx/Details.tsx";
 export { DynamicIcon } from "./mdx/DynamicIcon.tsx";
+export { File, FileTree, Folder } from "./mdx/FileTree.tsx";
 export { Hint } from "./mdx/Hint.tsx";
 export { Icon } from "./mdx/Icon.tsx";
 export { IconSearch } from "./mdx/IconSearch.tsx";
