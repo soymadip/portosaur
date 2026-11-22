@@ -48,7 +48,7 @@ func (s *Server) projectFor(documentURI uri.URI) (string, bool) {
 // prop values in MDX from the components schema. A document
 // outside a Portosaur project gets an empty list, not an error.
 func (s *Server) Completion(ctx context.Context, params *protocol.CompletionParams) (protocol.CompletionResult, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return &protocol.CompletionList{}, nil
 	}

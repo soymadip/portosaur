@@ -25,7 +25,7 @@ import (
 // definition's destination jumps to the target page or
 // heading, like an inline link.
 func (s *Server) Definition(_ context.Context, params *protocol.DefinitionParams) (protocol.DefinitionResult, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}

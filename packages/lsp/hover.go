@@ -13,7 +13,7 @@ import (
 // value. In MDX it covers frontmatter keys and component names
 // and props.
 func (s *Server) Hover(ctx context.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Position, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}

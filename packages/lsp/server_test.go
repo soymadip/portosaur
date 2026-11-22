@@ -1596,3 +1596,49 @@ func TestMDXOutsideProjectIsEmpty(t *testing.T) {
 		t.Fatalf("completions outside a project = %v, want none", labels(items))
 	}
 }
+
+// TestCompletionWaitsForDidChange covers the stale-read race: a
+// completion requested while the didChange carrying the typed
+// text is still in flight must wait for the change and answer
+// from the new text, not the old one. The change lands from a
+// goroutine after a short delay. Without the wait the completion
+// sees the old text, whose last line is above the cursor, and
+// offers nothing.
+func TestCompletionWaitsForDidChange(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSome text.\n")
+	changed := make(chan struct{})
+	go func() {
+		defer close(changed)
+		time.Sleep(20 * time.Millisecond)
+		err := s.local.DidChange(context.Background(), &protocol.DidChangeTextDocumentParams{
+			TextDocument: protocol.VersionedTextDocumentIdentifier{
+				TextDocumentIdentifier: protocol.TextDocumentIdentifier{URI: documentURI},
+				Version:                2,
+			},
+			ContentChanges: []protocol.TextDocumentContentChangeEvent{
+				&protocol.TextDocumentContentChangeWholeDocument{Text: "# Page\n\nSome text.\n\n<"},
+			},
+		})
+		if err != nil {
+			t.Errorf("didChange: %v", err)
+		}
+	}()
+	result, err := s.local.Completion(context.Background(), &protocol.CompletionParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: documentURI},
+			Position:     protocol.Position{Line: 4, Character: 1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("completion: %v", err)
+	}
+	list, ok := result.(*protocol.CompletionList)
+	if !ok {
+		t.Fatalf("completion: got %T, want *protocol.CompletionList", result)
+	}
+	<-changed
+	if !hasLabel(list.Items, "Btn") {
+		t.Fatalf("completions = %v, want the tag list including Btn", labels(list.Items))
+	}
+}

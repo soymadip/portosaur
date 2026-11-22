@@ -15,7 +15,7 @@ import (
 // can substitute get a hint: unknown keys already get a
 // diagnostic, and a map, list, or boolean cannot be substituted.
 func (s *Server) InlayHint(_ context.Context, params *protocol.InlayHintParams) ([]protocol.InlayHint, error) {
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Range.End, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}

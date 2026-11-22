@@ -23,7 +23,7 @@ func (s *Server) CodeAction(_ context.Context, params *protocol.CodeActionParams
 	if !wantsQuickFix(params.Context.Only) {
 		return nil, nil
 	}
-	text, ok := s.documents.waitFor(params.TextDocument.URI, 100*time.Millisecond)
+	text, ok := s.documents.waitForPosition(params.TextDocument.URI, params.Range.End, 100*time.Millisecond)
 	if !ok {
 		return nil, nil
 	}
