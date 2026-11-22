@@ -1,6 +1,7 @@
 {
   "activationEvents": [
     "onCommand:portosaur.preview",
+    "onCommand:portosaur.showServerStatus",
     "onCommand:portosaur.stopPreviewServer",
     "onLanguage:mdx",
     "workspaceContains:**/porto.yml",
@@ -21,6 +22,10 @@
       {
         "command": "portosaur.restartServer",
         "title": "Portosaur: Restart Language Server"
+      },
+      {
+        "command": "portosaur.showServerStatus",
+        "title": "Portosaur: Show Language Server Status"
       },
       {
         "command": "portosaur.stopPreviewServer",

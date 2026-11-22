@@ -36,7 +36,7 @@ how `porto.yml` is handled.
 | Code actions (quick fixes)                         |   Yes   | Yes |                                                                                         |
 | Page outline                                       |   Yes   | Yes | Headings nested by level, plus the frontmatter keys                                     |
 | MDX preview                                        |   Yes   |  —  | Zed extensions cannot show panels                                                       |
-| Server status in the status bar                    |   Yes   |  —  | Click to restart the server. Zed extensions cannot add status bar items                 |
+| Server status in the status bar                    |   Yes   |  —  | Click to open the server menu. Zed extensions cannot add status bar items               |
 | `porto.yml` handling                               |   Yes   | Yes | Through the `$schema` line: the YAML extension in VS Code, built-in YAML support in Zed |
 
 The extensions themselves live in `vscode/` and `zed/`. The server
