@@ -47,8 +47,8 @@ func TestVarsInlayHintShowsValue(t *testing.T) {
 	s := startTestServer(t, varsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nWelcome to {vars.project.name} at {vars.site.url}.\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 2 || labels[0] != "Portosaur" || labels[1] != "https://example.com" {
-		t.Fatalf("inlay hints = %v, want [Portosaur https://example.com]", labels)
+	if labels := hintLabels(hints); len(labels) != 2 || labels[0] != "→ Portosaur" || labels[1] != "→ https://example.com" {
+		t.Fatalf("inlay hints = %v, want [→ Portosaur → https://example.com]", labels)
 	}
 	// Each hint sits right after its reference's closing brace.
 	if hints[0].Position != (protocol.Position{Line: 2, Character: 30}) {
@@ -66,8 +66,18 @@ func TestVarsInlayHintSkipsUnknownAndNonScalar(t *testing.T) {
 	s := startTestServer(t, varsFixture(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{vars.nope} and {vars.project} and {vars.project.name}\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "Portosaur" {
-		t.Fatalf("inlay hints = %v, want only Portosaur", labels)
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ Portosaur" {
+		t.Fatalf("inlay hints = %v, want only → Portosaur", labels)
+	}
+}
+
+func TestVarsInlayHintSkipsEmptyValue(t *testing.T) {
+	root := contentFixture(t, "docs_home:\n  title: Docs\nvars:\n  empty: \"\"\n  name: Portosaur\n", nil)
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{vars.empty} and {vars.name}\n")
+	hints := s.inlayHints(t, documentURI, wholeDocument())
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ Portosaur" {
+		t.Fatalf("inlay hints = %v, want only → Portosaur (an empty value gets no hint, not a bare arrow)", labels)
 	}
 }
 
@@ -88,7 +98,7 @@ func TestVarsInlayHintRespectsRange(t *testing.T) {
 		End:   protocol.Position{Line: 4, Character: 20},
 	}
 	hints := s.inlayHints(t, documentURI, rng)
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "https://example.com" {
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ https://example.com" {
 		t.Fatalf("inlay hints = %v, want only the site url", labels)
 	}
 }
@@ -100,13 +110,10 @@ func TestVarsHoverDescription(t *testing.T) {
 	if content == nil {
 		t.Fatal("no hover for a {vars.} reference")
 	}
-	for _, want := range []string{"{vars.project.name}", "vars:", "porto.yml"} {
+	for _, want := range []string{"{vars.project.name}", "vars:", "porto.yml", "`Portosaur`"} {
 		if !strings.Contains(content.Value, want) {
 			t.Fatalf("hover = %q, want it to mention %q", content.Value, want)
 		}
-	}
-	if strings.Contains(content.Value, "Portosaur") {
-		t.Fatalf("hover = %q, want no value in the hover (it shows inline)", content.Value)
 	}
 	if strings.Contains(content.Value, "string") {
 		t.Fatalf("hover = %q, want no type in the hover", content.Value)
@@ -134,8 +141,8 @@ func TestEnvInlayHintShowsProcessEnvValue(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nWelcome to {env.PORTO_LSP_TEST_PROC}.\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-process" {
-		t.Fatalf("inlay hints = %v, want [from-process]", labels)
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ from-process" {
+		t.Fatalf("inlay hints = %v, want [→ from-process]", labels)
 	}
 	if hints[0].Position != (protocol.Position{Line: 2, Character: 36}) {
 		t.Fatalf("hint position = %+v, want line 2 character 36 (right after the reference)", hints[0].Position)
@@ -153,8 +160,8 @@ func TestEnvInlayHintShowsDotenvValue(t *testing.T) {
 	s := startTestServer(t, root)
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSite is {env.PORTO_LSP_TEST_FILE}.\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-dotenv" {
-		t.Fatalf("inlay hints = %v, want [from-dotenv]", labels)
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ from-dotenv" {
+		t.Fatalf("inlay hints = %v, want [→ from-dotenv]", labels)
 	}
 }
 
@@ -167,8 +174,8 @@ func TestEnvInlayHintProcessEnvWins(t *testing.T) {
 	s := startTestServer(t, root)
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\nSite is {env.PORTO_LSP_TEST_SHARED}.\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "from-process" {
-		t.Fatalf("inlay hints = %v, want [from-process]", labels)
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ from-process" {
+		t.Fatalf("inlay hints = %v, want [→ from-process]", labels)
 	}
 }
 
@@ -178,8 +185,8 @@ func TestEnvInlayHintSkipsUnknownAndEmpty(t *testing.T) {
 	s := startTestServer(t, fixtureProject(t))
 	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n{env.PORTO_LSP_TEST_NOPE} and {env.PORTO_LSP_TEST_EMPTY} and {env.PORTO_LSP_TEST_DEFINED}\n")
 	hints := s.inlayHints(t, documentURI, wholeDocument())
-	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "shown" {
-		t.Fatalf("inlay hints = %v, want only shown", labels)
+	if labels := hintLabels(hints); len(labels) != 1 || labels[0] != "→ shown" {
+		t.Fatalf("inlay hints = %v, want only → shown (an empty value gets no hint, not a bare arrow)", labels)
 	}
 }
 
@@ -201,13 +208,10 @@ func TestEnvHoverDescription(t *testing.T) {
 	if content == nil {
 		t.Fatal("no hover for a {env.} reference")
 	}
-	for _, want := range []string{"{env.PORTO_LSP_TEST_PROC}", "system environment", "replaces"} {
+	for _, want := range []string{"{env.PORTO_LSP_TEST_PROC}", "system environment", "replaces", "`from-process`"} {
 		if !strings.Contains(content.Value, want) {
 			t.Fatalf("hover = %q, want it to mention %q", content.Value, want)
 		}
-	}
-	if strings.Contains(content.Value, "from-process") {
-		t.Fatalf("hover = %q, want no value in the hover (it shows inline)", content.Value)
 	}
 	if strings.Contains(content.Value, "string") {
 		t.Fatalf("hover = %q, want no type in the hover", content.Value)
@@ -228,8 +232,8 @@ func TestEnvHoverNamesDotenvFile(t *testing.T) {
 	if !strings.Contains(content.Value, ".env.local") {
 		t.Fatalf("hover = %q, want it to name .env.local", content.Value)
 	}
-	if strings.Contains(content.Value, "from-local") {
-		t.Fatalf("hover = %q, want no value in the hover (it shows inline)", content.Value)
+	if !strings.Contains(content.Value, "`from-local`") {
+		t.Fatalf("hover = %q, want it to show the value", content.Value)
 	}
 }
 
