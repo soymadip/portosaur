@@ -137,8 +137,11 @@
     "remark-directive": "^4.0.0",
     "remark-emoji": "^5.0.2",
     "remark-math": "^6.0.0",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
     "sharp": "^0.35.5",
     "shiki": "^4.6.0",
+    "unified": "^11.0.5",
     "zod": "^4.0.0"
   },
   "devDependencies": {
@@ -149,12 +152,9 @@
     "@types/react-dom": "^19.3.0",
     "next": "^16.4.6",
     "postcss": "^8.5.32",
-    "remark-mdx": "^3.1.1",
-    "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "serve": "^14.2.7",
     "tailwindcss": "^4.3.5",
-    "typescript": "^7.0.2",
-    "unified": "^11.0.5"
+    "typescript": "^7.0.2"
   }
 }
