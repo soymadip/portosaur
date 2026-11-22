@@ -104,6 +104,7 @@
 @import "./components/Diagram.css";
 @import "./components/FileTree.css";
 @import "./components/GhInfo.css";
+@import "./components/ImageZoom.css";
 @import "./reduced-motion.css";
 @import "./animations.css";
 @import "./print.css";

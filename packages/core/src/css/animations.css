@@ -277,6 +277,57 @@
   }
 }
 
+/* Image viewer: a 300ms fade, the backdrop fading with it.
+   Same shape as the diagram viewer — entry pure CSS via
+   `@starting-style` + `allow-discrete`, exit on the `closing`
+   class over 300ms (ImageZoom closes for real 300ms later). No
+   slide: the viewer goes full screen on a phone, so there is
+   nowhere to slide from. */
+.porto-image-dialog {
+  transition:
+    opacity 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+.porto-image-dialog::backdrop {
+  background-color: hsla(0, 0%, 0%, 0.2);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition:
+    opacity 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+@starting-style {
+  .porto-image-dialog,
+  .porto-image-dialog::backdrop {
+    opacity: 0;
+  }
+}
+/* The exit fades toward the closed state — `@starting-style`
+   alone only covers the entry, so without this the dialog would
+   sit at full opacity for 300ms and then vanish. */
+.porto-image-dialog:not([open]) {
+  opacity: 0;
+}
+.porto-image-dialog:not([open])::backdrop {
+  opacity: 0;
+}
+/* Closing: the exit runs on this class while the dialog is
+   still open (ImageZoom closes for real 300ms later) — the
+   pure-CSS exit never ran on some phones, so the dialog just
+   blinked out. The dialog and the backdrop fade together, so by
+   the time the dialog closes for real there is nothing left to
+   snap away. */
+.porto-image-dialog--closing {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.porto-image-dialog--closing::backdrop {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
 /* Hamburger icon morph (three lines -> X), 0.25s. */
 .porto-hamburger span {
   transition:

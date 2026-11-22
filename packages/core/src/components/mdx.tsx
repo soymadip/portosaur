@@ -26,6 +26,7 @@ import { Heading } from "./mdx/Heading.tsx";
 import { Hint } from "./mdx/Hint.tsx";
 import { Icon } from "./mdx/Icon.tsx";
 import { IconSearch } from "./mdx/IconSearch.tsx";
+import { ImageZoom } from "./mdx/ImageZoom.tsx";
 import { Indent } from "./mdx/Indent.tsx";
 import { Link } from "./mdx/Link.tsx";
 import { Pv } from "./mdx/Pv.tsx";
@@ -245,6 +246,9 @@ export function getMDXComponents(components?: MDXComponents) {
        Fumadocs-style — the wrapper scrolls, the table keeps its
        rounded corners. */
     table: Table,
+    /* Every markdown image opens in the zoom viewer on click.
+       An image inside a link keeps its link instead. */
+    img: ImageZoom,
     /* Headings carry an anchor link button, Fumadocs wiki style:
        the text links to its own anchor, the button copies it. */
     h2: (props: HTMLAttributes<HTMLHeadingElement>) => (
@@ -288,6 +292,7 @@ export { GhInfo } from "./mdx/GhInfo.tsx";
 export { Hint } from "./mdx/Hint.tsx";
 export { Icon } from "./mdx/Icon.tsx";
 export { IconSearch } from "./mdx/IconSearch.tsx";
+export { ImageZoom } from "./mdx/ImageZoom.tsx";
 export { Indent } from "./mdx/Indent.tsx";
 export { Link } from "./mdx/Link.tsx";
 export { Pv } from "./mdx/Pv.tsx";
