@@ -42,7 +42,6 @@ export function File({
 }) {
   return (
     <div className="porto-file-tree__file">
-      <span className="porto-file-tree__marker-slot" aria-hidden="true" />
       <span className="porto-file-tree__file-icon">
         <SiteIcon
           icon={icon ?? getFileIcon(name)}
@@ -94,9 +93,6 @@ export function Folder({
       open={defaultOpen || undefined}
     >
       <summary className="porto-file-tree__folder-summary">
-        <span className="porto-file-tree__marker-slot" aria-hidden="true">
-          {hasChildren && <DetailsMarker />}
-        </span>
         <span className="porto-file-tree__folder-icon">
           {folderIcon ? (
             <SiteIcon icon={folderIcon} size="16px" />
@@ -113,6 +109,11 @@ export function Folder({
         </span>
         <span className="porto-file-tree__name">{displayName}</span>
         {comment && <span className="porto-file-tree__comment">{comment}</span>}
+        {hasChildren && (
+          <span className="porto-file-tree__marker-slot" aria-hidden="true">
+            <DetailsMarker />
+          </span>
+        )}
       </summary>
       <div className="porto-file-tree__folder-children">{children}</div>
     </details>

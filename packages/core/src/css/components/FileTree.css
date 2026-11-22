@@ -33,6 +33,13 @@
     transparent
   );
 }
+@media (prefers-reduced-motion: no-preference) {
+  /* The hover tint fades in and out (150ms, like the sidebar). */
+  .porto-file-tree__file,
+  .porto-file-tree__folder-summary {
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
 .porto-file-tree__folder-summary {
   cursor: pointer;
   list-style: none;
@@ -47,10 +54,9 @@
   flex-shrink: 0;
   color: var(--porto-color-gray-3);
 }
-/* The chevron's slot, kept on every row so the icons line up:
-   folders with children show the chevron here, files and empty
-   folders leave it blank. The svg is `1em`, so the font-size
-   sets the chevron's size. */
+/* The chevron, pinned to the row's end — only folders with
+   children show one. The svg is `1em`, so the font-size sets
+   the chevron's size. */
 .porto-file-tree__marker-slot {
   display: inline-flex;
   flex-shrink: 0;
@@ -58,6 +64,7 @@
   justify-content: center;
   width: 1rem;
   height: 1rem;
+  margin-inline-start: auto;
   font-size: 1rem;
   color: var(--porto-color-gray-3);
 }
@@ -86,6 +93,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 /* A row with a note keeps the name readable: the name holds
    up to a little over half the row, the note takes the rest
@@ -96,27 +104,54 @@
   flex-shrink: 0;
   max-width: 55%;
 }
-/* A `#` note after the name, muted and a step smaller — it
-   truncates like the name. */
+/* A `#` note after the name, muted and two steps smaller, with
+   room between it and the name — it truncates like the name. */
 .porto-file-tree__comment {
   min-width: 0;
+  margin-inline-start: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--porto-color-gray-3);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 }
-/* The folder icon swaps closed and open with the fold. */
+/* The folder icon swaps closed and open with the fold — a
+   cross-fade, not a snap. Both glyphs sit on top of each other
+   in a fixed 1rem box; the fold fades one out and the other in. */
+.porto-file-tree__folder-icon {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+}
+.porto-file-tree__folder-icon--closed,
 .porto-file-tree__folder-icon--open {
-  display: none;
-}
-.porto-file-tree__folder[open] .porto-file-tree__folder-icon--closed {
-  display: none;
-}
-.porto-file-tree__folder[open] .porto-file-tree__folder-icon--open {
+  position: absolute;
+  inset: 0;
   display: inline-flex;
 }
+.porto-file-tree__folder-icon--open {
+  opacity: 0;
+}
+.porto-file-tree__folder[open] .porto-file-tree__folder-icon--closed {
+  opacity: 0;
+}
+.porto-file-tree__folder[open] .porto-file-tree__folder-icon--open {
+  opacity: 1;
+}
 @media (prefers-reduced-motion: no-preference) {
+  .porto-file-tree__folder-icon--closed,
+  .porto-file-tree__folder-icon--open {
+    transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Lets `block-size: 0 -> auto` interpolate for the fold
+     below. Without it the fold snaps at the midpoint instead
+     of gliding — the matching rule in content.css skips
+     .not-content, so the tree needs its own. */
+  .porto-file-tree__folder {
+    interpolate-size: allow-keywords;
+  }
   /* The fold, same `::details-content` trick as Details: the
      UA's `content-visibility: hidden` flips instantly, so we
      override it and hide via opacity + visibility instead. */
@@ -169,7 +204,7 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background-color: var(--porto-color-hairline-light);
+  background-color: var(--porto-color-gray-4);
 }
 /* The last file's line stops halfway down its own row. */
 .porto-file-tree__folder-children > .porto-file-tree__file:last-child::before {
@@ -192,7 +227,7 @@
   top: 0;
   height: 50%;
   width: 1px;
-  background-color: var(--porto-color-hairline-light);
+  background-color: var(--porto-color-gray-4);
 }
 /* The stub from the line to the row's icon. */
 .porto-file-tree__folder-children > .porto-file-tree__file::after,
@@ -204,5 +239,5 @@
   inset-inline-start: -0.5rem;
   top: 50%;
   width: 1rem;
-  border-top: 1px solid var(--porto-color-hairline-light);
+  border-top: 1px solid var(--porto-color-gray-4);
 }
