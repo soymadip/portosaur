@@ -99,10 +99,10 @@ body:has(#porto__sidebar:popover-open) {
     /* OG Docusaurus pattern: the sidebar is full-height and its
        top navbar-height slice sits hidden behind the navbar (the
        navbar paints above it, z-index 10 over 5). The slice holds
-       a copy of the navbar brand (see `__brand` below), revealed
-       when the navbar hides — so when the navbar hides on scroll,
-       the sidebar stays exactly where it is instead of sliding
-       up, and the brand takes the navbar's place. */
+       a copy of the navbar brand (see `__brand` below). When the
+       navbar hides, the pane glides up with it (see the
+       navbar-hidden rule below) and the brand slides off the
+       top with the pane. */
     inset-block: 0 0;
   }
   /* The collapse slide: transform + inset-block + border-radius
@@ -123,6 +123,18 @@ body:has(#porto__sidebar:popover-open) {
       opacity 0.25s,
       display 0.25s allow-discrete,
       overlay 0.25s allow-discrete;
+  }
+  /* When the navbar hides on scroll, the sidebar glides up with
+     it (stuck to the navbar's bottom edge), so the sidebar and
+     the TOC move as one with the navbar. Only the top moves —
+     the bottom stays at the viewport bottom, so the pane grows
+     taller and the tree gains the freed space. The `inset-block`
+     entry in the transition above animates the move. Scoped to
+     the expanded sidebar: the collapsed floating card keeps its
+     own inset from the navbar. */
+  html.porto-navbar-hidden:not(.porto-sidebar-collapsed)
+    .porto-mobile-menu--persistent {
+    inset-block-start: calc(-1 * var(--porto-nav-height));
   }
   /* Desktop sidebar collapse (Fumadocs' docs layout): the pane
      slides out by its own width while the content expands into
