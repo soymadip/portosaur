@@ -66,6 +66,7 @@
 @import "./components/SearchDialog.css";
 @import "./components/SearchResults.css";
 @import "./components/SearchHighlight.css";
+@import "./components/search-input.css";
 @import "./components/Sidebar.css";
 @import "./components/MobileMenu.css";
 @import "./components/MobileMenuFooter.css";

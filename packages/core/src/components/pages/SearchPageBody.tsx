@@ -106,7 +106,7 @@ export function SearchPageBody() {
         placeholder="Search the documentation…"
         aria-label="Search the documentation"
         autoComplete="off"
-        className="porto-search-page__input"
+        className="porto-search-input porto-search-page__input"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
