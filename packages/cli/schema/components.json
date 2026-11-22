@@ -313,17 +313,22 @@
     },
     "File": {
       "type": "object",
-      "description": "File — one row in a `FileTree`: an icon and a mono name. The icon is a plain file unless the `icon` prop gives an Iconify id.",
+      "description": "File — one row in a `FileTree`: an icon and a name. The icon comes from the file's extension or well-known name unless the `icon` prop gives an Iconify id.",
       "properties": {
         "name": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "The file name, shown in mono."
+          "description": "The file name."
         },
         "icon": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "An Iconify id for the file icon, like `lu:file-json`. Defaults to a plain file."
+          "description": "An Iconify id for the file icon, like `lu:file-json`. Defaults to the icon for the file's extension or name."
+        },
+        "comment": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "A note after the name, shown muted with a `#` in front of it."
         }
       },
       "required": ["name"],
@@ -331,7 +336,7 @@
     },
     "FileTree": {
       "type": "object",
-      "description": "FileTree — a file listing for docs: folders that open and close, files as rows. A Folder is a native `<details>` element (the same collapsible Details uses), so no JavaScript is involved — the chevron rotates and the folder icon swaps open and closed in CSS. File names render in mono.",
+      "description": "FileTree — a file listing for docs: folders that open and close, files as rows. The look follows Fumadocs' file tree — a bordered card, rows with an icon and a name, a hairline guide behind nested rows, no chevron: the folder icon itself swaps open and closed. A Folder is a native `<details>` element, so no JavaScript is involved.",
       "properties": {},
       "additionalProperties": false
     },
@@ -342,33 +347,26 @@
         "name": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "The folder name, shown in mono."
+          "description": "The folder name."
+        },
+        "icon": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An Iconify id for the folder icon. Defaults to the icon for the folder's name, or the folder glyph."
         },
         "defaultOpen": {
           "x-ts-type": "boolean",
           "type": "boolean",
           "description": "Open the folder by default. Closed by default.",
           "default": false
+        },
+        "comment": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "A note after the name, shown muted with a `#` in front of it."
         }
       },
       "required": ["name"],
-      "additionalProperties": false
-    },
-    "GhInfo": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "x-ts-type": "string",
-          "type": "string",
-          "description": "The repository owner, like `soymadip`."
-        },
-        "repo": {
-          "x-ts-type": "string",
-          "type": "string",
-          "description": "The repository name, like `portosaur`."
-        }
-      },
-      "required": ["owner", "repo"],
       "additionalProperties": false
     },
     "Hint": {
@@ -452,6 +450,42 @@
           "description": "The link target. Without it the text renders unlinked."
         }
       },
+      "additionalProperties": false
+    },
+    "RepoInfo": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The repository owner, like `soymadip`."
+        },
+        "repo": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The repository name, like `portosaur`."
+        },
+        "provider": {
+          "x-ts-type": "RepoProvider",
+          "type": "string",
+          "enum": [
+            "github",
+            "gitlab",
+            "codeberg",
+            "forgejo",
+            "gitea",
+            "sourcehut"
+          ],
+          "description": "Where the repo lives: `github`, `gitlab`, `codeberg`, `forgejo`, `gitea` or `sourcehut` (default `github`).",
+          "default": "github"
+        },
+        "host": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The instance the repo lives on, like `git.example.com`. Required for `forgejo` and `gitea`."
+        }
+      },
+      "required": ["owner", "repo"],
       "additionalProperties": false
     },
     "Step": {

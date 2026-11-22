@@ -502,7 +502,12 @@ function typeToSchema(
 
   const branches = splitTopLevel(typeText, "|")
     .map((branch) => branch.trim())
-    .filter((branch) => branch !== "null" && branch !== "undefined");
+    // A leading `|` (prettier's multi-line union style) leaves an
+    // empty first branch — that is not an unmapped type.
+    .filter(
+      (branch) =>
+        branch !== "" && branch !== "null" && branch !== "undefined",
+    );
   if (branches.length === 0) {
     return schema;
   }

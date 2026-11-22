@@ -1,8 +1,8 @@
-/* GhInfo — a card linking to a GitHub repo, with its star
+/* RepoInfo — a card linking to a GitHub repo, with its star
    and fork counts. The prose link color would tint the whole
    card accent, so every row carries its own color and the icons
    inherit from their row. */
-.porto-gh-info {
+.porto-repo-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -21,7 +21,7 @@
     border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-a.porto-gh-info:hover {
+a.porto-repo-info:hover {
   border-color: color-mix(
     in srgb,
     var(--porto-color-text-accent) 70%,
@@ -29,31 +29,31 @@ a.porto-gh-info:hover {
   );
   box-shadow: var(--porto-shadow-md);
 }
-.porto-gh-info__head {
+.porto-repo-info__head {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
   color: var(--porto-color-white);
 }
-.porto-gh-info__name {
+.porto-repo-info__name {
   font-weight: 600;
   /* A long owner/repo name wraps instead of blowing the card
      past the page on a narrow screen. */
   overflow-wrap: anywhere;
 }
-.porto-gh-info__description {
+.porto-repo-info__description {
   font-size: 0.875rem;
   color: var(--porto-color-gray-3);
 }
-.porto-gh-info__counts {
+.porto-repo-info__counts {
   display: flex;
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
   color: var(--porto-color-gray-3);
 }
-.porto-gh-info__count {
+.porto-repo-info__count {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
