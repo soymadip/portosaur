@@ -4,6 +4,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import {
   LanguageClient,
+  State,
   Trace,
   TransportKind,
 } from "vscode-languageclient/node";
@@ -20,6 +21,8 @@ let client: LanguageClient | undefined;
 let starting = false;
 let restartTimer: ReturnType<typeof setTimeout> | undefined;
 let preview: PreviewManager | undefined;
+let statusBarItem: vscode.StatusBarItem | undefined;
+let stateSubscription: vscode.Disposable | undefined;
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -68,6 +71,10 @@ export async function deactivate(): Promise<void> {
   clearTimeout(restartTimer);
   preview?.dispose();
   preview = undefined;
+  stateSubscription?.dispose();
+  stateSubscription = undefined;
+  statusBarItem?.dispose();
+  statusBarItem = undefined;
   // A client whose start failed is not running: stopping it
   // throws.
   if (client?.needsStop()) {
@@ -187,6 +194,11 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
       serverOptions,
       clientOptions,
     );
+    showStatusBarItem(context);
+    updateStatusBarItem(State.Starting);
+    stateSubscription = client.onDidChangeState((event) => {
+      updateStatusBarItem(event.newState);
+    });
     await client.setTrace(Trace.fromString(traceLevel()));
     await client.start();
   } catch (error) {
@@ -203,8 +215,53 @@ async function restartClient(context: vscode.ExtensionContext): Promise<void> {
   if (client?.needsStop()) {
     await client.stop();
   }
+  stateSubscription?.dispose();
+  stateSubscription = undefined;
   client = undefined;
   await startClient(context);
+}
+
+// showStatusBarItem creates the server status item on first use
+// and shows it. The item appears only once a Portosaur project
+// has started the client, and lives until deactivate.
+function showStatusBarItem(context: vscode.ExtensionContext): void {
+  if (!statusBarItem) {
+    statusBarItem = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Right,
+      100,
+    );
+    statusBarItem.command = "portosaur.restartServer";
+    context.subscriptions.push(statusBarItem);
+  }
+  statusBarItem.show();
+}
+
+// updateStatusBarItem redraws the status item for a client state.
+function updateStatusBarItem(state: State): void {
+  if (!statusBarItem) {
+    return;
+  }
+  switch (state) {
+    case State.Running:
+      statusBarItem.text = "$(check) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server is running. Click to restart.";
+      break;
+    case State.Starting:
+      statusBarItem.text = "$(sync~spin) Portosaur";
+      statusBarItem.tooltip = "Portosaur language server is starting…";
+      break;
+    case State.StartFailed:
+      statusBarItem.text = "$(error) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server could not start. Click to restart.";
+      break;
+    case State.Stopped:
+      statusBarItem.text = "$(error) Portosaur";
+      statusBarItem.tooltip =
+        "Portosaur language server is stopped. Click to restart.";
+      break;
+  }
 }
 
 // resolveLocalServer checks a user-provided server path before
