@@ -1,5 +1,5 @@
 {
-  "generated_from": "FileTree page Codeblock Syntax section",
+  "generated_from": "GhInfo component page",
   "routes": [
     {
       "url": "/",
@@ -259,7 +259,8 @@
         "Link",
         "Cards",
         "Steps",
-        "File Tree"
+        "File Tree",
+        "GhInfo"
       ]
     },
     {
@@ -316,6 +317,11 @@
         "Codeblock Syntax",
         "Props Reference"
       ]
+    },
+    {
+      "url": "/docs/markdown/components/gh-info/",
+      "title": "GhInfo | Portosaur",
+      "headings": ["GhInfo", "Behavior", "Props Reference"]
     },
     {
       "url": "/docs/markdown/components/hint/",

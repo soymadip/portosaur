@@ -30,6 +30,7 @@
 /docs/markdown/components/dropdown/
 /docs/markdown/components/dynamic-icon/
 /docs/markdown/components/file-tree/
+/docs/markdown/components/gh-info/
 /docs/markdown/components/hint/
 /docs/markdown/components/icon-search/
 /docs/markdown/components/icon/
