@@ -13,6 +13,16 @@
  * ├── package.json
  * ```
  *
+ * A `#` note after a name renders after it, muted — the first
+ * ` #` splits the name from the note, so a `#` inside the note
+ * itself stays put. A line that is only a `#` note is skipped.
+ *
+ * ```files
+ * my-site/
+ * ├── blog/         # Long-form blog posts and articles
+ * ├── package.json  # Local project dependencies and build scripts
+ * ```
+ *
  * Nesting comes from the column each name starts at (a child
  * starts further right than its parent), so the tree characters
  * (`├──`, `│`, `└──`) are only decoration — plain indentation
@@ -35,12 +45,14 @@ interface FileNode {
   depth: number;
   type: "file";
   name: string;
+  comment?: string;
 }
 
 interface FolderNode {
   depth: number;
   type: "folder";
   name: string;
+  comment?: string;
   children: TreeNode[];
 }
 
@@ -84,19 +96,45 @@ function parseFileTree(code: string): TreeNode | undefined {
     if (!name) {
       continue;
     }
+    // A line that is only a `#` note is skipped — it annotates
+    // the tree, it is not an entry in it.
+    if (name.startsWith("#")) {
+      continue;
+    }
 
-    // Children start at a later column than their parent.
+    // Children start at a later column than their parent. The
+    // column comes from the name before the note is split off —
+    // the note sits after the name, so it never moves it.
     const column = line.length - name.length;
+
+    // A `#` note after the name: `index.ts  # entry point`.
+    // The first ` #` splits them, so a `#` inside the note
+    // itself stays put.
+    let cleanName = name;
+    let comment: string | undefined;
+    const hashAt = name.indexOf(" #");
+    if (hashAt !== -1) {
+      const note = name.slice(hashAt + 2).trim();
+      comment = note ? note : undefined;
+      cleanName = name.slice(0, hashAt).trimEnd();
+    }
+
     let parent: TreeNode | undefined;
     for (let i = column - 1; i >= 0 && !parent; i--) {
       parent = stack.get(i);
     }
 
     const depth = parent ? parent.depth + 1 : 0;
-    const isFolder = name.endsWith("/");
+    const isFolder = cleanName.endsWith("/");
     const node: TreeNode = isFolder
-      ? { type: "folder", name: name.slice(0, -1), children: [], depth }
-      : { type: "file", name, depth };
+      ? {
+          type: "folder",
+          name: cleanName.slice(0, -1),
+          comment,
+          children: [],
+          depth,
+        }
+      : { type: "file", name: cleanName, comment, depth };
     stack.set(column, node);
     if (!parent) {
       roots.push(node);
@@ -140,6 +178,14 @@ function nodeToMdx(node: TreeNode, depth = 0): any {
     { type: "mdxJsxAttribute", name: "name", value: node.name },
   ];
 
+  if (node.comment) {
+    attributes.push({
+      type: "mdxJsxAttribute",
+      name: "comment",
+      value: node.comment,
+    });
+  }
+
   if (node.type === "file") {
     return {
       type: "mdxJsxFlowElement",
@@ -164,6 +210,34 @@ function nodeToMdx(node: TreeNode, depth = 0): any {
     name: "Folder",
     children: node.children.map((item) => nodeToMdx(item, depth + 1)),
   };
+}
+
+/**
+ * Every entry a drawn tree holds, flattened: the icon scan
+ * resolves each name to its auto icon, so the tree's icons
+ * reach the site module. The nameless wrapper around several
+ * roots is not an entry.
+ */
+export function fileTreeEntries(
+  code: string,
+): { name: string; isFolder: boolean }[] {
+  const root = parseFileTree(code);
+  if (!root) {
+    return [];
+  }
+  const entries: { name: string; isFolder: boolean }[] = [];
+  const walk = (node: TreeNode) => {
+    if (node.name) {
+      entries.push({ name: node.name, isFolder: node.type === "folder" });
+    }
+    if (node.type === "folder") {
+      for (const child of node.children) {
+        walk(child);
+      }
+    }
+  };
+  walk(root);
+  return entries;
 }
 
 export default function remarkFileTree() {

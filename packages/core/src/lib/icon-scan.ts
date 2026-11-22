@@ -11,10 +11,12 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { getFileIcon, getFolderIcon } from "./fileIcons.ts";
 import { getIconSvg, hasKnownPrefix } from "./icon-data.ts";
 import { getPrefixRegex } from "./iconPrefixes.ts";
 import { normalizeIconId, type SiteIconData } from "./site-icons.ts";
 import { techMap } from "./techmap.ts";
+import { fileTreeEntries } from "../plugins/remarkFileTree.ts";
 
 export interface IconScanSpec {
   projectDir: string;
@@ -57,6 +59,11 @@ const CORE_ICON_PATTERN = /<SiteIcon[^>]*\b(?:icon|fallbackIcon)="([^"]+)"/g;
 const CORE_FALLBACK_PATTERN = /fallbackIcon:[ \t]*"([^"]+)"/g;
 /** Fixed `icon: "prefix:name"` literals in core's own source. */
 const CORE_OBJECT_ICON_PATTERN = /\bicon:[ \t]*"([a-z]+:[a-z0-9-]+)"/g;
+/** `files` fences (backtick or tilde): their entries' auto icons. */
+const FILES_FENCE_PATTERN =
+  /^(?:```|~~~)files[ \t]*\r?\n([\s\S]*?)^(?:```|~~~)/gim;
+/** `name="..."` on a `<File>` or `<Folder>` element. */
+const TREE_NAME_PATTERN = /<(File|Folder)[^>]*\bname="([^"]+)"/g;
 
 function shortcodePattern(): RegExp {
   return new RegExp(`:(${getPrefixRegex()}):([a-zA-Z0-9-_]+):`, "g");
@@ -213,9 +220,32 @@ export function collectSiteIcons(
         continue;
       }
       readYaml(frontmatterOf(text));
-      readBody(stripCodeBlocks(text));
+      const body = stripCodeBlocks(text);
+      readBody(body);
       for (const slug of slugsFromPath(file, dir)) {
         slugs.add(slug);
+      }
+      // File trees name their files, and the tree's auto icons
+      // come from those names — resolve them the same way the
+      // tree renders them, so the icons reach the module.
+      for (const match of text.matchAll(FILES_FENCE_PATTERN)) {
+        for (const entry of fileTreeEntries(match[1])) {
+          const icon = entry.isFolder
+            ? getFolderIcon(entry.name)
+            : getFileIcon(entry.name);
+          if (icon) {
+            values.add(icon);
+          }
+        }
+      }
+      for (const match of body.matchAll(TREE_NAME_PATTERN)) {
+        const icon =
+          match[1] === "Folder"
+            ? getFolderIcon(match[2])
+            : getFileIcon(match[2]);
+        if (icon) {
+          values.add(icon);
+        }
       }
     }
   }

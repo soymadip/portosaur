@@ -11,4 +11,4 @@ icon: "lu:sparkles"
 <DynamicIcon slug="react" fallbackIcon="md:code" />
 ```
 
-`icon` accepts an icon identifier, emoji, image path/URL, inline SVG string, or `{ src, fallback }` object. Without `icon`, `slug` is checked against Portosaur's technology map and bundled devicons before `fallbackIcon` is used. It also accepts `size`.
+`icon` accepts an icon identifier, emoji, image path/URL, inline SVG string, or `{ src, fallback }` object. It also accepts `size`. Without `icon`, `slug` is checked against Portosaur's name-to-icon map and bundled devicons before `fallbackIcon` is used. The map covers programming languages and tools, file types and folder names, professions, and everyday topics — `react`, `python`, `docker`, `doctor`, `cooking`, `travel` — so a page usually gets a fitting icon with no `icon` set at all. It is the same map the file tree uses for its auto icons, and it lives in the core at `packages/core/src/lib/techmap.ts`.

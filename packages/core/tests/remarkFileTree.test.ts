@@ -105,4 +105,62 @@ describe("remarkFileTree", () => {
     const output = process(["```Files", "package.json", "```", ""].join("\n"));
     expect(output).toContain('<File name="package.json" />');
   });
+
+  test("a `#` note after a name becomes a comment attribute", () => {
+    const output = process(
+      [
+        "```files",
+        "my-site/",
+        "├── blog/         # Long-form blog posts",
+        "├── package.json  # Project dependencies",
+        "```",
+        "",
+      ].join("\n"),
+    );
+    expect(output).toContain('<Folder name="my-site" defaultOpen>');
+    expect(output).toContain(
+      '<Folder name="blog" comment="Long-form blog posts" defaultOpen />',
+    );
+    expect(output).toContain(
+      '<File name="package.json" comment="Project dependencies" />',
+    );
+  });
+
+  test("a `#` inside the note stays put", () => {
+    const output = process(
+      ["```files", "notes.md  # the #1 doc", "```", ""].join("\n"),
+    );
+    expect(output).toContain('<File name="notes.md" comment="the #1 doc" />');
+  });
+
+  test("a line that is only a note is skipped", () => {
+    const output = process(
+      [
+        "```files",
+        "project",
+        "├── # the source tree",
+        "├── index.ts",
+        "```",
+        "",
+      ].join("\n"),
+    );
+    expect(output).toContain('<File name="index.ts" />');
+    expect(output).not.toContain("# the source tree");
+  });
+
+  test("an empty note adds no comment", () => {
+    const output = process(["```files", "index.ts  #", "```", ""].join("\n"));
+    expect(output).toContain('<File name="index.ts" />');
+    expect(output).not.toContain("comment");
+  });
+
+  test("a comment survives a file becoming a folder", () => {
+    const output = process(
+      ["```files", "src  # source", "    index.ts", "```", ""].join("\n"),
+    );
+    expect(output).toContain(
+      '<Folder name="src" comment="source" defaultOpen>',
+    );
+    expect(output).toContain('<File name="index.ts" />');
+  });
 });

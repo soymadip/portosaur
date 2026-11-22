@@ -29,6 +29,8 @@ A shortcode :si:react: in prose.
 
 <DynamicIcon slug="kotlin" />
 
+<DynamicIcon slug="arduino" />
+
 \`\`\`yaml
 # A code sample — never scanned.
 icon: md:not-real
@@ -72,10 +74,12 @@ describe("collectSiteIcons", () => {
       expect(icons.has("mdi:home")).toBe(true);
       expect(icons.has("simple-icons:react")).toBe(true);
       expect(icons.has("mdi:settings")).toBe(true);
-      // The `1 - python` dir slug guesses the Python icon, and the
-      // DynamicIcon slug guesses devicon (kotlin is not in techMap).
+      // The `1 - python` dir slug guesses the Python icon, the
+      // kotlin slug guesses from techMap, and the arduino slug
+      // guesses devicon (arduino is not in techMap).
       expect(icons.has("simple-icons:python")).toBe(true);
-      expect(icons.has("devicon:kotlin")).toBe(true);
+      expect(icons.has("simple-icons:kotlin")).toBe(true);
+      expect(icons.has("devicon:arduino")).toBe(true);
       // The config feature icon.
       expect(icons.has("mdi:book")).toBe(true);
       // The fixed icons the core's own pages render.
@@ -126,6 +130,45 @@ describe("collectSiteIcons", () => {
       });
       expect(icons.has("lucide:maximize-2")).toBe(true);
       expect(warnings).not.toContain("[Icons] Icon not found: lu:maximize-2");
+    } finally {
+      rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  test("collects file-tree auto icons from fences and JSX names", () => {
+    const { projectDir, contentDir } = fixtureSite();
+    try {
+      fs.writeFileSync(
+        path.join(contentDir, "tree.md"),
+        [
+          "---",
+          "title: Tree",
+          "---",
+          "",
+          "```files",
+          "project",
+          "├── src",
+          "│   └── index.ts",
+          "├── package.json",
+          "```",
+          "",
+          "<FileTree>",
+          '  <File name="photo.png" />',
+          "</FileTree>",
+          "",
+        ].join("\n"),
+      );
+      const { icons } = collectSiteIcons({
+        projectDir,
+        contentDirs: [contentDir],
+        coreRoot,
+      });
+      // The fence's folder, file, and special name.
+      expect(icons.has("lucide:folder-code")).toBe(true);
+      expect(icons.has("simple-icons:typescript")).toBe(true);
+      expect(icons.has("simple-icons:npm")).toBe(true);
+      // The JSX File's extension.
+      expect(icons.has("lucide:file-image")).toBe(true);
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }
