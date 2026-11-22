@@ -25,6 +25,9 @@
   width: 100%;
   background-color: var(--porto-color-black);
   overflow-y: auto;
+  /* Keep scrolls that start over the sidebar inside it: without
+     this, wheeling past either end scrolls the page behind. */
+  overscroll-behavior: contain;
   opacity: 0;
   transition:
     opacity 0.25s,
