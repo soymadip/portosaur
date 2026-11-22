@@ -277,6 +277,47 @@ type Prop = {
   description?: string;
 };
 
+// The JSDoc block directly above the export of a component,
+// cleaned to its first paragraph on one line. The first
+// paragraph is the summary; later paragraphs hold the details
+// (and, for Diagram, the popup behaviour), which belong in the
+// source, not in a completion list. Returns null when no block
+// comment sits above the export.
+function componentDescription(file: string, name: string): string | null {
+  const source = fs.readFileSync(file, "utf8");
+  const fnAt = source.indexOf(`export function ${name}(`);
+  if (fnAt === -1) {
+    throw new Error(`${name}: no exported function declaration in ${file}`);
+  }
+  const before = source.slice(0, fnAt).trimEnd();
+  if (!before.endsWith("*/")) {
+    return null;
+  }
+  const start = before.lastIndexOf("/*");
+  if (start === -1) {
+    return null;
+  }
+  const raw = before.slice(start + 2, before.length - 2);
+  const lines = raw
+    .replace(/^\*+/, "")
+    .split("\n")
+    .map((line) => line.replace(/^\s*\*?\s?/, ""));
+  const paragraph: string[] = [];
+  let started = false;
+  for (const line of lines) {
+    if (line.trim() === "") {
+      if (started) {
+        break;
+      }
+      continue;
+    }
+    started = true;
+    paragraph.push(line);
+  }
+  const text = paragraph.join(" ").replace(/\s+/g, " ").trim();
+  return text || null;
+}
+
 // The first parameter's type annotation of `export function Name(`.
 function componentPropsType(file: string, name: string): string {
   const source = fs.readFileSync(file, "utf8");
@@ -491,8 +532,12 @@ function generateComponentSchema(): Record<string, unknown> {
 
     const definition: Record<string, unknown> = {
       type: "object",
-      properties,
     };
+    const description = componentDescription(file, name);
+    if (description) {
+      definition.description = description;
+    }
+    definition.properties = properties;
     if (required.length > 0) {
       definition.required = required;
     }

@@ -149,6 +149,11 @@ function resolveQueryKey(
   return groupId;
 }
 
+/**
+ * Tabs — a tab group: TabItem panels switched by tab buttons.
+ * Groups with the same groupId stay in sync, and queryString
+ * remembers the active tab in the URL.
+ */
 export function Tabs({
   children,
   defaultValue,

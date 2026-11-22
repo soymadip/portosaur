@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -341,6 +342,22 @@ func detailText(items []protocol.CompletionItem, label string) (string, bool) {
 			continue
 		}
 		return item.Detail.Get()
+	}
+	return "", false
+}
+
+// docText returns the documentation text of the completion item
+// with the given label.
+func docText(items []protocol.CompletionItem, label string) (string, bool) {
+	for _, item := range items {
+		if item.Label != label {
+			continue
+		}
+		doc, ok := item.Documentation.(*protocol.MarkupContent)
+		if !ok {
+			return "", false
+		}
+		return doc.Value, true
 	}
 	return "", false
 }
@@ -808,6 +825,85 @@ func TestComponentCompletionNames(t *testing.T) {
 	}
 	if detail, ok := detailText(items, "button"); !ok || detail != "Clickable button" {
 		t.Fatalf("button detail = %q, want %q", detail, "Clickable button")
+	}
+}
+
+// TestComponentCompletionShowsDescription checks a built-in
+// component's row names what it does: the Detail is the first
+// sentence of its description, and the documentation leads with
+// the full description before the props list.
+func TestComponentCompletionShowsDescription(t *testing.T) {
+	s := startTestServer(t, fixtureProject(t))
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	if detail, ok := detailText(items, "Btn"); !ok || detail != "Btn — the MDX content button: a link styled as a button." {
+		t.Fatalf("Btn detail = %q, want the first sentence of its description", detail)
+	}
+	doc, ok := docText(items, "Btn")
+	if !ok {
+		t.Fatal("Btn has no documentation")
+	}
+	if !strings.HasPrefix(doc, "Btn — the MDX content button: a link styled as a button. A thin wrapper around the shared `Button`") {
+		t.Fatalf("Btn doc = %q, want it to start with the full description", doc)
+	}
+	if !strings.Contains(doc, "Props: ") {
+		t.Fatalf("Btn doc = %q, want it to keep the props list", doc)
+	}
+	// A component with required props shows its description, not
+	// the required list, once it has one.
+	if detail, ok := detailText(items, "Icon"); !ok || detail != "Icon — renders a single Iconify icon by id (md:book, fa7-solid:font, …) as inline SVG, from the site's generated icon map." {
+		t.Fatalf("Icon detail = %q, want the first sentence of its description", detail)
+	}
+}
+
+// TestComponentCompletionFallsBackWithoutDescription checks a
+// component with no description in the schema keeps the old
+// behaviour: the Detail names its required props and the
+// documentation is the props list alone.
+func TestComponentCompletionFallsBackWithoutDescription(t *testing.T) {
+	raw := realSchema(t, schemaComponents)
+	var schema map[string]any
+	if err := json.Unmarshal(raw, &schema); err != nil {
+		t.Fatalf("parsing the components schema: %v", err)
+	}
+	defs, _ := schema["definitions"].(map[string]any)
+	icon, _ := defs["Icon"].(map[string]any)
+	delete(icon, "description")
+	stripped, err := json.Marshal(schema)
+	if err != nil {
+		t.Fatalf("re-encoding the components schema: %v", err)
+	}
+
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "porto.yml"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	installSchema(t, root, schemaFrontmatter, realSchema(t, schemaFrontmatter))
+	installSchema(t, root, schemaComponents, stripped)
+
+	s := startTestServer(t, root)
+	documentURI := s.open(t, filepath.Join(s.root, "page.mdx"), "# Hello\n\n<")
+	items := s.complete(t, documentURI, 2, 1)
+	if detail, ok := detailText(items, "Icon"); !ok || detail != "required: id" {
+		t.Fatalf("Icon detail = %q, want %q", detail, "required: id")
+	}
+	if doc, ok := docText(items, "Icon"); !ok || doc != "Props: className, color, id*, size" {
+		t.Fatalf("Icon doc = %q, want the props list alone", doc)
+	}
+}
+
+func TestFirstSentence(t *testing.T) {
+	cases := []struct{ desc, want string }{
+		{"One sentence.", "One sentence."},
+		{"First. Second.", "First."},
+		{"With `code` here. More.", "With code here."},
+		{"No period", "No period"},
+		{"", ""},
+	}
+	for _, c := range cases {
+		if got := firstSentence(c.desc); got != c.want {
+			t.Fatalf("firstSentence(%q) = %q, want %q", c.desc, got, c.want)
+		}
 	}
 }
 

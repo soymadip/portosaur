@@ -193,7 +193,12 @@ func componentNameCompletions(schema *resolvedSchema, context tagContext, text s
 		for name, raw := range definitions {
 			def, _ := asMap(raw)
 			cand := tagCandidate{name: name, doc: componentDoc(def), source: tagBuiltin}
-			if required := schemaRequired(def); len(required) > 0 {
+			// The detail names what the component does, like the
+			// YAML server's schema descriptions. A component with
+			// no description falls back to its required props.
+			if desc := schemaDescription(def); desc != "" {
+				cand.detail = firstSentence(desc)
+			} else if required := schemaRequired(def); len(required) > 0 {
 				cand.detail = "required: " + strings.Join(required, ", ")
 			}
 			candidates[name] = cand
@@ -349,25 +354,44 @@ func schemaRequired(node map[string]any) []string {
 
 // componentDoc renders a component's props as a one-line doc:
 // "Props: value*, label, default" with required props marked.
+// firstSentence returns the first sentence of a description,
+// with backticks stripped: Detail is plain text, so code ticks
+// would show as clutter. A sentence ends at the first period
+// followed by a space; a description with no such period comes
+// back whole.
+func firstSentence(desc string) string {
+	text := strings.ReplaceAll(desc, "`", "")
+	if at := strings.Index(text, ". "); at != -1 {
+		return text[:at+1]
+	}
+	return text
+}
+
+// componentDoc is the documentation shown for a built-in
+// component: its description first, then its props, required
+// ones marked with `*`.
 func componentDoc(def map[string]any) string {
-	props := schemaProperties(def)
-	if props == nil {
-		return ""
+	var parts []string
+	if desc := schemaDescription(def); desc != "" {
+		parts = append(parts, desc)
 	}
-	required := map[string]bool{}
-	for _, name := range schemaRequired(def) {
-		required[name] = true
-	}
-	names := make([]string, 0, len(props))
-	for name := range props {
-		if required[name] {
-			names = append(names, name+"*")
-		} else {
-			names = append(names, name)
+	if props := schemaProperties(def); props != nil {
+		required := map[string]bool{}
+		for _, name := range schemaRequired(def) {
+			required[name] = true
 		}
+		names := make([]string, 0, len(props))
+		for name := range props {
+			if required[name] {
+				names = append(names, name+"*")
+			} else {
+				names = append(names, name)
+			}
+		}
+		sort.Strings(names)
+		parts = append(parts, "Props: "+strings.Join(names, ", "))
 	}
-	sort.Strings(names)
-	return "Props: " + strings.Join(names, ", ")
+	return strings.Join(parts, "\n\n")
 }
 
 func keyCompletions(schema *resolvedSchema, context cursorContext) *protocol.CompletionList {

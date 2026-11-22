@@ -132,6 +132,7 @@ function TopicCard({ card }: { card: TopicListItem }) {
   );
 }
 
+/** TopicList — cards linking to the page's child pages, or to the given items. */
 export function TopicList({
   forceRender = false,
   items: propItems,

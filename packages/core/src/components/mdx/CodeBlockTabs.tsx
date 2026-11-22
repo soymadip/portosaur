@@ -8,29 +8,28 @@ import { Tabs, type TabValue } from "./Tabs.tsx";
 import { TabItem } from "./TabItem.tsx";
 
 /**
- * CodeBlockTabs — the tabs Fumadocs' `remark-code-tab` generates
- * from code fences with `tab="..."` meta (and `remark-npm` from
- * npm commands). The plugin emits a `CodeBlockTabsList` of
- * `CodeBlockTabsTrigger`s plus a `CodeBlockTab` per fence. This
- * component reads that shape and renders the plain `Tabs`
- * underneath, so code tabs share its switching, group sync,
- * persistence, and keyboard support. The `porto-tabs--code`
- * variant drops the panel padding — the code fills the box.
- *
- * `CodeBlockTabsList`, `CodeBlockTabsTrigger`, and `CodeBlockTab`
- * are element descriptors only: `CodeBlockTabs` reads their props
- * and never renders them. They are mapped in `mdx.tsx` so MDX can
- * resolve the generated elements. Rendered on their own, they
- * pass their children through.
+ * CodeBlockTabsList — the tab buttons of a CodeBlockTabs group. A
+ * descriptor only: CodeBlockTabs reads its children and never
+ * renders it.
  */
 export function CodeBlockTabsList({ children }: { children?: ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * CodeBlockTabsTrigger — one tab button in a CodeBlockTabsList. A
+ * descriptor only: CodeBlockTabs reads its props and never
+ * renders it.
+ */
 export function CodeBlockTabsTrigger({ children }: { children?: ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * CodeBlockTab — one code panel of a CodeBlockTabs group. A
+ * descriptor only: CodeBlockTabs reads its props and never
+ * renders it.
+ */
 export function CodeBlockTab({ children }: { children?: ReactNode }) {
   return <>{children}</>;
 }
@@ -52,6 +51,22 @@ function textOf(node: ReactNode): string {
 
 type ElementProps = { value?: string; children?: ReactNode };
 
+/**
+ * CodeBlockTabs — the tabs Fumadocs' `remark-code-tab` generates
+ * from code fences with `tab="..."` meta (and `remark-npm` from
+ * npm commands). The plugin emits a `CodeBlockTabsList` of
+ * `CodeBlockTabsTrigger`s plus a `CodeBlockTab` per fence. This
+ * component reads that shape and renders the plain `Tabs`
+ * underneath, so code tabs share its switching, group sync,
+ * persistence, and keyboard support. The `porto-tabs--code`
+ * variant drops the panel padding — the code fills the box.
+ *
+ * `CodeBlockTabsList`, `CodeBlockTabsTrigger`, and `CodeBlockTab`
+ * are element descriptors only: `CodeBlockTabs` reads their props
+ * and never renders them. They are mapped in `mdx.tsx` so MDX can
+ * resolve the generated elements. Rendered on their own, they
+ * pass their children through.
+ */
 export function CodeBlockTabs({
   children,
   defaultValue,

@@ -6,6 +6,7 @@
   "definitions": {
     "Btn": {
       "type": "object",
+      "description": "Btn — the MDX content button: a link styled as a button. A thin wrapper around the shared `Button` — the variants (primary / secondary / success / warning / danger / info / ghost), `outline`, and `sm` / `lg` sizes are OG's Button API, and the `icon` prop renders a DynamicIcon before the label. `className`, `disabled`, `onClick`, `title`, and `ariaLabel` pass straight through to the shared Button.",
       "properties": {
         "href": {
           "x-ts-type": "string",
@@ -77,11 +78,13 @@
     },
     "CodeBlockTab": {
       "type": "object",
+      "description": "CodeBlockTab — one code panel of a CodeBlockTabs group. A descriptor only: CodeBlockTabs reads its props and never renders it.",
       "properties": {},
       "additionalProperties": false
     },
     "CodeBlockTabs": {
       "type": "object",
+      "description": "CodeBlockTabs — the tabs Fumadocs' `remark-code-tab` generates from code fences with `tab=\"...\"` meta (and `remark-npm` from npm commands). The plugin emits a `CodeBlockTabsList` of `CodeBlockTabsTrigger`s plus a `CodeBlockTab` per fence. This component reads that shape and renders the plain `Tabs` underneath, so code tabs share its switching, group sync, persistence, and keyboard support. The `porto-tabs--code` variant drops the panel padding — the code fills the box.",
       "properties": {
         "defaultValue": {
           "x-ts-type": "string",
@@ -103,16 +106,19 @@
     },
     "CodeBlockTabsList": {
       "type": "object",
+      "description": "CodeBlockTabsList — the tab buttons of a CodeBlockTabs group. A descriptor only: CodeBlockTabs reads its children and never renders it.",
       "properties": {},
       "additionalProperties": false
     },
     "CodeBlockTabsTrigger": {
       "type": "object",
+      "description": "CodeBlockTabsTrigger — one tab button in a CodeBlockTabsList. A descriptor only: CodeBlockTabs reads its props and never renders it.",
       "properties": {},
       "additionalProperties": false
     },
     "Details": {
       "type": "object",
+      "description": "Details — native `<details>` element. The Docusaurus `<Details summary=\"…\">` shape maps directly onto it. Styled by the prose rules in content.css.",
       "properties": {
         "summary": {
           "x-ts-type": "string",
@@ -124,6 +130,7 @@
     },
     "Diagram": {
       "type": "object",
+      "description": "Diagram — renders a build-time diagram. remarkMermaid turns ```mermaid fences into `<Diagram svg=\"...\"/>`, and the Pele SVG goes straight into the page (Pele escapes diagram text and filters links and styles, and the icons come from the site's own Iconify packs). The wrapper centers the diagram (content.css).",
       "properties": {
         "svg": {
           "x-ts-type": "string",
@@ -136,6 +143,7 @@
     },
     "Dropdown": {
       "type": "object",
+      "description": "Dropdown — the MDX `<Dropdown>` tag: a thin wrapper around the shared Dropdown with the compact trigger, keeping OG's MDX API — `trigger` / `label`, an `items` array (`{ label, to?, href? }[]`), and `children` as the menu content when no items are given. `className`, `menuClassName`, and `triggerClassName` pass extra CSS classes through, like OG's. A click opens the menu (no hover-open — click works on touch too, where hover doesn't exist). Clicking an item or elsewhere closes it.",
       "properties": {
         "label": {
           "x-ts-type": "string",
@@ -193,6 +201,7 @@
     },
     "DynamicIcon": {
       "type": "object",
+      "description": "DynamicIcon — renders a frontmatter `icon` value, which may be an Iconify id, a local image path, a remote URL, or an emoji.",
       "properties": {
         "icon": {
           "x-ts-type": "DynamicIconValue",
@@ -219,6 +228,7 @@
     },
     "Hint": {
       "type": "object",
+      "description": "Hint — simplified tooltip: the `msg` prop (the hint's content lives in the prop, not in children) renders in a tinted box above any children. OG's full portal tooltip is Phase 2 scope.",
       "properties": {
         "msg": {
           "x-ts-type": "string",
@@ -230,6 +240,7 @@
     },
     "Icon": {
       "type": "object",
+      "description": "Icon — renders a single Iconify icon by id (`md:book`, `fa7-solid:font`, …) as inline SVG, from the site's generated icon map. The `:prefix:name:` shortcode in prose becomes this element (`remarkIcons`).",
       "properties": {
         "id": {
           "x-ts-type": "string",
@@ -257,6 +268,7 @@
     },
     "IconSearch": {
       "type": "object",
+      "description": "IconSearch — a search field for the site's icons, with the shorthand to copy.",
       "properties": {
         "dropUp": {
           "x-ts-type": "boolean",
@@ -268,11 +280,13 @@
     },
     "Indent": {
       "type": "object",
+      "description": "Indent — renders children in an indented block.",
       "properties": {},
       "additionalProperties": false
     },
     "Link": {
       "type": "object",
+      "description": "Link — the explicit `<Link to=\"…\">` MDX tag (distinct from Markdown `[text](href)` links, which the route's `a` override handles). `to` maps to `href`. Internal links render through Next.js `<Link>` (trailing-slashed), external ones as plain anchors opening in a new tab.",
       "properties": {
         "to": {
           "x-ts-type": "string",
@@ -288,6 +302,7 @@
     },
     "Pv": {
       "type": "object",
+      "description": "Pv (Preview) — trigger only in Phase 1: renders as a plain link/button naming the previewed file. The viewer is Phase 2.",
       "properties": {
         "href": {
           "x-ts-type": "string",
@@ -299,6 +314,7 @@
     },
     "TabItem": {
       "type": "object",
+      "description": "TabItem — one panel of a `Tabs` group. Hidden unless its `value` is the active tab. Outside a `Tabs` group (no context) it renders its children plainly.",
       "properties": {
         "value": {
           "x-ts-type": "string",
@@ -330,6 +346,7 @@
     },
     "Tabs": {
       "type": "object",
+      "description": "Tabs — a tab group: TabItem panels switched by tab buttons. Groups with the same groupId stay in sync, and queryString remembers the active tab in the URL.",
       "properties": {
         "defaultValue": {
           "x-ts-type": "string | null",
@@ -371,6 +388,7 @@
     },
     "TopicList": {
       "type": "object",
+      "description": "TopicList — cards linking to the page's child pages, or to the given items.",
       "properties": {
         "forceRender": {
           "x-ts-type": "boolean",

@@ -73,6 +73,7 @@ function renderFetchedIcon(collection: unknown, name: string): string {
   return `<svg ${attributes} fill="currentColor" aria-hidden="true">${rendered.body}</svg>`;
 }
 
+/** IconSearch — a search field for the site's icons, with the shorthand to copy. */
 export function IconSearch({
   dropUp = false,
 }: {
