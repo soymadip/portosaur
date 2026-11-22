@@ -23,6 +23,7 @@ type linkContext struct {
 	partial      string         // the destination text before the cursor
 	partialRange protocol.Range // value start to the cursor
 	angled       bool           // a bracketed markdown destination `](<...>)`
+	angledClosed bool           // the bracketed destination already has its `>`
 	jsx          bool           // a Link `href` or Btn `to`/`href` prop value
 }
 
@@ -126,6 +127,7 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 				partial:      partial,
 				partialRange: rangeFromOffsets(lines, lineStart+parsed.destStart, lineStart+partialEnd),
 				angled:       parsed.angled,
+				angledClosed: parsed.angled,
 			}
 		}
 	}
@@ -144,11 +146,13 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 		if cursor >= destStart && cursor <= destEnd && !inCodeSpan(spans, destStart) {
 			valueStart, valueEnd := destStart, destEnd
 			angled := false
+			angledClosed := false
 			if valueStart < valueEnd && line[valueStart] == '<' {
 				if close := strings.IndexByte(line[valueStart:], '>'); close >= 0 && valueStart+close < valueEnd {
 					valueStart++
 					valueEnd = valueStart + close - 1
 					angled = true
+					angledClosed = true
 				} else {
 					// Unclosed bracket: the user is still typing
 					// the destination, so everything after the
@@ -172,6 +176,7 @@ func markdownLinkAtCursor(text string, pos protocol.Position) linkContext {
 				partial:      partial,
 				partialRange: rangeFromOffsets(lines, lineStart+valueStart, lineStart+partialEnd),
 				angled:       angled,
+				angledClosed: angledClosed,
 			}
 		}
 		search = destStart

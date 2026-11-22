@@ -283,8 +283,8 @@ func TestLinkCompletionRelativeUnclosedAngledIsLiteral(t *testing.T) {
 	if !hasLabel(items, "my page.mdx") {
 		t.Fatalf("completions = %v, want my page.mdx (literal spaces)", labels(items))
 	}
-	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my page.mdx" {
-		t.Fatalf("my page edit = %q, want the literal insert", text)
+	if text, ok := editText(items, "my page.mdx"); !ok || text != "./my page.mdx>" {
+		t.Fatalf("my page edit = %q, want the literal insert plus the closing >", text)
 	}
 	if hasLabel(items, "my%20page.mdx") {
 		t.Fatalf("completions = %v, include the %%20 form in an unclosed angled destination", labels(items))
@@ -312,8 +312,41 @@ func TestLinkCompletionUnclosedAngledEmptyOffersPageURLs(t *testing.T) {
 	if !hasLabel(items, "/docs/sibling") {
 		t.Fatalf("completions = %v, missing /docs/sibling", labels(items))
 	}
-	if text, ok := editText(items, "/docs/sibling"); !ok || text != "/docs/sibling" {
-		t.Fatalf("sibling edit = %q, want the clean URL", text)
+	if text, ok := editText(items, "/docs/sibling"); !ok || text != "/docs/sibling>" {
+		t.Fatalf("sibling edit = %q, want the clean URL plus the closing >", text)
+	}
+}
+
+func TestLinkCompletionUnclosedAngledDirsStayOpen(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./")
+	items := s.complete(t, documentURI, 2, 7)
+	if text, ok := editText(items, "1 - getting-started/"); !ok || text != "./1 - getting-started/" {
+		t.Fatalf("directory edit = %q, want no closing > (the user continues into the directory)", text)
+	}
+}
+
+func TestLinkCompletionUnclosedAngledDotStaysOpen(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<.")
+	items := s.complete(t, documentURI, 2, 6)
+	if text, ok := editText(items, "./"); !ok || text != "./" {
+		t.Fatalf("./ edit = %q, want no closing > (the user continues typing the path)", text)
+	}
+	if text, ok := editText(items, "../"); !ok || text != "../" {
+		t.Fatalf("../ edit = %q, want no closing >", text)
+	}
+}
+
+func TestLinkCompletionUnclosedAngledHeadingsClose(t *testing.T) {
+	s := startTestServer(t, docsFixture(t))
+	documentURI := s.open(t, filepath.Join(s.root, "docs", "page.mdx"), "# Page\n\n[x](<./sibling.mdx#")
+	items := s.complete(t, documentURI, 2, 19)
+	if len(items) != 1 || items[0].Label != "sibling" {
+		t.Fatalf("completions = %v, want only sibling", labels(items))
+	}
+	if text, ok := editText(items, "sibling"); !ok || text != "sibling>" {
+		t.Fatalf("sibling edit = %q, want the id plus the closing >", text)
 	}
 }
 

@@ -105,6 +105,17 @@ func (s *Server) refLabelCompletion(params *protocol.CompletionParams, text stri
 	return nil, false
 }
 
+// angleClose is the `>` a completion appends when it fills an
+// unclosed angle-bracket destination, so the user does not have
+// to type it. A closed destination already has one, and a plain
+// destination never takes one.
+func (link linkContext) angleClose() string {
+	if link.angled && !link.angledClosed {
+		return ">"
+	}
+	return ""
+}
+
 // pageCompletion offers clean URLs from the page index,
 // filtered by the typed prefix. The insert drops the trailing
 // slash: the user picks the path and types `#heading` right
@@ -121,7 +132,7 @@ func (s *Server) pageCompletion(params *protocol.CompletionParams, root string, 
 		item := protocol.CompletionItem{
 			Label:    label,
 			Kind:     protocol.CompletionItemKindFile,
-			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: label},
+			TextEdit: &protocol.TextEdit{Range: link.partialRange, NewText: label + link.angleClose()},
 		}
 		if rel, err := filepath.Rel(root, files[0]); err == nil {
 			item.Detail = protocol.NewOptional(filepath.ToSlash(rel))
@@ -165,7 +176,7 @@ func (s *Server) headingCompletion(params *protocol.CompletionParams, text, root
 			Label:    heading.id,
 			Kind:     protocol.CompletionItemKindValue,
 			Detail:   protocol.NewOptional(heading.text),
-			TextEdit: &protocol.TextEdit{Range: editRange, NewText: heading.id},
+			TextEdit: &protocol.TextEdit{Range: editRange, NewText: heading.id + link.angleClose()},
 		})
 	}
 	return &protocol.CompletionList{IsIncomplete: false, Items: items}
@@ -249,7 +260,7 @@ func (s *Server) relativeCompletion(params *protocol.CompletionParams, root stri
 			Label:      name,
 			Kind:       protocol.CompletionItemKindFile,
 			FilterText: protocol.NewOptional(insert),
-			TextEdit:   &protocol.TextEdit{Range: link.partialRange, NewText: insert},
+			TextEdit:   &protocol.TextEdit{Range: link.partialRange, NewText: insert + link.angleClose()},
 		})
 	}
 	sort.Slice(items, func(i, j int) bool { return items[i].Label < items[j].Label })
