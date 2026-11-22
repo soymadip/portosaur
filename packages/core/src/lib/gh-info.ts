@@ -17,6 +17,8 @@
 export interface RepositoryInfo {
   stars: number;
   forks: number;
+  /** The repo's description, or null when it has none. */
+  description: string | null;
 }
 
 /** One fetch per repo per build, shared across pages. */
@@ -71,7 +73,14 @@ async function fetchOnce(
     );
     return null;
   }
-  return { stars: data.stargazers_count, forks: data.forks_count };
+  return {
+    stars: data.stargazers_count,
+    forks: data.forks_count,
+    // The description is optional — a missing or non-string one
+    // just means the card shows no description.
+    description:
+      typeof data.description === "string" ? data.description : null,
+  };
 }
 
 export function fetchRepositoryInfo(

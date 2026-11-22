@@ -64,11 +64,26 @@ describe("formatCount", () => {
 });
 
 describe("fetchRepositoryInfo", () => {
-  test("returns the star and fork counts", async () => {
+  test("returns the star and fork counts and the description", async () => {
     globalThis.fetch = (async () =>
-      jsonResponse({ stargazers_count: 42, forks_count: 7 })) as any;
+      jsonResponse({
+        stargazers_count: 42,
+        forks_count: 7,
+        description: "A cool repo",
+      })) as any;
     const info = await fetchRepositoryInfo("owner-a", "repo-a");
-    expect(info).toEqual({ stars: 42, forks: 7 });
+    expect(info).toEqual({ stars: 42, forks: 7, description: "A cool repo" });
+  });
+
+  test("a missing description becomes null, not a failure", async () => {
+    globalThis.fetch = (async () =>
+      jsonResponse({
+        stargazers_count: 1,
+        forks_count: 0,
+        description: null,
+      })) as any;
+    const info = await fetchRepositoryInfo("owner-g", "repo-g");
+    expect(info).toEqual({ stars: 1, forks: 0, description: null });
   });
 
   test("sends the token when GITHUB_TOKEN is set", async () => {

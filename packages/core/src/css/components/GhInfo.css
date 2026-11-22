@@ -6,6 +6,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  /* The card hugs its content instead of spanning the page —
+     a repo name and two counts don't need the full width. A long
+     description caps it at 28rem so the card stays a card. */
+  width: max-content;
+  max-width: min(28rem, 100%);
   padding: 0.75rem 1rem;
   border: 1px solid var(--porto-color-card-border);
   background-color: var(--porto-color-gray-6);
@@ -28,10 +33,18 @@ a.porto-gh-info:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
   color: var(--porto-color-white);
 }
 .porto-gh-info__name {
   font-weight: 600;
+  /* A long owner/repo name wraps instead of blowing the card
+     past the page on a narrow screen. */
+  overflow-wrap: anywhere;
+}
+.porto-gh-info__description {
+  font-size: 0.875rem;
+  color: var(--porto-color-gray-3);
 }
 .porto-gh-info__counts {
   display: flex;

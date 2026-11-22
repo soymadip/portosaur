@@ -1,12 +1,12 @@
 ---
 title: "GhInfo"
-desc: "A card linking to a GitHub repository, with its star and fork counts."
+desc: "A card linking to a GitHub repository, with its description, star and fork counts."
 icon: "lu:github"
 ---
 
-Link to a GitHub repository with its star and fork counts. The
-counts are fetched from the GitHub API at build time and baked
-into the page, so a rebuild refreshes them.
+Link to a GitHub repository with its description, star and fork
+counts. The counts are fetched from the GitHub API at build time
+and baked into the page, so a rebuild refreshes them.
 
 ```jsx
 <GhInfo owner="soymadip" repo="portosaur" />
@@ -21,6 +21,8 @@ The example above, live:
 - **Build-time counts.** The card fetches the numbers while the
   site builds, so the page carries no live request and works
   with scripting off. The counts are as fresh as the last build.
+- **Description.** The repo's description shows under the name
+  when it has one.
 - **Rate limit.** Without a token the GitHub API allows 60
   requests an hour, shared across the build machine's IP. Set a
   `GITHUB_TOKEN` environment variable on the build to raise it.

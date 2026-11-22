@@ -31,6 +31,11 @@ export async function GhInfo({
           {owner}/{repo}
         </span>
       </span>
+      {info?.description ? (
+        <span className="porto-gh-info__description">
+          {info.description}
+        </span>
+      ) : null}
       {info ? (
         <span className="porto-gh-info__counts">
           <span className="porto-gh-info__count">
