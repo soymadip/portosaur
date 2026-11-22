@@ -103,6 +103,7 @@
 @import "./components/IconSearch.css";
 @import "./components/Diagram.css";
 @import "./components/FileTree.css";
+@import "./components/GhInfo.css";
 @import "./reduced-motion.css";
 @import "./animations.css";
 @import "./print.css";

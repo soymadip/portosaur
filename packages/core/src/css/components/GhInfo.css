@@ -1,0 +1,47 @@
+/* GhInfo — a card linking to a GitHub repo, with its star
+   and fork counts. The prose link color would tint the whole
+   card accent, so every row carries its own color and the icons
+   inherit from their row. */
+.porto-gh-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--porto-color-card-border);
+  background-color: var(--porto-color-gray-6);
+  border-radius: 0.5rem;
+  box-shadow: var(--porto-shadow-sm);
+  text-decoration: none;
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+a.porto-gh-info:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 70%,
+    var(--porto-color-hairline-light)
+  );
+  box-shadow: var(--porto-shadow-md);
+}
+.porto-gh-info__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--porto-color-white);
+}
+.porto-gh-info__name {
+  font-weight: 600;
+}
+.porto-gh-info__counts {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--porto-color-gray-3);
+}
+.porto-gh-info__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

@@ -323,6 +323,23 @@
       "required": ["name"],
       "additionalProperties": false
     },
+    "GhInfo": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The repository owner, like `soymadip`."
+        },
+        "repo": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The repository name, like `portosaur`."
+        }
+      },
+      "required": ["owner", "repo"],
+      "additionalProperties": false
+    },
     "Hint": {
       "type": "object",
       "description": "Hint — simplified tooltip: the `msg` prop (the hint's content lives in the prop, not in children) renders in a tinted box above any children. OG's full portal tooltip is Phase 2 scope.",

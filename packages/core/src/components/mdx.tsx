@@ -21,6 +21,7 @@ import { Details } from "./mdx/Details.tsx";
 import { Diagram } from "./mdx/Diagram.tsx";
 import { File, FileTree, Folder } from "./mdx/FileTree.tsx";
 import { DynamicIcon } from "./mdx/DynamicIcon.tsx";
+import { GhInfo } from "./mdx/GhInfo.tsx";
 import { Heading } from "./mdx/Heading.tsx";
 import { Hint } from "./mdx/Hint.tsx";
 import { Icon } from "./mdx/Icon.tsx";
@@ -116,6 +117,7 @@ const BLOCK_COMPONENTS: Set<unknown> = new Set([
   Diagram,
   Dropdown,
   FileTree,
+  GhInfo,
   Hint,
   IconSearch,
   Indent,
@@ -218,6 +220,7 @@ export function getMDXComponents(components?: MDXComponents) {
     File,
     FileTree,
     Folder,
+    GhInfo,
     Hint,
     Icon,
     IconSearch,
@@ -281,6 +284,7 @@ export {
 export { Details } from "./mdx/Details.tsx";
 export { DynamicIcon } from "./mdx/DynamicIcon.tsx";
 export { File, FileTree, Folder } from "./mdx/FileTree.tsx";
+export { GhInfo } from "./mdx/GhInfo.tsx";
 export { Hint } from "./mdx/Hint.tsx";
 export { Icon } from "./mdx/Icon.tsx";
 export { IconSearch } from "./mdx/IconSearch.tsx";

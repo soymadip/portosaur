@@ -1,0 +1,38 @@
+---
+title: "GhInfo"
+desc: "A card linking to a GitHub repository, with its star and fork counts."
+icon: "lu:github"
+---
+
+Link to a GitHub repository with its star and fork counts. The
+counts are fetched from the GitHub API at build time and baked
+into the page, so a rebuild refreshes them.
+
+```jsx
+<GhInfo owner="soymadip" repo="portosaur" />
+```
+
+The example above, live:
+
+<GhInfo owner="soymadip" repo="portosaur" />
+
+## Behavior
+
+- **Build-time counts.** The card fetches the numbers while the
+  site builds, so the page carries no live request and works
+  with scripting off. The counts are as fresh as the last build.
+- **Rate limit.** Without a token the GitHub API allows 60
+  requests an hour, shared across the build machine's IP. Set a
+  `GITHUB_TOKEN` environment variable on the build to raise it.
+- **A failed fetch never breaks the build.** When the API is
+  unreachable, rate-limited, or doesn't know the repo, the card
+  renders without counts and the build warns.
+
+## Props Reference
+
+### `<GhInfo />`
+
+| Prop | Type | Description |
+| ---- | ---- | ----------- |
+| `owner` | `string` | The repository owner, like `soymadip`. Required. |
+| `repo` | `string` | The repository name, like `portosaur`. Required. |

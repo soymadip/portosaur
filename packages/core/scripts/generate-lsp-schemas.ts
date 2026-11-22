@@ -277,6 +277,17 @@ type Prop = {
   description?: string;
 };
 
+// The offset of a component's export, sync or async: `export
+// function Name(` or `export async function Name(` (GhInfo
+// awaits its build-time fetch).
+function findExportedFunction(source: string, name: string): number {
+  const asyncAt = source.indexOf(`export async function ${name}(`);
+  if (asyncAt !== -1) {
+    return asyncAt;
+  }
+  return source.indexOf(`export function ${name}(`);
+}
+
 // The JSDoc block directly above the export of a component,
 // cleaned to its first paragraph on one line. The first
 // paragraph is the summary; later paragraphs hold the details
@@ -285,7 +296,7 @@ type Prop = {
 // comment sits above the export.
 function componentDescription(file: string, name: string): string | null {
   const source = fs.readFileSync(file, "utf8");
-  const fnAt = source.indexOf(`export function ${name}(`);
+  const fnAt = findExportedFunction(source, name);
   if (fnAt === -1) {
     throw new Error(`${name}: no exported function declaration in ${file}`);
   }
@@ -331,7 +342,7 @@ function componentDefaults(
 ): Map<string, string | number | boolean> {
   const defaults = new Map<string, string | number | boolean>();
   const source = fs.readFileSync(file, "utf8");
-  const fnAt = source.indexOf(`export function ${name}(`);
+  const fnAt = findExportedFunction(source, name);
   if (fnAt === -1) {
     return defaults;
   }
@@ -380,7 +391,7 @@ function componentDefaults(
 // The first parameter's type annotation of `export function Name(`.
 function componentPropsType(file: string, name: string): string {
   const source = fs.readFileSync(file, "utf8");
-  const fnAt = source.indexOf(`export function ${name}(`);
+  const fnAt = findExportedFunction(source, name);
   if (fnAt === -1) {
     throw new Error(`${name}: no exported function declaration in ${file}`);
   }
