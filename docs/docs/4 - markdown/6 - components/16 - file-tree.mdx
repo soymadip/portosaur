@@ -7,7 +7,7 @@ icon: "lu:folder-tree"
 Show a project layout or a directory of files. Folders open and close
 on click; files are plain rows. Icons come from the file and folder
 names when you don't set one, and a `#` note after a name shows
-after it, muted.
+after it, muted and smaller.
 
 ```jsx
 <FileTree>
@@ -38,8 +38,10 @@ The example above, live — try opening the `components` folder:
 ## Behavior
 
 - **Folders.** Click a folder to open or close it. Folders start
-  closed unless `defaultOpen` is set. The folder icon swaps open
-  and closed; the fold animates over 200ms, like `<Details>`.
+  closed unless `defaultOpen` is set. A folder with children
+  shows a chevron, and its name ends with a `/`, so folders and
+  files stay easy to tell apart. The folder icon swaps open and
+  closed; the fold animates over 200ms, like `<Details>`.
 - **Files.** A file is a row with an icon and a name. The icon
   comes from the file's extension or well-known name — `index.ts`
   gets the TypeScript icon, `package.json` the npm one — unless
@@ -47,9 +49,9 @@ The example above, live — try opening the `components` folder:
 - **Folders, too.** A folder's icon comes from its name — `src`,
   `docs`, `blog` — unless the `icon` prop gives one. A folder
   with its own icon keeps it open and closed.
-- **Comments.** A `#` note after a name renders after it, muted.
-  In JSX pass it as `comment`; in a `files` fence write it after
-  the name.
+- **Comments.** A `#` note after a name renders after it, muted
+  and smaller. In JSX pass it as `comment`; in a `files` fence
+  write it after the name.
 - **Nesting.** Folders nest as deep as needed — each level indents
   behind a hairline guide.
 - **No JavaScript.** A folder is a native `<details>` element, so
@@ -87,7 +89,7 @@ project
 ```
 
 Add a `#` note after a name to annotate it — the note renders after
-the name, muted. A line that is only a note is skipped.
+the name, muted and smaller. A line that is only a note is skipped.
 
 ````md
 ```files
@@ -129,7 +131,7 @@ my-site/
 | --------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
 | `name`    | `string` | —              | The file name. Required.                                                                                     |
 | `icon`    | `string` | Extension icon | An Iconify id for the file icon, like `lu:file-json`. Defaults to the icon for the file's extension or name. |
-| `comment` | `string` | —              | A note after the name, shown muted with a `#` in front.                                                      |
+| `comment` | `string` | —              | A note after the name, shown muted and smaller.                                                              |
 
 ### `<Folder />`
 
@@ -138,5 +140,5 @@ my-site/
 | `name`        | `string`    | —         | The folder name. Required.                                                                          |
 | `icon`        | `string`    | Name icon | An Iconify id for the folder icon. Defaults to the icon for the folder's name, or the folder glyph. |
 | `defaultOpen` | `boolean`   | `false`   | Open the folder by default.                                                                         |
-| `comment`     | `string`    | —         | A note after the name, shown muted with a `#` in front.                                             |
+| `comment`     | `string`    | —         | A note after the name, shown muted and smaller.                                                     |
 | `children`    | `ReactNode` | —         | The files and folders inside.                                                                       |

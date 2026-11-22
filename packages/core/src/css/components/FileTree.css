@@ -1,11 +1,12 @@
 /* FileTree — a file listing. Rendered by FileTree/File/Folder.
    The look follows Fumadocs' file tree: a bordered card, rows
-   with an icon and a name, a hairline guide behind nested rows,
-   no chevron — the folder icon itself swaps open and closed.
-   A Folder is a native <details> (the same collapsible Details
-   uses), so the fold animation below mirrors the Details rules
-   in content.css — those rules skip .not-content, and this panel
-   carries it, so the tree needs its own copy. */
+   with an icon and a name, no chevron — the folder icon itself
+   swaps open and closed. Nested rows join their parent with
+   branch lines, like a drawn tree. A Folder is a native
+   <details> (the same collapsible Details uses), so the fold
+   animation below mirrors the Details rules in content.css —
+   those rules skip .not-content, and this panel carries it, so
+   the tree needs its own copy. */
 
 .porto-file-tree {
   margin-top: var(--porto-content-gap-y);
@@ -46,6 +47,40 @@
   flex-shrink: 0;
   color: var(--porto-color-gray-3);
 }
+/* The chevron's slot, kept on every row so the icons line up:
+   folders with children show the chevron here, files and empty
+   folders leave it blank. The svg is `1em`, so the font-size
+   sets the chevron's size. */
+.porto-file-tree__marker-slot {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  color: var(--porto-color-gray-3);
+}
+.porto-file-tree__marker-slot .porto-details-marker {
+  display: inline-flex;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .porto-file-tree__marker-slot .porto-details-marker {
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+.porto-file-tree__folder[open]
+  > .porto-file-tree__folder-summary
+  .porto-details-marker {
+  transform: rotateZ(90deg);
+}
+[dir="rtl"] .porto-file-tree__folder-summary .porto-details-marker,
+.porto-file-tree
+  [dir="rtl"]
+  .porto-file-tree__folder-summary
+  .porto-details-marker {
+  transform: rotateZ(180deg);
+}
 .porto-file-tree__name {
   min-width: 0;
   overflow: hidden;
@@ -61,13 +96,15 @@
   flex-shrink: 0;
   max-width: 55%;
 }
-/* A `#` note after the name, muted — it truncates like the name. */
+/* A `#` note after the name, muted and a step smaller — it
+   truncates like the name. */
 .porto-file-tree__comment {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--porto-color-gray-3);
+  font-size: 0.8125rem;
 }
 /* The folder icon swaps closed and open with the fold. */
 .porto-file-tree__folder-icon--open {
@@ -105,10 +142,67 @@
       visibility 0s;
   }
 }
-/* Nested files sit under the folder's icon, behind a hairline
-   guide. */
+/* Nested rows sit under their parent, joined by the branch
+   lines below. The indent puts the line through the middle of
+   the parent's icon. */
 .porto-file-tree__folder-children {
-  margin-inline-start: 0.5rem;
+  margin-inline-start: 1rem;
   padding-inline-start: 0.5rem;
-  border-inline-start: 1px solid var(--porto-color-hairline-light);
+}
+/* Branch lines: each nested row joins its parent's line with
+   an elbow — a vertical line down the parent's icon center and
+   a short stub to the row's icon. The last row's line stops at
+   its middle, so it turns instead of continuing. Top-level
+   rows are roots and get no lines. */
+.porto-file-tree__folder-children > .porto-file-tree__file,
+.porto-file-tree__folder-children > .porto-file-tree__folder,
+.porto-file-tree__folder-children
+  > .porto-file-tree__folder
+  > .porto-file-tree__folder-summary {
+  position: relative;
+}
+.porto-file-tree__folder-children > .porto-file-tree__file::before,
+.porto-file-tree__folder-children > .porto-file-tree__folder::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--porto-color-hairline-light);
+}
+/* The last file's line stops halfway down its own row. */
+.porto-file-tree__folder-children > .porto-file-tree__file:last-child::before {
+  bottom: auto;
+  height: 50%;
+}
+/* A folder's line spans its whole subtree, so it lives on the
+   <details> — except the last folder's, which stops at its
+   summary's middle and so lives on the summary instead. */
+.porto-file-tree__folder-children
+  > .porto-file-tree__folder:last-child::before {
+  display: none;
+}
+.porto-file-tree__folder-children
+  > .porto-file-tree__folder:last-child
+  > .porto-file-tree__folder-summary::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.5rem;
+  top: 0;
+  height: 50%;
+  width: 1px;
+  background-color: var(--porto-color-hairline-light);
+}
+/* The stub from the line to the row's icon. */
+.porto-file-tree__folder-children > .porto-file-tree__file::after,
+.porto-file-tree__folder-children
+  > .porto-file-tree__folder
+  > .porto-file-tree__folder-summary::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.5rem;
+  top: 50%;
+  width: 1rem;
+  border-top: 1px solid var(--porto-color-hairline-light);
 }

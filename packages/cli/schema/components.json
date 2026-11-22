@@ -328,7 +328,7 @@
         "comment": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "A note after the name, shown muted with a `#` in front of it."
+          "description": "A note after the name, shown muted and smaller."
         }
       },
       "required": ["name"],
@@ -336,13 +336,13 @@
     },
     "FileTree": {
       "type": "object",
-      "description": "FileTree — a file listing for docs: folders that open and close, files as rows. The look follows Fumadocs' file tree — a bordered card, rows with an icon and a name, a hairline guide behind nested rows, no chevron: the folder icon itself swaps open and closed. A Folder is a native `<details>` element, so no JavaScript is involved.",
+      "description": "FileTree — a file listing for docs: folders that open and close, files as rows. The look follows Fumadocs' file tree — a bordered card, rows with an icon and a name. Nested rows join their parent with branch lines, like a drawn tree. A Folder is a native `<details>` element, so no JavaScript is involved.",
       "properties": {},
       "additionalProperties": false
     },
     "Folder": {
       "type": "object",
-      "description": "Folder — a collapsible folder in a `FileTree`: a native `<details>` element, so no JavaScript is involved. Closed by default unless `defaultOpen` is set.",
+      "description": "Folder — a collapsible folder in a `FileTree`: a native `<details>` element, so no JavaScript is involved. Closed by default unless `defaultOpen` is set. Folders with children show a chevron, and the name ends with a `/`.",
       "properties": {
         "name": {
           "x-ts-type": "string",
@@ -363,7 +363,7 @@
         "comment": {
           "x-ts-type": "string",
           "type": "string",
-          "description": "A note after the name, shown muted with a `#` in front of it."
+          "description": "A note after the name, shown muted and smaller."
         }
       },
       "required": ["name"],
