@@ -116,3 +116,29 @@ func TestExtractHeadingsUnclosedFrontmatter(t *testing.T) {
 		t.Fatalf("headings = %+v, want none", headings)
 	}
 }
+
+func TestExtractHeadingsKeepsUnderscores(t *testing.T) {
+	for _, tc := range []struct {
+		line string
+		text string
+		id   string
+	}{
+		{"### `topic_list` Options\n", "topic_list Options", "topic_list-options"},
+		{"## snake_case heading\n", "snake_case heading", "snake_case-heading"},
+		{"## _italic_ and __bold__\n", "italic and bold", "italic-and-bold"},
+		{"## `_private` method\n", "_private method", "_private-method"},
+		{"## `__init__`\n", "__init__", "__init__"},
+		{"## my__var\n", "my__var", "my__var"},
+	} {
+		headings := extractHeadings(tc.line)
+		if len(headings) != 1 {
+			t.Fatalf("extractHeadings(%q) = %d headings, want 1", tc.line, len(headings))
+		}
+		if headings[0].text != tc.text {
+			t.Fatalf("extractHeadings(%q) text = %q, want %q", tc.line, headings[0].text, tc.text)
+		}
+		if headings[0].id != tc.id {
+			t.Fatalf("extractHeadings(%q) id = %q, want %q", tc.line, headings[0].id, tc.id)
+		}
+	}
+}
