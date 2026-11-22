@@ -9,6 +9,11 @@ export function Steps({ children }: { children?: React.ReactNode }) {
   return <div className="porto-steps not-content">{children}</div>;
 }
 
+/**
+ * Step — one step in a `Steps` sequence: an optional title and
+ * its body as children. The number comes from the CSS counter,
+ * so steps renumber themselves when reordered.
+ */
 export function Step({
   title,
   children,

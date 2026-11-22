@@ -18,6 +18,11 @@ export function Cards({ children }: { children?: React.ReactNode }) {
   );
 }
 
+/**
+ * Card — one card in a `Cards` grid: a title, an optional
+ * description and icon, and an optional href that turns the
+ * whole card into a link. Children render below the description.
+ */
 export function Card({
   title,
   description,

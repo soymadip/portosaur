@@ -81,6 +81,40 @@
       },
       "additionalProperties": false
     },
+    "Card": {
+      "type": "object",
+      "description": "Card — one card in a `Cards` grid: a title, an optional description and icon, and an optional href that turns the whole card into a link. Children render below the description.",
+      "properties": {
+        "title": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The card title."
+        },
+        "description": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "A short line under the title."
+        },
+        "href": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The link destination — with one the whole card is a link."
+        },
+        "icon": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An Iconify id for the icon beside the title, like `lu:rocket`."
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false
+    },
+    "Cards": {
+      "type": "object",
+      "description": "Cards — an author-written grid of cards: hand-picked links or notes in the middle of a page. Unlike TopicList, which builds its cards from the page tree, these cards are written out in the MDX by hand. Each Card takes a title, an optional description, an optional icon (an Iconify id), and an optional href — with an href the whole card is a link, without one it is a plain card. Children render below the description.",
+      "properties": {},
+      "additionalProperties": false
+    },
     "CodeBlockTab": {
       "type": "object",
       "description": "CodeBlockTab — one code panel of a CodeBlockTabs group. A descriptor only: CodeBlockTabs reads its props and never renders it.",
@@ -236,6 +270,49 @@
       "required": ["icon"],
       "additionalProperties": false
     },
+    "File": {
+      "type": "object",
+      "description": "File — one row in a `FileTree`: an icon and a mono name. The icon is a plain file unless the `icon` prop gives an Iconify id.",
+      "properties": {
+        "name": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The file name, shown in mono."
+        },
+        "icon": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "An Iconify id for the file icon, like `lu:file-json`. Defaults to a plain file."
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "FileTree": {
+      "type": "object",
+      "description": "FileTree — a file listing for docs: folders that open and close, files as rows. A Folder is a native `<details>` element (the same collapsible Details uses), so no JavaScript is involved — the chevron rotates and the folder icon swaps open and closed in CSS. File names render in mono.",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "Folder": {
+      "type": "object",
+      "description": "Folder — a collapsible folder in a `FileTree`: a native `<details>` element, so no JavaScript is involved. Closed by default unless `defaultOpen` is set.",
+      "properties": {
+        "name": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The folder name, shown in mono."
+        },
+        "defaultOpen": {
+          "x-ts-type": "boolean",
+          "type": "boolean",
+          "description": "Open the folder by default. Closed by default.",
+          "default": false
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
     "Hint": {
       "type": "object",
       "description": "Hint — simplified tooltip: the `msg` prop (the hint's content lives in the prop, not in children) renders in a tinted box above any children. OG's full portal tooltip is Phase 2 scope.",
@@ -317,6 +394,24 @@
           "description": "The link target. Without it the text renders unlinked."
         }
       },
+      "additionalProperties": false
+    },
+    "Step": {
+      "type": "object",
+      "description": "Step — one step in a `Steps` sequence: an optional title and its body as children. The number comes from the CSS counter, so steps renumber themselves when reordered.",
+      "properties": {
+        "title": {
+          "x-ts-type": "string",
+          "type": "string",
+          "description": "The step heading."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Steps": {
+      "type": "object",
+      "description": "Steps — a numbered sequence for guides and tutorials. Each Step takes an optional title and its body as children. The numbers come from a CSS counter, so no JavaScript is involved: the badge and the line joining the steps are both drawn in Steps.css.",
+      "properties": {},
       "additionalProperties": false
     },
     "TabItem": {

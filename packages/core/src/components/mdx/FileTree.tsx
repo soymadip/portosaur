@@ -12,6 +12,11 @@ export function FileTree({ children }: { children?: React.ReactNode }) {
   return <div className="porto-file-tree not-content">{children}</div>;
 }
 
+/**
+ * File — one row in a `FileTree`: an icon and a mono name. The
+ * icon is a plain file unless the `icon` prop gives an Iconify
+ * id.
+ */
 export function File({
   name,
   icon,
@@ -31,6 +36,11 @@ export function File({
   );
 }
 
+/**
+ * Folder — a collapsible folder in a `FileTree`: a native
+ * `<details>` element, so no JavaScript is involved. Closed by
+ * default unless `defaultOpen` is set.
+ */
 export function Folder({
   name,
   defaultOpen = false,
