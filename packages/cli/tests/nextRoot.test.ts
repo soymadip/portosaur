@@ -422,10 +422,13 @@ describe("buildHomePageContent", () => {
     expect(content).toContain("<DocsHomePage config={config} />");
   });
 
-  test("renders a placeholder in portfolio mode (Phase 3 builds the real home)", () => {
+  test("renders the portfolio home in portfolio mode", () => {
     const content = buildHomePageContent(options({ siteMode: "portfolio" }), 0);
     expect(content).not.toContain("DocsHomePage");
-    expect(content).toContain("{config.site.title}");
+    expect(content).toContain(
+      'import { PortfolioHomePage } from "@portosaur/core/components/pages/portfolio-home-page";',
+    );
+    expect(content).toContain("<PortfolioHomePage config={config} />");
   });
 
   test("titles the home Home in docs mode, Me in portfolio mode (OG rule)", () => {

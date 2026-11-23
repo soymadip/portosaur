@@ -1,0 +1,403 @@
+/* Portfolio hero — intro, name, profession, description,
+ * "Learn More" button, social icon row, profile picture.
+ * Rendered by HeroSection. The entrance animation reuses the
+ * docs home's keyframes (docs-home-page.css, always loaded).
+ * The title and profession keep the old home's hover lift and
+ * underline. The hero fills the viewport like the old one. */
+
+.porto-hero-section {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--porto-nav-height));
+  padding: 2rem 0;
+}
+
+.porto-hero__container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-width: 1300px;
+  width: 90%;
+  margin: 0 auto 2rem;
+  padding: 0 2rem;
+}
+
+.porto-hero__text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding-right: 3rem;
+  padding-left: 1rem;
+}
+
+.porto-hero__intro {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--porto-color-gray-3);
+  margin: 0 0 0.2rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s
+    forwards;
+}
+
+.porto-hero__title {
+  position: relative;
+  display: inline-block;
+  font-size: 4.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0.2rem 0;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s
+    forwards;
+  transition: transform 200ms ease;
+}
+.porto-hero__title:hover {
+  transform: translateY(-2px);
+}
+.porto-hero__title::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--porto-color-text-accent);
+  transition: width 200ms ease;
+}
+.porto-hero__title:hover::after {
+  width: 100%;
+}
+
+.porto-hero__comma {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--porto-color-gray-3);
+  margin-left: 0.1rem;
+  margin-right: 0.5rem;
+}
+
+.porto-hero__subtitle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s
+    forwards;
+}
+
+.porto-hero__subtitle {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--porto-color-gray-3);
+}
+
+.porto-hero__profession {
+  position: relative;
+  display: inline-block;
+  font-size: 2.9rem;
+  font-weight: 550;
+  line-height: 1.1;
+  color: var(--porto-color-text);
+  margin: 0;
+  transition: transform 200ms ease;
+}
+.porto-hero__profession:hover {
+  transform: translateY(-2px);
+}
+.porto-hero__profession::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--porto-color-text);
+  transition: width 200ms ease;
+}
+.porto-hero__profession:hover::after {
+  width: 100%;
+}
+
+.porto-hero__desc {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--porto-color-gray-3);
+  max-width: 600px;
+  margin: 1.5rem 0 0;
+  text-align: left;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s
+    forwards;
+}
+
+.porto-hero__actions {
+  display: flex;
+  align-items: center;
+  margin-top: 2.5rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.6s
+    forwards;
+}
+
+/* The call to action is a small rounded rectangle, not a pill,
+   and it turns into an outline on hover. */
+.porto-hero__cta {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  margin-top: 0;
+  margin-right: 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 0.4rem;
+  text-decoration: none;
+  color: var(--porto-color-black);
+  background-color: var(--porto-color-text-accent);
+  border: 2px solid var(--porto-color-text-accent);
+  cursor: pointer;
+  outline: none;
+  box-shadow: var(--porto-shadow-sm);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
+}
+.porto-hero__cta:hover {
+  background-color: transparent;
+  color: var(--porto-color-text-accent);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--porto-shadow-md);
+  text-decoration: none;
+}
+.porto-hero__cta:active {
+  transform: translateY(-2px);
+}
+.porto-hero__cta:focus {
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--porto-color-text-accent) 30%, transparent);
+}
+
+/* The social icon row: bare icons in the accent color, no
+   circles. Each icon takes its brand color on hover, from the
+   --hover-color the component sets per link. */
+.porto-social-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 38px;
+}
+.porto-social-links__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--porto-color-text-accent);
+  text-decoration: none;
+  transition:
+    color 0.3s ease,
+    transform 0.2s ease;
+}
+.porto-social-links__link:hover {
+  opacity: 0.9;
+  transform: translateY(-4px) scale(1.15);
+  text-decoration: none;
+  color: var(--hover-color, var(--porto-color-text-accent));
+}
+
+.porto-hero__picture {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
+  padding-right: 2rem;
+  opacity: 0;
+  animation: porto-hero-slide-up-fade 0.7s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s
+    forwards;
+}
+.porto-hero__picture img {
+  display: block;
+  height: 270px;
+  width: auto;
+  max-width: 100%;
+  border-radius: 20%;
+  object-fit: cover;
+  box-shadow: none;
+  margin-top: -30px;
+  margin-right: 2rem;
+  transition:
+    transform 0.5s ease,
+    box-shadow 0.5s ease;
+}
+.porto-hero__picture img:hover {
+  transform: scale(1.04) translateY(-8px);
+  box-shadow: var(--porto-shadow-lg);
+}
+
+/* Where the hero stacks, the picture goes on top and the text
+   centers underneath it. */
+@media (max-width: 768px) {
+  .porto-hero-section {
+    min-height: 100vh;
+    padding: 1rem 0 3rem;
+    box-sizing: border-box;
+  }
+  .porto-hero__container {
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    height: 100%;
+    margin-bottom: 0;
+    padding: 0;
+  }
+  /* Where the hero stacks, the picture goes on top and the text
+     centers underneath it. The two halves keep their own
+     height instead of splitting the container between them. */
+  .porto-hero__text,
+  .porto-hero__picture {
+    flex: none;
+  }
+  .porto-hero__picture {
+    padding-right: 0;
+    justify-content: center;
+    margin-top: -0.5rem;
+    margin-bottom: 0;
+    width: 100%;
+  }
+  .porto-hero__picture img {
+    height: 180px;
+    margin-top: -20px;
+    margin-bottom: 1.2rem;
+    margin-right: 0;
+  }
+  .porto-hero__picture img:hover {
+    transform: scale(1.03);
+    box-shadow: var(--porto-shadow-md);
+  }
+  .porto-hero__text {
+    padding-right: 0;
+    padding-left: 0;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .porto-hero__title {
+    font-size: 3rem;
+  }
+  .porto-hero__comma {
+    font-size: 0.9rem;
+  }
+  .porto-hero__subtitle-row {
+    justify-content: center;
+    margin: 0.2rem 0;
+  }
+  .porto-hero__subtitle {
+    font-size: 1.2rem;
+  }
+  .porto-hero__profession {
+    font-size: 2rem;
+  }
+  .porto-hero__desc {
+    margin: 1.2rem auto 0;
+    max-width: 95%;
+    font-size: 1rem;
+    padding: 0;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .porto-hero__actions {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+  .porto-hero__cta {
+    margin-right: 0;
+    margin-bottom: 1.2rem;
+  }
+  .porto-social-links {
+    margin: 0;
+    width: 100%;
+    justify-content: center;
+    height: auto;
+    padding-bottom: 0.5rem;
+  }
+  .porto-social-links__link {
+    margin: 0 1rem;
+  }
+  .porto-social-links__link svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .porto-hero-section {
+    min-height: 100vh;
+    padding: 0.5rem 0 2rem;
+  }
+  .porto-hero__picture {
+    margin-top: -2rem;
+  }
+  .porto-hero__picture img {
+    height: 160px;
+    margin-top: -25px;
+    margin-bottom: 1.5rem;
+  }
+  .porto-hero__title {
+    font-size: 2.3rem;
+  }
+  .porto-hero__comma {
+    font-size: 0.8rem;
+  }
+  .porto-hero__subtitle {
+    font-size: 1rem;
+  }
+  .porto-hero__profession {
+    font-size: 1.5rem;
+  }
+  .porto-hero__desc {
+    margin: 0.5rem auto 0;
+    max-width: 92%;
+    line-height: 1.4;
+    font-size: 0.9rem;
+  }
+  .porto-hero__cta {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+  }
+  .porto-social-links__link svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-hero__intro,
+  .porto-hero__title,
+  .porto-hero__subtitle-row,
+  .porto-hero__desc,
+  .porto-hero__actions,
+  .porto-hero__picture {
+    opacity: 1;
+    animation: none;
+  }
+  .porto-hero__title,
+  .porto-hero__title::after,
+  .porto-hero__profession,
+  .porto-hero__profession::after,
+  .porto-hero__cta,
+  .porto-hero__picture img,
+  .porto-social-links__link {
+    transition: none;
+  }
+}

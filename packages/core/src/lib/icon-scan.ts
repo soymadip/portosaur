@@ -59,7 +59,11 @@ const CORE_ICON_PATTERN = /<SiteIcon[^>]*\b(?:icon|fallbackIcon)="([^"]+)"/g;
 const CORE_FALLBACK_PATTERN = /fallbackIcon:[ \t]*"([^"]+)"/g;
 /** Fixed `icon: "prefix:name"` literals in core's own source. */
 const CORE_OBJECT_ICON_PATTERN = /\bicon:[ \t]*"([a-z]+:[a-z0-9-]+)"/g;
-/** `files` fences (backtick or tilde): their entries' auto icons. */
+/** `name:` values on config list items (social links and the
+ * like): slug guess candidates, so a link named "LinkedIn"
+ * gets its icon without an explicit `icon:` value. Config
+ * only — frontmatter names are page titles, already covered. */
+const CONFIG_NAME_PATTERN = /^\s*-\s*name:[ \t]*["']?([^"'\n#]+)/gm;
 const FILES_FENCE_PATTERN =
   /^(?:```|~~~)files[ \t]*\r?\n([\s\S]*?)^(?:```|~~~)/gim;
 /** `name="..."` on a `<File>` or `<Folder>` element. */
@@ -252,7 +256,11 @@ export function collectSiteIcons(
 
   if (spec.configFile) {
     try {
-      readYaml(fs.readFileSync(spec.configFile, "utf-8"));
+      const configText = fs.readFileSync(spec.configFile, "utf-8");
+      readYaml(configText);
+      for (const match of configText.matchAll(CONFIG_NAME_PATTERN)) {
+        slugs.add(match[1].trim().toLowerCase());
+      }
     } catch {}
   }
 

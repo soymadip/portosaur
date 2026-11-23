@@ -1,0 +1,98 @@
+/* NavArrow — the floating arrow at the bottom center of
+ * the portfolio home: it appears once the reader has
+ * scrolled a bit, jumps to the next section on tap, and
+ * points back to the top at the bottom of the page.
+ * Rendered by NavArrow. The chevron bounces while it
+ * points down. */
+
+.porto-nav-arrow {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+  cursor: pointer;
+  box-shadow: var(--porto-shadow-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    opacity 300ms ease,
+    background-color 150ms ease;
+}
+.porto-nav-arrow--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.porto-nav-arrow:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 85%,
+    black
+  );
+  transform: translateX(-50%) translateY(-5px) scale(1.1);
+  box-shadow: var(--porto-shadow-md);
+}
+.porto-nav-arrow:active {
+  transform: translateX(-50%) translateY(-2px) scale(0.95);
+}
+
+/* The button fades a little while the page is being scrolled. */
+.porto-nav-arrow--visible.porto-nav-arrow--scrolling {
+  opacity: 0.7;
+}
+
+.porto-nav-arrow__bounce {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: porto-nav-arrow-bounce 2s infinite;
+}
+
+@keyframes porto-nav-arrow-bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 768px) {
+  .porto-nav-arrow {
+    bottom: 1.5rem;
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-nav-arrow {
+    transition: opacity 150ms ease;
+    animation: none;
+  }
+  .porto-nav-arrow--visible {
+    transform: translateX(-50%) translateY(0);
+  }
+  .porto-nav-arrow__bounce {
+    animation: none;
+  }
+}

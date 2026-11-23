@@ -1,0 +1,263 @@
+/* Portfolio contact — the social links as a grid of cards.
+ * Rendered by ContactSection. Each card is a small fixed
+ * square with a large accent icon, its name, and a short
+ * line. The icon takes the site's brand color (or the link's
+ * own `color`) on hover only, from the --icon-hover-color
+ * the component sets per card. */
+
+.porto-contact-section {
+  min-height: calc(100vh - var(--porto-nav-height));
+  margin-bottom: 0;
+  width: 100%;
+  padding: 0 0 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.porto-contact__container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.porto-contact__header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.porto-contact__heading {
+  position: relative;
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 0.6rem;
+}
+
+.porto-contact__subheading {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--porto-color-gray-3);
+  max-width: 600px;
+  margin: 0.05rem auto 0;
+}
+
+.porto-contact__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: 0.9rem;
+  max-width: 1300px;
+  width: 100%;
+  padding: 0 0.5rem;
+}
+
+.porto-contact__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 150px;
+  min-height: 160px;
+  padding: 1.3rem 1.2rem;
+  text-align: center;
+  text-decoration: none;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-gray-4);
+  border-radius: 0.8rem;
+  box-shadow: var(--porto-shadow-sm);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+.porto-contact__card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--porto-shadow-md);
+  background-color: var(--porto-color-gray-5);
+  text-decoration: none;
+}
+.porto-contact__card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--porto-color-text-accent);
+  transition: width 0.3s ease;
+}
+.porto-contact__card:hover::after {
+  width: 100%;
+}
+
+.porto-contact__icon {
+  display: inline-flex;
+  font-size: 3.5rem;
+  margin-bottom: 0.3rem;
+  color: var(--porto-color-text-accent);
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+.porto-contact__card:hover .porto-contact__icon {
+  transform: scale(1.1);
+  color: var(--icon-hover-color, var(--porto-color-text-accent));
+}
+.porto-contact__icon img {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.porto-contact__name {
+  position: relative;
+  display: inline-block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 0.5rem;
+  padding-bottom: 3px;
+}
+.porto-contact__name::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 1px;
+  background-color: var(--porto-color-gray-1);
+  opacity: 0.15;
+}
+
+.porto-contact__desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--porto-color-gray-3);
+  margin: 0.3rem 0 0;
+  opacity: 0.8;
+  text-align: center;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .porto-contact__card {
+    width: 140px;
+  }
+  .porto-contact__grid {
+    gap: 1.1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .porto-contact__card {
+    width: 150px;
+  }
+  .porto-contact__grid {
+    gap: 1rem;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .porto-contact-section {
+    padding: 0.5rem 0 4rem;
+  }
+  .porto-contact__header {
+    margin-bottom: 1.2rem;
+  }
+  .porto-contact__heading {
+    font-size: 2.2rem;
+  }
+  .porto-contact__subheading {
+    font-size: 0.9rem;
+  }
+  .porto-contact__card {
+    width: 150px;
+    min-height: 150px;
+    padding: 1.2rem 1.2rem;
+  }
+  .porto-contact__icon {
+    font-size: 3rem;
+    margin-bottom: 0.25rem;
+  }
+  .porto-contact__icon img {
+    width: 3rem;
+    height: 3rem;
+  }
+  .porto-contact__name {
+    font-size: 1.5rem;
+  }
+  .porto-contact__grid {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .porto-contact-section {
+    padding: 0 0 3rem;
+  }
+  .porto-contact__header {
+    margin-bottom: 1rem;
+  }
+  .porto-contact__heading {
+    font-size: 1.9rem;
+  }
+  .porto-contact__subheading {
+    font-size: 0.9rem;
+    max-width: 90%;
+  }
+  .porto-contact__grid {
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+  /* Small phones get icon-only squares. */
+  .porto-contact__card {
+    width: 60px;
+    height: 60px;
+    min-height: unset;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+  }
+  .porto-contact__icon {
+    font-size: 2.5rem;
+    margin: 3px 0 0;
+    position: relative;
+    top: 1.5px;
+  }
+  .porto-contact__icon img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .porto-contact__name,
+  .porto-contact__desc,
+  .porto-contact__card::after {
+    display: none;
+  }
+  .porto-contact__card:hover {
+    transform: translateY(-3px) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-contact__card,
+  .porto-contact__card::after,
+  .porto-contact__icon {
+    transition: none;
+  }
+}

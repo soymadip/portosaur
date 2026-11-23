@@ -1,0 +1,15 @@
+/* Portfolio home — the page shell. Rendered by
+ * portfolio-home-page. The sections stack in order; each
+ * section carries its own container and padding. */
+
+.porto-portfolio-home {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+/* Anchor jumps land clear of the fixed navbar. */
+.porto-portfolio-home > section {
+  scroll-margin-top: 4.5rem;
+}

@@ -45,6 +45,7 @@
 /docs/markdown/dynamic-variables/
 /docs/markdown/frontmatter/
 /docs/markdown/icons/
+/docs/portfolio-home/
 /docs/progressive-web-app/
 /docs/theme-customization/
 /notes/

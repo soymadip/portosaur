@@ -1,5 +1,5 @@
 {
-  "generated_from": "RepoInfo component page (renamed, six providers)",
+  "generated_from": "Portfolio home page (five sections) + portfolio home guide page",
   "routes": [
     {
       "url": "/",
@@ -35,6 +35,7 @@
       "headings": [
         "Portosaur Docs",
         "Getting Started",
+        "Portfolio Home",
         "Configuration",
         "Markdown Features",
         "Progressive Web App (PWA)",
@@ -435,6 +436,19 @@
       "url": "/docs/markdown/icons/",
       "title": "Icons & Emoji | Portosaur",
       "headings": ["Icons & Emoji", "Ways to Use Icons/Emojis"]
+    },
+    {
+      "url": "/docs/portfolio-home/",
+      "title": "Portfolio Home | Portosaur",
+      "headings": [
+        "Portfolio Home",
+        "Hero",
+        "About",
+        "Projects",
+        "Experience",
+        "Contact",
+        "The floating arrow"
+      ]
     },
     {
       "url": "/docs/progressive-web-app/",

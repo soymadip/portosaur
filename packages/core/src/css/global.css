@@ -88,6 +88,13 @@
 @import "./components/blog-authors-page.css";
 @import "./components/tasks-page.css";
 @import "./components/TasksTable.css";
+@import "./components/portfolio-home-page.css";
+@import "./components/HeroSection.css";
+@import "./components/AboutSection.css";
+@import "./components/ProjectsSection.css";
+@import "./components/ExperienceSection.css";
+@import "./components/ContactSection.css";
+@import "./components/NavArrow.css";
 @import "./empty-states.css";
 @import "./components/SearchPageBody.css";
 /* Shared components + MDX components. */

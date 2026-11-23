@@ -6,7 +6,8 @@
  * `themeConfig.navbar.items`:
  *
  *   - Docs (docs mode) / About Me, Projects, Experience, Contact
- *     anchors (portfolio mode, when each section is enabled)
+ *     anchors (portfolio mode, when each section renders — the
+ *     same visibility rule the home page itself uses)
  *   - custom `theme.navigation.navbar_items` (links + dropdowns)
  *   - "More" dropdown: Notes (portfolio mode), Blog, Tasks (when
  *     enabled), Portosaur version link (unless disabled)
@@ -19,6 +20,12 @@
 
 import type { PortosaurOptions } from "./config.ts";
 import { isSamePage, pageHref } from "./pageUrl.ts";
+import {
+  isAboutVisible,
+  isContactVisible,
+  isExperienceVisible,
+  isProjectsVisible,
+} from "./portfolio-home.ts";
 
 export interface NavLink {
   label: string;
@@ -94,28 +101,31 @@ export function buildNavEntries(
       current: isSamePage(docsHref, pathname),
     });
   } else {
-    if (homePage.aboutSection?.enable) {
+    // The anchor links follow the same visibility rule as the
+    // sections themselves: an enabled-but-empty section renders
+    // nothing, so its link hides too.
+    if (isAboutVisible(homePage.aboutSection ?? {})) {
       rightEntries.push({
         label: "About Me",
         href: "/#about",
         current: isSamePage("/#about", pathname),
       });
     }
-    if (homePage.projectShelf?.enable) {
+    if (isProjectsVisible(homePage.projectShelf ?? {})) {
       rightEntries.push({
         label: "Projects",
         href: "/#projects",
         current: isSamePage("/#projects", pathname),
       });
     }
-    if (homePage.experienceSection?.enable) {
+    if (isExperienceVisible(homePage.experienceSection ?? {})) {
       rightEntries.push({
         label: "Experience",
         href: "/#experience",
         current: isSamePage("/#experience", pathname),
       });
     }
-    if (homePage.socialSection?.enable) {
+    if (isContactVisible(homePage.socialSection ?? {})) {
       rightEntries.push({
         label: "Contact",
         href: "/#contact",

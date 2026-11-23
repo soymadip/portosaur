@@ -195,11 +195,7 @@ features:
 
 ### `home_page`
 
-Configures sections for portfolio sites (active when `home_page` is declared).
-
-:::info[Coming soon]
-The portfolio home sections aren't built yet — these keys are read but nothing renders them today.
-:::
+Configures sections for portfolio sites (active when `home_page` is declared). See [Portfolio Home](/docs/portfolio-home) for how the sections render.
 
 #### `home_page.hero`
 
@@ -228,13 +224,13 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 
 #### `home_page.project_shelf`
 
-| Key          | Type      | Default                                                              | Description                          |
-| :----------- | :-------- | :------------------------------------------------------------------- | :----------------------------------- |
-| `enable`     | `boolean` | `true`                                                               | Toggle the Project Shelf section.    |
-| `heading`    | `string`  | `"My Projects"`                                                      | Heading for the projects section.    |
-| `subheading` | `string`  | `"A collection of all my works, with featured projects highlighted"` | Subheading for the projects section. |
-| `projects`   | `array`   | `[]`                                                                 | Array of project items.              |
-| `autoplay`   | `boolean` | `true`                                                               | Autoplay the project carousel.       |
+| Key          | Type      | Default                                                              | Description                                                                                                     |
+| :----------- | :-------- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `enable`     | `boolean` | `true`                                                               | Toggle the Project Shelf section.                                                                               |
+| `heading`    | `string`  | `"My Projects"`                                                      | Heading for the projects section.                                                                               |
+| `subheading` | `string`  | `"A collection of all my works, with featured projects highlighted"` | Subheading for the projects section.                                                                            |
+| `projects`   | `array`   | `[]`                                                                 | Array of project items.                                                                                         |
+| `autoplay`   | `boolean` | `true`                                                               | Autoplay the project shelf, one card every 5 seconds. Pauses while the reader hovers over or focuses the shelf. |
 
 #### `home_page.experience`
 
@@ -247,12 +243,12 @@ The portfolio home sections aren't built yet — these keys are read but nothing
 
 #### `home_page.social`
 
-| Key          | Type      | Default                                                                         | Description                              |
-| :----------- | :-------- | :------------------------------------------------------------------------------ | :--------------------------------------- |
-| `enable`     | `boolean` | `true`                                                                          | Toggle the Social Links section.         |
-| `heading`    | `string`  | `"Get In Touch"`                                                                | Heading for the social links section.    |
-| `subheading` | `string`  | `"Feel free to reach out for collaborations, questions, or just to say hello!"` | Subheading for the social links section. |
-| `links`      | `array`   | `[]`                                                                            | Array of social objects.                 |
+| Key          | Type      | Default                                                                         | Description                                                                                                                                                                                 |
+| :----------- | :-------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `enable`     | `boolean` | `true`                                                                          | Toggle the Social Links section.                                                                                                                                                            |
+| `heading`    | `string`  | `"Get In Touch"`                                                                | Heading for the social links section.                                                                                                                                                       |
+| `subheading` | `string`  | `"Feel free to reach out for collaborations, questions, or just to say hello!"` | Subheading for the social links section.                                                                                                                                                    |
+| `links`      | `array`   | `[]`                                                                            | Array of social objects. Each link takes `name`, `url`, and optionally `icon`, `desc`, and `color` (a CSS color for the icon). The icon is guessed from the `name` when `icon` is left out. |
 
 ---
 

@@ -1,0 +1,308 @@
+/* Portfolio about — the old home's card: one rounded panel
+ * with the photo and resume button in a tinted column on the
+ * side and the bio and skills beside it. Rendered by
+ * AboutSection. */
+
+.porto-about-section {
+  padding: 2rem 0 4rem;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.porto-about__container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2rem 0;
+}
+
+.porto-about__header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.porto-about__heading {
+  position: relative;
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 0.6rem;
+}
+.porto-about__heading::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--porto-color-text-accent);
+  border-radius: 2px;
+}
+
+/* The card: one rounded panel holding both columns. */
+.porto-about__card {
+  display: flex;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--porto-shadow-md);
+  min-height: 461px;
+}
+
+/* Left column: photo and resume button on a faint accent tint. */
+.porto-about__image-col {
+  flex: 0.8;
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 3%,
+    transparent
+  );
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5rem;
+  border-right: 1px solid var(--porto-color-card-border);
+}
+
+/* The photo is a circle in a gradient ring. */
+.porto-about__image-wrap {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  padding: 6px;
+  background: linear-gradient(
+    135deg,
+    var(--porto-color-text-accent),
+    color-mix(in srgb, var(--porto-color-text-accent) 60%, white)
+  );
+  box-shadow: 0 10px 30px
+    color-mix(in srgb, var(--porto-color-text-accent) 20%, transparent);
+  transition: transform 0.3s ease;
+}
+.porto-about__image-wrap:hover {
+  transform: scale(1.05);
+}
+.porto-about__image-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid var(--porto-color-gray-6);
+}
+
+.porto-about__resume {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* The resume button is a solid accent button, overriding the
+   preview link's dashed outline. */
+.porto-about__resume .porto-pv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+  border: 1px solid var(--porto-color-text-accent);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.porto-about__resume a.porto-pv:hover {
+  background-color: var(--porto-color-gray-6);
+  color: var(--porto-color-text-accent);
+  border-color: var(--porto-color-text-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px
+    color-mix(in srgb, var(--porto-color-text-accent) 20%, transparent);
+}
+.porto-about__resume-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Right column: bio paragraphs and the skills grid. */
+.porto-about__text-col {
+  flex: 1.2;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Long bios scroll inside the card instead of stretching it. */
+.porto-about__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+.porto-about__text::-webkit-scrollbar {
+  width: 5px;
+}
+.porto-about__text::-webkit-scrollbar-track {
+  background: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 5%,
+    transparent
+  );
+  border-radius: 10px;
+}
+.porto-about__text::-webkit-scrollbar-thumb {
+  background: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 20%,
+    transparent
+  );
+  border-radius: 10px;
+}
+.porto-about__text::-webkit-scrollbar-thumb:hover {
+  background: var(--porto-color-text-accent);
+}
+
+.porto-about__paragraph {
+  position: relative;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--porto-color-gray-2);
+  margin: 0;
+  padding-left: 1rem;
+}
+.porto-about__paragraph::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  width: 1.5px;
+  background-color: var(--porto-color-gray-5);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.porto-about__skills {
+  margin-top: 1.7rem;
+}
+
+.porto-about__skills-title {
+  position: relative;
+  display: inline-block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 1.4rem;
+}
+.porto-about__skills-title::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 2px;
+  bottom: -0.4rem;
+  left: 0;
+  background-color: var(--porto-color-text-accent);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+.porto-about__skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.porto-about__skill-tag {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--porto-color-gray-3);
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 8px;
+  cursor: default;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+.porto-about__skill-tag:hover {
+  border-color: var(--porto-color-text-accent);
+  color: var(--porto-color-text-accent);
+  transform: translateY(-2px);
+  background-color: color-mix(
+    in srgb,
+    var(--porto-color-text-accent) 5%,
+    transparent
+  );
+}
+
+@media (max-width: 992px) {
+  .porto-about__card {
+    flex-direction: column;
+  }
+  .porto-about__image-col {
+    border-right: none;
+    border-bottom: 1px solid var(--porto-color-card-border);
+    padding: 2.5rem;
+  }
+  .porto-about__text-col {
+    padding: 2rem;
+  }
+  .porto-about__skills {
+    text-align: center;
+  }
+  .porto-about__skills-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .porto-about__skills-grid {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .porto-about-section {
+    padding: 4rem 0;
+  }
+  .porto-about__heading {
+    font-size: 2rem;
+  }
+  .porto-about__image-wrap {
+    width: 160px;
+    height: 160px;
+  }
+  .porto-about__paragraph {
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-about__image-wrap,
+  .porto-about__resume .porto-pv,
+  .porto-about__skill-tag {
+    transition: none;
+  }
+}

@@ -55,6 +55,11 @@ docsHome:
   features:
     - title: Books
       icon: md:book
+home_page:
+  social:
+    links:
+      - name: LinkedIn
+        url: https://linkedin.com/in/test
 `,
   );
   return { projectDir, contentDir };
@@ -82,6 +87,9 @@ describe("collectSiteIcons", () => {
       expect(icons.has("devicon:arduino")).toBe(true);
       // The config feature icon.
       expect(icons.has("mdi:book")).toBe(true);
+      // A config list-item `name:` guesses its icon from the
+      // techmap, so a social link needs no explicit `icon:`.
+      expect(icons.has("mdi:linkedin")).toBe(true);
       // The fixed icons the core's own pages render.
       expect(icons.has("mdi:folder")).toBe(true);
       expect(icons.has("mdi:notebook")).toBe(true);

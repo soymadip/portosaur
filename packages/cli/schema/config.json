@@ -649,6 +649,9 @@
                   },
                   "desc": {
                     "type": ["string", "null"]
+                  },
+                  "color": {
+                    "type": ["string", "null"]
                   }
                 },
                 "additionalProperties": false,

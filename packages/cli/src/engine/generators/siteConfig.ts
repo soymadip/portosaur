@@ -368,7 +368,7 @@ export function buildSiteConfig(
       "home_page.social.subheading", // Subheading for the social links section.
       "Feel free to reach out for collaborations, questions, or just to say hello!",
     ),
-    links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string }
+    links: get("home_page.social.links", []), // @items { name: string, url: string, icon?: string, desc?: string, color?: string }
   };
 
   const docsHome = {

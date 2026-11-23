@@ -501,10 +501,11 @@ export default function Layout({ children }: { children: ReactNode }) {
  * Builds the contents of the generated `.portosaur/app/page.tsx`.
  *
  * Docs mode renders the core's docs home (hero + feature cards from
- * `config.docsHome`). Portfolio mode renders a minimal placeholder in
- * Phase 1 — the portfolio home sections land in Phase 3. The title
- * follows the OG rule (Astro `index.astro`): "Home" in docs mode,
- * "Me" in portfolio mode, suffixed with `| {site title}`.
+ * `config.docsHome`). Portfolio mode renders the core's portfolio
+ * home (hero, about, projects, experience, contact from
+ * `config.homePage`). The title follows the OG rule (Astro
+ * `index.astro`): "Home" in docs mode, "Me" in portfolio mode,
+ * suffixed with `| {site title}`.
  *
  * The suffix is baked in as an absolute title instead of relying on
  * the root layout's template: Next's `accumulateMetadata` only
@@ -534,19 +535,13 @@ export default function Page() {
   }
 
   return `${header(mtime)}import { config } from "@/lib/config";
+import { PortfolioHomePage } from "@portosaur/core/components/pages/portfolio-home-page";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: { absolute: ${JSON.stringify(absoluteTitle)} } };
 
-// Phase 1 placeholder — the portfolio home sections (hero, about,
-// projects, experience, social links, contact) land in Phase 3.
 export default function Page() {
-  return (
-    <main>
-      <h1>{config.site.title}</h1>
-      <p>{config.site.tagline}</p>
-    </main>
-  );
+  return <PortfolioHomePage config={config} />;
 }
 `;
 }

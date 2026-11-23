@@ -12,16 +12,18 @@ export function HeroImage({
   fallback,
   width,
   height,
+  alt = "Hero",
 }: {
   src: string;
   fallback?: string;
   width?: number;
   height?: number;
+  alt?: string;
 }) {
   return (
     <img
       src={src}
-      alt="Hero"
+      alt={alt}
       loading="eager"
       fetchPriority="high"
       decoding="async"

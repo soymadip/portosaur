@@ -1,0 +1,386 @@
+/* Portfolio projects — the project shelf as a multi-card
+ * scroller: three cards on desktop, two on a tablet, one on a
+ * phone, moving one card at a time. Rendered by
+ * ProjectsSection. The track position is a CSS variable
+ * (`--porto-scroller-offset`, a percentage the component
+ * computes), so the stylesheet can flip the slide direction
+ * for right-to-left pages. The arrows flank the track like
+ * the old home's, and hide on phones, where the shelf is
+ * swiped instead. Card widths follow the same breakpoints
+ * the component's visible count uses. */
+
+.porto-projects-section {
+  width: 100%;
+  padding: 3rem 0 7rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.porto-projects__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.porto-projects__header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.porto-projects__heading {
+  position: relative;
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 0.6rem;
+}
+
+.porto-projects__subheading {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--porto-color-gray-3);
+  max-width: 600px;
+  margin: 0.4rem auto 0;
+}
+
+/* The arrows and the viewport sit in one row. */
+.porto-projects__scroller {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.porto-projects__viewport {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  padding-block: 1rem;
+  /* Vertical scrolling stays with the browser; horizontal drags
+     reach the swipe handlers instead of scrolling the page. */
+  touch-action: pan-y;
+}
+
+.porto-projects__track {
+  display: flex;
+  margin-inline: -10px;
+  transform: translateX(var(--porto-scroller-offset, 0%));
+  transition: transform 250ms ease;
+}
+
+/* Right-to-left: the row lays out right to left, so the track
+   moves right to reach the next card. */
+[dir="rtl"] .porto-projects__track {
+  transform: translateX(calc(-1 * var(--porto-scroller-offset, 0%)));
+}
+
+/* The gap lives as padding inside each card slot, so the track
+   step stays an exact fraction of the viewport width. */
+.porto-projects__card-wrap {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+@media (min-width: 601px) {
+  .porto-projects__card-wrap {
+    flex-basis: 50%;
+  }
+}
+@media (min-width: 1025px) {
+  .porto-projects__card-wrap {
+    flex-basis: 33.3333%;
+  }
+}
+
+/* The arrows are solid accent circles flanking the track. */
+.porto-projects__arrow {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--porto-shadow-md);
+  z-index: 10;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+.porto-projects__arrow:hover:not(:disabled) {
+  transform: scale(1.1);
+  background: color-mix(in srgb, var(--porto-color-text-accent) 85%, black);
+}
+.porto-projects__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Right-to-left: the chevrons point the other way. */
+[dir="rtl"] .porto-projects__arrow svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .porto-projects__arrow {
+    display: none;
+  }
+}
+
+.porto-projects__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--porto-color-gray-6);
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 0.8rem;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+.porto-projects__card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--porto-shadow-lg);
+  border-color: var(--porto-color-text-accent);
+  z-index: 10;
+}
+
+/* The tile keeps a 62% aspect ratio and carries the state
+   badge, the featured star, and the tags on top of the icon. */
+.porto-projects__tile {
+  position: relative;
+  width: 100%;
+  padding-top: 62%;
+  overflow: hidden;
+  background-color: var(--porto-color-gray-5);
+  color: var(--porto-color-gray-1);
+  border-bottom: 1px solid var(--porto-color-hairline);
+}
+
+.porto-projects__tile-icon {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s ease;
+}
+.porto-projects__card:hover .porto-projects__tile-icon {
+  transform: scale(1.08);
+}
+.porto-projects__tile-icon svg,
+.porto-projects__tile-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.porto-projects__tile-icon span[role="img"] {
+  font-size: 3rem;
+}
+.porto-projects__tile-icon span svg {
+  width: 100%;
+  height: 100%;
+}
+
+.porto-projects__state {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  padding: 1px 4px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 0.4rem;
+  color: var(--porto-color-gray-2);
+  background-color: var(--porto-color-gray-6);
+}
+.porto-projects__state--active {
+  background-color: var(--porto-color-green);
+  color: var(--porto-color-bg);
+}
+.porto-projects__state--completed {
+  background-color: var(--porto-color-blue);
+  color: var(--porto-color-bg);
+}
+.porto-projects__state--maintenance {
+  background-color: var(--porto-color-orange);
+  color: var(--porto-color-bg);
+}
+.porto-projects__state--paused {
+  background-color: var(--porto-color-red);
+  color: var(--porto-color-bg);
+}
+.porto-projects__state--archived {
+  background-color: var(--porto-color-gray-4);
+  color: var(--porto-color-bg);
+}
+.porto-projects__state--planned {
+  background-color: var(--porto-color-purple);
+  color: var(--porto-color-bg);
+}
+
+.porto-projects__featured {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+  font-size: 0.75rem;
+  box-shadow: var(--porto-shadow-sm);
+}
+.porto-projects__featured svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* The tags sit on the tile, bottom left, clear of the star. */
+.porto-projects__tags {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 32px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.porto-projects__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 3px 3px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--porto-color-gray-2);
+  background-color: var(--porto-color-gray-6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--porto-color-card-border);
+  border-radius: 3px;
+  box-shadow: var(--porto-shadow-sm);
+}
+.porto-projects__tag--extra {
+  background-color: var(--porto-color-text-accent);
+  color: var(--porto-color-black);
+  cursor: help;
+}
+
+.porto-projects__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.2rem 1.5rem 0.5rem;
+}
+
+.porto-projects__title {
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--porto-color-text-accent);
+  margin: 0 0 0.4rem;
+}
+
+.porto-projects__desc {
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--porto-color-gray-3);
+  margin: 0 0 0.4rem;
+}
+
+.porto-projects__links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem 1.8rem;
+  margin-top: auto;
+}
+
+.porto-projects__link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--porto-color-gray-3);
+  background-color: var(--porto-color-gray-5);
+  border: 1px solid var(--porto-color-gray-4);
+  border-radius: 0.4rem;
+  box-shadow: var(--porto-shadow-sm);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.porto-projects__link:hover {
+  color: var(--porto-color-text-accent);
+  background-color: var(--porto-color-gray-6);
+  transform: translateY(-2px);
+  box-shadow: var(--porto-shadow-md);
+  border-color: var(--porto-color-text-accent);
+  text-decoration: none;
+}
+.porto-projects__link:active {
+  transform: translateY(-1px);
+  box-shadow: var(--porto-shadow-sm);
+}
+.porto-projects__link svg {
+  color: var(--porto-color-gray-2);
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+.porto-projects__link:hover svg {
+  transform: scale(1.08);
+  color: var(--porto-color-text-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porto-projects__track,
+  .porto-projects__arrow,
+  .porto-projects__card,
+  .porto-projects__tile-icon,
+  .porto-projects__link,
+  .porto-projects__link svg {
+    transition: none;
+  }
+}
