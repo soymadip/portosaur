@@ -1,0 +1,76 @@
+---
+title: "Logger"
+desc: "Terminal logging with colored levels, boxes, and ANSI colors — built into @portosaur/cli."
+icon: "🪵"
+---
+
+The logger lives in `@portosaur/cli` — there is no separate package to install. It provides terminal logging with colored status prefixes, banner boxes, and a zero-dependency ANSI color utility.
+
+---
+
+## Log Levels
+
+Every log method formats messages with colored status prefixes:
+
+| Level                 | Prefix      | Color   | Notes                                      |
+| :-------------------- | :---------- | :------ | :----------------------------------------- |
+| `logger.info(msg)`    | `[INFO]`    | Cyan    | General informational messages.            |
+| `logger.success(msg)` | `[SUCCESS]` | Green   | Successful task completions.               |
+| `logger.warn(msg)`    | `[WARNING]` | Yellow  | Warnings and deprecations.                 |
+| `logger.error(msg)`   | `[ERROR]`   | Red     | Errors and exceptions.                     |
+| `logger.debug(msg)`   | `[INFO]`    | Cyan    | Active only when `DEBUG=1` or `VERBOSE=1`. |
+| `logger.tip(msg)`     | `[TIP]`     | Magenta | Helpful hints and guidance.                |
+| `logger.note(msg)`    | `[NOTE]`    | Gray    | Contextual notes.                          |
+
+### Basic Usage
+
+```javascript
+import { logger } from "@portosaur/cli";
+
+logger.info("Initializing project...");
+logger.success("Project scaffolded successfully!");
+logger.warn("Port 3000 is already in use, trying 3001");
+logger.error("Failed to parse porto.yml");
+logger.tip("Run 'porto dev' to preview your site");
+```
+
+---
+
+## Box Headings
+
+All logger levels are callable functions with a `.box()` method that renders bordered banner boxes in the terminal:
+
+```javascript
+logger.info.box("Portosaur v0.25.2", {
+  title: "STATUS",
+  border: "rounded",
+  padding: 1,
+});
+```
+
+### Box Options
+
+```typescript
+interface BoxOptions {
+  title?: string;
+  padding?: number;
+  border?: "rounded" | "single" | "double" | "none";
+}
+```
+
+:::tip[CI/CD Auto-Degradation]
+When running inside a continuous integration environment (`process.env.CI` is set), `.box()` calls automatically degrade to standard single-line logs to prevent ASCII formatting corruption in CI log viewers.
+:::
+
+---
+
+## ANSI Colors API
+
+`@portosaur/cli` also exports a zero-dependency terminal color utility:
+
+```javascript
+import { colors } from "@portosaur/cli";
+
+console.log(colors.cyan.bold("Portosaur"));
+console.log(colors.green("Ready in 500ms"));
+```

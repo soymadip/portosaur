@@ -1,0 +1,48 @@
+---
+title: "Steps"
+desc: "Numbered sequences for guides and tutorials."
+icon: "lu:list-ordered"
+---
+
+Walk the reader through a sequence — install steps, a setup guide,
+any procedure where the order matters. The numbers are automatic.
+
+```jsx
+<Steps>
+  <Step title="Install the CLI">Run `bun add -g @portosaur/cli`.</Step>
+  <Step title="Scaffold a site">Run `porto init` and answer the prompts.</Step>
+  <Step title="Build it">Run `porto build` — the site lands in `build/`.</Step>
+</Steps>
+```
+
+The example above, live:
+
+<Steps>
+  <Step title="Install the CLI">Run `bun add -g @portosaur/cli`.</Step>
+  <Step title="Scaffold a site">Run `porto init` and answer the prompts.</Step>
+  <Step title="Build it">Run `porto build` — the site lands in `build/`.</Step>
+</Steps>
+
+## Behavior
+
+- **Numbering.** Steps number themselves in order — no `number` prop
+  to keep in sync. Reorder the steps and the numbers follow.
+- **Titles.** A step without a `title` renders just its body, still
+  numbered. The body can hold anything — prose, code blocks, links.
+- **No JavaScript.** The badges and the line joining them are pure
+  CSS, so steps render the same with scripting off.
+
+## Props Reference
+
+### `<Steps />`
+
+| Prop       | Type        | Description            |
+| ---------- | ----------- | ---------------------- |
+| `children` | `ReactNode` | The `<Step>` elements. |
+
+### `<Step />`
+
+| Prop       | Type        | Default | Description       |
+| ---------- | ----------- | ------- | ----------------- |
+| `title`    | `string`    | —       | The step heading. |
+| `children` | `ReactNode` | —       | The step body.    |

@@ -1,0 +1,129 @@
+---
+title: "Carousel"
+desc: "One slide at a time — images, cards, or anything."
+icon: "lu:images"
+---
+
+Show several images in one slot — a screenshot gallery, before and
+after shots, a feature showcase. One slide shows at a time, and the
+reader moves between them with arrows, dots, the keyboard, or a swipe.
+
+{/* prettier-ignore */}
+```jsx
+<Carousel>
+  ![First screen](/img/carousel-1.svg)
+  ![Second screen](/img/carousel-2.svg)
+  ![Third screen](/img/carousel-3.svg)
+</Carousel>
+```
+
+The example above, live:
+
+{/* prettier-ignore */}
+<Carousel>
+  ![First screen](/img/carousel-1.svg)
+  ![Second screen](/img/carousel-2.svg)
+  ![Third screen](/img/carousel-3.svg)
+</Carousel>
+
+## Raw images
+
+Markdown images and raw `<img>` tags work the same as slides, and
+either way the alt text shows as a caption under the image. Raw
+images do not open the zoom viewer — only Markdown images do.
+
+```jsx
+<Carousel>
+  <img src="/img/carousel-1.svg" alt="First screen, as a raw tag" />
+  <img src="/img/carousel-2.svg" alt="Second screen, as a raw tag" />
+</Carousel>
+```
+
+The example above, live:
+
+<Carousel>
+  <img src="/img/carousel-1.svg" alt="First screen, as a raw tag" />
+  <img src="/img/carousel-2.svg" alt="Second screen, as a raw tag" />
+</Carousel>
+
+## Cards as slides
+
+Anything can be a slide, not just images. A whole `<Cards>` grid
+makes one slide, or a single `<Card>` on its own — though one card
+stretches to the full slide width, so a grid per slide usually looks
+better.
+
+```jsx
+<Carousel>
+  <Cards>
+    <Card
+      title="Install"
+      description="Get the CLI on your machine."
+      icon="lu:download"
+    />
+    <Card
+      title="Scaffold"
+      description="Start a new site in seconds."
+      icon="lu:folder-plus"
+    />
+  </Cards>
+  <Cards>
+    <Card title="Write" description="Author pages in MDX." icon="lu:pen-line" />
+    <Card title="Build" description="Ship the static site." icon="lu:hammer" />
+  </Cards>
+</Carousel>
+```
+
+The example above, live:
+
+<Carousel>
+  <Cards>
+    <Card
+      title="Install"
+      description="Get the CLI on your machine."
+      icon="lu:download"
+    />
+    <Card
+      title="Scaffold"
+      description="Start a new site in seconds."
+      icon="lu:folder-plus"
+    />
+  </Cards>
+  <Cards>
+    <Card title="Write" description="Author pages in MDX." icon="lu:pen-line" />
+    <Card title="Build" description="Ship the static site." icon="lu:hammer" />
+  </Cards>
+</Carousel>
+
+## Behavior
+
+- **Captions.** A slide that is a bare image shows its alt text as a
+  caption underneath. A `<figure>` slide keeps its own caption and
+  gets no automatic one.
+- **One image per slide.** Consecutive Markdown images become
+  separate slides even without blank lines between them — each
+  image is its own slide.
+- **Autoplay.** `autoplay={5}` moves to the next slide every five
+  seconds. It pauses while the pointer is over the carousel or
+  anything inside it has focus, and resumes after. `0` turns it off.
+- **Looping.** The arrows wrap from the last slide back to the first.
+  With `loop={false}` they stop at the ends instead.
+- **Keyboard.** Left and right arrows move between slides when the
+  carousel has focus. Home and End jump to the first and last slide.
+- **Swipe.** Drag left or right on touch to switch slides.
+- **One slide.** A carousel with a single slide shows no arrows or
+  dots — there is nothing to switch between.
+- **Reduced motion.** With reduced motion on, slides switch instantly
+  instead of sliding.
+
+## Props Reference
+
+### `<Carousel />`
+
+| Prop         | Type        | Default | Description                                   |
+| ------------ | ----------- | ------- | --------------------------------------------- |
+| `showArrows` | `boolean`   | `true`  | Show the prev/next arrow buttons.             |
+| `showDots`   | `boolean`   | `true`  | Show the dot indicators under the slides.     |
+| `autoplay`   | `number`    | `0`     | Seconds between slides. 0 turns autoplay off. |
+| `loop`       | `boolean`   | `true`  | Wrap from the last slide back to the first.   |
+| `children`   | `ReactNode` | —       | The slides, one element each.                 |

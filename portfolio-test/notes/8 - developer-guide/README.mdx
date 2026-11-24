@@ -1,0 +1,70 @@
+---
+title: "Developer Overview"
+desc: "Architecture, package dependency flow, and internal packages for contributors."
+icon: "md:dev-to"
+---
+
+Welcome to the **Portosaur Developer Guide**. This section is intended for developers, contributors, and power users who want to extend Portosaur or understand its internal mechanics.
+
+---
+
+## In This Section
+
+<TopicList />
+
+---
+
+## Monorepo Architecture
+
+Portosaur is architected as an ESM-first monorepo using Bun Workspaces, built on Fumadocs headless core 16.19.7 + Next.js + React. The CLI generates a thin Next.js root in the user's `.portosaur/` directory. The real UI lives in `@portosaur/core`.
+
+```txt
+packages/
+├── cli/       # CLI entry point, config engine, generators
+├── app/       # React UI (layouts, pages, MDX components, CSS, plugins)
+└── wizard/    # Interactive prompt library
+docs/          # Documentation site (dogfoods the CLI)
+src/
+└── cz/        # Commitizen versioning
+proxy/         # Cloudflare Worker CORS/file proxy
+tests/         # URL snapshots, goldens, smoke test
+```
+
+---
+
+## Architectural Principles
+
+1. **Unidirectional Dependency Flow**:
+   - `cli` → `wizard`
+   - The core package is NOT a CLI dependency — the generated Next.js root imports it, and user projects depend on it directly.
+   - No circular dependencies are allowed.
+2. **Lightweight CLI**:
+   - `@portosaur/cli` MUST NOT depend on `@portosaur/core` or heavy frontend frameworks (Next.js/React).
+   - The app is injected into the user's local project `package.json` to keep global CLI installs fast.
+3. **Generated Root**:
+   - Never edit a site's `.portosaur/` directory by hand — it is regenerated on every build/dev run. Edit the generators in `packages/cli/src/engine/generators/` instead.
+4. **Internal Workspace Imports**:
+   - Always use `@portosaur/<package>` for cross-package dependencies rather than relative parent paths like `../../wizard`.
+5. **TypeScript**:
+   - Type stripping (erasable syntax only), explicit `.ts` extensions on relative imports, types live in the source files.
+6. **Runtime Compatibility**:
+   - Package management and fast runs are powered by **Bun**, while keeping full **Node.js compatibility** across all packages.
+
+---
+
+## Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/soymadip/portosaur.git
+cd portosaur
+
+# Install all workspace dependencies
+bun install
+
+# Run the test suite
+bun run test:all
+
+# Verify docs URL parity after a docs build
+bun tests/url-snapshot.ts --docs-only
+```

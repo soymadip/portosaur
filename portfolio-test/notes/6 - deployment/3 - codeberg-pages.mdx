@@ -1,0 +1,66 @@
+---
+title: "Codeberg Pages"
+desc: "Deploy to Codeberg Pages with Forgejo Actions or Woodpecker CI."
+icon: "di:codeberg"
+---
+
+[Codeberg Pages](https://docs.codeberg.org/codeberg-pages/) serves static sites at `codeberg.page` domains. Portosaur supports deployment through Codeberg's Forgejo Actions and provides a legacy Woodpecker CI template.
+
+## 1. Choose a Repository and URL
+
+Codeberg Pages supports user/organization sites and per-repository sites:
+
+- **User or organization site**: use a public repository named `pages`. Its site is served at `https://<owner>.codeberg.page/`.
+- **Repository site**: use a public repository with your project name. Its site is served at `https://<owner>.codeberg.page/<repository>/`.
+
+For a repository site, set the path prefix explicitly in `porto.yml`:
+
+```yaml
+site:
+  url: "https://<owner>.codeberg.page"
+  base_url: "/<repository>/"
+```
+
+For a user or organization site, use the root path `base_url: "/"`. Codeberg's Pages URLs are not automatically inferred by Portosaur's `auto` URL settings.
+
+## 2. Generate a Forgejo Actions Workflow
+
+For a new project, select **Codeberg** as the VCS Provider and **Codeberg Pages (Forgejo CI)** as the Hosting Platform:
+
+```bash
+porto init -p codeberg -h codeberg-pages -u <codeberg-username>
+```
+
+For an existing project, run:
+
+```bash
+porto init --ci-only -h codeberg-pages
+```
+
+This creates `.forgejo/workflows/deploy.yml`. On a push to `main`, the workflow installs dependencies, runs `bun run build`, then invokes the Codeberg Pages action to publish the `build/` directory.
+
+The generated action's `site` setting includes the repository path. For a `pages` repository used as a user or organization homepage, edit that setting in `.forgejo/workflows/deploy.yml` to use `https://<owner>.codeberg.page/` without `/pages/`.
+
+## 3. Enable Actions and Deploy
+
+Forgejo Actions must be enabled for the repository:
+
+1. Open the repository on Codeberg.
+2. Go to **Settings → Actions → General**.
+3. Enable Actions and save the setting.
+
+Push the workflow to `main`, then check the repository's **Actions** tab for the run. The repository must be public for Codeberg Pages. After a successful run, open the URL selected in the workflow's `site` setting.
+
+## 4. Use Woodpecker CI (Legacy)
+
+If the repository still uses Woodpecker, generate its pipeline instead:
+
+```bash
+porto init --ci-only -h woodpecker
+```
+
+This creates `.woodpecker/deploy.yml`. Activate the repository at [ci.codeberg.org](https://ci.codeberg.org). The generated pipeline builds the site and pushes `build/` to a `pages` branch, so its deploy step needs permission to push to that repository branch. Forgejo Actions is the recommended option for new setups.
+
+## 5. Use a Custom Domain
+
+Configure the custom domain through Codeberg Pages and set the matching origin and path in `porto.yml`. Use `/` for a root-domain site or the repository path for a repository site. Follow [Codeberg's custom-domain instructions](https://docs.codeberg.org/codeberg-pages/using-custom-domain/) for DNS and HTTPS setup.

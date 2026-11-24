@@ -1,0 +1,112 @@
+---
+title: "Editor Support"
+desc: "Suggestions, hover help, and error checking in porto.yml and MDX pages, right in your editor."
+icon: "md:code"
+---
+
+Portosaur ships a small language server, `porto-lsp`, that understands your MDX pages. In frontmatter it suggests keys and values, explains each key on hover, and flags unknown keys and wrong types. In the page body it suggests components like `<Btn>` and `<Hint>` while you type, with their props.
+
+`porto.yml` is not handled by the server. Every `porto.yml` carries a `$schema` line at the top, pointing at the schema shipped with the installed `@portosaur/cli`, and the YAML support in your editor reads it to suggest config keys and values, explain each key on hover, and flag mistakes.
+
+The server only activates inside a Portosaur project, so it stays quiet in other folders.
+
+---
+
+## What the server does
+
+Beyond completion and hover, the server also:
+
+- **Warns about components.** An unknown component name, a missing required prop, a bad icon name, or a prop value outside its allowed list gets a warning. Icon names are checked the way the build checks them: the prefix must be a known icon pack and the value must be `prefix:name`.
+- **Jumps to link targets.** Go to definition on a markdown link or a `Link`/`Btn` link prop value opens the target page, landing on the heading after a `#hash`. On a `{{vars.key}}` reference it opens `porto.yml` at the line defining the key.
+- **Makes links clickable.** Links and images in the document open their target on Ctrl/Cmd+click: pages and files in the project, and external URLs in the browser. Broken links get no link, since there is nothing to open.
+- **Suggests link paths.** Inside a link destination it offers the site's pages as clean URLs, heading ids after a `#`, and relative file paths when the typed text starts with a `.`. A heading with a custom `[#id]` is offered under that id.
+- **Updates links on rename.** Renaming a page file or a whole folder rewrites the clean-URL links that point at it, in markdown links and `Link`/`Btn` props across every page, keeping the `#hash` on the end. Relative file-path props inside the moved file are recomputed from its new location. Relative file-path markdown links are left to the MDX extension, which rewrites those itself.
+- **Flags broken links.** A link to a page that does not exist, by clean URL or by relative file path, is flagged with the severity from `site.content.on_broken_links`. External links, anchors, and destinations holding a `{vars.}` or `{env.}` expression stay quiet.
+- **Covers reference-style links.** `[text][ref]` links get the same treatment as inline links: the `[ref]:` destination completes, jumps, and is checked, the use site jumps to the definition, and a use with no definition is flagged.
+- **Flags broken images.** An image whose file does not exist, by relative path or under the project's `static/` directory, is flagged with the severity from `site.content.on_broken_images`. External images, `data:` URIs, and sources holding a `{vars.}` or `{env.}` expression stay quiet.
+- **Flags multi-segment slugs.** A `slug:` in frontmatter with a `/` in it is an error, since a slug only renames the file itself.
+- **Warns about duplicate slugs.** Two pages that land on the same URL get a warning naming the other page, since the build fails on duplicate slugs.
+- **Warns about duplicate headings.** Two headings in a page that share an anchor get flagged with the severity from `site.content.on_duplicate_h2`, naming the `-1` id the second one gets. The editor checks every level, not just h2, and offers a quick fix that adds the id as a custom id, so the heading keeps the id it already has.
+- **Warns when an H1 overrides the title.** A page with a frontmatter `title` and an H1 in the body gets a warning, since the H1 wins for the visible page heading. With `hide_title` the warning stays quiet, since the H1 is hidden too.
+- **Errors on a second H1.** An H1 that renders beside the page title H1 is an error, since a page should have one H1. The first H1 becomes the page title, so any later H1, or a lone H1 when the first heading is H2 or deeper, is flagged.
+- **Suggests the title key over an H1.** A page with an H1 and no frontmatter `title` gets a hint suggesting the `title` key instead, with a quick fix that moves the text into frontmatter and removes the H1.
+- **Completes `{vars.}`.** Inside an expression it suggests the keys of the `vars:` section from `porto.yml`, nested per dot.
+- **Flags unknown `{vars.}` keys.** A `{{vars.key}}` that is not defined under `vars:` in `porto.yml` is flagged with the severity from `site.content.on_missing_var`. The `{{vars.key}}` escape form stays quiet.
+- **Shows `{vars.}` values inline.** A `{{vars.key}}` that resolves to a value shows `→ value` right after it, and hovering over it shows the value and where it comes from.
+- **Flags unset `{env.}` vars.** A `{{env.VAR}}` that is not set in the environment or the project's `.env` files is flagged with the severity from `site.content.on_missing_env`. The `{{env.VAR}}` escape form stays quiet.
+- **Shows `{env.}` values inline.** A `{{env.VAR}}` that is set shows `→ value` right after it, and hovering over it shows the value and where it comes from.
+- **Completes `{env.}`.** Inside an expression it suggests the env var names the build can see, from the system environment and the project's `.env` files. Each suggestion shows the value beside the name, with its source in the popup.
+- **Suggests shortcodes.** Typing `:` in prose offers icon packs (`:si:` and the rest) and emoji shortcodes (`:smile:`), filtered as you type. Emoji appear only when `site.content.render_emoji_shortcodes` is on.
+- **Suggests code fence languages and options.** On a fence line it offers language names, including `mermaid`, `package-install`, and `npm`, and after the language it offers the block options `title`, `tab`, `noCopy`, `noWrap`, and `lineNumbers`.
+- **Suggests icon pack prefixes.** While typing an icon value, in frontmatter `icon:` or an `Icon`, `DynamicIcon`, or `Btn` prop, it offers the pack prefixes (`si:`, `lu:`, and the rest) with the pack name beside each. After the colon, icon names stay free text.
+- **Completes tags.** After `<` it offers the built-in components, the components the file imports, and HTML tags. An imported name wins over a built-in with the same name, and each import names the file it comes from. Each built-in shows what it does beside its name, with the full description and its props in the popup. Picking a tag inserts the whole tag: a pair with the cursor inside for tags that take content, self-closing for the rest. A tag with required props fills them in too, with the cursor in the first one.
+- **Pops up prop values.** Accepting a prop that takes a value puts the cursor after `name=`, inside quotes for a text value, and leaves a space after the value so the next prop has room. A prop with a default fills it in as selected text, so typing replaces it and Tab keeps it. The value list opens on its own in VS Code. In Zed the values appear when you start typing instead.
+- **Continues lists.** Pressing Enter at the end of a list item starts the next one: the next number, the same bullet, or a fresh unchecked task box. Enter on an empty item leaves the list.
+- **Indents after frontmatter keys.** Pressing Enter after a `key:` line in frontmatter starts the next line two spaces in, so the nested keys line up. A `key: value` line stays at the same level.
+- **Needs format on type.** List continuation and frontmatter indent run on format on type, which the extension turns on for MDX by default. Setting `editor.formatOnType` to false in your settings still wins and turns both off.
+- **Drops object keys onto the next line.** Accepting an object key like `toc:` puts the cursor on the next line, indented for the first child, and the child list pops up on its own in VS Code. In Zed the children appear when you type a letter or hit Ctrl+Space.
+- **Fixes problems.** Quick fixes change an invalid value to a valid one, remove an unknown frontmatter key, and add a missing required prop.
+- **Outlines the page.** The outline shows the headings nested by level, plus the frontmatter keys.
+
+---
+
+## VS Code
+
+Install the [Portosaur extension](https://marketplace.visualstudio.com/items?itemName=soymadip.portosaur) from the Marketplace (also on [Open VSX](https://open-vsx.org/extension/soymadip/portosaur)). You also need the [MDX extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx), which provides the MDX language itself, and the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), which handles `porto.yml` through the `$schema` line. Both are installed automatically along with the Portosaur extension.
+
+On first use the extension downloads the matching server binary from the Portosaur releases and checks it before running it. There is nothing else to set up.
+
+Two settings are available:
+
+| Setting                  | What it does                                                                                                   |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `portosaur.server.path`  | Use a local build of the server instead of the downloaded one.                                                 |
+| `portosaur.trace.server` | Log the traffic between the editor and the server (`off`, `messages`, `verbose`). Useful when reporting a bug. |
+
+If the server stops responding, run **Portosaur: Restart Language Server** from the Command Palette.
+
+The status bar shows whether the server is running, starting, or stopped. Clicking it opens a menu with the server status, version, memory use, and path, plus a restart button. Picking the path row opens a picker to choose or type a different server binary. The Command Palette offers the same picker directly as **Portosaur: Select Language Server**.
+
+Typing `(` right after `]` in a link or image puts `<>` in with the cursor inside, ready for the destination. This only happens in VS Code.
+
+After picking a completion, erasing a letter or two brings the menu back. This only happens in VS Code.
+
+### Preview
+
+Open an MDX page and run **Portosaur: Preview Page** from the Command Palette, or press the preview button in the editor toolbar. The extension starts the dev server for the project if it is not running yet, then shows the page beside the editor. The panel follows the file you are editing, so switching to another page moves the preview to it.
+
+If a server is already answering on the preview port, the extension reuses it instead of starting its own. Stop a server the extension started with **Portosaur: Stop Preview Server**. The port is `portosaur.preview.port` (3000 by default).
+
+---
+
+## Zed
+
+Install `portosaur` from the extension list, along with the [MDX extension](https://zed.dev/extensions/mdx), which provides the MDX language itself. The server binary is downloaded on first use, the same as in VS Code. `porto.yml` works through Zed's built-in YAML support, which reads the `$schema` line, with nothing extra to install.
+
+To use a local build of the server instead, set the binary path in your Zed settings:
+
+```json
+{
+  "lsp": {
+    "porto-lsp": {
+      "binary": {
+        "path": "/path/to/porto-lsp"
+      }
+    }
+  }
+}
+```
+
+Zed shows each suggestion's description right after its name. To pin it to the right edge of the list instead, the way the YAML server's descriptions sit, set this in your Zed settings:
+
+```json
+{
+  "completion_detail_alignment": "right"
+}
+```
+
+---
+
+## Other editors
+
+Neovim, Helix, and anything else that speaks the Language Server Protocol can run the server directly. Download the binary for your platform from the [Portosaur releases](https://github.com/soymadip/portosaur/releases) and start it with the `--stdio` flag. For `porto.yml`, point your YAML language server at the schema with the `$schema` line at the top of the file.

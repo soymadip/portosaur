@@ -1,0 +1,64 @@
+---
+title: "Link"
+desc: "Explicit links with client-side routing."
+icon: "lu:link"
+---
+
+The `<Link>` component is the explicit way to write a link in MDX. Plain Markdown links (`[text](href)`) already get the same treatment automatically — use `<Link>` when you need a link inside another component, or want to pass extra attributes to the anchor.
+
+## Basic Usage
+
+```jsx
+<Link href="/docs/getting-started/installation">Install Portosaur</Link>
+```
+
+<Link href="/docs/getting-started/installation">Install Portosaur</Link>
+
+## Internal and external links
+
+The component resolves the destination itself, so one prop covers every kind of link:
+
+- **Internal links** (`href` with a page path): navigate client-side, without a full page reload. The site's trailing slash is added automatically.
+- **External links** (`href` with a full URL): open in a new tab, safely (`target="_blank"` and `rel="noopener noreferrer"`).
+- **Same-page anchors** (`href` with a `#section`): plain anchors, no routing.
+
+```jsx
+<Link href="/docs/config/reference">Config Reference</Link>
+
+<Link href="https://github.com/soymadip/portosaur">GitHub Repo</Link>
+
+<Link href="#basic-usage">Back to the top</Link>
+```
+
+Any other props (like `className`) pass through to the anchor element.
+
+## Linking by file path
+
+You can link to another page by its file path instead of its URL. The build turns the file path into the page's URL. Paths are relative to the file you are writing in, and a `#section` on the end still works:
+
+```md
+[Installation](./1%20-%20installation.mdx)
+
+[Config](../3%20-%20config.mdx)
+```
+
+Numbered names carry spaces, so write them as `%20`, or wrap the whole path in angle brackets:
+
+```md
+[Installation](<./1 - installation.mdx>)
+```
+
+It works in `<Link>` too, where the name goes in as-is, spaces and all:
+
+```jsx
+<Link href="./1 - installation.mdx">Installation</Link>
+```
+
+A link to a file that does not exist, or to a file outside the content folders, is left alone with a build warning.
+
+## Props Reference
+
+| Prop       | Type     | Default | Description                                                                                                                |
+| :--------- | :------- | :------ | :------------------------------------------------------------------------------------------------------------------------- |
+| `href`     | `string` | None    | Link destination. Required. Internal paths navigate client-side. Full URLs open in a new tab. `#anchors` stay on the page. |
+| `children` | `node`   | None    | The link text or content.                                                                                                  |

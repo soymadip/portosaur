@@ -1,0 +1,89 @@
+---
+title: "Dynamic Variables"
+desc: "Reuse values and inject environment variables across your site."
+icon: "md:code-braces"
+---
+
+{vars.project.title} lets you define values once in `porto.yml` & reference them dynamically throughout your config and Markdown/MDX pages.
+
+## Syntax Overview
+
+- **In `porto.yml`**: Use double curly braces `{{path.to.key}}`.
+- **In `.md`/`.mdx` files**: Use single curly braces `{vars.<path.to.key>}` (or `{vars.<key>}`), and `{env.<VAR_NAME>}` for environment variables.
+
+```yaml title="porto.yml"
+vars:
+  project:
+    title: "Portosaur"
+    repo: "https://github.com/soymadip/portosaur"
+  author:
+    name: "Octo Cat"
+    handle: "@octocat"
+
+site:
+  edit_url: "{{{vars.project.repo}}}/edit/main/docs/"
+  tagline: "Docs built for {{{vars.author.name}}}"
+```
+
+And in your Markdown files:
+
+```md title="docs/example.mdx"
+Welcome to {{vars.project.title}}!
+Check out the repository at [{{vars.project.title}} on GitHub]({{vars.project.repo}}).
+
+<!--Above gets resolved to:-->
+
+Welcome to {vars.project.title}!
+Check out the repository at [{vars.project.title} on GitHub]({vars.project.repo}).
+```
+
+## Variable Sources
+
+### 1. User Variables (`vars`)
+
+Any key declared under the `vars:` root block in `porto.yml` is accessible as `{vars.<key>}` or `{{vars.<key>}}`.
+
+```yaml
+vars:
+  versions:
+    node_min: "24.15"
+    cli: "0.25.2"
+  company: "Acme Corp"
+```
+
+An unknown key fails the build by default. Change that with `site.content.on_missing_var` (`throw`, `warn`, or `ignore`). With `warn` the build prints a warning and renders the missing key as empty, with `ignore` it renders empty silently.
+
+### 2. Environment Variables (`env`)
+
+Access environment variables during development and CI/CD builds:
+
+```yaml
+site:
+  url: "{{env.PORTOSAUR_DEPLOY_URL}}"
+```
+
+If an environment variable is unset, the placeholder resolves safely to an empty string.
+
+In MDX files, use `{env.<VAR_NAME>}` the same way you use `{vars.<key>}`:
+
+```md title="docs/example.mdx"
+Deploys go to {{env.PORTOSAUR_DEPLOY_URL}}.
+```
+
+An unset variable resolves to an empty string here too, and the build prints a warning about it by default. Change that with `site.content.on_missing_env` (`throw`, `warn`, or `ignore`).
+
+**Never put secrets in MDX.** Env values used in MDX end up in the built public HTML, so anyone can read them. Use `{env.}` for public values like deploy URLs, never for tokens or passwords.
+
+## Escaping Variables
+
+```markdown
+Use {{{vars.double.parenthesis}}} to reference your title.
+```
+
+The rendered output will be:
+
+```text
+Use {{vars.project.title}} to reference your title.
+```
+
+The same double-brace escape works for env vars: `{{env.<VAR_NAME>}}` renders as the literal text `{env.<VAR_NAME>}`.

@@ -1,0 +1,172 @@
+# yaml-language-server: $schema=./node_modules/@portosaur/cli/schema/config.json
+#
+# Portosaur Project Configuration
+# Check full Config Docs: https://soymadip.github.io/portosaur/docs/config
+#
+
+# User variables for use in your values as {{vars.key}}
+vars:
+  project:
+    title: Portosaur
+    tagline: "for your digital personality"
+    desc: "Complete portfolio cum personal website solution for your digital personality."
+    repo: "https://github.com/soymadip/portosaur"
+
+  pkg:
+    name: portosaur
+    bin: porto
+
+  defaults:
+    hostingList: "github-pages, gitlab-pages etc.."
+    vcsList: "github, gitlab"
+    vcs: "github"
+
+  tools:
+    bun: "https://bun.sh/"
+    docusaurus: "https://docusaurus.io/"
+    vitepress: "https://vitepress.dev/"
+    yaml: "https://yaml.org/"
+    staticShort: "https://github.com/soymadip/staticshort"
+    git: "https://git-scm.com/"
+    mdx: "https://mdxjs.com/"
+
+  icons:
+    gh_emoji_codes: "https://gist.github.com/soymadip/5a58d7548df3568e9b22f87718aab027"
+    search: "https://icon-sets.iconify.design/"
+    lucide: "https://lucide.dev/icons/"
+    simple_icons: "https://simpleicons.org/"
+    mdi: "https://pictogrammers.com/library/mdi/"
+    devicon: "https://devicon.dev/"
+    octicon: "https://primer.style/foundations/icons/"
+    logos: "https://svgl.app/"
+    line_md: "https://icon-sets.iconify.design/line-md/"
+    streamline: "https://streamlinehq.com/"
+    fontawesome: "https://fontawesome.com/icons"
+
+  versions:
+    node_min: 24.15
+    portosaur: "0.25.2"
+
+  twitter: "@unknown"
+  github: "unknown"
+  linkedin: "unknown"
+
+# Site Metadata, SEO, Parser behavior
+site:
+  url: "auto"
+  base_url: "auto"
+  # TEMPORARY for PWA verification builds only — the synced
+  # editor-support.mdx contains literal {vars.key} examples that
+  # the strict default (throw) fails the build on.
+  content:
+    on_missing_var: warn
+
+# Page Content & Sections
+home_page:
+  hero:
+    title: "Soumadip Das"
+    profession: "Your Profession"
+    desc: "Short description about you, your passion, your goals etc."
+    profile_pic: "img/icon.png"
+
+    social:
+      - name: "LinkedIn"
+        url: "https://www.linked.com/in/unknown"
+
+      - name: "GitHub"
+        icon: "github" # TODO: needs documentation
+        url: "https://github.com/unknown"
+
+      - name: "Telegram"
+        url: "https://t.me/unknown"
+
+  about:
+    enable: true
+    image: "{{home_page.hero.profile_pic}}"
+    bio:
+      - "I'm a {{home_page.hero.profession}} who loves turning ideas into reality."
+      - "With a background in computer science and a passion for design, I bridge the gap between aesthetics and functionality."
+      - "Also I am interested in Your interest1, interest2 etc etc......"
+    skills:
+      - "skill 1"
+      - "skill 2"
+      - "skill 3"
+    resume: "{{porto_static}}/sample-resume.pdf"
+
+  project_shelf:
+    enable: true
+    projects:
+      - title: "Your Awesome Project"
+        icon: null
+        state: "active" # options: active, completed, maintenance, paused, archived, planned
+        desc: "A brief description of what this project does and the tech used."
+        tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"]
+        website: "https://example.com"
+        repo: "https://github.com/yourname/project1"
+
+      - title: "Your Awesome Project 2"
+        icon: "img/project-blank.png"
+        bg: "#5c8f2d"
+        tags: ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"]
+        featured: true
+        state: "completed"
+        desc: "A brief description of what this project does and the tech used."
+        website: "https://example.com"
+        repo: "https://github.com/yourname/project2"
+        demo: "https://example.com/demo"
+
+      - title: "Your Awesome Project 3"
+        icon: "https://github.com/soymadip/KireiSakura-Kit/blob/main/Assets/icon.png?raw=true"
+        bg: "#aa47be"
+        state: "completed"
+        desc: "A brief description of what this project does and the tech used."
+        website: "https://example.com"
+        repo: "https://github.com/yourname/project2"
+        demo: "https://example.com/demo"
+
+  experience:
+    enable: true
+    list:
+      - company: "Tech Solutions Inc."
+        role: "Senior Developer"
+        duration: "2022 - Present"
+        desc: "Leading the frontend team in building a high-performance dashboard."
+
+  # Reach me out section
+  social:
+    enable: true
+    links:
+      - name: "Email"
+        desc: "Send me an email"
+        url: "mailto:yourname@example.com"
+
+      - name: "LinkedIn"
+        desc: "Connect on LinkedIn"
+        url: "https://linkedin.com/in/unknown"
+
+      - name: "Telegram"
+        desc: "Reach me on Telegram"
+        url: "https://t.me/unknown"
+
+      - name: "Discord"
+        desc: "Become my friend"
+        url: "https://discord.com/users/yourid"
+
+      - name: "Twitter"
+        desc: "Find me on Twitter"
+        url: "https://twitter.com/unknown"
+
+      - name: "GitLab"
+        desc: "View my GitLab profile"
+        url: "https://gitlab.com/unknown"
+
+      - name: "Anilist"
+        desc: "If you are otaku, check out!"
+        url: "https://anilist.co/user/unknown"
+
+tasks:
+  enable: true
+  list:
+    - title: "Build the future"
+      status: "completed"
+      desc: "Implementing the core framework."

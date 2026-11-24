@@ -1,0 +1,31 @@
+{
+  "dependencies": {
+    "@portosaur/cli": "workspace:*",
+    "@portosaur/core": "workspace:*",
+    "fumadocs-core": "16.19.7",
+    "fumadocs-mdx": "15.6.4",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "name": "portfolio-test",
+  "private": true,
+  "scripts": {
+    "build": "porto build",
+    "dev": "porto dev",
+    "serve": "porto serve"
+  },
+  "version": "0.26.0"
+}

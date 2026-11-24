@@ -1,0 +1,83 @@
+---
+title: "Portfolio Home"
+desc: "The portfolio home page: hero, about, projects, experience, and contact, all driven by the home_page block in porto.yml."
+icon: "lu:home"
+---
+
+Portfolio sites open on a home page with five sections, stacked in this order: hero, about, projects, experience, and contact. Everything comes from the `home_page` block in `porto.yml`. A section with `enable: false`, or with nothing to show, renders nothing and leaves no gap.
+
+```yaml
+home_page:
+  hero:
+    title: "Your Name"
+    profession: "Your Profession"
+    desc: "Short description about you, your passion, your goals etc."
+  about:
+    bio: ["First paragraph about you.", "Second paragraph."]
+    skills: ["TypeScript", "React", "Go"]
+  project_shelf:
+    projects:
+      - title: "My Project"
+        desc: "What it does."
+        state: "active"
+  experience:
+    enable: true
+    list:
+      - company: "Acme"
+        role: "Engineer"
+        duration: "2024 - Now"
+  social:
+    links:
+      - name: "GitHub"
+        url: "https://github.com/you"
+```
+
+---
+
+## Hero
+
+The hero shows an intro line, your name, your profession, and a short description, next to your profile picture. `profile_pic` takes a path under `static/` or a remote URL. When it is left out, the site icon is used instead.
+
+The **Learn More** button jumps to the first section below the hero that is actually showing. When no section below the hero is showing, the button is hidden.
+
+The social icon row beside the button comes from `hero.social`. Each link needs a `name` and a `url`. The icon is guessed from the name (GitHub, LinkedIn, Telegram, and the rest of the icon map), or set with `icon`.
+
+---
+
+## About
+
+The about section shows a heading, a photo, your bio, a skills grid, and a resume button, all inside one card. `image` falls back to the hero profile picture when it is left out. `bio` takes one string or a list of paragraphs. `resume` takes a path or a URL and opens the file in a new tab. Set it to `"none"` (the default) to hide the button.
+
+The section hides itself when there is no bio, no skills, and no resume file. A photo alone is not enough to show it.
+
+---
+
+## Projects
+
+Projects show as a scrolling row of cards: three at a time on a desktop, two on a tablet, one on a phone. The arrows move one card at a time, and the row can be swiped on touch screens. On phones the arrows hide and the row is swiped only. Keyboard arrows work too when the row is focused.
+
+Each project takes a `title`, and optionally an `icon` (a path under `static/`), a `bg` color for the icon tile, a `state` (`active`, `completed`, `maintenance`, `paused`, `archived`, or `planned`), a `desc`, up to any number of `tags`, and `website`, `repo`, and `demo` links. Featured projects get a star on the tile. The tile shows the first three tags and a `+N` chip for the rest.
+
+With `autoplay: true`, the row moves on its own, one card every 5 seconds, and wraps back to the start. It pauses while the reader hovers over the row or focuses it, and resumes when they move away.
+
+---
+
+## Experience
+
+Experience is a vertical timeline, newest first. List your roles newest first and they render in that order. Each item takes a `company` and a `role`, and optionally a `duration` and a `desc`.
+
+The section is off by default. Turn it on with `experience.enable: true`.
+
+---
+
+## Contact
+
+Contact shows your social links as a grid of cards, each with its icon, name, and a short line. Email links sort first. When a link has no `desc`, the card reads "Connect with me on" followed by the link name.
+
+The icon shows in the site accent, and takes the link's own `color` on hover, falling back to the site's brand color from the icon map. Set `color` to any CSS color to override it. The icon itself is guessed from the `name`, or set with `icon`.
+
+---
+
+## The floating arrow
+
+A round arrow floats at the bottom center of the page once the reader has scrolled a bit. It jumps to the next section on tap, and at the bottom of the page it points back to the top. It only shows when the page has more than one section.

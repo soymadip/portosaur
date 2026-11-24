@@ -1,0 +1,19 @@
+---
+title: "Indent"
+desc: "Clean indentation without fragile raw HTML."
+icon: "lu:indent-increase"
+---
+
+Indents child content cleanly without introducing fragile raw HTML spacing:
+
+```jsx
+First-level text.<Indent level={1} />Indented text.<Indent level={2} />More indented text.
+```
+
+`Indent` inserts an inline spacer. It does not wrap or indent child content.
+
+## Props Reference
+
+| Prop    | Type     | Default | Description                    |
+| :------ | :------- | :------ | :----------------------------- |
+| `level` | `number` | `1`     | Spacer width is `level * 2em`. |

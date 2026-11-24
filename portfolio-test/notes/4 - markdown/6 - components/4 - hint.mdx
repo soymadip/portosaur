@@ -1,0 +1,38 @@
+---
+title: "Hint"
+desc: "Hover tooltips for inline text."
+icon: "lu:lightbulb"
+---
+
+Attach hover tooltips to any inline text or element.
+
+```jsx
+Hover over this <Hint msg="Portosaur automatically detects preview types!">intelligent preview</Hint> to learn more.
+```
+
+## Positioning & Styles
+
+```jsx
+<Hint msg="Tooltip pinned to the right" right>
+  Right tooltip
+</Hint>
+
+<Hint msg="Custom warning style" bg="#fef3c7" color="#92400e">
+  Warning note
+</Hint>
+```
+
+## Props Reference
+
+| Prop                        | Type        | Default               | Description                                       |
+| :-------------------------- | :---------- | :-------------------- | :------------------------------------------------ |
+| **`msg`**                   | `ReactNode` | Required              | Tooltip content.                                  |
+| `bottom` / `left` / `right` | `boolean`   | Top                   | Tooltip position relative to the trigger.         |
+| `noUl`                      | `boolean`   | `false`               | Remove the dotted underline from the trigger.     |
+| `bg` / `color`              | `string`    | Theme defaults        | Tooltip background and text colors.               |
+| `shadow`                    | `string`    | Default shadow        | Custom CSS `filter` value for the tooltip shadow. |
+| `gap`                       | `number`    | `5`                   | Distance in pixels between trigger and tooltip.   |
+| `className`                 | `string`    | `""`                  | Additional class on the trigger wrapper.          |
+| `zIndex`                    | `number`    | Default tooltip layer | Override tooltip stacking order.                  |
+| `hideOnClick`               | `boolean`   | `false`               | Hide the tooltip when the trigger is clicked.     |
+| `onClick`                   | `function`  | None                  | Click handler for the trigger wrapper.            |

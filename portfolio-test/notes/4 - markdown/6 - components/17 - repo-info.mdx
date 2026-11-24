@@ -1,0 +1,110 @@
+---
+title: "RepoInfo"
+desc: "A card linking to a repository on GitHub, GitLab, Codeberg, Forgejo, Gitea or SourceHut, with its description, star and fork counts."
+icon: "lu:git-branch"
+---
+
+Link to a repository with its description, star and fork counts.
+The counts are fetched from the provider's API at build time and
+baked into the page, so a rebuild refreshes them.
+
+```jsx
+<RepoInfo owner="soymadip" repo="portosaur" />
+```
+
+The example above, live:
+
+<RepoInfo owner="soymadip" repo="portosaur" />
+
+## Other Providers
+
+GitHub is the default. Set `provider` for the others:
+
+```jsx
+<RepoInfo owner="gitlab-org" repo="gitlab" provider="gitlab" />
+<RepoInfo owner="Codeberg" repo="Community" provider="codeberg" />
+```
+
+Both, live — side by side when they fit:
+
+<RepoInfo owner="gitlab-org" repo="gitlab" provider="gitlab" />
+<RepoInfo owner="Codeberg" repo="Community" provider="codeberg" />
+
+## Self-Hosted Forges
+
+Forgejo and Gitea run on the author's own server, so they need
+a `host` — the instance the repo lives on:
+
+```jsx
+<RepoInfo
+  owner="gitea"
+  repo="tea"
+  provider="gitea"
+  host="gitea.com"
+/>
+<RepoInfo
+  owner="Codeberg"
+  repo="Community"
+  provider="forgejo"
+  host="codeberg.org"
+/>
+```
+
+Both, live (Codeberg itself runs Forgejo, so it doubles as the
+Forgejo example):
+
+<RepoInfo owner="gitea" repo="tea" provider="gitea" host="gitea.com" />
+
+<RepoInfo
+  owner="Codeberg"
+  repo="Community"
+  provider="forgejo"
+  host="codeberg.org"
+/>
+
+## SourceHut
+
+SourceHut has no star or fork counts, so the card shows the
+name and description only. Its API needs a token for any
+request — without a `SOURCEHUT_TOKEN` the card renders without
+a description. The owner can be written with or without the
+`~`:
+
+```jsx
+<RepoInfo owner="~sircmpwn" repo="git.sr.ht" provider="sourcehut" />
+```
+
+## Behavior
+
+- **Build-time counts.** The card fetches the numbers while the
+  site builds, so the page carries no live request and works
+  with scripting off. The counts are as fresh as the last build.
+- **Description.** The repo's description shows under the name
+  when it has one.
+- **Side by side.** Two cards next to each other sit in a row
+  and wrap onto separate lines when the page is too narrow for
+  both.
+- **GitLab groups.** A GitLab `owner` can be a group path, like
+  `group/subgroup`, for repos nested under subgroups.
+- **Rate limit.** Each provider limits unauthenticated requests
+  (GitHub allows 60 an hour, shared across the build machine's
+  IP). Set a token environment variable on the build to raise
+  it: `GITHUB_TOKEN`, `GITLAB_TOKEN`, `CODEBERG_TOKEN`,
+  `FORGEJO_TOKEN`, `GITEA_TOKEN` or `SOURCEHUT_TOKEN`.
+- **A failed fetch never breaks the build.** When the API is
+  unreachable, rate-limited, or doesn't know the repo, the card
+  renders without counts and the build warns. A missing `host`
+  for Forgejo or Gitea is the one exception: without a host
+  there is no URL to fetch or link to, so the build fails with
+  a clear message.
+
+## Props Reference
+
+### `<RepoInfo />`
+
+| Prop       | Type                                                                        | Description                                                                                 |
+| ---------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `owner`    | `string`                                                                    | The repository owner, like `soymadip`. Required.                                            |
+| `repo`     | `string`                                                                    | The repository name, like `portosaur`. Required.                                            |
+| `provider` | `"github" \| "gitlab" \| "codeberg" \| "forgejo" \| "gitea" \| "sourcehut"` | Where the repo lives. Default: `github`.                                                    |
+| `host`     | `string`                                                                    | The instance the repo lives on, like `git.example.com`. Required for `forgejo` and `gitea`. |

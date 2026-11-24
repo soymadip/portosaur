@@ -1,0 +1,308 @@
+---
+title: "Configuration"
+desc: "Learn how to configure your site to suit your preference & needs."
+icon: "md:settings"
+---
+
+{vars.project.title} allows you to customize the look & behaviour of your site through a single `porto.yml` in your project's root.
+
+Portosaur 1.0 renamed the config file from `config.yml` to `porto.yml`. A `config.yml` still works, but it is deprecated — rename it to `porto.yml`.
+
+## Config Reference
+
+Below is a reference of all the configuration keys available in `porto.yml`.
+
+### `site`
+
+Global identity, routing, SEO, and build settings.
+
+| Key                 | Type     | Default        | Description                                                                                                                 |
+| :------------------ | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `url`               | `string` | `"auto"`       | Canonical site URL. Set to `"auto"` for automatic CI/CD platform detection.                                                 |
+| `base_url`          | `string` | `"auto"`       | Base path for sub-directory deployments (e.g. `/my-project/`). Set to `"auto"` for automatic detection.                     |
+| `title`             | `string` | `(mode title)` | Site title shown in browser tabs and header metadata.                                                                       |
+| `tagline`           | `string` | `""`           | Brief tagline used for SEO meta descriptions.                                                                               |
+| `favicon`           | `string` | `""`           | Path to the site favicon (relative to `static/` or theme defaults).                                                         |
+| `social_card`       | `string` | `""`           | Social sharing preview image (OpenGraph / Twitter card).                                                                    |
+| `edit_url`          | `string` | `null`         | Base URL for "Edit this page" links (e.g. `https://github.com/user/repo/edit/main/docs/`).                                  |
+| `on_broken_links`   | `string` | `"throw"`      | Behavior when a broken link is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet.             |
+| `on_broken_anchors` | `string` | `"throw"`      | Behavior when a missing link anchor `#` is encountered (`throw`, `warn`, `ignore`). Coming soon — links aren't checked yet. |
+| `head_tags`         | `array`  | `[]`           | List of custom HTML tags to inject into `<head>` (see [Custom Head Tags](#custom-head-tags)).                               |
+
+#### `site.build`
+
+| Key          | Type     | Default   | Description                                    |
+| :----------- | :------- | :-------- | :--------------------------------------------- |
+| `output_dir` | `string` | `"build"` | Directory name for compiled production assets. |
+
+#### `site.rss`
+
+RSS feed generator for the blog. Coming soon — no feed is generated yet.
+
+| Key         | Type      | Default        | Description                                   |
+| :---------- | :-------- | :------------- | :-------------------------------------------- |
+| `enable`    | `boolean` | `true`         | Toggle RSS feed generation for blog articles. |
+| `copyright` | `string`  | `(dynamic)`    | Custom copyright notice for the RSS XML feed. |
+| `desc`      | `string`  | `site.tagline` | Description tag inside the RSS feed.          |
+
+#### `site.robots_txt`
+
+Robots file generator for search engine crawlers.
+
+| Key            | Type      | Default                             | Description                                                                        |
+| :------------- | :-------- | :---------------------------------- | :--------------------------------------------------------------------------------- |
+| `enable`       | `boolean` | `true`                              | Toggle automatic `robots.txt` generation in build directory.                       |
+| `rules`        | `array`   | `[{ user_agent: "*", allow: "/" }]` | Crawler directives.                                                                |
+| `custom_lines` | `array`   | `[]`                                | Custom raw lines appended directly to `robots.txt`. Coming soon — not emitted yet. |
+
+#### `site.content`
+
+Configure how content renders.
+
+| Key                       | Type   | Default   | Description                                                                                                                         |
+| :------------------------ | :----- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `add_mdx_desc`            | `bool` | `true`    | Show the page description under the title. Per-page `hide_desc` frontmatter overrides this.                                         |
+| `format`                  | `str`  | `"mdx"`   | Markdown parser format<br/>Options: `"mdx"`, `"md"`, `"detect"`.                                                                    |
+| `on_broken_links`         | `str`  | `"throw"` | MD broken link behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. Coming soon — links aren't checked yet.                      |
+| `on_broken_images`        | `str`  | `"throw"` | MD broken image behavior.<br/>Options: same as above. Coming soon — images aren't checked yet.                                      |
+| `on_missing_var`          | `str`  | `"throw"` | Missing `{vars.<key>}` behavior.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. `warn` and `ignore` render the missing key as empty. |
+| `on_missing_env`          | `str`  | `"warn"`  | Missing `{env.<VAR_NAME>}` behavior.<br/>Options: same as above.                                                                    |
+| `on_duplicate_h2`         | `str`  | `"warn"`  | Two h2 headings in a page sharing an anchor.<br/>Options: `"throw"`, `"warn"`, `"ignore"`. `throw` fails the build.                 |
+| `mermaid`                 | `bool` | `true`    | Render ` ```mermaid ` fences as diagrams (Pele renders them at build time, no client JS).                                           |
+| `render_emoji_shortcodes` | `bool` | `true`    | Render emoji shortcodes like `:smile:`.                                                                                             |
+| `toc.enable`              | `bool` | `true`    | Show the table of contents. Per-page `toc` frontmatter overrides this.                                                              |
+| `toc.min_level`           | `num`  | `2`       | Shallowest heading level in the table of contents.                                                                                  |
+| `toc.max_level`           | `num`  | `5`       | Deepest heading level in the table of contents.                                                                                     |
+
+#### `site.pwa`
+
+Progressive Web App manifest and service worker.
+
+| Key             | Type      | Default | Description                                                          |
+| :-------------- | :-------- | :------ | :------------------------------------------------------------------- |
+| `enable`        | `boolean` | `true`  | Enable the PWA manifest, install prompt, and offline service worker. |
+| `notifications` | `boolean` | `false` | Enable web push notification scaffolding. Coming soon.               |
+
+#### `site.preview`
+
+| Key       | Type     | Default | Description                                                                                        |
+| :-------- | :------- | :------ | :------------------------------------------------------------------------------------------------- |
+| `timeout` | `number` | `15`    | Timeout in seconds for fetching preview content. Coming soon — the preview viewer isn't built yet. |
+
+#### Content Directories & Routing
+
+| Key                     | Type      | Default   | Description                                                     |
+| :---------------------- | :-------- | :-------- | :-------------------------------------------------------------- |
+| `site.docs.dir`         | `string`  | `"docs"`  | Directory containing documentation files (docs mode).           |
+| `site.docs.route`       | `string`  | `"docs"`  | URL route base path for documentation pages.                    |
+| `site.notes.dir`        | `string`  | `"notes"` | Directory containing note files (portfolio mode).               |
+| `site.notes.route`      | `string`  | `"notes"` | URL route base path for notes pages.                            |
+| `site.notes.topic_list` | `boolean` | `true`    | Automatically append sub-topic cards to category landing pages. |
+| `site.blog.dir`         | `string`  | `"blog"`  | Directory containing blog Markdown articles.                    |
+| `site.blog.route`       | `string`  | `"blog"`  | URL route base path for blog articles.                          |
+
+---
+
+### `theme`
+
+Visual appearance and user interface settings.
+
+| Key            | Type     | Default       | Description                                                     |
+| :------------- | :------- | :------------ | :-------------------------------------------------------------- |
+| `color_scheme` | `string` | `"portosaur"` | Name of a bundled scheme or relative path to a custom CSS file. |
+| `default_mode` | `string` | `"dark"`      | Initial color mode (`light` or `dark`).                         |
+
+#### `theme.appearance`
+
+| Key                    | Type      | Default | Description                                                   |
+| :--------------------- | :-------- | :------ | :------------------------------------------------------------ |
+| `show_theme_switch`    | `boolean` | `true`  | Show the light/dark mode toggle button in the navigation bar. |
+| `disable_project_link` | `boolean` | `false` | Hide the Project link in the navbar.                          |
+
+#### `theme.navigation`
+
+| Key                     | Type      | Default | Description                                                                                |
+| :---------------------- | :-------- | :------ | :----------------------------------------------------------------------------------------- |
+| `auto_collapse`         | `boolean` | `true`  | Auto-collapse inactive sidebar categories.                                                 |
+| `sidebar_collapsed`     | `boolean` | `false` | Start with the sidebar collapsed.                                                          |
+| `hide_navbar_on_scroll` | `boolean` | `true`  | Automatically hide the navbar when scrolling down.                                         |
+| `navbar_items`          | `array`   | `[]`    | Custom navbar items — each with a `label` and a `to` (internal) or `href` (external) link. |
+| `collapsable_sidebar`   | `boolean` | `true`  | Enable the collapsible sidebar.                                                            |
+
+The visitor's own collapse toggle is remembered for the session (until the tab closes) and wins over `sidebar_collapsed` on a reload — the configured default only applies on the first visit.
+
+#### `theme.footer`
+
+| Key                    | Type      | Default     | Description                                                                              |
+| :--------------------- | :-------- | :---------- | :--------------------------------------------------------------------------------------- |
+| `enable`               | `boolean` | `true`      | Toggle the footer section.                                                               |
+| `message`              | `string`  | `(dynamic)` | Custom footer text — HTML allowed. Defaults to a copyright line with a Portosaur credit. |
+| `disable_project_link` | `boolean` | `false`     | Hide the Project link in the footer.                                                     |
+
+---
+
+### `docs_home`
+
+Configures the documentation homepage (active when `docs_home` is declared).
+
+| Key        | Type     | Default          | Description                                 |
+| :--------- | :------- | :--------------- | :------------------------------------------ |
+| `title`    | `string` | `""`             | Hero banner title.                          |
+| `tagline`  | `string` | `""`             | Hero banner subtitle.                       |
+| `desc`     | `string` | `""`             | Explanatory description paragraph.          |
+| `icon`     | `string` | `"img/icon.png"` | Project icon displayed on the homepage.     |
+| `actions`  | `array`  | `[]`             | Call-to-action buttons (see schema below).  |
+| `features` | `array`  | `[]`             | Feature highlight cards (see schema below). |
+
+#### `docs_home.actions`
+
+```yaml
+actions:
+  - text: "Get Started"
+    link: "/docs"
+    icon: "si:rocket"
+  - text: "GitHub"
+    link: "https://github.com/user/repo"
+    icon: "si:github"
+```
+
+| Key    | Type     | Description                                        |
+| :----- | :------- | :------------------------------------------------- |
+| `text` | `string` | Button label.                                      |
+| `link` | `string` | Internal route or external URL.                    |
+| `icon` | `string` | Icon identifier (e.g. `si:rocket`, `md:settings`). |
+
+#### `docs_home.features`
+
+```yaml
+features:
+  - title: "High Performance"
+    icon: "⚡"
+    color: "#f5a9b8"
+    desc: "Blazing fast static builds with zero unnecessary runtime."
+    link: "/docs/getting-started"
+```
+
+| Key     | Type     | Description                                                                                                                                                              |
+| :------ | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title` | `string` | Feature heading.                                                                                                                                                         |
+| `icon`  | `string` | Emoji or icon identifier.                                                                                                                                                |
+| `desc`  | `string` | Feature description text.                                                                                                                                                |
+| `link`  | `string` | URL for the card. (optional)                                                                                                                                             |
+| `color` | `string` | Icon color — any valid CSS color (hex, `rgb()`, `hsl()`, or a named color). Invalid values are ignored. Only SVG icons are tinted. Emoji and image icons are unaffected. |
+
+---
+
+### `home_page`
+
+Configures sections for portfolio sites (active when `home_page` is declared). See [Portfolio Home](/docs/portfolio-home) for how the sections render.
+
+#### `home_page.hero`
+
+| Key                     | Type     | Default                                                        | Description                                           |
+| :---------------------- | :------- | :------------------------------------------------------------- | :---------------------------------------------------- |
+| `title`                 | `string` | `"Your Name"`                                                  | Main title or name in the hero section.               |
+| `desc`                  | `string` | `"Short description about you, your passion, your goals etc."` | Short description about you, your passion, goals etc. |
+| `intro`                 | `string` | `"Hello there, I'm"`                                           | Intro text before name.                               |
+| `subtitle`              | `string` | `"I am a"`                                                     | Subtitle text after name.                             |
+| `profession`            | `string` | `"Your Profession"`                                            | Professional headline or role.                        |
+| `profile_pic`           | `string` | `""`                                                           | Path/URL to profile picture in the hero section.      |
+| `learn_more_button_txt` | `string` | `"Learn More"`                                                 | Text for the call-to-action button.                   |
+| `social`                | `array`  | `[]`                                                           | List of social links.                                 |
+
+#### `home_page.about`
+
+| Key              | Type      | Default       | Description                       |
+| :--------------- | :-------- | :------------ | :-------------------------------- |
+| `enable`         | `boolean` | `true`        | Toggle the About Me section.      |
+| `heading`        | `string`  | `"About Me"`  | Heading for the About Me section. |
+| `bio`            | `array`   | `[]`          | Paragraphs for your biography.    |
+| `image`          | `string`  | `""`          | About-section image.              |
+| `skills`         | `array`   | `[]`          | Skills list.                      |
+| `skills_heading` | `string`  | `"My Skills"` | Heading for the skills list.      |
+| `resume`         | `string`  | `"none"`      | Path/URL to your resume file.     |
+
+#### `home_page.project_shelf`
+
+| Key          | Type      | Default                                                              | Description                                                                                                     |
+| :----------- | :-------- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `enable`     | `boolean` | `true`                                                               | Toggle the Project Shelf section.                                                                               |
+| `heading`    | `string`  | `"My Projects"`                                                      | Heading for the projects section.                                                                               |
+| `subheading` | `string`  | `"A collection of all my works, with featured projects highlighted"` | Subheading for the projects section.                                                                            |
+| `projects`   | `array`   | `[]`                                                                 | Array of project items.                                                                                         |
+| `autoplay`   | `boolean` | `true`                                                               | Autoplay the project shelf, one card every 5 seconds. Pauses while the reader hovers over or focuses the shelf. |
+
+#### `home_page.experience`
+
+| Key          | Type      | Default                                  | Description                            |
+| :----------- | :-------- | :--------------------------------------- | :------------------------------------- |
+| `enable`     | `boolean` | `false`                                  | Toggle the Experience section.         |
+| `heading`    | `string`  | `"Experience"`                           | Heading for the experience section.    |
+| `subheading` | `string`  | `"My professional journey, in a glance"` | Subheading for the experience section. |
+| `list`       | `array`   | `[]`                                     | Array of timeline items.               |
+
+#### `home_page.social`
+
+| Key          | Type      | Default                                                                         | Description                                                                                                                                                                                 |
+| :----------- | :-------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `enable`     | `boolean` | `true`                                                                          | Toggle the Social Links section.                                                                                                                                                            |
+| `heading`    | `string`  | `"Get In Touch"`                                                                | Heading for the social links section.                                                                                                                                                       |
+| `subheading` | `string`  | `"Feel free to reach out for collaborations, questions, or just to say hello!"` | Subheading for the social links section.                                                                                                                                                    |
+| `links`      | `array`   | `[]`                                                                            | Array of social objects. Each link takes `name`, `url`, and optionally `icon`, `desc`, and `color` (a CSS color for the icon). The icon is guessed from the `name` when `icon` is left out. |
+
+---
+
+### `tasks`
+
+Public roadmap and task tracking (portfolio mode).
+
+```yaml
+tasks:
+  enable: true
+  title: "Roadmap"
+  subtitle: "Things I'm currently working on"
+  list:
+    - title: "Release Portosaur v1.0"
+      status: "active" # active, pending, or completed
+      desc: "Full feature complete release."
+```
+
+---
+
+### `vars`
+
+Free-form key-value store for variables referenced via `{vars.<key>}` in Markdown and `{{vars.<key>}}` in configuration.
+
+```yaml
+vars:
+  repo: "https://github.com/soymadip/portosaur"
+  author: "Soy Madip"
+```
+
+---
+
+### Custom Head Tags
+
+Inject custom meta, link, or script tags into `<head>`:
+
+```yaml
+site:
+  head_tags:
+    - meta:
+        name: "keywords"
+        content: "portfolio, documentation, static site"
+    - script:
+        src: "https://analytics.example.com/script.js"
+        async: true
+```
+
+---
+
+### Icon Values
+
+Every `icon` key in `porto.yml` (and Markdown frontmatter) accepts either:
+
+- **Unicode Emojis**: `"⚡"`, `"🚀"`, `"🛠️"`
+- **Icon Identifiers**: `<prefix>:<name>` syntax (e.g., `si:github`, `lucide:rocket`, `md:settings`, `di:nodejs`)
+
+For the full list of supported icon sets, shorthand prefixes, tree-shaking details, and the interactive icon browser, see the [Icons & Emoji Guide](/docs/markdown/icons/).

@@ -1,0 +1,79 @@
+---
+title: "Cards"
+desc: "Hand-picked link cards in a grid, for the middle of a page."
+icon: "lu:layout-grid"
+---
+
+Drop a grid of cards anywhere in a page — hand-picked links or notes,
+written out by hand. Unlike `<TopicList>`, which builds its cards from
+the page tree, these cards say exactly what you write.
+
+```jsx
+<Cards>
+  <Card
+    title="Getting started"
+    description="Install the CLI and build your first site."
+    href="/docs/getting-started/"
+    icon="lu:rocket"
+  />
+  <Card
+    title="Configuration"
+    description="Every config key, explained."
+    href="/docs/config/"
+    icon="lu:settings"
+  />
+</Cards>
+```
+
+The example above, live:
+
+<Cards>
+  <Card
+    title="Getting started"
+    description="Install the CLI and build your first site."
+    href="/docs/getting-started/"
+    icon="lu:rocket"
+  />
+  <Card
+    title="Configuration"
+    description="Every config key, explained."
+    href="/docs/config/"
+    icon="lu:settings"
+  />
+  <Card
+    title="A plain card"
+    description="Without an href the card is not a link — it just sits there, holding a note."
+    icon="lu:sticky-note"
+  />
+</Cards>
+
+## Behavior
+
+- **Grid.** One column on narrow screens, two columns from 997px up.
+  Cards in a row stretch to the tallest one.
+- **Links.** With an `href` the whole card is a link — internal pages
+  go through the router, external URLs open in a new tab. Link cards
+  lift on hover; plain cards stay still, so they never promise a
+  link that isn't there.
+- **Icons.** The `icon` is an Iconify id, like `lu:rocket` — the same
+  ids the `<Icon>` component takes. Leave it out for a text-only card.
+- **Children.** Anything written inside a `<Card>` renders below the
+  description, for a longer note than the description line allows.
+
+## Props Reference
+
+### `<Cards />`
+
+| Prop       | Type        | Description            |
+| ---------- | ----------- | ---------------------- |
+| `children` | `ReactNode` | The `<Card>` elements. |
+
+### `<Card />`
+
+| Prop          | Type        | Default | Description                                                    |
+| ------------- | ----------- | ------- | -------------------------------------------------------------- |
+| `title`       | `string`    | —       | The card title. Required.                                      |
+| `description` | `string`    | —       | A short line under the title.                                  |
+| `href`        | `string`    | —       | The link destination. With one the whole card is a link.       |
+| `icon`        | `string`    | —       | An Iconify id for the icon beside the title, like `lu:rocket`. |
+| `children`    | `ReactNode` | —       | Extra content below the description.                           |

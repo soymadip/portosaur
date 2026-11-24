@@ -28,6 +28,7 @@
   "version": "0.26.0",
   "workspaces": [
     "docs",
+    "portfolio-test",
     "packages/*"
   ],
   "devDependencies": {

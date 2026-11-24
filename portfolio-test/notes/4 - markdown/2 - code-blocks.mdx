@@ -1,0 +1,244 @@
+---
+title: "Code Blocks"
+desc: "Syntax highlighting, file titles, line numbers, magic comments, and code tabs."
+icon: "md:code"
+---
+
+{vars.project.title} includes built-in syntax highlighting powered by Shiki. Every code block renders in a frame with copy and wrap buttons — no setup needed.
+
+---
+
+## Basic Code Blocks
+
+Create code blocks using standard Markdown triple-backticks with an optional language identifier:
+
+````markdown
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
+```
+````
+
+---
+
+## File Titles
+
+Add a file path or title to the header of the code block using `title="..."`. The header shows the language's icon, the title, and the copy button:
+
+````markdown
+```javascript title="src/utils/math.js"
+export function add(a, b) {
+  return a + b;
+}
+```
+````
+
+Live:
+
+```javascript title="src/utils/math.js"
+export function add(a, b) {
+  return a + b;
+}
+```
+
+---
+
+## Line Numbers
+
+Display line numbers by appending `lineNumbers` to the code fence. Start from a number other than 1 with `lineNumbers=<start>`:
+
+````markdown
+```typescript lineNumbers
+interface User {
+  id: string;
+  name: string;
+}
+```
+````
+
+Live:
+
+```typescript lineNumbers
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+```
+
+---
+
+## Magic Comments
+
+Annotate lines inside a code block with `// [!code ...]` comments. The comment itself is stripped from view. The line it sits on gets the styling.
+
+### Highlight a Line
+
+Use `// [!code highlight]` to draw attention to a line:
+
+```javascript
+function connect() {
+  const client = new DatabaseClient(); // [!code highlight]
+  return client.start();
+}
+```
+
+### Diff Lines
+
+Mark a line as added or removed with `// [!code ++]` and `// [!code --]`:
+
+```javascript
+function processData(input) {
+  const result = eval(input); // [!code --]
+  const result = parse(input); // [!code ++]
+  return result;
+}
+```
+
+### Highlight a Word
+
+Use `// [!code word:<text>]` to highlight one word on the line:
+
+```javascript
+const client = new DatabaseClient(); // [!code word:client]
+```
+
+### Focus Lines
+
+Use `// [!code focus]` to keep some lines bright and dim the rest:
+
+```javascript
+function demo() {
+  const a = 1; // [!code focus]
+  const b = 2;
+  return a + b; // [!code focus]
+}
+```
+
+---
+
+## Code Tabs
+
+Group code blocks into tabs by marking each fence with `tab="..."`. Fences with the same tab name, one after another, become one tabbed block:
+
+````markdown
+```bash tab="npm"
+npm install portosaur
+```
+
+```bash tab="bun"
+bun add portosaur
+```
+````
+
+Live:
+
+```bash tab="npm"
+npm install portosaur
+```
+
+```bash tab="bun"
+bun add portosaur
+```
+
+Groups that share a `tab-group="..."` id switch together, and the choice is remembered between visits — the same syncing as [`<Tabs>`](/docs/markdown/components/tabs/):
+
+```bash tab="npm" tab-group="pm"
+npm run dev
+```
+
+```bash tab="bun" tab-group="pm"
+bun run dev
+```
+
+Try switching one group — the other follows:
+
+```bash tab="npm" tab-group="pm"
+npm run build
+```
+
+```bash tab="bun" tab-group="pm"
+bun run build
+```
+
+### Package Manager Tabs
+
+A fence tagged `package-install` (or `npm`) turns one npm command into tabs for every package manager:
+
+````markdown
+```package-install
+portosaur
+```
+````
+
+Live:
+
+```package-install
+portosaur
+```
+
+Other languages work the same way — add `lang="..."` to the fence, and the tabs become that language's managers. Python gets pip, uv, poetry, and pipx tabs. Ruby gets gem and bundler:
+
+````markdown
+```package-install lang="python"
+requests
+```
+````
+
+Live:
+
+```package-install lang="python"
+requests
+```
+
+---
+
+## Hiding the Copy Button
+
+Add `noCopy` to the fence to leave the copy button off:
+
+````markdown
+```javascript noCopy
+const token = "do-not-copy-me";
+```
+````
+
+---
+
+## Wrapping Long Lines
+
+Long lines scroll sideways by default. When a block has a line too long to fit, a wrap button appears beside the copy button — tap it to wrap the lines at the block's edge instead. Tap it again to go back to scrolling.
+
+Live — the line below is too long for the block:
+
+{/* prettier-ignore */}
+```javascript
+const docsUrl = "https://portosaur.dev/docs/markdown/code-blocks/#wrapping-long-lines";
+```
+
+Add `noWrap` to the fence to leave the wrap button off:
+
+````markdown
+```javascript noWrap
+const token = "do-not-wrap-me";
+```
+````
+
+Live:
+
+```javascript noWrap
+const token = "do-not-wrap-me";
+```
+
+---
+
+## Dynamic Variables in Code Blocks
+
+Dynamic variables defined in `porto.yml` can also be injected inside code blocks using the `{vars.<key>}` token:
+
+````markdown
+```bash
+bun install -g @portosaur/cli@{vars.versions.portosaur}
+```
+````

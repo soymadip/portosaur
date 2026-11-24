@@ -1,0 +1,58 @@
+---
+title: "Surge.sh"
+desc: "Deploy your site to Surge.sh with zero configuration."
+icon: "lo:surge"
+---
+
+[Surge](https://surge.sh/) publishes static sites from a directory. Portosaur's generated workflows build the site and deploy `build/` to a Surge domain named after your project repository.
+
+## 1. Create Surge Credentials
+
+Install and authenticate the Surge CLI on your computer, then retrieve an API token:
+
+```bash
+bunx surge login
+bunx surge token
+```
+
+Keep the token private. Do not put it in `porto.yml` or commit it to your repository.
+
+## 2. Generate a Deployment Workflow
+
+For a new project, select your VCS Provider and **Surge.sh** as the Hosting Platform. For example:
+
+```bash
+porto init -p github -h surge -u <username> -P <project-name>
+```
+
+Replace `github` with `gitlab`, `codeberg`, or `sourcehut` when using a different provider. For an existing project, run this inside the repository:
+
+```bash
+porto init --ci-only -h surge
+```
+
+The existing-project command detects the provider from the Git remote and creates the matching workflow. Depending on the provider, it creates a file under `.github/workflows/`, `.gitlab-ci.yml`, `.forgejo/workflows/`, or `.build.yml`.
+
+The generated workflow runs on pushes to `main`, installs dependencies, builds the site, and deploys `build/` to `https://<repository-name>.surge.sh`.
+
+## 3. Add Repository Secrets
+
+Add the following protected secrets or CI variables in the repository hosting service:
+
+| Name          | Value                                          |
+| :------------ | :--------------------------------------------- |
+| `SURGE_LOGIN` | The email address used for your Surge account. |
+| `SURGE_TOKEN` | The token returned by `bunx surge token`.      |
+
+Use the secret settings for your provider:
+
+- **GitHub**: **Settings → Secrets and variables → Actions**.
+- **GitLab**: **Settings → CI/CD → Variables**. Mask and protect both values where available.
+- **Codeberg/Forgejo**: **Settings → Secrets → Actions**.
+- **SourceHut**: add them to the build's secrets/environment configuration.
+
+## 4. Deploy and Verify
+
+Commit and push to `main`. Open the provider's CI page and confirm the build and deploy steps pass. Visit `https://<repository-name>.surge.sh` to verify the published site.
+
+The default domain is based on the repository name, not the VCS username. To use a custom domain, change the generated `surge --domain` argument and configure that domain in Surge. Set `site.url` in `porto.yml` to the chosen origin and `site.base_url` to `/`.

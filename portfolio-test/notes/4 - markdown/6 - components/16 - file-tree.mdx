@@ -1,0 +1,144 @@
+---
+title: "File Tree"
+desc: "A file listing for docs — folders that open and close, files as rows."
+icon: "lu:folder-tree"
+---
+
+Show a project layout or a directory of files. Folders open and close
+on click; files are plain rows. Icons come from the file and folder
+names when you don't set one, and a `#` note after a name shows
+after it, muted and smaller.
+
+```jsx
+<FileTree>
+  <Folder name="src" defaultOpen>
+    <File name="index.ts" />
+    <File name="app.tsx" />
+    <Folder name="components">
+      <File name="Button.tsx" />
+    </Folder>
+  </Folder>
+  <File name="package.json" />
+</FileTree>
+```
+
+The example above, live — try opening the `components` folder:
+
+<FileTree>
+  <Folder name="src" defaultOpen>
+    <File name="index.ts" />
+    <File name="app.tsx" />
+    <Folder name="components">
+      <File name="Button.tsx" />
+    </Folder>
+  </Folder>
+  <File name="package.json" />
+</FileTree>
+
+## Behavior
+
+- **Folders.** Click a folder to open or close it. Folders start
+  closed unless `defaultOpen` is set. A folder with children
+  shows a chevron, and its name ends with a `/`, so folders and
+  files stay easy to tell apart. The folder icon swaps open and
+  closed; the fold animates over 200ms, like `<Details>`.
+- **Files.** A file is a row with an icon and a name. The icon
+  comes from the file's extension or well-known name — `index.ts`
+  gets the TypeScript icon, `package.json` the npm one — unless
+  the `icon` prop gives an Iconify id.
+- **Folders, too.** A folder's icon comes from its name — `src`,
+  `docs`, `blog` — unless the `icon` prop gives one. A folder
+  with its own icon keeps it open and closed.
+- **Comments.** A `#` note after a name renders after it, muted
+  and smaller. In JSX pass it as `comment`; in a `files` fence
+  write it after the name.
+- **Nesting.** Folders nest as deep as needed — each level indents
+  behind a hairline guide.
+- **No JavaScript.** A folder is a native `<details>` element, so
+  the tree works with scripting off.
+
+## Codeblock Syntax
+
+Draw the tree as text in a `files` fence instead of writing JSX
+— handy for a quick listing. Nesting comes from how far right
+each name starts, so the tree characters are only decoration and
+plain indentation works too. A name ending with `/` is a folder,
+and so is any name with lines nested under it. Every folder
+starts open.
+
+````md
+```files
+project
+├── src
+│   ├── index.ts
+│   └── components
+│       └── Button.tsx
+├── package.json
+```
+````
+
+The fence above, live:
+
+```files
+project
+├── src
+│   ├── index.ts
+│   └── components
+│       └── Button.tsx
+├── package.json
+```
+
+Add a `#` note after a name to annotate it — the note renders after
+the name, muted and smaller. A line that is only a note is skipped.
+
+````md
+```files
+my-site/
+├── blog/         # Long-form blog posts and articles
+├── notes/        # Portfolio sites only: Markdown/MDX digital notebook
+├── docs/         # Documentation sites only: Markdown/MDX technical documentation
+├── static/       # Static assets served at the root (images, icons, PDFs)
+├── porto.yml     # Primary configuration file (single source of truth)
+├── package.json  # Local project dependencies and build scripts
+└── README.md     # Project overview and instructions
+```
+````
+
+The fence above, live:
+
+```files
+my-site/
+├── blog/         # Long-form blog posts and articles
+├── notes/        # Portfolio sites only: Markdown/MDX digital notebook
+├── docs/         # Documentation sites only: Markdown/MDX technical documentation
+├── static/       # Static assets served at the root (images, icons, PDFs)
+├── porto.yml     # Primary configuration file (single source of truth)
+├── package.json  # Local project dependencies and build scripts
+└── README.md     # Project overview and instructions
+```
+
+## Props Reference
+
+### `<FileTree />`
+
+| Prop       | Type        | Description                           |
+| ---------- | ----------- | ------------------------------------- |
+| `children` | `ReactNode` | The `<File>` and `<Folder>` elements. |
+
+### `<File />`
+
+| Prop      | Type     | Default        | Description                                                                                                  |
+| --------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `name`    | `string` | —              | The file name. Required.                                                                                     |
+| `icon`    | `string` | Extension icon | An Iconify id for the file icon, like `lu:file-json`. Defaults to the icon for the file's extension or name. |
+| `comment` | `string` | —              | A note after the name, shown muted and smaller.                                                              |
+
+### `<Folder />`
+
+| Prop          | Type        | Default   | Description                                                                                         |
+| ------------- | ----------- | --------- | --------------------------------------------------------------------------------------------------- |
+| `name`        | `string`    | —         | The folder name. Required.                                                                          |
+| `icon`        | `string`    | Name icon | An Iconify id for the folder icon. Defaults to the icon for the folder's name, or the folder glyph. |
+| `defaultOpen` | `boolean`   | `false`   | Open the folder by default.                                                                         |
+| `comment`     | `string`    | —         | A note after the name, shown muted and smaller.                                                     |
+| `children`    | `ReactNode` | —         | The files and folders inside.                                                                       |
