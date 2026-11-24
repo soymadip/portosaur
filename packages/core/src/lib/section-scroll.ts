@@ -48,10 +48,24 @@ export function scrollBehavior(): ScrollBehavior {
 }
 
 /**
- * Jumps to the element with this id, landing it just below the
- * navbar when the navbar will be showing at the end of the glide,
- * or flush at the viewport top when it will be hidden. The scroll
- * goes through `window.scrollTo` with an absolute top — NOT
+ * The element a jump aims at: the section's first heading when it
+ * has one, else the section itself. A section's top padding puts
+ * its heading well below its top edge (About: 80px), so aiming at
+ * the section edge leaves a gap under the navbar even on a perfect
+ * landing. Aiming at the heading lands the visible start of the
+ * section just below the navbar, or flush at the top when the
+ * navbar will be hidden.
+ */
+export function jumpTarget(section: Element): Element {
+  return section.querySelector("h2") ?? section;
+}
+
+/**
+ * Jumps to the element with this id, landing its heading just below
+ * the navbar when the navbar will be showing at the end of the glide,
+ * or flush at the viewport top when it will be hidden. Sections
+ * without a heading land on their own top edge. The scroll goes
+ * through `window.scrollTo` with an absolute top — NOT
  * `scrollIntoView`, which would also apply the CSS scroll padding
  * and double the offset. Returns false when no such element
  * exists, so the caller can fall back to the native jump.
@@ -69,7 +83,8 @@ export function scrollToSection(
   const rem =
     parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-  const targetTop = element.getBoundingClientRect().top + scrollY;
+  const target = jumpTarget(element);
+  const targetTop = target.getBoundingClientRect().top + scrollY;
   const offset = landingOffset({
     navbarHeight,
     hideOnScroll: options.hideOnScroll,

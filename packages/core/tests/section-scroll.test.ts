@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { landingOffset } from "../src/lib/section-scroll.ts";
+import { jumpTarget, landingOffset } from "../src/lib/section-scroll.ts";
 
 const NAV = 56;
 const GAP = 16;
@@ -99,5 +99,20 @@ describe("landingOffset", () => {
         gap: GAP,
       }),
     ).toBe(NAV + GAP);
+  });
+});
+
+describe("jumpTarget", () => {
+  test("aims at the section's first h2 when it has one", () => {
+    const heading = { tagName: "H2" } as unknown as Element;
+    const section = {
+      querySelector: (selector: string) => (selector === "h2" ? heading : null),
+    } as unknown as Element;
+    expect(jumpTarget(section)).toBe(heading);
+  });
+
+  test("falls back to the section itself when it has no h2", () => {
+    const section = { querySelector: () => null } as unknown as Element;
+    expect(jumpTarget(section)).toBe(section);
   });
 });
