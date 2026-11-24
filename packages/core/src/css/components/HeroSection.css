@@ -327,6 +327,11 @@
   .porto-hero__cta {
     margin-right: 0;
     margin-bottom: 1.2rem;
+    /* A 44px tap target on touch screens: the button measured
+       41px tall, so its height is pinned and the label centers. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .porto-social-links {
     margin: 0;
@@ -336,7 +341,11 @@
     padding-bottom: 0.5rem;
   }
   .porto-social-links__link {
-    margin: 0 1rem;
+    /* 44px tap targets: the icon is 25px (22px below 480px), so
+       the padding makes up the rest. The margin shrinks so the
+       row stays compact. */
+    margin: 0 0.4rem;
+    padding: 0.7rem;
   }
   .porto-social-links__link svg {
     width: 25px;

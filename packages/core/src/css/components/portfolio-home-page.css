@@ -12,7 +12,9 @@
 /* The footer is shared with the docs site, so this stays scoped
  * to the portfolio home: with no vertical padding of its own the
  * message sat in a 23px strip, 1px under its top border and
- * flush with the bottom of the page. */
+ * flush with the bottom of the page. The bottom inset keeps the
+ * message clear of the gesture bar on phones that have one. */
 body:has(.porto-portfolio-home) .porto-footer {
   padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }

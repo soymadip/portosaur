@@ -28,6 +28,12 @@ export function NavArrow({ sections }: { sections: string[] }) {
   const [direction, setDirection] = useState<"down" | "up">("down");
   const [isVisible, setIsVisible] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  /* Lifted above the footer at the bottom of the page: the
+     arrow sits over the footer text otherwise (15px of overlap
+     on phones). The footer's height is measured live when the
+     arrow flips up, so wrapped text still clears. */
+  const [liftPx, setLiftPx] = useState<number | null>(null);
+  const directionRef = useRef<"down" | "up">("down");
   const scrollTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -37,10 +43,19 @@ export function NavArrow({ sections }: { sections: string[] }) {
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
       setIsVisible(scrollTop > 100);
-      if (scrollTop + windowHeight >= fullHeight - 50) {
-        setDirection("up");
-      } else {
-        setDirection("down");
+      const nextDirection =
+        scrollTop + windowHeight >= fullHeight - 50 ? "up" : "down";
+      if (nextDirection !== directionRef.current) {
+        directionRef.current = nextDirection;
+        setDirection(nextDirection);
+        if (nextDirection === "up") {
+          const footer = document.querySelector(".porto-footer");
+          setLiftPx(
+            footer instanceof HTMLElement ? footer.offsetHeight + 16 : 88,
+          );
+        } else {
+          setLiftPx(null);
+        }
       }
       setIsScrolling(true);
       if (scrollTimeoutRef.current !== null) {
@@ -105,6 +120,11 @@ export function NavArrow({ sections }: { sections: string[] }) {
     <button
       type="button"
       className={`porto-nav-arrow${isVisible ? " porto-nav-arrow--visible" : ""}${isScrolling ? " porto-nav-arrow--scrolling" : ""}`}
+      style={
+        liftPx !== null
+          ? { bottom: `calc(${liftPx}px + env(safe-area-inset-bottom, 0px))` }
+          : undefined
+      }
       onClick={handleClick}
       aria-label={
         direction === "down" ? "Scroll to next section" : "Scroll to top"

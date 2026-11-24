@@ -5,7 +5,10 @@
  * `onError` fallback swap needs an event handler, which server
  * components can't have. On load failure (and only once — the
  * handler clears itself first) the image swaps to the fallback
- * source.
+ * source. Above-the-fold images load eagerly at high priority;
+ * below-the-fold ones (the About photo) pass `priority={false}`
+ * and load lazily instead, so they never compete with the hero
+ * for bandwidth on a slow connection.
  */
 export function HeroImage({
   src,
@@ -13,19 +16,21 @@ export function HeroImage({
   width,
   height,
   alt = "Hero",
+  priority = true,
 }: {
   src: string;
   fallback?: string;
   width?: number;
   height?: number;
   alt?: string;
+  priority?: boolean;
 }) {
   return (
     <img
       src={src}
       alt={alt}
-      loading="eager"
-      fetchPriority="high"
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : "auto"}
       decoding="async"
       width={width ?? 400}
       height={height ?? 400}

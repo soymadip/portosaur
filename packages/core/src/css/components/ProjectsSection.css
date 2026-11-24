@@ -141,6 +141,12 @@
   .porto-projects__arrow {
     display: none;
   }
+  /* 44px tap targets on touch screens: the card links measured
+     36px tall. They are already flex rows, so the height pins
+     and the label stays centered. */
+  .porto-projects__link {
+    min-height: 44px;
+  }
 }
 
 .porto-projects__card {

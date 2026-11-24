@@ -64,6 +64,7 @@ export function AboutSection({
                   width={image.width}
                   height={image.height}
                   alt={about.name || "About Me"}
+                  priority={false}
                 />
               </div>
             )}

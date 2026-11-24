@@ -21,9 +21,24 @@
   overflow: hidden;
 }
 .porto-site-title img {
-  height: calc(var(--porto-nav-height) - 2 * var(--porto-nav-pad-y));
+  /* The nav height grows by the top inset on notched phones,
+     so the inset is subtracted back out here: the logo stays
+     the height of the content row, not of the whole bar. */
+  height: calc(
+    var(--porto-nav-height) - 2 * var(--porto-nav-pad-y) -
+      env(safe-area-inset-top, 0px)
+  );
   width: auto;
   max-width: 100%;
   object-fit: contain;
   object-position: 0 50%;
+}
+
+/* 44px tap target on touch screens: the title link measured
+   35px tall. It is already a centered flex row, so the height
+   pins and the logo and text stay centered. */
+@media (max-width: 50rem) {
+  .porto-site-title {
+    min-height: 44px;
+  }
 }

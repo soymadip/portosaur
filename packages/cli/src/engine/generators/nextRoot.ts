@@ -387,7 +387,11 @@ export function buildNextEnvContent(): string {
  * time (via the core's `image-size` helper). The theme color lives
  * in a `generateViewport` export instead: Next 16 ignores
  * `metadata.themeColor` (it warns "unsupported metadata" and drops
- * it) and only renders the tag from the viewport. The manifest link
+ * it) and only renders the tag from the viewport. The viewport also
+ * carries `viewportFit: "cover"`, which lets the page extend under
+ * notches and gesture bars so `env(safe-area-inset-*)` reports real
+ * values instead of 0 — the navbar, the floating arrow, and the
+ * footer all read those insets. The manifest link
  * is emitted only when `site.pwa.enable` is on — with the PWA off
  * there is no manifest file to link to.
  */
@@ -482,9 +486,9 @@ ${manifestField}    appleWebApp: {
 export async function generateViewport(): Promise<Viewport> {
   const themeColor = getCssVar("--porto-color-bg", config.cssFiles ?? []);
   if (!themeColor) {
-    return {};
+    return { viewportFit: "cover" };
   }
-  return { themeColor };
+  return { themeColor, viewportFit: "cover" };
 }
 
 export default function Layout({ children }: { children: ReactNode }) {

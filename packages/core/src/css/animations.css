@@ -70,8 +70,13 @@
     opacity 0.25s ease,
     display 0.25s ease allow-discrete;
 }
+/* The backdrop stays transparent: the pane itself is opaque and
+   starts below the navbar, so a dimmed backdrop would darken
+   nothing but the navbar strip above it. The backdrop element
+   still sits over the page behind, so tapping outside the pane
+   still dismisses the menu. */
 .porto-mobile-menu::backdrop {
-  background-color: var(--porto-color-backdrop-overlay);
+  background-color: transparent;
   transition:
     opacity 0.25s ease,
     display 0.25s ease allow-discrete;

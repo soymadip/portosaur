@@ -389,7 +389,8 @@ describe("buildRootLayoutContent", () => {
       expect(content).toContain(
         'getCssVar("--porto-color-bg", config.cssFiles ?? [])',
       );
-      expect(content).toContain("return { themeColor };");
+      expect(content).toContain('return { themeColor, viewportFit: "cover" };');
+      expect(content).toContain('return { viewportFit: "cover" };');
     } finally {
       rmSync(projectDir, { recursive: true, force: true });
     }

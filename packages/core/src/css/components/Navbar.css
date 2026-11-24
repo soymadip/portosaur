@@ -22,6 +22,10 @@
      widths (see the media query below). */
   padding: var(--porto-nav-pad-y) var(--porto-nav-pad-x);
   padding-inline-end: var(--porto-nav-pad-x);
+  /* On notched phones the bar grows by the top inset (see
+     --porto-nav-height) and this padding keeps its content
+     below the notch. Zero everywhere else. */
+  padding-top: calc(var(--porto-nav-pad-y) + env(safe-area-inset-top, 0px));
   /* The header shares the content background — it is separated
      by the border above, not by color. */
   background-color: var(--porto-color-bg);
@@ -157,6 +161,18 @@
 @media (min-width: 50rem) {
   .porto-menu-button {
     display: none;
+  }
+}
+
+/* 44px tap targets on touch screens: the navbar's inner row is
+   only 32px tall, so the buttons extend into the bar's vertical
+   padding — invisible on their transparent backgrounds, and the
+   bar itself stays 56px. */
+@media (max-width: 50rem) {
+  .porto-menu-button,
+  .porto-navbar__search-group .porto-button {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 

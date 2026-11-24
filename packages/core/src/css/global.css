@@ -302,7 +302,11 @@
   --porto-line-height-headings: 1.2;
 
   /* Key layout values */
-  --porto-nav-height: 3.5rem;
+  /* The top inset grows the bar on notched phones (with
+     viewport-fit=cover) so its content clears the notch; every
+     consumer of this height — scroll padding, menu, sidebar,
+     jump landings — grows with it. Zero everywhere else. */
+  --porto-nav-height: calc(3.5rem + env(safe-area-inset-top, 0px));
   /* Navbar edge padding; desktop raises it in the media query below. */
   --porto-nav-pad-x: 0.55rem;
   --porto-nav-pad-y: 0.75rem;
@@ -410,7 +414,7 @@
 @media (min-width: 50em) {
   :root {
     /* 60px, matching the OG Portosaur/Docusaurus navbar height. */
-    --porto-nav-height: 3.4rem;
+    --porto-nav-height: calc(3.4rem + env(safe-area-inset-top, 0px));
     --porto-nav-pad-x: 0.5rem;
     --porto-text-h1: var(--porto-text-5xl);
     --porto-text-h2: var(--porto-text-4xl);

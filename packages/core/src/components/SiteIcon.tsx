@@ -98,6 +98,11 @@ export function SiteIcon({
     <img
       src={resolved.src}
       alt="icon"
+      /* Image-file icons (project tiles, contact icons) sit
+         below the fold, so they load lazily instead of
+         competing with the hero for bandwidth. */
+      loading="lazy"
+      decoding="async"
       onError={
         resolved.fallback
           ? (event) => {

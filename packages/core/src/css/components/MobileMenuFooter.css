@@ -91,3 +91,24 @@
 .porto-mobile-preferences__version-link:hover {
   color: var(--porto-color-white);
 }
+
+/* 44px tap targets on touch screens: the nav links measured
+   32px tall, the theme trigger and options 37px, the version
+   link 38px. Mobile only — the desktop sidebar keeps its
+   tighter rows. */
+@media (max-width: 50rem) {
+  .porto-mobile-nav a,
+  .porto-mobile-nav summary {
+    padding-block: 0.7em;
+  }
+  .porto-mobile-preferences summary.porto-dropdown__trigger,
+  .porto-mobile-preferences .porto-dropdown__item {
+    min-height: 44px;
+  }
+  .porto-mobile-preferences__version-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
