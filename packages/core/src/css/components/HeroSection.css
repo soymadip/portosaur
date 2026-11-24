@@ -102,7 +102,11 @@
   font-size: 2.9rem;
   font-weight: 550;
   line-height: 1.1;
-  color: var(--porto-color-text);
+  color: color-mix(
+    in srgb,
+    var(--porto-color-text) 85%,
+    var(--porto-color-accent)
+  );
   margin: 0;
   transition: transform 200ms ease;
 }
