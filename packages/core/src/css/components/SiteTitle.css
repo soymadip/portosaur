@@ -19,6 +19,7 @@
 }
 .porto-site-title span {
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 .porto-site-title img {
   /* The nav height grows by the top inset on notched phones,

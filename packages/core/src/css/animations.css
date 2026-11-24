@@ -76,11 +76,9 @@
     transform 0.25s ease,
     display 0.25s ease allow-discrete;
 }
-/* The backdrop stays transparent: the pane itself is opaque and
-   starts below the navbar, so a dimmed backdrop would darken
-   nothing but the navbar strip above it. The backdrop element
-   still sits over the page behind, so tapping outside the pane
-   still dismisses the menu. */
+/* The backdrop stays transparent: the scrim element dims and
+   blurs the page behind, so the backdrop only needs to exist
+   to catch outside taps for light-dismiss. */
 .porto-mobile-menu::backdrop {
   background-color: transparent;
   transition:
@@ -420,6 +418,7 @@ details.porto-navbar__dropdown[open]::details-content {
   .porto-mobile-menu,
   .porto-mobile-menu::backdrop,
   .porto-mobile-menu .porto-mobile-menu__content,
+  .porto-mobile-menu__view,
   .porto-search-dialog,
   .porto-search-dialog::backdrop,
   .porto-diagram-dialog,

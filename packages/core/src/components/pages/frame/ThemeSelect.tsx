@@ -15,7 +15,7 @@ import { SiteIcon } from "../../SiteIcon.tsx";
  * own markup instead of the browser-native `<select>` popup. The
  * moon/sun/laptop icons render from the site's icon map.
  *
- * Two instances render on a page (navbar + mobile menu footer).
+ * Two instances render on a page (navbar + drawer header).
  * They stay in sync through the shared theme store in
  * `lib/theme.ts` (`useThemePreference`).
  *

@@ -102,9 +102,17 @@
 }
 
 .porto-sidebar ul ul li {
-  margin-inline-start: var(--porto-sidebar-item-padding-inline);
+  /* The guide line hangs from the middle of the parent row's
+     icon: the margin puts the border one row-padding plus half
+     the icon in from the parent's content edge, and the padding
+     gives back the same amount, so the text stays where it was. */
+  margin-inline-start: calc(
+    var(--porto-sidebar-item-padding-inline) + var(--porto-text-sm) / 2
+  );
   border-inline-start: 1px solid var(--porto-sidebar-guide-color);
-  padding-inline-start: var(--porto-sidebar-item-padding-inline);
+  padding-inline-start: calc(
+    var(--porto-sidebar-item-padding-inline) - var(--porto-text-sm) / 2
+  );
   --porto-sidebar-guide-color: var(--porto-color-hairline-light);
 }
 
@@ -158,7 +166,10 @@
    it used to be keyed on [data-open="true"], so every nested
    row jumped 2.4px sideways the instant its category was
    clicked — margin and padding have no transition, so the jump
-   landed before the fold even started. */
+   landed before the fold even started. The margin puts the
+   guide line on the middle of the parent row's icon, like the
+   general rule above; the padding keeps this level's deeper
+   total, so the text stays where it was. */
 .porto-sidebar__top-level
   > li
   > .porto-sidebar__folder
@@ -166,9 +177,12 @@
   > ul
   > li,
 .porto-sidebar__top-level > li:has(a[aria-current="page"]) > ul > li {
-  margin-inline-start: calc(var(--porto-sidebar-item-padding-inline) + 0.3rem);
+  margin-inline-start: calc(
+    var(--porto-sidebar-item-padding-inline) + var(--porto-text-sm) / 2
+  );
   padding-inline-start: calc(
-    var(--porto-sidebar-item-padding-inline) - 0.15rem
+    var(--porto-sidebar-item-padding-inline) + 0.15rem - var(--porto-text-sm) /
+      2
   );
 }
 .porto-sidebar__folder-panel > ul {

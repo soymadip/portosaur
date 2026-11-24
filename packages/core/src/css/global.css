@@ -334,6 +334,10 @@
   --porto-z-index-menu: 5;
   --porto-z-index-navbar: 10;
   --porto-z-index-skiplink: 20;
+  /* Above the navbar and the floating arrow, so the whole page
+     dims behind the open drawer. Below the top layer, so the
+     drawer and the dialogs still paint over it. */
+  --porto-z-index-scrim: 25;
 
   color-scheme: dark;
 }

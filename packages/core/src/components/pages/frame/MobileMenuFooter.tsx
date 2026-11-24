@@ -12,13 +12,13 @@ import {
 import { stripBase } from "../../../lib/pageUrl.ts";
 import { SiteIcon } from "../../SiteIcon.tsx";
 import { HashLink } from "../../HashLink.tsx";
-import { ThemeSelect } from "./ThemeSelect.tsx";
 
 /**
- * The mobile menu footer — the navbar links (which live outside the
- * sidebar tree on desktop) and the theme select, so mobile readers
- * can reach every nav destination from the popover, plus the
- * Portosaur version link.
+ * The mobile menu's main view — the navbar links (which live
+ * outside the sidebar tree on desktop), so mobile readers can
+ * reach every nav destination from the drawer, plus the
+ * Portosaur version link pinned to the bottom. The theme select
+ * lives in the drawer header instead.
  */
 export function MobileMenuFooter() {
   const config = usePortoConfig();
@@ -138,11 +138,6 @@ export function MobileMenuFooter() {
           </ul>
         </details>
       </nav>
-      {config.theme.showThemeSwitch && (
-        <div className="porto-mobile-preferences__theme-row">
-          <ThemeSelect />
-        </div>
-      )}
       {showProjectLink && (
         <a
           className="porto-mobile-preferences__version-link"

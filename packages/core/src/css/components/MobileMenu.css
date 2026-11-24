@@ -6,12 +6,15 @@
 
 /* The mobile navigation popover, shared by every page. On docs
    pages it also holds the sidebar tree and becomes the persistent
-   sidebar from 50rem up; on other pages it holds only the footer
-   (nav links, theme select, version link). The toggle lives in the
+   sidebar from 50rem up; on other pages it holds only the main
+   menu (nav links, version link). The toggle lives in the
    navbar and opens this popover via `popovertarget`. Below 50rem
-   the pane is a drawer: it parks off the right edge and slides in
-   0.25s (the transform transition lives in animations.css, with
-   the `@starting-style` entry). */
+   the pane is a full-height drawer: it covers the navbar, parks
+   off the right edge, and slides in 0.25s (the transform
+   transition lives in animations.css, with the `@starting-style`
+   entry). Inside, two views slide sideways between each other —
+   the main menu and, on docs pages, the tree (see the views
+   rules below). */
 .porto-mobile-menu {
   /* User agents apply opinionated styles to popovers; reset them. */
   border: unset;
@@ -21,7 +24,7 @@
 
   position: fixed;
   z-index: var(--porto-z-index-menu);
-  inset-block: var(--porto-nav-height) 0;
+  inset-block: 0 0;
   /* The UA popover stylesheet sets `inset: 0`, which leaves
      `inset-inline-start: 0` in place — with both inline sides
      set and a fixed width, the box is over-constrained and the
@@ -56,23 +59,21 @@
   transform: translateX(0);
 }
 
-/* The scrim: the frosted dim over the page below the navbar while
-   the mobile menu is open — the search backdrop's treatment
-   (black at 20% + 4px blur), so the page stays visible behind
-   frosted glass instead of going dark. A separate element because
-   the popover's ::backdrop covers the whole viewport including
-   the navbar, which stays bright. It never takes clicks
-   (pointer-events none), so taps pass through to the invisible
-   backdrop and light-dismiss still works. Shown via
-   body:has(:popover-open), the same hook the hamburger X uses;
-   the desktop persistent sidebar is never a popover, so the
-   scrim never shows there. */
+/* The scrim: the frosted dim over the page while the mobile
+   menu is open — the search backdrop's treatment (black at 20%
+   + 4px blur), so the page stays visible behind frosted glass
+   instead of going dark. It covers the whole viewport including
+   the navbar, which sits behind the full-height drawer. It never
+   takes clicks (pointer-events none), so taps pass through to
+   the invisible backdrop and light-dismiss still works. Shown
+   via body:has(:popover-open), the same hook the hamburger X
+   uses; the desktop persistent sidebar is never a popover, so
+   the scrim never shows there. */
 .porto-mobile-menu__scrim {
   position: fixed;
-  inset-block-start: var(--porto-nav-height);
-  inset-block-end: 0;
+  inset-block: 0;
   inset-inline: 0;
-  z-index: var(--porto-z-index-menu);
+  z-index: var(--porto-z-index-scrim);
   background-color: hsla(0, 0%, 0%, 0.2);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
@@ -118,6 +119,92 @@ body:has(#porto__sidebar:popover-open) .porto-mobile-menu__scrim {
   }
 }
 
+/* The drawer's own header, mobile only — the full-height pane
+   covers the navbar, so the title, theme toggle, and close
+   button live here instead, the old site's layout (title left,
+   theme + close right). Its height is the navbar height, so it
+   lines up with the bar it covers, and the top padding clears
+   the notch on phones that have one. No bottom border, like
+   the navbar on mobile. */
+.porto-mobile-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--porto-nav-height);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-inline: 0.5rem 0.3rem;
+}
+.porto-mobile-menu__header .porto-site-title {
+  flex: 1;
+  min-width: 0;
+}
+/* 44px tap targets: the theme trigger measured 37px in the
+   footer, and the close button is an icon. */
+.porto-mobile-menu__header .porto-dropdown__trigger {
+  min-height: 44px;
+}
+.porto-mobile-menu__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 0;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  color: var(--porto-color-gray-1);
+  cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.porto-mobile-menu__close:hover {
+  color: var(--porto-color-white);
+}
+
+/* "Back to main menu" — the bar at the top of the tree view
+   that slides back to the main menu. Full-width, like the old
+   site's: it bleeds past the view's side padding, on the
+   secondary surface, with a hairline below it and a gap to
+   the tree. The width is explicit because a <button>
+   shrink-wraps to its text even with display: block
+   (measured 187px without it). */
+.porto-mobile-menu__back {
+  display: block;
+  width: calc(100% + 0.6rem);
+  margin-inline: -0.3rem;
+  margin-block-end: 1rem;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-block-end: 1px solid var(--porto-color-hairline);
+  background-color: var(--porto-color-gray-6);
+  color: var(--porto-color-gray-1);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.porto-mobile-menu__back:hover {
+  color: var(--porto-color-white);
+}
+
+/* The two-view drawer is mobile only: at desktop the header
+   and the back bar are gone, the track and the tree view
+   dissolve (display: contents) so the tree is a direct child
+   of the content column exactly as before, and the main-menu
+   view is gone (its footer hides at desktop anyway). */
+@media (min-width: 50rem) {
+  .porto-mobile-menu__header,
+  .porto-mobile-menu__back {
+    display: none;
+  }
+  .porto-mobile-menu__views,
+  .porto-mobile-menu__view--secondary {
+    display: contents;
+  }
+  .porto-mobile-menu__view--primary {
+    display: none;
+  }
+}
+
 /* Horizontal padding is 0.3rem each side, not the 1rem sidebar
    gutter: at 1rem every entry sat one nest-level in from the pane
    edge (a nest level is 1rem: 0.5rem margin + 0.5rem padding on
@@ -135,14 +222,69 @@ body:has(#porto__sidebar:popover-open) .porto-mobile-menu__scrim {
   gap: 1rem;
 }
 
-/* The footer slot stretches to fill the pane, so the version link
-   can pin to the bottom (its own margin does the pinning). On
-   pages with a long tree there is no free space and the footer
-   sits right below the tree, as before. */
+/* The footer slot stretches to fill the main-menu view, so the
+   version link can pin to the bottom (its own margin does the
+   pinning). */
 .porto-mobile-menu__footer-slot {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+/* The two-view drawer, mobile only. The pane never scrolls —
+   each view scrolls on its own, so the main menu's version
+   link pins to the viewport bottom even on docs pages with a
+   long tree. The views sit side by side in a clipped track and
+   slide together: showing the tree moves both panels left, so
+   the tree comes in from the right, the old site's direction.
+   The content wrapper dissolves (display: contents) so the
+   header and the track are the pane's direct children and the
+   track height (pane height minus the header) resolves against
+   the pane. This block sits after the content rule above on
+   purpose — at equal specificity the later `display: flex`
+   would win over `display: contents` and the track would size
+   to its content instead of the pane. */
+@media (max-width: 49.999rem) {
+  .porto-mobile-menu {
+    overflow: hidden;
+  }
+  .porto-mobile-menu__content {
+    display: contents;
+  }
+  .porto-mobile-menu__views {
+    display: flex;
+    overflow: hidden;
+    height: calc(100% - var(--porto-nav-height));
+  }
+  .porto-mobile-menu__view {
+    flex: 0 0 100%;
+    min-width: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transition: transform 0.25s ease;
+  }
+  .porto-mobile-menu__view--primary {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0.3rem 0;
+  }
+  .porto-mobile-menu__view--secondary {
+    padding: 0 0.3rem;
+  }
+  /* No "Docs" / "Notes" heading above the tree: the tree has
+     its own view now, with the back bar above it, so the label
+     is redundant. The whole title row goes (its 1rem bottom
+     margin with it), leaving the back bar's own 1rem gap.
+     Mobile only — the desktop sidebar keeps its title. */
+  .porto-mobile-menu__view--secondary .porto-sidebar-title-row {
+    display: none;
+  }
+  .porto-mobile-menu--show-secondary .porto-mobile-menu__view {
+    transform: translateX(-100%);
+  }
+  html[dir="rtl"] .porto-mobile-menu--show-secondary .porto-mobile-menu__view {
+    transform: translateX(100%);
+  }
 }
 
 /* Lock body scroll while the menu popover is open (mobile only —

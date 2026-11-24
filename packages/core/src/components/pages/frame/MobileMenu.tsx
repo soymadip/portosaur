@@ -16,22 +16,30 @@ import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { buttonClass } from "../../Button.tsx";
 import { SiteIcon } from "../../SiteIcon.tsx";
 import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
+import { SiteTitle } from "./SiteTitle.tsx";
+import { ThemeSelect } from "./ThemeSelect.tsx";
 
 /**
  * MobileMenu — the mobile navigation popover, shared by every page.
  *
- * On docs pages (`hasSidebar`) the popover also holds the sidebar
- * tree (the `children` slot) and becomes the persistent sidebar
- * from 50rem up. On other pages it holds only the footer (nav
- * links, theme select, version link). The toggle lives in the
- * navbar (right cluster, mobile only) and opens this popover via
- * `popovertarget` — no JavaScript needed to open/close. This
- * component only resets the popover attribute on desktop
- * (persistent variant), traps focus while the menu is open, syncs
- * the navbar toggle button's `aria-expanded` on open/close, and
- * closes the menu the moment a link inside it is tapped (before
- * the navigation fetch — the user gets immediate feedback instead
- * of staring at the open menu while the next page loads).
+ * Two views, Docusaurus-style: the main menu (nav links, version
+ * link) and, on docs pages (`hasSidebar`), the sidebar tree with
+ * a "Back to main menu" bar above it. The views slide sideways
+ * between each other; docs pages open on the tree, other pages
+ * on the main menu, and closing the drawer resets to the page
+ * default. The drawer is full-height with its own header (site
+ * title, theme select, close button), since it covers the
+ * navbar. From 50rem up the pane becomes the persistent sidebar
+ * and the views dissolve — the tree shows directly, as before.
+ * The toggle lives in the navbar (right cluster, mobile only)
+ * and opens this popover via `popovertarget` — no JavaScript
+ * needed to open/close. This component only resets the popover
+ * attribute on desktop (persistent variant), traps focus while
+ * the menu is open, syncs the navbar toggle button's
+ * `aria-expanded` on open/close, and closes the menu the moment
+ * a link inside it is tapped (before the navigation fetch — the
+ * user gets immediate feedback instead of staring at the open
+ * menu while the next page loads).
  *
  * The popover attribute is managed imperatively (like the Astro
  * build's `resetPopoverAttribute`): React renders `popover="auto"`
@@ -155,6 +163,13 @@ export function MobileMenu({
   );
   const [hovered, setHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  // Which drawer view shows: the tree on docs pages, the main
+  // menu elsewhere. Reset to the page default whenever the
+  // drawer closes or the page changes (below) — without the
+  // reset, a docs page left on the main menu would reopen on it,
+  // and a navigation to a tree-less page would leave the main
+  // menu slid off-canvas with nothing in its place.
+  const [showSecondary, setShowSecondary] = useState(hasSidebar);
   // True once the client has taken the sidebar's default state
   // over from the first-paint markers (below) — this component's
   // own global marker unmounts with it.
@@ -177,6 +192,12 @@ export function MobileMenu({
     const resetPopoverAttribute = () => {
       const desktop = mediaQuery.matches;
       setIsDesktop(desktop);
+      // Crossing the breakpoint resets the drawer view: the
+      // desktop sidebar shows the tree directly, and a drawer
+      // reopened after a round trip starts on the page default
+      // (removing the popover attribute fires no toggle event,
+      // so the close reset below never runs for a resize).
+      setShowSecondary(hasSidebar);
       const persistent = hasSidebar && desktop;
       if (persistent) {
         pane.removeAttribute("popover");
@@ -208,6 +229,12 @@ export function MobileMenu({
     const onToggle = (event: Event) => {
       const open = (event as ToggleEvent).newState === "open";
       trapFocus(open);
+      // Closing resets the view to the page default, so the
+      // drawer reopens on the tree (docs pages) or the main
+      // menu (other pages), like the old site.
+      if (!open) {
+        setShowSecondary(hasSidebar);
+      }
       // Announce the menu state: the navbar toggle button
       // carries `aria-expanded`, and the popover API doesn't
       // update it — so sync it here on every toggle.
@@ -241,6 +268,15 @@ export function MobileMenu({
       pane.removeEventListener("click", onClick);
     };
   }, [hasSidebar]);
+
+  // A navigation resets the view too: a link tap closes the
+  // drawer (handled above), but a back/forward step leaves it
+  // open over the new page — without this, a docs page left on
+  // the main menu would keep it after navigating to another
+  // docs page, and a tree-less page would show an empty drawer.
+  useEffect(() => {
+    setShowSecondary(hasSidebar);
+  }, [pathname, hasSidebar]);
 
   // The collapse state lives on <html> as classes — the pane
   // slide, the content expansion, the floating panel and the
@@ -470,11 +506,15 @@ export function MobileMenu({
           role="dialog"
           aria-modal="true"
           aria-label={hasSidebar ? "Docs sidebar" : "Mobile navigation"}
-          className={
-            hasSidebar
-              ? "porto-mobile-menu porto-mobile-menu--persistent"
-              : "porto-mobile-menu"
-          }
+          className={[
+            "porto-mobile-menu",
+            hasSidebar ? "porto-mobile-menu--persistent" : "",
+            showSecondary && hasSidebar
+              ? "porto-mobile-menu--show-secondary"
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           // The collapsed pane is inert (except while peeked) so
           // its links can't be tabbed to off-screen — desktop only,
           // where the collapse exists at all.
@@ -482,25 +522,64 @@ export function MobileMenu({
           onPointerEnter={onPeekEnter}
           onPointerLeave={onPeekLeave}
         >
-          <div
-            className={
-              hasSidebar
-                ? "porto-mobile-menu__content"
-                : "porto-mobile-menu__content porto-mobile-menu__content--no-sidebar"
-            }
-          >
-            {children}
-            <div className="porto-mobile-menu__footer-slot md:hidden">
-              <MobileMenuFooter />
+          {/* The drawer's own header, mobile only — the
+            full-height pane covers the navbar, so the title,
+            theme toggle, and close button live here instead,
+            the old site's layout. The close button hides the
+            popover directly, no JavaScript needed. */}
+          <div className="porto-mobile-menu__header">
+            <SiteTitle />
+            {config.theme.showThemeSwitch && <ThemeSelect />}
+            <button
+              type="button"
+              className="porto-mobile-menu__close"
+              popoverTarget="porto__sidebar"
+              popoverTargetAction="hide"
+              aria-label="Close menu"
+            >
+              <SiteIcon icon="lu:x" size="20px" strokeWidth={2.5} />
+            </button>
+          </div>
+          <div className="porto-mobile-menu__content">
+            {/* Two views, Docusaurus-style: the main menu first,
+              the tree second. The show-secondary class slides
+              both panels left, so the tree comes in from the
+              right. The hidden view is inert (mobile only — at
+              desktop the views dissolve and the tree shows
+              directly, so nothing may stay inert there). */}
+            <div className="porto-mobile-menu__views">
+              <div
+                className="porto-mobile-menu__view porto-mobile-menu__view--primary"
+                inert={showSecondary && hasSidebar && !isDesktop}
+              >
+                <div className="porto-mobile-menu__footer-slot md:hidden">
+                  <MobileMenuFooter />
+                </div>
+              </div>
+              {hasSidebar && (
+                <div
+                  className="porto-mobile-menu__view porto-mobile-menu__view--secondary"
+                  inert={!showSecondary && !isDesktop}
+                >
+                  <button
+                    type="button"
+                    className="porto-mobile-menu__back"
+                    onClick={() => setShowSecondary(false)}
+                  >
+                    ← Back to main menu
+                  </button>
+                  {children}
+                </div>
+              )}
             </div>
           </div>
         </div>
-        {/* The scrim: dims + blurs the page below the navbar while
-          the menu is open (the search backdrop's treatment). It is
-          a separate element because the popover's ::backdrop covers
-          the whole viewport including the navbar, which stays
-          bright. It never takes clicks, so taps pass through to
-          the backdrop and light-dismiss still works. */}
+        {/* The scrim: dims + blurs the page while the menu is
+          open (the search backdrop's treatment), over the whole
+          viewport including the navbar, which sits behind the
+          full-height drawer. It never takes clicks, so taps
+          pass through to the backdrop and light-dismiss still
+          works. */}
         <div className="porto-mobile-menu__scrim" aria-hidden="true" />
         {hasSidebar && (
           <>
