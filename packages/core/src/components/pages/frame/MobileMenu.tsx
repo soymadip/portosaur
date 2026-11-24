@@ -482,9 +482,15 @@ export function MobileMenu({
           onPointerEnter={onPeekEnter}
           onPointerLeave={onPeekLeave}
         >
-          <div className="porto-mobile-menu__content">
+          <div
+            className={
+              hasSidebar
+                ? "porto-mobile-menu__content"
+                : "porto-mobile-menu__content porto-mobile-menu__content--no-sidebar"
+            }
+          >
             {children}
-            <div className="md:hidden">
+            <div className="porto-mobile-menu__footer-slot md:hidden">
               <MobileMenuFooter />
             </div>
           </div>

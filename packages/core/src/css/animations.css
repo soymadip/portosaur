@@ -381,23 +381,36 @@ details.porto-dropdown[open] .porto-dropdown__menu {
 /* The mobile footer's inline nav accordions: the same 200ms
    fade + slide, on the `::details-content` wrapper — in-flow
    content has nothing to paint over, so the wrapper transform
-   is harmless here. */
+   is harmless here. The fold also collapses the height
+   (`block-size: 0` + `overflow: hidden`): without it the
+   closed content stays invisible but keeps its layout space,
+   leaving a dead gap below the summary. Same trick as the
+   markdown Details fold and the file tree. */
+details.porto-navbar__dropdown {
+  /* Lets `block-size: 0 -> auto` interpolate for the fold below. */
+  interpolate-size: allow-keywords;
+}
 details.porto-navbar__dropdown::details-content {
+  overflow: hidden;
+  block-size: 0;
   content-visibility: visible;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-4px);
   transition:
+    block-size 200ms ease-out,
     opacity 0.2s ease,
     transform 0.2s ease,
     visibility 0s 0.2s;
   transition-behavior: allow-discrete;
 }
 details.porto-navbar__dropdown[open]::details-content {
+  block-size: auto;
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
   transition:
+    block-size 200ms ease-out,
     opacity 0.2s ease,
     transform 0.2s ease,
     visibility 0s;

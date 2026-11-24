@@ -6,9 +6,20 @@
 .porto-mobile-preferences {
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 0.5rem;
   border-top: 1px solid var(--porto-color-gray-6);
   padding: 0.5rem 0;
+}
+
+/* No sidebar tree above the footer (home pages): the top border
+   only exists to separate the footer from the tree, so without
+   one it is a stray line at the top of the drawer. Drop it and
+   the top padding with it, so the first link starts where the
+   tree would. */
+.porto-mobile-menu__content--no-sidebar .porto-mobile-preferences {
+  border-top: none;
+  padding-top: 0;
 }
 
 .porto-mobile-nav {
@@ -81,6 +92,7 @@
   display: block;
   border-top: 1px solid var(--porto-color-gray-6);
   padding-top: 0.75rem;
+  margin-block-start: auto;
   text-align: center;
   font-size: var(--porto-text-sm);
   text-decoration: none;

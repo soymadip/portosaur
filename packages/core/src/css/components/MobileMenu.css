@@ -135,6 +135,16 @@ body:has(#porto__sidebar:popover-open) .porto-mobile-menu__scrim {
   gap: 1rem;
 }
 
+/* The footer slot stretches to fill the pane, so the version link
+   can pin to the bottom (its own margin does the pinning). On
+   pages with a long tree there is no free space and the footer
+   sits right below the tree, as before. */
+.porto-mobile-menu__footer-slot {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 /* Lock body scroll while the menu popover is open (mobile only —
    the persistent desktop sidebar is not a popover). */
 body:has(#porto__sidebar:popover-open) {
