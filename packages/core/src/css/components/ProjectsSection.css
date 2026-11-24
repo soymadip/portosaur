@@ -145,7 +145,7 @@
   overflow: hidden;
   background-color: var(--porto-color-gray-6);
   border: 1px solid var(--porto-color-card-border);
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,

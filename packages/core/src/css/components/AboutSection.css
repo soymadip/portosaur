@@ -50,7 +50,7 @@
   display: flex;
   background-color: var(--porto-color-gray-6);
   border: 1px solid var(--porto-color-card-border);
-  border-radius: 24px;
+  border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: var(--porto-shadow-md);
   min-height: 461px;
