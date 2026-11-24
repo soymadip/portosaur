@@ -1,5 +1,6 @@
 import { PAGE_TITLE_ID } from "../../../lib/docPage.ts";
 import type { SizedImage, SocialLink } from "../../../lib/portfolio-home.ts";
+import { HashLink } from "../../HashLink.tsx";
 import { HeroImage } from "../HeroImage.tsx";
 import { SocialLinks } from "./SocialLinks.tsx";
 
@@ -59,13 +60,13 @@ export function HeroSection({
           {hero.desc && <p className="porto-hero__desc">{hero.desc}</p>}
           <div className="porto-hero__actions">
             {nextId && (
-              <a
+              <HashLink
                 href={`#${nextId}`}
                 className="porto-hero__cta"
-                aria-label="Learn more about me"
+                ariaLabel="Learn more about me"
               >
                 {hero.learnMoreButtonTxt || "Learn More"}
-              </a>
+              </HashLink>
             )}
             <SocialLinks links={hero.social} />
           </div>

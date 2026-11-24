@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePortoConfig } from "../../../lib/porto-context.tsx";
+import {
+  scrollBehavior,
+  scrollToSection,
+} from "../../../lib/section-scroll.ts";
 import { SiteIcon } from "../../SiteIcon.tsx";
 
 /** A section counts as reached once its top is within this
- * distance of the viewport top. Anchor jumps and scrollIntoView
- * land with the heading about 144px down (the scroll padding
- * plus the scroll margin), so a smaller threshold re-selects
- * the section the reader is already on and the arrow appears
- * dead. */
+ * distance of the viewport top. Downward jumps land the section
+ * flush at the top (offset 0) and upward ones just below the
+ * navbar (~72px), so either landing counts as reached and the
+ * arrow moves on to the next section instead of re-selecting
+ * the one the reader is already on. */
 const REACHED_WITHIN_PX = 200;
 
 /**
@@ -19,6 +24,7 @@ const REACHED_WITHIN_PX = 200;
  * points down.
  */
 export function NavArrow({ sections }: { sections: string[] }) {
+  const config = usePortoConfig();
   const [direction, setDirection] = useState<"down" | "up">("down");
   const [isVisible, setIsVisible] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -57,7 +63,7 @@ export function NavArrow({ sections }: { sections: string[] }) {
 
   const handleClick = () => {
     if (direction === "up") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
       return;
     }
     const windowTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -76,20 +82,20 @@ export function NavArrow({ sections }: { sections: string[] }) {
     if (nextSectionId === null) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
-        behavior: "smooth",
+        behavior: scrollBehavior(),
       });
       return;
     }
     if (nextSectionId === sections[sections.length - 1]) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
-        behavior: "smooth",
+        behavior: scrollBehavior(),
       });
       return;
     }
-    document
-      .getElementById(nextSectionId)
-      ?.scrollIntoView({ behavior: "smooth" });
+    scrollToSection(nextSectionId, {
+      hideOnScroll: config.theme.hideNavbarOnScroll,
+    });
   };
 
   if (sections.length <= 1) {
