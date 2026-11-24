@@ -62,12 +62,18 @@
   }
 }
 
-/* Mobile menu: the pane fades in 0.25s, its content slides down 8px
- * (ported from VitePress's VPNavScreen). Pure CSS via
- * `@starting-style` + `allow-discrete` — no JS animation state. */
+/* Mobile menu: the drawer slides in from the right edge in
+ * 0.25s, one panel — no fade, no separate content slide. Pure
+ * CSS via `@starting-style` + `allow-discrete` — no JS animation
+ * state. The closed state is the base rule's off-canvas park
+ * (MobileMenu.css), so the exit slides back out while `display`
+ * holds the pane rendered. The pane's `@starting-style` lives
+ * in MobileMenu.css, next to its resting `transform` rules —
+ * split across stylesheets, Chrome skips the entry transition.
+ */
 .porto-mobile-menu {
   transition:
-    opacity 0.25s ease,
+    transform 0.25s ease,
     display 0.25s ease allow-discrete;
 }
 /* The backdrop stays transparent: the pane itself is opaque and
@@ -81,19 +87,9 @@
     opacity 0.25s ease,
     display 0.25s ease allow-discrete;
 }
-.porto-mobile-menu .porto-mobile-menu__content {
-  /* The content's top padding never changes during the
-     collapse — the title rides the pane's top inset down with
-     it — so only the popover's transform transition lives here. */
-  transition: transform 0.25s ease;
-}
 @starting-style {
-  .porto-mobile-menu,
   .porto-mobile-menu::backdrop {
     opacity: 0;
-  }
-  .porto-mobile-menu .porto-mobile-menu__content {
-    transform: translateY(-8px);
   }
 }
 

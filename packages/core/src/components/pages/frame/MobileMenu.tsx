@@ -39,10 +39,11 @@ import { MobileMenuFooter } from "./MobileMenuFooter.tsx";
  * on viewport changes. React never re-applies an unchanged prop,
  * so the imperative change survives re-renders.
  *
- * Open/close animation — ported from VitePress's VPNavScreen:
- * the pane fades (opacity 0.25s) while its content slides down
- * 8px into place, and reverses on close. Pure CSS —
- * `@starting-style` + `allow-discrete` (see animations.css).
+ * Open/close animation — the drawer slides in from the right
+ * edge (transform 0.25s), one panel with no fade. Pure CSS —
+ * `@starting-style` + `allow-discrete` (see animations.css);
+ * the closed state is the base rule's off-canvas park, so the
+ * exit slides back out the same way.
  *
  * Desktop sidebar collapse — ported from Fumadocs' docs layout:
  * the tree's title row holds a collapse trigger (Lucide's
@@ -488,6 +489,13 @@ export function MobileMenu({
             </div>
           </div>
         </div>
+        {/* The scrim: dims + blurs the page below the navbar while
+          the menu is open (the search backdrop's treatment). It is
+          a separate element because the popover's ::backdrop covers
+          the whole viewport including the navbar, which stays
+          bright. It never takes clicks, so taps pass through to
+          the backdrop and light-dismiss still works. */}
+        <div className="porto-mobile-menu__scrim" aria-hidden="true" />
         {hasSidebar && (
           <>
             {/* The floating way back: visible only while the

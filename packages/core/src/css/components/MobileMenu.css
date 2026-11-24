@@ -8,9 +8,10 @@
    pages it also holds the sidebar tree and becomes the persistent
    sidebar from 50rem up; on other pages it holds only the footer
    (nav links, theme select, version link). The toggle lives in the
-   navbar and opens this popover via `popovertarget`. The open/close
-   animation (VitePress's nav screen — pane fades 0.25s, content
-   slides down 8px) lives in animations.css. */
+   navbar and opens this popover via `popovertarget`. Below 50rem
+   the pane is a drawer: it parks off the right edge and slides in
+   0.25s (the transform transition lives in animations.css, with
+   the `@starting-style` entry). */
 .porto-mobile-menu {
   /* User agents apply opinionated styles to popovers; reset them. */
   border: unset;
@@ -21,22 +22,100 @@
   position: fixed;
   z-index: var(--porto-z-index-menu);
   inset-block: var(--porto-nav-height) 0;
-  inset-inline-start: 0;
-  width: 100%;
-  background-color: var(--porto-color-black);
+  /* The UA popover stylesheet sets `inset: 0`, which leaves
+     `inset-inline-start: 0` in place — with both inline sides
+     set and a fixed width, the box is over-constrained and the
+     start side wins, pinning the drawer left. Unset it so the
+     drawer anchors to the inline end. */
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  /* Drawer width: most of the phone, capped so a strip of the
+     page stays visible beside it (390px phone: 320px drawer,
+     70px of page; 360px phone: 306px, 54px of page). */
+  width: min(85vw, 20rem);
+  /* Same separator as the desktop sidebar's edge — the pane is
+     opaque over the page, and the backdrop is transparent,
+     so the edge needs its own line. */
+  border-inline-start: 1px solid var(--porto-color-hairline);
+  background-color: var(--porto-color-bg);
   overflow-y: auto;
   /* Keep scrolls that start over the sidebar inside it: without
      this, wheeling past either end scrolls the page behind. */
   overscroll-behavior: contain;
-  opacity: 0;
+  /* Parked off the right edge while closed; `:popover-open`
+     below slides it in, and the exit slides it back out while
+     `display`/`overlay` hold it rendered (allow-discrete). */
+  transform: translateX(100%);
   transition:
-    opacity 0.25s,
+    transform 0.25s ease,
     display 0.25s allow-discrete,
     overlay 0.25s allow-discrete;
 }
 
 .porto-mobile-menu:popover-open {
+  transform: translateX(0);
+}
+
+/* The scrim: the frosted dim over the page below the navbar while
+   the mobile menu is open — the search backdrop's treatment
+   (black at 20% + 4px blur), so the page stays visible behind
+   frosted glass instead of going dark. A separate element because
+   the popover's ::backdrop covers the whole viewport including
+   the navbar, which stays bright. It never takes clicks
+   (pointer-events none), so taps pass through to the invisible
+   backdrop and light-dismiss still works. Shown via
+   body:has(:popover-open), the same hook the hamburger X uses;
+   the desktop persistent sidebar is never a popover, so the
+   scrim never shows there. */
+.porto-mobile-menu__scrim {
+  position: fixed;
+  inset-block-start: var(--porto-nav-height);
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: var(--porto-z-index-menu);
+  background-color: hsla(0, 0%, 0%, 0.2);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s allow-discrete;
+}
+body:has(#porto__sidebar:popover-open) .porto-mobile-menu__scrim {
   opacity: 1;
+  visibility: visible;
+}
+
+/* Right-to-left: the drawer anchors to the left edge
+   (`inset-inline-end`), so it parks off the left instead.
+   Mobile only — the desktop persistent pane resets its
+   transform in the 50rem block below, and this higher-
+   specificity selector would beat that reset. */
+@media (max-width: 49.999rem) {
+  html[dir="rtl"] .porto-mobile-menu {
+    transform: translateX(-100%);
+  }
+}
+
+/* The entry start: without this, the first frame after the
+   popover opens would already sit at rest (translateX(0)) and
+   the drawer would appear instead of sliding in. The selector
+   MUST include `:popover-open` — with a bare selector Chrome
+   skips the entry transition entirely (proven by minimal repro:
+   bare `transform`, bare `translate`, and bare + `overlay` all
+   render at rest, only `:popover-open` slides). This also MUST
+   live in this file, next to the resting `transform` rules
+   above — split across stylesheets, Chrome skips the entry
+   transition too (the search dialog's entry slide proved it). */
+@starting-style {
+  .porto-mobile-menu:popover-open {
+    transform: translateX(100%);
+  }
+  html[dir="rtl"] .porto-mobile-menu:popover-open {
+    transform: translateX(-100%);
+  }
 }
 
 /* Horizontal padding is 0.3rem each side, not the 1rem sidebar
@@ -54,11 +133,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  transition: transform 0.25s ease;
-}
-
-.porto-mobile-menu[popover]:not(:popover-open) .porto-mobile-menu__content {
-  transform: translateY(-8px);
 }
 
 /* Lock body scroll while the menu popover is open (mobile only —
@@ -83,12 +157,19 @@ body:has(#porto__sidebar:popover-open) {
   .porto-mobile-menu--persistent {
     display: block;
     width: var(--porto-sidebar-width);
+    /* The base rule anchors the mobile drawer to the inline
+       end; the desktop sidebar goes back to the start side. */
+    inset-inline-start: 0;
+    inset-inline-end: auto;
     background-color: var(--porto-color-bg-sidebar);
     /* Same separator as the TOC panel's left border. */
     border-inline-end: 1px solid var(--porto-color-hairline);
     /* Not a popover at desktop widths, so it never matches
-       `:popover-open` — keep it fully opaque. */
-    opacity: 1;
+       `:popover-open` — reset the mobile drawer's off-canvas
+       park, or the sidebar would sit hidden off the right edge.
+       The collapse/peek rules below still override this with
+       their own transforms. */
+    transform: none;
     /* OG Docusaurus pattern: the sidebar is full-height and its
        top navbar-height slice sits hidden behind the navbar (the
        navbar paints above it, z-index 10 over 5). The slice is
