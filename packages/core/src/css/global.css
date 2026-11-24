@@ -436,6 +436,20 @@ html {
      the :has rule below — the TOC only exists on those pages, so
      other pages must not pay its 3rem. */
   scroll-padding-top: calc(var(--porto-nav-height) + 1rem);
+  /* Anchor jumps glide instead of snapping — the portfolio
+     "Learn More" button and the navbar section links are plain
+     anchors, so this is what moves the reader smoothly. */
+  scroll-behavior: smooth;
+}
+
+/* Reduced motion: anchor jumps snap instead of gliding. This
+ * sits here, next to the smooth rule, rather than in
+ * reduced-motion.css — that file is imported above this rule
+ * and would lose at equal specificity. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html:has(.porto-mobile-toc) {

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
@@ -12,6 +11,7 @@ import {
 } from "../../../lib/navbar.ts";
 import { stripBase } from "../../../lib/pageUrl.ts";
 import { SiteIcon } from "../../SiteIcon.tsx";
+import { HashLink } from "../../HashLink.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
 
 /**
@@ -58,13 +58,13 @@ export function MobileMenuFooter() {
                     {item.label}
                   </a>
                 ) : (
-                  <Link
+                  <HashLink
                     href={item.href}
                     className={item.active ? "active" : undefined}
                     prefetch={item.current ? false : undefined}
                   >
                     {item.label}
-                  </Link>
+                  </HashLink>
                 )}
               </li>
             ))}
@@ -86,14 +86,14 @@ export function MobileMenuFooter() {
       );
     }
     return (
-      <Link
+      <HashLink
         key={key}
         href={entry.href}
         className={entry.active ? "active" : undefined}
         prefetch={entry.current ? false : undefined}
       >
         {entry.label}
-      </Link>
+      </HashLink>
     );
   };
 
@@ -125,13 +125,13 @@ export function MobileMenuFooter() {
                     {item.label}
                   </a>
                 ) : (
-                  <Link
+                  <HashLink
                     href={item.href}
                     className={item.active ? "active" : undefined}
                     prefetch={item.current ? false : undefined}
                   >
                     {item.label}
-                  </Link>
+                  </HashLink>
                 )}
               </li>
             ))}

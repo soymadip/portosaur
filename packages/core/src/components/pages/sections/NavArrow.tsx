@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { SiteIcon } from "../../SiteIcon.tsx";
 
+/** A section counts as reached once its top is within this
+ * distance of the viewport top. Anchor jumps and scrollIntoView
+ * land with the heading about 144px down (the scroll padding
+ * plus the scroll margin), so a smaller threshold re-selects
+ * the section the reader is already on and the arrow appears
+ * dead. */
+const REACHED_WITHIN_PX = 200;
+
 /**
  * NavArrow — the floating arrow button at the bottom center of
  * the portfolio home. It appears once the reader has scrolled a
@@ -60,7 +68,7 @@ export function NavArrow({ sections }: { sections: string[] }) {
         continue;
       }
       const absoluteTop = element.getBoundingClientRect().top + windowTop;
-      if (absoluteTop > windowTop + 100) {
+      if (absoluteTop > windowTop + REACHED_WITHIN_PX) {
         nextSectionId = id;
         break;
       }

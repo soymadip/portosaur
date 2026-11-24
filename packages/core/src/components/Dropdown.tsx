@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Fragment,
   useCallback,
@@ -10,6 +9,7 @@ import {
 } from "react";
 import { pageHref } from "../lib/pageUrl.ts";
 import { buttonClass } from "./Button.tsx";
+import { HashLink } from "./HashLink.tsx";
 import { SiteIcon } from "./SiteIcon.tsx";
 
 /**
@@ -45,7 +45,7 @@ export type DropdownItem =
   | {
       id?: string;
       label: string;
-      /** An internal page path — rendered with Next.js `<Link>`. */
+      /** An internal page path — rendered with `HashLink`. */
       to?: string;
       /** A full URL or absolute path — external ones open a new tab. */
       href?: string;
@@ -101,7 +101,7 @@ function renderItem(
   if (item.to !== undefined) {
     return (
       <li key={key}>
-        <Link
+        <HashLink
           href={pageHref(item.to)}
           className={className}
           title={item.desc}
@@ -109,7 +109,7 @@ function renderItem(
           onClick={item.onClick}
         >
           {content}
-        </Link>
+        </HashLink>
       </li>
     );
   }
@@ -132,7 +132,7 @@ function renderItem(
     }
     return (
       <li key={key}>
-        <Link
+        <HashLink
           href={item.href}
           className={className}
           title={item.desc}
@@ -140,7 +140,7 @@ function renderItem(
           onClick={item.onClick}
         >
           {content}
-        </Link>
+        </HashLink>
       </li>
     );
   }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import {
@@ -11,6 +10,7 @@ import {
 import { stripBase } from "../../../lib/pageUrl.ts";
 import { usePortoConfig } from "../../../lib/porto-context.tsx";
 import { Dropdown } from "../../Dropdown.tsx";
+import { HashLink } from "../../HashLink.tsx";
 import { SearchDialog } from "./SearchDialog.tsx";
 import { SiteTitle } from "./SiteTitle.tsx";
 import { ThemeSelect } from "./ThemeSelect.tsx";
@@ -125,14 +125,14 @@ export function Navbar({
       );
     }
     return (
-      <Link
+      <HashLink
         key={key}
         className={entry.active ? "porto-nav-link active" : "porto-nav-link"}
         href={entry.href}
         prefetch={entry.current ? false : undefined}
       >
         {entry.label}
-      </Link>
+      </HashLink>
     );
   };
 
