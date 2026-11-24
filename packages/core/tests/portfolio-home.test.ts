@@ -45,7 +45,7 @@ describe("isResumeFile", () => {
     expect(isResumeFile("https://example.com/cv.pdf")).toBe(true);
   });
 
-  test("\"none\" and blanks do not", () => {
+  test('"none" and blanks do not', () => {
     expect(isResumeFile("none")).toBe(false);
     expect(isResumeFile(" None ")).toBe(false);
     expect(isResumeFile("")).toBe(false);

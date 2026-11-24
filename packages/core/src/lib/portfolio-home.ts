@@ -69,8 +69,8 @@ export function bioParagraphs(bio: unknown): string[] {
   if (!Array.isArray(bio)) {
     return [];
   }
-  return bio.filter((paragraph): paragraph is string =>
-    typeof paragraph === "string",
+  return bio.filter(
+    (paragraph): paragraph is string => typeof paragraph === "string",
   );
 }
 
@@ -219,9 +219,9 @@ function isEmailLink(link: {
 
 /** The contact links with email first, everything else in
  * config order. A stable sort, so equal links keep their order. */
-export function sortEmailFirst<T extends { url?: string; icon?: string; name?: string }>(
-  links: T[],
-): T[] {
+export function sortEmailFirst<
+  T extends { url?: string; icon?: string; name?: string },
+>(links: T[]): T[] {
   return [...links].sort((a, b) => {
     const emailA = isEmailLink(a);
     const emailB = isEmailLink(b);
