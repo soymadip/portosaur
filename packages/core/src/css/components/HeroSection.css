@@ -245,7 +245,7 @@
    centers underneath it. */
 @media (max-width: 768px) {
   .porto-hero-section {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--porto-nav-height));
     padding: 1rem 0 3rem;
     box-sizing: border-box;
   }
@@ -346,7 +346,7 @@
 
 @media (max-width: 480px) {
   .porto-hero-section {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--porto-nav-height));
     padding: 0.5rem 0 2rem;
   }
   .porto-hero__picture {

@@ -26,7 +26,7 @@
 
 .porto-contact__header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
   margin-top: 0;
 }
 
@@ -45,7 +45,7 @@
   line-height: 1.6;
   color: var(--porto-color-gray-3);
   max-width: 600px;
-  margin: 0.05rem auto 0;
+  margin: 0.4rem auto 0;
 }
 
 .porto-contact__grid {
@@ -54,7 +54,6 @@
   gap: 1.2rem;
   justify-content: center;
   margin: 0 auto;
-  margin-top: 0.9rem;
   max-width: 1300px;
   width: 100%;
   padding: 0 0.5rem;
@@ -177,11 +176,8 @@
   .porto-contact-section {
     padding: 0.5rem 0 4rem;
   }
-  .porto-contact__header {
-    margin-bottom: 1.2rem;
-  }
   .porto-contact__heading {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
   .porto-contact__subheading {
     font-size: 0.9rem;
@@ -211,11 +207,8 @@
   .porto-contact-section {
     padding: 0 0 3rem;
   }
-  .porto-contact__header {
-    margin-bottom: 1rem;
-  }
   .porto-contact__heading {
-    font-size: 1.9rem;
+    font-size: 2rem;
   }
   .porto-contact__subheading {
     font-size: 0.9rem;

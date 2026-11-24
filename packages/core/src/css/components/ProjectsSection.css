@@ -11,7 +11,7 @@
 
 .porto-projects-section {
   width: 100%;
-  padding: 3rem 0 7rem;
+  padding: 3rem 0 4rem;
   position: relative;
   overflow: hidden;
 }
@@ -24,7 +24,10 @@
 
 .porto-projects__header {
   text-align: center;
-  margin-bottom: 3.5rem;
+  /* The scroller viewport adds 1rem of its own padding above the
+     cards, so 1.5rem here leaves the same 2.5rem of visible space
+     below the heading as the other sections have. */
+  margin-bottom: 1.5rem;
 }
 
 .porto-projects__heading {
@@ -132,6 +135,9 @@
 }
 
 @media (max-width: 768px) {
+  .porto-projects__heading {
+    font-size: 2rem;
+  }
   .porto-projects__arrow {
     display: none;
   }

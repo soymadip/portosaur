@@ -8,3 +8,11 @@
   flex: 1 0 auto;
   width: 100%;
 }
+
+/* The footer is shared with the docs site, so this stays scoped
+ * to the portfolio home: with no vertical padding of its own the
+ * message sat in a 23px strip, 1px under its top border and
+ * flush with the bottom of the page. */
+body:has(.porto-portfolio-home) .porto-footer {
+  padding: 1rem;
+}
