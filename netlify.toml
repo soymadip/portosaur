@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "bun run schema && bun run --cwd docs build && mkdir -p docs/build/schema && cp packages/cli/schema/*.json docs/build/schema/"
+  command = "sh scripts/netlify-build.sh"
   publish = "docs/build"
 
 [build.environment]
