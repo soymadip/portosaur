@@ -52,10 +52,17 @@ export function RootLayout({
   const sidebarScript = `(function(){try{if(sessionStorage.getItem("porto-sidebar-collapsed") === "1"){document.documentElement.classList.add("porto-sidebar-collapsed");}}catch(error){}})();`;
 
   return (
+    // data-scroll-behavior="smooth" is Next.js's contract for a
+    // site whose CSS asks for smooth scrolling (global.css does):
+    // with it, the router turns smooth scrolling off during a
+    // route change so its own scroll-to-top lands instantly.
+    // Without it, the router's scrolls animate and fight each
+    // other, and a page can arrive scrolled to its bottom.
     <html
       lang="en"
       data-theme={defaultMode}
       data-scheme={scheme}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>
